@@ -74,9 +74,11 @@ uses SysUtils,// this declaration must be at the start, before the FreeGeometry 
   FreeVersionUnit,
   FasterList,
   FreeFileBuffer,
+  FreeCalculationFiles,
   FreeGeometry,
   FreeMatrices,
   FreeStringsUnit,
+  FreeUiChoices,
   FreeControlPointFrm,
   FreeLogger,
   //FreeOpenDialog
@@ -339,6 +341,7 @@ type
     FDraft: TFloatType;
     // Calculation flags
     FCalculated: boolean;
+    FSACSymmetryCorrection: boolean;
     FErrors: TFreeHydrostaticErrors;
     FHydrostaticType: TFreeHydrostaticType;
     // Determines how calculations are performed: short, extensive etc.
@@ -362,6 +365,7 @@ type
       Separator: char);
     // Add calculated data to a stringlist to either show in a report or save to disc
     procedure AddHeader(Strings: TStringList);
+    function BuildAuxiliaryReports(Reports: TStringList): string;
     procedure AddFooter(Strings: TStringList; Mode: TFreeHydrostaticsMode);
     function Balance(Displacement: TFloatType; FreeToTrim: boolean;
       var Output: TFreeCrosscurvesData): boolean;
@@ -407,6 +411,9 @@ type
   private
     FFreeShip: TFreeShip;
     FItems: TFasterListTFreeSpline;
+    FMemoItems:TFasterListTFreeSpline;
+    FMemoKey:string;
+    FReuseCount:Integer;
     FIntersectionType: TFreeIntersectionType;
     FPlane: T3DPlane;
     FBuilt: boolean;
@@ -429,6 +436,7 @@ type
       var COG: T3DCoordinate; var MomentOfInertia: T2DCoordinate);
     procedure Clear;
     constructor Create(Owner: TFreeShip);
+    property ReuseCount:Integer read FReuseCount;
     procedure CreateStarboardPart;
     // Create the starboardhalf of the ship, for use in hydrostatic calculations
     procedure Delete(Redraw: boolean);
@@ -687,6 +695,7 @@ type
     procedure File_ExportPAM;
     // Save ordinates to the PAM file format for Added masses calcs
     procedure File_Export_AddMass;
+    procedure ExportAddedMassInWorkspace;
     // Creates a file to be read by the CFD program Added masses
     procedure File_Execute_AddMass;
     //(Component:TComponent);               // Output in Added masses program
@@ -849,6 +858,7 @@ type
     procedure Selection_Delete;
     // Delete all selected items
     procedure Selection_SelectAll;
+    procedure Selection_ToggleAll;
     // Select all visible items
     procedure Selection_SelectAllControlPoints;
     procedure Selection_SelectLeakPoints;
@@ -937,6 +947,7 @@ type
 
     FThemeName: string;
     FParentThemeName: string;
+    FStudioThemeInitialized: boolean;
     FMenuIconSize: integer;
     FToolIconSize: integer;
 
@@ -958,6 +969,8 @@ type
     // Default directory where Language files stored. Default FGlobalAppDataDirectory/Languages
     FLanguageFile: string;
     FLanguage: string;
+    FQuickLanguageEnabled: boolean;
+    FQuickLanguageFirst, FQuickLanguageSecond: string;
 
     FMaxUndoMemory: integer;
     // Max. amount of allowable undo memory in megabytes
@@ -1005,6 +1018,8 @@ type
     procedure ResetDirectories;
     procedure SetDefaults;
     procedure Save;
+    function TrySetInterfaceLanguage(const LanguageKey: string): boolean;
+    procedure SaveCurrentLanguage;
     procedure SaveToDta;
 
     function getThemeConfigFile(ThemeName: string): string;
@@ -1047,6 +1062,9 @@ type
     property ExportDirectory: string read FGetExportDirectory write FExportDirectory;
     property CreasePointColor: TColor read FCreasePointColor write FCreasePointColor;
     property Language: string read FLanguage write FLanguage;
+    property QuickLanguageEnabled: boolean read FQuickLanguageEnabled write FQuickLanguageEnabled;
+    property QuickLanguageFirst: string read FQuickLanguageFirst write FQuickLanguageFirst;
+    property QuickLanguageSecond: string read FQuickLanguageSecond write FQuickLanguageSecond;
     property LanguageFile: string read FLanguageFile write FLanguageFile;
     property LayerColor: TColor read FLayerColor write FLayerColor;
     property LeakPointColor: TColor read FLeakPointColor write FLeakPointColor;
@@ -1287,6 +1305,7 @@ type
     FIntersectionDialog: TForm;
     // Dialog containing intersectionlines
     FProjectSettings: TFreeProjectSettings;
+    FProjectSettingsDialog:TForm; // Owned by this component; reuse native controls.
     FHydrostaticCalculations: TFasterListTFreeHydrostaticCalc;
     // List containing all hydrostatic calculations
     FUndoObjects: TFasterListTFreeUndoObject;
@@ -1317,6 +1336,14 @@ type
     FResistanceRBHSData: TFreeRBHSSeriesResistanceData;
     FResistanceMHData: TFreeMHSeriesResistanceData;
     FDesignHydrostatics: TFreeHydrostaticCalc;
+  private
+    FLegacyCalculationLayout: string;
+    function CalculationRoot: string;
+    function GetCalculationDirectory: string;
+    procedure ParseProject(Source: TFreeFileBuffer);
+    procedure AdoptProject(Candidate: TFreeShip);
+    procedure BindProjectOwners;
+    procedure UpdateLoadedProject;
     // This object calculates hydrostatic data to draw in the viewports
     //FFontSize: integer; // use Preferences.FontSize
     procedure FBuildValidFrameTable(
@@ -1397,6 +1424,8 @@ type
   protected   { Protected declarations }
     procedure ViewportRequestExtents(Sender: TObject; var Min, Max: T3DCoordinate);
   public      { Public declarations }
+    LinesplanFillCache:TObject; // Detached display cache, owned while the window is closed.
+    LinesplanFillCacheKey:string;
     IsRebuildAsyncDisabled:boolean;
     function GetFocusedViewport: TFreeViewport;
     procedure AddViewport(Viewport: TFreeViewport);
@@ -1420,7 +1449,10 @@ type
     function GetAllNamedPoints:TStringList;
     procedure ImportChines(Np: integer; Chines: TFasterListTFreeSpline);
     // imports a number of longitudinally lines and creates developable surfaces between each two subsequent chines
-    procedure LoadProject(Source: TFreeFileBuffer);
+    function BeginCalculation(const PublishedOutputs: array of string): TFreeCalculationScope;
+    property CalculationDirectory: string read GetCalculationDirectory;
+    property LegacyCalculationLayout: string read FLegacyCalculationLayout;
+    procedure LoadProject(Source: TFreeFileBuffer; UpdateViews: Boolean = True);
     procedure LoadControlPointGroups(Source:TFreeFileBuffer);
     procedure LoadControlPointNames(Source:TFreeFileBuffer);
     procedure LoadControlEdgeNames(Source:TFreeFileBuffer);
@@ -1585,7 +1617,7 @@ var
 
 implementation
 
-uses Math,
+uses Math, FreeShip_26Icons, FreeMeshFingerprint, FreeSafeLanguage, FreeLabelLayout, FreeSafeFile,
   FreeIGESUnit,
   FreeHydrostaticsDlg,
   FreeIntersectionDlg,
@@ -1636,7 +1668,7 @@ uses Math,
   Main,
   freehullformwindow_panel,
   FreeGridDlg,
-  FreeProcess,
+  FreeProcess, SHA1,
   FreeDeleteDlg;
 
 {$I FreeShipUnit_Functions.inc}

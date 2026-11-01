@@ -5,6 +5,24 @@ begin
   Result:=Parent=nil;
 end;
 
+procedure TCustomMDIPanel.SetBounds(ALeft, ATop, AWidth, AHeight: Integer);
+var OldBounds,DirtyBounds:TRect; GeometryWasAdjusted:Boolean; Flags:Cardinal;
+begin
+  OldBounds:=BoundsRect;
+  GeometryWasAdjusted:=(Left<>ALeft) or (Top<>ATop) or (Width<>AWidth) or (Height<>AHeight);
+  inherited SetBounds(ALeft,ATop,AWidth,AHeight);
+  if GeometryWasAdjusted and (Parent<>nil) and Parent.HandleAllocated and
+    not FExposedRepaintActive and not (csDestroying in ComponentState) then begin
+    DirtyBounds:=Rect(Min(OldBounds.Left,Left),Min(OldBounds.Top,Top),
+      Max(OldBounds.Right,Left+Width),Max(OldBounds.Bottom,Top+Height));
+    Flags:=RDW_INVALIDATE or RDW_ERASE or RDW_ALLCHILDREN;
+    if WindowPositionState in [wpsMoving,wpsResizing] then Flags:=Flags or RDW_UPDATENOW;
+    FExposedRepaintActive:=True;
+    try LCLIntf.RedrawWindow(Parent.Handle,@DirtyBounds,0,Flags)
+    finally FExposedRepaintActive:=False end;
+  end;
+end;
+
 constructor TCustomMDIPanel.CreateNew(AOwner: TComponent);
 begin
   Include(FFormState,fsCreating);
@@ -241,77 +259,24 @@ begin
 end;
 
 function TCustomMDIPanel.drawMaximizeIcon(size: integer): TBitmap;
-var
-  scale, i, r: integer;
-  ACanvas: TLazCanvas;
-  ImgHandle, ImgMaskHandle: HBitmap;
 begin
-  ACanvas := createCompatibleBpp32LazCanvas(size, size);
-
-  scale := size div 8;
-  i := scale;
-  r := size - i;
-  ACanvas.Pen.FPColor := FPColor(0, 0, 0, $FFFF);
-  ACanvas.Pen.Width := scale;
-  ACanvas.Rectangle(i, i, r, r);
-
-  TLazIntfImage(ACanvas.Image).CreateBitmaps(ImgHandle, ImgMaskHandle, False);
-  Result := TBitmap.Create;
-  Result.Handle := ImgHandle;
-  Result.MaskHandle := ImgMaskHandle;
-
-  ACanvas.Image.Free;
-  ACanvas.Free;
+  Result:=TBitmap.Create;
+  try LoadFreeShip_26Icon(Result,'Maximize',Size)
+  except Result.Free; raise end;
 end;
 
 function TCustomMDIPanel.drawMinimizeIcon(size: integer): TBitmap;
-var
-  scale, i, r : integer;
-  ACanvas: TLazCanvas;
-  ImgHandle, ImgMaskHandle: HBitmap;
 begin
-  ACanvas := createCompatibleBpp32LazCanvas(size, size);
-
-  scale := size div 8;
-  ACanvas.Pen.FPColor := FPColor(0, 0, 0, $FFFF);
-  i := scale * 2;
-  r := size - i;
-  ACanvas.Pen.Width := scale;
-  ACanvas.Line(i, size div 2, r, size div 2);
-
-  TLazIntfImage(ACanvas.Image).CreateBitmaps(ImgHandle, ImgMaskHandle, False);
-  Result := TBitmap.Create;
-  Result.Handle := ImgHandle;
-  Result.MaskHandle := ImgMaskHandle;
-
-  ACanvas.Image.Free;
-  ACanvas.Free;
+  Result:=TBitmap.Create;
+  try LoadFreeShip_26Icon(Result,'Minimize',Size)
+  except Result.Free; raise end;
 end;
 
 function TCustomMDIPanel.drawRestoreIcon(size: integer): TBitmap;
-var
-  scale, i, r : integer;
-  ACanvas: TLazCanvas;
-  ImgHandle, ImgMaskHandle: HBitmap;
 begin
-  ACanvas := createCompatibleBpp32LazCanvas(size, size);
-
-  scale := size div 8;
-  ACanvas.Brush.FPColor := FPColor(0, 0, 0, 0);
-  ACanvas.FillRect(0, 0, size, size);
-  ACanvas.Pen.FPColor := FPColor(0, 0, 0, $FFFF);
-  i := scale * 2;
-  r := size - i;
-  ACanvas.Pen.Width := scale;
-  ACanvas.Rectangle(i, i, r, r);
-
-  TLazIntfImage(ACanvas.Image).CreateBitmaps(ImgHandle, ImgMaskHandle, False);
-  Result := TBitmap.Create;
-  Result.Handle := ImgHandle;
-  Result.MaskHandle := ImgMaskHandle;
-
-  ACanvas.Image.Free;
-  ACanvas.Free;
+  Result:=TBitmap.Create;
+  try LoadFreeShip_26Icon(Result,'Restore',Size)
+  except Result.Free; raise end;
 end;
 
 function TCustomMDIPanel.deriveCaptionHeight:integer;
@@ -364,8 +329,10 @@ begin
     BorderStyle := bsNone; //bsSingle;
     BorderWidth := 0;
     Caption := '';
-    Color := clInactiveCaption;
-    Font.Color := clCaptionText;
+    ParentBackground := False;
+    Color := RGB(224, 236, 232);
+    Font.Name := 'Microsoft YaHei UI';
+    Font.Color := RGB(32, 55, 50);
     Font.Style := [fsBold];
     Height := SCH; // Font.Height + 8;
     ParentColor := False;
@@ -380,7 +347,8 @@ begin
   FCaptionLabel.Parent := FCaptionPanel;
   FCaptionLabel.ParentFont := true;
   FCaptionLabel.Align := alClient;
-  FCaptionLabel.Alignment := taCenter;
+  FCaptionLabel.Alignment := taLeftJustify;
+  FCaptionLabel.BorderSpacing.Left := 8;
   FCaptionLabel.Layout := tlCenter;
   FCaptionLabel.Caption := 'MDIPanel';
   FCaptionLabel.OnMouseMove := @CaptionPanelMouseMove;
@@ -554,7 +522,7 @@ end;
 
 procedure TCustomMDIPanel.SetIcon(val: TIcon);
 begin
-  FSystemButton.Picture.Icon.Assign(val);
+  if Assigned(FSystemButton) then FSystemButton.Picture.Icon.Assign(val);
 end;
 
 procedure TCustomMDIPanel.Paint;
@@ -653,6 +621,12 @@ procedure TCustomMDIPanel.WndProc(var TheMessage: TLMessage);
 var
   Form : TCustomForm;
 begin
+  {$IFDEF MSWINDOWS}
+  if (TheMessage.Msg=LM_WINDOWPOSCHANGING) and
+    (TLMWindowPosChanging(TheMessage).WindowPos<>nil) then
+    TLMWindowPosChanging(TheMessage).WindowPos^.flags:=
+      TLMWindowPosChanging(TheMessage).WindowPos^.flags or SWP_NOCOPYBITS;
+  {$ENDIF}
     //DebugLn('CCC TControl.WndPRoc ',Name,':',ClassName);
 {    if (csDesigning in ComponentState) then
     begin
@@ -940,6 +914,75 @@ begin
   end;
 end;
 
+procedure TCustomMDIPanel.BeginSharedResize(Side:TWindowResizingSide; const Hit:TPoint);
+var I,Tolerance:Integer; P:TCustomMDIPanel; R:TRect;
+begin
+  FWindowResizingSide:=Side; FResizeStart:=BoundsRect;
+  FResizeNeighborX:=nil; FResizeNeighborY:=nil;
+  if (Parent=nil) or (WindowState<>wsNormal) then Exit;
+  Tolerance:=2;
+  // Lock neighbors at mouse-down: dragging the exposed edge never links later.
+  for I:=Parent.ControlCount-1 downto 0 do
+    if (Parent.Controls[I]<>Self) and (Parent.Controls[I] is TCustomMDIPanel) then begin
+      P:=TCustomMDIPanel(Parent.Controls[I]);
+      if not P.Visible or (P.WindowState<>wsNormal) then Continue;
+      R:=P.BoundsRect;
+      if (FResizeNeighborX=nil) and (Hit.Y>=Max(Top,R.Top)) and
+         (Hit.Y<Min(Top+Height,R.Bottom)) then begin
+        if ((Side in [wrszsW,wrszsNW,wrszsSW]) and (Abs(Left-R.Right)<=Tolerance)) or
+           ((Side in [wrszsE,wrszsNE,wrszsSE]) and (Abs(Left+Width-R.Left)<=Tolerance)) then begin
+          FResizeNeighborX:=P; FNeighborStartX:=R;
+        end;
+      end;
+      if (FResizeNeighborY=nil) and (Hit.X>=Max(Left,R.Left)) and
+         (Hit.X<Min(Left+Width,R.Right)) then begin
+        if ((Side in [wrszsN,wrszsNW,wrszsNE]) and (Abs(Top-R.Bottom)<=Tolerance)) or
+           ((Side in [wrszsS,wrszsSW,wrszsSE]) and (Abs(Top+Height-R.Top)<=Tolerance)) then begin
+          FResizeNeighborY:=P; FNeighborStartY:=R;
+        end;
+      end;
+    end;
+end;
+
+procedure TCustomMDIPanel.ApplySharedResize(var L,T,W,H:Integer);
+var Edge,Lo,Hi:Integer; P:TCustomMDIPanel; R:TRect;
+begin
+  P:=FResizeNeighborX;
+  if Assigned(P) and (P.Parent=Parent) then begin
+    R:=FNeighborStartX;
+    if FWindowResizingSide in [wrszsE,wrszsNE,wrszsSE] then begin
+      Lo:=FResizeStart.Left+Max(1,Constraints.MinWidth); Hi:=R.Right-Max(1,P.Constraints.MinWidth);
+      if Constraints.MaxWidth>0 then Hi:=Min(Hi,FResizeStart.Left+Constraints.MaxWidth);
+      if P.Constraints.MaxWidth>0 then Lo:=Max(Lo,R.Right-P.Constraints.MaxWidth);
+      Edge:=Max(Lo,Min(Hi,L+W)); L:=FResizeStart.Left; W:=Edge-L;
+      P.SetBounds(Edge,R.Top,R.Right-Edge,R.Bottom-R.Top);
+    end else begin
+      Lo:=R.Left+Max(1,P.Constraints.MinWidth); Hi:=FResizeStart.Right-Max(1,Constraints.MinWidth);
+      if Constraints.MaxWidth>0 then Lo:=Max(Lo,FResizeStart.Right-Constraints.MaxWidth);
+      if P.Constraints.MaxWidth>0 then Hi:=Min(Hi,R.Left+P.Constraints.MaxWidth);
+      Edge:=Max(Lo,Min(Hi,L)); L:=Edge; W:=FResizeStart.Right-Edge;
+      P.SetBounds(R.Left,R.Top,Edge-R.Left,R.Bottom-R.Top);
+    end;
+  end;
+  P:=FResizeNeighborY;
+  if Assigned(P) and (P.Parent=Parent) then begin
+    R:=FNeighborStartY;
+    if FWindowResizingSide in [wrszsS,wrszsSW,wrszsSE] then begin
+      Lo:=FResizeStart.Top+Max(1,Constraints.MinHeight); Hi:=R.Bottom-Max(1,P.Constraints.MinHeight);
+      if Constraints.MaxHeight>0 then Hi:=Min(Hi,FResizeStart.Top+Constraints.MaxHeight);
+      if P.Constraints.MaxHeight>0 then Lo:=Max(Lo,R.Bottom-P.Constraints.MaxHeight);
+      Edge:=Max(Lo,Min(Hi,T+H)); T:=FResizeStart.Top; H:=Edge-T;
+      P.SetBounds(R.Left,Edge,R.Right-R.Left,R.Bottom-Edge);
+    end else begin
+      Lo:=R.Top+Max(1,P.Constraints.MinHeight); Hi:=FResizeStart.Bottom-Max(1,Constraints.MinHeight);
+      if Constraints.MaxHeight>0 then Lo:=Max(Lo,FResizeStart.Bottom-Constraints.MaxHeight);
+      if P.Constraints.MaxHeight>0 then Hi:=Min(Hi,R.Top+P.Constraints.MaxHeight);
+      Edge:=Max(Lo,Min(Hi,T)); T:=Edge; H:=FResizeStart.Bottom-Edge;
+      P.SetBounds(R.Left,R.Top,R.Right-R.Left,Edge-R.Top);
+    end;
+  end;
+end;
+
 procedure TCustomMDIPanel.BorderMouseDown(Sender: TObject; Button: TMouseButton;
   Shift: TShiftState; X, Y: integer);
 var
@@ -947,7 +990,9 @@ var
 begin
   if (Button = mbLeft) and (Shift = [ssLeft]) then
   begin
-    WindowPositionState := wpsResizing;
+    BeginSharedResize(FWindowResizingSide,Point(Left+X,Top+Y));
+    SetMotionState(wpsResizing);
+    MouseCapture:=True;
     TL := Parent.ClientToScreen(BoundsRect.TopLeft);
     //writeln('d:',Mouse.CursorPos.X, ':', Mouse.CursorPos.Y);
     WindowCaptionMouseX := Mouse.CursorPos.X - TL.X;
@@ -1027,6 +1072,7 @@ begin
     end;
 
     //writeln('setBounds(', L, ',', T, ',', W, ',', H, ')');
+    ApplySharedResize(L,T,W,H);
     setBounds(L, T, W, H);
   end;
 end;
@@ -1034,8 +1080,12 @@ end;
 procedure TCustomMDIPanel.BorderMouseUp(Sender: TObject; Button: TMouseButton;
   Shift: TShiftState; X, Y: integer);
 begin
-  if (WindowPositionState = wpsResizing) then
-    WindowPositionState := wpsNone;
+  if WindowPositionState=wpsResizing then begin
+    FResizeNeighborX:=nil; FResizeNeighborY:=nil;
+    SetMotionState(wpsNone); MouseCapture:=False;
+    if (Parent<>nil) and Parent.HandleAllocated then
+      LCLIntf.RedrawWindow(Parent.Handle,nil,0,RDW_INVALIDATE or RDW_ERASE or RDW_ALLCHILDREN or RDW_UPDATENOW);
+  end;
 end;
 
 procedure TCustomMDIPanel.CaptionPanelMouseDown(Sender: TObject; Button: TMouseButton;
@@ -1045,7 +1095,8 @@ var
 begin
   if (Button = mbLeft) and (Shift = [ssLeft]) then
   begin
-    WindowPositionState := wpsMoving;
+    SetMotionState(wpsMoving);
+    LCLIntf.SetCapture(FCaptionPanel.Handle);
     //TL:=ClientToScreen(TPanel(TPanel(Sender).Parent).BoundsRect.TopLeft);
     TL := Parent.ClientToScreen(BoundsRect.TopLeft);
     //writeln('d:',Mouse.CursorPos.X, ':', Mouse.CursorPos.Y);
@@ -1053,6 +1104,31 @@ begin
     WindowCaptionMouseY := Mouse.CursorPos.Y - TL.Y;
     setActive(True);
   end;
+end;
+
+procedure TCustomMDIPanel.SnapMovePosition(var X,Y:Integer);
+var I,BestX,BestY,DistanceX,DistanceY,Threshold:Integer; P:TControl;
+  procedure TryX(Candidate:Integer);
+  begin
+    if Abs(Candidate-X)<DistanceX then begin DistanceX:=Abs(Candidate-X);BestX:=Candidate end;
+  end;
+  procedure TryY(Candidate:Integer);
+  begin
+    if Abs(Candidate-Y)<DistanceY then begin DistanceY:=Abs(Candidate-Y);BestY:=Candidate end;
+  end;
+begin
+  if Parent=nil then Exit;
+  Threshold:=Scale96ToForm(12);DistanceX:=Threshold+1;DistanceY:=Threshold+1;BestX:=X;BestY:=Y;
+  TryX(0);TryX(Parent.ClientWidth-Width);TryY(0);TryY(Parent.ClientHeight-Height);
+  for I:=0 to Parent.ControlCount-1 do begin
+    P:=Parent.Controls[I];
+    if (P=Self) or not (P is TCustomMDIPanel) or not P.Visible then Continue;
+    if TCustomMDIPanel(P).WindowState<>wsNormal then Continue;
+    TryX(P.Left);TryX(P.Left+P.Width);TryX(P.Left-Width);TryX(P.Left+P.Width-Width);
+    TryY(P.Top);TryY(P.Top+P.Height);TryY(P.Top-Height);TryY(P.Top+P.Height-Height);
+  end;
+  if DistanceX<=Threshold then X:=BestX;
+  if DistanceY<=Threshold then Y:=BestY;
 end;
 
 procedure TCustomMDIPanel.CaptionPanelMouseMove(Sender: TObject; Shift: TShiftState;
@@ -1067,8 +1143,8 @@ begin
     SL := Point(Mouse.CursorPos.X - WindowCaptionMouseX,
                 Mouse.CursorPos.Y - WindowCaptionMouseY);
     TL := Parent.ScreenToClient(SL);
-    Left := TL.X;
-    Top := TL.Y;
+    SnapMovePosition(TL.X,TL.Y);
+    SetBounds(TL.X,TL.Y,Width,Height);
     //writeln('w:',TL.X, ':', TL.Y);
   end;
 end;
@@ -1078,8 +1154,10 @@ procedure TCustomMDIPanel.CaptionPanelMouseUp(Sender: TObject; Button: TMouseBut
 begin
   if (WindowPositionState = wpsMoving) then
   begin
-    WindowPositionState := wpsNone;
+    SetMotionState(wpsNone); if LCLIntf.GetCapture=FCaptionPanel.Handle then LCLIntf.ReleaseCapture;
     FCaptionLabel.Cursor := crDefault;
+    if (Parent<>nil) and Parent.HandleAllocated then
+      LCLIntf.RedrawWindow(Parent.Handle,nil,0,RDW_INVALIDATE or RDW_ERASE or RDW_ALLCHILDREN or RDW_UPDATENOW);
   end;
 end;
 
@@ -1156,29 +1234,71 @@ begin
     FMinimizeButton.Left := 60;
 end;
 
+procedure TCustomMDIPanel.SetMotionState(Value:TWindowPositionState);
+begin
+  if WindowPositionState=Value then Exit;
+  WindowPositionState:=Value;
+  if Assigned(FOnMoveResize) then FOnMoveResize(Self);
+end;
+
+procedure TCustomMDIPanel.SetWindowState(Value:TWindowState);
+begin
+  case Value of
+    wsNormal:DoRestore;
+    wsMinimized:DoMinimize;
+    wsMaximized:DoMaximize;
+  end;
+end;
+
+procedure TCustomMDIPanel.ArrangeMinimized;
+var I,N,W,H,Cols:Integer; P:TCustomMDIPanel;
+begin
+  if Parent=nil then Exit;
+  W:=Min(Scale96ToForm(200),Parent.ClientWidth); if W<1 then Exit;
+  H:=Max(Constraints.MinHeight,FCaptionPanel.Height+BorderWidth*2);
+  Cols:=Max(1,Parent.ClientWidth div W);N:=0;
+  for I:=0 to Parent.ControlCount-1 do
+    if Parent.Controls[I] is TCustomMDIPanel then begin
+      P:=TCustomMDIPanel(Parent.Controls[I]);
+      if P.FWindowState<>wsMinimized then Continue;
+      P.SetBounds((N mod Cols)*W,Max(0,Parent.ClientHeight-((N div Cols)+1)*H),W,H);
+      Inc(N);
+    end;
+end;
+
 procedure TCustomMDIPanel.DoMaximize;
 begin
-  if FWindowState = wsNormal then
-    FNormalBounds := Self.BoundsRect;
-  Self.setBounds(0, 0, Parent.ClientWidth, Parent.ClientHeight);
-  FWindowState := wsMaximized;
+  if Parent=nil then Exit;
+  if FWindowState=wsNormal then FNormalBounds:=BoundsRect;
+  FWindowState:=wsMaximized;
+  SetBounds(0,0,Parent.ClientWidth,Parent.ClientHeight);
+  ArrangeMinimized;
+  BringToFront;
   OrderButtons;
+  Parent.Invalidate;
 end;
 
 procedure TCustomMDIPanel.DoMinimize;
 begin
-  if FWindowState = wsNormal then
-    FNormalBounds := Self.BoundsRect;
-  Self.setBounds(0, 0, 200, FCaptionPanel.Height + BevelWidth * 2);
-  FWindowState := wsMinimized;
+  if Parent=nil then Exit;
+  if FWindowState=wsNormal then FNormalBounds:=BoundsRect;
+  FWindowState:=wsMinimized;
+  ArrangeMinimized;
+  BringToFront;
   OrderButtons;
+  Parent.Invalidate;
 end;
 
 procedure TCustomMDIPanel.DoRestore;
 begin
-  Self.BoundsRect := FNormalBounds;
-  FWindowState := wsNormal;
+  if FWindowState<>wsNormal then begin
+    FWindowState:=wsNormal;
+    BoundsRect:=FNormalBounds;
+  end;
+  ArrangeMinimized;
+  BringToFront;
   OrderButtons;
+  if Parent<>nil then Parent.Invalidate;
 end;
 
 procedure TCustomMDIPanel.MaximizeButtonClick(Sender: TObject);
@@ -1414,7 +1534,7 @@ begin
     //Color := clActiveCaption;
     //BorderColor:=clActiveBorder;
     //BorderColor:=clRed;
-    FCaptionPanel.Color := clActiveCaption;
+    FCaptionPanel.Color := RGB(232, 244, 240);
     setZOrder(True);
     InactivateSiblings;
     //unsetMouseClickProxies;
@@ -1425,7 +1545,7 @@ begin
     //Color := clInactiveBorder;
     //Color := clInactiveCaption;
     //BorderColor:=clInactiveBorder;
-    FCaptionPanel.Color := clInactiveCaption;
+    FCaptionPanel.Color := RGB(250, 252, 250);
     //setMouseClickProxies;
     if assigned(FOnDeactivate) then FOnDeactivate(Self);
   end;

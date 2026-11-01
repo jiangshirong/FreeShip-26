@@ -72,6 +72,15 @@ type
     BitBtnResetDirs: TSpeedButton;
     BitBtnResetColors: TSpeedButton;
     ComboBox1: TComboBox;
+    CheckQuickLanguage: TCheckBox;
+    ComboQuickFirst: TComboBox;
+    ComboQuickSecond: TComboBox;
+    LabelQuickLanguage: TLabel;
+    LabelQuickFirst: TLabel;
+    LabelQuickSecond: TLabel;
+    PanelQuickLanguage: TPanel;
+    PanelQuickFirst: TPanel;
+    PanelQuickSecond: TPanel;
     ComboBoxEncoding: TComboBox;
     ComboBoxThemes: TComboBox;
     EditExecDir: TEdit;
@@ -220,6 +229,7 @@ type
     procedure ResetDirsButtonClick(Sender: TObject);
     procedure ComboBoxThemesChange(Sender: TObject);
     procedure EditDirChange(Sender: TObject);
+    procedure QuickLanguageChange(Sender: TObject);
     procedure FormActivate(Sender: TObject);
     procedure PageControl1Change(Sender: TObject);
     procedure SpeedButton12Click(Sender: TObject);
@@ -244,6 +254,11 @@ type
   public    { Public declarations }
     property IsThemeChanged: boolean read FThemeChanged;
     property IsConfigChanged: boolean read FConfigChanged;
+    procedure SetUndoMemoryLimit(Value: integer);
+    function QuickLanguagesValid: boolean;
+    procedure UpdateQuickLanguageControls;
+    procedure ConfigureQuickLanguages(Choices, DisplayMap: TStrings;
+      const FirstLanguage, SecondLanguage: string; Enabled: boolean);
     //property Theme: string read ComboBoxThemes.Text;
     function Execute(Freeship: TFreeShip): boolean;
   end;
@@ -252,6 +267,8 @@ var
   FreePreferencesDialog: TFreePreferencesDialog;
 
 implementation
+
+uses FreeUiChoices;
 
 {$IFnDEF FPC}
   {$R *.dfm}
@@ -291,10 +308,7 @@ begin
   Panel26.Color := FFreeship.Preferences.ZebraStripeColor;
   SpinEdit1.Value := FFreeship.Preferences.PointSize;
   seFontSize.Value := FFreeship.Preferences.FontSize;
-  if FFreeship.Preferences.MaxUndoMemory < 1 then
-    FreeNumInput1.Value := 1
-  else
-    FreeNumInput1.Value := FFreeship.Preferences.MaxUndoMemory;
+  SetUndoMemoryLimit(FFreeship.Preferences.MaxUndoMemory);
 
   EditLanguagesDir.Text := FFreeship.Preferences.LanguagesDirectory;
   EditManualsDir.Text := FFreeship.Preferences.ManualsDirectory;
@@ -320,6 +334,14 @@ begin
   ComboBoxEncoding.ItemIndex := i;
 
 end;{TFreePreferencesDialog.Updatedata}
+
+procedure TFreePreferencesDialog.SetUndoMemoryLimit(Value: integer);
+begin
+  // Preserve an existing setting even if it exceeds the normal input range.
+  if Value > FreeNumInput1.MaxValue then FreeNumInput1.MaxValue := Value;
+  if Value < 1 then Value := 1;
+  FreeNumInput1.Value := Value;
+end;
 
 function TFreePreferencesDialog.Execute(Freeship: TFreeShip): boolean;
 begin
@@ -376,8 +398,61 @@ end;
 
 procedure TFreePreferencesDialog.OkButtonClick(Sender: TObject);
 begin
+  if not QuickLanguagesValid then
+  begin
+    MessageDlg(rsQuickChooseDifferent, mtWarning, [mbOK], 0);
+    Exit;
+  end;
   ModalResult := mrOk;
 end;{TFreePreferencesDialog.BitBtn1Click}
+
+function TFreePreferencesDialog.QuickLanguagesValid: boolean;
+begin
+  Result := not CheckQuickLanguage.Checked or
+    ((ComboQuickFirst.ItemIndex >= 0) and (ComboQuickSecond.ItemIndex >= 0) and
+     (ComboQuickFirst.ItemIndex <> ComboQuickSecond.ItemIndex));
+end;
+
+procedure TFreePreferencesDialog.ConfigureQuickLanguages(Choices, DisplayMap: TStrings;
+  const FirstLanguage, SecondLanguage: string; Enabled: boolean);
+  function FindChoice(Combo: TComboBox; const Key: string): integer;
+  var Index: integer; Canonical: string;
+  begin
+    Result := -1;
+    Canonical := LanguageName(LanguageCode(Key));
+    if Canonical = '' then Canonical := Key;
+    for Index := 0 to Combo.Items.Count - 1 do
+      if SameText(LanguageChoiceKey(DisplayMap, Combo.Items[Index]), Canonical) then
+        Exit(Index);
+  end;
+begin
+  ComboQuickFirst.Items.Assign(Choices);
+  ComboQuickSecond.Items.Assign(Choices);
+  ComboQuickFirst.ItemIndex := FindChoice(ComboQuickFirst, FirstLanguage);
+  if (ComboQuickFirst.ItemIndex < 0) and (ComboQuickFirst.Items.Count > 0) then
+    ComboQuickFirst.ItemIndex := 0;
+  ComboQuickSecond.ItemIndex := FindChoice(ComboQuickSecond, SecondLanguage);
+  if (ComboQuickSecond.ItemIndex < 0) and (ComboQuickSecond.Items.Count > 1) then
+    if ComboQuickFirst.ItemIndex = 0 then ComboQuickSecond.ItemIndex := 1
+    else ComboQuickSecond.ItemIndex := 0;
+  CheckQuickLanguage.Checked := Enabled;
+  UpdateQuickLanguageControls;
+end;
+
+procedure TFreePreferencesDialog.UpdateQuickLanguageControls;
+begin
+  if not Assigned(CheckQuickLanguage) then Exit;
+  if Assigned(ComboQuickFirst) then ComboQuickFirst.Enabled := CheckQuickLanguage.Checked;
+  if Assigned(ComboQuickSecond) then ComboQuickSecond.Enabled := CheckQuickLanguage.Checked;
+  if Assigned(LabelQuickFirst) then LabelQuickFirst.Enabled := CheckQuickLanguage.Checked;
+  if Assigned(LabelQuickSecond) then LabelQuickSecond.Enabled := CheckQuickLanguage.Checked;
+end;
+
+procedure TFreePreferencesDialog.QuickLanguageChange(Sender: TObject);
+begin
+  UpdateQuickLanguageControls;
+  FConfigChanged := True;
+end;
 
 procedure TFreePreferencesDialog.CancelButtonClick(Sender: TObject);
 begin

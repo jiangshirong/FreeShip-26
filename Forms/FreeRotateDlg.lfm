@@ -23,7 +23,7 @@ object FreeRotateDialog: TFreeRotateDialog
     object OKButton: TSpeedButton
       Left = 233
       Height = 30
-      Hint = 'Close dialog.'
+      Hint = 'Close dialog'
       Top = 2
       Width = 80
       Align = alRight
@@ -75,7 +75,7 @@ object FreeRotateDialog: TFreeRotateDialog
     object CancelButton: TSpeedButton
       Left = 315
       Height = 30
-      Hint = 'Cancel operation.'
+      Hint = 'Cancel operation'
       Top = 2
       Width = 83
       Align = alRight

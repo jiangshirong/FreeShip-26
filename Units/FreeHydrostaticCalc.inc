@@ -105,13 +105,7 @@ var
   k_test, h_min, m_ballast, L_max: single;
   Zc, a, lform, Teta, dT_, Tr, Ix, Iy: single;
   ID: integer;
-  ffile: textfile;
-  ffile1: textfile;
-  ffile2: textfile;
   D1, D2, Swl, dD, X1, X2, Y1, Y2, Z1, Z2, Xd, Yd, Zd: single;
-  Twl: array [1..101] of single;
-  Xaft: array [1..101] of single;
-  Xfor: array [1..101] of single;
 label
   ExitDo, new;
 begin
@@ -429,8 +423,7 @@ begin
 
     // Check if any layers are present to show
     N := 0;
-    if FileExistsUTF8('Weights.txt') { *Converted from FileExists* } then
-      DeleteFileUTF8('Weights.txt'); { *Converted from DeleteFile* }
+
     for I := 1 to Owner.NumberOfLayers do
       if Owner.Layer[I - 1].Count > 0 then
         Inc(N);
@@ -466,23 +459,6 @@ begin
           if Owner.Layer[I - 1].Count > 0 then
           begin
             Str := Owner.Layer[I - 1].Name;
-            if Owner.ProjectSettings.EnableBonjeanSAC then
-            begin
-              if FileExistsUTF8('Weights.txt') { *Converted from FileExists* } then
-              begin
-                Assignfile(FFile1, 'Weights.txt');
-                Append(FFile1);
-              end
-              else
-              begin
-                Assignfile(FFile1, 'Weights.txt');
-                   {$I-}
-                Rewrite(FFile1);
-{$I+}
-              end;
-              writeln(ffile1, '! ' + str);
-              closefile(ffile1);
-            end;
             Properties := Owner.Layer[I - 1].SurfaceProperties;
             Properties.SurfaceCenterOfGravity.Z :=
               Properties.SurfaceCenterOfGravity.Z - FData.ModelMin.Z;
@@ -544,7 +520,7 @@ begin
       //  Расчет средней осадки и углов крена и дифферента
       if (FData.Displacement < 0.01) or (FData.WaterplaneArea < 0.01) then
       begin
-        MessageDlg('Project Draft or Weight are very large/small!!!',
+        MessageDlg(rsLocDraftWeightRange,
           mtError, [mbOK], 0);
         exit;
       end;
@@ -663,35 +639,6 @@ begin
             57.29 / hl, -1, 8) + ' ' + rs_degr {UserString[455]});
       end;
       Strings.Add(Space(4));
-
-      // Расчет координат штевней для СПШ и масштаба Бонжана
-
-      if (Owner.NumberofWaterlines > 0) and (Owner.NumberofWaterlines < 100) and
-        (Owner.NumberofStations < 100) and Owner.ProjectSettings.EnableBonjeanSAC then
-      begin
-        Assignfile(FFile, 'Sterns.txt');
-         {$I-}
-        Rewrite(FFile);
-{$I+}
-        Writeln(FFile, Owner.NumberofWaterlines: 3, Owner.NumberofStations: 3);
-        Writeln(FFile, ' ');
-        HydObject := TFreeHydrostaticCalc.Create(Owner);
-        for I := 0 to Owner.NumberofWaterlines - 1 do
-        begin
-          FData.WaterlinePlane.D := Owner.Waterline[I].FPlane.d;
-          Twl[I + 1] := -FData.WaterlinePlane.D;
-          HydObject.Draft := Twl[I + 1];
-          HydObject.Calculate;
-          Xaft[I + 1] := HydObject.Data.WlMin.X;
-          Xfor[I + 1] := HydObject.Data.WlMax.X;
-          Writeln(FFile, -FData.WaterlinePlane.D: 9: 3, HydObject.Data.WlMin.X: 9: 3,
-            HydObject.Data.WlMax.X: 9: 3);
-        end;
-        FreeAndNil(HydObject);
-        Writeln(FFile, ' ');
-        Writeln(FFile, 'EOF ');
-        CloseFile(FFile);
-      end;
 
       // Расчет грузового размера, если включено автоперемещение
 
@@ -1265,8 +1212,7 @@ begin
   if not Owner.Built then exit;
 
   N := 0;
-  if FileExistsUTF8('Weights.txt') { *Converted from FileExists* } then
-    DeleteFileUTF8('Weights.txt'); { *Converted from DeleteFile* }
+
   Total.Weight := 0;
   Total.SurfaceCenterOfGravity.X := 0.0;
   Total.SurfaceCenterOfGravity.Y := 0.0;
@@ -1316,80 +1262,200 @@ begin
 end;{TFreeHydrostaticCalc.CalculateGravity}
 
 procedure TFreeHydrostaticCalc.CalculateMidshipLocation;
-var i:integer; Frame: TFreeIntersection;
-  X,X1,X2, Step, MaxArea, Area :TFloatType;
-  MOI: T2DCoordinate;
-  COG: T3DCoordinate;
-  MaxStation: integer;
-begin
-  MaxStation := 0;
-  FMidshipLocation := 0.5 * FData.ModelMax.X;
+const
+  SearchIntervals = 128;
+  GoldenRatio = 0.6180339887498949;
+var
+  Frame: TFreeIntersection;
+  MinX, MaxX, LengthX, CenterX, Tolerance, MaxArea, X: Double;
+  Areas, Positions: array of Double;
+  CachedPositions: array of TFloatType;
+  CachedAreas: array of Double;
+  I, J, K, L, Count, UniqueCount, CacheCount: Integer;
+  HaveBounds: Boolean;
+  Layer: TFreeSubdivisionLayer;
+  Face: TFreeSubdivisionFace;
 
-  Frame := TFreeIntersection.Create(Owner);
-  Frame.FUseHydrostaticsSurfacesOnly := True;
-  Frame.FIntersectionType := fiStation;
-  MaxArea := 0.0;
-  for I := 0 to Owner.NumberofStations - 1 do
+  procedure SortPositions(Left, Right: Integer);
+  var A, B: Integer; Pivot, Temp: Double;
   begin
-    Frame.Plane := Owner.Station[I].Plane;
-    X := -Frame.Plane.d;
-    Frame.Built := false;
+    A := Left;
+    B := Right;
+    Pivot := Positions[(Left + Right) div 2];
+    repeat
+      while Positions[A] < Pivot do Inc(A);
+      while Positions[B] > Pivot do Dec(B);
+      if A <= B then
+      begin
+        Temp := Positions[A]; Positions[A] := Positions[B]; Positions[B] := Temp;
+        Inc(A); Dec(B);
+      end;
+    until A > B;
+    if Left < B then SortPositions(Left, B);
+    if A < Right then SortPositions(A, Right);
+  end;
+
+  function AreaAt(X: Double): Double;
+  var
+    Area: TFloatType;
+    MOI: T2DCoordinate;
+    COG: T3DCoordinate;
+    Left, Right, Middle, Index: Integer;
+  begin
+    Frame.FPlane.d := -X;
+    // Refined Double positions can describe the same Single-precision plane.
+    // Reuse only identical planes; the section integrator is unchanged.
+    X := -Frame.FPlane.d;
+    Left := 0;
+    Right := CacheCount - 1;
+    while Left <= Right do
+    begin
+      Middle := Left + (Right - Left) div 2;
+      if CachedPositions[Middle] = X then Exit(CachedAreas[Middle]);
+      if CachedPositions[Middle] < X then Left := Middle + 1
+      else Right := Middle - 1;
+    end;
+    Index := Left;
+    Frame.Built := False;
     Frame.CalculateArea(FData.WaterlinePlane, Area, COG, MOI);
-    if MaxArea < Area then
+    Result := Area;
+    if CacheCount = Length(CachedPositions) then
     begin
+      SetLength(CachedPositions, CacheCount + 256);
+      SetLength(CachedAreas, CacheCount + 256);
+    end;
+    if Index < CacheCount then
+    begin
+      Move(CachedPositions[Index], CachedPositions[Index + 1],
+        (CacheCount - Index) * SizeOf(CachedPositions[0]));
+      Move(CachedAreas[Index], CachedAreas[Index + 1],
+        (CacheCount - Index) * SizeOf(CachedAreas[0]));
+    end;
+    CachedPositions[Index] := X;
+    CachedAreas[Index] := Result;
+    Inc(CacheCount);
+    if (Result > MaxArea) or ((Result = MaxArea) and
+      (Abs(X - CenterX) < Abs(FMidshipLocation - CenterX))) then
+    begin
+      MaxArea := Result;
       FMidshipLocation := X;
-      MaxArea := Area;
-      MaxStation := i;
     end;
   end;
 
-  // find precise location up to 0.1 of length unit
-  Step := 0.1;
-  if MaxStation > 0 then // search between MaxStation-1 and MaxStation
+  procedure Refine(Left, Right: Double);
+  var A, B, AreaA, AreaB: Double; Iteration: Integer;
   begin
-    X1 := - Owner.Station[MaxStation - 1].Plane.d;
-    X2 := - Owner.Station[MaxStation].Plane.d;
+    A := Right - GoldenRatio * (Right - Left);
+    B := Left + GoldenRatio * (Right - Left);
+    AreaA := AreaAt(A);
+    AreaB := AreaAt(B);
+    for Iteration := 1 to 32 do
+    begin
+      if Right - Left <= Tolerance then Break;
+      if AreaA < AreaB then
+      begin
+        Left := A;
+        A := B;
+        AreaA := AreaB;
+        B := Left + GoldenRatio * (Right - Left);
+        AreaB := AreaAt(B);
+      end
+      else
+      begin
+        Right := B;
+        B := A;
+        AreaB := AreaA;
+        A := Right - GoldenRatio * (Right - Left);
+        AreaA := AreaAt(A);
+      end;
+    end;
+    AreaAt((Left + Right) * 0.5);
+  end;
+begin
+  MinX := FData.ModelMin.X;
+  MaxX := FData.ModelMax.X;
+  // CalculateVolume also uses this method, but does not populate ModelMin/Max.
+  if MaxX <= MinX then
+  begin
+    HaveBounds := False;
+    for I := 0 to Owner.NumberOfLayers - 1 do
+    begin
+      Layer := Owner.Layer[I];
+      if not Layer.UseInHydrostatics then Continue;
+      for J := 0 to Layer.Count - 1 do
+        for K := 0 to Layer.Items[J].ChildCount - 1 do
+        begin
+          Face := Layer.Items[J].Child[K];
+          for L := 0 to Face.NumberOfPoints - 1 do
+          begin
+            X := Face.Point[L].Coordinate.X;
+            if not HaveBounds then begin MinX := X; MaxX := X; HaveBounds := True end
+            else begin MinX := Min(MinX, X); MaxX := Max(MaxX, X) end;
+          end;
+        end;
+    end;
+  end;
+  LengthX := MaxX - MinX;
+  CenterX := MinX + 0.5 * LengthX;
+  FMidshipLocation := CenterX;
+  if LengthX <= 0 then Exit;
+  // This is a numerical maximum-section search, independent of display stations.
+  // Hydrostatic control-point abscissae supplement the uniform samples. Refine
+  // sampled peaks to one millionth of model length, subject to Single precision.
+  // This finite search does not prove a global maximum for arbitrary geometry.
+  Count := SearchIntervals + 1;
+  for I := 0 to Owner.NumberOfLayers - 1 do
+    if Owner.Layer[I].UseInHydrostatics then
+      for J := 0 to Owner.Layer[I].Count - 1 do
+        Inc(Count, Owner.Layer[I].Items[J].NumberOfPoints);
+  SetLength(Positions, Count);
+  Count := 0;
+  for I := 0 to SearchIntervals do
+  begin
+    Positions[Count] := MinX + LengthX * I / SearchIntervals;
+    Inc(Count);
+  end;
+  for I := 0 to Owner.NumberOfLayers - 1 do
+  begin
+    Layer := Owner.Layer[I];
+    if not Layer.UseInHydrostatics then Continue;
+    for J := 0 to Layer.Count - 1 do
+      for K := 0 to Layer.Items[J].NumberOfPoints - 1 do
+      begin
+        X := Layer.Items[J].Point[K].Coordinate.X;
+        if (X >= MinX) and (X <= MaxX) then
+        begin Positions[Count] := X; Inc(Count) end;
+      end;
+  end;
+  SortPositions(0, Count - 1);
+  UniqueCount := 1;
+  for I := 1 to Count - 1 do
+    if Positions[I] > Positions[UniqueCount - 1] then
+    begin Positions[UniqueCount] := Positions[I]; Inc(UniqueCount) end;
+  SetLength(Positions, UniqueCount);
+  SetLength(Areas, UniqueCount);
+  Tolerance := Max(1e-6, LengthX * 1e-6);
+  MaxArea := -1;
+  CacheCount := 0;
+  Frame := TFreeIntersection.Create(Owner);
+  try
+    Frame.FUseHydrostaticsSurfacesOnly := True;
+    Frame.FIntersectionType := fiStation;
     Frame.FPlane.a := 1.0;
     Frame.FPlane.b := 0.0;
     Frame.FPlane.c := 0.0;
-    X := X1;
-    while X < X2 do
-    begin
-      Frame.FPlane.d := -X;
-      Frame.Built := false;
-      Frame.CalculateArea(FData.WaterlinePlane, Area, COG, MOI);
-      if MaxArea < Area then
-      begin
-        FMidshipLocation := X;
-        MaxArea := Area;
-      end;
-      X := X + Step;
-    end;
+    AreaAt(CenterX);
+    for I := 0 to UniqueCount - 1 do Areas[I] := AreaAt(Positions[I]);
+    if Areas[0] > Areas[1] then Refine(Positions[0], Positions[1]);
+    for I := 1 to UniqueCount - 2 do
+      if (Areas[I] >= Areas[I - 1]) and (Areas[I] >= Areas[I + 1]) and
+        ((Areas[I] > Areas[I - 1]) or (Areas[I] > Areas[I + 1])) then
+        Refine(Positions[I - 1], Positions[I + 1]);
+    if Areas[UniqueCount - 1] > Areas[UniqueCount - 2] then
+      Refine(Positions[UniqueCount - 2], Positions[UniqueCount - 1]);
+  finally
+    Frame.Free;
   end;
-
-  if MaxStation < Owner.NumberofStations-1 then // search between MaxStation and MaxStation+1
-  begin
-    X1 := - Owner.Station[MaxStation].Plane.d;
-    X2 := - Owner.Station[MaxStation+1].Plane.d;
-    Frame.FPlane.a := 1.0;
-    Frame.FPlane.b := 0.0;
-    Frame.FPlane.c := 0.0;
-    X := X1;
-    while X < X2 do
-    begin
-      Frame.FPlane.d := -X;
-      Frame.Built := false;
-      Frame.CalculateArea(FData.WaterlinePlane, Area, COG, MOI);
-      if MaxArea < Area then
-      begin
-        FMidshipLocation := X;
-        MaxArea := Area;
-      end;
-      X := X + Step;
-    end;
-  end;
-
-  FreeAndNil(Frame);
 end;
 
 
@@ -1429,16 +1495,12 @@ var
   Frame: TFreeIntersection;
   Spline: TFreeSpline;
   HydObject: TFreehydrostaticCalc;
-  ffile: textfile;
   SDP, Zsdp, SDP_, Zsdp_, SmomentZ: single;
   Xsdp, Xsdp_, SmomentX, Z_min: single;
   Smid, Zmid, Smid_, Zmid_, Smom: single;
   isymm, Nmet: integer;
   dT, T, Vol: single;
   Sw, Sm: array [1..101] of single;
-  Twl: array [1..101] of single;
-  Xbon: array [1..101] of single;
-  Wbon: array [1..101, 1..101] of single;
 
 
   function RotatePoint(P: T3DCoordinate): T3DCoordinate;
@@ -1531,6 +1593,7 @@ begin
    HeelingAngle:=40;
    }
   isymm := 0;
+  FSACSymmetryCorrection := False;
   Nmet := 0;
   CosHeel := Cos(DegToRad(-HeelingAngle));
   SinHeel := Sin(DegToRad(-HeelingAngle));
@@ -1825,6 +1888,7 @@ begin
         FData.MidshipCoeff := FData.MidshipCoeff / 2.0;
         FData.MidshipArea := FData.MidshipArea / 2.0;
         isymm := 1;
+        FSACSymmetryCorrection := True;
       end;
     end
     else if Owner.ProjectSettings.ProjectBeam * Draft <> 0.0 then
@@ -1963,76 +2027,7 @@ begin
         FData.SAC[I].Y := 0.0;
       end;
 
-      // Расчет семейства СПШ до крайней верхней ватерлинии для построения масштаба Бонжана
-      SmomentZ := FData.WaterlinePlane.D;
-      if (Owner.NumberofWaterlines > 0) and (Owner.NumberofWaterlines < 100) and
-        (Owner.NumberofStations < 100) and Owner.ProjectSettings.EnableBonjeanSAC then
-      begin
-        Assignfile(FFile, 'SACs.txt');
-         {$I-}
-        Rewrite(FFile);
-{$I+}
-        Writeln(FFile, Owner.NumberofWaterlines: 3, Owner.NumberofStations: 3);
-        Writeln(FFile, ' ');
-        for J := 0 to Owner.NumberofWaterlines - 1 do
-        begin
-          FData.WaterlinePlane.D := Owner.Waterline[J].FPlane.d;
-          Twl[J + 1] := -FData.WaterlinePlane.D;
-          Writeln(FFile, -FData.WaterlinePlane.D: 10: 4);
-          for I := 0 to Owner.NumberofStations - 1 do
-          begin
-            Frame := TFreeIntersection.Create(Owner);
-            Frame.FIntersectionType := Owner.Station[I].FIntersectionType;
-            Frame.Plane := Owner.Station[I].Plane;
-            Frame.FUseHydrostaticsSurfacesOnly := True;
-            Fdata.Sac[I].X := -Frame.Plane.d;
-            Frame.CalculateArea(FData.WaterlinePlane, FData.Sac[I].Y, P1, TmpP2D);
-            FreeAndNil(Frame);
-            Xbon[I + 1] := Fdata.Sac[I].X;
-            Wbon[J + 1, I + 1] := Fdata.Sac[I].Y;
-          end;
-
-
-          if (Fdata.Sac[Trunc(Owner.NumberofStations / 2)].Y > FData.MidshipArea) and
-            (isymm = 1) then
-            for I := 0 to Owner.NumberofStations - 1 do
-              Fdata.Sac[I].Y := Fdata.Sac[I].Y / 2.0;
-          for I := 0 to Owner.NumberofStations - 1 do
-            Writeln(FFile, Fdata.Sac[I].X: 10: 4, Fdata.Sac[I].Y: 10: 4);
-          Writeln(FFile, ' ');
-        end;
-        Writeln(FFile, 'EOF ');
-        CloseFile(FFile);
-
-        // Расчет масштаба Бонжана
-
-        Assignfile(FFile, 'Bonjean.txt');
-       {$I-}
-        Rewrite(FFile);
-{$I+}
-        Writeln(FFile, Owner.NumberofWaterlines: 3, Owner.NumberofStations: 3);
-        Writeln(FFile, ' ');
-        Write(FFile, '        ');
-        for J := 1 to Owner.NumberofStations - 1 do
-          Write(FFile, Xbon[J]: 8: 3);
-        WriteLn(FFile, Xbon[Owner.NumberofStations]: 8: 3);
-        for J := 1 to Owner.NumberofWaterlines do
-        begin
-          Write(FFile, Twl[J]: 8: 3);
-          for I := 1 to Owner.NumberofStations - 1 do
-            if Wbon[J, I] > 999 then
-              Write(FFile, Wbon[J, I]: 8: 2)
-            else
-              Write(FFile, Wbon[J, I]: 8: 3);
-          WriteLn(FFile, Wbon[J, Owner.NumberofStations]: 8: 3);
-        end;
-        Writeln(FFile, 'EOF ');
-        CloseFile(FFile);
-      end;
-
-
-      // Расчет СПШ для действующей ватерлинии КВЛ
-      FData.WaterlinePlane.D := SmomentZ;
+      // Sectional areas for the requested waterplane remain in FData.SAC.
       for I := 0 to Owner.NumberofStations - 1 do
       begin
         Frame := TFreeIntersection.Create(Owner);
@@ -2403,6 +2398,7 @@ end;{TFreeHydrostaticCalc.CalculateVolume}
 procedure TFreeHydrostaticCalc.Clear;
 begin
   Calculated := False;
+  FSACSymmetryCorrection := False;
   FHydrostaticType := fhShort;
   FHeelingAngle := 0.0;
   FTrim := 0.0;
@@ -2434,29 +2430,144 @@ begin
   inherited Destroy;
 end;{TFreeHydrostaticCalc.Destroy}
 
+resourcestring
+  rsHydroAuxInputs = 'Additional tables were not generated: use between 1 and 99 waterlines and at most 99 stations.';
+  rsHydroAuxIncomplete = 'Additional tables were not generated because the hydrostatic calculation is incomplete.';
+  rsHydroAuxInvalidWaterline = 'Additional tables were not generated: a selected waterline has an invalid submerged hull.';
+  rsHydroAuxNoStations = 'SACs.txt and Bonjean.txt were not generated because no stations are defined. Weights.txt and Sterns.txt are available.';
+
+function TFreeHydrostaticCalc.BuildAuxiliaryReports(Reports: TStringList): string;
+var
+  Tables: array[0..3] of TStringList;
+  X, Areas: array of TFloatType;
+  I, J: integer;
+  Frame: TFreeIntersection;
+  Other: TFreeHydrostaticCalc;
+  Plane: T3DPlane;
+  Center: T3DCoordinate;
+  Moment: T2DCoordinate;
+  Line, Header: string;
+  HalfArea: boolean;
+  Properties: TLayerProperties;
+
+  function Number(Value: Extended; Width, Decimals: integer): string;
+  begin
+    Str(Value:Width:Decimals, Result);
+  end;
+
+begin
+  Result := '';
+  if not Owner.ProjectSettings.EnableBonjeanSAC then Exit;
+  if Reports.Count <> 0 then
+    raise EArgumentException.Create('Additional report destination must be empty.');
+  if (Owner.NumberOfWaterlines < 1) or (Owner.NumberOfWaterlines > 99) or
+     (Owner.NumberOfStations > 99) then
+  begin
+    Result := rsHydroAuxInputs;
+    Exit;
+  end;
+  if not Calculated then Calculate;
+  if (Errors <> []) or (FData.Volume <= 0) then
+  begin
+    Result := rsHydroAuxIncomplete;
+    Exit;
+  end;
+  for I := 0 to High(Tables) do Tables[I] := nil;
+  Frame := nil;
+  Other := nil;
+  try
+    for I := 0 to High(Tables) do Tables[I] := TStringList.Create;
+    Str(Owner.NumberOfWaterlines:3, Header); Str(Owner.NumberOfStations:3, Line);
+    Header := Header + Line;
+    for I := 0 to 1 do begin Tables[I].Add(Header); Tables[I].Add(' ') end;
+    Tables[3].Add(Header); Tables[3].Add(' ');
+    SetLength(X, Owner.NumberOfStations);
+    SetLength(Areas, Owner.NumberOfStations);
+    Line := '        ';
+    for I := 0 to High(X) do
+    begin
+      X[I] := -Owner.Station[I].Plane.d;
+      Line := Line + Number(X[I], 8, 3);
+    end;
+    Tables[1].Add(Line);
+    Frame := TFreeIntersection.Create(Owner);
+    Frame.FIntersectionType := fiStation;
+    Frame.FUseHydrostaticsSurfacesOnly := True;
+    Other := TFreeHydrostaticCalc.Create(Owner);
+    Plane := FData.WaterlinePlane;
+    for J := 0 to Owner.NumberOfWaterlines - 1 do
+    begin
+      Plane.d := Owner.Waterline[J].Plane.d;
+      Tables[0].Add(Number(-Plane.d, 10, 4));
+      Line := Number(-Plane.d, 8, 3);
+      for I := 0 to High(X) do
+      begin
+        Frame.Plane := Owner.Station[I].Plane;
+        Frame.Built := False;
+        Frame.CalculateArea(Plane, Areas[I], Center, Moment);
+        // The legacy Bonjean table records raw areas, before SAC correction.
+        if (I < High(X)) and (Areas[I] > 999) then
+          Line := Line + Number(Areas[I], 8, 2)
+        else Line := Line + Number(Areas[I], 8, 3);
+      end;
+      Tables[1].Add(Line);
+      HalfArea := (Length(X) > 0) and FSACSymmetryCorrection and
+        (Areas[Length(X) div 2] > FData.MidshipArea);
+      for I := 0 to High(X) do
+      begin
+        if HalfArea then Areas[I] := Areas[I] / 2;
+        Tables[0].Add(Number(X[I], 10, 4) + Number(Areas[I], 10, 4));
+      end;
+      Tables[0].Add(' ');
+      Other.Draft := -Plane.d;
+      Other.Calculate;
+      if Other.Errors - [feNothingSubmerged] <> [] then
+      begin
+        Result := rsHydroAuxInvalidWaterline;
+        Exit;
+      end;
+      Tables[3].Add(Number(-Plane.d, 9, 3) + Number(Other.Data.WlMin.X, 9, 3) +
+        Number(Other.Data.WlMax.X, 9, 3));
+    end;
+    Tables[0].Add('EOF '); Tables[1].Add('EOF ');
+    Tables[3].Add(' '); Tables[3].Add('EOF ');
+    for I := 0 to Owner.NumberOfLayers - 1 do
+      if Owner.Layer[I].Count > 0 then
+      begin
+        Tables[2].Add('! ' + Owner.Layer[I].Name);
+        Properties := Owner.Layer[I].CalculateSurfaceProperties(Tables[2]);
+      end;
+    if Length(X) > 0 then
+    begin
+      Reports.AddObject('SACs.txt', Tables[0]); Tables[0] := nil;
+      Reports.AddObject('Bonjean.txt', Tables[1]); Tables[1] := nil;
+    end
+    else Result := rsHydroAuxNoStations;
+    Reports.AddObject('Weights.txt', Tables[2]); Tables[2] := nil;
+    Reports.AddObject('Sterns.txt', Tables[3]); Tables[3] := nil;
+  finally
+    Other.Free;
+    Frame.Free;
+    for I := 0 to High(Tables) do Tables[I].Free;
+  end;
+end;
+
 procedure TFreeHydrostaticCalc.ShowData(Mode: TFreeHydrostaticsMode);
 var
   Strings: TStringList;
   Dialog: TFreeHydrostaticsDialog;
-  I: integer;
 
 begin
   if not Calculated then
     Calculate;
   Strings := TStringList.Create;
-  AddData(Strings, Mode, ';');
-  Dialog := TFreeHydrostaticsDialog.Create(Owner);
-  //ShowTranslatedValues(Dialog);
-  //Strings.SaveToFile('FreeHydrostaticsMode.ShowData.Strings.txt');
+  Dialog := nil;
   try
-    Dialog.Edit.Lines.BeginUpdate;
-    Dialog.Edit.Clear;
-    //writeln('FreeHydrostaticsMode: Text >>>');
-    for I := 1 to Strings.Count do
-      Dialog.Edit.Lines.Add(Strings.Strings[I - 1])//writeln(Strings.Strings[I-1]);
-    ;
-    //writeln('FreeHydrostaticsMode: Text <<<');
-    Dialog.Edit.Lines.EndUpdate;
+    AddData(Strings, Mode, ';');
+    Dialog := TFreeHydrostaticsDialog.Create(Owner);
+    Dialog.Edit.Lines.Assign(Strings);
+    if Mode = fhSingleCalculation then
+      Dialog.AuxiliaryNotice := BuildAuxiliaryReports(Dialog.AdditionalReports);
     Dialog.ShowModal;
   finally
     FreeAndNil(Strings);

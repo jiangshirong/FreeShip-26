@@ -458,7 +458,11 @@ var
   P3D, P3DA, P3DB, P3DA2, P3DB2 : T3DCoordinate;
   MFL: TFloatType;
   B3D: T3DLine;
+  PointIsVisible: Boolean;
+  PointLabel: String;
+  LabelPlacement: TLabelPlacement;
 begin
+  PointIsVisible := Viewport.ViewportMode = vmWireframe;
   if Viewport.ViewportMode <> vmWireframe then
   begin
     P3D := FCoordinate;
@@ -475,15 +479,17 @@ begin
       if Pz.Z >= Viewport.ZBuffer.FBuffer[Pz.Y][Pz.X] then
       begin
         // yes, the point is visible
+        PointIsVisible := True;
         Viewport.ZBuffer.FBuffer[Pz.Y][Pz.X] := Pz.Z;
 
         if Viewport.PenWidth <> 1 then
           Viewport.PenWidth := 1;
         Viewport.PenColor := Color;
+        if not Selected then Viewport.PenColor:=Viewport.ControlPointEntranceColor(Point(Pz.X,Pz.Y),Color,PtrUInt(Self));
         Viewport.BrushStyle := bsClear;
         Viewport.PenStyle := psSolid;
-        for I := 1 to Surface.ControlPointSize do
-          Viewport.Rectangle(Pz.X - I, Pz.Y - I, Pz.X + I, Pz.Y + I);
+        if Viewport.ControlPointRevealed(Point(Pz.X,Pz.Y)) then
+          Viewport.DrawControlPointMarker(Point(Pz.X,Pz.Y),Surface.ControlPointSize);
       end;
     end;
   end
@@ -499,21 +505,23 @@ begin
     if Viewport.PenWidth <> 1 then
       Viewport.PenWidth := 1;
     Viewport.PenColor := Color;
+    if not Selected then Viewport.PenColor:=Viewport.ControlPointEntranceColor(P,Color,PtrUInt(Self));
     if Viewport.BrushStyle <> bsClear then
       Viewport.BrushStyle := bsClear;
+    if Viewport.ControlPointRevealed(P) then begin
     if Selected then
     begin
       //FInitializeCanvas(Viewport,1,Color,Mode);
-      for I := 1 to Surface.ControlPointSize do
-        Viewport.Rectangle(P.X - I, P.Y - I, P.X + I, P.Y + I);
+      Viewport.DrawControlPointMarker(P,Surface.ControlPointSize);
       Viewport.Rectangle(P.X - Surface.ControlPointSize - 2, P.Y -
         Surface.ControlPointSize - 2, P.X + Surface.ControlPointSize + 2, P.Y + Surface.ControlPointSize + 2);
     end
     else
     begin
-      for I := 1 to Surface.ControlPointSize do
-        Viewport.Rectangle(P.X - I, P.Y - I, P.X + I, P.Y + I);
+      Viewport.DrawControlPointMarker(P,Surface.ControlPointSize);
     end;
+
+    end; // stationary control-point reveal
 
     if (FLinearConstraintPointA <> nil) and (FLinearConstraintPointB <> nil) then
     begin
@@ -561,10 +569,45 @@ begin
 
     //end;
   end;
-  if (FName > '') then
+  PointLabel := FName;
+  if PointIsVisible and (Viewport.ControlPointCoordinateAxis <> 0) then
   begin
+    PointLabel := '';
+    case Viewport.ControlPointCoordinateAxis of
+      1: PointLabel := PointLabel + FormatFloat('0.000', FCoordinate.X);
+      2: PointLabel := PointLabel + FormatFloat('0.000', FCoordinate.Y);
+      3: PointLabel := PointLabel + FormatFloat('0.000', FCoordinate.Z);
+    end;
+  end;
+  if (PointLabel <> '') then
+  begin
+    // Surface.Draw visits selected points first, so the selected representative
+    // owns a shared projection/value before unselected points can claim it.
+    if (Viewport.ControlPointCoordinateAxis<>0) and not Viewport.Printing then
+      if not Viewport.LabelLayout.ClaimCoordinateLabel(P,PointLabel) then Exit;
+
+    if Viewport.ControlPointCoordinateAxis <> 0 then
+    begin
+      // Rasterize coordinate text on the viewport's bitmap with a real UI font.
+      Viewport.FontName := 'Segoe UI';
+      if Viewport.FontSize < 9 then Viewport.FontSize := 9;
+      if Viewport.DrawingCanvas.Font.Quality <> fqAntialiased then
+        Viewport.DrawingCanvas.Font.Quality := fqAntialiased;
+      if Viewport.DrawingCanvas.Font.Style <> [] then
+        Viewport.DrawingCanvas.Font.Style := [];
+    end;
     Viewport.FontColor := Color;
-    ViewPort.TextOut(P.X + 2, P.Y + 2, FName);
+    if Viewport.Printing then
+      Viewport.TextOut(P.X + Surface.ControlPointSize + 4, P.Y + 3, PointLabel)
+    else
+    begin
+      LabelPlacement := Viewport.LabelLayout.Place('point:' + IntToHex(PtrUInt(Self), SizeOf(Pointer)*2),
+        PointLabel, P, Point(P.X + Surface.ControlPointSize + 4, P.Y + 3),
+        Viewport.TextWidth(PointLabel), Viewport.TextHeight(PointLabel), lkPoint);
+      if LabelPlacement.Visible then begin
+        Viewport.TextOutLabel(LabelPlacement,PointLabel);
+      end;
+    end;
   end;
 end;{TFreeSubdivisionControlPoint.Draw}
 

@@ -54,6 +54,8 @@ uses
 
 type
 
+  TFreeDraftSequence = array of Single;
+
   { TFreeHydrostaticsForm }
 
   TFreeHydrostaticsForm = class(TForm)
@@ -76,6 +78,7 @@ type
     procedure Edit1KeyPress(Sender: TObject;
       var Key: char);
     procedure Button1Click(Sender: TObject);
+    procedure CloseFromTitleBar(Sender:TObject; var CloseAction:TCloseAction);
     procedure Edit1Exit(Sender: TObject);
     procedure Edit3Exit(Sender: TObject);
     procedure Edit4Exit(Sender: TObject);
@@ -103,6 +106,11 @@ type
       read FGetTrim write FSetTrim;
   end;
 
+const
+  MaxHydrostaticDraftRows = 10000;
+
+function BuildHydrostaticDraftSequence(StartValue, EndValue, StepValue: Single): TFreeDraftSequence;
+
 var
   FreeHydrostaticsForm: TFreeHydrostaticsForm;
 
@@ -115,7 +123,60 @@ implementation
   {$R *.lfm}
 {$ENDIF}
 
-uses FreeLanguageSupport;
+uses FreeLanguageSupport, Math;
+
+resourcestring
+  rsHydroDraft = 'Draft';
+  rsHydroTrim = 'Trim';
+  rsHydroVolume = 'Volume';
+  rsHydroDisplacement = 'Displ';
+  rsHydroDraftFinite = 'Draft values and step must be finite numbers.';
+  rsHydroDraftRange = 'The end draft must not be below the start draft, and the step must be positive.';
+  rsHydroDraftRows = 'Too many draft rows. Increase the step (maximum %d rows).';
+  rsHydroDraftPrecision = 'The draft step is too small for the precision of these draft values.';
+
+function BuildHydrostaticDraftSequence(StartValue, EndValue, StepValue: Single): TFreeDraftSequence;
+var
+  Ratio, StartWide, EndWide, StepWide: Double;
+  WholeSteps, I, Count: Integer;
+  Value: Single;
+begin
+  SetLength(Result, 0);
+  if IsNan(StartValue) or IsInfinite(StartValue) or IsNan(EndValue) or
+    IsInfinite(EndValue) or IsNan(StepValue) or IsInfinite(StepValue) then
+    raise EArgumentException.Create(rsHydroDraftFinite);
+  if (EndValue < StartValue) or (StepValue <= 0) then
+    raise EArgumentException.Create(rsHydroDraftRange);
+  if EndValue = StartValue then
+  begin
+    SetLength(Result, 1);
+    Result[0] := StartValue;
+    Exit;
+  end;
+  StartWide := StartValue;
+  EndWide := EndValue;
+  StepWide := StepValue;
+  Ratio := (EndWide - StartWide) / StepWide;
+  if Ratio > MaxHydrostaticDraftRows then
+    raise EArgumentException.CreateFmt(rsHydroDraftRows, [MaxHydrostaticDraftRows]);
+  WholeSteps := Math.Min(Trunc(Ratio), MaxHydrostaticDraftRows - 1);
+  SetLength(Result, WholeSteps + 2);
+  Count := 0;
+  for I := 0 to WholeSteps do
+  begin
+    // Compute each value from its index, without accumulating rounding error.
+    Value := StartWide + I * StepWide;
+    if Value >= EndValue then Break;
+    if (Count > 0) and (Value <= Result[Count - 1]) then
+      raise EArgumentException.Create(rsHydroDraftPrecision);
+    Result[Count] := Value;
+    Inc(Count);
+  end;
+  if Count >= MaxHydrostaticDraftRows then
+    raise EArgumentException.CreateFmt(rsHydroDraftRows, [MaxHydrostaticDraftRows]);
+  Result[Count] := EndValue;
+  SetLength(Result, Count + 1);
+end;
 
 function TFreeHydrostaticsForm.FGetStartDraft: single;
 begin
@@ -178,6 +239,11 @@ begin
     key := #0;
 end;{TFreeHydrostaticsForm.Edit1KeyPress}
 
+procedure TFreeHydrostaticsForm.CloseFromTitleBar(Sender:TObject; var CloseAction:TCloseAction);
+begin
+  ModalResult:=mrOk;
+end;
+
 procedure TFreeHydrostaticsForm.Button1Click(Sender: TObject);
 begin
   ModalResult := mrOk;
@@ -207,41 +273,52 @@ procedure TFreeHydrostaticsForm.Button2Click(Sender: TObject);
 var
   Value: single;
   HydObject: TFreeHydrostaticCalc;
-  I: integer;
+  I, DraftIndex: integer;
+  Drafts: TFreeDraftSequence;
   PrevCursor: TCursor;
   ResultsDlg: TFreeHydrostaticsResultsDialog;
   Units: TFreeUnitType;
   Strings: TStringList;
   Cb, Cm, Cp, Zmin: single;
 begin
-  if (StartDraft < EndDraft) and (DraftStep > 0.0001) then
+  try
+    Drafts := BuildHydrostaticDraftSequence(StartDraft, EndDraft, DraftStep);
+  except
+    on E: EArgumentException do
+    begin
+      MessageDlg(E.Message, mtError, [mbOK], 0);
+      Exit;
+    end;
+  end;
   begin
-    Value := StartDraft;
     PrevCursor := Screen.Cursor;
     Screen.Cursor := crHourglass;
-    Strings := TStringList.Create;
-    ResultsDlg := TFreeHydrostaticsResultsDialog.Create(self);
-    ShowTranslatedValues(ResultsDlg);
+    Strings := nil;
+    ResultsDlg := nil;
+    HydObject := nil;
     try
+      Strings := TStringList.Create;
+      ResultsDlg := TFreeHydrostaticsResultsDialog.Create(self);
+      ShowTranslatedValues(ResultsDlg);
       // Quietly test for inconsistencies
       if not FFreeShip.ProjectSettings.DisableModelCheck then
         FFreeShip.Edit.Model_Check(False);
       HydObject := TFreeHydrostaticCalc.Create(FFreeShip);
-      ResultsDlg.Grid.RowCount := Round((EndDraft - StartDraft) / DraftStep) + 3;
+      ResultsDlg.Grid.RowCount := Length(Drafts) + 2;
       Units := FFreeship.ProjectSettings.ProjectUnits;
 
       ResultsDlg.Grid.Colcount := 18;
-      ResultsDlg.Grid.Cells[0, 0] := 'Draft';
+      ResultsDlg.Grid.Cells[0, 0] := rsHydroDraft;
       ResultsDlg.Grid.Cells[0, 1] := LengthStr(Units);
-      ResultsDlg.Grid.Cells[1, 0] := 'Trim';
+      ResultsDlg.Grid.Cells[1, 0] := rsHydroTrim;
       ResultsDlg.Grid.Cells[1, 1] := LengthStr(Units);
       ResultsDlg.Grid.Cells[2, 0] := 'Lwl';
       ResultsDlg.Grid.Cells[2, 1] := LengthStr(Units);
       ResultsDlg.Grid.Cells[3, 0] := 'Bwl';
       ResultsDlg.Grid.Cells[3, 1] := LengthStr(Units);
-      ResultsDlg.Grid.Cells[4, 0] := 'Volume';
+      ResultsDlg.Grid.Cells[4, 0] := rsHydroVolume;
       ResultsDlg.Grid.Cells[4, 1] := VolStr(Units);
-      ResultsDlg.Grid.Cells[5, 0] := 'Displ.';
+      ResultsDlg.Grid.Cells[5, 0] := rsHydroDisplacement;
       ResultsDlg.Grid.Cells[5, 1] := WeightStr(Units);
       ResultsDlg.Grid.Cells[6, 0] := 'LCB';
       ResultsDlg.Grid.Cells[6, 1] := LengthStr(Units);
@@ -276,15 +353,13 @@ begin
           ResultsDlg.Grid.ColWidths[I] := 55;
       Zmin := 0;
       I := 2;
-      while (Value <= EndDraft + DraftStep) or (abs(Value - EndDraft) < 1e-3) do
+      for DraftIndex := 0 to High(Drafts) do
       begin
+        Value := Drafts[DraftIndex];
         HydObject.Clear;
         HydObject.HeelingAngle := 0.0;
         HydObject.Trim := Trim;
-        if Value <= EndDraft then
-          HydObject.Draft := Value - Zmin
-        else
-          HydObject.Draft := EndDraft - Zmin;
+        HydObject.Draft := Value - Zmin;
         HydObject.Calculate;
         // Пересчет коэфФициентов полноты, если базовая линия проходит через линию киля
         if abs(HydObject.Data.ModelMin.Z) > 0.001 then
@@ -341,7 +416,6 @@ begin
             HydObject.Data.KMlongitudinal));
           Inc(I);
         end;
-        Value := Value + DraftStep;
         if (feMakingWater in HydObject.Errors) then
           break; // stop if the vessel is making water
       end;
@@ -350,13 +424,14 @@ begin
       Strings.add('');
       HydObject.AddFooter(Strings, fhMultipleCalculations);
       ResultsDlg.Header.Lines.AddStrings(Strings);
-      HydObject.Destroy;
-      //ResultsDlg.Grid.RowCount := I;
-    finally
-      Strings.Destroy;
+      ResultsDlg.Grid.RowCount := Math.Max(3, I);
       Screen.Cursor := PrevCursor;
       ResultsDlg.Execute;
-      ResultsDlg.Destroy;
+    finally
+      FreeAndNil(HydObject);
+      FreeAndNil(ResultsDlg);
+      FreeAndNil(Strings);
+      Screen.Cursor := PrevCursor;
     end;
   end;
 end;{TFreeHydrostaticsForm.Button2Click}

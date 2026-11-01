@@ -5,7 +5,7 @@ unit MDIPanel;
 interface
 
 uses
-Classes, SysUtils, Types, TypInfo,
+Classes, SysUtils, Types, TypInfo, Math, FreeShip_26Icons,
 // LCL
 LCLStrConsts, LCLType, LCLProc, LCLIntf, LCLVersion, LCLClasses,
 LMessages, LResources, GraphType, Graphics, Menus,
@@ -62,6 +62,8 @@ type
   TCustomMDIPanel = class(TCustomPanel)
   private
     FClientControls:TFPList;
+    FExposedRepaintActive: Boolean;
+    FOnMoveResize: TNotifyEvent;
     FCaptionPanel: TPanel;
     FCaptionLabel: TLabel;
     FClientPanel: TMDIClientPanel; //TScrollBox;
@@ -99,6 +101,8 @@ type
     FClickProxies: TFPList;
     FCaptionButtons: TCaptionButtons;
     FWindowResizingSide: TWindowResizingSide;
+    FResizeNeighborX,FResizeNeighborY:TCustomMDIPanel;
+    FResizeStart,FNeighborStartX,FNeighborStartY:TRect;
 
     //FLastResizeWidth:integer;
     //FLastResizeHeight:integer;
@@ -136,6 +140,9 @@ type
     procedure CloseButtonClick(Sender: TObject);
     procedure DoClose(CloseAction: TCloseAction);
     procedure MaximizeButtonClick(Sender: TObject);
+    procedure SetMotionState(Value:TWindowPositionState);
+    procedure SetWindowState(Value:TWindowState);
+    procedure ArrangeMinimized;
     procedure DoMaximize;
     procedure MinimizeButtonClick(Sender: TObject);
     procedure DoMinimize;
@@ -153,12 +160,8 @@ type
     procedure CaptionPanelMouseUp(Sender: TObject; Button: TMouseButton;
       Shift: TShiftState; X, Y: integer);
 
-    procedure BorderMouseDown(Sender: TObject; Button: TMouseButton;
-      Shift: TShiftState; X, Y: integer);
-    procedure BorderMouseMove(Sender: TObject; Shift: TShiftState; X, Y: integer);
     procedure BorderMouseUp(Sender: TObject; Button: TMouseButton;
       Shift: TShiftState; X, Y: integer);
-    procedure SetBorderCursor(X, Y: integer);
 
     function deriveCaptionHeight:integer;
     function deriveCaptionIconHeight:integer;
@@ -179,6 +182,10 @@ type
     procedure ClientPanelOnMouseDown(Sender: TObject; Button: TMouseButton;
               Shift: TShiftState; X, Y: Integer);
   protected
+    procedure SetBorderCursor(X, Y: integer);
+    procedure BorderMouseDown(Sender: TObject; Button: TMouseButton;
+      Shift: TShiftState; X, Y: integer);
+    procedure BorderMouseMove(Sender: TObject; Shift: TShiftState; X, Y: integer);
     procedure LMSysCommand(var message: TLMessage); message LM_SYSCOMMAND;
     procedure Release;
     procedure Deactivate; virtual;
@@ -198,6 +205,10 @@ type
     procedure SetMDIPanelManager(AValue: TMDIPanelManager);
     procedure InactivateSiblings;
   public
+    procedure SnapMovePosition(var X,Y:Integer);
+    procedure BeginSharedResize(Side:TWindowResizingSide; const Hit:TPoint);
+    procedure ApplySharedResize(var L,T,W,H:Integer);
+    procedure SetBounds(ALeft, ATop, AWidth, AHeight: Integer); override;
     constructor CreateNew(AOwner: TComponent); virtual;
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
@@ -225,6 +236,8 @@ type
     property Caption: TCaption read GetCaption write SetCaption;
     property CaptionPanel: TPanel read FCaptionPanel;
     property Icon: TIcon read getIcon write setIcon stored IsIconStored;
+    property PositionState:TWindowPositionState read WindowPositionState;
+    property OnMoveResize: TNotifyEvent read FOnMoveResize write FOnMoveResize;
     property OnActivate: TNotifyEvent read FOnActivate write FOnActivate;
     property OnDeactivate: TNotifyEvent read FOnDeactivate write FOnDeactivate;
     property OnClose: TCloseEvent read FOnClose write FOnClose;
@@ -294,7 +307,8 @@ type
       property PopupParent: TCustomForm read FPopupParent write FPopupParent;
       property ShowInTaskBar: TShowInTaskbar read FShowInTaskbar write FShowInTaskBar
                                       default stDefault;
-      property WindowState: TWindowState read FWindowState write FWindowState
+      property NormalBounds: TRect read FNormalBounds write FNormalBounds;
+      property WindowState: TWindowState read FWindowState write SetWindowState
                                          default wsNormal;
 
   end;

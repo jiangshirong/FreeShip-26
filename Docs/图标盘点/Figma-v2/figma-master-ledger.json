@@ -1,0 +1,513 @@
+{
+  "fileKey": "MTqjNNRAStv8Hnsbb1FCgI",
+  "sessionId": "4a936456-4ca2-453f-90f2-66d18b7f07ec",
+  "pageId": "0:1",
+  "created": [
+    {
+      "key": "ProjectSettings",
+      "id": "7:26",
+      "name": "Icon/ProjectSettings",
+      "width": 20,
+      "height": 20
+    },
+    {
+      "key": "Observe",
+      "id": "7:33",
+      "name": "Icon/Observe",
+      "width": 20,
+      "height": 20
+    },
+    {
+      "key": "ModelCheck",
+      "id": "7:38",
+      "name": "Icon/ModelCheck",
+      "width": 20,
+      "height": 20
+    },
+    {
+      "key": "Transform",
+      "id": "7:43",
+      "name": "Icon/Transform",
+      "width": 20,
+      "height": 20
+    },
+    {
+      "key": "ViewBody",
+      "id": "7:47",
+      "name": "Icon/ViewBody",
+      "width": 20,
+      "height": 20
+    },
+    {
+      "key": "ViewProfile",
+      "id": "7:51",
+      "name": "Icon/ViewProfile",
+      "width": 20,
+      "height": 20
+    },
+    {
+      "key": "ViewPlan",
+      "id": "7:55",
+      "name": "Icon/ViewPlan",
+      "width": 20,
+      "height": 20
+    },
+    {
+      "key": "ViewPerspective",
+      "id": "7:59",
+      "name": "Icon/ViewPerspective",
+      "width": 20,
+      "height": 20
+    },
+    {
+      "key": "NewFile",
+      "id": "7:63",
+      "name": "Icon/NewFile",
+      "width": 20,
+      "height": 20
+    },
+    {
+      "key": "OpenFile",
+      "id": "7:68",
+      "name": "Icon/OpenFile",
+      "width": 20,
+      "height": 20
+    },
+    {
+      "key": "SaveFile",
+      "id": "7:72",
+      "name": "Icon/SaveFile",
+      "width": 20,
+      "height": 20
+    },
+    {
+      "key": "SaveAs",
+      "id": "7:76",
+      "name": "Icon/SaveAs",
+      "width": 20,
+      "height": 20
+    },
+    {
+      "key": "ExportFile",
+      "id": "7:81",
+      "name": "Icon/ExportFile",
+      "width": 20,
+      "height": 20
+    },
+    {
+      "key": "ExportImage",
+      "id": "7:85",
+      "name": "Icon/ExportImage",
+      "width": 20,
+      "height": 20
+    },
+    {
+      "key": "Print",
+      "id": "7:91",
+      "name": "Icon/Print",
+      "width": 20,
+      "height": 20
+    },
+    {
+      "key": "Confirm",
+      "id": "7:95",
+      "name": "Icon/Confirm",
+      "width": 20,
+      "height": 20
+    },
+    {
+      "key": "Cancel",
+      "id": "7:99",
+      "name": "Icon/Cancel",
+      "width": 20,
+      "height": 20
+    },
+    {
+      "key": "ZoomIn",
+      "id": "7:103",
+      "name": "Icon/ZoomIn",
+      "width": 20,
+      "height": 20
+    },
+    {
+      "key": "ZoomOut",
+      "id": "7:108",
+      "name": "Icon/ZoomOut",
+      "width": 20,
+      "height": 20
+    },
+    {
+      "key": "FitView",
+      "id": "7:113",
+      "name": "Icon/FitView",
+      "width": 20,
+      "height": 20
+    },
+    {
+      "key": "FillColor",
+      "id": "7:118",
+      "name": "Icon/FillColor",
+      "width": 20,
+      "height": 20
+    },
+    {
+      "key": "Lighting",
+      "id": "7:122",
+      "name": "Icon/Lighting",
+      "width": 20,
+      "height": 20
+    },
+    {
+      "key": "Monochrome",
+      "id": "7:126",
+      "name": "Icon/Monochrome",
+      "width": 20,
+      "height": 20
+    },
+    {
+      "key": "MirrorPlanView",
+      "id": "7:131",
+      "name": "Icon/MirrorPlanView",
+      "width": 20,
+      "height": 20
+    },
+    {
+      "key": "BothSides",
+      "id": "7:135",
+      "name": "Icon/BothSides",
+      "width": 20,
+      "height": 20
+    },
+    {
+      "key": "Grid",
+      "id": "7:139",
+      "name": "Icon/Grid",
+      "width": 20,
+      "height": 20
+    },
+    {
+      "key": "Normals",
+      "id": "7:143",
+      "name": "Icon/Normals",
+      "width": 20,
+      "height": 20
+    },
+    {
+      "key": "Curvature",
+      "id": "7:147",
+      "name": "Icon/Curvature",
+      "width": 20,
+      "height": 20
+    },
+    {
+      "key": "Hydrostatics",
+      "id": "7:151",
+      "name": "Icon/Hydrostatics",
+      "width": 20,
+      "height": 20
+    },
+    {
+      "key": "Camera",
+      "id": "7:155",
+      "name": "Icon/Camera",
+      "width": 20,
+      "height": 20
+    },
+    {
+      "key": "InteriorEdges",
+      "id": "7:161",
+      "name": "Icon/InteriorEdges",
+      "width": 20,
+      "height": 20
+    },
+    {
+      "key": "Stations",
+      "id": "7:166",
+      "name": "Icon/Stations",
+      "width": 20,
+      "height": 20
+    },
+    {
+      "key": "Waterlines",
+      "id": "7:171",
+      "name": "Icon/Waterlines",
+      "width": 20,
+      "height": 20
+    },
+    {
+      "key": "Buttocks",
+      "id": "7:176",
+      "name": "Icon/Buttocks",
+      "width": 20,
+      "height": 20
+    },
+    {
+      "key": "Diagonals",
+      "id": "7:180",
+      "name": "Icon/Diagonals",
+      "width": 20,
+      "height": 20
+    },
+    {
+      "key": "AddOne",
+      "id": "7:185",
+      "name": "Icon/AddOne",
+      "width": 20,
+      "height": 20
+    },
+    {
+      "key": "AddRange",
+      "id": "7:189",
+      "name": "Icon/AddRange",
+      "width": 20,
+      "height": 20
+    },
+    {
+      "key": "Delete",
+      "id": "7:193",
+      "name": "Icon/Delete",
+      "width": 20,
+      "height": 20
+    },
+    {
+      "key": "DeleteSelected",
+      "id": "7:198",
+      "name": "Icon/DeleteSelected",
+      "width": 20,
+      "height": 20
+    },
+    {
+      "key": "DeleteAll",
+      "id": "7:203",
+      "name": "Icon/DeleteAll",
+      "width": 20,
+      "height": 20
+    },
+    {
+      "key": "SplitSection",
+      "id": "7:208",
+      "name": "Icon/SplitSection",
+      "width": 20,
+      "height": 20
+    },
+    {
+      "key": "NewLayer",
+      "id": "7:212",
+      "name": "Icon/NewLayer",
+      "width": 20,
+      "height": 20
+    },
+    {
+      "key": "DeleteEmptyLayers",
+      "id": "7:216",
+      "name": "Icon/DeleteEmptyLayers",
+      "width": 20,
+      "height": 20
+    },
+    {
+      "key": "MoveUp",
+      "id": "7:220",
+      "name": "Icon/MoveUp",
+      "width": 20,
+      "height": 20
+    },
+    {
+      "key": "MoveDown",
+      "id": "7:224",
+      "name": "Icon/MoveDown",
+      "width": 20,
+      "height": 20
+    },
+    {
+      "key": "LayerVisibility",
+      "id": "7:228",
+      "name": "Icon/LayerVisibility",
+      "width": 20,
+      "height": 20
+    },
+    {
+      "key": "LayerAutoGroup",
+      "id": "7:233",
+      "name": "Icon/LayerAutoGroup",
+      "width": 20,
+      "height": 20
+    },
+    {
+      "key": "Move",
+      "id": "7:239",
+      "name": "Icon/Move",
+      "width": 20,
+      "height": 20
+    },
+    {
+      "key": "Scale",
+      "id": "7:243",
+      "name": "Icon/Scale",
+      "width": 20,
+      "height": 20
+    },
+    {
+      "key": "RotateCW",
+      "id": "7:248",
+      "name": "Icon/RotateCW",
+      "width": 20,
+      "height": 20
+    },
+    {
+      "key": "RotateCCW",
+      "id": "7:253",
+      "name": "Icon/RotateCCW",
+      "width": 20,
+      "height": 20
+    },
+    {
+      "key": "Mirror",
+      "id": "7:258",
+      "name": "Icon/Mirror",
+      "width": 20,
+      "height": 20
+    },
+    {
+      "key": "Undo",
+      "id": "7:262",
+      "name": "Icon/Undo",
+      "width": 20,
+      "height": 20
+    },
+    {
+      "key": "Redo",
+      "id": "7:266",
+      "name": "Icon/Redo",
+      "width": 20,
+      "height": 20
+    },
+    {
+      "key": "SelectAll",
+      "id": "7:270",
+      "name": "Icon/SelectAll",
+      "width": 20,
+      "height": 20
+    },
+    {
+      "key": "DeselectAll",
+      "id": "7:275",
+      "name": "Icon/DeselectAll",
+      "width": 20,
+      "height": 20
+    },
+    {
+      "key": "Lock",
+      "id": "7:279",
+      "name": "Icon/Lock",
+      "width": 20,
+      "height": 20
+    },
+    {
+      "key": "Unlock",
+      "id": "7:284",
+      "name": "Icon/Unlock",
+      "width": 20,
+      "height": 20
+    },
+    {
+      "key": "AlignPoints",
+      "id": "7:289",
+      "name": "Icon/AlignPoints",
+      "width": 20,
+      "height": 20
+    },
+    {
+      "key": "Collapse",
+      "id": "7:295",
+      "name": "Icon/Collapse",
+      "width": 20,
+      "height": 20
+    },
+    {
+      "key": "SplitEdge",
+      "id": "7:304",
+      "name": "Icon/SplitEdge",
+      "width": 20,
+      "height": 20
+    },
+    {
+      "key": "ExtrudeEdge",
+      "id": "7:311",
+      "name": "Icon/ExtrudeEdge",
+      "width": 20,
+      "height": 20
+    },
+    {
+      "key": "CreaseEdge",
+      "id": "7:315",
+      "name": "Icon/CreaseEdge",
+      "width": 20,
+      "height": 20
+    },
+    {
+      "key": "NewCurve",
+      "id": "7:319",
+      "name": "Icon/NewCurve",
+      "width": 20,
+      "height": 20
+    },
+    {
+      "key": "InvertFace",
+      "id": "7:324",
+      "name": "Icon/InvertFace",
+      "width": 20,
+      "height": 20
+    },
+    {
+      "key": "Markers",
+      "id": "7:328",
+      "name": "Icon/Markers",
+      "width": 20,
+      "height": 20
+    },
+    {
+      "key": "Flowlines",
+      "id": "7:332",
+      "name": "Icon/Flowlines",
+      "width": 20,
+      "height": 20
+    },
+    {
+      "key": "FreeObjects",
+      "id": "7:336",
+      "name": "Icon/FreeObjects",
+      "width": 20,
+      "height": 20
+    },
+    {
+      "key": "Dimensions",
+      "id": "7:342",
+      "name": "Icon/Dimensions",
+      "width": 20,
+      "height": 20
+    },
+    {
+      "key": "CheckEdges",
+      "id": "7:346",
+      "name": "Icon/CheckEdges",
+      "width": 20,
+      "height": 20
+    },
+    {
+      "key": "PartName",
+      "id": "7:350",
+      "name": "Icon/PartName",
+      "width": 20,
+      "height": 20
+    },
+    {
+      "key": "ObjectDetails",
+      "id": "7:355",
+      "name": "Icon/ObjectDetails",
+      "width": 20,
+      "height": 20
+    }
+  ],
+  "reused": [],
+  "masterCount": 87
+}

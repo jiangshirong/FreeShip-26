@@ -8,6 +8,7 @@ object FreeHydrostaticsResultsDialog: TFreeHydrostaticsResultsDialog
   ClientWidth = 900
   Font.Color = clBlack
   Font.Name = 'Arial'
+  OnCreate = FormCreate
   OnResize = FormResize
   Position = poMainFormCenter
   LCLVersion = '3.2.0.0'
@@ -124,6 +125,7 @@ object FreeHydrostaticsResultsDialog: TFreeHydrostaticsResultsDialog
       OnClick = ButtonSaveClick
     end
     object ButtonClose: TSpeedButton
+      Visible = False
       Left = 818
       Height = 30
       Top = 2

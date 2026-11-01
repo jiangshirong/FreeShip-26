@@ -59,3 +59,11 @@ lib/
 
 # Valgring log trace
 *.trc
+
+# FreeShip_26: local development artifacts (not part of the published source)
+*.candidate
+.FreeShip-*
+Tests/
+.coordinate-settings/
+.local-settings/
+.lazarus-config/

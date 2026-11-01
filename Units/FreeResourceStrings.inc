@@ -154,13 +154,13 @@ resourcestring
   rs_Appendage_coefficient = 'Appendage coefficient';
 
  //rs_NOTE_1__Draft__and_all_other_vertical_heights__is_measured_from_point_of_the_hull_Z_0_ {UserString[52]}
-  rs_NOTE_1__Draft__and_all_other_vertical_heights__is_measured_from_point_of_the_hull_Z_0_ = 'NOTE 1: Draft (and all other vertical heights) is measured from point of the hull Z=0.';
+  rs_NOTE_1__Draft__and_all_other_vertical_heights__is_measured_from_point_of_the_hull_Z_0_ = 'NOTE 1: Draft (and all other vertical heights) is measured from point of the hull Z=0';
 
  //rs_NOTE_2__All_calculated_coefficients_based_on_actual_dimensions_of_submerged_body_ {UserString[53]}
-  rs_NOTE_2__All_calculated_coefficients_based_on_actual_dimensions_of_submerged_body_ = 'NOTE 2: All calculated coefficients based on actual dimensions of submerged body.';
+  rs_NOTE_2__All_calculated_coefficients_based_on_actual_dimensions_of_submerged_body_ = 'NOTE 2: All calculated coefficients based on actual dimensions of submerged body';
 
  //rs_NOTE_2__All_calculated_coefficients_based_on_project_length___draft_and_beam_ {UserString[54]}
-  rs_NOTE_2__All_calculated_coefficients_based_on_project_length___draft_and_beam_ = 'NOTE 2: All calculated coefficients based on project length), draft and beam.';
+  rs_NOTE_2__All_calculated_coefficients_based_on_project_length___draft_and_beam_ = 'NOTE 2: All calculated coefficients based on project length), draft and beam';
 
  //rs_measured_from_the_aft_perpendicular_at_X_0_0 {UserString[55]}
   rs_measured_from_the_aft_perpendicular_at_X_0_0 = 'measured from the aft perpendicular at X=0.0';
@@ -205,7 +205,7 @@ resourcestring
   rs_Are_you_sure_you_want_to_delete_this_background_image_ = 'Are you sure you want to delete this background image?';
 
  //rs_There_is_already_one_backgroundimage_assigned_to_this_view_ {UserString[69]}
-  rs_There_is_already_one_backgroundimage_assigned_to_this_view_ = 'There is already one backgroundimage assigned to this view.';
+  rs_There_is_already_one_backgroundimage_assigned_to_this_view_ = 'There is already one backgroundimage assigned to this view';
 
  //rs_Do_you_want_to_replace_it_with_another_one_ {UserString[70]}
   rs_Do_you_want_to_replace_it_with_another_one_ = 'Do you want to replace it with another one?';
@@ -238,13 +238,13 @@ resourcestring
   rs_remove_starboard_side = 'remove starboard side';
 
  //rs_controlface_s__could_be_removed_ {UserString[80]}
-  rs_controlface_s__could_be_removed_ = 'controlface(s) could be removed.';
+  rs_controlface_s__could_be_removed_ = 'controlface(s) could be removed';
 
  //rs_controlpoints_s__could_be_removed_ {UserString[81]}
-  rs_controlpoints_s__could_be_removed_ = 'controlpoints(s) could be removed.';
+  rs_controlpoints_s__could_be_removed_ = 'controlpoints(s) could be removed';
 
  //rs_No_faces_could_be_removed_ {UserString[82]}
-  rs_No_faces_could_be_removed_ = 'No faces could be removed.';
+  rs_No_faces_could_be_removed_ = 'No faces could be removed';
 
  //rs_flip_normals {UserString[83]}
   rs_flip_normals = 'flip normals';
@@ -298,7 +298,7 @@ resourcestring
   rs_Could_not_find_the_interior_point_ = 'Could not find the interior point!';
 
  //rs_Could_not_export_surfaces_ {UserString[100]}
-  rs_Could_not_export_surfaces_ = 'Could not export surfaces.';
+  rs_Could_not_export_surfaces_ = 'Could not export surfaces';
 
  //rs_Michlet_export {UserString[101]}
   rs_Michlet_export = 'Michlet export';
@@ -364,10 +364,10 @@ resourcestring
   rs_Invalid_z_coordinate_in_surface = 'Invalid z-coordinate in surface';
 
  //rs_Invalid_contour_distance_ {UserString[122]}
-  rs_Invalid_contour_distance_ = 'Invalid contour distance.';
+  rs_Invalid_contour_distance_ = 'Invalid contour distance';
 
  //rs_No_geometry_imported_ {UserString[123]}
-  rs_No_geometry_imported_ = 'No geometry imported.';
+  rs_No_geometry_imported_ = 'No geometry imported';
 
  //rs_The_file_contains_no_BSpline_surfaces {UserString[124]}
   rs_The_file_contains_no_BSpline_surfaces = 'The file contains no BSpline surfaces';
@@ -400,7 +400,7 @@ resourcestring
   rs_Error_in_line = 'Error in line';
 
  //rs_Could_not_open_the_file_ {UserString[133]}
-  rs_Could_not_open_the_file_ = 'Could not open the file.';
+  rs_Could_not_open_the_file_ = 'Could not open the file';
 
  //rs_import_bodyplan {UserString[134]}
   rs_import_bodyplan = 'import bodyplan';
@@ -442,7 +442,7 @@ resourcestring
   rs_import_markers = 'import markers';
 
  //rs_No_markers_could_be_imported_ {UserString[147]}
-  rs_No_markers_could_be_imported_ = 'No markers could be imported.';
+  rs_No_markers_could_be_imported_ = 'No markers could be imported';
 
  //rs_analyze_surface {UserString[148]}
   rs_analyze_surface = 'analyze surface';
@@ -469,7 +469,7 @@ resourcestring
   rs_edges_found_with_more_then_2_faces_connected_to_it_ = 'edges found with more then 2 faces connected to it!';
 
  //rs_Model_is_ok_ {UserString[156]}
-  rs_Model_is_ok_ = 'Model is ok.';
+  rs_Model_is_ok_ = 'Model is ok';
 
  //rs_new_model {UserString[157]}
   rs_new_model = 'new model';
@@ -487,7 +487,7 @@ resourcestring
   rs_remove_unused_points = 'remove unused points';
 
  //rs_points_removed_ {UserString[162]}
-  rs_points_removed_ = 'points removed.';
+  rs_points_removed_ = 'points removed';
 
  //rs_insert_plane_intersections {UserString[163]}
   rs_insert_plane_intersections = 'insert plane intersections';
@@ -496,10 +496,10 @@ resourcestring
   rs_layer_intersection = 'layer intersection';
 
  //rs_No_intersection_points_found_ {UserString[165]}
-  rs_No_intersection_points_found_ = 'No intersection points found.';
+  rs_No_intersection_points_found_ = 'No intersection points found';
 
  //rs_At_least_two_layers_are_needed_to_perform_this_operation_ {UserString[166]}
-  rs_At_least_two_layers_are_needed_to_perform_this_operation_ = 'At least two layers are needed to perform this operation.';
+  rs_At_least_two_layers_are_needed_to_perform_this_operation_ = 'At least two layers are needed to perform this operation';
 
  //rs_lock_points {UserString[167]}
   rs_lock_points = 'lock points';
@@ -878,7 +878,7 @@ resourcestring
   rs_Redo = 'Redo';
 
  //rs_Displacement_step_can_not_be_zero_ {UserString[292]}
-  rs_Displacement_step_can_not_be_zero_ = 'Displacement step can not be zero.';
+  rs_Displacement_step_can_not_be_zero_ = 'Displacement step can not be zero';
 
  //rs_Cross_curves {UserString[293]}
   rs_Cross_curves = 'Cross curves';
@@ -917,10 +917,10 @@ resourcestring
   rs_Draft_on_midship = 'Draft on midship';
 
  //rs_Draft_on_F_P_ {UserString[305]}
-  rs_Draft_on_F_P_ = 'Draft on F.P.';
+  rs_Draft_on_F_P_ = 'Draft on F.P';
 
  //rs_Draft_on_F_A_ {UserString[306]}
-  rs_Draft_on_F_A_ = 'Draft on F.A.';
+  rs_Draft_on_F_A_ = 'Draft on F.A';
 
  //rs_Warning____Very_big_trim__Tf_Ta_ {UserString[307]}
   rs_Warning____Very_big_trim__Tf_Ta_ = 'Warning!!! Very big trim (Tf-Ta)';
@@ -971,7 +971,7 @@ resourcestring
   rs_Appendages_areas_ = 'Appendages areas:';
 
  //rs_ATTENTION____Calculation_for_sea_vessels_by_Holtrop_1988_method_ {UserString[323]}
-  rs_ATTENTION____Calculation_for_sea_vessels_by_Holtrop_1988_method_ = 'ATTENTION!!! Calculation for sea vessels by Holtrop-1988 method.';
+  rs_ATTENTION____Calculation_for_sea_vessels_by_Holtrop_1988_method_ = 'ATTENTION!!! Calculation for sea vessels by Holtrop-1988 method';
 
  //rs_kN {UserString[324]}
   rs_kN = 'kN';
@@ -1037,7 +1037,7 @@ resourcestring
  //rs_t_______________________________________________________t_________________________t = '+-------------------------------------------------------+-------------------------+';
 
  //rs_4_If_wetted_surface_area_S_is_set_as_0__then_S_to_calculate_by_formulae_from_method_of_Holtrop_ {UserString[345]}
-  //rs_4_If_wetted_surface_area_S_is_set_as_0__then_S_to_calculate_by_formulae_from_method_of_Holtrop_ = '4.If wetted surface area S is set as 0, then S to calculate by formulae from method of Holtrop.';
+  //rs_4_If_wetted_surface_area_S_is_set_as_0__then_S_to_calculate_by_formulae_from_method_of_Holtrop_ = '4.If wetted surface area S is set as 0, then S to calculate by formulae from method of Holtrop';
 
  //rs_5_The_wetted_area_of_transom_you_can_determine_from_sectional_areas_curve_on_Profile_View_or {UserString[346]}
   //rs_5_The_wetted_area_of_transom_you_can_determine_from_sectional_areas_curve_on_Profile_View_or = '5.The wetted area of transom you can determine from sectional areas curve on Profile View or';
@@ -1067,7 +1067,7 @@ resourcestring
   //rs_Expanded_blade_area_ratio_Ae_Ao_is_calculate_from_condition__when_cavitation_be_absent_ = 'Expanded blade area ratio Ae/Ao is calculate from condition, when cavitation be absent.';
 
  //rs_8_Absolutely_rougness_of_hull_less_150_mkm_one_can_don_t_set_ {UserString[355]}
-  //rs_8_Absolutely_rougness_of_hull_less_150_mkm_one_can_don_t_set_ = '8.Absolutely rougness of hull less 150 mkm one can don''t set.';
+  //rs_8_Absolutely_rougness_of_hull_less_150_mkm_one_can_don_t_set_ = '8.Absolutely rougness of hull less 150 mkm one can don''t set';
 
  //rs_Calculation_of_the_propeller_elements_for_main_engine_selection {UserString[356]}
   rs_Calculation_of_the_propeller_elements_for_main_engine_selection = 'Calculation of the propeller elements for main engine selection';
@@ -1367,7 +1367,7 @@ resourcestring
   rs_ft = 'ft';
 
  //rs_degr {UserString[455]}
-  rs_degr = 'degr';
+  rs_degr = '°';
 
  //rs_lbs {UserString[456]}
   rs_lbs = 'lbs';
@@ -1436,7 +1436,7 @@ resourcestring
   rs_by_Papmehl_s_formulae_with_addings_of_KSRI__Russia_ = 'by Papmehl''s formulae with addings of KSRI (Russia)';
 
  //rs_Because_extrapolation_is_used__can_be_some_errores_ {UserString[478]}
-  rs_Because_extrapolation_is_used__can_be_some_errores_ = 'Because extrapolation is used, can be some errores.';
+  rs_Because_extrapolation_is_used__can_be_some_errores_ = 'Because extrapolation is used, can be some errores';
 
  //rs_Recomendations_for {UserString[479]}
   rs_Recomendations_for = 'Recomendations for';
@@ -1445,10 +1445,10 @@ resourcestring
   rs_You_must_to_increase_number_of_blades_until = 'You must to increase number of blades until';
 
  //rs_Ae_Aooo___1_3_You_must_to_increase_Dp_ {UserString[481]}
-  rs_Ae_Aooo___1_3_You_must_to_increase_Dp_ = 'Ae/Ao** > 1.3 You must to increase Dp.';
+  rs_Ae_Aooo___1_3_You_must_to_increase_Dp_ = 'Ae/Ao** > 1.3 You must to increase Dp';
 
  //rs_You_must_to_increase_Ae_Ao__May_be_cavitation_and_or_destruction_of_propeller_ {UserString[482]}
-  rs_You_must_to_increase_Ae_Ao__May_be_cavitation_and_or_destruction_of_propeller_ = 'You must to increase Ae/Ao! May be cavitation and/or destruction of propeller.';
+  rs_You_must_to_increase_Ae_Ao__May_be_cavitation_and_or_destruction_of_propeller_ = 'You must to increase Ae/Ao! May be cavitation and/or destruction of propeller';
 
  //rs_Click_button_for_start_selection_of_engine {UserString[483]}
   rs_Click_button_for_start_selection_of_engine = 'Click button for start selection of engine';
@@ -1478,7 +1478,7 @@ resourcestring
   rs_Note_3__The_bulb_characteristics_was_calculated_right__if_F_P__is_through_point_of_intersection = 'Note 3: The bulb characteristics was calculated right, if F.P. is through point of intersection';
 
  //rs_forward_line_with_DWL_ {UserString[494]}
-  rs_forward_line_with_DWL_ = 'forward line with DWL.';
+  rs_forward_line_with_DWL_ = 'forward line with DWL';
 
  //rs_l_Speed_l_Speed_l__Fr___l___R_v__l___R_r__l___R_T__l__Power__l__R_T_e_l_Power_e_l {UserString[495]}
   rs_l_Speed_l_Speed_l__Fr___l___R_v__l___R_r__l___R_T__l__Power__l__R_T_e_l_Power_e_l = '| Speed | Speed |  Fr   |   R_v  |   R_r  |   R_T  |  Power  |  R_T_e | Power_e |';
@@ -1508,7 +1508,7 @@ resourcestring
   rs_Type_and_series_of_propeller = 'Type and series of propeller';
 
  //rs_OK__Propeller_is_not_cavitate_ {UserString[504]}
-  rs_OK__Propeller_is_not_cavitate_ = 'OK! Propeller is not cavitate.';
+  rs_OK__Propeller_is_not_cavitate_ = 'OK! Propeller is not cavitate';
 
  //rs_ATTENTION____This_is_propeller_with_cavitation_ {UserString[505]}
   rs_ATTENTION____This_is_propeller_with_cavitation_ = 'ATTENTION!!! This is propeller with cavitation!';
@@ -2198,7 +2198,7 @@ resourcestring
   rs_ATTENTION____Stopped_acceleration_calculation__because_steady_engine_RPM = 'ATTENTION!!! Stopped acceleration calculation, because steady engine RPM';
 
  //rs_is_lower_then_critical__Increase_engine_power_ {UserString[735]}
-  rs_is_lower_then_critical__Increase_engine_power_ = 'is lower then critical. Increase engine power.';
+  rs_is_lower_then_critical__Increase_engine_power_ = 'is lower then critical. Increase engine power';
 
  //rs_Do_not_resistance_calculation_results_of_a_ship___ {UserString[736]}
   rs_Do_not_resistance_calculation_results_of_a_ship___ = 'Do not resistance calculation results of a ship!!!';
@@ -2303,7 +2303,7 @@ resourcestring
   rs_Propeller_Pitch_Diameter_Ratio_P_Dp_____ = 'Propeller Pitch Diameter Ratio P/Dp    =';
 
  //rs_Program_of_aerodynamics_characteristics_calculation_for_merchant_ships_ {UserString[770]}
-  rs_Program_of_aerodynamics_characteristics_calculation_for_merchant_ships_ = 'Program of aerodynamics characteristics calculation for merchant ships.';
+  rs_Program_of_aerodynamics_characteristics_calculation_for_merchant_ships_ = 'Program of aerodynamics characteristics calculation for merchant ships';
 
  //rs_1_1___This_wind_resistance_prediction_method_in_this_program_has_been_described_by_ {UserString[771]}
   rs_1_1___This_wind_resistance_prediction_method_in_this_program_has_been_described_by_ = '1.1   This wind resistance prediction method in this program has been described by:';
@@ -2312,7 +2312,7 @@ resourcestring
   rs_1_1_1_R_M_Isherwood___Wind__Resistance_of__Merchant__Ships___Proceedings__of__Royal = '1.1.1 R.M.Isherwood, "Wind  Resistance of  Merchant  Ships", Proceedings  of  Royal';
 
  //rs_Institution_of_Naval_Architects__1973_ {UserString[773]}
-  rs_Institution_of_Naval_Architects__1973_ = 'Institution of Naval Architects, 1973.';
+  rs_Institution_of_Naval_Architects__1973_ = 'Institution of Naval Architects, 1973';
 
  //rs_1_2___Needed_input_data_parameters_ {UserString[774]}
   rs_1_2___Needed_input_data_parameters_ = '1.2   Needed input data parameters:';
@@ -2756,16 +2756,16 @@ resourcestring
   rs_Note__Propeller_s_metal___1_brass_MntFe__2_bronze_AltFe_H9_4_4__3_carbon_steel_ = 'Note: Propeller''s metal:  1-brass Mn+Fe; 2-bronze Al+Fe H9-4-4; 3-carbon steel;';
 
  //rs_4_brass_AltMntFe__5_bronze_Neva_60__6_bronze_Neva_70__7_stainless_steel__8_duralumin_ {UserString[927]}
-  rs_4_brass_AltMntFe__5_bronze_Neva_60__6_bronze_Neva_70__7_stainless_steel__8_duralumin_ = '4-brass Al+Mn+Fe; 5-bronze Neva-60; 6-bronze Neva-70; 7-stainless steel; 8-duralumin.';
+  rs_4_brass_AltMntFe__5_bronze_Neva_60__6_bronze_Neva_70__7_stainless_steel__8_duralumin_ = '4-brass Al+Mn+Fe; 5-bronze Neva-60; 6-bronze Neva-70; 7-stainless steel; 8-duralumin';
 
  //rs_Calculation_of_propeller_on_general_strength_for_r_D_0_3_ {UserString[928]}
   rs_Calculation_of_propeller_on_general_strength_for_r_D_0_3_ = 'Calculation of propeller on general strength for r/D=0.3:';
 
  //rs_Propeller_is_a_strong_in_uniform_flow_ {UserString[929]}
-  rs_Propeller_is_a_strong_in_uniform_flow_ = 'Propeller is a strong in uniform flow.';
+  rs_Propeller_is_a_strong_in_uniform_flow_ = 'Propeller is a strong in uniform flow';
 
  //rs_Propeller_is_a_strong_in_non_uniform_flow_ {UserString[930]}
-  rs_Propeller_is_a_strong_in_non_uniform_flow_ = 'Propeller is a strong in non-uniform flow.';
+  rs_Propeller_is_a_strong_in_non_uniform_flow_ = 'Propeller is a strong in non-uniform flow';
 
  //rs_This_is_propeller_not_a_strong_in_uniform_flow_ {UserString[931]}
   rs_This_is_propeller_not_a_strong_in_uniform_flow_ = 'This is propeller not a strong in uniform flow!';
@@ -2879,7 +2879,7 @@ resourcestring
   rs_l___kn__l_______l__degr_l___lbf___l___lbf___l___lbf___l___ehp___l = '|  [kn] |   -   | [degr]|  [lbf]  |  [lbf]  |  [lbf]  |  [ehp]  |';
 
  //rs_ATTENTION____Increase_number_of_propellers_or_decrease_estimate_speed_ {UserString[971]}
-  rs_ATTENTION____Increase_number_of_propellers_or_decrease_estimate_speed_ = 'ATTENTION!!! Increase number of propellers or decrease estimate speed.';
+  rs_ATTENTION____Increase_number_of_propellers_or_decrease_estimate_speed_ = 'ATTENTION!!! Increase number of propellers or decrease estimate speed';
 
  //rs___calculated {UserString[972]}
   rs___calculated = '- calculated';
@@ -2960,13 +2960,13 @@ resourcestring
   rs_GZ_Psi_ = 'GZ(Psi)';
 
  //rs_Shaf_effic_oGearbox_effic_ {UserString[998]}
-  rs_Shaf_effic_oGearbox_effic_ = 'Shaf effic.*Gearbox effic.';
+  rs_Shaf_effic_oGearbox_effic_ = 'Shaf effic.*Gearbox effic';
 
  //rs_for_D_ {UserString[999]}
   rs_for_D_ = 'for D=';
 
  //rs_Acceleration__free_and_active_brake_calculation_ {UserString[1000]}
-  rs_Acceleration__free_and_active_brake_calculation_ = 'Acceleration, free and active brake calculation.';
+  rs_Acceleration__free_and_active_brake_calculation_ = 'Acceleration, free and active brake calculation';
 
  //rs_Time__sec_ {UserString[1001]}
   rs_Time__sec_ = 'Time [sec]';
@@ -2990,10 +2990,10 @@ resourcestring
   rs_Active_brake_of_ship_calculation__reverse_ = 'Active brake of ship calculation (reverse)';
 
  //rs_Free_brake_of_ship_ {UserString[1008]}
-  rs_Free_brake_of_ship_ = 'Free brake of ship.';
+  rs_Free_brake_of_ship_ = 'Free brake of ship';
 
  //rs_Active_brake_of_ship_ {UserString[1009]}
-  rs_Active_brake_of_ship_ = 'Active brake of ship.';
+  rs_Active_brake_of_ship_ = 'Active brake of ship';
 
  //rs_tonnes_and_Z_CoG__ {UserString[1010]}
   rs_tonnes_and_Z_CoG__ = 'tonnes and Z CoG =';
@@ -3380,13 +3380,13 @@ resourcestring
   rs_1__Do_not_found_into__Exec_or_was_damaged_file = '1. Do not found into \Exec or was damaged file';
 
  //rs_2__Input_datas_are_outside_valid_domain_or_catalog_is_not_valid_ {UserString[1140]}
-  rs_2__Input_datas_are_outside_valid_domain_or_catalog_is_not_valid_ = '2. Input datas are outside valid domain or catalog is not valid.';
+  rs_2__Input_datas_are_outside_valid_domain_or_catalog_is_not_valid_ = '2. Input datas are outside valid domain or catalog is not valid';
 
  //rs_3__This_is_very_slow_computer__Fcpu___800_MHz_ {UserString[1141]}
-  rs_3__This_is_very_slow_computer__Fcpu___800_MHz_ = '3. This is very slow computer, Fcpu < 800 MHz.';
+  rs_3__This_is_very_slow_computer__Fcpu___800_MHz_ = '3. This is very slow computer, Fcpu < 800 MHz';
 
  //rs_4__CPU_is_loaded_more_80__another_processes_ {UserString[1142]}
-  rs_4__CPU_is_loaded_more_80__another_processes_ = '4. CPU is loaded more 80% another processes.';
+  rs_4__CPU_is_loaded_more_80__another_processes_ = '4. CPU is loaded more 80% another processes';
 
  //rs_Final_calculations_of_resistance_and_power_by_method_van_Oortmerssen_1971 {UserString[1143]}
   rs_Final_calculations_of_resistance_and_power_by_method_van_Oortmerssen_1971 = 'Final calculations of resistance and power by method van Oortmerssen-1971';
@@ -4139,10 +4139,10 @@ resourcestring
   rs_l___Vs__l__FrV__lEpsilonl___R_f___l___R_p___l___R_t___l___Pe____l = '|   Vs  |  FrV  |Epsilon|   R_f   |   R_p   |   R_t   |   Pe    |';
 
  //rs_ATTENTION_____Vs_is_out_valid_domain_0_____40_knots_for_used_diagram_ {UserString[1403]}
-  rs_ATTENTION_____Vs_is_out_valid_domain_0_____40_knots_for_used_diagram_ = 'ATTENTION !!! Vs is out valid domain 0 ... 40 knots for used diagram.';
+  rs_ATTENTION_____Vs_is_out_valid_domain_0_____40_knots_for_used_diagram_ = 'ATTENTION !!! Vs is out valid domain 0 ... 40 knots for used diagram';
 
  //rs_ATTENTION_____Power_is_out_valid_domain_30_____400_BHP_per_unit_for_used_diagram_ {UserString[1404]}
-  rs_ATTENTION_____Power_is_out_valid_domain_30_____400_BHP_per_unit_for_used_diagram_ = 'ATTENTION !!! Power is out valid domain 30 ... 400 BHP per unit for used diagram.';
+  rs_ATTENTION_____Power_is_out_valid_domain_30_____400_BHP_per_unit_for_used_diagram_ = 'ATTENTION !!! Power is out valid domain 30 ... 400 BHP per unit for used diagram';
 
  //rs_m_s {UserString[1405]}
   rs_m_s = 'm/s';
@@ -4286,7 +4286,7 @@ resourcestring
   rs_Need_restart_calculation__Design_hydrostatics__for_model_displacement_balance___ = 'Need restart calculation "Design hydrostatics" for model displacement balance...';
 
  //rs_Need_enable_automoving_model_to_baseline_or_set_new_project_draft_ {UserString[1452]}
-  rs_Need_enable_automoving_model_to_baseline_or_set_new_project_draft_ = 'Need enable automoving model to baseline or set new project draft.';
+  rs_Need_enable_automoving_model_to_baseline_or_set_new_project_draft_ = 'Need enable automoving model to baseline or set new project draft';
 
  //rs_Righting_lever_transverse_form_stability___GZ_tform {UserString[1453]}
   rs_Righting_lever_transverse_form_stability___GZ_tform = 'Righting lever transverse form stability   GZ_tform';
@@ -4538,7 +4538,7 @@ resourcestring
   rs_V_kts____RT_N______PE_kW_______w________t_____REQ_THR_N_____EtaH______EtaR = 'V(kts)   RT(N)     PE(kW)      w        t     REQ.THR(N)    EtaH      EtaR';
 
  //rs_Design_Margin_Has_Been_Included_in_RT__PE__and_REQ_THR___RT__1_t__ {UserString[1536]}
-  rs_Design_Margin_Has_Been_Included_in_RT__PE__and_REQ_THR___RT__1_t__ = 'Design Margin Has Been Included in RT, PE, and REQ.THR = RT/(1-t).';
+  rs_Design_Margin_Has_Been_Included_in_RT__PE__and_REQ_THR___RT__1_t__ = 'Design Margin Has Been Included in RT, PE, and REQ.THR = RT/(1-t)';
 
  //rs_Calculation_of_propeller_is_stop__because_Np_set_zero_in_resistance_calculation_ {UserString[1537]}
   rs_Calculation_of_propeller_is_stop__because_Np_set_zero_in_resistance_calculation_ = 'Calculation of propeller is stop, because Np set zero in resistance calculation!';
@@ -4889,7 +4889,7 @@ resourcestring rs_Resistance_MH_Note = ''
   +'ships.'+#10
   +'7.Propeller diameter D with one-screw is <= 0.8*Ta, and for twin-screw <= 0.7*Ta.'+#10
   +'Expanded blade area ratio Ae/Ao is calculate from condition, when cavitation be absent.'+#10
-  +'8.Absolutely rougness of hull less 150 mkm one can don''t set.'+#10
+  +'8.Absolutely rougness of hull less 150 mkm one can don''t set'+#10
   +'9. Limitations of resistance calculation by OCT 5.0181-75 (xUSSR) and another methods are:'+#10
   +'9.1 Series N 1 - high-speed and medium-rate ships: container carrier, Ro-Ro vessel, lighter carrier;'+#10
   +'9.2 Series N 2 - passenger and cargopassenger ships:'+#10
@@ -5173,7 +5173,7 @@ resourcestring rs_Resistance_Holtrop_Note_p3 = ''
 
 // rs_Resistance_Holtrop_Note_p5 UserStrings: 345
 resourcestring rs_Resistance_Holtrop_Note_p4 = ''
-  +'4.If wetted surface area S is set as 0, then S to calculate by formulae from method of Holtrop.';
+  +'4.If wetted surface area S is set as 0, then S to calculate by formulae from method of Holtrop';
 
 // rs_Resistance_Holtrop_Note_p5 UserStrings: 346-349
 resourcestring rs_Resistance_Holtrop_Note_p5 = ''
@@ -5195,7 +5195,7 @@ resourcestring rs_Resistance_Holtrop_Note_p7 = ''
 
 // rs_Resistance_Holtrop_Note_p7 UserStrings: 355
 resourcestring rs_Resistance_Holtrop_Note_p8 = ''
-  +'8.Absolutely rougness of hull less 150 mkm one can don''t set.';
+  +'8.Absolutely rougness of hull less 150 mkm one can don''t set';
 
 // rs_Resistance_Holtrop_Note_p9 UserStrings: 1294-1299
 resourcestring rs_Resistance_Holtrop_Note_p9 = ''
@@ -5447,10 +5447,10 @@ resourcestring rs_Propeller_Task2_Note = ''
 
   // rs_Hydrodin_Task1_Note UserStrings: 770-799 844-848
   resourcestring rs_Hydrodin_Task1_Note = ''
-    +'Program of aerodynamics characteristics calculation for merchant ships.'+#10
+    +'Program of aerodynamics characteristics calculation for merchant ships'+#10
     +'1.1   This wind resistance prediction method in this program has been described by:'+#10
     +'1.1.1 R.M.Isherwood, "Wind  Resistance of  Merchant  Ships", Proceedings  of  Royal'+#10
-    +'Institution of Naval Architects, 1973.'+#10
+    +'Institution of Naval Architects, 1973'+#10
     +'1.2   Needed input data parameters:'+#10
     +'SLOA - Length overall [m];'+#10
     +'B    - Beam [m];'+#10
@@ -5665,4 +5665,151 @@ resourcestring rs_Resistance_Hollen_Note_p5 = ''
   +'|    Dp/Ta    |  0,430 ... 0,840  |  0,655 ... 1,050   |  0,495 ... 0,860  |'+#10
   +'+-------------+-------------------+--------------------+-------------------+';
 
-
+// Messages that were previously hard-coded in dialogs and calculation code.
+resourcestring
+  rsLocCpLimit = 'ATTENTION!!! Cp>0,85 or Cwp>0,85';
+  rsLocBulbLimit = 'ATTENTION!!! Z_bulb > 0.8*Tf';
+  rsLocKeDataRequired = 'Data for Ke calculation is required';
+  rsLocKeFileMissing = 'Input file TMPke.txt was not found in %s';
+  rsLocFeatureUnavailable = 'Not available in this version';
+  rsLocLayerIntegrity = 'Layers integrity is not Ok. Enable logs and check logs output. Further processing is not safe';
+  rsLocDraftWeightRange = 'Project Draft or Weight are very large/small!!!';
+  rsLocSeedMissing = 'Seed could not be found!';
+  rsLocMinimumComparisonError = 'Error in comparing minimum values';
+  rsLocEdgeMissing = 'Could not find edge!';
+  rsLocFaceSubdivisionError = 'Error in TFreeSubdivisionFace.Subdivide';
+  rsLocGridIncomplete = 'Could not establish the entire grid!';
+  rsLocLoadedModelIntegrity = 'Loaded Model integrity corruption';
+  rsLocBeforeBuildIntegrity = 'Before build Model integrity corruption';
+  rsLocAfterBuildIntegrity = 'After Build Model integrity corruption';
+  rsLocVrmlLoadException = 'Exception in VRML Load:';
+  rsLocMatrixSizeMismatch = 'Matrix size must match to be solved';
+  rsLocMatrixSquareInvert = 'Matrix must be square to invert';
+  rsLocMatrixUnsolvable = 'Matrix could not be solved';
+  rsLocMatrixSquareSolve = 'Matrix must be square to be solved';
+  rsLocMatrixAddMismatch = 'Matrix size does not match in Add';
+  rsLocMatrixAccessError = 'Error in accesing matrix';
+  rsLocMatrixIdentitySquare = 'Matrix must be square to create identity';
+  rsLocMatrixMultiplyMismatch = 'Matrix size do not match in multiply';
+  rsLocMatrixSubtractMismatch = 'Matrix size does not match in Subtract';
+  rsLocVrml2PointIndex = 'Point index out of bounds in TVRML2Coordinates.FGetPoint';
+  rsLocVrml2FaceIndex = 'Face index out of bounds in TVRMLIndexedFaceSet.FGetFace';
+  rsLocVrml2Invalid = 'Not a VRML V2.0 format';
+  rsLocVrml1PointIndex = 'Point index out of bounds in TVRMLCoordinate3.FGetPoint';
+  rsLocVrml1FaceIndex = 'Face index out of bounds in TVRMLIndexedFaceSet.FGetFace';
+  rsLocVrml1Invalid = 'Not a VRML V1.0 format';
+  rsLocManualNotFound = 'Manual file "%s" not found in "%s" directory';
+  rsLocGplTranslationsLink = 'You can visit https://www.gnu.org/licenses/translations.html';
+  rsLocEnglishGplFallback = 'English GPL will be opened';
+  rsLocCalculating = 'Calculating...';
+  rsLocCouldNotLoadLanguage = 'Could not load language file %s';
+  rsChoiceMetric = 'Metric';
+  rsChoiceImperial = 'Imperial';
+  rsChoiceLow = 'Low';
+  rsChoiceMedium = 'Medium';
+  rsChoiceHigh = 'High';
+  rsChoiceHighest = 'Highest';
+  rsChoiceProjectDimensions = 'Dimensions from project settings';
+  rsChoiceSubmergedDimensions = 'Actual dimensions of submerged body';
+  rsChoiceHorizontal = 'Horizontal (X,Y)';
+  rsChoiceLateral = 'Lateral (X,Z)';
+  rsChoiceTransverse = 'Transverse (Y,Z)';
+  rsLanguageChinese = 'Chinese';
+  rsLanguageCzech = 'Czech';
+  rsLanguageGerman = 'German';
+  rsLanguageJapanese = 'Japanese';
+  rsLanguageEnglish = 'English';
+  rsLanguageFrench = 'French';
+  rsLanguageItalian = 'Italian';
+  rsLanguageDutch = 'Dutch';
+  rsLanguageNorwegian = 'Norwegian';
+  rsLanguageRussian = 'Russian';
+  rsLanguageSpanish = 'Spanish';
+  rsLanguageFinnish = 'Finnish';
+  rsLanguageUkrainian = 'Ukrainian';
+  rsLanguageVietnamese = 'Vietnamese';
+  rsChoiceVeryHigh = 'Very High';
+  rsChoiceKeel = 'Keel';
+  rsChoiceRudder = 'Rudder';
+  rsChoiceTrapezoidal = 'Trapezoidal';
+  rsChoiceSemiEllipse = 'Semi ellipse';
+  rsChoiceQuarterEllipse = 'Quarter ellipse';
+  rsChoiceStraightQuarterChord = 'Straight quarter chord line';
+  rsChoiceNoBulb = 'No bullb';
+  rsChoiceRoundProfile = 'Round profile';
+  rsChoiceWing = 'Wing';
+  rsChoiceRoundWing = 'Round wing';
+  rsChoiceLead = 'Plumbum';
+  rsChoiceSteel = 'Steel';
+  rsChoiceTungsten = 'Wolfram';
+  rsChoiceSetDensity = 'Set density';
+  rsChoiceUnlimitedArea = 'Nonlimit';
+  rsChoiceRussianRegistry2010 = 'Russian Registry 2010';
+  rsChoiceRussianRegistry1996 = 'Russian Registry 1996';
+  rsChoiceGiss = 'GISS';
+  rsChoiceUkrainianRegistry2005 = 'Ukrainian Registry 2005';
+  rsChoicePassengerFerry = 'Passenger ship and ferry';
+  rsChoiceCargoMidFull = 'Cargo ship with middle engine is in full cargo';
+  rsChoiceCargoMidBallast = 'Cargo ship with middle engine is in ballast';
+  rsChoiceCargoAftFull = 'Cargo ship with aft engine is in full cargo';
+  rsChoiceCargoAftBallast = 'Cargo ship with aft engine is in ballast';
+  rsChoiceTankerMidFull = 'Tanker and bulkcarrier with middle engine is in full cargo';
+  rsChoiceTankerMidBallast = 'Tanker and bulkcarrier with middle engine is in ballast';
+  rsChoiceTankerAftFull = 'Tanker and bulkcarrier with aft engine is in full cargo';
+  rsChoiceTankerAftBallast = 'Tanker and bulkcarrier with aft engine is in ballast';
+  rsChoiceTrawler = 'Trawler';
+  rsChoiceTug = 'Tug';
+  rsChoiceAnyObject = 'Any Objects or Ships';
+  rsChoiceUnderwaterVehicle = 'Underwater Vechicle';
+  rsChoiceDisplacementSeaShips = 'Displacement Sea Ships';
+  rsChoiceDisplacementRiverShips = 'Displacement River Ships';
+  rsChoiceNone = 'None';
+  rsChoiceDual = 'Dual';
+  rsChoiceSeriesB = 'B series Troost';
+  rsChoiceSeriesT = 'T series Titov';
+  rsChoiceSeriesM = 'M series Mishkevich';
+  rsChoiceSeriesZ = 'Z series Zavadovsky';
+  rsChoiceSeriesTurbal = 'T series Turbal';
+  rsChoiceSeriesZM = 'ZM series KSRI-BIHS';
+  rsChoiceSeriesZV = 'ZV series Zvezdkina';
+  rsChoiceSeriesE = 'E series';
+  rsChoiceSeriesVIT = 'VIT series';
+  rsChoiceSeriesKA19 = 'KA in 19a series ';
+  rsChoiceSeriesKA470 = 'KA-4-70 series';
+  rsChoiceSeriesSPP = 'SPP series';
+  rsChoiceUnknown = 'unknown';
+  rsChoiceReserved = 'reserved';
+  rsChoiceModelTests = 'model tests';
+  rsChoiceDoubrovskyCat = 'Doubrovsky for catamarans';
+  rsChoiceDoubrovskyTri = 'Doubrovsky for trimarans';
+  rsChoiceHardChineCat = 'for hard-chine catamarans';
+  rsChoiceVoytkunsky = 'Voytkunsky 1985';
+  rsChoiceMolland = 'Molland 1994';
+  rsChoicePhamHardChine = 'Pham Kantimahanthi Sahoo 2001 hard chine';
+  rsChoiceAlferievRiver = 'Alferiev for river catamarans ';
+  rsChoiceZips = 'Zips 1995';
+  rsChoiceSchwetz = 'Schwetz-Sahoo 2002';
+  rsChoiceSahoo = 'Sahoo 2004';
+  rsChoiceGrubisic = 'Grubisic 2005';
+  rsChoiceVanOortmerssen = 'van Oortmerssen 1971';
+  rsChoiceRidgeleyNewitt = 'Ridgeley-Newitt 1967';
+  rsChoiceUBC = 'UBC 1993';
+  rsChoiceNeyman = 'diagram of Neyman';
+  rsChoiceEroshin = 'Eroshin for fishships';
+  rsChoiceReservedTitle = 'Reserved';
+  rsChoiceAnyDisplacement = 'Any displacement ships';
+  rsChoiceDisplacementSeaCargo = 'Displacement sea and cargo ships';
+  rsChoiceDisplacementRiver = 'Displacement river ships';
+  rsChoiceRoundBilgeHighspeed = 'Round bilge highspeed boats';
+  rsChoiceMultihull = 'Multihull ships';
+  rsChoiceFishingShips = 'Fishing ships';
+  rsChoiceWaterjet = 'Waterjet';
+  rsChoiceFppCpp = 'FPP or CPP';
+  rsChoiceOutboardProp = 'Outboard or Outdrive Prop';
+  rsChoiceCavitatedProp = 'Cavitated propeller';
+  rsChoiceSupercavitatedProp = 'Supercavitated propeller';
+  rsChoicePartiallySubmergedProp = 'Partially submerged propeller';
+  rsQuickChooseDifferent = 'Choose two different languages for quick switching';
+  rsQuickLanguageMissing = 'The language file for %s could not be found';
+  rsQuickSwitchLanguage = 'Switch interface language';
+  rsQuickCannotSave = 'The selected language could not be saved: %s';

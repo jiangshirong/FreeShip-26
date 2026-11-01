@@ -1,9 +1,10 @@
 object FreeAddMassOutputDialog: TFreeAddMassOutputDialog
+  OnCreate = FormCreate
   Left = 551
   Height = 539
   Top = 153
   Width = 694
-  Caption = 'Add_Mass file generator.'
+  Caption = 'Add_Mass file generator'
   ClientHeight = 539
   ClientWidth = 694
   OnResize = FormResize

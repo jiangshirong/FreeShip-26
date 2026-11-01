@@ -3,7 +3,7 @@ object FreeIntersectLayerDialog: TFreeIntersectLayerDialog
   Height = 200
   Top = 202
   Width = 400
-  Caption = 'Intersect two layers.'
+  Caption = 'Intersect two layers'
   ClientHeight = 200
   ClientWidth = 400
   Position = poMainFormCenter

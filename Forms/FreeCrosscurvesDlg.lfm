@@ -1,9 +1,10 @@
 object FreeCrosscurvesDialog: TFreeCrosscurvesDialog
+  OnCreate = FormCreate
   Left = 545
   Height = 739
   Top = 197
   Width = 970
-  Caption = 'Cross curves.'
+  Caption = 'Cross curves'
   ClientHeight = 739
   ClientWidth = 970
   Position = poOwnerFormCenter
@@ -35,7 +36,7 @@ object FreeCrosscurvesDialog: TFreeCrosscurvesDialog
     end
     object ToolButton1: TToolButton
       Left = 13
-      Hint = 'Start the calculation.'
+      Hint = 'Start the calculation'
       Top = 2
       AutoSize = True
       Caption = 'ToolButton1'
@@ -54,17 +55,17 @@ object FreeCrosscurvesDialog: TFreeCrosscurvesDialog
     end
     object PrintButton: TToolButton
       Left = 113
-      Hint = 'Print the results of the calculation.'
+      Hint = 'Print the results of the calculation'
       Top = 2
       AutoSize = True
-      Caption = 'Cross curves.'
+      Caption = 'Cross curves'
       Enabled = False
       ImageIndex = 2
       OnClick = PrintButtonClick
     end
     object SaveButton: TToolButton
       Left = 163
-      Hint = 'Save the results of the calculation.'
+      Hint = 'Save the results of the calculation'
       Top = 2
       AutoSize = True
       Caption = 'SaveButton'
@@ -82,7 +83,7 @@ object FreeCrosscurvesDialog: TFreeCrosscurvesDialog
     end
     object ToolButton25: TToolButton
       Left = 221
-      Hint = 'Close the window and save changes.'
+      Hint = 'Close the window and save changes'
       Top = 2
       AutoSize = True
       ImageIndex = 1
@@ -90,7 +91,7 @@ object FreeCrosscurvesDialog: TFreeCrosscurvesDialog
     end
     object ToolButton7: TToolButton
       Left = 271
-      Hint = 'Close window without saving changes.'
+      Hint = 'Close window without saving changes'
       Top = 2
       AutoSize = True
       ImageIndex = 0
@@ -128,7 +129,7 @@ object FreeCrosscurvesDialog: TFreeCrosscurvesDialog
         Height = 240
         Top = 10
         Width = 397
-        Caption = 'Displacements.'
+        Caption = 'Displacements'
         ChildSizing.ControlsPerLine = 2
         ClientHeight = 212
         ClientWidth = 393
@@ -227,7 +228,7 @@ object FreeCrosscurvesDialog: TFreeCrosscurvesDialog
               Height = 28
               Top = 72
               Width = 182
-              Caption = 'Incremental displ.'
+              Caption = 'Incremental displ'
               TabOrder = 1
               OnClick = CheckBox1Click
             end
@@ -249,7 +250,7 @@ object FreeCrosscurvesDialog: TFreeCrosscurvesDialog
                 Height = 36
                 Top = 0
                 Width = 93
-                Caption = 'Start displ.'
+                Caption = 'Start displ'
                 Layout = tlCenter
                 ParentColor = False
               end
@@ -268,7 +269,7 @@ object FreeCrosscurvesDialog: TFreeCrosscurvesDialog
                 Height = 36
                 Top = 38
                 Width = 93
-                Caption = 'End displ.'
+                Caption = 'End displ'
                 Layout = tlCenter
                 ParentColor = False
               end
@@ -309,7 +310,7 @@ object FreeCrosscurvesDialog: TFreeCrosscurvesDialog
         Top = 260
         Width = 397
         AutoSize = True
-        Caption = 'Heeling angles.'
+        Caption = 'Heeling angles'
         ClientHeight = 116
         ClientWidth = 393
         TabOrder = 1

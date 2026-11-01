@@ -307,6 +307,8 @@ function TFreeBackgroundImage.TargetRect: TRect;
 var
   Pt: TPoint;
 begin
+  if (FBitmap = nil) or (FOwner = nil) then
+    Exit(Rect(0, 0, 0, 0));
   Pt := FOwner.Project(ZERO);
   Result.Left := Pt.X - round(Owner.Scale * Owner.Zoom * FScale * FOrigin.X);
   Result.Top := Pt.Y - round(Owner.Scale * Owner.Zoom * FScale * FOrigin.Y);
@@ -320,8 +322,14 @@ var
   Pt: TPoint;
   P2D: T2DCoordinate;
   JPEGImage: TJPEGImage;
+  NewBitmap, OldBitmap: TBitmap;
+  NewQuality: Byte;
+  NewScale: TFloatType;
 begin
   Dialog := TOpenPictureDialog.Create(Application);
+  NewBitmap := nil;
+  JPEGImage := nil;
+  try
   Dialog.InitialDir := InitialDir;
   Dialog.Filter := createDialogFilter(rsImageFiles, ['jpg', 'bmp'], False)
    +'|'+createDialogFilter(rsJPEGFiles, ['jpg'], False)
@@ -329,36 +337,52 @@ begin
   Dialog.Options := [ofHideReadOnly];
   if Dialog.Execute then
   begin
-    Clear;
-    FShowInView := Owner.ViewType;
-
-    FBitmap := TBitmap.Create;
+    NewBitmap := TBitmap.Create;
     if Uppercase(ExtractFileExt(Dialog.Filename)) = '.JPG' then
     begin
       JPEGImage := TJPEGImage.Create;
       JPEGImage.LoadFromFile(Dialog.FileName);
-      FBitmap.Assign(JPEGImage);
-      FreeAndNil(JPEGImage);
-      FQuality := JPEGImage.CompressionQuality;
+      NewBitmap.Assign(JPEGImage);
+      NewQuality := JPEGImage.CompressionQuality;
     end
     else
     begin
-      FBitmap.LoadFromFile(Dialog.Filename);
-      FQuality := 100;
+      NewBitmap.LoadFromFile(Dialog.Filename);
+      NewQuality := 100;
     end;
+    if (NewBitmap.Width <= 0) or (NewBitmap.Height <= 0) then
+      raise EReadError.Create('The background image has no pixels');
     // calculate scale
     Pt := Owner.Project(ZERO);
     Pt.X := Owner.ClientWidth;
     P2D := Owner.ProjectBackTo2D(Pt);
+    NewScale := P2D.X / NewBitmap.Width;
+    // Decode and calculate placement before replacing a usable background.
+    OldBitmap := FBitmap;
+    FBitmap := NewBitmap;
+    NewBitmap := nil;
+    OldBitmap.Free;
+    FShowInView := Owner.ViewType;
     FOrigin.X := 0;
     FOrigin.Y := FBitmap.Height;
-    FScale := P2D.X / FBitmap.Width;
+    FScale := NewScale;
+    FQuality := NewQuality;
+    FTransparent := False;
+    FTransparentColor := clBlack;
+    FVisible := True;
+    FAlpha := 255;
+    FTolerance := 5;
+    Invalidate;
     FOwner.Refresh;
     if (not (csdestroying in owner.componentstate)) then
       if assigned(Owner.FOnChangeBackgroundImage) then
         Owner.FOnChangeBackgroundImage(Owner);
   end;
-  FreeAndNil(Dialog);
+  finally
+    JPEGImage.Free;
+    NewBitmap.Free;
+    Dialog.Free;
+  end;
 end;{TFreeBackgroundImage.Open}
 
 procedure TFreeBackgroundImage.Save;

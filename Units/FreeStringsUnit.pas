@@ -57,6 +57,8 @@ procedure SetUserStringsLang;
 function UserString(Index:Integer):String;
 function LanguageCode(Language:string): string;
 function LanguageName(code:string): string;
+function LanguageDisplayName(const Language: string): string;
+function IsVisibleInterfaceLanguage(const Language: string): boolean;
 
 implementation
 
@@ -71,7 +73,9 @@ end;{UserString}
 // Returns ISO 639 codes from a Language name
 function LanguageCode(Language:string): string;
 begin
+  Result := '';
   case Language of
+   'Japanese': Result := 'ja';
    'Chinese': Result := 'cn';
    'Czech': Result := 'cs';
    'German','Deutsch': Result := 'de';
@@ -91,7 +95,9 @@ end;
 // Returns English Language name from an ISO 639 code
 function LanguageName(code:string): string;
 begin
+  Result := '';
   case code of
+   'ja': Result := 'Japanese';
    'cn': Result := 'Chinese';
    'cs': Result := 'Czech';
    'de': Result := 'German';
@@ -106,6 +112,36 @@ begin
    'uk': Result := 'Ukrainian';
    'vi': Result := 'Vietnamese';
   end;
+end;
+
+function LanguageDisplayName(const Language: string): string;
+begin
+  case Language of
+    'Japanese': Result := rsLanguageJapanese;
+    'Chinese': Result := rsLanguageChinese;
+    'Czech': Result := rsLanguageCzech;
+    'German': Result := rsLanguageGerman;
+    'English': Result := rsLanguageEnglish;
+    'French': Result := rsLanguageFrench;
+    'Italian': Result := rsLanguageItalian;
+    'Dutch': Result := rsLanguageDutch;
+    'Norwegian': Result := rsLanguageNorwegian;
+    'Russian': Result := rsLanguageRussian;
+    'Spanish': Result := rsLanguageSpanish;
+    'Finnish': Result := rsLanguageFinnish;
+    'Ukrainian': Result := rsLanguageUkrainian;
+    'Vietnamese': Result := rsLanguageVietnamese;
+  else
+    Result := Language;
+  end;
+end;
+
+function IsVisibleInterfaceLanguage(const Language: string): boolean;
+var Code: string;
+begin
+  Code:=LanguageCode(Language);
+  Result:=(Code='cn') or (Code='ru') or (Code='en') or (Code='fr') or
+    (Code='de') or (Code='es') or (Code='ja');
 end;
 
 // check

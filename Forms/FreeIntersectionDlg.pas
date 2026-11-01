@@ -125,6 +125,7 @@ type
     procedure ToolBar1Click(Sender: TObject);
   private   { Private declarations }
     FFreeShip: TFreeShip;
+    FUpdatingGrids: Boolean;
     procedure FillButtocks;
     //procedure FillBox;
     procedure FillDiagonals;
@@ -154,6 +155,7 @@ uses FreeStringsUnit;
 
 procedure TFreeIntersectionDialog.UpdateMenu;
 begin
+  if FFreeShip = nil then Exit;
   if ShowStations.Checked then
   begin
     AddOne.Hint := rs_Add_one_station {UserString[223]} + '.';
@@ -187,6 +189,7 @@ end;{TFreeIntersectionDialog.UpdateMenu}
 procedure TFreeIntersectionDialog.UnselectAll;
 var I : integer;
 begin
+  if FFreeShip = nil then Exit;
   for I := 0 to FFreeShip.NumberofStations - 1 do
     FFreeship.Station[I].Selected := False;
   for I := 0 to FFreeShip.NumberofButtocks - 1 do
@@ -246,10 +249,16 @@ end;{TFreeIntersectionDialog.FillBox}
 
 procedure TFreeIntersectionDialog.FillGrids;
 begin
-  FillStations;
-  FillButtocks;
-  FillWaterlines;
-  FillDiagonals;
+  if FFreeShip = nil then Exit;
+  FUpdatingGrids := True;
+  try
+    FillStations;
+    FillButtocks;
+    FillWaterlines;
+    FillDiagonals;
+  finally
+    FUpdatingGrids := False;
+  end;
 end;
 
 function boolToCB(b:boolean):String;
@@ -415,7 +424,10 @@ begin
   if aCol = 2 then
   begin
     grid := sender as TStringGrid;
-    Intersection := grid.Objects[1,aRow+1] as TFreeIntersection;
+    if FUpdatingGrids or (FFreeShip = nil) then Exit;
+    if (aRow < grid.FixedRows) or (aRow >= grid.RowCount) then Exit;
+    Intersection := grid.Objects[1,aRow] as TFreeIntersection;
+    if Intersection = nil then Exit;
     if Intersection.ShowCurvature <> (aState = cbChecked) then
     begin
       Intersection.ShowCurvature := (aState = cbChecked);
@@ -461,8 +473,12 @@ var S:String; F:TFloatType;
   intersection:TFreeIntersection; i:integer;
   grid: TStringGrid;
 begin
+  if FUpdatingGrids or (FFreeShip = nil) then Exit;
   grid := Sender as TStringGrid;
   if grid.Col<>1 then exit;
+  if (grid.Row < grid.FixedRows) or (grid.Row >= grid.RowCount) then Exit;
+  intersection := grid.Objects[1, grid.Row] as TFreeIntersection;
+  if intersection = nil then Exit;
   try
     intersection := grid.Objects[1, grid.Row] as TFreeIntersection;
     S := grid.Cells[1, grid.Row];
@@ -473,9 +489,9 @@ begin
       FFreeship.Redraw;
     end
     else
-      sgStations.Cells[grid.Col, grid.Row] := format('%7.4f',[intersection.Distance]);
+      grid.Cells[grid.Col, grid.Row] := format('%7.4f',[intersection.Distance]);
   except
-    sgStations.Cells[grid.Col, grid.Row] := format('%7.4f',[intersection.Distance]);
+    grid.Cells[grid.Col, grid.Row] := format('%7.4f',[intersection.Distance]);
   end;
 end;
 
@@ -513,6 +529,7 @@ procedure TFreeIntersectionDialog.OnGridSelection(Sender: TObject; aCol,
 var Intersection: TFreeIntersection;  i, ii, r,r1,r2:integer;
   grid: TStringGrid;
 begin
+  if FUpdatingGrids or (FFreeShip = nil) then Exit;
   grid := Sender as TStringGrid;
   UnselectAll;
   for r:=0 to grid.SelectedRangeCount-1 do
@@ -521,8 +538,9 @@ begin
     r2:=grid.SelectedRange[r].Bottom;
     for i:=r1 to r2 do
     begin
+      if (i < grid.FixedRows) or (i >= grid.RowCount) then Continue;
       intersection := grid.Objects[1, i] as TFreeIntersection;
-      intersection.Selected := true;
+      if intersection <> nil then intersection.Selected := true;
     end;
   end;
   FFreeship.Redraw;

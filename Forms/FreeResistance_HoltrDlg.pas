@@ -245,6 +245,7 @@ type
     _Label20: TLabel;
     _Label30: TLabel;
     _Label34: TLabel;
+    procedure FormCreate(Sender: TObject);
     procedure File_ExportData(dat, dan: array of single);
     procedure File_ExportData84(dat, dan: array of single);
 
@@ -375,6 +376,7 @@ type
   public
     function CorrectInputdata: boolean;
     procedure doCalculate;
+    procedure CalculateInWorkspace;
     procedure Calculate;
     function Execute(Freeship: TFreeship;
       AutoExtract: boolean): boolean;
@@ -475,7 +477,7 @@ var
 
 implementation
 
-uses FreeLogger, FreeStringsUnit,
+uses FreeCalculationFiles, FreeUiChoices, FreeLogger, FreeStringsUnit,
      FreeProcess;
 
 {$IFnDEF FPC}
@@ -484,6 +486,11 @@ uses FreeLogger, FreeStringsUnit,
 {$ELSE}
   {$R *.lfm}
 {$ENDIF}
+
+procedure TFreeResistance_Holtr.FormCreate(Sender: TObject);
+begin
+  SetResistanceShipTypeChoices(A11Box);
+end;
 
 function TFreeResistance_Holtr.CorrectInputdata: boolean;
 begin
@@ -552,18 +559,29 @@ begin
   Cwp := WlArea / (Lwl * Bwl);
   if (Cwp >= 1) or (Cp >= 1) then
   begin
-    MessageDlg('ATTENTION!!! Cp=1 or Cwp=1', mtError, [mbOK], 0);
+    MessageDlg(rs_Error__Cp_1_or_Cwp_1, mtError, [mbOK], 0);
     Exit;
   end;
   if (ZBulb / 0.8 > Tc + Draft / 2) then
   begin
-    MessageDlg('ATTENTION!!! Z_bulb > 0.8*Tf', mtError, [mbOK], 0);
+    MessageDlg(rsLocBulbLimit, mtError, [mbOK], 0);
     Exit;
   end;
   Result := True;
 end;{TFreeResistance_Holtr.CorrectInputdata}
 
 procedure TFreeResistance_Holtr.doCalculate;
+var Job: TFreeCalculationScope;
+begin
+  if FFreeship = nil then Exit;
+  Job := FFreeship.BeginCalculation(['RESIST.dat','RESISTp.dat','Propres.dat']);
+  try
+    CalculateInWorkspace;
+    Job.Complete;
+  finally Job.Free end;
+end;
+
+procedure TFreeResistance_Holtr.CalculateInWorkspace;
 var
   ConvertedSpeed: single;
   FroudeNumber: single;
@@ -931,11 +949,11 @@ begin
     Speed := Vs[1];
 
     PathFileOld := GetCurrentDir;
-    ForceDirectoriesUTF8(FFreeship.Preferences.TempDirectory);
-    SetCurrentDirUTF8(FFreeship.Preferences.TempDirectory);
+    ForceDirectoriesUTF8(FFreeship.CalculationDirectory);
+    SetCurrentDirUTF8(FFreeship.CalculationDirectory);
 
     FTmpFileName:='RESISTp.dat';
-    Assignfile(FFile, 'RESISTp.dat');
+    Assignfile(FFile, IncludeTrailingPathDelimiter(FFreeship.CalculationDirectory)+'RESISTp.dat');
     Rewrite(FFile);
     try
       Writeln(FFile,
@@ -976,7 +994,7 @@ begin
     end;
 
     FTmpFileName:='RESIST.dat';
-    Assignfile(FFile, 'RESIST.dat');
+    Assignfile(FFile, IncludeTrailingPathDelimiter(FFreeship.CalculationDirectory)+'RESIST.dat');
     Rewrite(FFile);
     try
       for ispeed := 1 to 10 do
@@ -2035,7 +2053,7 @@ begin
   try
     CurDir:=GetCurrentDir;
     try
-      SetCurrentDir(FFreeShip.Preferences.TempDirectory);
+      SetCurrentDir(FFreeship.CalculationDirectory);
       doCalculate;
     except
       on E:EInOutError do
@@ -2172,6 +2190,9 @@ end;{TFreeResistance_Holtr.Estimate4BoxClick}
 procedure TFreeResistance_Holtr.CalculateResistanceHoltr(ConvertedSpeed, LCB, Cp: single;
   var Rf, Rr, w, t0, nr: single);
 var
+  ProcessCallerDirectory: string;
+  ProcessCallerCursor: TCursor;
+ 
   Rn_keel, Cf_keel, Rf_keel: single;
   Vs, C, Ke_: double;
   Rn_rudder, Cf_Rudder, Rf_rudder: single;
@@ -2205,6 +2226,9 @@ label
   NewSearch1;
 
 begin
+  ProcessCallerDirectory := GetCurrentDirUTF8;
+  ProcessCallerCursor := Screen.Cursor;
+  try
   Rf := 0.0;
   Rr := 0.0;
   if Convertedspeed <= 0 then
@@ -2358,22 +2382,21 @@ begin
 
     //  Определяем текущий каталог с проектами и с данными для расчета IN.
     PathFileOld := GetCurrentDir;
-    ForceDirectoriesUTF8(FFreeship.Preferences.TempDirectory);
-    SetCurrentDirUTF8(FFreeship.Preferences.TempDirectory);
+    ForceDirectoriesUTF8(FFreeship.CalculationDirectory);
+    SetCurrentDirUTF8(FFreeship.CalculationDirectory);
     FileToFind := FileSearchUTF8('TMPke.txt', GetCurrentDir);
     { *Converted from FileSearch* }
     if FileToFind <> 'TMPke.txt' then
     begin
       SetCurrentDir(PathFileOld);
-      MessageDlg('File with inpit data TMPke.txt is not found in ' +
-        GetCurrentDir, mtError, [mbOK], 0);
+      MessageDlg(Format(rsLocKeFileMissing, [GetCurrentDir]), mtError, [mbOK], 0);
       exit;
     end;
 
     // Запускаем программу расчета
     //ExecuteProcess(UTF8ToSys(FExecDirectory + DirectorySeparator+'SeaMargn.EXE'), '', []);
     ExecFullName := FExecDirectory + DirectorySeparator+'SeaMargn.EXE';
-    ExecuteFreePlugin(FFreeship.Preferences.TempDirectory, ExecFullName);
+    ExecuteFreeCalculation(FFreeship.CalculationDirectory, ExecFullName, fcSeaMargin);
 
     FileName := 'OUT.TXT';
     //  Определяем есть ли файл с результатами расчета OUT. Если TMPke.txt присутствует значит расчет не закончен
@@ -2484,14 +2507,14 @@ begin
     if FileToFind <> 'IN.' then
     begin
       SetCurrentDir(PathFileOld);
-      MessageDlg('Нет файла исходных данных для расчета!!!', mtError, [mbOK], 0);
+      MessageDlg(rs_Have_not_input_file_for_calculation_is_here___, mtError, [mbOK], 0);
       exit;
     end;
 
     // Запускаем программу расчета
     //SysUtils.ExecuteProcess(UTF8ToSys(FExecDirectory + DirectorySeparator+'PowerPrd.EXE'), '', []);
     ExecFullName := FExecDirectory + DirectorySeparator+'PowerPrd.EXE';
-    ExecuteFreePlugin(FFreeship.Preferences.TempDirectory, ExecFullName);
+    ExecuteFreeCalculation(FFreeship.CalculationDirectory, ExecFullName, fcPowerPrediction);
 
     FileName := 'OUT.';
     //  Определяем есть ли файл с результатами расчета OUT. Если IN. присутствует значит расчет не закончен
@@ -2525,6 +2548,10 @@ begin
       end;
     end;
   end; //if (jspeed=1) and (iflag>0)
+  finally
+    SetCurrentDirUTF8(ProcessCallerDirectory);
+    Screen.Cursor := ProcessCallerCursor;
+  end;
 end;{TFreeResistance_Holtr.CalculateResistanceHoltr}
 
 procedure TFreeResistance_Holtr.resist(vms: single; dat: array of single;

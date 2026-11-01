@@ -116,6 +116,7 @@ type
     MoveUp: TToolButton;
     MoveDown: TToolButton;
     _ToolButton4: TToolButton;
+    procedure FormCloseQuery(Sender: TObject; var CanClose: Boolean);
     procedure cbControlNetVisibleClick(Sender: TObject);
     procedure LayerBoxClick(Sender: TObject);
     procedure LayerBoxClickCheck(Sender: TObject);
@@ -180,6 +181,13 @@ uses FreeStringsUnit,
 {$ELSE}
   {$R *.lfm}
 {$ENDIF}
+
+procedure TFreeLayerDialog.FormCloseQuery(Sender: TObject; var CanClose: Boolean);
+begin
+  // This dialog edits the model live. Match its existing Done button semantics.
+  ModalResult := mrOK;
+  CanClose := True;
+end;
 
 procedure TFreeLayerDialog.UpdateMenu;
 var I,N : INteger;

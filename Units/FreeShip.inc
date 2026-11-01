@@ -457,7 +457,10 @@ procedure TFreeShip.FSetBuilt(Val: boolean);
 var
   I: integer;
 begin
-  if not Val and not Surface.RebuildRequested then
+  FreeAndNil(LinesplanFillCache);LinesplanFillCacheKey:='';
+  if LinesplanFrame <> nil then
+    TFreeLinesplanFrame(LinesplanFrame).InvalidateRenderCache;
+  if not Val and not Surface.RebuildRequested and not IsRebuildAsyncDisabled then
   begin
     Application.QueueAsyncCall(@RebuildAsync, 0);
     Surface.RebuildRequested := true;
@@ -497,11 +500,16 @@ begin
            Viewports[i].Cursor := crSetPoint;
     end;
     Redraw;
+    if MainForm is TMainForm then
+      TMainForm(MainForm).UpdateStudioModeButtons;
   end;
 end;{TFreeShip.FSetEditMode}
 
 procedure TFreeShip.FSetFileChanged(Val: boolean);
 begin
+  FreeAndNil(LinesplanFillCache);LinesplanFillCacheKey:='';
+  if LinesplanFrame <> nil then
+    TFreeLinesplanFrame(LinesplanFrame).InvalidateRenderCache;
   if Val <> FFileChanged then
   begin
     FFileChanged := Val;
@@ -971,6 +979,7 @@ begin
   FProjectSettings.Clear;
   FFilenameSet := False;
   FStopAskingForFileVersion := False;
+  FLegacyCalculationLayout := '';
   Fillchar(FResistanceDelftData, SizeOf(FResistanceDelftData), 0);
   Fillchar(FResistanceKaperData, SizeOf(TFreeKAPERResistanceData), 0);
   Fillchar(FResistanceHoltrData, SizeOf(FResistanceHoltrData), 0);
@@ -1035,6 +1044,10 @@ end;{TFreeShip.ClearUndo}
 
 destructor TFreeShip.Destroy;
 begin
+  if LinesplanFrame<>nil then TFreeLinesplanFrame(LinesplanFrame).FreeShip:=nil;
+  FreeAndNil(LinesplanFillCache);
+  IsRebuildAsyncDisabled := True;
+  Application.RemoveAsyncCalls(Self);
   FOnChangeCursorIncrement:=nil;
   FOnFileChanged:=nil;
   FOnUpdateGeometryInfo:=nil;
@@ -1083,6 +1096,9 @@ procedure TFreeShip.Draw;
 var
   I: integer;
 begin
+  FreeAndNil(LinesplanFillCache);LinesplanFillCacheKey:='';
+  if LinesplanFrame <> nil then
+    TFreeLinesplanFrame(LinesplanFrame).InvalidateRenderCache;
   for I := 1 to NumberOfViewports do
     Viewport[I - 1].Invalidate ;
   if LinesplanFrame <> nil then
@@ -1092,6 +1108,13 @@ end;{TFreeShip.Draw}
 resourcestring rsSplitSection = 'Split Section';
 
 procedure TFreeShip.DrawToViewport(Viewport: TFreeViewport);
+type
+  TQueuedGridLabel = record
+    Text, Key, FontName: string;
+    X, Y, FontSize: integer;
+    FontColor: TColor;
+    Kind: TLabelKind;
+  end;
 var
   I, Size: integer;
   Plane: T3DPlane;
@@ -1106,11 +1129,36 @@ var
   Nrect, NDecimal: integer;
   R, G, B: byte;
   Tmp: TFloatType;
+  LayoutIndex: integer;
+  AreaLabel: TLabelPlacement;
+  AreaPreferred: TPoint;
+  GridLabels: array of TQueuedGridLabel;
+
+  procedure DrawQueuedGridLabels;
+  var J, Pass: integer; Item: TQueuedGridLabel; Placement: TLabelPlacement;
+      SavedFont: TFont;
+  begin
+    if Viewport.Printing or (Length(GridLabels)=0) then Exit;
+    SavedFont:=TFont.Create; SavedFont.Assign(Viewport.DrawingCanvas.Font);
+    try
+      // Named reference lines are more important than ordinary grid ticks.
+      for Pass:=0 to 1 do for J:=0 to High(GridLabels) do begin
+        Item:=GridLabels[J];
+        if (Pass=0) <> (Item.Kind=lkNamedLine) then Continue;
+        Viewport.FontName:=Item.FontName; Viewport.FontSize:=Item.FontSize;
+        Viewport.FontColor:=Item.FontColor;
+        Placement:=Viewport.LabelLayout.Place(Item.Key,Item.Text,Point(Item.X,Item.Y),
+          Point(Item.X,Item.Y),Viewport.TextWidth(Item.Text),Viewport.TextHeight(Item.Text),Item.Kind);
+        if Placement.Visible then Viewport.TextOutLabel(Placement,Item.Text);
+      end;
+    finally Viewport.DrawingCanvas.Font.Assign(SavedFont); SavedFont.Free end;
+  end;
 
   procedure DrawPoint(P: T3DCoordinate; Text: string; CompensateHeight: boolean);
   var
     Pt: TPoint;
     Size: integer;
+    LabelPlacement: TLabelPlacement;
   begin
     if CompensateHeight then
       P.Z := P.Z + FDesignHydrostatics.FData.ModelMin.Z;
@@ -1139,8 +1187,63 @@ var
     Viewport.Pie(Pt.X - Size, Pt.Y - Size, Pt.X + Size, Pt.Y + Size, Pt.X - 1,
       Pt.Y + Size, Pt.X + Size, Pt.Y - 1);
     Viewport.BrushStyle := bsClear;
-    Viewport.TextOut(Pt.X + 2 * size, Pt.Y, Text);
+    if Viewport.Printing then
+      Viewport.TextOut(Pt.X + 2 * size, Pt.Y, Text)
+    else
+    begin
+      LabelPlacement := Viewport.LabelLayout.Place('hydro:' + Text, Text, Pt,
+        Point(Pt.X + 2 * Size, Pt.Y), Viewport.TextWidth(Text),
+        Viewport.TextHeight(Text), lkPoint);
+      if LabelPlacement.Visible then begin
+        Viewport.DrawLabelLeader(Pt, LabelPlacement.Rect);
+        Viewport.TextOutLabel(LabelPlacement,Text);
+      end;
+    end;
   end;{DrawPoint}
+
+  procedure DrawLoadingPreview;
+  var J,K:Integer; A,B:T3DCoordinate; Progress,Local,T,Span:Double;
+    Face:TFreeSubdivisionControlFace; Edge:TFreeSubdivisionEdge;
+    function Reveal(X:Double):Double;
+    begin
+      T:=(X-Surface.Min.X)/Span;
+      Result:=Max(0.0,Min(1.0,Progress*1.6-T*0.6));
+      Result:=1-Sqr(1-Result);
+    end;
+    function Fade(Color:TColor; Amount:Double):TColor;
+    var C,Bg:TColor;
+    begin
+      C:=ColorToRGB(Color); Bg:=ColorToRGB(Viewport.Color);
+      Result:=RGBToColor(Round((Bg and 255)*(1-Amount)+(C and 255)*Amount),
+        Round(((Bg shr 8) and 255)*(1-Amount)+((C shr 8) and 255)*Amount),
+        Round(((Bg shr 16) and 255)*(1-Amount)+((C shr 16) and 255)*Amount));
+    end;
+  begin
+    Progress:=Viewport.ProgressiveFraction;
+    Span:=Max(0.000001,Surface.Max.X-Surface.Min.X);
+    Viewport.PenWidth:=1;
+    if not Surface.Built then Surface.Rebuild;
+    for J:=0 to Surface.NumberOfControlFaces-1 do begin
+      Face:=Surface.ControlFace[J];
+      if (Face.Layer=nil) or not Face.Layer.SurfaceVisible then Continue;
+      for K:=0 to Face.ControlDescendantEdgeCount-1 do begin
+        Edge:=Face.ControlDescendantEdge[K];
+        A:=Edge.StartPoint.Coordinate;
+        B:=Edge.EndPoint.Coordinate;
+        Local:=Reveal((A.X+B.X)*0.5);
+        if Local<=0 then Continue;
+        B.X:=A.X+(B.X-A.X)*Local; B.Y:=A.Y+(B.Y-A.Y)*Local; B.Z:=A.Z+(B.Z-A.Z)*Local;
+        if Viewport.ViewType=fvBodyplan then begin
+          if A.X<=Surface.SplitSectionLocation then A.Y:=-A.Y;
+          if B.X<=Surface.SplitSectionLocation then B.Y:=-B.Y;
+        end;
+        Viewport.PenColor:=Fade(Preferences.EdgeColor,Local);
+        Viewport.DrawModelLine(A,B);
+      end;
+    end;
+    // Stage one draws lines only. Point markers enter after this preview ends.
+    Viewport.PreviewFrameReady;
+  end;
 
   procedure DrawGrid;
   var
@@ -1158,6 +1261,26 @@ var
     Pts: array of TPoint;
     cl: TColor;
     pw: integer;
+    procedure PlaceLabel(X, Y: integer; const Text: string; CanMove: boolean; const Identity:string='');
+    var Kind: TLabelKind; N,J,Occurrence: integer;
+    begin
+      if Viewport.Printing then begin Viewport.TextOut(X, Y, Text); Exit end;
+      // Keep the same model endpoint while it crosses the viewport boundary.
+      // Reassigning the name to the opposite endpoint bypasses layout animation.
+      Inc(LayoutIndex);
+      if CanMove then Kind := lkNamedLine
+      else if Abs(Pt2.X - Pt1.X) < Abs(Pt2.Y - Pt1.Y) then Kind := lkVerticalTick
+      else Kind := lkHorizontalTick;
+      N:=Length(GridLabels); SetLength(GridLabels,N+1);
+      Occurrence:=0;
+      for J:=0 to N-1 do if (GridLabels[J].Kind=Kind) and (GridLabels[J].Text=Text) then Inc(Occurrence);
+      if Identity<>'' then GridLabels[N].Key:='reference:'+Identity
+      else GridLabels[N].Key:='grid:'+IntToStr(Ord(Kind))+':'+Text+':'+IntToStr(Occurrence);
+      GridLabels[N].Text:=Text;
+      GridLabels[N].X:=X; GridLabels[N].Y:=Y; GridLabels[N].Kind:=Kind;
+      GridLabels[N].FontName:=Viewport.FontName; GridLabels[N].FontSize:=Viewport.FontSize;
+      GridLabels[N].FontColor:=Viewport.FontColor;
+    end;
 
     procedure SetFontHeight(DesiredHeight: TFloatType);
     var
@@ -1225,8 +1348,8 @@ var
           Pt2 := Viewport.Project(P2);
           Viewport.MoveTo(Pt1.X, Pt1.Y);
           Viewport.LineTo(Pt2.X, Pt2.Y);
-          Viewport.TextOut(Pt1.X, Pt1.Y, Str);
-          Viewport.TextOut(Pt2.X, Pt2.Y - Height, Str);
+          PlaceLabel(Pt1.X, Pt1.Y, Str, False);
+          PlaceLabel(Pt2.X, Pt2.Y - Height, Str, False);
         end;
       end;
       if DrawDiagonals then
@@ -1279,13 +1402,13 @@ var
             Width := Viewport.TextWidth(Str);
           if Viewport.ViewType = fvBodyplan then
           begin
-            Viewport.TextOut(Pt1.X, Pt1.Y, Str);
-            Viewport.TextOut(Pt2.X - Width, Pt2.Y - Height, str);
+            PlaceLabel(Pt1.X, Pt1.Y, Str, False);
+            PlaceLabel(Pt2.X - Width, Pt2.Y - Height, str, False);
           end
           else
           begin
-            Viewport.TextOut(Pt1.X, Pt1.Y - Height, Str);
-            Viewport.TextOut(Pt2.X - Width, Pt2.Y - Height, str);
+            PlaceLabel(Pt1.X, Pt1.Y - Height, Str, False);
+            PlaceLabel(Pt2.X - Width, Pt2.Y - Height, str, False);
           end;
           if (Visibility.ModelView = mvBoth) or (Viewport.ViewType = fvBodyplan) then
           begin
@@ -1299,13 +1422,13 @@ var
             Viewport.LineTo(Pt2.X, Pt2.Y);
             if Viewport.ViewType = fvBodyplan then
             begin
-              Viewport.TextOut(Pt1.X - Width, Pt1.Y, Str);
-              Viewport.TextOut(Pt2.X - Width, Pt2.Y - Height, str);
+              PlaceLabel(Pt1.X - Width, Pt1.Y, Str, False);
+              PlaceLabel(Pt2.X - Width, Pt2.Y - Height, str, False);
             end
             else
             begin
-              Viewport.TextOut(Pt2.X - Width, Pt2.Y, str);
-              Viewport.TextOut(Pt1.X, Pt1.Y, Str);
+              PlaceLabel(Pt2.X - Width, Pt2.Y, str, False);
+              PlaceLabel(Pt1.X, Pt1.Y, Str, False);
             end;
           end;
         end;
@@ -1325,8 +1448,8 @@ var
           Viewport.MoveTo(Pt1.X, Pt1.Y);
           Viewport.LineTo(Pt2.X, Pt2.Y);
           Width := Viewport.TextWidth(Str);
-          Viewport.TextOut(Pt1.X, Pt1.Y - Height, Str);
-          Viewport.TextOut(Pt2.X - Width, Pt2.Y - Height, str);
+          PlaceLabel(Pt1.X, Pt1.Y - Height, Str, False);
+          PlaceLabel(Pt2.X - Width, Pt2.Y - Height, str, False);
         end;
       end;
 
@@ -1348,13 +1471,13 @@ var
         Width := Viewport.TextWidth(Str);
         if Viewport.ViewType = fvBodyplan then
         begin
-          Viewport.TextOut(Pt1.X - Width div 2, Pt1.Y, str);
-          Viewport.TextOut(Pt2.X - Width div 2, Pt2.Y - Height, Str);
+          PlaceLabel(Pt1.X - Width div 2, Pt1.Y, str, False);
+          PlaceLabel(Pt2.X - Width div 2, Pt2.Y - Height, Str, False);
         end
         else
         begin
-          Viewport.TextOut(Pt1.X - Width, Pt1.Y - Height, str);
-          Viewport.TextOut(Pt2.X, Pt2.Y - Height, Str);
+          PlaceLabel(Pt1.X - Width, Pt1.Y - Height, str, False);
+          PlaceLabel(Pt2.X, Pt2.Y - Height, Str, False);
         end;
         Viewport.PenWidth := 1;
         Viewport.FontColor := Preferences.GridFontColor;
@@ -1377,8 +1500,7 @@ var
         Viewport.MoveTo(Pt1.X, Pt1.Y);
         Viewport.LineTo(Pt2.X, Pt2.Y);
         Width := Viewport.TextWidth(Str);
-        Viewport.TextOut(Pt1.X, Pt1.Y - Height, Str);
-        Viewport.TextOut(Pt2.X - Width, Pt2.Y - Height, str);
+        PlaceLabel(Pt1.X, Pt1.Y - Height, Str, True);
 
         // Draw dwl
         if ProjectSettings.FMainParticularsHasBeenSet then
@@ -1405,8 +1527,7 @@ var
           Viewport.LineTo(Pt2.X, Pt2.Y);
 
           Width := Viewport.TextWidth(Str);
-          Viewport.TextOut(Pt1.X - Width div 2, Pt1.Y - Height, Str);
-          Viewport.TextOut(Pt2.X - Width div 2, Pt2.Y - Height, str);
+          PlaceLabel(Pt1.X - Width div 2, Pt1.Y - Height, Str, True);
         end;
       end;
 
@@ -1425,8 +1546,8 @@ var
         Viewport.MoveTo(Pt1.X, Pt1.Y+30);
         Viewport.LineTo(Pt2.X, Pt2.Y-20);
         Width := Viewport.TextWidth(Str);
-        Viewport.TextOut(Pt1.X, Pt1.Y - Height+30, Str);
-        Viewport.TextOut(Pt2.X - Width, Pt2.Y - Height-20, str);
+        PlaceLabel(Pt1.X, Pt1.Y - Height+30, Str, True,'split:lower');
+        PlaceLabel(Pt2.X - Width, Pt2.Y - Height-20, str, True,'split:upper');
       end;
 
     end;
@@ -1434,6 +1555,55 @@ var
 
 begin
   if Surface.IsBuilding then exit; // no double entries
+
+  Surface.SplitSectionLocation := Projectsettings.ProjectSplitSectionLocation;
+  // Preview and final frames use identical point shapes, visibility and colors.
+  Surface.ShowControlNet:=Visibility.ShowControlNet;
+  Surface.ShowFreeObjects:=Visibility.ShowFreeObjects;
+  Surface.ControlPointSize:=Preferences.PointSize;
+  Surface.Selectedcolor:=Preferences.SelectColor;
+  Surface.LeakColor:=Preferences.LeakPointColor;
+  Surface.CreasePointColor:=Preferences.CreasePointColor;
+  Surface.RegularPointColor:=Preferences.RegularPointColor;
+  Surface.CornerPointColor:=Preferences.CornerPointColor;
+  Surface.DartPointColor:=Preferences.DartPointColor;
+  if Viewport.ProgressivePreview and not Viewport.Printing then begin
+    // Prepare once before the preview clock starts, not on the transition frame.
+    if (Viewport.ViewportMode=vmWireframe) and Visibility.ShowHydrostaticData then begin
+      if FDesignHydrostatics.Draft<>ProjectSettings.ProjectDraft then FDesignHydrostatics.Draft:=ProjectSettings.ProjectDraft;
+      if not FDesignHydrostatics.Calculated then begin FDesignHydrostatics.Calculate;FDesignHydrostatics.CalculateGravity end;
+    end;
+    DrawLoadingPreview;
+    Exit;
+  end;
+  Viewport.BeginOverlayFrame;
+  LayoutIndex := 0;
+  Viewport.LabelLayout.ExtraCost := nil;
+  Viewport.SyncLabelHistory;
+  Viewport.LabelLayout.BeginFrame(Types.Rect(0, 0, Viewport.ClientWidth, Viewport.ClientHeight),
+    'model:' + Filename + ':' + IntToStr(Ord(Viewport.ViewType)));
+  if Visibility.ShowControlNet and not Viewport.Printing then
+  begin
+    for I := 0 to Surface.NumberOfControlPoints - 1 do
+      if Surface.ControlPoint[I].Visible then
+      begin
+        P := Surface.ControlPoint[I].Coordinate;
+        if (Viewport.ViewType = fvBodyplan) and (P.X <= Surface.SplitSectionLocation) then P.Y := -P.Y;
+        Pt := Viewport.Project(P);
+        Size := Preferences.PointSize + 3;
+        Viewport.LabelLayout.Reserve(Types.Rect(Pt.X-Size, Pt.Y-Size, Pt.X+Size+1, Pt.Y+Size+1));
+      end;
+    for I := 0 to Surface.NumberOfControlEdges - 1 do
+      if Surface.ControlEdge[I].Visible then
+      begin
+        P := Surface.ControlEdge[I].StartPoint.Coordinate;
+        if (Viewport.ViewType = fvBodyplan) and (P.X <= Surface.SplitSectionLocation) then P.Y := -P.Y;
+        Pt := Viewport.Project(P);
+        P := Surface.ControlEdge[I].EndPoint.Coordinate;
+        if (Viewport.ViewType = fvBodyplan) and (P.X <= Surface.SplitSectionLocation) then P.Y := -P.Y;
+        Viewport.LabelLayout.AddSegment(Pt, Viewport.Project(P));
+      end;
+  end;
 
   if not Surface.Built then
     surface.Rebuild;   // temporary rebuilding here. TODO - dont
@@ -1652,10 +1822,18 @@ begin
           Viewport.LineTo(Pt.X + Size, Pt.Y);
           Str := FloatToStrF(FDesignHydrostatics.FData.SAC[I - 1].Y, ffFixed, 7, 2);
           if P.X < FProjectsettings.ProjectSplitSectionLocation then
-            Viewport.TextOut(Pt.X - Viewport.TextWidth(str), Pt.Y -
-              Viewport.TextHeight(str), Str)
+            AreaPreferred := Point(Pt.X - Viewport.TextWidth(Str), Pt.Y - Viewport.TextHeight(Str))
           else
-            Viewport.TextOut(Pt.X, Pt.Y - Viewport.TextHeight(str), Str);
+            AreaPreferred := Point(Pt.X, Pt.Y - Viewport.TextHeight(Str));
+          if Viewport.Printing then Viewport.TextOut(AreaPreferred.X, AreaPreferred.Y, Str)
+          else begin
+            AreaLabel := Viewport.LabelLayout.Place('sectional-area:' + IntToStr(I), Str,
+              Pt, AreaPreferred, Viewport.TextWidth(Str), Viewport.TextHeight(Str), lkPoint);
+            if AreaLabel.Visible then begin
+              Viewport.DrawLabelLeader(Pt, AreaLabel.Rect);
+              Viewport.TextOutLabel(AreaLabel,Str);
+            end;
+          end;
         end;
         FreeAndNil(Curve);
       end;
@@ -1717,12 +1895,22 @@ begin
         end
         else
           Str := '0.0';
-        Viewport.TextOut(Rect.Right + 5,
-          (Rect.Top + Rect.Bottom - Viewport.TextHeight(str)) div 2, Str);
+        AreaPreferred:=Point(Rect.Right + 5,
+          (Rect.Top + Rect.Bottom - Viewport.TextHeight(Str)) div 2);
+        if Viewport.Printing then Viewport.TextOut(AreaPreferred.X,AreaPreferred.Y,Str)
+        else begin
+          AreaLabel:=Viewport.LabelLayout.Place('legend:'+IntToStr(I),Str,AreaPreferred,
+            AreaPreferred,Viewport.TextWidth(Str),Viewport.TextHeight(Str),lkHorizontalTick,1);
+          if AreaLabel.Visible then
+            Viewport.TextOutLabel(AreaLabel,Str);
+        end;
       end;
       Rect.Top := Rect.Top + RectHeight;
     end;
   end;
+  Viewport.EndOverlayFrame;
+  DrawQueuedGridLabels;
+  Viewport.LabelLayout.EndFrame;
 end;{TFreeShip.DrawToViewport}
 
 procedure TFreeShip.Extents(var Min, Max: T3DCoordinate);
@@ -2039,9 +2227,128 @@ begin
   end;
 end;{TFreeShip.ImportChines}
 
-procedure TFreeShip.LoadProject(Source: TFreeFileBuffer);
+procedure TFreeShip.BindProjectOwners;
+var I: Integer;
+begin
+  FSurface.FreeShip := Self;
+  FVisibility.FFreeShip := Self;
+  FProjectSettings.FFreeShip := Self;
+  for I := 0 to NumberOfStations - 1 do Station[I].FFreeShip := Self;
+  for I := 0 to NumberOfButtocks - 1 do Buttock[I].FFreeShip := Self;
+  for I := 0 to NumberOfWaterlines - 1 do Waterline[I].FFreeShip := Self;
+  for I := 0 to NumberOfDiagonals - 1 do Diagonal[I].FFreeShip := Self;
+  for I := 0 to NumberOfMarkers - 1 do Marker[I].FOwner := Self;
+  for I := 0 to NumberOfBackgroundImages - 1 do BackgroundImage[I].FOwner := Self;
+  for I := 0 to NumberOfFlowlines - 1 do Flowline[I].FFreeShip := Self;
+end;
+
+procedure TFreeShip.AdoptProject(Candidate: TFreeShip);
+  procedure SwapObject(var Left, Right);
+  var Temp: TObject;
+  begin
+    Temp := TObject(Left);
+    TObject(Left) := TObject(Right);
+    TObject(Right) := Temp;
+  end;
+begin
+  // The parsed surface takes over the main instance's UI subscriptions.
+  // The candidate then owns and disposes of the previous project.
+  FSurface.ExchangeEventHandlers(Candidate.FSurface);
+  SwapObject(FSurface, Candidate.FSurface);
+  SwapObject(FVisibility, Candidate.FVisibility);
+  SwapObject(FProjectSettings, Candidate.FProjectSettings);
+  SwapObject(FStations, Candidate.FStations);
+  SwapObject(FButtocks, Candidate.FButtocks);
+  SwapObject(FWaterlines, Candidate.FWaterlines);
+  SwapObject(FDiagonals, Candidate.FDiagonals);
+  SwapObject(FMarkers, Candidate.FMarkers);
+  SwapObject(FBackgroundImages, Candidate.FBackgroundImages);
+  SwapObject(FFlowLines, Candidate.FFlowLines);
+  SwapObject(FSelectedFlowlines, Candidate.FSelectedFlowlines);
+  SwapObject(FSelectedMarkers, Candidate.FSelectedMarkers);
+  BindProjectOwners;
+  Candidate.BindProjectOwners;
+  FLegacyCalculationLayout := Candidate.FLegacyCalculationLayout;
+  FPrecision := Candidate.FPrecision;
+  FFileVersion := Candidate.FFileVersion;
+  FPropellerTask1Data := Candidate.FPropellerTask1Data;
+  FPropellerTask2Data := Candidate.FPropellerTask2Data;
+  FPropellerTask3Data := Candidate.FPropellerTask3Data;
+  FPropellerTask4Data := Candidate.FPropellerTask4Data;
+  FPropellerTask5Data := Candidate.FPropellerTask5Data;
+  FPropellerRvrsData := Candidate.FPropellerRvrsData;
+  FHydrodynManeuvData := Candidate.FHydrodynManeuvData;
+  FHydrodynTask1Data := Candidate.FHydrodynTask1Data;
+  FResistanceDelftData := Candidate.FResistanceDelftData;
+  FResistanceKaperData := Candidate.FResistanceKaperData;
+  FResistancePlaningData := Candidate.FResistancePlaningData;
+  FResistanceHoltrData := Candidate.FResistanceHoltrData;
+  FResistanceHollenData := Candidate.FResistanceHollenData;
+  FResistanceOortmerData := Candidate.FResistanceOortmerData;
+  FResistanceFungData := Candidate.FResistanceFungData;
+  FResistanceOSTData := Candidate.FResistanceOSTData;
+  FResistanceRBHSData := Candidate.FResistanceRBHSData;
+  FResistanceMHData := Candidate.FResistanceMHData;
+  FActiveControlPoint := nil;
+  FEditMode := emSelectItems;
+  FCurrentlyMoving := False;
+  FPointHasBeenMoved := False;
+  FFileChanged := False;
+  FModelIsLoaded := True;
+  FStopAskingForFileVersion := False;
+end;
+
+procedure TFreeShip.LoadProject(Source: TFreeFileBuffer; UpdateViews: Boolean);
 var
+  Candidate: TFreeShip;
   PrevCursor: TCursor;
+begin
+  // Parse and rebuild without touching the live model or its undo history.
+  PrevCursor := Screen.Cursor;
+  Screen.Cursor := crHourGlass;
+  Candidate := nil;
+  try
+    Candidate := TFreeShip.Create(nil);
+    Candidate.IsRebuildAsyncDisabled := True;
+    Candidate.Preferences.FbmEncoding := Preferences.FbmEncoding;
+    Candidate.Preferences.UnderWaterColor := Preferences.UnderWaterColor;
+    Candidate.Preferences.UnderWaterColorAlpha := Preferences.UnderWaterColorAlpha;
+    Candidate.Surface.LayerColor := Surface.LayerColor;
+    Candidate.Surface.Layer[0].Color := Surface.LayerColor;
+    Candidate.ParseProject(Source);
+    if Assigned(FControlpointForm) then FControlpointForm.ActiveControlPoint := nil;
+    AdoptProject(Candidate);
+  finally
+    Candidate.Free;
+    Screen.Cursor := PrevCursor;
+  end;
+  if UpdateViews then UpdateLoadedProject;
+end;{TFreeShip.LoadProject}
+
+procedure TFreeShip.UpdateLoadedProject;
+var I: Integer; Pt: TPoint;
+begin
+  FDesignHydrostatics.Calculated := False;
+  for I := 0 to NumberOfHydrostaticCalculations - 1 do
+    HydrostaticCalculation[I].Calculated := False;
+  Pt := Point(0, 0);
+  for I := 0 to NumberOfViewports - 1 do
+    Viewport[I].BackgroundImage.AssignData(nil, fvPerspective,
+      Pt, 1.0, False, clBlack, 255, 100, 3, True);
+  for I := 0 to NumberOfBackgroundImages - 1 do BackgroundImage[I].UpdateViews;
+  if Assigned(Surface.OnChangeLayerData) then Surface.OnChangeLayerData(Surface);
+  if Assigned(Surface.OnChangeActiveLayer) then
+    Surface.OnChangeActiveLayer(Surface, Surface.ActiveLayer);
+  Surface.ExecuteOnSelectItem(Surface);
+  Surface.ExecuteOnChangeActiveControlPoint(Surface.ActiveControlPoint);
+  if Assigned(FOnChangeCursorIncrement) then FOnChangeCursorIncrement(Self);
+  if Assigned(FOnFileChanged) then FOnFileChanged(Self);
+  if Assigned(FOnUpdateGeometryInfo) then FOnUpdateGeometryInfo(Self);
+  Draw;
+end;{TFreeShip.UpdateLoadedProject}
+
+procedure TFreeShip.ParseProject(Source: TFreeFileBuffer);
+var
   I, N, PointN: integer;
   Str, PointName: string;
   Intersection: TFreeIntersection;
@@ -2049,16 +2356,7 @@ var
   Data: TFreeBackgroundImageData;
   vFlowline: TFreeFlowline;
   //PreviewImg : TJPegImage;
-  CF0:TFreeSubdivisionControlFace;
 begin
-  // Remember the filename because it will be erased by the clear method
-  Str := FFilename;
-  Clear;
-  FFilename := Str;
-  PrevCursor := Screen.Cursor;
-  Screen.Cursor := crHourGlass;
-  try // finally
-  try // except
     Logger.Debug('LoadBinary');
     Source.Reset;
     Source.Encoding := Preferences.FbmEncoding;
@@ -2067,19 +2365,23 @@ begin
     begin
       Source.LoadTFreeFileVersion(FFileVersion);
       Source.Version := FFileVersion;
-      if (FFileVersion <= CurrentVersion) or (FFileVersion <= High(FFileVersion)) then
+      if (Ord(FFileVersion) >= Ord(Low(TFreeFileVersion))) and
+         (Ord(FFileVersion) <= Ord(High(TFreeFileVersion))) then
       begin
         Source.LoadInteger(I);
+        if (I < Ord(Low(TFreePrecisionType))) or (I > Ord(High(TFreePrecisionType))) then
+          raise EReadError.CreateFmt('Invalid model precision: %d', [I]);
         FPrecision := TFreePrecisionType(I);
         Visibility.LoadBinary(Source);
         ProjectSettings.LoadBinary(Source, nil);
         // Load actual subdivision-surface data.
         Surface.LoadBinary(Source);
-        CF0:=Surface.ControlFace[0];
         // Load stations
         Source.LoadInteger(N);
+        if (N < 0) or ((not (Source is TFreeTextBuffer)) and (N > Source.Count - Source.Position)) then
+          raise EReadError.CreateFmt('Invalid project collection count: %d', [N]);
         Logger.Debug('Stations:' + IntToStr(N) + ' pos:' + IntToStr(Source.Position));
-        FStations.Capacity := N;
+        if not (Source is TFreeTextBuffer) then FStations.Capacity := N;
         for I := 1 to N do
         begin
           Intersection := TFreeIntersection.Create(self);
@@ -2088,7 +2390,9 @@ begin
         end;
         // Load Buttocks
         Source.LoadInteger(N);
-        FButtocks.Capacity := N;
+        if (N < 0) or ((not (Source is TFreeTextBuffer)) and (N > Source.Count - Source.Position)) then
+          raise EReadError.CreateFmt('Invalid project collection count: %d', [N]);
+        if not (Source is TFreeTextBuffer) then FButtocks.Capacity := N;
         Logger.Debug('Buttocks:' + IntToStr(N) + ' pos:' + IntToStr(Source.Position));
         for I := 1 to N do
         begin
@@ -2098,7 +2402,9 @@ begin
         end;
         // Load Waterlines
         Source.LoadInteger(N);
-        FWaterlines.Capacity := N;
+        if (N < 0) or ((not (Source is TFreeTextBuffer)) and (N > Source.Count - Source.Position)) then
+          raise EReadError.CreateFmt('Invalid project collection count: %d', [N]);
+        if not (Source is TFreeTextBuffer) then FWaterlines.Capacity := N;
         Logger.Debug('Waterlines:' + IntToStr(N) + ' pos:' + IntToStr(Source.Position));
         for I := 1 to N do
         begin
@@ -2110,8 +2416,10 @@ begin
         begin
           // Load Diagonals
           Source.LoadInteger(N);
+        if (N < 0) or ((not (Source is TFreeTextBuffer)) and (N > Source.Count - Source.Position)) then
+          raise EReadError.CreateFmt('Invalid project collection count: %d', [N]);
           Logger.Debug('Diagonals:' + IntToStr(N) + ' pos:' + IntToStr(Source.Position));
-          FDiagonals.Capacity := N;
+          if not (Source is TFreeTextBuffer) then FDiagonals.Capacity := N;
           for I := 1 to N do
           begin
             Intersection := TFreeIntersection.Create(self);
@@ -2122,8 +2430,10 @@ begin
           begin
             // Load markers
             Source.LoadInteger(N);
+        if (N < 0) or ((not (Source is TFreeTextBuffer)) and (N > Source.Count - Source.Position)) then
+          raise EReadError.CreateFmt('Invalid project collection count: %d', [N]);
             Logger.Debug('Markers:' + IntToStr(N) + ' pos:' + IntToStr(Source.Position));
-            FMarkers.Capacity := N;
+            if not (Source is TFreeTextBuffer) then FMarkers.Capacity := N;
             for I := 1 to N do
             begin
               vMarker := TFreeMarker.Create(Surface);
@@ -2142,6 +2452,8 @@ begin
               if FileVersion >= fv250 then
               begin
                 Source.LoadInteger(N);
+        if (N < 0) or ((not (Source is TFreeTextBuffer)) and (N > Source.Count - Source.Position)) then
+          raise EReadError.CreateFmt('Invalid project collection count: %d', [N]);
                 Logger.Debug('BackgroundImages:' + IntToStr(
                   N) + ' pos:' + IntToStr(Source.Position));
                 for I := 1 to N do
@@ -2151,9 +2463,11 @@ begin
                   Data.LoadBinary(Source);
                 end;
                 Source.LoadInteger(N);
+        if (N < 0) or ((not (Source is TFreeTextBuffer)) and (N > Source.Count - Source.Position)) then
+          raise EReadError.CreateFmt('Invalid project collection count: %d', [N]);
                 Logger.Debug('Flowlines:' + IntToStr(N) + ' pos:' +
                   IntToStr(Source.Position));
-                FFlowlines.Capacity := N;
+                if not (Source is TFreeTextBuffer) then FFlowlines.Capacity := N;
                 for I := 1 to N do
                 begin
                   vFlowline := TFreeFlowline.Create(self);
@@ -2169,6 +2483,8 @@ begin
                           Source.LoadTFreeMHSeriesResistanceData(FPropellerTask2Data,SizeOf(TFreeTask2PropellerData));
                           Source.LoadTFreeMHSeriesResistanceData(FPropellerTask3Data,SizeOf(TFreeTask3PropellerData));
                           }
+                  Source.PrepareLegacyCalculations;
+                  FLegacyCalculationLayout := Source.LegacyCalculationLayout;
                   Source.LoadTFreeHoltrSeriesResistanceData(FResistanceHoltrData);
                   Source.LoadTFreeOSTSeriesResistanceData(FResistanceOSTData);
                   Source.LoadTFreeTask1PropellerData(FPropellerTask1Data);
@@ -2227,41 +2543,30 @@ begin
         end;  //if FileVersion>=fv180
       end //if (FFileVersion<=CurrentVersion) or (FFileVersion<=High(FFileVersion))
       else
-        MessageDlg(rs_This_file_was_created_with_a_later_version_of_FREE_ship_ {UserString[113]} + eol + rs_and_cannot_be_opened_with_this_version {UserString[188]} +
-          '.', mtError, [mbOK], 0);
+        raise EReadError.Create(rs_This_file_was_created_with_a_later_version_of_FREE_ship_ + eol +
+          rs_and_cannot_be_opened_with_this_version);
     end //if Str='FREE!ship' then
     else
-      MessageDlg(rs_This_is_not_a_valid_FREE_ship_file_ {UserString[189]}, mtError, [mbOK], 0);
+      raise EReadError.Create(rs_This_is_not_a_valid_FREE_ship_file_);
 
     Surface.UnderWaterColor := ProjectSettings.ProjectUnderWaterColor;
     Surface.ShadeUnderWater := ProjectSettings.ProjectShadeUnderwaterShip;
 
-    FileChanged := False;
-    ModelIsLoaded := True;
-  except
-    Surface.Clear;
-    raise;
-  end;
-  finally
     Surface.DesiredSubdivisionLevel := Ord(Precision) + 1;
-    //CF0:=Surface.ControlFace[0];
-    Surface.Rebuild; // it will be rebuilt in Draw
-    Screen.Cursor := PrevCursor;
-    for I := 1 to NumberofBackgroundImages do
-      BackgroundImage[I - 1].UpdateViews;
-    if Assigned(OnUpdateGeometryInfo) then
-      OnUpdateGeometryInfo(self);
-  end;
-end;{TFreeShip.LoadBinary}
+    Surface.Rebuild;
+    FFileChanged := False;
+    FModelIsLoaded := True;
+end;{TFreeShip.ParseProject}
 
 procedure TFreeShip.LoadControlPointNames(Source:TFreeFileBuffer);
 var I,N:integer; NameData:TNameData;
 begin
-  Source.LoadInteger(N);
+  N := LoadModelCount(Source, 'control point name', 2 * SizeOf(Integer));
   Logger.Debug('ControlPoint Names:' + IntToStr(N) + ' pos:' + IntToStr(Source.Position));
   for I := 1 to N do
   begin
     Source.LoadTNameData(NameData);
+    RequireModelIndex(NameData.N, Surface.NumberOfControlPoints, 'named control point');
     Surface.ControlPoint[NameData.N].Name:=NameData.Name;
   end;
 end;
@@ -2269,24 +2574,25 @@ end;
 procedure TFreeShip.LoadControlPointGroups(Source:TFreeFileBuffer);
 var I,N:integer; G:TFreeSubdivisionControlPointGroup;
 begin
-  Source.LoadInteger(N);
+  N := LoadModelCount(Source, 'control point group', 2 * SizeOf(Integer));
   Logger.Debug('ControlPointGroups:' + IntToStr(N) + ' pos:' + IntToStr(Source.Position));
   for I := 1 to N do
   begin
     G:=TFreeSubdivisionControlPointGroup.Create(Surface);
-    G.LoadBinary(Source);
     Surface.ControlPointGroups.Add(G);
+    G.LoadBinary(Source);
   end;
 end;
 
 procedure TFreeShip.LoadControlEdgeNames(Source:TFreeFileBuffer);
 var I,N:integer; NameData:TNameData;
 begin
-  Source.LoadInteger(N);
+  N := LoadModelCount(Source, 'control edge name', 2 * SizeOf(Integer));
   Logger.Debug('ControlEdge Names:' + IntToStr(N) + ' pos:' + IntToStr(Source.Position));
   for I := 1 to N do
   begin
     Source.LoadTNameData(NameData);
+    RequireModelIndex(NameData.N, Surface.NumberOfControlEdges, 'named control edge');
     Surface.ControlEdge[NameData.N].Name:=NameData.Name;
   end;
 end;
@@ -2294,11 +2600,12 @@ end;
 procedure TFreeShip.LoadControlFaceNames(Source:TFreeFileBuffer);
 var I,N:integer; NameData:TNameData;
 begin
-  Source.LoadInteger(N);
+  N := LoadModelCount(Source, 'control face name', 2 * SizeOf(Integer));
   Logger.Debug('ControlFace Names:' + IntToStr(N) + ' pos:' + IntToStr(Source.Position));
   for I := 1 to N do
   begin
     Source.LoadTNameData(NameData);
+    RequireModelIndex(NameData.N, Surface.NumberOfControlFaces, 'named control face');
     Surface.ControlFace[NameData.N].Name:=NameData.Name;
   end;
 end;
@@ -2306,11 +2613,12 @@ end;
 procedure TFreeShip.LoadControlCurveNames(Source:TFreeFileBuffer);
 var I,N:integer; NameData:TNameData;
 begin
-  Source.LoadInteger(N);
+  N := LoadModelCount(Source, 'control curve name', 2 * SizeOf(Integer));
   Logger.Debug('ControlCurve Names:' + IntToStr(N) + ' pos:' + IntToStr(Source.Position));
   for I := 1 to N do
   begin
     Source.LoadTNameData(NameData);
+    RequireModelIndex(NameData.N, Surface.NumberOfControlCurves, 'named control curve');
     Surface.ControlCurve[NameData.N].Name:=NameData.Name;
   end;
 end;
@@ -2319,11 +2627,14 @@ procedure TFreeShip.LoadControlPointAnchors(Source:TFreeFileBuffer);
 var I,N:integer; AnchorData:TAnchorData;
   Point,AnchorPoint:TFreeSubdivisionControlPoint;
 begin
-  Source.LoadInteger(N);
+  N := LoadModelCount(Source, 'anchor', 2 * SizeOf(Integer) + SizeOf(Boolean));
   Logger.Debug('Anchors:' + IntToStr(N) + ' pos:' + IntToStr(Source.Position));
   for I := 1 to N do
   begin
     Source.LoadTAnchorData(AnchorData);
+    RequireModelIndex(AnchorData.N, Surface.NumberOfControlPoints, 'anchored control point');
+    if AnchorData.AnchorPoint <> -1 then
+      RequireModelIndex(AnchorData.AnchorPoint, Surface.NumberOfControlPoints, 'anchor point');
     if (AnchorData.AnchorPoint > -1) then
       begin
         Point := Surface.ControlPoint[AnchorData.N];
@@ -2338,11 +2649,16 @@ end;
 procedure TFreeShip.LoadControlPointLinearConstraints(Source:TFreeFileBuffer);
 var I,N:integer; LCData:TLinearConstraintData;
 begin
-  Source.LoadInteger(N);
+  N := LoadModelCount(Source, 'linear constraint', 3 * SizeOf(Integer));
   Logger.Debug('ControlPoint Linear Constraints:' + IntToStr(N) + ' pos:' + IntToStr(Source.Position));
   for I := 1 to N do
   begin
     Source.LoadTLinearConstraintData(LCData);
+    RequireModelIndex(LCData.N, Surface.NumberOfControlPoints, 'constrained control point');
+    if LCData.LinearConstraintPointA <> -1 then
+      RequireModelIndex(LCData.LinearConstraintPointA, Surface.NumberOfControlPoints, 'constraint point A');
+    if LCData.LinearConstraintPointB <> -1 then
+      RequireModelIndex(LCData.LinearConstraintPointB, Surface.NumberOfControlPoints, 'constraint point B');
     if (LCData.LinearConstraintPointA > -1)
       and (LCData.LinearConstraintPointB > -1) then
       Surface.ControlPoint[LCData.N].SetLinearConstraint(
@@ -2377,7 +2693,8 @@ begin
     begin
       Source.LoadTFreeFileVersion(FFileVersion);
       Source.Version := FFileVersion;
-      if FFileVersion >= fv210 then
+      if (Ord(FFileVersion) <= Ord(High(TFreeFileVersion))) and
+         (FFileVersion >= fv210) then
       begin
         Source.LoadInteger(I);
         FPrecision := TFreePrecisionType(I);
@@ -2425,12 +2742,17 @@ procedure TFreeShip.Redraw;
 var
   I: integer;
 begin
+  FreeAndNil(LinesplanFillCache);LinesplanFillCacheKey:='';
+  if LinesplanFrame <> nil then
+    TFreeLinesplanFrame(LinesplanFrame).InvalidateRenderCache;
   // Redraws model to all viewports using the current min/max coordinates of the boundingbox
-  for I := 1 to NumberOfViewports do
+  for I := 1 to NumberOfViewports do begin
+    Viewport[I - 1].InvalidateAnimationBase;
     if Viewport[I - 1].Zoom = 1.0 then
       Viewport[I - 1].ZoomExtents
     else
       Viewport[I - 1].Refresh;
+  end;
   if LinesplanFrame <> nil then
     TFreeLinesplanframe(LinesplanFrame).Viewport.Refresh;
 end;{TFreeShip.Redraw}
@@ -2732,9 +3054,8 @@ end;
 procedure TFreeShip.SaveControlPointGroups(Destination:TFreeFileBuffer);
   var I,N:integer;
   begin
-    N:=0;
-    for i:=0 to Surface.NumberOfControlPointGroups-1 do
-        if Surface.ControlPointGroup[i].Name<>'' then inc(N);
+      // Unnamed groups are still written, so they must be included in the count.
+      N := Surface.NumberOfControlPointGroups;
     Destination.Add(N);
 
     for i:=0 to Surface.NumberOfControlPointGroups-1 do
@@ -3469,12 +3790,35 @@ begin
       begin
         Point.Selected := not Point.Selected;
         if not Point.Selected then
-          Point := SelectedControlPoint[NumberOfSelectedControlPoints - 1];
+        begin
+          if NumberOfSelectedControlPoints > 0 then
+            Point := SelectedControlPoint[NumberOfSelectedControlPoints - 1]
+          else Point := nil;
+        end;
         for J := 1 to NumberOfViewports do
           self.Viewport[J - 1].Refresh;
       end;
       if ActiveControlPoint <> point then
         ActiveControlPoint := Point;
+      if Point = nil then Exit;
+      // Use the rendered point, including the body-plan mirror, instead of the mouse hit position.
+      P3D := Point.Coordinate;
+      if (Viewport.ViewType = fvBodyplan) and (P3D.X <= Surface.SplitSectionLocation) then
+        P3D.Y := -P3D.Y;
+      P := Viewport.ClientToScreen(Viewport.Project(P3D));
+      with Screen.MonitorFromPoint(P).WorkareaRect do
+      begin
+        Tmp := P.X + 16;
+        if Tmp + FControlpointForm.Width > Right then Tmp := P.X - FControlpointForm.Width - 16;
+        if Tmp < Left then Tmp := Left;
+        J := P.Y + 16;
+        if J + FControlpointForm.Height > Bottom then J := P.Y - FControlpointForm.Height - 16;
+        if J < Top then J := Top;
+        FControlpointForm.Position := poDesigned;
+        FControlpointForm.SetBounds(Tmp, J, FControlpointForm.Width, FControlpointForm.Height);
+      end;
+      if not FControlpointForm.Visible then
+        FControlpointForm.Show;
       FCurrentlyMoving := True;
       FPointHasBeenMoved := False;
       FPrevCursorPosition.X := X;
@@ -3690,6 +4034,9 @@ end;
 procedure TFreeShip.InvalidateIntersections;
 var i:integer;
 begin
+  FreeAndNil(LinesplanFillCache);LinesplanFillCacheKey:='';
+  if LinesplanFrame <> nil then
+    TFreeLinesplanFrame(LinesplanFrame).InvalidateRenderCache;
     for I := 0 to NumberOfStations-1 do
       Station[I].Built := false;
     for I := 0 to NumberOfButtocks-1 do
@@ -3728,3 +4075,28 @@ begin
     Min.Y := -Max.Y;
 end;
 
+
+// Cache identity covers geometry, hydrostatic layers, units and principal data.
+// Calculation-dialog settings are excluded so resistance -> propeller chains
+// remain usable. Changing the hull or water density selects a fresh cache.
+function TFreeShip.CalculationRoot: string;
+var B:TFreeFileBuffer; M:TMemoryStream; D:TSHA1Digest;
+begin
+  B:=TFreeFileBuffer.Create; M:=TMemoryStream.Create;
+  try
+    B.Version:=CurrentVersion;
+    B.Add(FileName); B.Add(Ord(ProjectSettings.ProjectUnits)); B.Add(Ord(Precision));
+    B.Add(ProjectSettings.ProjectLength); B.Add(ProjectSettings.ProjectBeam);
+    B.Add(ProjectSettings.ProjectDraft); B.Add(ProjectSettings.ProjectWaterDensity);
+    B.Add(ProjectSettings.ProjectWaterTemper);
+    Surface.SaveBinary(B);
+    B.SaveToStream(M); D:=SHA1Buffer(M.Memory^,M.Size);
+    Result:=IncludeTrailingPathDelimiter(Preferences.TempDirectory)+'model-'+SHA1Print(D);
+  finally M.Free; B.Free end;
+end;
+
+function TFreeShip.GetCalculationDirectory: string;
+begin Result:=FreeCalculationDirectory(CalculationRoot) end;
+
+function TFreeShip.BeginCalculation(const PublishedOutputs: array of string): TFreeCalculationScope;
+begin Result:=TFreeCalculationScope.Create(CalculationRoot,Preferences.ExecDirectory,PublishedOutputs) end;

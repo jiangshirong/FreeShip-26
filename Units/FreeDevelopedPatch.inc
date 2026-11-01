@@ -161,6 +161,9 @@ begin
   Move(Org.FEdgeErrors[0], FEdgeErrors[0], FEdges.Count * SizeOf(double));
   FMaxAreaError := Org.FMaxAreaError;
   FTotalAreaError := Org.FTotalAreaError;
+  FAbsoluteAreaError := Org.FAbsoluteAreaError;
+  FReferenceArea := Org.FReferenceArea;
+  FNormalizedError := Org.FNormalizedError;
 end;{TFreeDevelopedPatch.Assign}
 
 procedure TFreeDevelopedPatch.Clear;
@@ -172,6 +175,11 @@ begin
   FXGrid := 1;
   FYGrid := 1;
   FNoIterations := 0;
+  FMaxAreaError := 0;
+  FTotalAreaError := 0;
+  FAbsoluteAreaError := 0;
+  FReferenceArea := 0;
+  FNormalizedError := 0;
   FName := '';
   FPoints.Clear;
   FEdges.Clear;
@@ -1429,18 +1437,14 @@ var
   end;{Unroll2D}
 
   function TriangleArea(P1, P2, P3: T2DCoordinate): extended;
-  const
-    half: extended = 0.5;
   var
-    d12x, d12y, d23x, d23y, d31x, d31y: extended;
+    Ux, Uy, Vx, Vy: extended;
   begin
-    d12x := (P1.x - P2.x);
-    d12y := (P1.y - P2.y);
-    d23x := (P2.x - P3.x);
-    d23y := (P2.y - P3.y);
-    d31x := (P3.x - P1.x);
-    d31y := (P3.y - P1.y);
-    Result := half * (d12x * d12y + d23x * d23y + d31x * d31y);
+    Ux := P2.X - P1.X;
+    Uy := P2.Y - P1.Y;
+    Vx := P3.X - P1.X;
+    Vy := P3.Y - P1.Y;
+    Result := 0.5 * Abs(Ux * Vy - Uy * Vx);
   end;{TriangleArea}
 
   procedure ProcessFaces(Seedface: TFreeSubdivisionFace; var MaxError: extended;
@@ -1455,13 +1459,13 @@ var
     P1, P2: TFreeSubdivisionPoint;
     L2D, L3D: extended;
     Error: extended;
-    TotalError: extended;
+    MaxLength: extended;
     _3DArea: extended;
     _2DArea: extended;
     Temp: boolean;
   begin
     MaxError := 0.0;
-    TotalError := 0.0;
+    MaxLength := 0.0;
     FMaxAreaError := 0.0;
     FTotalAreaError := 0.0;
 
@@ -1532,11 +1536,14 @@ var
     // Calculate diff. in area of all faces
     FMaxAreaerror := 0.0;
     FTotalAreaError := 0.0;
+    FAbsoluteAreaError := 0.0;
+    FReferenceArea := 0.0;
     for I := 1 to FDoneList.Count do
     begin
       Face := FDoneList[I - 1];
       _2DArea := 0.0;
       _3DArea := Face.Area;
+      FReferenceArea := FReferenceArea + Abs(_3DArea);
       // calculate 2D area
       S := FPoints.SortedIndexOf(Face.Point[0]);
       for J := 3 to Face.NumberOfpoints do
@@ -1549,6 +1556,7 @@ var
       Error := _2DArea - _3DArea;
       FTotalAreaError := FTotalAreaError + Error;
       Error := abs(Error);
+      FAbsoluteAreaError := FAbsoluteAreaError + Error;
       if Error > FMaxAreaError then
         FMaxAreaError := Error;
     end;
@@ -1568,13 +1576,22 @@ var
         L2D := sqr(F2DCoordinates[E].Coordinate.X - F2DCoordinates[S].Coordinate.X) +
           sqr(F2DCoordinates[E].Coordinate.Y - F2DCoordinates[S].Coordinate.Y);
         Error := Sqrt(L2D) - Sqrt(L3D);
-        TotalError := TotalError + abs(Error);
+        if Sqrt(L3D) > MaxLength then MaxLength := Sqrt(L3D);
         if abs(Error) > MaxError then
           MaxError := abs(Error);
         FEdgeErrors[I - 1] := Error;
       end;
     end;
-    MaxError := MaxError + abs(FTotalAreaError);
+    // Compare candidate unfoldings without mixing length and area units.
+    // Absolute face errors cannot cancel when one region grows and another shrinks.
+    if FReferenceArea > 0 then
+      FNormalizedError := MaxError / Sqrt(FReferenceArea) +
+        FAbsoluteAreaError / FReferenceArea
+    else if MaxLength > 0 then
+      FNormalizedError := MaxError / MaxLength
+    else
+      FNormalizedError := 0;
+    MaxError := FNormalizedError;
   end;{ProcessFaces}
 
 begin
@@ -1917,7 +1934,7 @@ begin
     end;
   end
   else
-    MessageDlg('Seed could not be found!', mtError, [mbOK], 0);
+    MessageDlg(rsLocSeedMissing, mtError, [mbOK], 0);
   {Seedfaces.Destroy;
   Seedfaces := nil;
   FreeAndNil(FFaces);

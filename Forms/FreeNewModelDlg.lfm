@@ -5,9 +5,10 @@ object FreeNewModelDialog: TFreeNewModelDialog
   Width = 500
   AutoSize = True
   BorderStyle = bsDialog
-  Caption = 'New model.'
+  Caption = 'New model'
   ClientHeight = 300
   ClientWidth = 500
+  OnCreate = FormCreate
   ParentFont = True
   Position = poScreenCenter
   LCLVersion = '3.2.0.0'

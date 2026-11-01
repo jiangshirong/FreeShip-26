@@ -310,6 +310,11 @@ begin
   for I := 1 to Count do
     Items[I - 1].Free;
   FItems.Clear;
+  if FMemoItems<>nil then begin
+    for I:=0 to FMemoItems.Count-1 do FMemoItems[I].Free;
+    FMemoItems.Clear;
+  end;
+  FMemoKey:='';
   FBuilt := False;
   FShowCurvature := False;
   FUseHydrostaticsSurfacesOnly := False;
@@ -321,6 +326,7 @@ begin
   inherited Create;
   FFreeShip := Owner;
   FItems := TFasterListTFreeSpline.Create;
+  FMemoItems:=TFasterListTFreeSpline.Create;
   FItems.Clear;
   Clear;
 end;{TFreeIntersection.Create}
@@ -447,6 +453,7 @@ destructor TFreeIntersection.Destroy;
 begin
   Clear;
   FreeAndNil(FItems);
+  FreeAndNil(FMemoItems);
   inherited Destroy;
 end;{TFreeIntersection.Destroy}
 
@@ -794,17 +801,38 @@ begin
 end;{TFreeIntersection.LoadBinary}
 
 procedure TFreeIntersection.Rebuild;
-var
-  I: integer;
+var I:Integer;Key:string;Spline:TFreeSpline;Persistent:Boolean;
 begin
-  // Force to destroy all current Items
-  Built := False;
-  FreeShip.Surface.IntersectPlane(Plane, FUseHydrostaticsSurfacesOnly, FItems);
-  // Use a low simplification factor to remove only points that are (nearly) on a line
+ Persistent:=False;
+ for I:=0 to FreeShip.NumberOfStations-1 do if FreeShip.Station[I]=Self then Persistent:=True;
+ for I:=0 to FreeShip.NumberOfButtocks-1 do if FreeShip.Buttock[I]=Self then Persistent:=True;
+ for I:=0 to FreeShip.NumberOfWaterlines-1 do if FreeShip.Waterline[I]=Self then Persistent:=True;
+ for I:=0 to FreeShip.NumberOfDiagonals-1 do if FreeShip.Diagonal[I]=Self then Persistent:=True;
+ if not Persistent then begin
+  Built:=False;FreeShip.Surface.IntersectPlane(Plane,FUseHydrostaticsSurfacesOnly,FItems);
   if FreeShip.ProjectSettings.ProjectSimplifyIntersections then
-    for I := 1 to Count do
-      self.Items[I - 1].Simplify(2.0);
-  Built := True;
+   for I:=0 to Count-1 do Items[I].Simplify(2.0);
+  Built:=True;Exit;
+ end;
+ if not FreeShip.Surface.Built then FreeShip.Surface.Rebuild;
+ Key:=MeshSectionFingerprint(FreeShip.Surface,Plane,FUseHydrostaticsSurfacesOnly,
+   FreeShip.ProjectSettings.ProjectSimplifyIntersections);
+ Built:=False;
+ if (FMemoKey<>'') and (FMemoKey=Key) then begin
+  for I:=0 to FMemoItems.Count-1 do begin
+   Spline:=TFreeSpline.Create(FreeShip.Surface);Spline.Assign(FMemoItems[I]);FItems.Add(Spline);
+  end;
+  Inc(FReuseCount);Built:=True;Exit;
+ end;
+ FreeShip.Surface.IntersectPlane(Plane,FUseHydrostaticsSurfacesOnly,FItems);
+ if FreeShip.ProjectSettings.ProjectSimplifyIntersections then
+  for I:=0 to Count-1 do Items[I].Simplify(2.0);
+ for I:=0 to FMemoItems.Count-1 do FMemoItems[I].Free;
+ FMemoItems.Clear;FMemoKey:='';
+ for I:=0 to Count-1 do begin
+  Spline:=TFreeSpline.Create(FreeShip.Surface);Spline.Assign(Items[I]);FMemoItems.Add(Spline);
+ end;
+ FMemoKey:=Key;Built:=True;
 end;{TFreeIntersection.Rebuild}
 
 procedure TFreeIntersection.SaveToDXF(Strings: TStringList);

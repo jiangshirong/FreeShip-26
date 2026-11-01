@@ -41,7 +41,7 @@ object FreeControlPointForm: TFreeControlPointForm
       Height = 36
       Top = 6
       Width = 71
-      Caption = 'X-coord.'
+      Caption = 'X-coord'
       Layout = tlCenter
       ParentColor = False
       ParentFont = False
@@ -51,7 +51,7 @@ object FreeControlPointForm: TFreeControlPointForm
       Height = 36
       Top = 44
       Width = 71
-      Caption = 'Y-coord.'
+      Caption = 'Y-coord'
       Layout = tlCenter
       ParentColor = False
       ParentFont = False
@@ -61,7 +61,7 @@ object FreeControlPointForm: TFreeControlPointForm
       Height = 36
       Top = 82
       Width = 71
-      Caption = 'Z-coord.'
+      Caption = 'Z-coord'
       Layout = tlCenter
       ParentColor = False
       ParentFont = False

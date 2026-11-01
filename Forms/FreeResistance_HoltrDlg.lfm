@@ -1,4 +1,5 @@
 object FreeResistance_Holtr: TFreeResistance_Holtr
+  OnCreate = FormCreate
   Left = 697
   Height = 1155
   Top = 79
@@ -1760,14 +1761,14 @@ object FreeResistance_Holtr: TFreeResistance_Holtr
     end
     object tbCalculate: TToolButton
       Left = 15
-      Hint = 'Start the calculation.'
+      Hint = 'Start the calculation'
       Top = 2
       ImageIndex = 3
       OnClick = tbCalculateClick
     end
     object tbPrint: TToolButton
       Left = 77
-      Hint = 'Print the results of the calculation.'
+      Hint = 'Print the results of the calculation'
       Top = 2
       Caption = 'tbPrint'
       ImageIndex = 2
@@ -1783,14 +1784,14 @@ object FreeResistance_Holtr: TFreeResistance_Holtr
     end
     object tbCloseSave: TToolButton
       Left = 149
-      Hint = 'Close the window and save changes.'
+      Hint = 'Close the window and save changes'
       Top = 2
       ImageIndex = 1
       OnClick = tbCloseSaveClick
     end
     object tbClose: TToolButton
       Left = 211
-      Hint = 'Close window without saving changes.'
+      Hint = 'Close window without saving changes'
       Top = 2
       ImageIndex = 0
       OnClick = tbCloseClick

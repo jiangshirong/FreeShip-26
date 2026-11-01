@@ -38,7 +38,7 @@ interface
 
 uses
   //Math,
-  SysUtils;
+  SysUtils, Classes;
 
 var
   FStat_SortedIndexOf_calls:QWord;
@@ -522,11 +522,9 @@ end;{TFasterList.Exchange}
 
 function TFasterList.FGet(Index: integer): TItemType;
 begin
-  if (Index >= 0) and (Index < FCount) then
-    Result := FList[Index]
-//  else
-//    Result := nil;
-// !! Generate excetion if accessed out of array
+  if (Index < 0) or (Index >= FCount) then
+    raise EListError.CreateFmt('List index %d out of bounds (count %d)', [Index, FCount]);
+  Result := FList[Index];
 end;{TFasterList.FGet}
 
 function TFasterList.FGetObject(Index: integer): Pointer;

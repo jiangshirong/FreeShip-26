@@ -177,8 +177,8 @@ object FreePreferencesDialog: TFreePreferencesDialog
           TabOrder = 0
           object Panel53: TPanel
             Left = 64
-            Height = 116
-            Top = 238
+            Height = 236
+            Top = 178
             Width = 487
             AutoSize = True
             BevelOuter = bvNone
@@ -187,7 +187,7 @@ object FreePreferencesDialog: TFreePreferencesDialog
             ChildSizing.VerticalSpacing = 4
             ChildSizing.Layout = cclLeftToRightThenTopToBottom
             ChildSizing.ControlsPerLine = 2
-            ClientHeight = 116
+            ClientHeight = 236
             ClientWidth = 487
             ParentFont = False
             TabOrder = 0
@@ -228,10 +228,79 @@ object FreePreferencesDialog: TFreePreferencesDialog
                 OnChange = EditDirChange
               end
             end
-            object Label27: TLabel
+            object LabelQuickLanguage: TLabel
               Left = 10
               Height = 36
               Top = 40
+              Width = 217
+              Alignment = taRightJustify
+              Caption = 'Two-language mode'
+              Layout = tlCenter
+            end
+            object PanelQuickLanguage: TPanel
+              Left = 237
+              Height = 36
+              Top = 40
+              Width = 240
+              AutoSize = True
+              BevelOuter = bvNone
+              object CheckQuickLanguage: TCheckBox
+                Height = 36
+                Width = 220
+                Caption = 'Enable (Ctrl+Alt+L)'
+                OnChange = QuickLanguageChange
+              end
+            end
+            object LabelQuickFirst: TLabel
+              Left = 10
+              Height = 36
+              Top = 80
+              Width = 217
+              Alignment = taRightJustify
+              Caption = 'First language'
+              Layout = tlCenter
+            end
+            object PanelQuickFirst: TPanel
+              Left = 237
+              Height = 36
+              Top = 80
+              Width = 240
+              AutoSize = True
+              BevelOuter = bvNone
+              object ComboQuickFirst: TComboBox
+                Height = 36
+                Width = 200
+                Style = csDropDownList
+                OnChange = QuickLanguageChange
+              end
+            end
+            object LabelQuickSecond: TLabel
+              Left = 10
+              Height = 36
+              Top = 120
+              Width = 217
+              Alignment = taRightJustify
+              Caption = 'Second language'
+              Layout = tlCenter
+            end
+            object PanelQuickSecond: TPanel
+              Left = 237
+              Height = 36
+              Top = 120
+              Width = 240
+              AutoSize = True
+              BevelOuter = bvNone
+              object ComboQuickSecond: TComboBox
+                Height = 36
+                Width = 200
+                Style = csDropDownList
+                OnChange = QuickLanguageChange
+              end
+            end
+            object Label27: TLabel
+              Left = 10
+              Height = 36
+              Top = 160
               Width = 217
               Alignment = taRightJustify
               Caption = 'Max. undo memory (Mb)'
@@ -242,7 +311,7 @@ object FreePreferencesDialog: TFreePreferencesDialog
             object Panel54: TPanel
               Left = 237
               Height = 36
-              Top = 40
+              Top = 160
               Width = 240
               AutoSize = True
               BevelOuter = bvNone
@@ -257,7 +326,8 @@ object FreePreferencesDialog: TFreePreferencesDialog
                 Width = 50
                 Align = alLeft
                 Alignment = taRightJustify
-                MaxValue = 25
+                MinValue = 1
+                MaxValue = 4096
                 OnChange = EditDirChange
                 ParentFont = False
                 TabOrder = 0
@@ -266,7 +336,7 @@ object FreePreferencesDialog: TFreePreferencesDialog
             object LabelEncoding: TLabel
               Left = 10
               Height = 36
-              Top = 80
+              Top = 200
               Width = 217
               Alignment = taRightJustify
               Caption = 'Encoding for FBM'
@@ -277,7 +347,7 @@ object FreePreferencesDialog: TFreePreferencesDialog
             object Panel52: TPanel
               Left = 237
               Height = 36
-              Top = 80
+              Top = 200
               Width = 240
               AutoSize = True
               BevelOuter = bvNone

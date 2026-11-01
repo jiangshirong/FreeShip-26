@@ -10,6 +10,7 @@ object FreeHydrostaticsForm: TFreeHydrostaticsForm
   ClientWidth = 300
   Position = poOwnerFormCenter
   LCLVersion = '2.0.8.0'
+  OnClose = CloseFromTitleBar
   object Panel2: TPanel
     Left = 0
     Height = 30
@@ -22,6 +23,7 @@ object FreeHydrostaticsForm: TFreeHydrostaticsForm
     ClientWidth = 300
     TabOrder = 0
     object Button1: TSpeedButton
+      Visible = False
       Left = 228
       Height = 30
       Top = 0
@@ -45,7 +47,7 @@ object FreeHydrostaticsForm: TFreeHydrostaticsForm
     object Button2: TSpeedButton
       Left = 0
       Height = 30
-      Hint = 'Start the calculation.'
+      Hint = 'Start the calculation'
       Top = 0
       Width = 105
       Align = alLeft

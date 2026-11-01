@@ -181,7 +181,6 @@ begin
   V := V - trunc(V); // fractional part of Value
   V := FValueSpaceStart+V*FValueSpaceWidth; // compress value into subSpace
   C := HSVtoColor(H,FSaturation,V);
-  writeln('H:',H,' V:',V);
   FHue := H;
   FValue := V;
   result := C;

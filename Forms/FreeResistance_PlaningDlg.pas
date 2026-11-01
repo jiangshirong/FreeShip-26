@@ -170,6 +170,7 @@ type
     Label281: TLabel;
 
     PrintDialog: TPrintDialog;
+    procedure FormCreate(Sender: TObject);
     procedure ComboBox1Change(Sender: TObject);
     procedure File_ExportDataCP(dat: array of single);
     procedure File_ExportDataCB(dat: array of single);
@@ -195,6 +196,7 @@ type
   private{ Private declarations }
     FFreeship: TFreeship;
     procedure DoCalculate;
+    procedure CalculateInWorkspace;
     function FGetLCB: single;
     procedure FSetLCB(val: single);
     function FGetle: single;
@@ -265,7 +267,7 @@ var
 
 implementation
 
-uses FreeStringsUnit, FreeProcess;
+uses FreeCalculationFiles, FreeUiChoices, FreeStringsUnit, FreeProcess;
 
 {$IFnDEF FPC}
   {$R *.dfm}
@@ -273,6 +275,12 @@ uses FreeStringsUnit, FreeProcess;
 {$ELSE}
   {$R *.lfm}
 {$ENDIF}
+
+procedure TFreeResistance_Planing.FormCreate(Sender: TObject);
+begin
+  SetChoiceLabels(ComboBox1, [rsChoiceWaterjet, rsChoiceFppCpp, rsChoiceOutboardProp,
+    rsChoiceCavitatedProp, rsChoiceSupercavitatedProp, rsChoicePartiallySubmergedProp]);
+end;
 
 function TFreeResistance_Planing.FGetLCB: single;
 begin
@@ -445,7 +453,21 @@ begin
 end;
 
 procedure TFreeResistance_Planing.DoCalculate;
+var Job: TFreeCalculationScope;
+begin
+  if FFreeship = nil then Exit;
+  Job := FFreeship.BeginCalculation(['RESIST.dat','RESISTp.dat','Propres.dat']);
+  try
+    CalculateInWorkspace;
+    Job.Complete;
+  finally Job.Free end;
+end;
+
+procedure TFreeResistance_Planing.CalculateInWorkspace;
 var
+  ProcessCallerDirectory: string;
+  ProcessCallerCursor: TCursor;
+ 
   I, J, n1, n2, n3, n4, II, ki, Nwj, N, Imax: integer;
   Mdelta, Lambda, Nu, MdeltaOpt, Mdelta_: single;
   dv, vo, vk, FrB, V_, Ro, v, g, vms, B, Xg: single;
@@ -577,6 +599,9 @@ label
   NewSearch5;
   /// S=V**0.333*2.262*sqrt(L/V**0.333)*(1+0.046*B/T+0.00287*(B/T)**2)
 begin
+  ProcessCallerDirectory := GetCurrentDirUTF8;
+  ProcessCallerCursor := Screen.Cursor;
+  try
   TChartSeries(Chart.Series[0]).Clear;
   TChartSeries(Chart.Series[1]).Clear;
   TChartSeries(Chart.Series[2]).Clear;
@@ -1344,8 +1369,8 @@ begin
     dat[10] := 2;  // Reserved
 
     PathFileOld := GetCurrentDir;
-    ForceDirectoriesUTF8(FFreeship.Preferences.TempDirectory);
-    SetCurrentDirUTF8(FFreeship.Preferences.TempDirectory);
+    ForceDirectoriesUTF8(FFreeship.CalculationDirectory);
+    SetCurrentDirUTF8(FFreeship.CalculationDirectory);
     FExecDirectory := FFreeship.Preferences.ExecDirectory;
 
     File_ExportDataCP(dat);
@@ -1366,7 +1391,7 @@ begin
 
     ExecFullName := FExecDirectory + DirectorySeparator+'CLEMPOUP.EXE';
     //SysUtils.ExecuteProcess(UTF8ToSys(FExecDirectory + DirectorySeparator+'CLEMPOUP.EXE'), '', []);
-    ExecuteFreePlugin(FFreeship.Preferences.TempDirectory, ExecFullName);
+    ExecuteFreeCalculation(FFreeship.CalculationDirectory, ExecFullName, fcClemPoup);
 
     ResultFileName := 'clempoup.RES';
     i := 1;
@@ -1504,8 +1529,8 @@ begin
     dat[10] := 2;  // Reserved
 
     PathFileOld := GetCurrentDir;
-    ForceDirectoriesUTF8(FFreeship.Preferences.TempDirectory);
-    SetCurrentDirUTF8(FFreeship.Preferences.TempDirectory);
+    ForceDirectoriesUTF8(FFreeship.CalculationDirectory);
+    SetCurrentDirUTF8(FFreeship.CalculationDirectory);
     FExecDirectory := FFreeship.Preferences.ExecDirectory;
 
     File_ExportDataCB(dat);
@@ -1520,7 +1545,7 @@ begin
 
     //SysUtils.ExecuteProcess(UTF8ToSys(FExecDirectory + DirectorySeparator+'CLEMBLOU.EXE'), '', []);
     ExecFullName := FExecDirectory + DirectorySeparator+'CLEMBLOU.EXE';
-    ExecuteFreePlugin(FFreeship.Preferences.TempDirectory, ExecFullName);
+    ExecuteFreeCalculation(FFreeship.CalculationDirectory, ExecFullName, fcClemBlou);
 
     ResultFileName := 'clemblou.res';
     i := 1;
@@ -1659,8 +1684,8 @@ begin
     dat[10] := Nu;
 
     PathFileOld := GetCurrentDir;
-    ForceDirectoriesUTF8(FFreeship.Preferences.TempDirectory);
-    SetCurrentDirUTF8(FFreeship.Preferences.TempDirectory);
+    ForceDirectoriesUTF8(FFreeship.CalculationDirectory);
+    SetCurrentDirUTF8(FFreeship.CalculationDirectory);
     FExecDirectory := FFreeship.Preferences.ExecDirectory;
 
     File_ExportDataBU(dat);
@@ -1699,7 +1724,7 @@ begin
 
     //SysUtils.ExecuteProcess(UTF8ToSys(FExecDirectory + DirectorySeparator+'BUNKOV.EXE'), '', []);
     ExecFullName := FExecDirectory + DirectorySeparator+'BUNKOV.EXE';
-    ExecuteFreePlugin(FFreeship.Preferences.TempDirectory, ExecFullName);
+    ExecuteFreeCalculation(FFreeship.CalculationDirectory, ExecFullName, fcBunkov);
 
     ResultFileName := 'bunkov00.res';
     i := 1;
@@ -1819,8 +1844,8 @@ begin
     dat[10] := 0;
 
     PathFileOld := GetCurrentDir;
-    ForceDirectoriesUTF8(FFreeship.Preferences.TempDirectory);
-    SetCurrentDirUTF8(FFreeship.Preferences.TempDirectory);
+    ForceDirectoriesUTF8(FFreeship.CalculationDirectory);
+    SetCurrentDirUTF8(FFreeship.CalculationDirectory);
     FExecDirectory := FFreeship.Preferences.ExecDirectory;
 
     File_ExportDataCompton(dat);
@@ -1852,7 +1877,7 @@ begin
     //SysUtils.ExecuteProcess(UTF8ToSys(FExecDirectory + DirectorySeparator+'COMPTON.EXE'), '', []);
 
     ExecFullName := FExecDirectory + DirectorySeparator+'COMPTON.EXE';
-    ExecuteFreePlugin(FFreeship.Preferences.TempDirectory, ExecFullName);
+    ExecuteFreeCalculation(FFreeship.CalculationDirectory, ExecFullName, fcCompton);
 
     ResultFileName := 'Compton0.res';
     i := 1;
@@ -1970,8 +1995,8 @@ begin
     dat[10] := 0;
 
     PathFileOld := GetCurrentDir;
-    ForceDirectoriesUTF8(FFreeship.Preferences.TempDirectory);
-    SetCurrentDirUTF8(FFreeship.Preferences.TempDirectory);
+    ForceDirectoriesUTF8(FFreeship.CalculationDirectory);
+    SetCurrentDirUTF8(FFreeship.CalculationDirectory);
     FExecDirectory := FFreeship.Preferences.ExecDirectory;
 
     File_ExportDataWolfson(dat);
@@ -2000,7 +2025,7 @@ begin
 
     //SysUtils.ExecuteProcess(UTF8ToSys(FExecDirectory + DirectorySeparator+'WOLFSON.EXE'), '', []);
     ExecFullName := FExecDirectory + DirectorySeparator+'WOLFSON.EXE';
-    ExecuteFreePlugin(FFreeship.Preferences.TempDirectory, ExecFullName);
+    ExecuteFreeCalculation(FFreeship.CalculationDirectory, ExecFullName, fcWolfson);
 
     ResultFileName := 'Wolfson0.res';
     i := 1;
@@ -2124,8 +2149,8 @@ begin
     dat[10] := 0;  // зарезервировано
 
     PathFileOld := GetCurrentDir;
-    ForceDirectoriesUTF8(FFreeship.Preferences.TempDirectory);
-    SetCurrentDirUTF8(FFreeship.Preferences.TempDirectory);
+    ForceDirectoriesUTF8(FFreeship.CalculationDirectory);
+    SetCurrentDirUTF8(FFreeship.CalculationDirectory);
     FExecDirectory := FFreeship.Preferences.ExecDirectory;
 
     File_ExportDataRadojcic(dat);
@@ -2159,7 +2184,7 @@ begin
 
     //SysUtils.ExecuteProcess(UTF8ToSys(FExecDirectory + DirectorySeparator+'RADOJCIC.EXE'), '', []);
     ExecFullName := FExecDirectory + DirectorySeparator+'RADOJCIC.EXE';
-    ExecuteFreePlugin(FFreeship.Preferences.TempDirectory, ExecFullName);
+    ExecuteFreeCalculation(FFreeship.CalculationDirectory, ExecFullName, fcRadojcic);
 
     ResultFileName := 'Radojcic.res';
     i := 1;
@@ -2288,7 +2313,7 @@ begin
     nr := 1;
   end;
 
-  tmpDir := FFreeship.Preferences.TempDirectory + DirectorySeparator;
+  tmpDir := FFreeship.CalculationDirectory + DirectorySeparator;
 
   Assignfile(FFile, tmpDir+'RESISTp.dat');
   ////{$I-}
@@ -2539,6 +2564,10 @@ begin
   if Combobox.ItemIndex = 4 then
     ResultsMemo.Lines.Add(Space(10) +
       'Copyright (c) 2010, Le Quoc Van (HydroNShIp_ClemBlou v1.0)');
+  finally
+    SetCurrentDirUTF8(ProcessCallerDirectory);
+    Screen.Cursor := ProcessCallerCursor;
+  end;
 end;{TFreeResistance_Planing.Calculate}
 
 function TFreeResistance_Planing.Execute(Freeship: TFreeship; AutoExtract: boolean): boolean;
@@ -2942,7 +2971,7 @@ begin
   end;
   if Combobox1.ItemIndex > 2 then
   begin
-    MessageDlg('NOT available in this version!!!', mtError, [mbOK], 0);
+    MessageDlg(rsLocFeatureUnavailable, mtError, [mbOK], 0);
   end;
   Calculate;
 end;{TFreeResistance_Planing.SelectPropulsorType;}

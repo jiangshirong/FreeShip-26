@@ -1067,7 +1067,7 @@ function TVRML2Coordinates.FGetPoint(Index: integer): T3DCoordinate;
     else
     begin
       Result := ZERO;
-      MessageDlg('Point index out of bounds in TVRML2Coordinates.FGetPoint',
+      MessageDlg(rsLocVrml2PointIndex,
         mtError, [mbOK], 0);
     end;
   end;{TVRML2Coordinates.FGetPoint}
@@ -1203,7 +1203,7 @@ function TVRML2Coordinates.FGetPoint(Index: integer): T3DCoordinate;
     else
     begin
       Result := nil;
-      MessageDlg('Face index out of bounds in TVRMLIndexedFaceSet.FGetFace',
+      MessageDlg(rsLocVrml2FaceIndex,
         mtError, [mbOK], 0);
     end;
   end;{TVRMLIndexedFaceSet.FGetFace}
@@ -1367,7 +1367,7 @@ function TVRML2Coordinates.FGetPoint(Index: integer): T3DCoordinate;
         VRMLVersion := TVRMLList.CheckVRMLFileVersion(Filename);
         if VRMLVersion <> 'VRML V2.0' then
         begin
-          MessageDlg('Not a VRML V2.0 format', mtError, [mbOK], 0);
+          MessageDlg(rsLocVrml2Invalid, mtError, [mbOK], 0);
           exit;
         end;
         try
@@ -1465,7 +1465,7 @@ function TVRML2Coordinates.FGetPoint(Index: integer): T3DCoordinate;
           MessageDlg(rs_No_meshdata_could_be_imported {UserString[203]} + '.', mtError, [mbOK], 0);
         except
           on E:Exception do
-             MessageDlg('Exception in VRML Load:'+#10+E.Message, mtError, [mbOK], 0);
+             MessageDlg(rsLocVrmlLoadException+#10+E.Message, mtError, [mbOK], 0);
         end;
         //FreeAndNil(VRMLScene);
         SubdivisionSurface.IsLoading := false;

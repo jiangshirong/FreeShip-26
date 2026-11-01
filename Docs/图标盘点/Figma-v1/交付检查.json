@@ -1,0 +1,12 @@
+{
+  "source_svg_count": 15,
+  "transparent_png_count": 69,
+  "sizes_and_alpha": "pass",
+  "local_preview_review": "completed",
+  "figma_structure": "15 masters + 6-state button set + 26 variables created",
+  "figma_screenshot_review": "not_run: Starter MCP limit",
+  "figma_gallery_composition": "not_created: Starter MCP limit",
+  "app_integration": "implemented: toolbar 11 + viewport chrome 3 + About Legal and shared Info",
+  "resource_loading": "69 embedded PNGs; no runtime dependency on Docs",
+  "verification": "resource sizes, actual toolbar image list resolutions and About footer glyphs pass; window suite 34 pass / 7 not_run / 1 review; toolbar suite blocked by removed legacy View callbacks"
+}

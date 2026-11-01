@@ -1,10 +1,11 @@
 object FreePropeller_Task5: TFreePropeller_Task5
+  OnCreate = FormCreate
   Left = 542
   Height = 600
   Top = 153
   Width = 900
   BorderStyle = bsDialog
-  Caption = 'Calculation of Open Water Characteristics of Screw Propeller.'
+  Caption = 'Calculation of Open Water Characteristics of Screw Propeller'
   ClientHeight = 600
   ClientWidth = 900
   Position = poOwnerFormCenter
@@ -36,7 +37,7 @@ object FreePropeller_Task5: TFreePropeller_Task5
     end
     object PrintButton: TToolButton
       Left = 13
-      Hint = 'Print the results of the calculation.'
+      Hint = 'Print the results of the calculation'
       Top = 2
       Caption = 'PrintButton'
       ImageIndex = 2
@@ -52,14 +53,14 @@ object FreePropeller_Task5: TFreePropeller_Task5
     end
     object ToolButton25: TToolButton
       Left = 71
-      Hint = 'Close the window and save changes.'
+      Hint = 'Close the window and save changes'
       Top = 2
       ImageIndex = 1
       OnClick = ToolButton25Click
     end
     object ToolButton7: TToolButton
       Left = 121
-      Hint = 'Close window without saving changes.'
+      Hint = 'Close window without saving changes'
       Top = 2
       ImageIndex = 0
       OnClick = ToolButton7Click

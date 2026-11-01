@@ -243,6 +243,7 @@ type
     _Label30: TLabel;
     _Label34: TLabel;
     _Label37: TLabel;
+    procedure FormCreate(Sender: TObject);
     procedure File_ExportData(dat, dan: array of single);
     procedure File_ExportDataKe(dat, dan: array of single);
     procedure CheckBox2Click(Sender: TObject);
@@ -363,6 +364,7 @@ type
     Wlarea: single;
     function CorrectInputdata: boolean;
     procedure Calculate;
+    procedure CalculateInWorkspace;
     function Execute(Freeship: TFreeship;
       AutoExtract: boolean): boolean;
     property Bwl: single
@@ -462,7 +464,7 @@ var
 
 implementation
 
-uses FreeStringsUnit, FreeProcess;
+uses FreeCalculationFiles, FreeUiChoices, FreeStringsUnit, FreeProcess;
 
 {$IFnDEF FPC}
   {$R *.dfm}
@@ -470,6 +472,11 @@ uses FreeStringsUnit, FreeProcess;
 {$ELSE}
   {$R *.lfm}
 {$ENDIF}
+
+procedure TFreeResistance_FungLeib.FormCreate(Sender: TObject);
+begin
+  SetResistanceShipTypeChoices(A11Box);
+end;
 
 function TFreeResistance_FungLeib.CorrectInputdata: boolean;
 begin
@@ -532,7 +539,7 @@ begin
   Cwp := WlArea / (Lwl * Bwl);
   if (Cwp = 1) or (Cp = 1) then
   begin
-    MessageDlg('Error: Cp=1 or Cwp=1', mtError, [mbOK], 0);
+    MessageDlg(rs_Error__Cp_1_or_Cwp_1, mtError, [mbOK], 0);
     Exit;
   end;
 
@@ -540,7 +547,21 @@ begin
 end;{TFreeResistance_FungLeib.CorrectInputdata}
 
 procedure TFreeResistance_FungLeib.Calculate;
+var Job: TFreeCalculationScope;
+begin
+  if FFreeship = nil then Exit;
+  Job := FFreeship.BeginCalculation(['RESIST.dat','RESISTp.dat','Propres.dat']);
+  try
+    CalculateInWorkspace;
+    Job.Complete;
+  finally Job.Free end;
+end;
+
+procedure TFreeResistance_FungLeib.CalculateInWorkspace;
 var
+  ProcessCallerDirectory: string;
+  ProcessCallerCursor: TCursor;
+ 
   ConvertedSpeed: single;
   FroudeNumber: single;
   Rf, Rr, Rt, flag: single;
@@ -573,6 +594,9 @@ label
 label
   NewSearch1;
 begin
+  ProcessCallerDirectory := GetCurrentDirUTF8;
+  ProcessCallerCursor := Screen.Cursor;
+  try
   Vs[1] := StartSpeed;
   Vs[4] := EndSpeed;
   Vs[5] := StepSpeed;
@@ -825,14 +849,14 @@ begin
     ConvertedSpeed := Speed * 0.514444;
 
     PathFileOld := GetCurrentDir;
-    ForceDirectoriesUTF8(FFreeship.Preferences.TempDirectory);
-    SetCurrentDirUTF8(FFreeship.Preferences.TempDirectory);
+    ForceDirectoriesUTF8(FFreeship.CalculationDirectory);
+    SetCurrentDirUTF8(FFreeship.CalculationDirectory);
 
     CalculateResistanceFungLeib(ConvertedSpeed, LCB, Cp, Rf, Rr, w, t0, nr);
 
     if (Lwl > 0) and (Bwl > 0) and (Dp >= 0) and (Np >= 0) and (Ta > 0) then
     begin
-      PathFileOld := FFreeship.Preferences.InitDirectory; // каталог Freeshipa
+      PathFileOld := IncludeTrailingPathDelimiter(FFreeship.CalculationDirectory); // каталог Freeshipa
       //  Определяем каталог с программой FungLeib.exe
       FExecDirectory := FFreeship.Preferences.ExecDirectory;
 
@@ -849,7 +873,7 @@ begin
 
       //SysUtils.ExecuteProcess(UTF8ToSys(FExecDirectory + DirectorySeparator+'fungleib.EXE'), '', []);
       ExecFullName := FExecDirectory + DirectorySeparator+'fungleib.EXE';
-      ExecuteFreePlugin(FFreeship.Preferences.TempDirectory, ExecFullName);
+      ExecuteFreeCalculation(FFreeship.CalculationDirectory, ExecFullName, fcFung);
 
       //  Определяем есть ли файл с результатами расчета FUNGLEIB.RES. Если fungdata.dat присутствует значит расчет не закончен
       i := 1;
@@ -886,11 +910,7 @@ begin
       begin
         II := II + 1;
         for I := 1 to 8 do
-          try
-            Read(FFile, res[I, II]);
-          except
-            res[I, II] := 0;
-          end;
+          Read(FFile, res[I, II]);
         if IsNaN(res[6, II]) then continue;
         if (res[6, II] < 0) then
         begin
@@ -931,7 +951,7 @@ begin
         { *Converted from FileSearch* }
         if FileToFind <> 'TMPke.txt' then
         begin
-          MessageDlg('Нет файла исходных данных для расчета!!!', mtError, [mbOK], 0);
+          MessageDlg(rs_Have_not_input_file_for_calculation_is_here___, mtError, [mbOK], 0);
           exit;
         end;
 
@@ -939,7 +959,7 @@ begin
 
         //SysUtils.ExecuteProcess(UTF8ToSys(FExecDirectory + DirectorySeparator+'SeaMargn.EXE'), '', []);
         ExecFullName := FExecDirectory + DirectorySeparator+'SeaMargn.EXE';
-        ExecuteFreePlugin(FFreeship.Preferences.TempDirectory, ExecFullName);
+        ExecuteFreeCalculation(FFreeship.CalculationDirectory, ExecFullName, fcSeaMargin);
 
         FileName := 'OUT.TXT';
         //  Определяем есть ли файл с результатами расчета OUT. Если TMPke.txt присутствует значит расчет не закончен
@@ -1000,7 +1020,7 @@ begin
       end;
     end;
     // Записываем результаты расчета в Resistp.dat для 10 скоростей
-    Assignfile(FFile, 'RESISTp.dat');
+    Assignfile(FFile, IncludeTrailingPathDelimiter(FFreeship.CalculationDirectory)+'RESISTp.dat');
          //{$I-}
     Rewrite(FFile);
 //{$I+}
@@ -1022,7 +1042,7 @@ begin
     end;
     CloseFile(FFile);
     // Записываем результаты расчета в Resist.dat для 5 скоростей
-    Assignfile(FFile, 'RESIST.dat');
+    Assignfile(FFile, IncludeTrailingPathDelimiter(FFreeship.CalculationDirectory)+'RESIST.dat');
           //{$I-}
     Rewrite(FFile);
 //{$I+}
@@ -1232,6 +1252,10 @@ begin
 
     ResultsMemo.Visible := True;
     PrintButton.Enabled := True;
+  end;
+  finally
+    SetCurrentDirUTF8(ProcessCallerDirectory);
+    Screen.Cursor := ProcessCallerCursor;
   end;
 end;{TFreeResistance_FungLeib.Calculate}
 
@@ -2040,7 +2064,7 @@ begin
   begin
     if (A_9 <= 0) or (A_8 <= 0) or (A_6 <= 0) or (A_7 <= 0) or (A_11 <= 0) then
     begin
-      MessageDlg('Data for Ke calcs need!!!', mtInformation, [mbOK], 0);
+      MessageDlg(rsLocKeDataRequired, mtInformation, [mbOK], 0);
       exit;
     end;
     dat[1] := Lwl;        // Lpp

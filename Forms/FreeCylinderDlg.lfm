@@ -4,7 +4,7 @@ object FreeCylinderDialog: TFreeCylinderDialog
   Top = 419
   Width = 554
   BorderStyle = bsDialog
-  Caption = 'Add a cylinder.'
+  Caption = 'Add a cylinder'
   ClientHeight = 251
   ClientWidth = 554
   LCLVersion = '2.0.6.0'

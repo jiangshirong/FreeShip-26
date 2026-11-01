@@ -910,6 +910,8 @@ var
 
 implementation
 
+uses FreeUiChoices;
+
 {$IFnDEF FPC}
   {$R *.dfm}
 
@@ -1793,6 +1795,13 @@ end;
 
 procedure TFreeKeelWizardDialog.FormCreate(Sender: TObject);
 begin
+  SetChoiceLabels(ComboBoxSubdivisionLevel, [rsChoiceLow, rsChoiceMedium, rsChoiceHigh, rsChoiceVeryHigh]);
+  SetChoiceLabels(ComboBox, [rsChoiceKeel, rsChoiceRudder]);
+  SetChoiceLabels(ComboBoxPlanformShape, [rsChoiceTrapezoidal, rsChoiceSemiEllipse,
+    rsChoiceQuarterEllipse, rsChoiceStraightQuarterChord]);
+  SetChoiceLabels(InputBulbShape, [rsChoiceNoBulb, rsChoiceRoundProfile,
+    rsChoiceWing, rsChoiceRoundWing]);
+  SetChoiceLabels(InputMaterial, [rsChoiceLead, rsChoiceSteel, rsChoiceTungsten, rsChoiceSetDensity]);
   FShowControlNet:=true;
   FShowInteriorEdges:=false;
   FShowBothSides:=false;
@@ -2139,7 +2148,7 @@ procedure TFreeKeelWizardDialog.SpeedButton1Click(Sender: TObject);
 var
   Str: string;
 begin
-  Str := UTF8Lowercase(Combobox.Text) + ' ' + _Combobox2.Text;
+  Str := UTF8Lowercase(OriginalChoiceLabel(ComboBox, ['Keel', 'Rudder'])) + ' ' + _Combobox2.Text;
   FFreeship.Edit.CreateUndoObject('Add ' + str, True);
   SendToSurface(FFreeship.Surface);
   FFreeship.FileChanged := True;
@@ -2514,9 +2523,11 @@ begin
 
   PrevCursor := Screen.Cursor;
   try
-    Str := UTF8Lowercase(Combobox.Text) + ' ' + _Combobox2.Text;
+    Str := UTF8Lowercase(OriginalChoiceLabel(ComboBox, ['Keel', 'Rudder'])) + ' ' + _Combobox2.Text;
     Layer := Surface.AddNewLayer;
-    Str := ComboBoxPlanformShape.Text + ' ' + UTF8Lowercase(ComboBox.Text) + ' ' + _ComboBox2.Text;
+    Str := OriginalChoiceLabel(ComboBoxPlanformShape, ['Trapezoidal', 'Semi ellipse',
+      'Quarter ellipse', 'Straight quarter chord line']) + ' ' +
+      UTF8Lowercase(OriginalChoiceLabel(ComboBox, ['Keel', 'Rudder'])) + ' ' + _ComboBox2.Text;
     Layer.Name := Str;
     Layer.Color := FFreeship.Preferences.LayerColor;
     Layer.Color := FLayerColor;
@@ -2624,7 +2635,8 @@ begin
     if InputBulbShape.ItemIndex > 0 then
     begin
       Layer := Surface.AddNewLayer;
-      Layer.Name := InputBulbShape.Text + '_' + InputBulbWing.Text;
+      Layer.Name := OriginalChoiceLabel(InputBulbShape, ['No bullb', 'Round profile',
+        'Wing', 'Round wing']) + '_' + InputBulbWing.Text;
       Layer.Color := FLayerColor; //FFreeship.Preferences.LayerColor;
       Layer.AlphaBlend:=255;
 

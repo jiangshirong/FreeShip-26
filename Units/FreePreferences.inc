@@ -166,6 +166,9 @@ begin
   FTempDirectory := '';
   FLanguage := 'English';
   FLanguageFile := '';
+  FQuickLanguageEnabled := False;
+  FQuickLanguageFirst := 'Chinese';
+  FQuickLanguageSecond := 'Russian';
   FMaxUndoMemory := 20;// Max 20Mb undomemory
   FFbmEncoding := 'cp1252';
 end;{TFreePreferences.Clear}
@@ -177,13 +180,46 @@ begin
   Clear;
 end;{TFreePreferences.Create}
 
+function TFreePreferences.TrySetInterfaceLanguage(const LanguageKey: string): boolean;
+var Code, CanonicalName, Path: string;
+begin
+  Result := False;
+  Code := LanguageCode(LanguageKey);
+  CanonicalName := LanguageName(Code);
+  if (Code = '') or (CanonicalName = '') then Exit;
+  Path := IncludeTrailingPathDelimiter(FLanguagesDirectory) + 'FreeShip.' + Code + '.po';
+  if not FileExistsUTF8(Path) then Exit;
+  if not SameText(FLanguage, CanonicalName) then
+  begin
+    if not ApplyLanguageSafely(Code, FLanguagesDirectory) then Exit;
+    FLanguage := CanonicalName;
+    FLanguageFile := Path;
+    SetUserStringsLang;
+  end;
+  Result := True;
+end;
+
+procedure TFreePreferences.SaveCurrentLanguage;
+var FileName: string; Params: TColorIniFile;
+begin
+  FileName := getUserConfigDirectory + DirectorySeparator + 'FreeShip.ini';
+  if not DirectoryExistsUTF8(ExtractFilePath(FileName)) then
+    ForceDirectoriesUTF8(ExtractFilePath(FileName));
+  Params := TColorIniFile.Create(FileName, False);
+  try
+    Params.WriteString('General', 'Language', FLanguage);
+  finally
+    Params.Free;
+  end;
+end;
+
 procedure TFreePreferences.Edit;
 var
   Dialog: TFreePreferencesDialog;
   Lang: string;
   I: integer;
   Dir: string;
-  StrList: TStringList;
+  StrList, LanguageDisplayMap: TStringList;
 const DS = DirectorySeparator;
 
   procedure Browse(Dir: string);
@@ -199,7 +235,7 @@ const DS = DirectorySeparator;
       //Tmp := ChangeFileExt(ExtractFilename(Filename), '');
       Tmp := Filename.Split('.')[1];
       Tmp := LanguageName(Tmp);
-      if Tmp = '' then exit;
+      if (Tmp = '') or not IsVisibleInterfaceLanguage(Tmp) then exit;
       found := False;
       for I := 1 to Dialog.ComboBox1.Items.Count do
         if Uppercase(Tmp) = Uppercase(Dialog.Combobox1.Items[I - 1]) then
@@ -229,19 +265,18 @@ const DS = DirectorySeparator;
 
 begin
   Dialog := TFreePreferencesDialog.Create(Owner);
+  LanguageDisplayMap := TStringList.Create;
+  try
   //ShowTranslatedValues(Dialog);
   //Dir:=ExtractFileDir(Application.ExeName)+'/Languages/';
   Dir := FLanguagesDirectory;
   Dialog.ComboBox1.Items.Clear;
   Dialog.ComboBox1.Items.Add('English');
   Browse(Dir);
-  Dialog.ComboBox1.ItemIndex := 0;
-  for I := 1 to Dialog.ComboBox1.Items.Count do
-    if Uppercase(Dialog.ComboBox1.Items[I - 1]) = Uppercase(FLanguage) then
-    begin
-      Dialog.ComboBox1.ItemIndex := I - 1;
-      break;
-    end;
+  // The language key is stored separately; translated labels may be sorted.
+  SetLanguageChoices(Dialog.ComboBox1, LanguageDisplayMap, FLanguage);
+  Dialog.ConfigureQuickLanguages(Dialog.ComboBox1.Items, LanguageDisplayMap,
+    FQuickLanguageFirst, FQuickLanguageSecond, FQuickLanguageEnabled);
 
   Dialog.ComboBoxThemes.Text := FThemeName;
   StrList := TStringList.Create;
@@ -284,7 +319,12 @@ begin
     ZebraStripeColor := Dialog.Panel26.Color;
     ViewportColor := Dialog.Panel4.Color;
     // Set viewportcolor last, because it forces a repaint
-    Lang := Dialog.Combobox1.Text;
+    Lang := LanguageChoiceKey(LanguageDisplayMap, Dialog.Combobox1.Text);
+    FQuickLanguageEnabled := Dialog.CheckQuickLanguage.Checked;
+    if Dialog.ComboQuickFirst.ItemIndex >= 0 then
+      FQuickLanguageFirst := LanguageChoiceKey(LanguageDisplayMap, Dialog.ComboQuickFirst.Text);
+    if Dialog.ComboQuickSecond.ItemIndex >= 0 then
+      FQuickLanguageSecond := LanguageChoiceKey(LanguageDisplayMap, Dialog.ComboQuickSecond.Text);
 
     FLanguagesDirectory := Dialog.EditLanguagesDir.Text;
     FManualsDirectory := Dialog.EditManualsDir.Text;
@@ -300,27 +340,7 @@ begin
     FGlobalImportDirectory := Dialog.EditGlobalImportDir.Text;
     FThemeName := Dialog.ComboBoxThemes.Text;
 
-    if Uppercase(Lang) <> Uppercase(FLanguage) then
-      if FileExistsUTF8(FLanguagesDirectory + DS + 'FreeShip.'+LanguageCode(Lang) + '.po')
-      then
-      begin
-        (*LoadLanguage(Lang, FLanguagesDirectory + DS + Lang + '.ini');
-        FLanguageFile := FLanguagesDirectory + DS + Lang + '.ini';*)
-        SetDefaultLang(LanguageCode(Lang), FLanguagesDirectory, 'FreeShip', true);
-        FLanguage := Lang;
-        (*
-        for I := 1 to Application.ComponentCount do
-          if Application.Components[I - 1] is TCustomForm then
-            //ShowTranslatedValues(Application.Components[I - 1]);
-        for I := 1 to MainForm.MDIChildCount do
-          if MainForm.MDIChildren[I - 1] is TFreeLinesplanForm then
-            //ShowTranslatedValues(TFreeLinesplanForm(
-              MainForm.MDIChildren[I - 1]).LinesplanFrame)
-          else
-            //ShowTranslatedValues(MainForm.MDIChildren[I - 1]);
-         *)
-      end//else FLanguage:=Lang;
-    ;
+    TrySetInterfaceLanguage(Lang);
 
     FFbmEncoding := string(Dialog.ComboBoxEncoding.Items.Objects[
       Dialog.ComboBoxEncoding.ItemIndex]);
@@ -350,7 +370,10 @@ begin
       Save;
 
   end;
-  FreeAndNil(Dialog);
+  finally
+    LanguageDisplayMap.Free;
+    FreeAndNil(Dialog);
+  end;
 end;{TFreePreferences.Edit}
 
 
@@ -404,6 +427,13 @@ function TFreePreferences.getGlobalConfigDirectory: string;
 var
   D,GACD,LACD,UD,TD: string;
 begin
+  // A checkout uses its own configuration, independent of installed versions.
+  if DirectoryExistsUTF8(ExtractFilePath(Application.ExeName) + 'locale') and
+     DirectoryExistsUTF8(ExtractFilePath(Application.ExeName) + 'Themes') then
+  begin
+    Result := ExcludeTrailingPathDelimiter(ExtractFilePath(Application.ExeName));
+    Exit;
+  end;
   GACD:=GetAppConfigDir(true);
   LACD:=GetAppConfigDir(false);
   UD:=GetUserDir;
@@ -435,11 +465,22 @@ function TFreePreferences.getUserConfigDirectory: string;
 var
   D: string;
 begin
-  Result := ExcludeTrailingPathDelimiter(GetAppConfigDir(False));
+  D := ExtractFilePath(Application.ExeName);
+  if DirectoryExistsUTF8(D + 'locale') and DirectoryExistsUTF8(D + 'Themes') then
+    Result := ExcludeTrailingPathDelimiter(D) + DirectorySeparator + '.coordinate-settings'
+  else
+    Result := ExcludeTrailingPathDelimiter(GetAppConfigDir(False));
 end;
 
 function TFreePreferences.getGlobalAppDataDirectory: string;
 begin
+  // A source-tree build keeps its own resources next to the executable.
+  if DirectoryExistsUTF8(ExtractFilePath(Application.ExeName) + 'locale') and
+     DirectoryExistsUTF8(ExtractFilePath(Application.ExeName) + 'Themes') then
+  begin
+    Result := ExcludeTrailingPathDelimiter(ExtractFilePath(Application.ExeName));
+    Exit;
+  end;
   {$ifdef UNIX}
   if FApplicationScope = asUser then
   begin
@@ -831,133 +872,71 @@ end;
 
 
 // loads icons from FMenuIconDirectory that is set according to theme and icon size
-procedure TFreePreferences.LoadImageListByActions(ImageList: TImageList;
-  ActionList: TActionList);
-var
-  i, II, sz, ilcnt: integer;
-  A: TAction;
-  AName, IName, IPath, IconFile: string;
-  cil: TCustomImageList;
-  bmp: TBitmap;
-  png: TPortableNetworkGraphic;
-  img: TLazIntfImage;
+// Prefer the embedded unified icons; preserve legacy artwork for unmapped actions.
+procedure TFreePreferences.LoadImageListByActions(ImageList:TImageList; ActionList:TActionList);
+var I,Index,ClaimIndex:Integer;A:TAction;Key,Path,Slot:string;
+    PNG:TPortableNetworkGraphic;Bitmap:TBitmap;Image:TLazIntfImage;Claims:TStringList;
 begin
-  sz := ToolIconSize;
-  cil := TCustomImageList(ImageList);
-  ilcnt := cil.Count;
-  ImageList.Width := sz;
-  ImageList.Height := sz;
-  IPath := ToolIconDirectory;
-  bmp := TBitmap.Create;
-  bmp.SetSize(sz, sz);
-  png := TPortableNetworkGraphic.Create;
-  //img:= TLazIntfImage.Create(sz,sz);
-
-  // insert empties, just for count
-  //for i:=0 to ActionList.ActionCount-1 do
-  //  if TAction(ActionList.Actions[i]).ImageIndex > -1 then
-  //    cil.Add(bmp,nil);
-
-  for i := 0 to ilcnt - 1 do
-    cil.Add(bmp, nil);
-  ilcnt := cil.Count;
-
-  for i := 0 to ActionList.ActionCount - 1 do
-  begin
-    A := TAction(ActionList.Actions[i]);
-    AName := A.Name;
-    if Aname = 'LayerVisibilityDialog' then
-      II:=0;
-    II := A.ImageIndex;
-    if (II > -1) then
-    begin
-      IconFile := GetIconFileName(Theme, AName, ToolIconSize);
-      if (IconFile > '') and FileExistsUTF8(IconFile) then
-        if (II < ilcnt) then
-        begin
-          png.LoadFromFile(IconFile);
-          img := png.CreateIntfImage;
-          //img.LoadFromFile(IPath+DirectorySeparator+AName+'.png');
-          bmp.LoadFromIntfImage(img);
-          cil.Replace(II, bmp, nil);
-          img.Free;
-        end;
-    end;
+ ImageList.Width:=ToolIconSize;ImageList.Height:=ToolIconSize;
+ PNG:=TPortableNetworkGraphic.Create;Bitmap:=TBitmap.Create;Claims:=TStringList.Create;
+ try
+  for I:=0 to ActionList.ActionCount-1 do begin
+   A:=TAction(ActionList.Actions[I]);Index:=A.ImageIndex;
+   Key:=FreeShip_26IconKey(A.Name);
+   if Index<0 then begin
+     if Key='' then Continue;
+     Index:=ImageList.Count;
+   end;
+   if Key<>'' then LoadFreeShip_26Icon(PNG,Key,ToolIconSize)
+   else begin
+    Path:=GetIconFileName(Theme,A.Name,ToolIconSize);
+    if (Path='') or not FileExistsUTF8(Path) then Continue;
+    PNG.LoadFromFile(Path);Key:='legacy:'+A.Name;
+   end;
+   Slot:=IntToStr(Index);ClaimIndex:=Claims.IndexOfName(Slot);
+   // A legacy index may represent several unrelated actions. Split only real conflicts.
+   if (ClaimIndex>=0) and (Claims.ValueFromIndex[ClaimIndex]<>Key) then Index:=ImageList.Count;
+   Bitmap.SetSize(ToolIconSize,ToolIconSize);
+   Image:=PNG.CreateIntfImage;
+   try Bitmap.LoadFromIntfImage(Image) finally Image.Free end;
+   while ImageList.Count<=Index do ImageList.Add(Bitmap,nil);
+   ImageList.Replace(Index,Bitmap,nil);A.ImageIndex:=Index;
+   Claims.Values[IntToStr(Index)]:=Key;
   end;
-  bmp.Free;
-  png.Free;
+ finally Claims.Free;Bitmap.Free;PNG.Free end;
 end;
 
-// loads icon into Bitmap that is set according to theme and icon size
-procedure TFreePreferences.LoadImageIntoBitmap(Bitmap: TBitmap; Name: string);
-var
-  sz: integer;
-  IName, IPath, IconFile: string;
-  bmp: TBitmap;
-  png: TPortableNetworkGraphic;
-  img: TLazIntfImage;
+procedure TFreePreferences.LoadImageIntoBitmap(Bitmap:TBitmap;Name:string);
+var PNG:TPortableNetworkGraphic;Image:TLazIntfImage;Path:string;
 begin
-  sz := ToolIconSize;
-  IPath := ToolIconDirectory;
-  bmp := TBitmap.Create;
-  bmp.SetSize(sz, sz);
-  png := TPortableNetworkGraphic.Create;
-  img := TLazIntfImage.Create(sz, sz);
-
-  IconFile := GetIconFileName(Theme, Name, ToolIconSize);
-
-  if (IconFile > '') and FileExistsUTF8(IconFile) then
-  begin
-    png.LoadFromFile(IconFile);
-    img := png.CreateIntfImage;
-    bmp.LoadFromIntfImage(img);
-    Bitmap.FreeImage;
-    Bitmap.Assign(bmp);
-    img.Free;
+ PNG:=TPortableNetworkGraphic.Create;
+ try
+  if HasFreeShip_26Icon(Name) then LoadFreeShip_26Icon(PNG,Name,ToolIconSize)
+  else begin
+   Path:=GetIconFileName(Theme,Name,ToolIconSize);
+   if (Path='') or not FileExistsUTF8(Path) then Exit;
+   PNG.LoadFromFile(Path);
   end;
-  bmp.Free;
-  png.Free;
+  Image:=PNG.CreateIntfImage;
+  try Bitmap.LoadFromIntfImage(Image) finally Image.Free end;
+ finally PNG.Free end;
 end;
 
-// loads icons from FMenuIconDirectory that is set according to theme and icon size
-procedure TFreePreferences.LoadImageIntoList(ImageList: TImageList;
-  Item: integer; Name: string);
-var
-  i, II, sz, ilcnt: integer;
-  A: TAction;
-  IName, IPath, IconFile: string;
-  cil: TCustomImageList;
-  bmp: TBitmap;
-  png: TPortableNetworkGraphic;
-  img: TLazIntfImage;
+procedure TFreePreferences.LoadImageIntoList(ImageList:TImageList;Item:Integer;Name:string);
+var Bitmap:TBitmap;Path:string;
 begin
-  sz := ToolIconSize;
-  ImageList.Width := sz;
-  ImageList.Height := sz;
-  IPath := ToolIconDirectory;
-  cil := TCustomImageList(ImageList);
-  ilcnt := cil.Count;
-  bmp := TBitmap.Create;
-  bmp.SetSize(sz, sz);
-  png := TPortableNetworkGraphic.Create;
-  img := TLazIntfImage.Create(sz, sz);
-
-  IconFile := GetIconFileName(Theme, Name, ToolIconSize);
-
-  if (Item > ImageList.Count - 1) then
-    for i := ImageList.Count to Item do
-      cil.Add(bmp, nil);
-
-  if (IconFile > '') and FileExistsUTF8(IconFile) then
-  begin
-    png.LoadFromFile(IconFile);
-    img := png.CreateIntfImage;
-    bmp.LoadFromIntfImage(img);
-    cil.Replace(Item, bmp, nil);
-    img.Free;
-  end;
-  bmp.Free;
-  png.Free;
+ if Item<0 then Exit;
+ if not HasFreeShip_26Icon(Name) then begin
+  Path:=GetIconFileName(Theme,Name,ToolIconSize);
+  if (Path='') or not FileExistsUTF8(Path) then Exit;
+ end;
+ ImageList.Width:=ToolIconSize;ImageList.Height:=ToolIconSize;
+ Bitmap:=TBitmap.Create;
+ try
+  LoadImageIntoBitmap(Bitmap,Name);
+  while ImageList.Count<=Item do ImageList.Add(Bitmap,nil);
+  ImageList.Replace(Item,Bitmap,nil);
+ finally Bitmap.Free end;
 end;
 
 procedure TFreePreferences.LoadTheme(ThemeName: string);
@@ -1068,12 +1047,27 @@ begin
     FManualsDirectory);
   FTempDirectory := params.ReadString('Directories', 'TempDirectory', FTempDirectory);
 
+  // The checkout can move, so never restore its resource paths from an old
+  // machine-specific or temporary drive mapping.
+  if DirectoryExistsUTF8(getGlobalAppDataDirectory + DirectorySeparator + 'locale') and
+     DirectoryExistsUTF8(getGlobalAppDataDirectory + DirectorySeparator + 'Themes') then
+  begin
+    FGlobalOpenDirectory := getGlobalAppDataDirectory + DirectorySeparator + 'Ships';
+    FGlobalImportDirectory := getGlobalAppDataDirectory + DirectorySeparator + 'Import';
+    if not DirectoryExistsUTF8(FGlobalImportDirectory) then
+      FGlobalImportDirectory := getGlobalAppDataDirectory;
+    FLanguagesDirectory := getGlobalAppDataDirectory + DirectorySeparator + 'locale';
+    FExecDirectory := getGlobalAppDataDirectory + DirectorySeparator + 'Exec';
+    FManualsDirectory := getGlobalAppDataDirectory + DirectorySeparator + 'Manuals';
+  end;
+
   //FThemeDirectory := params.ReadString('Directories','ThemeDirectory',FMenuIconDirectory);
   //FThemeName := params.ReadString('Theme','Name',FThemeName);
 
   FMenuIconSize := params.ReadInteger('Graphic', 'MenuIconSize', FMenuIconSize);
   FToolIconSize := params.ReadInteger('Graphic', 'ToolIconSize', FToolIconSize);
   FThemeName := params.ReadString('Graphic', 'Theme', FThemeName);
+  FStudioThemeInitialized := params.ReadBool('Graphic', 'StudioThemeInitialized', FStudioThemeInitialized);
 
   // made dynamic from theme and tool icon size
   //ToolIconDirectory := params.ReadString('Directories', 'ToolIconDirectory', ToolIconDirectory);
@@ -1124,6 +1118,9 @@ begin
   end;
 
   FLanguage := params.ReadString('General', 'Language', FLanguage);
+  FQuickLanguageEnabled := params.ReadBool('General', 'QuickLanguageEnabled', FQuickLanguageEnabled);
+  FQuickLanguageFirst := params.ReadString('General', 'QuickLanguageFirst', FQuickLanguageFirst);
+  FQuickLanguageSecond := params.ReadString('General', 'QuickLanguageSecond', FQuickLanguageSecond);
   FLanguageFile := FLanguagesDirectory+DirectorySeparator+'FreeShip.'+LanguageCode(Flanguage)+'.po';
   if not FileExistsUTF8(FLanguageFile) { *Converted from FileExists* } then
     FLanguage := 'English';
@@ -1137,12 +1134,18 @@ begin
   FPointSize := 2;
   FFontSize := 8;
   FLanguage := 'English';
+  FQuickLanguageEnabled := False;
+  FQuickLanguageFirst := 'Chinese';
+  FQuickLanguageSecond := 'Russian';
+  if FileExistsUTF8(getGlobalAppDataDirectory + DirectorySeparator + 'locale' +
+    DirectorySeparator + 'FreeShip.cn.po') then FLanguage := 'Chinese';
   FFbmEncoding := 'cp1252';
   FMaxUndoMemory := 32;
   FMenuIconSize := 16;
   FToolIconSize := 24;
   FThemeName := 'Default';
   FParentThemeName := '';
+  FStudioThemeInitialized := False;
   ResetDirectories;
   ResetColors;
 end;
@@ -1174,7 +1177,7 @@ begin
   FExportDirectory := FUserDataDirectory + DS + 'Export';
 
   FLanguagesDirectory := chooseDirAppDataDir(FGlobalAppDataDirectory +
-    DS + 'Languages', FUserAppDataDirectory + DS + 'locale');
+    DS + 'locale', FUserAppDataDirectory + DS + 'locale');
   FExecDirectory := chooseDirAppDataDir(FGlobalAppDataDirectory +
     DS + 'Exec', FUserAppDataDirectory + DS + 'Exec');
   FManualsDirectory := chooseDirAppDataDir(FGlobalAppDataDirectory +
@@ -1185,6 +1188,9 @@ begin
 
   FGlobalOpenDirectory:=FGlobalAppDataDirectory + DS + 'Ships';
   FGlobalImportDirectory:=FGlobalAppDataDirectory + DS + 'Import';
+  if DirectoryExistsUTF8(FGlobalAppDataDirectory + DS + 'locale') and
+     not DirectoryExistsUTF8(FGlobalImportDirectory) then
+    FGlobalImportDirectory := FGlobalAppDataDirectory;
 
   S:=StringReplace('/Themes/Default/icons/16','/',DS,[rfReplaceAll]);
   FMenuIconDirectory := chooseDirAppDataDir(FGlobalAppDataDirectory + S,
@@ -1244,7 +1250,13 @@ begin
   end;
 
   try
-    LoadTheme(FThemeName);
+    // Migrate the stock default only; retain any custom theme selection.
+    if not FStudioThemeInitialized and SameText(FThemeName, 'Default') and
+       FileExistsUTF8(getThemeConfigFile('StudioLight')) then
+      LoadTheme('StudioLight')
+    else
+      LoadTheme(FThemeName);
+    FStudioThemeInitialized := True;
   except on E:Exception do
     ShowMessage(format(rsThemeLoadErrorMessage,[FThemeName]) + E.Message);
   end;
@@ -1373,6 +1385,7 @@ begin
   params.WriteInteger('Graphic', 'MenuIconSize', FMenuIconSize);
   params.WriteInteger('Graphic', 'ToolIconSize', FToolIconSize);
   params.WriteString('Graphic', 'Theme', FThemeName);
+  params.WriteBool('Graphic', 'StudioThemeInitialized', FStudioThemeInitialized);
 
   params.EraseSection('RecentFiles');
   for I := 0 to Owner.Edit.FRecentFiles.Count - 1 do
@@ -1394,6 +1407,9 @@ begin
   end;
 
   params.WriteString('General', 'Language', FLanguage);
+  params.WriteBool('General', 'QuickLanguageEnabled', FQuickLanguageEnabled);
+  params.WriteString('General', 'QuickLanguageFirst', FQuickLanguageFirst);
+  params.WriteString('General', 'QuickLanguageSecond', FQuickLanguageSecond);
   params.WriteString('General', 'FbmEncoding', FbmEncoding);
   params.WriteInteger('General', 'MaxUndoMemory', FMaxUndoMemory);
 end;

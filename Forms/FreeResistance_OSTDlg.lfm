@@ -1,4 +1,5 @@
 object FreeResistance_OST: TFreeResistance_OST
+  OnCreate = FormCreate
   Left = 327
   Height = 1055
   Top = 99
@@ -1888,14 +1889,14 @@ object FreeResistance_OST: TFreeResistance_OST
     end
     object ToolButton20: TToolButton
       Left = 13
-      Hint = 'Start the calculation.'
+      Hint = 'Start the calculation'
       Top = 2
       ImageIndex = 3
       OnClick = ToolButton20Click
     end
     object PrintButton: TToolButton
       Left = 75
-      Hint = 'Print the results of the calculation.'
+      Hint = 'Print the results of the calculation'
       Top = 2
       Caption = 'PrintButton'
       ImageIndex = 2
@@ -1911,14 +1912,14 @@ object FreeResistance_OST: TFreeResistance_OST
     end
     object ToolButton25: TToolButton
       Left = 145
-      Hint = 'Close the window and save changes.'
+      Hint = 'Close the window and save changes'
       Top = 2
       ImageIndex = 1
       OnClick = ToolButton25Click
     end
     object ToolButton7: TToolButton
       Left = 207
-      Hint = 'Close window without saving changes.'
+      Hint = 'Close window without saving changes'
       Top = 2
       ImageIndex = 0
       OnClick = ToolButton7Click

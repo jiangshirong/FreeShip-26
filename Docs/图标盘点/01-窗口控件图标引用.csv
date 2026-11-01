@@ -1,0 +1,535 @@
+﻿文件,窗口标题,控件路径,控件类型,功能文字,动作,图标键,索引,机制,资源线索,状态,行号
+Forms\EnterThemeNameDlg.lfm,'Enter Theme Name',EnterThemeNameDlg/Panel1/BitBtn2,TSpeedButton,'Cancel',,,,内嵌Glyph,待关联图像列表,静态引用，运行时可见性待逐入口确认,44
+Forms\EnterThemeNameDlg.lfm,'Enter Theme Name',EnterThemeNameDlg/Panel1/BitBtn1,TSpeedButton,'OK',,,,内嵌Glyph,待关联图像列表,静态引用，运行时可见性待逐入口确认,93
+Forms\Free2DDXFExportDlg.lfm,'Export intersections to DXF as 2D polylines.',DXFExport2DDialog/Panel1/BitBtn1,TSpeedButton,'OK',,,,内嵌Glyph,待关联图像列表,静态引用，运行时可见性待逐入口确认,26
+Forms\Free2DDXFExportDlg.lfm,'Export intersections to DXF as 2D polylines.',DXFExport2DDialog/Panel1/BitBtn2,TSpeedButton,'Cancel',,,,内嵌Glyph,待关联图像列表,静态引用，运行时可见性待逐入口确认,75
+Forms\Free2DDXFExportDlg.lfm,'Export intersections to DXF as 2D polylines.',DXFExport2DDialog/Panel3/Panel4/SpeedButton1,TSpeedButton,,,,,内嵌Glyph,待关联图像列表,静态引用，运行时可见性待逐入口确认,174
+Forms\FreeAddMassOutputDlg.lfm,'Add_Mass file generator.',FreeAddMassOutputDialog/Panel1/OKbutton,TSpeedButton,'OK',,,,内嵌Glyph,待关联图像列表,静态引用，运行时可见性待逐入口确认,24
+Forms\FreeAddMassOutputDlg.lfm,'Add_Mass file generator.',FreeAddMassOutputDialog/Panel1/CancelButton,TSpeedButton,'Cancel',,,,内嵌Glyph,待关联图像列表,静态引用，运行时可见性待逐入口确认,72
+Forms\FreeAddMassOutputDlg.lfm,'Add_Mass file generator.',FreeAddMassOutputDialog/Panel2/PageControl1/TabSheet3,TTabSheet,'Environment',,,2,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,461
+Forms\FreeAddMassOutputDlg.lfm,'Add_Mass file generator.',FreeAddMassOutputDialog/Panel2/PageControl1/TabSheet2,TTabSheet,'Results',,,1,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,850
+Forms\FreeAddMassOutputDlg.lfm,'Add_Mass file generator.',FreeAddMassOutputDialog/Panel2/PageControl1/TabSheet4,TTabSheet,'Help',,,1,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,868
+Forms\FreeBackgroundBlendingDlg.lfm,'Background blending.',FreeBackgroundBlendDialog/Panel1/BitBtn1,TSpeedButton,'OK',,,,内嵌Glyph,待关联图像列表,静态引用，运行时可见性待逐入口确认,27
+Forms\FreeBackgroundBlendingDlg.lfm,'Background blending.',FreeBackgroundBlendDialog/Panel1/BitBtn2,TSpeedButton,'Cancel',,,,内嵌Glyph,待关联图像列表,静态引用，运行时可见性待逐入口确认,76
+Forms\FreeBackgroundToleranceDlg.lfm,'Background Tolerance',FreeBackgroundToleranceDialog/Panel1/BitBtn1,TSpeedButton,'OK',,,,内嵌Glyph,待关联图像列表,静态引用，运行时可见性待逐入口确认,21
+Forms\FreeBackgroundToleranceDlg.lfm,'Background Tolerance',FreeBackgroundToleranceDialog/Panel1/BitBtn2,TSpeedButton,'Cancel',,,,内嵌Glyph,待关联图像列表,静态引用，运行时可见性待逐入口确认,70
+Forms\FreeCrosscurvesDlg.lfm,'Cross curves.',FreeCrosscurvesDialog/ToolBar1/_ToolButton10,TToolButton,'_ToolButton10',,,6,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,29
+Forms\FreeCrosscurvesDlg.lfm,'Cross curves.',FreeCrosscurvesDialog/ToolBar1/ToolButton1,TToolButton,'ToolButton1',,,3,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,37
+Forms\FreeCrosscurvesDlg.lfm,'Cross curves.',FreeCrosscurvesDialog/ToolBar1/ToolButton2,TToolButton,'Abort',,,4,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,46
+Forms\FreeCrosscurvesDlg.lfm,'Cross curves.',FreeCrosscurvesDialog/ToolBar1/PrintButton,TToolButton,'Cross curves.',,,2,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,56
+Forms\FreeCrosscurvesDlg.lfm,'Cross curves.',FreeCrosscurvesDialog/ToolBar1/SaveButton,TToolButton,'SaveButton',,,5,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,66
+Forms\FreeCrosscurvesDlg.lfm,'Cross curves.',FreeCrosscurvesDialog/ToolBar1/_ToolButton14,TToolButton,'_ToolButton14',,,12,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,76
+Forms\FreeCrosscurvesDlg.lfm,'Cross curves.',FreeCrosscurvesDialog/ToolBar1/ToolButton25,TToolButton,,,,1,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,84
+Forms\FreeCrosscurvesDlg.lfm,'Cross curves.',FreeCrosscurvesDialog/ToolBar1/ToolButton7,TToolButton,,,,0,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,92
+Forms\FreeCrosscurvesDlg.lfm,'Cross curves.',FreeCrosscurvesDialog/Panel1/PageControl1/TabSheet2,TTabSheet,'Data',,,1,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,719
+Forms\FreeCrosscurvesDlg.lfm,'Cross curves.',FreeCrosscurvesDialog/Panel1/PageControl1/TabSheet4,TTabSheet,'Results',,,1,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,818
+Forms\FreeCylinderDlg.lfm,'Add a cylinder.',FreeCylinderDialog/Panel1/BitBtn1,TSpeedButton,'OK',,,,内嵌Glyph,待关联图像列表,静态引用，运行时可见性待逐入口确认,245
+Forms\FreeCylinderDlg.lfm,'Add a cylinder.',FreeCylinderDialog/Panel1/BitBtn2,TSpeedButton,'Cancel',,,,内嵌Glyph,待关联图像列表,静态引用，运行时可见性待逐入口确认,294
+Forms\FreeEmptyModelChooserDlg.lfm,'Background blending.',FreeEmptyModelChooserDialog/Panel1/OKbutton,TSpeedButton,'OK',,,,内嵌Glyph,待关联图像列表,静态引用，运行时可见性待逐入口确认,23
+Forms\FreeEmptyModelChooserDlg.lfm,'Background blending.',FreeEmptyModelChooserDialog/Panel1/CancelButton,TSpeedButton,'Cancel',,,,内嵌Glyph,待关联图像列表,静态引用，运行时可见性待逐入口确认,72
+Forms\FreeExpanedPlatesDlg.lfm,,FreeExpanedplatesDialog/ToolBar1/ToolButton20,TToolButton,'-90',RotateCCW90,RotateCCW90,2,ImageIndex/Action,Themes/Default/icons/24/RotateCCW90.png,静态引用，运行时可见性待逐入口确认,296
+Forms\FreeExpanedPlatesDlg.lfm,,FreeExpanedplatesDialog/ToolBar1/ToolButton1,TToolButton,'-5',RotateCCW5,RotateCCW5,1,ImageIndex/Action,Themes/Default/icons/24/RotateCCW5.png,静态引用，运行时可见性待逐入口确认,302
+Forms\FreeExpanedPlatesDlg.lfm,,FreeExpanedplatesDialog/ToolBar1/ToolButton11,TToolButton,'-1',RotateCCW1,RotateCCW1,8,ImageIndex/Action,Themes/Default/icons/24/RotateCCW1.png,静态引用，运行时可见性待逐入口确认,308
+Forms\FreeExpanedPlatesDlg.lfm,,FreeExpanedplatesDialog/ToolBar1/ToolButton10,TToolButton,,,,6,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,314
+Forms\FreeExpanedPlatesDlg.lfm,,FreeExpanedplatesDialog/ToolBar1/ToolButton12,TToolButton,'+1',RotateCW1,RotateCW1,9,ImageIndex/Action,Themes/Default/icons/24/RotateCW1.png,静态引用，运行时可见性待逐入口确认,322
+Forms\FreeExpanedPlatesDlg.lfm,,FreeExpanedplatesDialog/ToolBar1/ToolButton2,TToolButton,'+5',RotateCW5,RotateCW5,3,ImageIndex/Action,Themes/Default/icons/24/RotateCW5.png,静态引用，运行时可见性待逐入口确认,328
+Forms\FreeExpanedPlatesDlg.lfm,,FreeExpanedplatesDialog/ToolBar1/ToolButton3,TToolButton,'+90',RotateCW90,RotateCW90,4,ImageIndex/Action,Themes/Default/icons/24/RotateCW90.png,静态引用，运行时可见性待逐入口确认,334
+Forms\FreeExpanedPlatesDlg.lfm,,FreeExpanedplatesDialog/ToolBar1/_ToolButton4,TToolButton,'_ToolButton4',,,5,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,340
+Forms\FreeExpanedPlatesDlg.lfm,,FreeExpanedplatesDialog/ToolBar1/ToolButton5,TToolButton,'Extents',ZoomExtents,ZoomExtents,0,ImageIndex/Action,Themes/Default/icons/24/ZoomExtents.png,静态引用，运行时可见性待逐入口确认,349
+Forms\FreeExpanedPlatesDlg.lfm,,FreeExpanedplatesDialog/ToolBar1/ToolButton8,TToolButton,'ZoomIn',ZoomIn,ZoomIn,7,ImageIndex/Action,Themes/Default/icons/24/ZoomIn.png,静态引用，运行时可见性待逐入口确认,355
+Forms\FreeExpanedPlatesDlg.lfm,,FreeExpanedplatesDialog/ToolBar1/ToolButton9,TToolButton,'Zoom out',ZoomOut,ZoomOut,6,ImageIndex/Action,Themes/Default/icons/24/ZoomOut.png,静态引用，运行时可见性待逐入口确认,361
+Forms\FreeExpanedPlatesDlg.lfm,,FreeExpanedplatesDialog/ToolBar1/_ToolButton6,TToolButton,'_ToolButton6',,,1,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,367
+Forms\FreeExpanedPlatesDlg.lfm,,FreeExpanedplatesDialog/ToolBar1/ToolButton19,TToolButton,'Solid',ShowFillColor,ShowFillColor,16,ImageIndex/Action,Themes/Default/icons/24/ShowFillColor.png,静态引用，运行时可见性待逐入口确认,376
+Forms\FreeExpanedPlatesDlg.lfm,,FreeExpanedplatesDialog/ToolBar1/ToolButton4,TToolButton,'ShowSubmergedArea',ShowSubmergedArea,ShowSubmergedArea,23,ImageIndex/Action,Themes/Default/icons/24/ShowSubmergedArea.png,静态引用，运行时可见性待逐入口确认,382
+Forms\FreeExpanedPlatesDlg.lfm,,FreeExpanedplatesDialog/ToolBar1/ToolButton18,TToolButton,'Interior edges',ShowInteriorEdges,ShowInteriorEdges,15,ImageIndex/Action,Themes/Default/icons/24/ShowInteriorEdges.png,静态引用，运行时可见性待逐入口确认,388
+Forms\FreeExpanedPlatesDlg.lfm,,FreeExpanedplatesDialog/ToolBar1/ToolButton23,TToolButton,'ShowErrorEdges',ShowErrorEdges,ShowErrorEdges,18,ImageIndex/Action,Themes/Default/icons/24/ShowErrorEdges.png,静态引用，运行时可见性待逐入口确认,394
+Forms\FreeExpanedPlatesDlg.lfm,,FreeExpanedplatesDialog/ToolBar1/ToolButton26,TToolButton,'ShowDimensions',ShowDimensions,ShowDimensions,21,ImageIndex/Action,Themes/Default/icons/24/ShowDimensions.png,静态引用，运行时可见性待逐入口确认,400
+Forms\FreeExpanedPlatesDlg.lfm,,FreeExpanedplatesDialog/ToolBar1/ToolButton27,TToolButton,'Part name',ShowPartName,ShowPartName,22,ImageIndex/Action,Themes/Default/icons/24/ShowPartName.png,静态引用，运行时可见性待逐入口确认,407
+Forms\FreeExpanedPlatesDlg.lfm,,FreeExpanedplatesDialog/ToolBar1/ToolButton15,TToolButton,'Stations',ShowStations,ShowStations,14,ImageIndex/Action,Themes/Default/icons/24/ShowStations.png,静态引用，运行时可见性待逐入口确认,413
+Forms\FreeExpanedPlatesDlg.lfm,,FreeExpanedplatesDialog/ToolBar1/ToolButton16,TToolButton,'Buttocks',ShowButtocks,ShowButtocks,12,ImageIndex/Action,Themes/Default/icons/24/ShowButtocks.png,静态引用，运行时可见性待逐入口确认,420
+Forms\FreeExpanedPlatesDlg.lfm,,FreeExpanedplatesDialog/ToolBar1/ToolButton17,TToolButton,'Waterlines',ShowWaterlines,ShowWaterlines,13,ImageIndex/Action,Themes/Default/icons/24/ShowWaterlines.png,静态引用，运行时可见性待逐入口确认,426
+Forms\FreeExpanedPlatesDlg.lfm,,FreeExpanedplatesDialog/ToolBar1/ToolButton24,TToolButton,'Diagonals',ShowDiagonals,ShowDiagonals,19,ImageIndex/Action,Themes/Default/icons/24/ShowDiagonals.png,静态引用，运行时可见性待逐入口确认,432
+Forms\FreeExpanedPlatesDlg.lfm,,FreeExpanedplatesDialog/ToolBar1/_ToolButton14,TToolButton,'_ToolButton14',,,12,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,438
+Forms\FreeExpanedPlatesDlg.lfm,,FreeExpanedplatesDialog/ToolBar1/ToolButton25,TToolButton,'Print',Print,Print,20,ImageIndex/Action,Themes/Default/icons/24/Print.png,静态引用，运行时可见性待逐入口确认,447
+Forms\FreeExpanedPlatesDlg.lfm,,FreeExpanedplatesDialog/ToolBar1/ToolButton7,TToolButton,'Save bitmap',SaveBitmap,SaveBitmap,10,ImageIndex/Action,Themes/Default/icons/24/SaveBitmap.png,静态引用，运行时可见性待逐入口确认,453
+Forms\FreeExpanedPlatesDlg.lfm,,FreeExpanedplatesDialog/ToolBar1/ToolButton13,TToolButton,'DXF',ExportDXF,ExportDXF,11,ImageIndex/Action,Themes/Default/icons/24/ExportDXF.png,静态引用，运行时可见性待逐入口确认,459
+Forms\FreeExpanedPlatesDlg.lfm,,FreeExpanedplatesDialog/ToolBar1/ToolButton6,TToolButton,'Text file',ExportTextFile,ExportTextFile,24,ImageIndex/Action,Themes/Default/icons/24/ExportTextFile.png,静态引用，运行时可见性待逐入口确认,465
+Forms\FreeExpanedPlatesDlg.lfm,,FreeExpanedplatesDialog/ToolBar1/_ToolButton21,TToolButton,'_ToolButton21',,,12,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,471
+Forms\FreeExpanedPlatesDlg.lfm,,FreeExpanedplatesDialog/ToolBar1/ToolButton22,TToolButton,'Close Dialog',CloseDialog,CloseDialog,25,ImageIndex/Action,Themes/Default/icons/24/CloseDialog.png,静态引用，运行时可见性待逐入口确认,480
+Forms\FreeExpanedPlatesDlg.lfm,,FreeExpanedplatesDialog/ActionList1/ZoomExtents,TAction,'Extents',,ZoomExtents,0,ImageIndex/Action,Themes/Default/icons/24/ZoomExtents.png,静态引用，运行时可见性待逐入口确认,503
+Forms\FreeExpanedPlatesDlg.lfm,,FreeExpanedplatesDialog/ActionList1/RotateCCW5,TAction,'-5',,RotateCCW5,1,ImageIndex/Action,Themes/Default/icons/24/RotateCCW5.png,静态引用，运行时可见性待逐入口确认,511
+Forms\FreeExpanedPlatesDlg.lfm,,FreeExpanedplatesDialog/ActionList1/RotateCCW90,TAction,'-90',,RotateCCW90,2,ImageIndex/Action,Themes/Default/icons/24/RotateCCW90.png,静态引用，运行时可见性待逐入口确认,518
+Forms\FreeExpanedPlatesDlg.lfm,,FreeExpanedplatesDialog/ActionList1/RotateCW5,TAction,'+5',,RotateCW5,3,ImageIndex/Action,Themes/Default/icons/24/RotateCW5.png,静态引用，运行时可见性待逐入口确认,525
+Forms\FreeExpanedPlatesDlg.lfm,,FreeExpanedplatesDialog/ActionList1/RotateCW90,TAction,'+90',,RotateCW90,4,ImageIndex/Action,Themes/Default/icons/24/RotateCW90.png,静态引用，运行时可见性待逐入口确认,532
+Forms\FreeExpanedPlatesDlg.lfm,,FreeExpanedplatesDialog/ActionList1/ZoomOut,TAction,'Zoom out',,ZoomOut,6,ImageIndex/Action,Themes/Default/icons/24/ZoomOut.png,静态引用，运行时可见性待逐入口确认,539
+Forms\FreeExpanedPlatesDlg.lfm,,FreeExpanedplatesDialog/ActionList1/ZoomIn,TAction,'ZoomIn',,ZoomIn,7,ImageIndex/Action,Themes/Default/icons/24/ZoomIn.png,静态引用，运行时可见性待逐入口确认,547
+Forms\FreeExpanedPlatesDlg.lfm,,FreeExpanedplatesDialog/ActionList1/RotateCCW1,TAction,'-1',,RotateCCW1,8,ImageIndex/Action,Themes/Default/icons/24/RotateCCW1.png,静态引用，运行时可见性待逐入口确认,555
+Forms\FreeExpanedPlatesDlg.lfm,,FreeExpanedplatesDialog/ActionList1/RotateCW1,TAction,'+1',,RotateCW1,9,ImageIndex/Action,Themes/Default/icons/24/RotateCW1.png,静态引用，运行时可见性待逐入口确认,562
+Forms\FreeExpanedPlatesDlg.lfm,,FreeExpanedplatesDialog/ActionList1/SaveBitmap,TAction,'Save bitmap',,SaveBitmap,10,ImageIndex/Action,Themes/Default/icons/24/SaveBitmap.png,静态引用，运行时可见性待逐入口确认,569
+Forms\FreeExpanedPlatesDlg.lfm,,FreeExpanedplatesDialog/ActionList1/ExportDXF,TAction,'DXF',,ExportDXF,11,ImageIndex/Action,Themes/Default/icons/24/ExportDXF.png,静态引用，运行时可见性待逐入口确认,576
+Forms\FreeExpanedPlatesDlg.lfm,,FreeExpanedplatesDialog/ActionList1/ShowButtocks,TAction,'Buttocks',,ShowButtocks,12,ImageIndex/Action,Themes/Default/icons/24/ShowButtocks.png,静态引用，运行时可见性待逐入口确认,583
+Forms\FreeExpanedPlatesDlg.lfm,,FreeExpanedplatesDialog/ActionList1/ShowWaterlines,TAction,'Waterlines',,ShowWaterlines,13,ImageIndex/Action,Themes/Default/icons/24/ShowWaterlines.png,静态引用，运行时可见性待逐入口确认,590
+Forms\FreeExpanedPlatesDlg.lfm,,FreeExpanedplatesDialog/ActionList1/ShowStations,TAction,'Stations',,ShowStations,14,ImageIndex/Action,Themes/Default/icons/24/ShowStations.png,静态引用，运行时可见性待逐入口确认,597
+Forms\FreeExpanedPlatesDlg.lfm,,FreeExpanedplatesDialog/ActionList1/ShowInteriorEdges,TAction,'Interior edges',,ShowInteriorEdges,15,ImageIndex/Action,Themes/Default/icons/24/ShowInteriorEdges.png,静态引用，运行时可见性待逐入口确认,604
+Forms\FreeExpanedPlatesDlg.lfm,,FreeExpanedplatesDialog/ActionList1/ShowFillColor,TAction,'Solid',,ShowFillColor,16,ImageIndex/Action,Themes/Default/icons/24/ShowFillColor.png,静态引用，运行时可见性待逐入口确认,611
+Forms\FreeExpanedPlatesDlg.lfm,,FreeExpanedplatesDialog/ActionList1/ShowErrorEdges,TAction,'ShowErrorEdges',,ShowErrorEdges,18,ImageIndex/Action,Themes/Default/icons/24/ShowErrorEdges.png,静态引用，运行时可见性待逐入口确认,618
+Forms\FreeExpanedPlatesDlg.lfm,,FreeExpanedplatesDialog/ActionList1/ShowDiagonals,TAction,'Diagonals',,ShowDiagonals,19,ImageIndex/Action,Themes/Default/icons/24/ShowDiagonals.png,静态引用，运行时可见性待逐入口确认,626
+Forms\FreeExpanedPlatesDlg.lfm,,FreeExpanedplatesDialog/ActionList1/Print,TAction,'Print',,Print,20,ImageIndex/Action,Themes/Default/icons/24/Print.png,静态引用，运行时可见性待逐入口确认,633
+Forms\FreeExpanedPlatesDlg.lfm,,FreeExpanedplatesDialog/ActionList1/ShowDimensions,TAction,'ShowDimensions',,ShowDimensions,21,ImageIndex/Action,Themes/Default/icons/24/ShowDimensions.png,静态引用，运行时可见性待逐入口确认,640
+Forms\FreeExpanedPlatesDlg.lfm,,FreeExpanedplatesDialog/ActionList1/ShowPartName,TAction,'Part name',,ShowPartName,22,ImageIndex/Action,Themes/Default/icons/24/ShowPartName.png,静态引用，运行时可见性待逐入口确认,648
+Forms\FreeExpanedPlatesDlg.lfm,,FreeExpanedplatesDialog/ActionList1/ShowSubmergedArea,TAction,'ShowSubmergedArea',,ShowSubmergedArea,23,ImageIndex/Action,Themes/Default/icons/24/ShowSubmergedArea.png,静态引用，运行时可见性待逐入口确认,656
+Forms\FreeExpanedPlatesDlg.lfm,,FreeExpanedplatesDialog/ActionList1/ExportTextFile,TAction,'Text file',,ExportTextFile,24,ImageIndex/Action,Themes/Default/icons/24/ExportTextFile.png,静态引用，运行时可见性待逐入口确认,663
+Forms\FreeExpanedPlatesDlg.lfm,,FreeExpanedplatesDialog/ActionList1/CloseDialog,TAction,'Close Dialog',,CloseDialog,25,ImageIndex/Action,Themes/Default/icons/24/CloseDialog.png,静态引用，运行时可见性待逐入口确认,670
+Forms\FreeExtrudeDlg.lfm,'Extrusion vector',FreeExtrudeDialog/Panel1/BitBtn1,TSpeedButton,'OK',,,,内嵌Glyph,待关联图像列表,静态引用，运行时可见性待逐入口确认,140
+Forms\FreeExtrudeDlg.lfm,'Extrusion vector',FreeExtrudeDialog/Panel1/BitBtn2,TSpeedButton,'Cancel',,,,内嵌Glyph,待关联图像列表,静态引用，运行时可见性待逐入口确认,189
+Forms\FreeFilePreviewDialog.lfm,,FreeFilePreviewDialog/LocationPanel/SaveToolsPanel/SpeedButtonNewDir,TSpeedButton,,,,,内嵌Glyph,待关联图像列表,静态引用，运行时可见性待逐入口确认,116
+Forms\FreeFilePreviewDialog.lfm,,FreeFilePreviewDialog/LocationPanel/SaveToolsPanel/SpeedButtonEditLocation,TSpeedButton,,,,,内嵌Glyph,待关联图像列表,静态引用，运行时可见性待逐入口确认,261
+Forms\FreeFilePreviewDialog.lfm,,FreeFilePreviewDialog/BottomPanel/BitBtnOpen,TBitBtn,'Open',,,,内嵌Glyph,待关联图像列表,静态引用，运行时可见性待逐入口确认,653
+Forms\FreeFilePreviewDialog.lfm,,FreeFilePreviewDialog/BottomPanel/BitBtnCancel,TBitBtn,'Cancel',,,,内嵌Glyph,待关联图像列表,静态引用，运行时可见性待逐入口确认,801
+Forms\FreeFilePreviewDialog.lfm,,FreeFilePreviewDialog/BottomPanel/Panel1/Panel4/SpeedButtonViewListLarge,TSpeedButton,,,,,内嵌Glyph,待关联图像列表,静态引用，运行时可见性待逐入口确认,981
+Forms\FreeFilePreviewDialog.lfm,,FreeFilePreviewDialog/BottomPanel/Panel1/Panel4/SpeedButtonViewListCompact,TSpeedButton,,,,,内嵌Glyph,待关联图像列表,静态引用，运行时可见性待逐入口确认,1032
+Forms\FreeFilePreviewDialog.lfm,,FreeFilePreviewDialog/BottomPanel/Panel1/Panel4/SpeedButtonViewListSimple,TSpeedButton,,,,,内嵌Glyph,待关联图像列表,静态引用，运行时可见性待逐入口确认,1083
+Forms\FreeFilePreviewDialog.lfm,,FreeFilePreviewDialog/BottomPanel/Panel1/Panel4/SpeedButtonViewDetails,TSpeedButton,,,,,内嵌Glyph,待关联图像列表,静态引用，运行时可见性待逐入口确认,1134
+Forms\FreeFilePreviewDialog.lfm,,FreeFilePreviewDialog/BottomPanel/Panel1/Panel4/SpeedButtonViewListHidden,TSpeedButton,,,,,内嵌Glyph,待关联图像列表,静态引用，运行时可见性待逐入口确认,1186
+Forms\FreeFilePreviewDialog.lfm,,FreeFilePreviewDialog/SavePanel/NavigationPanel/SpeedButtonGoUp,TSpeedButton,,,,,内嵌Glyph,待关联图像列表,静态引用，运行时可见性待逐入口确认,1339
+Forms\FreeFilePreviewDialog.lfm,,FreeFilePreviewDialog/SavePanel/NavigationPanel/SpeedButtonGoBack,TSpeedButton,,,,,内嵌Glyph,待关联图像列表,静态引用，运行时可见性待逐入口确认,1481
+Forms\FreeGridDlg.lfm,'Add a grid',FreeGridDialog/Panel1/BitBtn1,TSpeedButton,'OK',,,,内嵌Glyph,待关联图像列表,静态引用，运行时可见性待逐入口确认,269
+Forms\FreeGridDlg.lfm,'Add a grid',FreeGridDialog/Panel1/BitBtn2,TSpeedButton,'Cancel',,,,内嵌Glyph,待关联图像列表,静态引用，运行时可见性待逐入口确认,318
+Forms\freehullformwindow_form.lfm,'FreeHullWindow',FreeHullForm/PopupMenuHull/View1,TMenuItem,'View',,,2,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,52
+Forms\freehullformwindow_form.lfm,'FreeHullWindow',FreeHullForm/PopupMenuHull/Zoom1/ZoomIn1,TMenuItem,'Zoom in',ZoomIn,ZoomIn,5,ImageIndex/Action,Themes/Default/icons/24/ZoomIn.png,静态引用，运行时可见性待逐入口确认,70
+Forms\freehullformwindow_form.lfm,'FreeHullWindow',FreeHullForm/PopupMenuHull/Zoom1/Zoomout1,TMenuItem,'Zoom out',ZoomOut,ZoomOut,6,ImageIndex/Action,Themes/Default/icons/24/ZoomOut.png,静态引用，运行时可见性待逐入口确认,73
+Forms\freehullformwindow_form.lfm,'FreeHullWindow',FreeHullForm/PopupMenuHull/Zoom1/All1,TMenuItem,'All',ZoomExtents,ZoomExtents,4,ImageIndex/Action,Themes/Default/icons/24/ZoomExtents.png,静态引用，运行时可见性待逐入口确认,76
+Forms\freehullformwindow_form.lfm,'FreeHullWindow',FreeHullForm/PopupMenuHull/Camera1,TMenuItem,'Camera',,,0,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,80
+Forms\freehullformwindow_form.lfm,'FreeHullWindow',FreeHullForm/PopupMenuHull/Backgroundimage2,TMenuItem,'Background image',,,7,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,121
+Forms\freehullformwindow_form.lfm,'FreeHullWindow',FreeHullForm/PopupMenuHull/Backgroundimage2/Backgroundimage1,TMenuItem,'Load',ImportBackGround,ImportBackGround,9,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,130
+Forms\freehullformwindow_form.lfm,'FreeHullWindow',FreeHullForm/PopupMenuHull/Backgroundimage2/Export1,TMenuItem,'Save',BackgroundExport,BackgroundExport,8,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,133
+Forms\freehullformwindow_form.lfm,'FreeHullWindow',FreeHullForm/PopupMenuHull/Print1,TMenuItem,'Print',Print,Print,3,ImageIndex/Action,Themes/Default/icons/24/Print.png,静态引用，运行时可见性待逐入口确认,152
+Forms\freehullformwindow_form.lfm,'FreeHullWindow',FreeHullForm/ActionListHull/ZoomIn,TAction,'Zoom in',,ZoomIn,5,ImageIndex/Action,Themes/Default/icons/24/ZoomIn.png,静态引用，运行时可见性待逐入口确认,212
+Forms\freehullformwindow_form.lfm,'FreeHullWindow',FreeHullForm/ActionListHull/ZoomExtents,TAction,'All',,ZoomExtents,4,ImageIndex/Action,Themes/Default/icons/24/ZoomExtents.png,静态引用，运行时可见性待逐入口确认,219
+Forms\freehullformwindow_form.lfm,'FreeHullWindow',FreeHullForm/ActionListHull/ZoomOut,TAction,'Zoom out',,ZoomOut,6,ImageIndex/Action,Themes/Default/icons/24/ZoomOut.png,静态引用，运行时可见性待逐入口确认,226
+Forms\freehullformwindow_form.lfm,'FreeHullWindow',FreeHullForm/ActionListHull/Print,TAction,'Print',,Print,3,ImageIndex/Action,Themes/Default/icons/24/Print.png,静态引用，运行时可见性待逐入口确认,237
+Forms\freehullformwindow_form.lfm,'FreeHullWindow',FreeHullForm/ActionListHull/ImportBackGround,TAction,'Load',,ImportBackGround,9,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,276
+Forms\freehullformwindow_form.lfm,'FreeHullWindow',FreeHullForm/ActionListHull/BackgroundExport,TAction,'Save',,BackgroundExport,8,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,307
+Forms\freehullformwindow_panel.lfm,'FreeHullWindow',FreeHullWindow/PopupMenuHull/Camera1,TMenuItem,'Camera',,,0,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,55
+Forms\freehullformwindow_panel.lfm,'FreeHullWindow',FreeHullWindow/PopupMenuHull/Backgroundimage2,TMenuItem,'Background image',,,7,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,95
+Forms\freehullformwindow_panel.lfm,'FreeHullWindow',FreeHullWindow/PopupMenuHull/Backgroundimage2/Backgroundimage1,TMenuItem,'Load',ImportBackGround,ImportBackGround,9,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,104
+Forms\freehullformwindow_panel.lfm,'FreeHullWindow',FreeHullWindow/PopupMenuHull/Backgroundimage2/Export1,TMenuItem,'Save',BackgroundExport,BackgroundExport,8,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,107
+Forms\freehullformwindow_panel.lfm,'FreeHullWindow',FreeHullWindow/PopupMenuHull/Print1,TMenuItem,'Print',Print,Print,3,ImageIndex/Action,Themes/Default/icons/24/Print.png,静态引用，运行时可见性待逐入口确认,130
+Forms\freehullformwindow_panel.lfm,'FreeHullWindow',FreeHullWindow/ActionListHull/ZoomIn,TAction,'Zoom in',,ZoomIn,5,ImageIndex/Action,Themes/Default/icons/24/ZoomIn.png,静态引用，运行时可见性待逐入口确认,166
+Forms\freehullformwindow_panel.lfm,'FreeHullWindow',FreeHullWindow/ActionListHull/ZoomExtents,TAction,'All',,ZoomExtents,4,ImageIndex/Action,Themes/Default/icons/24/ZoomExtents.png,静态引用，运行时可见性待逐入口确认,173
+Forms\freehullformwindow_panel.lfm,'FreeHullWindow',FreeHullWindow/ActionListHull/ZoomOut,TAction,'Zoom out',,ZoomOut,6,ImageIndex/Action,Themes/Default/icons/24/ZoomOut.png,静态引用，运行时可见性待逐入口确认,179
+Forms\freehullformwindow_panel.lfm,'FreeHullWindow',FreeHullWindow/ActionListHull/Print,TAction,'Print',,Print,3,ImageIndex/Action,Themes/Default/icons/24/Print.png,静态引用，运行时可见性待逐入口确认,190
+Forms\freehullformwindow_panel.lfm,'FreeHullWindow',FreeHullWindow/ActionListHull/ImportBackGround,TAction,'Load',,ImportBackGround,9,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,229
+Forms\freehullformwindow_panel.lfm,'FreeHullWindow',FreeHullWindow/ActionListHull/BackgroundExport,TAction,'Save',,BackgroundExport,8,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,271
+Forms\FreeHydrodyn_ManeuvDlg.lfm,'Evaluation of Turning Ability and Stability. Turning Prediction.',FreeHydrodyn_Maneuv/ToolBar1/_ToolButton10,TToolButton,'_ToolButton10',,,6,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,28
+Forms\FreeHydrodyn_ManeuvDlg.lfm,'Evaluation of Turning Ability and Stability. Turning Prediction.',FreeHydrodyn_Maneuv/ToolBar1/PrintButton,TToolButton,'PrintButton',,,2,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,36
+Forms\FreeHydrodyn_ManeuvDlg.lfm,'Evaluation of Turning Ability and Stability. Turning Prediction.',FreeHydrodyn_Maneuv/ToolBar1/_ToolButton14,TToolButton,'_ToolButton14',,,12,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,44
+Forms\FreeHydrodyn_ManeuvDlg.lfm,'Evaluation of Turning Ability and Stability. Turning Prediction.',FreeHydrodyn_Maneuv/ToolBar1/ToolButton25,TToolButton,,,,1,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,52
+Forms\FreeHydrodyn_ManeuvDlg.lfm,'Evaluation of Turning Ability and Stability. Turning Prediction.',FreeHydrodyn_Maneuv/ToolBar1/ToolButton7,TToolButton,,,,0,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,59
+Forms\FreeHydrodyn_ManeuvDlg.lfm,'Evaluation of Turning Ability and Stability. Turning Prediction.',FreeHydrodyn_Maneuv/ToolBar1/ToolButton17,TToolButton,,,,3,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,66
+Forms\FreeHydrodyn_ManeuvDlg.lfm,'Evaluation of Turning Ability and Stability. Turning Prediction.',FreeHydrodyn_Maneuv/PageControl1/TabSheet2,TTabSheet,'Results',,,1,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,565
+Forms\FreeHydrodyn_RVRSDlg.lfm,"'Acceleration, free and active brake of ship calculation'",FreeHydrodyn_Rvrs/ToolBar1/_ToolButton10,TToolButton,'_ToolButton10',,,6,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,28
+Forms\FreeHydrodyn_RVRSDlg.lfm,"'Acceleration, free and active brake of ship calculation'",FreeHydrodyn_Rvrs/ToolBar1/PrintButton,TToolButton,'PrintButton',,,2,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,36
+Forms\FreeHydrodyn_RVRSDlg.lfm,"'Acceleration, free and active brake of ship calculation'",FreeHydrodyn_Rvrs/ToolBar1/_ToolButton14,TToolButton,'_ToolButton14',,,12,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,44
+Forms\FreeHydrodyn_RVRSDlg.lfm,"'Acceleration, free and active brake of ship calculation'",FreeHydrodyn_Rvrs/ToolBar1/ToolButton25,TToolButton,,,,1,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,52
+Forms\FreeHydrodyn_RVRSDlg.lfm,"'Acceleration, free and active brake of ship calculation'",FreeHydrodyn_Rvrs/ToolBar1/ToolButton7,TToolButton,,,,0,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,59
+Forms\FreeHydrodyn_RVRSDlg.lfm,"'Acceleration, free and active brake of ship calculation'",FreeHydrodyn_Rvrs/ToolBar1/ToolButton17,TToolButton,,,,3,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,66
+Forms\FreeHydrodyn_RVRSDlg.lfm,"'Acceleration, free and active brake of ship calculation'",FreeHydrodyn_Rvrs/PageControl1/TabSheet2,TTabSheet,'Results',,,1,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,549
+Forms\FreeHydrodyn_Task1Dlg.lfm,'Aerodynamic characteristics of a ship.',FreeHydrodyn_Task1/ToolBar1/_ToolButton10,TToolButton,'_ToolButton10',,,6,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,28
+Forms\FreeHydrodyn_Task1Dlg.lfm,'Aerodynamic characteristics of a ship.',FreeHydrodyn_Task1/ToolBar1/PrintButton,TToolButton,'PrintButton',,,2,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,36
+Forms\FreeHydrodyn_Task1Dlg.lfm,'Aerodynamic characteristics of a ship.',FreeHydrodyn_Task1/ToolBar1/_ToolButton14,TToolButton,'_ToolButton14',,,12,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,44
+Forms\FreeHydrodyn_Task1Dlg.lfm,'Aerodynamic characteristics of a ship.',FreeHydrodyn_Task1/ToolBar1/ToolButton25,TToolButton,,,,1,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,52
+Forms\FreeHydrodyn_Task1Dlg.lfm,'Aerodynamic characteristics of a ship.',FreeHydrodyn_Task1/ToolBar1/ToolButton7,TToolButton,,,,0,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,59
+Forms\FreeHydrodyn_Task1Dlg.lfm,'Aerodynamic characteristics of a ship.',FreeHydrodyn_Task1/ToolBar1/ToolButton17,TToolButton,,,,3,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,66
+Forms\FreeHydrodyn_Task1Dlg.lfm,'Aerodynamic characteristics of a ship.',FreeHydrodyn_Task1/PageControl1/TabSheet2,TTabSheet,'Results',,,1,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,416
+Forms\FreeHydrostaticsDlg.lfm,'Hydrostatics results',FreeHydrostaticsDialog/Panel22/ButtonPrint,TSpeedButton,'Print',,,,内嵌Glyph,待关联图像列表,静态引用，运行时可见性待逐入口确认,51
+Forms\FreeHydrostaticsDlg.lfm,'Hydrostatics results',FreeHydrostaticsDialog/Panel22/ButtonSave,TSpeedButton,'Save',,,,内嵌Glyph,待关联图像列表,静态引用，运行时可见性待逐入口确认,100
+Forms\FreeHydrostaticsDlg.lfm,'Hydrostatics results',FreeHydrostaticsDialog/Panel22/ButtonClose,TSpeedButton,'Close',,,,内嵌Glyph,待关联图像列表,静态引用，运行时可见性待逐入口确认,149
+Forms\FreeHydrostaticsFrm.lfm,'Hydrostatics',FreeHydrostaticsForm/Panel2/Button1,TSpeedButton,'Close',,,,内嵌Glyph,待关联图像列表,静态引用，运行时可见性待逐入口确认,24
+Forms\FreeHydrostaticsFrm.lfm,'Hydrostatics',FreeHydrostaticsForm/Panel2/Button2,TSpeedButton,'Calculate',,,,内嵌Glyph,待关联图像列表,静态引用，运行时可见性待逐入口确认,45
+Forms\FreeHydrostaticsResultsDlg.lfm,'Hydrostatics',FreeHydrostaticsResultsDialog/Panel1/ButtonPrint,TSpeedButton,'Print',,,,内嵌Glyph,待关联图像列表,静态引用，运行时可见性待逐入口确认,28
+Forms\FreeHydrostaticsResultsDlg.lfm,'Hydrostatics',FreeHydrostaticsResultsDialog/Panel1/ButtonSave,TSpeedButton,'Save',,,,内嵌Glyph,待关联图像列表,静态引用，运行时可见性待逐入口确认,77
+Forms\FreeHydrostaticsResultsDlg.lfm,'Hydrostatics',FreeHydrostaticsResultsDialog/Panel1/ButtonClose,TSpeedButton,'Close',,,,内嵌Glyph,待关联图像列表,静态引用，运行时可见性待逐入口确认,127
+Forms\FreeInsertPlaneDlg.lfm,'Insert multiple points',FreeInsertPlaneDialog/Panel1/BitBtn1,TSpeedButton,'OK',,,,内嵌Glyph,待关联图像列表,静态引用，运行时可见性待逐入口确认,183
+Forms\FreeInsertPlaneDlg.lfm,'Insert multiple points',FreeInsertPlaneDialog/Panel1/BitBtn2,TSpeedButton,'Cancel',,,,内嵌Glyph,待关联图像列表,静态引用，运行时可见性待逐入口确认,232
+Forms\FreeIntersectionDlg.lfm,'Intersections',FreeIntersectionDialog/Panel1/PageControl1/tsStations,TTabSheet,,,,2,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,35
+Forms\FreeIntersectionDlg.lfm,'Intersections',FreeIntersectionDialog/Panel1/PageControl1/tsButtocks,TTabSheet,,,,0,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,77
+Forms\FreeIntersectionDlg.lfm,'Intersections',FreeIntersectionDialog/Panel1/PageControl1/tsWaterlines,TTabSheet,,,,1,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,120
+Forms\FreeIntersectionDlg.lfm,'Intersections',FreeIntersectionDialog/Panel1/PageControl1/tsDiagonals,TTabSheet,,,,3,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,162
+Forms\FreeIntersectionDlg.lfm,'Intersections',FreeIntersectionDialog/ToolBar1/tbStations,TToolButton,'Stations',ShowStations,ShowStations,2,ImageIndex/Action,Themes/Default/icons/24/ShowStations.png,资源中默认隐藏，可能由代码启用,221
+Forms\FreeIntersectionDlg.lfm,'Intersections',FreeIntersectionDialog/ToolBar1/tbButtocks,TToolButton,'Buttocks',ShowButtocks,ShowButtocks,0,ImageIndex/Action,Themes/Default/icons/24/ShowButtocks.png,资源中默认隐藏，可能由代码启用,227
+Forms\FreeIntersectionDlg.lfm,'Intersections',FreeIntersectionDialog/ToolBar1/tbWaterlines,TToolButton,'Waterlines',ShowWaterlines,ShowWaterlines,1,ImageIndex/Action,Themes/Default/icons/24/ShowWaterlines.png,资源中默认隐藏，可能由代码启用,233
+Forms\FreeIntersectionDlg.lfm,'Intersections',FreeIntersectionDialog/ToolBar1/tbDiagonals,TToolButton,'Diagonals',ShowDiagonals,ShowDiagonals,3,ImageIndex/Action,Themes/Default/icons/24/ShowDiagonals.png,资源中默认隐藏，可能由代码启用,239
+Forms\FreeIntersectionDlg.lfm,'Intersections',FreeIntersectionDialog/ToolBar1/ToolButton14,TToolButton,'ToolButton14',,,12,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,245
+Forms\FreeIntersectionDlg.lfm,'Intersections',FreeIntersectionDialog/ToolBar1/tbAddOne,TToolButton,'Add...',AddOne,AddOne,7,ImageIndex/Action,Themes/Default/icons/24/AddOne.png,静态引用，运行时可见性待逐入口确认,253
+Forms\FreeIntersectionDlg.lfm,'Intersections',FreeIntersectionDialog/ToolBar1/tbAddRange,TToolButton,'Range',AddRange,AddRange,6,ImageIndex/Action,Themes/Default/icons/24/AddRange.png,静态引用，运行时可见性待逐入口确认,258
+Forms\FreeIntersectionDlg.lfm,'Intersections',FreeIntersectionDialog/ToolBar1/tbDeleteSelected,TToolButton,'DeleteSelected',DeleteSelected,DeleteSelected,5,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,263
+Forms\FreeIntersectionDlg.lfm,'Intersections',FreeIntersectionDialog/ToolBar1/tbCloseDialog,TToolButton,'CloseDialog',CloseDialog,CloseDialog,4,ImageIndex/Action,Themes/Default/icons/24/CloseDialog.png,静态引用，运行时可见性待逐入口确认,268
+Forms\FreeIntersectionDlg.lfm,'Intersections',FreeIntersectionDialog/ActionList1/ShowStations,TAction,'Stations',,ShowStations,2,ImageIndex/Action,Themes/Default/icons/24/ShowStations.png,静态引用，运行时可见性待逐入口确认,332
+Forms\FreeIntersectionDlg.lfm,'Intersections',FreeIntersectionDialog/ActionList1/ShowButtocks,TAction,'Buttocks',,ShowButtocks,0,ImageIndex/Action,Themes/Default/icons/24/ShowButtocks.png,静态引用，运行时可见性待逐入口确认,339
+Forms\FreeIntersectionDlg.lfm,'Intersections',FreeIntersectionDialog/ActionList1/ShowWaterlines,TAction,'Waterlines',,ShowWaterlines,1,ImageIndex/Action,Themes/Default/icons/24/ShowWaterlines.png,静态引用，运行时可见性待逐入口确认,345
+Forms\FreeIntersectionDlg.lfm,'Intersections',FreeIntersectionDialog/ActionList1/ShowDiagonals,TAction,'Diagonals',,ShowDiagonals,3,ImageIndex/Action,Themes/Default/icons/24/ShowDiagonals.png,静态引用，运行时可见性待逐入口确认,351
+Forms\FreeIntersectionDlg.lfm,'Intersections',FreeIntersectionDialog/ActionList1/CloseDialog,TAction,'CloseDialog',,CloseDialog,4,ImageIndex/Action,Themes/Default/icons/24/CloseDialog.png,静态引用，运行时可见性待逐入口确认,357
+Forms\FreeIntersectionDlg.lfm,'Intersections',FreeIntersectionDialog/ActionList1/AddOne,TAction,'Add...',,AddOne,7,ImageIndex/Action,Themes/Default/icons/24/AddOne.png,静态引用，运行时可见性待逐入口确认,363
+Forms\FreeIntersectionDlg.lfm,'Intersections',FreeIntersectionDialog/ActionList1/AddRange,TAction,'Range',,AddRange,6,ImageIndex/Action,Themes/Default/icons/24/AddRange.png,静态引用，运行时可见性待逐入口确认,369
+Forms\FreeIntersectionDlg.lfm,'Intersections',FreeIntersectionDialog/ActionList1/DeleteAll,TAction,'Delete all',,DeleteAll,5,ImageIndex/Action,Themes/Default/icons/24/DeleteAll.png,静态引用，运行时可见性待逐入口确认,375
+Forms\FreeIntersectionDlg.lfm,'Intersections',FreeIntersectionDialog/ActionList1/DeleteSelected,TAction,'DeleteSelected',,DeleteSelected,5,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,381
+Forms\FreeIntersectLayerDlg.lfm,'Intersect two layers.',FreeIntersectLayerDialog/Panel1/BitBtn1,TSpeedButton,'OK',,,,内嵌Glyph,待关联图像列表,静态引用，运行时可见性待逐入口确认,88
+Forms\FreeIntersectLayerDlg.lfm,'Intersect two layers.',FreeIntersectLayerDialog/Panel1/BitBtn2,TSpeedButton,'Cancel',,,,内嵌Glyph,待关联图像列表,静态引用，运行时可见性待逐入口确认,137
+Forms\FreeKeelWizardDlg.lfm,'Keel and rudder wizard',FreeKeelWizardDialog/Panel2/PageControl/TabSheet1/ViewToolbar/sbShowControlNet,TSpeedButton,'Show Control Net',ActionShowControlNet,ActionShowControlNet,2,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,82
+Forms\FreeKeelWizardDlg.lfm,'Keel and rudder wizard',FreeKeelWizardDialog/Panel2/PageControl/TabSheet1/ViewToolbar/sbShowInteriorEdges,TSpeedButton,'Show Interior Edges',ActionShowInteriorEdges,ActionShowInteriorEdges,3,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,98
+Forms\FreeKeelWizardDlg.lfm,'Keel and rudder wizard',FreeKeelWizardDialog/Panel2/PageControl/TabSheet1/ViewToolbar/sbShowBothSides,TSpeedButton,'Show Both Sides',ActionShowBothSides,ActionShowBothSides,4,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,115
+Forms\FreeKeelWizardDlg.lfm,'Keel and rudder wizard',FreeKeelWizardDialog/Panel2/PageControl/TabSheet2,TTabSheet,'Lift and drag',,,1,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,172
+Forms\FreeKeelWizardDlg.lfm,'Keel and rudder wizard',FreeKeelWizardDialog/Panel2/Panel7/PageControl1/TabSheet4,TTabSheet,'Bulb',,,1,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,741
+Forms\FreeKeelWizardDlg.lfm,'Keel and rudder wizard',FreeKeelWizardDialog/Panel1/BitBtn1,TSpeedButton,'OK',,,,内嵌Glyph,待关联图像列表,静态引用，运行时可见性待逐入口确认,1451
+Forms\FreeKeelWizardDlg.lfm,'Keel and rudder wizard',FreeKeelWizardDialog/Panel1/BitBtn2,TSpeedButton,'Cancel',,,,内嵌Glyph,待关联图像列表,静态引用，运行时可见性待逐入口确认,1501
+Forms\FreeLackenbyDlg.lfm,'Lackenby hullform transformation.',FreeLackenbyDialog/Panel1/Button1,TSpeedButton,'Transform',,,,内嵌Glyph,待关联图像列表,静态引用，运行时可见性待逐入口确认,443
+Forms\FreeLackenbyDlg.lfm,'Lackenby hullform transformation.',FreeLackenbyDialog/Panel1/SpeedButton1,TSpeedButton,'OK',,,,内嵌Glyph,待关联图像列表,静态引用，运行时可见性待逐入口确认,472
+Forms\FreeLackenbyDlg.lfm,'Lackenby hullform transformation.',FreeLackenbyDialog/Panel1/BitBtn2,TSpeedButton,'Cancel',,,,内嵌Glyph,待关联图像列表,静态引用，运行时可见性待逐入口确认,524
+Forms\FreeLayerDlg.lfm,'Layer properties.',FreeLayerDialog/ToolBar1/ToolButton20,TToolButton,,,,1,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,518
+Forms\FreeLayerDlg.lfm,'Layer properties.',FreeLayerDialog/ToolBar1/ToolButton3,TToolButton,'ToolButton3',,,2,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,525
+Forms\FreeLayerDlg.lfm,'Layer properties.',FreeLayerDialog/ToolBar1/_ToolButton2,TToolButton,'_ToolButton2',,,1,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,533
+Forms\FreeLayerDlg.lfm,'Layer properties.',FreeLayerDialog/ToolBar1/MoveUp,TToolButton,'Up',,,3,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,541
+Forms\FreeLayerDlg.lfm,'Layer properties.',FreeLayerDialog/ToolBar1/MoveDown,TToolButton,'Down',,,4,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,549
+Forms\FreeLayerDlg.lfm,'Layer properties.',FreeLayerDialog/ToolBar1/_ToolButton4,TToolButton,'_ToolButton4',,,1,ImageIndex/Action,待关联图像列表,资源中默认隐藏，可能由代码启用,557
+Forms\FreeLayerDlg.lfm,'Layer properties.',FreeLayerDialog/ToolBar1/ToolButton1,TToolButton,'Done',,,0,ImageIndex/Action,待关联图像列表,资源中默认隐藏，可能由代码启用,566
+Forms\FreeLinesplanFrme.lfm,,FreeLinesplanFrame/ToolBar1/ToolButton5,TToolButton,'Extents',ZoomExtents,ZoomExtents,0,ImageIndex/Action,Themes/Default/icons/24/ZoomExtents.png,静态引用，运行时可见性待逐入口确认,25
+Forms\FreeLinesplanFrme.lfm,,FreeLinesplanFrame/ToolBar1/ToolButton8,TToolButton,'ZoomIn',ZoomIn,ZoomIn,3,ImageIndex/Action,Themes/Default/icons/24/ZoomIn.png,静态引用，运行时可见性待逐入口确认,31
+Forms\FreeLinesplanFrme.lfm,,FreeLinesplanFrame/ToolBar1/ToolButton9,TToolButton,'Zoom out',ZoomOut,ZoomOut,2,ImageIndex/Action,Themes/Default/icons/24/ZoomOut.png,静态引用，运行时可见性待逐入口确认,37
+Forms\FreeLinesplanFrme.lfm,,FreeLinesplanFrame/ToolBar1/ToolButton6,TToolButton,'ToolButton6',,,1,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,43
+Forms\FreeLinesplanFrme.lfm,,FreeLinesplanFrame/ToolBar1/ToolButton19,TToolButton,'Solid',ShowFillColor,ShowFillColor,6,ImageIndex/Action,Themes/Default/icons/24/ShowFillColor.png,静态引用，运行时可见性待逐入口确认,51
+Forms\FreeLinesplanFrme.lfm,,FreeLinesplanFrame/ToolBar1/ToolButton2,TToolButton,'Use lights',UseLights,UseLights,7,ImageIndex/Action,Themes/Default/icons/24/UseLights.png,静态引用，运行时可见性待逐入口确认,57
+Forms\FreeLinesplanFrme.lfm,,FreeLinesplanFrame/ToolBar1/ToolButton3,TToolButton,'Monochrome',ShowMonochrome,ShowMonochrome,8,ImageIndex/Action,Themes/Default/icons/24/ShowMonochrome.png,静态引用，运行时可见性待逐入口确认,63
+Forms\FreeLinesplanFrme.lfm,,FreeLinesplanFrame/ToolBar1/ToolButton4,TToolButton,'MirrorPlanView',MirrorPlanView,MirrorPlanView,9,ImageIndex/Action,Themes/Default/icons/24/MirrorPlanView.png,静态引用，运行时可见性待逐入口确认,69
+Forms\FreeLinesplanFrme.lfm,,FreeLinesplanFrame/ToolBar1/ToolButton14,TToolButton,'ToolButton14',,,12,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,75
+Forms\FreeLinesplanFrme.lfm,,FreeLinesplanFrame/ToolBar1/ToolButton7,TToolButton,'Save bitmap',SaveBitmap,SaveBitmap,4,ImageIndex/Action,Themes/Default/icons/24/SaveBitmap.png,静态引用，运行时可见性待逐入口确认,84
+Forms\FreeLinesplanFrme.lfm,,FreeLinesplanFrame/ToolBar1/ToolButton13,TToolButton,'DXF',ExportDXF,ExportDXF,5,ImageIndex/Action,Themes/Default/icons/24/ExportDXF.png,静态引用，运行时可见性待逐入口确认,90
+Forms\FreeLinesplanFrme.lfm,,FreeLinesplanFrame/ToolBar1/ToolButton1,TToolButton,'Print',Print,Print,1,ImageIndex/Action,Themes/Default/icons/24/Print.png,静态引用，运行时可见性待逐入口确认,96
+Forms\FreeLinesplanFrme.lfm,,FreeLinesplanFrame/ToolBar1/ToolButton15,TToolButton,'ToolButton15',,,12,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,102
+Forms\FreeLinesplanFrme.lfm,,FreeLinesplanFrame/ActionList1/ZoomExtents,TAction,'Extents',,ZoomExtents,0,ImageIndex/Action,Themes/Default/icons/24/ZoomExtents.png,静态引用，运行时可见性待逐入口确认,129
+Forms\FreeLinesplanFrme.lfm,,FreeLinesplanFrame/ActionList1/SaveBitmap,TAction,'Save bitmap',,SaveBitmap,4,ImageIndex/Action,Themes/Default/icons/24/SaveBitmap.png,静态引用，运行时可见性待逐入口确认,137
+Forms\FreeLinesplanFrme.lfm,,FreeLinesplanFrame/ActionList1/ZoomIn,TAction,'ZoomIn',,ZoomIn,3,ImageIndex/Action,Themes/Default/icons/24/ZoomIn.png,静态引用，运行时可见性待逐入口确认,144
+Forms\FreeLinesplanFrme.lfm,,FreeLinesplanFrame/ActionList1/ZoomOut,TAction,'Zoom out',,ZoomOut,2,ImageIndex/Action,Themes/Default/icons/24/ZoomOut.png,静态引用，运行时可见性待逐入口确认,152
+Forms\FreeLinesplanFrme.lfm,,FreeLinesplanFrame/ActionList1/ExportDXF,TAction,'DXF',,ExportDXF,5,ImageIndex/Action,Themes/Default/icons/24/ExportDXF.png,静态引用，运行时可见性待逐入口确认,160
+Forms\FreeLinesplanFrme.lfm,,FreeLinesplanFrame/ActionList1/ShowFillColor,TAction,'Solid',,ShowFillColor,6,ImageIndex/Action,Themes/Default/icons/24/ShowFillColor.png,静态引用，运行时可见性待逐入口确认,167
+Forms\FreeLinesplanFrme.lfm,,FreeLinesplanFrame/ActionList1/Print,TAction,'Print',,Print,1,ImageIndex/Action,Themes/Default/icons/24/Print.png,静态引用，运行时可见性待逐入口确认,175
+Forms\FreeLinesplanFrme.lfm,,FreeLinesplanFrame/ActionList1/UseLights,TAction,'Use lights',,UseLights,7,ImageIndex/Action,Themes/Default/icons/24/UseLights.png,静态引用，运行时可见性待逐入口确认,182
+Forms\FreeLinesplanFrme.lfm,,FreeLinesplanFrame/ActionList1/ShowMonochrome,TAction,'Monochrome',,ShowMonochrome,8,ImageIndex/Action,Themes/Default/icons/24/ShowMonochrome.png,静态引用，运行时可见性待逐入口确认,190
+Forms\FreeLinesplanFrme.lfm,,FreeLinesplanFrame/ActionList1/MirrorPlanView,TAction,'MirrorPlanView',,MirrorPlanView,9,ImageIndex/Action,Themes/Default/icons/24/MirrorPlanView.png,静态引用，运行时可见性待逐入口确认,197
+Forms\FreeMichletOutputDlg.lfm,'Michlet file generator.',FreeMichletOutputDialog/Panel1/OKbutton,TSpeedButton,'OK',,,,内嵌Glyph,待关联图像列表,静态引用，运行时可见性待逐入口确认,24
+Forms\FreeMichletOutputDlg.lfm,'Michlet file generator.',FreeMichletOutputDialog/Panel1/CancelButton,TSpeedButton,'Cancel',,,,内嵌Glyph,待关联图像列表,静态引用，运行时可见性待逐入口确认,73
+Forms\FreeMichletOutputDlg.lfm,'Michlet file generator.',FreeMichletOutputDialog/Panel2/PageControl1/TabSheet3,TTabSheet,'Environment',,,2,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,456
+Forms\FreeMichletOutputDlg.lfm,'Michlet file generator.',FreeMichletOutputDialog/Panel2/PageControl1/TabSheet2,TTabSheet,'Resistance',,,1,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,617
+Forms\FreeMichletOutputDlg.lfm,'Michlet file generator.',FreeMichletOutputDialog/Panel2/PageControl1/TabSheet4,TTabSheet,'Waves',,,3,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,822
+Forms\FreeMirrorPlaneDlg.lfm,'Mirror',FreeMirrorPlaneDialog/Panel1/BitBtn1,TSpeedButton,'OK',,,,内嵌Glyph,待关联图像列表,静态引用，运行时可见性待逐入口确认,130
+Forms\FreeMirrorPlaneDlg.lfm,'Mirror',FreeMirrorPlaneDialog/Panel1/BitBtn2,TSpeedButton,'Cancel',,,,内嵌Glyph,待关联图像列表,静态引用，运行时可见性待逐入口确认,179
+Forms\FreeNewModelDlg.lfm,'New model.',FreeNewModelDialog/Panel3/BitBtn1,TSpeedButton,'OK',,,,内嵌Glyph,待关联图像列表,静态引用，运行时可见性待逐入口确认,26
+Forms\FreeNewModelDlg.lfm,'New model.',FreeNewModelDialog/Panel3/BitBtn2,TSpeedButton,'Cancel',,,,内嵌Glyph,待关联图像列表,静态引用，运行时可见性待逐入口确认,75
+Forms\FreePreferencesDlg.lfm,'|Preferences.|',FreePreferencesDialog/ButtonPanel/BitBtn2,TSpeedButton,'Cancel',,,,内嵌Glyph,待关联图像列表,静态引用，运行时可见性待逐入口确认,29
+Forms\FreePreferencesDlg.lfm,'|Preferences.|',FreePreferencesDialog/ButtonPanel/BitBtn1,TSpeedButton,'OK',,,,内嵌Glyph,待关联图像列表,静态引用，运行时可见性待逐入口确认,79
+Forms\FreePreferencesDlg.lfm,'|Preferences.|',FreePreferencesDialog/Panel1/PageControl1/TabSheet2/Panel51/Panel30/Panel32/SpeedButtonLanguagesDir,TSpeedButton,,,,,内嵌Glyph,待关联图像列表,静态引用，运行时可见性待逐入口确认,434
+Forms\FreePreferencesDlg.lfm,'|Preferences.|',FreePreferencesDialog/Panel1/PageControl1/TabSheet2/Panel51/Panel28/Panel29/SpeedButton12,TSpeedButton,,,,,内嵌Glyph,待关联图像列表,静态引用，运行时可见性待逐入口确认,501
+Forms\FreePreferencesDlg.lfm,'|Preferences.|',FreePreferencesDialog/Panel1/PageControl1/TabSheet2/Panel51/Panel31/Panel33/SpeedButton9,TSpeedButton,,,,,内嵌Glyph,待关联图像列表,静态引用，运行时可见性待逐入口确认,568
+Forms\FreePreferencesDlg.lfm,'|Preferences.|',FreePreferencesDialog/Panel1/PageControl1/TabSheet2/Panel51/Panel34/Panel35/SpeedButton13,TSpeedButton,,,,,内嵌Glyph,待关联图像列表,静态引用，运行时可见性待逐入口确认,635
+Forms\FreePreferencesDlg.lfm,'|Preferences.|',FreePreferencesDialog/Panel1/PageControl1/TabSheet2/Panel51/Panel38/Panel39/SpeedButton14,TSpeedButton,,,,,内嵌Glyph,待关联图像列表,静态引用，运行时可见性待逐入口确认,702
+Forms\FreePreferencesDlg.lfm,'|Preferences.|',FreePreferencesDialog/Panel1/PageControl1/TabSheet2/Panel51/Panel40/Panel41/SpeedButton17,TSpeedButton,,,,,内嵌Glyph,待关联图像列表,静态引用，运行时可见性待逐入口确认,768
+Forms\FreePreferencesDlg.lfm,'|Preferences.|',FreePreferencesDialog/Panel1/PageControl1/TabSheet2/Panel51/Panel42/Panel43/SpeedButton16,TSpeedButton,,,,,内嵌Glyph,待关联图像列表,静态引用，运行时可见性待逐入口确认,834
+Forms\FreePreferencesDlg.lfm,'|Preferences.|',FreePreferencesDialog/Panel1/PageControl1/TabSheet2/Panel51/Panel44/Panel45/SpeedButton15,TSpeedButton,,,,,内嵌Glyph,待关联图像列表,静态引用，运行时可见性待逐入口确认,901
+Forms\FreePreferencesDlg.lfm,'|Preferences.|',FreePreferencesDialog/Panel1/PageControl1/TabSheet2/Panel51/PanelGlobalImportDir/Panel47/SpeedButton19,TSpeedButton,,,,,内嵌Glyph,待关联图像列表,静态引用，运行时可见性待逐入口确认,967
+Forms\FreePreferencesDlg.lfm,'|Preferences.|',FreePreferencesDialog/Panel1/PageControl1/TabSheet2/Panel51/Panel48/Panel49/SpeedButton18,TSpeedButton,,,,,内嵌Glyph,待关联图像列表,静态引用，运行时可见性待逐入口确认,1033
+Forms\FreePreferencesDlg.lfm,'|Preferences.|',FreePreferencesDialog/Panel1/PageControl1/TabSheet2/Panel51/Panel55/BitBtnResetDirs,TSpeedButton,'Reset',,,,内嵌Glyph,待关联图像列表,静态引用，运行时可见性待逐入口确认,1076
+Forms\FreePreferencesDlg.lfm,'|Preferences.|',FreePreferencesDialog/Panel1/PageControl1/TabSheet3/Panel/Panel56/BitBtnResetColors,TSpeedButton,'Reset',,,,内嵌Glyph,待关联图像列表,静态引用，运行时可见性待逐入口确认,1921
+Forms\FreeProjectSettingsDlg.lfm,'Project settings.',FREEProjectSettingsDialog/Panel1/PageControl1/TabSheet3,TTabSheet,'Main dimensions',,,2,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,287
+Forms\FreeProjectSettingsDlg.lfm,'Project settings.',FREEProjectSettingsDialog/Panel1/PageControl1/TabSheet2,TTabSheet,'Hydrostatics',,,1,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,547
+Forms\FreeProjectSettingsDlg.lfm,'Project settings.',FREEProjectSettingsDialog/Panel3/BitBtn1,TSpeedButton,'OK',,,,内嵌Glyph,待关联图像列表,静态引用，运行时可见性待逐入口确认,831
+Forms\FreeProjectSettingsDlg.lfm,'Project settings.',FREEProjectSettingsDialog/Panel3/BitBtn2,TSpeedButton,'Cancel',,,,内嵌Glyph,待关联图像列表,静态引用，运行时可见性待逐入口确认,880
+Forms\FreePropeller_Task1Dlg.lfm,'Design of propeller elements for engine selection.',FreePropeller_Task1/ToolBar1/_ToolButton10,TToolButton,'_ToolButton10',,,6,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,27
+Forms\FreePropeller_Task1Dlg.lfm,'Design of propeller elements for engine selection.',FreePropeller_Task1/ToolBar1/PrintButton,TToolButton,'PrintButton',,,2,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,35
+Forms\FreePropeller_Task1Dlg.lfm,'Design of propeller elements for engine selection.',FreePropeller_Task1/ToolBar1/_ToolButton14,TToolButton,'_ToolButton14',,,12,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,43
+Forms\FreePropeller_Task1Dlg.lfm,'Design of propeller elements for engine selection.',FreePropeller_Task1/ToolBar1/ToolButton25,TToolButton,,,,1,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,51
+Forms\FreePropeller_Task1Dlg.lfm,'Design of propeller elements for engine selection.',FreePropeller_Task1/ToolBar1/ToolButton7,TToolButton,,,,0,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,58
+Forms\FreePropeller_Task1Dlg.lfm,'Design of propeller elements for engine selection.',FreePropeller_Task1/ToolBar1/ToolButton17,TToolButton,,,,3,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,65
+Forms\FreePropeller_Task1Dlg.lfm,'Design of propeller elements for engine selection.',FreePropeller_Task1/PageControl1/TabSheet2,TTabSheet,'Results',,,1,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,526
+Forms\FreePropeller_Task2Dlg.lfm,'Optimal propeller for selected engine.',FreePropeller_Task2/ToolBar1/_ToolButton10,TToolButton,'_ToolButton10',,,6,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,28
+Forms\FreePropeller_Task2Dlg.lfm,'Optimal propeller for selected engine.',FreePropeller_Task2/ToolBar1/PrintButton,TToolButton,'PrintButton',,,2,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,36
+Forms\FreePropeller_Task2Dlg.lfm,'Optimal propeller for selected engine.',FreePropeller_Task2/ToolBar1/_ToolButton14,TToolButton,'_ToolButton14',,,12,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,44
+Forms\FreePropeller_Task2Dlg.lfm,'Optimal propeller for selected engine.',FreePropeller_Task2/ToolBar1/ToolButton25,TToolButton,,,,1,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,52
+Forms\FreePropeller_Task2Dlg.lfm,'Optimal propeller for selected engine.',FreePropeller_Task2/ToolBar1/ToolButton7,TToolButton,,,,0,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,59
+Forms\FreePropeller_Task2Dlg.lfm,'Optimal propeller for selected engine.',FreePropeller_Task2/PageControl1/TabSheet2,TTabSheet,'Results',,,1,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,683
+Forms\FreePropeller_Task3Dlg.lfm,'Passport diagram',FreePropeller_Task3/ToolBar1/_ToolButton10,TToolButton,'_ToolButton10',,,6,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,28
+Forms\FreePropeller_Task3Dlg.lfm,'Passport diagram',FreePropeller_Task3/ToolBar1/PrintButton,TToolButton,'PrintButton',,,2,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,36
+Forms\FreePropeller_Task3Dlg.lfm,'Passport diagram',FreePropeller_Task3/ToolBar1/_ToolButton14,TToolButton,'_ToolButton14',,,12,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,44
+Forms\FreePropeller_Task3Dlg.lfm,'Passport diagram',FreePropeller_Task3/ToolBar1/ToolButton25,TToolButton,,,,1,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,52
+Forms\FreePropeller_Task3Dlg.lfm,'Passport diagram',FreePropeller_Task3/ToolBar1/ToolButton7,TToolButton,,,,0,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,59
+Forms\FreePropeller_Task3Dlg.lfm,'Passport diagram',FreePropeller_Task3/PageControl1/TabSheet2,TTabSheet,'Results',,,1,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,634
+Forms\FreePropeller_Task4Dlg.lfm,'Wageningen B-Screw Series Propeller Preliminary Design.',FreePropeller_Task4/ToolBar1/_ToolButton10,TToolButton,'_ToolButton10',,,6,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,28
+Forms\FreePropeller_Task4Dlg.lfm,'Wageningen B-Screw Series Propeller Preliminary Design.',FreePropeller_Task4/ToolBar1/PrintButton,TToolButton,'PrintButton',,,2,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,36
+Forms\FreePropeller_Task4Dlg.lfm,'Wageningen B-Screw Series Propeller Preliminary Design.',FreePropeller_Task4/ToolBar1/_ToolButton14,TToolButton,'_ToolButton14',,,12,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,44
+Forms\FreePropeller_Task4Dlg.lfm,'Wageningen B-Screw Series Propeller Preliminary Design.',FreePropeller_Task4/ToolBar1/ToolButton25,TToolButton,,,,1,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,52
+Forms\FreePropeller_Task4Dlg.lfm,'Wageningen B-Screw Series Propeller Preliminary Design.',FreePropeller_Task4/ToolBar1/ToolButton7,TToolButton,,,,0,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,59
+Forms\FreePropeller_Task4Dlg.lfm,'Wageningen B-Screw Series Propeller Preliminary Design.',FreePropeller_Task4/ToolBar1/ToolButton17,TToolButton,,,,3,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,66
+Forms\FreePropeller_Task4Dlg.lfm,'Wageningen B-Screw Series Propeller Preliminary Design.',FreePropeller_Task4/PageControl1/TabSheet2,TTabSheet,'Results',,,1,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,503
+Forms\FreePropeller_Task5Dlg.lfm,'Calculation of Open Water Characteristics of Screw Propeller.',FreePropeller_Task5/ToolBar1/_ToolButton10,TToolButton,'_ToolButton10',,,6,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,30
+Forms\FreePropeller_Task5Dlg.lfm,'Calculation of Open Water Characteristics of Screw Propeller.',FreePropeller_Task5/ToolBar1/PrintButton,TToolButton,'PrintButton',,,2,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,38
+Forms\FreePropeller_Task5Dlg.lfm,'Calculation of Open Water Characteristics of Screw Propeller.',FreePropeller_Task5/ToolBar1/_ToolButton14,TToolButton,'_ToolButton14',,,12,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,46
+Forms\FreePropeller_Task5Dlg.lfm,'Calculation of Open Water Characteristics of Screw Propeller.',FreePropeller_Task5/ToolBar1/ToolButton25,TToolButton,,,,1,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,54
+Forms\FreePropeller_Task5Dlg.lfm,'Calculation of Open Water Characteristics of Screw Propeller.',FreePropeller_Task5/ToolBar1/ToolButton7,TToolButton,,,,0,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,61
+Forms\FreePropeller_Task5Dlg.lfm,'Calculation of Open Water Characteristics of Screw Propeller.',FreePropeller_Task5/ToolBar1/ToolButton17,TToolButton,,,,3,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,68
+Forms\FreePropeller_Task5Dlg.lfm,'Calculation of Open Water Characteristics of Screw Propeller.',FreePropeller_Task5/PageControl1/TabSheet2,TTabSheet,'Results',,,1,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,446
+Forms\FreeResistance_DelftDlg.lfm,'Resistance for Sailing Yachts or a Sea Ships',FreeResistance_Delft/ToolBar1/_ToolButton10,TToolButton,'_ToolButton10',,,6,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,24
+Forms\FreeResistance_DelftDlg.lfm,'Resistance for Sailing Yachts or a Sea Ships',FreeResistance_Delft/ToolBar1/ToolButton20,TToolButton,,,,3,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,32
+Forms\FreeResistance_DelftDlg.lfm,'Resistance for Sailing Yachts or a Sea Ships',FreeResistance_Delft/ToolBar1/PrintButton,TToolButton,'PrintButton',,,2,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,39
+Forms\FreeResistance_DelftDlg.lfm,'Resistance for Sailing Yachts or a Sea Ships',FreeResistance_Delft/ToolBar1/_ToolButton14,TToolButton,'_ToolButton14',,,12,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,47
+Forms\FreeResistance_DelftDlg.lfm,'Resistance for Sailing Yachts or a Sea Ships',FreeResistance_Delft/ToolBar1/ToolButton25,TToolButton,,,,1,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,55
+Forms\FreeResistance_DelftDlg.lfm,'Resistance for Sailing Yachts or a Sea Ships',FreeResistance_Delft/ToolBar1/ToolButton7,TToolButton,,,,0,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,62
+Forms\FreeResistance_FungLeibDlg.lfm,'Resistance for naval ships by Fung-Leibmans method 1995',FreeResistance_FungLeib/ToolBar1/_ToolButton10,TToolButton,'_ToolButton10',,,6,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,1712
+Forms\FreeResistance_FungLeibDlg.lfm,'Resistance for naval ships by Fung-Leibmans method 1995',FreeResistance_FungLeib/ToolBar1/ToolButton20,TToolButton,,,,3,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,1720
+Forms\FreeResistance_FungLeibDlg.lfm,'Resistance for naval ships by Fung-Leibmans method 1995',FreeResistance_FungLeib/ToolBar1/PrintButton,TToolButton,'PrintButton',,,2,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,1727
+Forms\FreeResistance_FungLeibDlg.lfm,'Resistance for naval ships by Fung-Leibmans method 1995',FreeResistance_FungLeib/ToolBar1/_ToolButton14,TToolButton,'_ToolButton14',,,12,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,1735
+Forms\FreeResistance_FungLeibDlg.lfm,'Resistance for naval ships by Fung-Leibmans method 1995',FreeResistance_FungLeib/ToolBar1/ToolButton25,TToolButton,,,,1,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,1743
+Forms\FreeResistance_FungLeibDlg.lfm,'Resistance for naval ships by Fung-Leibmans method 1995',FreeResistance_FungLeib/ToolBar1/ToolButton7,TToolButton,,,,0,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,1750
+Forms\FreeResistance_HollenDlg.lfm,'Resistance for sea ships by Hollenbachs method 1998',FreeResistance_Hollen/ToolBar1/_ToolButton10,TToolButton,'_ToolButton10',,,6,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,28
+Forms\FreeResistance_HollenDlg.lfm,'Resistance for sea ships by Hollenbachs method 1998',FreeResistance_Hollen/ToolBar1/ToolButton20,TToolButton,,,,3,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,36
+Forms\FreeResistance_HollenDlg.lfm,'Resistance for sea ships by Hollenbachs method 1998',FreeResistance_Hollen/ToolBar1/PrintButton,TToolButton,'PrintButton',,,2,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,44
+Forms\FreeResistance_HollenDlg.lfm,'Resistance for sea ships by Hollenbachs method 1998',FreeResistance_Hollen/ToolBar1/_ToolButton14,TToolButton,'_ToolButton14',,,12,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,53
+Forms\FreeResistance_HollenDlg.lfm,'Resistance for sea ships by Hollenbachs method 1998',FreeResistance_Hollen/ToolBar1/ToolButton25,TToolButton,,,,1,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,61
+Forms\FreeResistance_HollenDlg.lfm,'Resistance for sea ships by Hollenbachs method 1998',FreeResistance_Hollen/ToolBar1/ToolButton7,TToolButton,,,,0,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,69
+Forms\FreeResistance_HoltrDlg.lfm,'Resistance for sea ships',FreeResistance_Holtr/ToolBar1/_ToolButton10,TToolButton,'_ToolButton10',,,6,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,1754
+Forms\FreeResistance_HoltrDlg.lfm,'Resistance for sea ships',FreeResistance_Holtr/ToolBar1/tbCalculate,TToolButton,,,,3,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,1762
+Forms\FreeResistance_HoltrDlg.lfm,'Resistance for sea ships',FreeResistance_Holtr/ToolBar1/tbPrint,TToolButton,'tbPrint',,,2,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,1769
+Forms\FreeResistance_HoltrDlg.lfm,'Resistance for sea ships',FreeResistance_Holtr/ToolBar1/_ToolButton14,TToolButton,'_ToolButton14',,,12,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,1777
+Forms\FreeResistance_HoltrDlg.lfm,'Resistance for sea ships',FreeResistance_Holtr/ToolBar1/tbCloseSave,TToolButton,,,,1,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,1785
+Forms\FreeResistance_HoltrDlg.lfm,'Resistance for sea ships',FreeResistance_Holtr/ToolBar1/tbClose,TToolButton,,,,0,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,1792
+Forms\FreeResistance_KaperDlg.lfm,'Kaper resistance calculation.',FreeResistance_Kaper/ToolBar1/_ToolButton10,TToolButton,'_ToolButton10',,,6,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,29
+Forms\FreeResistance_KaperDlg.lfm,'Kaper resistance calculation.',FreeResistance_Kaper/ToolBar1/PrintButton,TToolButton,'PrintButton',,,2,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,37
+Forms\FreeResistance_KaperDlg.lfm,'Kaper resistance calculation.',FreeResistance_Kaper/ToolBar1/_ToolButton14,TToolButton,'_ToolButton14',,,12,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,45
+Forms\FreeResistance_KaperDlg.lfm,'Kaper resistance calculation.',FreeResistance_Kaper/ToolBar1/ToolButton25,TToolButton,,,,1,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,53
+Forms\FreeResistance_KaperDlg.lfm,'Kaper resistance calculation.',FreeResistance_Kaper/ToolBar1/ToolButton7,TToolButton,,,,0,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,60
+Forms\FreeResistance_KaperDlg.lfm,'Kaper resistance calculation.',FreeResistance_Kaper/PageControl1/TabSheet2,TTabSheet,'Results',,,1,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,489
+Forms\FreeResistance_MHDlg.lfm,'Resistance for multihull ships',FreeResistance_MH/ToolBar1/_ToolButton10,TToolButton,'_ToolButton10',,,6,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,1890
+Forms\FreeResistance_MHDlg.lfm,'Resistance for multihull ships',FreeResistance_MH/ToolBar1/ToolButton20,TToolButton,,,,3,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,1898
+Forms\FreeResistance_MHDlg.lfm,'Resistance for multihull ships',FreeResistance_MH/ToolBar1/PrintButton,TToolButton,'PrintButton',,,2,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,1905
+Forms\FreeResistance_MHDlg.lfm,'Resistance for multihull ships',FreeResistance_MH/ToolBar1/_ToolButton14,TToolButton,'_ToolButton14',,,12,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,1913
+Forms\FreeResistance_MHDlg.lfm,'Resistance for multihull ships',FreeResistance_MH/ToolBar1/ToolButton25,TToolButton,,,,1,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,1921
+Forms\FreeResistance_MHDlg.lfm,'Resistance for multihull ships',FreeResistance_MH/ToolBar1/ToolButton7,TToolButton,,,,0,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,1928
+Forms\FreeResistance_OortmerDlg.lfm,'Resistance for small displacement ships methods',FreeResistance_Oortmer/ToolBar1/_ToolButton10,TToolButton,'_ToolButton10',,,6,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,1741
+Forms\FreeResistance_OortmerDlg.lfm,'Resistance for small displacement ships methods',FreeResistance_Oortmer/ToolBar1/ToolButton20,TToolButton,,,,3,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,1749
+Forms\FreeResistance_OortmerDlg.lfm,'Resistance for small displacement ships methods',FreeResistance_Oortmer/ToolBar1/PrintButton,TToolButton,'PrintButton',,,2,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,1756
+Forms\FreeResistance_OortmerDlg.lfm,'Resistance for small displacement ships methods',FreeResistance_Oortmer/ToolBar1/_ToolButton14,TToolButton,'_ToolButton14',,,12,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,1764
+Forms\FreeResistance_OortmerDlg.lfm,'Resistance for small displacement ships methods',FreeResistance_Oortmer/ToolBar1/ToolButton25,TToolButton,,,,1,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,1772
+Forms\FreeResistance_OortmerDlg.lfm,'Resistance for small displacement ships methods',FreeResistance_Oortmer/ToolBar1/ToolButton7,TToolButton,,,,0,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,1779
+Forms\FreeResistance_OSTDlg.lfm,'Resistance for displacement ships',FreeResistance_OST/ToolBar1/_ToolButton10,TToolButton,'_ToolButton10',,,6,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,1882
+Forms\FreeResistance_OSTDlg.lfm,'Resistance for displacement ships',FreeResistance_OST/ToolBar1/ToolButton20,TToolButton,,,,3,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,1890
+Forms\FreeResistance_OSTDlg.lfm,'Resistance for displacement ships',FreeResistance_OST/ToolBar1/PrintButton,TToolButton,'PrintButton',,,2,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,1897
+Forms\FreeResistance_OSTDlg.lfm,'Resistance for displacement ships',FreeResistance_OST/ToolBar1/_ToolButton14,TToolButton,'_ToolButton14',,,12,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,1905
+Forms\FreeResistance_OSTDlg.lfm,'Resistance for displacement ships',FreeResistance_OST/ToolBar1/ToolButton25,TToolButton,,,,1,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,1913
+Forms\FreeResistance_OSTDlg.lfm,'Resistance for displacement ships',FreeResistance_OST/ToolBar1/ToolButton7,TToolButton,,,,0,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,1920
+Forms\FreeResistance_PlaningDlg.lfm,'Planing resistance calculation.',FreeResistance_Planing/ToolBar1/_ToolButton10,TToolButton,'_ToolButton10',,,6,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,31
+Forms\FreeResistance_PlaningDlg.lfm,'Planing resistance calculation.',FreeResistance_Planing/ToolBar1/PrintButton,TToolButton,'PrintButton',,,2,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,39
+Forms\FreeResistance_PlaningDlg.lfm,'Planing resistance calculation.',FreeResistance_Planing/ToolBar1/_ToolButton14,TToolButton,'_ToolButton14',,,12,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,47
+Forms\FreeResistance_PlaningDlg.lfm,'Planing resistance calculation.',FreeResistance_Planing/ToolBar1/ToolButton25,TToolButton,,,,1,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,55
+Forms\FreeResistance_PlaningDlg.lfm,'Planing resistance calculation.',FreeResistance_Planing/ToolBar1/ToolButton7,TToolButton,,,,0,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,62
+Forms\FreeResistance_PlaningDlg.lfm,'Planing resistance calculation.',FreeResistance_Planing/PageControl1/TabSheet2,TTabSheet,'Results',,,1,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,908
+Forms\FreeResistance_RBHSDlg.lfm,'Resistance for displacement ships',FreeResistance_RBHS/ToolBar1/_ToolButton10,TToolButton,'_ToolButton10',,,6,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,1885
+Forms\FreeResistance_RBHSDlg.lfm,'Resistance for displacement ships',FreeResistance_RBHS/ToolBar1/ToolButton20,TToolButton,,,,3,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,1893
+Forms\FreeResistance_RBHSDlg.lfm,'Resistance for displacement ships',FreeResistance_RBHS/ToolBar1/PrintButton,TToolButton,'PrintButton',,,2,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,1900
+Forms\FreeResistance_RBHSDlg.lfm,'Resistance for displacement ships',FreeResistance_RBHS/ToolBar1/_ToolButton14,TToolButton,'_ToolButton14',,,12,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,1908
+Forms\FreeResistance_RBHSDlg.lfm,'Resistance for displacement ships',FreeResistance_RBHS/ToolBar1/ToolButton25,TToolButton,,,,1,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,1916
+Forms\FreeResistance_RBHSDlg.lfm,'Resistance for displacement ships',FreeResistance_RBHS/ToolBar1/ToolButton7,TToolButton,,,,0,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,1923
+Forms\FreeRotateDlg.lfm,'Rotation',FreeRotateDialog/Panel1/OKButton,TSpeedButton,'&Ok',,,,内嵌Glyph,待关联图像列表,静态引用，运行时可见性待逐入口确认,23
+Forms\FreeRotateDlg.lfm,'Rotation',FreeRotateDialog/Panel1/CancelButton,TSpeedButton,'&Cancel',,,,内嵌Glyph,待关联图像列表,静态引用，运行时可见性待逐入口确认,75
+Forms\FreeRotateDlgM.lfm,'Rotation',FreeRotateMDialog/Panel1/OKButton,TSpeedButton,'&Ok',,,,内嵌Glyph,待关联图像列表,静态引用，运行时可见性待逐入口确认,258
+Forms\FreeRotateDlgM.lfm,'Rotation',FreeRotateMDialog/Panel1/CancelButton,TSpeedButton,'&Cancel',,,,内嵌Glyph,待关联图像列表,静态引用，运行时可见性待逐入口确认,310
+Forms\FreeSaveImageDlg.lfm,'Save image.',SaveImageDialog/Panel2/Panel1/SpeedButton1,TSpeedButton,,,,,内嵌Glyph,待关联图像列表,静态引用，运行时可见性待逐入口确认,51
+Forms\FreeSaveImageDlg.lfm,'Save image.',SaveImageDialog/Panel4/BitBtn1,TSpeedButton,'OK',,,,内嵌Glyph,待关联图像列表,静态引用，运行时可见性待逐入口确认,209
+Forms\FreeSaveImageDlg.lfm,'Save image.',SaveImageDialog/Panel4/BitBtn2,TSpeedButton,'Cancel',,,,内嵌Glyph,待关联图像列表,静态引用，运行时可见性待逐入口确认,259
+Forms\FreeSelectLayersDlg.lfm,'Select layers.',FreeSelectLayersDialog/Panel5/BitBtn1,TSpeedButton,'OK',,,,内嵌Glyph,待关联图像列表,静态引用，运行时可见性待逐入口确认,75
+Forms\FreeSelectLayersDlg.lfm,'Select layers.',FreeSelectLayersDialog/Panel5/BitBtn2,TSpeedButton,'Cancel',,,,内嵌Glyph,待关联图像列表,静态引用，运行时可见性待逐入口确认,124
+Forms\FreeSplitSectionDlg.lfm,'Split section location',FreeSplitSectionDialog/TopPanel/Panel1/SpeedButton1,TSpeedButton,,,,64,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,66
+Forms\FreeSplitSectionDlg.lfm,'Split section location',FreeSplitSectionDialog/TopPanel/Panel1/SpeedButton3,TSpeedButton,,,,49,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,83
+Forms\FreeUndoHistoryDlg.lfm,'Undo history.',FreeUndoHistoryDialog/Panel/SpeedButton1,TSpeedButton,'Select',,,,内嵌Glyph,待关联图像列表,静态引用，运行时可见性待逐入口确认,25
+Forms\FreeUndoHistoryDlg.lfm,'Undo history.',FreeUndoHistoryDialog/Panel/SpeedButton2,TSpeedButton,'Cancel',,,,内嵌Glyph,待关联图像列表,静态引用，运行时可见性待逐入口确认,74
+Forms\Main.lfm,,MainForm/PanelMain/ToolBarFile/ToolButton20,TToolButton,'New...',NewModel,NewModel,13,ImageIndex/Action,Themes/Default/icons/24/NewModel.png,旧工具栏，当前Studio界面隐藏,200
+Forms\Main.lfm,,MainForm/PanelMain/ToolBarFile/ToolButtonOpenFile,TToolButton,'Open...',LoadFile,LoadFile,0,ImageIndex/Action,Themes/Default/icons/24/LoadFile.png,旧工具栏，当前Studio界面隐藏,206
+Forms\Main.lfm,,MainForm/PanelMain/ToolBarFile/ToolButton38,TToolButton,'Save',FileSave,FileSave,5,ImageIndex/Action,Themes/Default/icons/24/FileSave.png,旧工具栏，当前Studio界面隐藏,213
+Forms\Main.lfm,,MainForm/PanelMain/ToolBarFile/ToolButton3,TToolButton,'Exit',ExitProgram,ExitProgram,1,ImageIndex/Action,Themes/Default/icons/24/ExitProgram.png,旧工具栏，当前Studio界面隐藏,220
+Forms\Main.lfm,,MainForm/PanelMain/ToolBarVisibility/ToolButton8,TToolButton,'Control net',ShowControlNet,ShowControlNet,2,ImageIndex/Action,Themes/Default/icons/24/ShowControlNet.png,旧工具栏，当前Studio界面隐藏,246
+Forms\Main.lfm,,MainForm/PanelMain/ToolBarVisibility/ToolButton2,TToolButton,'Control curves',ShowControlCurves,ShowControlCurves,40,ImageIndex/Action,Themes/Default/icons/24/ShowControlCurves.png,旧工具栏，当前Studio界面隐藏,252
+Forms\Main.lfm,,MainForm/PanelMain/ToolBarVisibility/ToolButton9,TToolButton,'Interior edges',ShowInteriorEdges,ShowInteriorEdges,3,ImageIndex/Action,Themes/Default/icons/24/ShowInteriorEdges.png,旧工具栏，当前Studio界面隐藏,259
+Forms\Main.lfm,,MainForm/PanelMain/ToolBarVisibility/ToolButton10,TToolButton,'Show both sides',BothSides,BothSides,4,ImageIndex/Action,Themes/Default/icons/24/BothSides.png,旧工具栏，当前Studio界面隐藏,266
+Forms\Main.lfm,,MainForm/PanelMain/ToolBarVisibility/ToolButton31,TToolButton,'Grid',ShowGrid,ShowGrid,22,ImageIndex/Action,Themes/Default/icons/24/ShowGrid.png,旧工具栏，当前Studio界面隐藏,273
+Forms\Main.lfm,,MainForm/PanelMain/ToolBarVisibility/ToolButton21,TToolButton,'Stations',ShowStations,ShowStations,15,ImageIndex/Action,Themes/Default/icons/24/ShowStations.png,旧工具栏，当前Studio界面隐藏,280
+Forms\Main.lfm,,MainForm/PanelMain/ToolBarVisibility/ToolButton22,TToolButton,'Buttocks',ShowButtocks,ShowButtocks,16,ImageIndex/Action,Themes/Default/icons/24/ShowButtocks.png,旧工具栏，当前Studio界面隐藏,288
+Forms\Main.lfm,,MainForm/PanelMain/ToolBarVisibility/ToolButton23,TToolButton,'Waterlines',ShowWaterlines,ShowWaterlines,17,ImageIndex/Action,Themes/Default/icons/24/ShowWaterlines.png,旧工具栏，当前Studio界面隐藏,295
+Forms\Main.lfm,,MainForm/PanelMain/ToolBarVisibility/ToolButton35,TToolButton,'Diagonals',ShowDiagonals,ShowDiagonals,30,ImageIndex/Action,Themes/Default/icons/24/ShowDiagonals.png,旧工具栏，当前Studio界面隐藏,302
+Forms\Main.lfm,,MainForm/PanelMain/ToolBarVisibility/ToolButton46,TToolButton,'Hydrostatic features',ShowHydrostatics,ShowHydrostatics,49,ImageIndex/Action,Themes/Default/icons/24/ShowHydrostatics.png,旧工具栏，当前Studio界面隐藏,309
+Forms\Main.lfm,,MainForm/PanelMain/ToolBarVisibility/ToolButton48,TToolButton,'Flowlines',ShowFlowlines,ShowFlowlines,55,ImageIndex/Action,Themes/Default/icons/24/ShowFlowlines.png,旧工具栏，当前Studio界面隐藏,316
+Forms\Main.lfm,,MainForm/PanelMain/ToolBarVisibility/ToolButton30,TToolButton,'Normals',ShowNormals,ShowNormals,21,ImageIndex/Action,Themes/Default/icons/24/ShowNormals.png,旧工具栏，当前Studio界面隐藏,323
+Forms\Main.lfm,,MainForm/PanelMain/ToolBarVisibility/ToolButton37,TToolButton,'Curvature',Showcurvature,Showcurvature,38,ImageIndex/Action,Themes/Default/icons/24/Showcurvature.png,旧工具栏，当前Studio界面隐藏,330
+Forms\Main.lfm,,MainForm/PanelMain/ToolBarVisibility/ToolButton36,TToolButton,'Markers',ShowMarkers,ShowMarkers,36,ImageIndex/Action,Themes/Default/icons/24/ShowMarkers.png,旧工具栏，当前Studio界面隐藏,337
+Forms\Main.lfm,,MainForm/PanelMain/ToolBarVisibility/tbShowFreeObjects,TToolButton,'Show free objects',ShowFreeObjects,ShowFreeObjects,61,ImageIndex/Action,Themes/Default/icons/24/ShowFreeObjects.png,旧工具栏，当前Studio界面隐藏,380
+Forms\Main.lfm,,MainForm/PanelMain/ToolBarVisibility/ToolButton39,TToolButton,'Split Section location',SplitSectionDialog,SplitSectionDialog,63,ImageIndex/Action,Themes/Default/icons/24/SplitSectionDialog.png,旧工具栏，当前Studio界面隐藏,388
+Forms\Main.lfm,,MainForm/PanelMain/ToolBarLayers/ToolButton5,TToolButton,'New',NewLayer,NewLayer,7,ImageIndex/Action,Themes/Default/icons/24/NewLayer.png,旧工具栏，当前Studio界面隐藏,412
+Forms\Main.lfm,,MainForm/PanelMain/ToolBarLayers/ToolButton34,TToolButton,'Delete empty',DeleteEmptyLayers,DeleteEmptyLayers,29,ImageIndex/Action,Themes/Default/icons/24/DeleteEmptyLayers.png,旧工具栏，当前Studio界面隐藏,418
+Forms\Main.lfm,,MainForm/PanelMain/ToolBarLayers/ToolButton33,TToolButton,'Dialog',LayerDialog,LayerDialog,24,ImageIndex/Action,Themes/Default/icons/24/LayerDialog.png,旧工具栏，当前Studio界面隐藏,425
+Forms\Main.lfm,,MainForm/PanelMain/ToolBarLayers/ToolButton26,TToolButton,'Intersections...',IntersectionDialog,IntersectionDialog,14,ImageIndex/Action,Themes/Default/icons/24/IntersectionDialog.png,旧工具栏，当前Studio界面隐藏,445
+Forms\Main.lfm,,MainForm/PanelMain/ToolBarLayers/ToolButton6,TToolButton,'Auto group',LayerAutoGroup,LayerAutoGroup,6,ImageIndex/Action,Themes/Default/icons/24/LayerAutoGroup.png,旧工具栏，当前Studio界面隐藏,452
+Forms\Main.lfm,,MainForm/PanelMain/ToolBarLayers/ToolButton1,TToolButton,'Layer visibility dialog',LayerVisibilityDialog,LayerVisibilityDialog,62,ImageIndex/Action,Themes/Default/icons/24/LayerVisibilityDialog.png,旧工具栏，当前Studio界面隐藏,471
+Forms\Main.lfm,,MainForm/PanelMain/ToolBarPoints/ToolButton45,TToolButton,'Align',PointAlign,PointAlign,48,ImageIndex/Action,Themes/Default/icons/24/PointAlign.png,旧工具栏，当前Studio界面隐藏,495
+Forms\Main.lfm,,MainForm/PanelMain/ToolBarPoints/ToolButton18,TToolButton,'Collapse',PointCollapse,PointCollapse,12,ImageIndex/Action,Themes/Default/icons/24/PointCollapse.png,旧工具栏，当前Studio界面隐藏,501
+Forms\Main.lfm,,MainForm/PanelMain/ToolBarPoints/ToolButton42,TToolButton,'Lock points',PointsLock,PointsLock,44,ImageIndex/Action,Themes/Default/icons/24/PointsLock.png,旧工具栏，当前Studio界面隐藏,508
+Forms\Main.lfm,,MainForm/PanelMain/ToolBarPoints/ToolButton43,TToolButton,'Unlock points',PointsUnlock,PointsUnlock,43,ImageIndex/Action,Themes/Default/icons/24/PointsUnlock.png,旧工具栏，当前Studio界面隐藏,515
+Forms\Main.lfm,,MainForm/PanelMain/ToolBarPoints/ToolButton44,TToolButton,'Unlock all points',PointsUnlockAll,PointsUnlockAll,45,ImageIndex/Action,Themes/Default/icons/24/PointsUnlockAll.png,旧工具栏，当前Studio界面隐藏,522
+Forms\Main.lfm,,MainForm/PanelMain/ToolBarPoints/ToolButton41,TToolButton,'Insert plane...',InsertPlane,InsertPlane,42,ImageIndex/Action,Themes/Default/icons/24/InsertPlane.png,旧工具栏，当前Studio界面隐藏,529
+Forms\Main.lfm,,MainForm/PanelMain/ToolBarPoints/ToolButton47,TToolButton,'Intersect layers...',LayerIntersection,LayerIntersection,51,ImageIndex/Action,Themes/Default/icons/24/LayerIntersection.png,旧工具栏，当前Studio界面隐藏,536
+Forms\Main.lfm,,MainForm/PanelMain/ToolBarEdit/ToolButtonDelete,TToolButton,'Delete',Delete,Delete,8,ImageIndex/Action,Themes/Default/icons/24/Delete.png,旧工具栏，当前Studio界面隐藏,559
+Forms\Main.lfm,,MainForm/PanelMain/ToolBarEdit/ToolButtonUndo,TToolButton,'Undo',Undo,Undo,56,ImageIndex/Action,Themes/Default/icons/24/Undo.png,旧工具栏，当前Studio界面隐藏,566
+Forms\Main.lfm,,MainForm/PanelMain/ToolBarEdit/ToolButtonRedo,TToolButton,'Redo',Redo,Redo,57,ImageIndex/Action,Themes/Default/icons/24/Redo.png,旧工具栏，当前Studio界面隐藏,573
+Forms\Main.lfm,,MainForm/PanelMain/ToolBarEdit/ToolButtonSelect,TToolButton,'Deselect all',DeselectAll,DeselectAll,59,ImageIndex/Action,Themes/Default/icons/24/DeselectAll.png,旧工具栏，当前Studio界面隐藏,580
+Forms\Main.lfm,,MainForm/PanelMain/ToolBarEdges/ToolButton27,TToolButton,'Extrude...',EdgeExtrude,EdgeExtrude,19,ImageIndex/Action,Themes/Default/icons/24/EdgeExtrude.png,旧工具栏，当前Studio界面隐藏,605
+Forms\Main.lfm,,MainForm/PanelMain/ToolBarEdges/ToolButton29,TToolButton,'Split',EdgeSplit,EdgeSplit,20,ImageIndex/Action,Themes/Default/icons/24/EdgeSplit.png,旧工具栏，当前Studio界面隐藏,611
+Forms\Main.lfm,,MainForm/PanelMain/ToolBarEdges/ToolButton13,TToolButton,'Collapse',EdgeCollapse,EdgeCollapse,9,ImageIndex/Action,Themes/Default/icons/24/EdgeCollapse.png,旧工具栏，当前Studio界面隐藏,618
+Forms\Main.lfm,,MainForm/PanelMain/ToolBarEdges/ToolButton16,TToolButton,'Insert',NewEdge,NewEdge,10,ImageIndex/Action,Themes/Default/icons/24/NewEdge.png,旧工具栏，当前Studio界面隐藏,625
+Forms\Main.lfm,,MainForm/PanelMain/ToolBarEdges/ToolButton17,TToolButton,'Crease',EdgeCrease,EdgeCrease,11,ImageIndex/Action,Themes/Default/icons/24/EdgeCrease.png,旧工具栏，当前Studio界面隐藏,632
+Forms\Main.lfm,,MainForm/PanelMain/ToolBarFaces/ToolButton24,TToolButton,'New',NewFace,NewFace,18,ImageIndex/Action,Themes/Default/icons/24/NewFace.png,旧工具栏，当前Studio界面隐藏,655
+Forms\Main.lfm,,MainForm/PanelMain/ToolBarFaces/ToolButton32,TToolButton,'Invert',InvertFace,InvertFace,23,ImageIndex/Action,Themes/Default/icons/24/InvertFace.png,旧工具栏，当前Studio界面隐藏,661
+Forms\Main.lfm,,MainForm/PanelMain/ToolBarCurves/ToolButton40,TToolButton,'New',NewCurve,NewCurve,41,ImageIndex/Action,Themes/Default/icons/24/NewCurve.png,旧工具栏，当前Studio界面隐藏,686
+Forms\Main.lfm,,MainForm/ActionList1/LoadFile,TAction,'Open...',,LoadFile,0,ImageIndex/Action,Themes/Default/icons/24/LoadFile.png,静态引用，运行时可见性待逐入口确认,722
+Forms\Main.lfm,,MainForm/ActionList1/ExitProgram,TAction,'Exit',,ExitProgram,1,ImageIndex/Action,Themes/Default/icons/24/ExitProgram.png,静态引用，运行时可见性待逐入口确认,729
+Forms\Main.lfm,,MainForm/ActionList1/ImportCarene,TAction,'Carene XYZ file...',,ImportCarene,35,ImageIndex/Action,Themes/Default/icons/24/ImportCarene.png,静态引用，运行时可见性待逐入口确认,736
+Forms\Main.lfm,,MainForm/ActionList1/ExportDXF2DPolylines,TAction,'DXF 2D Polylines...',,ExportDXF2DPolylines,27,ImageIndex/Action,Themes/Default/icons/24/ExportDXF2DPolylines.png,静态引用，运行时可见性待逐入口确认,742
+Forms\Main.lfm,,MainForm/ActionList1/ShowControlNet,TAction,'Control net',,ShowControlNet,2,ImageIndex/Action,Themes/Default/icons/24/ShowControlNet.png,静态引用，运行时可见性待逐入口确认,754
+Forms\Main.lfm,,MainForm/ActionList1/ShowInteriorEdges,TAction,'Interior edges',,ShowInteriorEdges,3,ImageIndex/Action,Themes/Default/icons/24/ShowInteriorEdges.png,静态引用，运行时可见性待逐入口确认,761
+Forms\Main.lfm,,MainForm/ActionList1/NewWindow,TAction,'New window',,NewWindow,33,ImageIndex/Action,Themes/Default/icons/24/NewWindow.png,静态引用，运行时可见性待逐入口确认,768
+Forms\Main.lfm,,MainForm/ActionList1/TileWindow,TAction,'Tile',,TileWindow,32,ImageIndex/Action,Themes/Default/icons/24/TileWindow.png,静态引用，运行时可见性待逐入口确认,774
+Forms\Main.lfm,,MainForm/ActionList1/CascadeWindow,TAction,'Cascade',,CascadeWindow,34,ImageIndex/Action,Themes/Default/icons/24/CascadeWindow.png,静态引用，运行时可见性待逐入口确认,780
+Forms\Main.lfm,,MainForm/ActionList1/BothSides,TAction,'Show both sides',,BothSides,4,ImageIndex/Action,Themes/Default/icons/24/BothSides.png,静态引用，运行时可见性待逐入口确认,786
+Forms\Main.lfm,,MainForm/ActionList1/FileSaveas,TAction,'Save as...',,FileSaveas,39,ImageIndex/Action,Themes/Default/icons/24/FileSaveas.png,静态引用，运行时可见性待逐入口确认,793
+Forms\Main.lfm,,MainForm/ActionList1/LayerAutoGroup,TAction,'Auto group',,LayerAutoGroup,6,ImageIndex/Action,Themes/Default/icons/24/LayerAutoGroup.png,静态引用，运行时可见性待逐入口确认,807
+Forms\Main.lfm,,MainForm/ActionList1/NewLayer,TAction,'New',,NewLayer,7,ImageIndex/Action,Themes/Default/icons/24/NewLayer.png,静态引用，运行时可见性待逐入口确认,814
+Forms\Main.lfm,,MainForm/ActionList1/Delete,TAction,'Delete',,Delete,8,ImageIndex/Action,Themes/Default/icons/24/Delete.png,静态引用，运行时可见性待逐入口确认,821
+Forms\Main.lfm,,MainForm/ActionList1/EdgeCollapse,TAction,'Collapse',,EdgeCollapse,9,ImageIndex/Action,Themes/Default/icons/24/EdgeCollapse.png,静态引用，运行时可见性待逐入口确认,829
+Forms\Main.lfm,,MainForm/ActionList1/NewEdge,TAction,'Insert',,NewEdge,10,ImageIndex/Action,Themes/Default/icons/24/NewEdge.png,静态引用，运行时可见性待逐入口确认,836
+Forms\Main.lfm,,MainForm/ActionList1/EdgeCrease,TAction,'Crease',,EdgeCrease,11,ImageIndex/Action,Themes/Default/icons/24/EdgeCrease.png,静态引用，运行时可见性待逐入口确认,844
+Forms\Main.lfm,,MainForm/ActionList1/DeselectAll,TAction,'Deselect all',,DeselectAll,59,ImageIndex/Action,Themes/Default/icons/24/DeselectAll.png,静态引用，运行时可见性待逐入口确认,851
+Forms\Main.lfm,,MainForm/ActionList1/PointCollapse,TAction,'Collapse',,PointCollapse,12,ImageIndex/Action,Themes/Default/icons/24/PointCollapse.png,静态引用，运行时可见性待逐入口确认,858
+Forms\Main.lfm,,MainForm/ActionList1/ActiveLayerColor,TAction,'Active layer color',,ActiveLayerColor,25,ImageIndex/Action,Themes/Default/icons/24/ActiveLayerColor.png,静态引用，运行时可见性待逐入口确认,865
+Forms\Main.lfm,,MainForm/ActionList1/DeleteEmptyLayers,TAction,'Delete empty',,DeleteEmptyLayers,29,ImageIndex/Action,Themes/Default/icons/24/DeleteEmptyLayers.png,静态引用，运行时可见性待逐入口确认,872
+Forms\Main.lfm,,MainForm/ActionList1/LayerDialog,TAction,'Dialog',,LayerDialog,24,ImageIndex/Action,Themes/Default/icons/24/LayerDialog.png,静态引用，运行时可见性待逐入口确认,879
+Forms\Main.lfm,,MainForm/ActionList1/NewModel,TAction,'New...',,NewModel,13,ImageIndex/Action,Themes/Default/icons/24/NewModel.png,静态引用，运行时可见性待逐入口确认,887
+Forms\Main.lfm,,MainForm/ActionList1/ShowStations,TAction,'Stations',,ShowStations,15,ImageIndex/Action,Themes/Default/icons/24/ShowStations.png,静态引用，运行时可见性待逐入口确认,895
+Forms\Main.lfm,,MainForm/ActionList1/ShowButtocks,TAction,'Buttocks',,ShowButtocks,16,ImageIndex/Action,Themes/Default/icons/24/ShowButtocks.png,静态引用，运行时可见性待逐入口确认,902
+Forms\Main.lfm,,MainForm/ActionList1/ShowWaterlines,TAction,'Waterlines',,ShowWaterlines,17,ImageIndex/Action,Themes/Default/icons/24/ShowWaterlines.png,静态引用，运行时可见性待逐入口确认,909
+Forms\Main.lfm,,MainForm/ActionList1/NewFace,TAction,'New',,NewFace,18,ImageIndex/Action,Themes/Default/icons/24/NewFace.png,静态引用，运行时可见性待逐入口确认,916
+Forms\Main.lfm,,MainForm/ActionList1/IntersectionDialog,TAction,'Intersections...',,IntersectionDialog,14,ImageIndex/Action,Themes/Default/icons/24/IntersectionDialog.png,静态引用，运行时可见性待逐入口确认,923
+Forms\Main.lfm,,MainForm/ActionList1/EdgeExtrude,TAction,'Extrude...',,EdgeExtrude,19,ImageIndex/Action,Themes/Default/icons/24/EdgeExtrude.png,静态引用，运行时可见性待逐入口确认,930
+Forms\Main.lfm,,MainForm/ActionList1/EdgeSplit,TAction,'Split',,EdgeSplit,20,ImageIndex/Action,Themes/Default/icons/24/EdgeSplit.png,静态引用，运行时可见性待逐入口确认,937
+Forms\Main.lfm,,MainForm/ActionList1/ShowNormals,TAction,'Normals',,ShowNormals,21,ImageIndex/Action,Themes/Default/icons/24/ShowNormals.png,静态引用，运行时可见性待逐入口确认,956
+Forms\Main.lfm,,MainForm/ActionList1/ShowGrid,TAction,'Grid',,ShowGrid,22,ImageIndex/Action,Themes/Default/icons/24/ShowGrid.png,静态引用，运行时可见性待逐入口确认,999
+Forms\Main.lfm,,MainForm/ActionList1/Undo,TAction,'Undo',,Undo,56,ImageIndex/Action,Themes/Default/icons/24/Undo.png,静态引用，运行时可见性待逐入口确认,1006
+Forms\Main.lfm,,MainForm/ActionList1/InvertFace,TAction,'Invert',,InvertFace,23,ImageIndex/Action,Themes/Default/icons/24/InvertFace.png,静态引用，运行时可见性待逐入口确认,1025
+Forms\Main.lfm,,MainForm/ActionList1/ExportDXF3DPolylines,TAction,'DXF 3D Polylines...',,ExportDXF3DPolylines,27,ImageIndex/Action,Themes/Default/icons/24/ExportDXF3DPolylines.png,静态引用，运行时可见性待逐入口确认,1043
+Forms\Main.lfm,,MainForm/ActionList1/ExportDXFFaces,TAction,'DXF 3D mesh...',,ExportDXFFaces,27,ImageIndex/Action,Themes/Default/icons/24/ExportDXFFaces.png,静态引用，运行时可见性待逐入口确认,1050
+Forms\Main.lfm,,MainForm/ActionList1/ImportHullFile,TAction,'Carlson .hul file...',,ImportHullFile,28,ImageIndex/Action,Themes/Default/icons/24/ImportHullFile.png,静态引用，运行时可见性待逐入口确认,1057
+Forms\Main.lfm,,MainForm/ActionList1/ExportArchimedes,TAction,'Archimedes...',,ExportArchimedes,26,ImageIndex/Action,Themes/Default/icons/24/ExportArchimedes.png,静态引用，运行时可见性待逐入口确认,1086
+Forms\Main.lfm,,MainForm/ActionList1/ShowLinesplan,TAction,'Linesplan',,ShowLinesplan,31,ImageIndex/Action,Themes/Default/icons/24/ShowLinesplan.png,静态引用，运行时可见性待逐入口确认,1093
+Forms\Main.lfm,,MainForm/ActionList1/ShowDiagonals,TAction,'Diagonals',,ShowDiagonals,30,ImageIndex/Action,Themes/Default/icons/24/ShowDiagonals.png,静态引用，运行时可见性待逐入口确认,1099
+Forms\Main.lfm,,MainForm/ActionList1/ShowMarkers,TAction,'Markers',,ShowMarkers,36,ImageIndex/Action,Themes/Default/icons/24/ShowMarkers.png,静态引用，运行时可见性待逐入口确认,1106
+Forms\Main.lfm,,MainForm/ActionList1/DeleteMarkers,TAction,'Delete all markers',,DeleteMarkers,37,ImageIndex/Action,Themes/Default/icons/24/DeleteMarkers.png,静态引用，运行时可见性待逐入口确认,1113
+Forms\Main.lfm,,MainForm/ActionList1/Showcurvature,TAction,'Curvature',,Showcurvature,38,ImageIndex/Action,Themes/Default/icons/24/Showcurvature.png,静态引用，运行时可见性待逐入口确认,1125
+Forms\Main.lfm,,MainForm/ActionList1/FileSave,TAction,'Save',,FileSave,5,ImageIndex/Action,Themes/Default/icons/24/FileSave.png,静态引用，运行时可见性待逐入口确认,1139
+Forms\Main.lfm,,MainForm/ActionList1/ShowControlCurves,TAction,'Control curves',,ShowControlCurves,40,ImageIndex/Action,Themes/Default/icons/24/ShowControlCurves.png,静态引用，运行时可见性待逐入口确认,1152
+Forms\Main.lfm,,MainForm/ActionList1/NewCurve,TAction,'New',,NewCurve,41,ImageIndex/Action,Themes/Default/icons/24/NewCurve.png,静态引用，运行时可见性待逐入口确认,1159
+Forms\Main.lfm,,MainForm/ActionList1/InsertPlane,TAction,'Insert plane...',,InsertPlane,42,ImageIndex/Action,Themes/Default/icons/24/InsertPlane.png,静态引用，运行时可见性待逐入口确认,1166
+Forms\Main.lfm,,MainForm/ActionList1/PointsLock,TAction,'Lock points',,PointsLock,44,ImageIndex/Action,Themes/Default/icons/24/PointsLock.png,静态引用，运行时可见性待逐入口确认,1173
+Forms\Main.lfm,,MainForm/ActionList1/PointsUnlock,TAction,'Unlock points',,PointsUnlock,43,ImageIndex/Action,Themes/Default/icons/24/PointsUnlock.png,静态引用，运行时可见性待逐入口确认,1180
+Forms\Main.lfm,,MainForm/ActionList1/PointsUnlockAll,TAction,'Unlock all points',,PointsUnlockAll,45,ImageIndex/Action,Themes/Default/icons/24/PointsUnlockAll.png,静态引用，运行时可见性待逐入口确认,1187
+Forms\Main.lfm,,MainForm/ActionList1/ImportMarkers,TAction,'Import',,ImportMarkers,46,ImageIndex/Action,Themes/Default/icons/24/ImportMarkers.png,静态引用，运行时可见性待逐入口确认,1194
+Forms\Main.lfm,,MainForm/ActionList1/ExportMichlet,TAction,'Michlet...',,ExportMichlet,47,ImageIndex/Action,Themes/Default/icons/24/ExportMichlet.png,静态引用，运行时可见性待逐入口确认,1200
+Forms\Main.lfm,,MainForm/ActionList1/ExportAddMass,TAction,'Export and calculation Add_Mass',,ExportAddMass,57,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,1291
+Forms\Main.lfm,,MainForm/ActionList1/PointAlign,TAction,'Align',,PointAlign,48,ImageIndex/Action,Themes/Default/icons/24/PointAlign.png,静态引用，运行时可见性待逐入口确认,1317
+Forms\Main.lfm,,MainForm/ActionList1/ImportMichletWaves,TAction,'Michlet waves...',,ImportMichletWaves,47,ImageIndex/Action,Themes/Default/icons/24/ImportMichletWaves.png,静态引用，运行时可见性待逐入口确认,1324
+Forms\Main.lfm,,MainForm/ActionList1/ShowHydrostatics,TAction,'Hydrostatic features',,ShowHydrostatics,49,ImageIndex/Action,Themes/Default/icons/24/ShowHydrostatics.png,静态引用，运行时可见性待逐入口确认,1330
+Forms\Main.lfm,,MainForm/ActionList1/ExportIGES,TAction,'IGES',,ExportIGES,60,ImageIndex/Action,Themes/Default/icons/24/ExportIGES.png,静态引用，运行时可见性待逐入口确认,1347
+Forms\Main.lfm,,MainForm/ActionList1/LayerIntersection,TAction,'Intersect layers...',,LayerIntersection,51,ImageIndex/Action,Themes/Default/icons/24/LayerIntersection.png,静态引用，运行时可见性待逐入口确认,1363
+Forms\Main.lfm,,MainForm/ActionList1/KeelRudderWizard,TAction,'Keel and rudder wizard',,KeelRudderWizard,52,ImageIndex/Action,Themes/Default/icons/24/KeelRudderWizard.png,静态引用，运行时可见性待逐入口确认,1370
+Forms\Main.lfm,,MainForm/ActionList1/Redo,TAction,'Redo',,Redo,57,ImageIndex/Action,Themes/Default/icons/24/Redo.png,静态引用，运行时可见性待逐入口确认,1377
+Forms\Main.lfm,,MainForm/ActionList1/ImportPolyCad,TAction,'PolyCad',,ImportPolyCad,53,ImageIndex/Action,Themes/Default/icons/24/ImportPolyCad.png,静态引用，运行时可见性待逐入口确认,1395
+Forms\Main.lfm,,MainForm/ActionList1/ExportGHS,TAction,'GHS...',,ExportGHS,54,ImageIndex/Action,Themes/Default/icons/24/ExportGHS.png,静态引用，运行时可见性待逐入口确认,1406
+Forms\Main.lfm,,MainForm/ActionList1/ExportPAM,TAction,'Add_Mass *.PAM',,ExportPAM,56,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,1412
+Forms\Main.lfm,,MainForm/ActionList1/ShowFlowlines,TAction,'Flowlines',,ShowFlowlines,55,ImageIndex/Action,Themes/Default/icons/24/ShowFlowlines.png,静态引用，运行时可见性待逐入口确认,1418
+Forms\Main.lfm,,MainForm/ActionList1/SelectAll,TAction,'Select all',,SelectAll,58,ImageIndex/Action,Themes/Default/icons/24/SelectAll.png,静态引用，运行时可见性待逐入口确认,1430
+Forms\Main.lfm,,MainForm/ActionList1/PointAlighnPermanently,TAction,'Point Alighn Permanently',,PointAlighnPermanently,48,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,1456
+Forms\Main.lfm,,MainForm/ActionList1/ShowFreeObjects,TAction,'Show free objects',,ShowFreeObjects,61,ImageIndex/Action,Themes/Default/icons/24/ShowFreeObjects.png,静态引用，运行时可见性待逐入口确认,1499
+Forms\Main.lfm,,MainForm/ActionList1/SplitSectionDialog,TAction,'Split Section location',,SplitSectionDialog,63,ImageIndex/Action,Themes/Default/icons/24/SplitSectionDialog.png,静态引用，运行时可见性待逐入口确认,1506
+Forms\Main.lfm,,MainForm/ActionList1/LayerVisibilityDialog,TAction,'Layer visibility dialog',,LayerVisibilityDialog,62,ImageIndex/Action,Themes/Default/icons/24/LayerVisibilityDialog.png,静态引用，运行时可见性待逐入口确认,1513
+Forms\Main.lfm,,MainForm/ActionList1/SplitSection50pct,TAction,'Split Section middle location',,SplitSection50pct,64,ImageIndex/Action,Themes/Default/icons/24/SplitSection50pct.png,静态引用，运行时可见性待逐入口确认,1520
+Forms\Main.lfm,,MainForm/MainMenu1/File1/New3,TMenuItem,'New...',NewModel,NewModel,13,ImageIndex/Action,Themes/Default/icons/24/NewModel.png,静态引用，运行时可见性待逐入口确认,2014
+Forms\Main.lfm,,MainForm/MainMenu1/File1/Open,TMenuItem,'Open...',LoadFile,LoadFile,0,ImageIndex/Action,Themes/Default/icons/24/LoadFile.png,静态引用，运行时可见性待逐入口确认,2017
+Forms\Main.lfm,,MainForm/MainMenu1/File1/Save2,TMenuItem,'Save',FileSave,FileSave,5,ImageIndex/Action,Themes/Default/icons/24/FileSave.png,静态引用，运行时可见性待逐入口确认,2020
+Forms\Main.lfm,,MainForm/MainMenu1/File1/Save1,TMenuItem,'Save as...',FileSaveas,FileSaveas,39,ImageIndex/Action,Themes/Default/icons/24/FileSaveas.png,静态引用，运行时可见性待逐入口确认,2024
+Forms\Main.lfm,,MainForm/MainMenu1/File1/Import1/Carlssonhulfile1,TMenuItem,'Carlson .hul file...',ImportHullFile,ImportHullFile,28,ImageIndex/Action,Themes/Default/icons/24/ImportHullFile.png,静态引用，运行时可见性待逐入口确认,2032
+Forms\Main.lfm,,MainForm/MainMenu1/File1/Import1/Carenefile1,TMenuItem,'Carene XYZ file...',ImportCarene,ImportCarene,35,ImageIndex/Action,Themes/Default/icons/24/ImportCarene.png,静态引用，运行时可见性待逐入口确认,2044
+Forms\Main.lfm,,MainForm/MainMenu1/File1/Import1/PolyCad1,TMenuItem,'PolyCad',ImportPolyCad,ImportPolyCad,53,ImageIndex/Action,Themes/Default/icons/24/ImportPolyCad.png,静态引用，运行时可见性待逐入口确认,2050
+Forms\Main.lfm,,MainForm/MainMenu1/File1/Import1/ImportMichletWaves1,TMenuItem,'Michlet waves...',ImportMichletWaves,ImportMichletWaves,47,ImageIndex/Action,Themes/Default/icons/24/ImportMichletWaves.png,静态引用，运行时可见性待逐入口确认,2062
+Forms\Main.lfm,,MainForm/MainMenu1/File1/Export1/IGES1,TMenuItem,'IGES',ExportIGES,ExportIGES,60,ImageIndex/Action,Themes/Default/icons/24/ExportIGES.png,静态引用，运行时可见性待逐入口确认,2071
+Forms\Main.lfm,,MainForm/MainMenu1/File1/Export1/DXF3Dfaces1,TMenuItem,'DXF 3D mesh...',ExportDXFFaces,ExportDXFFaces,27,ImageIndex/Action,Themes/Default/icons/24/ExportDXFFaces.png,静态引用，运行时可见性待逐入口确认,2074
+Forms\Main.lfm,,MainForm/MainMenu1/File1/Export1/DXF2DPolylines1,TMenuItem,'DXF 2D Polylines...',ExportDXF2DPolylines,ExportDXF2DPolylines,27,ImageIndex/Action,Themes/Default/icons/24/ExportDXF2DPolylines.png,静态引用，运行时可见性待逐入口确认,2077
+Forms\Main.lfm,,MainForm/MainMenu1/File1/Export1/ExportDXFPolylines1,TMenuItem,'DXF 3D Polylines...',ExportDXF3DPolylines,ExportDXF3DPolylines,27,ImageIndex/Action,Themes/Default/icons/24/ExportDXF3DPolylines.png,静态引用，运行时可见性待逐入口确认,2080
+Forms\Main.lfm,,MainForm/MainMenu1/File1/Export1/MichletCFD1,TMenuItem,'Michlet...',ExportMichlet,ExportMichlet,47,ImageIndex/Action,Themes/Default/icons/24/ExportMichlet.png,静态引用，运行时可见性待逐入口确认,2101
+Forms\Main.lfm,,MainForm/MainMenu1/File1/Export1/ArchimedesMB1,TMenuItem,'Archimedes...',ExportArchimedes,ExportArchimedes,26,ImageIndex/Action,Themes/Default/icons/24/ExportArchimedes.png,静态引用，运行时可见性待逐入口确认,2104
+Forms\Main.lfm,,MainForm/MainMenu1/File1/Export1/GHS1,TMenuItem,'GHS...',ExportGHS,ExportGHS,54,ImageIndex/Action,Themes/Default/icons/24/ExportGHS.png,静态引用，运行时可见性待逐入口确认,2107
+Forms\Main.lfm,,MainForm/MainMenu1/File1/Export1/PAM1,TMenuItem,'Add_Mass *.PAM',ExportPAM,ExportPAM,56,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,2110
+Forms\Main.lfm,,MainForm/MainMenu1/Project1/Linesplan1,TMenuItem,'Linesplan',ShowLinesplan,ShowLinesplan,31,ImageIndex/Action,Themes/Default/icons/24/ShowLinesplan.png,静态引用，运行时可见性待逐入口确认,2126
+Forms\Main.lfm,,MainForm/MainMenu1/Edit1/Undo1,TMenuItem,'Undo',Undo,Undo,56,ImageIndex/Action,Themes/Default/icons/24/Undo.png,静态引用，运行时可见性待逐入口确认,2132
+Forms\Main.lfm,,MainForm/MainMenu1/Edit1/Archimedes1,TMenuItem,'Redo',Redo,Redo,57,ImageIndex/Action,Themes/Default/icons/24/Redo.png,静态引用，运行时可见性待逐入口确认,2135
+Forms\Main.lfm,,MainForm/MainMenu1/Edit1/Delete1,TMenuItem,'Delete',Delete,Delete,8,ImageIndex/Action,Themes/Default/icons/24/Delete.png,静态引用，运行时可见性待逐入口确认,2138
+Forms\Main.lfm,,MainForm/MainMenu1/Point1/Projectline1,TMenuItem,'Align',PointAlign,PointAlign,48,ImageIndex/Action,Themes/Default/icons/24/PointAlign.png,静态引用，运行时可见性待逐入口确认,2159
+Forms\Main.lfm,,MainForm/MainMenu1/Point1/MenuItemPointAlignPermanently,TMenuItem,'Align Permanently',PointAlighnPermanently,PointAlighnPermanently,48,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,2162
+Forms\Main.lfm,,MainForm/MainMenu1/Point1/PointCollapse1,TMenuItem,'Collapse',PointCollapse,PointCollapse,12,ImageIndex/Action,Themes/Default/icons/24/PointCollapse.png,静态引用，运行时可见性待逐入口确认,2172
+Forms\Main.lfm,,MainForm/MainMenu1/Point1/InsertPlane1,TMenuItem,'Insert plane...',InsertPlane,InsertPlane,42,ImageIndex/Action,Themes/Default/icons/24/InsertPlane.png,静态引用，运行时可见性待逐入口确认,2182
+Forms\Main.lfm,,MainForm/MainMenu1/Point1/Saveas1,TMenuItem,'Intersect layers...',LayerIntersection,LayerIntersection,51,ImageIndex/Action,Themes/Default/icons/24/LayerIntersection.png,静态引用，运行时可见性待逐入口确认,2185
+Forms\Main.lfm,,MainForm/MainMenu1/Point1/PointsLock1,TMenuItem,'Lock points',PointsLock,PointsLock,44,ImageIndex/Action,Themes/Default/icons/24/PointsLock.png,静态引用，运行时可见性待逐入口确认,2188
+Forms\Main.lfm,,MainForm/MainMenu1/Point1/Unlockpoints1,TMenuItem,'Unlock points',PointsUnlock,PointsUnlock,43,ImageIndex/Action,Themes/Default/icons/24/PointsUnlock.png,静态引用，运行时可见性待逐入口确认,2191
+Forms\Main.lfm,,MainForm/MainMenu1/Point1/Unlockallpoints1,TMenuItem,'Unlock all points',PointsUnlockAll,PointsUnlockAll,45,ImageIndex/Action,Themes/Default/icons/24/PointsUnlockAll.png,静态引用，运行时可见性待逐入口确认,2194
+Forms\Main.lfm,,MainForm/MainMenu1/Edge1/Extrude1,TMenuItem,'Extrude...',EdgeExtrude,EdgeExtrude,19,ImageIndex/Action,Themes/Default/icons/24/EdgeExtrude.png,静态引用，运行时可见性待逐入口确认,2200
+Forms\Main.lfm,,MainForm/MainMenu1/Edge1/Split1,TMenuItem,'Split',EdgeSplit,EdgeSplit,20,ImageIndex/Action,Themes/Default/icons/24/EdgeSplit.png,静态引用，运行时可见性待逐入口确认,2203
+Forms\Main.lfm,,MainForm/MainMenu1/Edge1/Collapse1,TMenuItem,'Collapse',EdgeCollapse,EdgeCollapse,9,ImageIndex/Action,Themes/Default/icons/24/EdgeCollapse.png,静态引用，运行时可见性待逐入口确认,2206
+Forms\Main.lfm,,MainForm/MainMenu1/Edge1/New2,TMenuItem,'Insert',NewEdge,NewEdge,10,ImageIndex/Action,Themes/Default/icons/24/NewEdge.png,静态引用，运行时可见性待逐入口确认,2209
+Forms\Main.lfm,,MainForm/MainMenu1/Edge1/Crease1,TMenuItem,'Crease',EdgeCrease,EdgeCrease,11,ImageIndex/Action,Themes/Default/icons/24/EdgeCrease.png,静态引用，运行时可见性待逐入口确认,2212
+Forms\Main.lfm,,MainForm/MainMenu1/Curve1/AddCurve1,TMenuItem,'New',NewCurve,NewCurve,41,ImageIndex/Action,Themes/Default/icons/24/NewCurve.png,静态引用，运行时可见性待逐入口确认,2218
+Forms\Main.lfm,,MainForm/MainMenu1/Face1/New4,TMenuItem,'New',NewFace,NewFace,18,ImageIndex/Action,Themes/Default/icons/24/NewFace.png,静态引用，运行时可见性待逐入口确认,2224
+Forms\Main.lfm,,MainForm/MainMenu1/Face1/Invert1,TMenuItem,'Invert',InvertFace,InvertFace,23,ImageIndex/Action,Themes/Default/icons/24/InvertFace.png,静态引用，运行时可见性待逐入口确认,2227
+Forms\Main.lfm,,MainForm/MainMenu1/Layer1/Activelayercolor1,TMenuItem,'Active layer color',ActiveLayerColor,ActiveLayerColor,25,ImageIndex/Action,Themes/Default/icons/24/ActiveLayerColor.png,静态引用，运行时可见性待逐入口确认,2233
+Forms\Main.lfm,,MainForm/MainMenu1/Layer1/Autogroup1,TMenuItem,'Auto group',LayerAutoGroup,LayerAutoGroup,6,ImageIndex/Action,Themes/Default/icons/24/LayerAutoGroup.png,静态引用，运行时可见性待逐入口确认,2236
+Forms\Main.lfm,,MainForm/MainMenu1/Layer1/New1,TMenuItem,'New',NewLayer,NewLayer,7,ImageIndex/Action,Themes/Default/icons/24/NewLayer.png,静态引用，运行时可见性待逐入口确认,2239
+Forms\Main.lfm,,MainForm/MainMenu1/Layer1/Deleteempty1,TMenuItem,'Delete empty',DeleteEmptyLayers,DeleteEmptyLayers,29,ImageIndex/Action,Themes/Default/icons/24/DeleteEmptyLayers.png,静态引用，运行时可见性待逐入口确认,2242
+Forms\Main.lfm,,MainForm/MainMenu1/Layer1/Deleteempty2,TMenuItem,'Dialog',LayerDialog,LayerDialog,24,ImageIndex/Action,Themes/Default/icons/24/LayerDialog.png,静态引用，运行时可见性待逐入口确认,2245
+Forms\Main.lfm,,MainForm/MainMenu1/Layer1/miShowLayerVisibilityDialog,TMenuItem,'Layer visibility dialog',LayerVisibilityDialog,LayerVisibilityDialog,62,ImageIndex/Action,Themes/Default/icons/24/LayerVisibilityDialog.png,静态引用，运行时可见性待逐入口确认,2248
+Forms\Main.lfm,,MainForm/MainMenu1/Visibility1/ShowControlNet1,TMenuItem,'Control net',ShowControlNet,ShowControlNet,2,ImageIndex/Action,Themes/Default/icons/24/ShowControlNet.png,静态引用，运行时可见性待逐入口确认,2254
+Forms\Main.lfm,,MainForm/MainMenu1/Visibility1/miShowFreeObjects,TMenuItem,'Show free objects',ShowFreeObjects,ShowFreeObjects,61,ImageIndex/Action,Themes/Default/icons/24/ShowFreeObjects.png,静态引用，运行时可见性待逐入口确认,2257
+Forms\Main.lfm,,MainForm/MainMenu1/Visibility1/Controlcurves1,TMenuItem,'Control curves',ShowControlCurves,ShowControlCurves,40,ImageIndex/Action,Themes/Default/icons/24/ShowControlCurves.png,静态引用，运行时可见性待逐入口确认,2260
+Forms\Main.lfm,,MainForm/MainMenu1/Visibility1/ShowInteriorEdges1,TMenuItem,'Interior edges',ShowInteriorEdges,ShowInteriorEdges,3,ImageIndex/Action,Themes/Default/icons/24/ShowInteriorEdges.png,静态引用，运行时可见性待逐入口确认,2263
+Forms\Main.lfm,,MainForm/MainMenu1/Visibility1/Showbothsides1,TMenuItem,'Show both sides',BothSides,BothSides,4,ImageIndex/Action,Themes/Default/icons/24/BothSides.png,静态引用，运行时可见性待逐入口确认,2266
+Forms\Main.lfm,,MainForm/MainMenu1/Visibility1/Analyzesurface2,TMenuItem,'Grid',ShowGrid,ShowGrid,22,ImageIndex/Action,Themes/Default/icons/24/ShowGrid.png,静态引用，运行时可见性待逐入口确认,2269
+Forms\Main.lfm,,MainForm/MainMenu1/Visibility1/Stations1,TMenuItem,'Stations',ShowStations,ShowStations,15,ImageIndex/Action,Themes/Default/icons/24/ShowStations.png,静态引用，运行时可见性待逐入口确认,2272
+Forms\Main.lfm,,MainForm/MainMenu1/Visibility1/Buttocks1,TMenuItem,'Buttocks',ShowButtocks,ShowButtocks,16,ImageIndex/Action,Themes/Default/icons/24/ShowButtocks.png,静态引用，运行时可见性待逐入口确认,2275
+Forms\Main.lfm,,MainForm/MainMenu1/Visibility1/Waterlines1,TMenuItem,'Waterlines',ShowWaterlines,ShowWaterlines,17,ImageIndex/Action,Themes/Default/icons/24/ShowWaterlines.png,静态引用，运行时可见性待逐入口确认,2278
+Forms\Main.lfm,,MainForm/MainMenu1/Visibility1/Diagonals1,TMenuItem,'Diagonals',ShowDiagonals,ShowDiagonals,30,ImageIndex/Action,Themes/Default/icons/24/ShowDiagonals.png,静态引用，运行时可见性待逐入口确认,2281
+Forms\Main.lfm,,MainForm/MainMenu1/Visibility1/Hydrostaticdata1,TMenuItem,'Hydrostatic features',ShowHydrostatics,ShowHydrostatics,49,ImageIndex/Action,Themes/Default/icons/24/ShowHydrostatics.png,静态引用，运行时可见性待逐入口确认,2284
+Forms\Main.lfm,,MainForm/MainMenu1/Visibility1/Flowlines1,TMenuItem,'Flowlines',ShowFlowlines,ShowFlowlines,55,ImageIndex/Action,Themes/Default/icons/24/ShowFlowlines.png,静态引用，运行时可见性待逐入口确认,2287
+Forms\Main.lfm,,MainForm/MainMenu1/Visibility1/Normals1,TMenuItem,'Normals',ShowNormals,ShowNormals,21,ImageIndex/Action,Themes/Default/icons/24/ShowNormals.png,静态引用，运行时可见性待逐入口确认,2290
+Forms\Main.lfm,,MainForm/MainMenu1/Visibility1/Curvature1,TMenuItem,'Curvature',Showcurvature,Showcurvature,38,ImageIndex/Action,Themes/Default/icons/24/Showcurvature.png,静态引用，运行时可见性待逐入口确认,2293
+Forms\Main.lfm,,MainForm/MainMenu1/Visibility1/Markers1,TMenuItem,'Markers',ShowMarkers,ShowMarkers,36,ImageIndex/Action,Themes/Default/icons/24/ShowMarkers.png,静态引用，运行时可见性待逐入口确认,2296
+Forms\Main.lfm,,MainForm/MainMenu1/Visibility1/miSetSplitSection,TMenuItem,'Split Section location',SplitSectionDialog,SplitSectionDialog,63,ImageIndex/Action,Themes/Default/icons/24/SplitSectionDialog.png,静态引用，运行时可见性待逐入口确认,2299
+Forms\Main.lfm,,MainForm/MainMenu1/Selection1/Selectall1,TMenuItem,'Select all',SelectAll,SelectAll,58,ImageIndex/Action,Themes/Default/icons/24/SelectAll.png,静态引用，运行时可见性待逐入口确认,2314
+Forms\Main.lfm,,MainForm/MainMenu1/Selection1/Clearselection1,TMenuItem,'Deselect all',DeselectAll,DeselectAll,59,ImageIndex/Action,Themes/Default/icons/24/DeselectAll.png,静态引用，运行时可见性待逐入口确认,2317
+Forms\Main.lfm,,MainForm/MainMenu1/ools1/Deleteempty3,TMenuItem,'Keel and rudder wizard',KeelRudderWizard,KeelRudderWizard,52,ImageIndex/Action,Themes/Default/icons/24/KeelRudderWizard.png,静态引用，运行时可见性待逐入口确认,2347
+Forms\Main.lfm,,MainForm/MainMenu1/ools1/Markers2/Import2,TMenuItem,'Import',ImportMarkers,ImportMarkers,46,ImageIndex/Action,Themes/Default/icons/24/ImportMarkers.png,静态引用，运行时可见性待逐入口确认,2352
+Forms\Main.lfm,,MainForm/MainMenu1/ools1/Markers2/Deletemarkers1,TMenuItem,'Delete all markers',DeleteMarkers,DeleteMarkers,37,ImageIndex/Action,Themes/Default/icons/24/DeleteMarkers.png,静态引用，运行时可见性待逐入口确认,2355
+Forms\Main.lfm,,MainForm/MainMenu1/Calculations1/Intersections1,TMenuItem,'Intersections...',IntersectionDialog,IntersectionDialog,14,ImageIndex/Action,Themes/Default/icons/24/IntersectionDialog.png,静态引用，运行时可见性待逐入口确认,2398
+Forms\Main.lfm,,MainForm/MainMenu1/Calculations1/HydrodynTask/AddMassCFD1,TMenuItem,'Export and calculation Add_Mass',ExportAddMass,ExportAddMass,57,ImageIndex/Action,待关联图像列表,静态引用，运行时可见性待逐入口确认,2463
+Forms\Main.lfm,,MainForm/MainMenu1/Window1/NewWindow1,TMenuItem,'New window',NewWindow,NewWindow,33,ImageIndex/Action,Themes/Default/icons/24/NewWindow.png,静态引用，运行时可见性待逐入口确认,2488
+Forms\Main.lfm,,MainForm/MainMenu1/Window1/Tile1,TMenuItem,'Tile',TileWindow,TileWindow,32,ImageIndex/Action,Themes/Default/icons/24/TileWindow.png,静态引用，运行时可见性待逐入口确认,2491
+Forms\Main.lfm,,MainForm/MainMenu1/Window1/Cascade1,TMenuItem,'Cascade',CascadeWindow,CascadeWindow,34,ImageIndex/Action,Themes/Default/icons/24/CascadeWindow.png,静态引用，运行时可见性待逐入口确认,2494
+Forms\tiledialog.lfm,,TileDialog/TopPanel/Panel1/ButtonOpenFile,TBitBtn,'Open Another',ActionOpenAnother,,,内嵌Glyph,待关联图像列表,静态引用，运行时可见性待逐入口确认,45

@@ -186,6 +186,7 @@ type
   public { Public declarations }
     Lpp, Bwl, Draft, Cp, Displ, Ws: single;
     procedure Calculate;
+    procedure CalculateInWorkspace;
     function Execute(Freeship: TFreeship;
       AutoExtract: boolean): boolean;
     property Dat2: single read FGetDat2 write FSetDat2;
@@ -221,7 +222,7 @@ var
 
 implementation
 
-uses FreeStringsUnit,
+uses FreeCalculationFiles, FreeStringsUnit,
   Printers,
   Math,
   FreeProcess;
@@ -432,10 +433,24 @@ end;{TFreeHydrodyn_Rvrs.FSetDat18}
 
 
 procedure TFreeHydrodyn_Rvrs.Calculate;
+var Job: TFreeCalculationScope;
+begin
+  if FFreeship = nil then Exit;
+  Job := FFreeship.BeginCalculation([]);
+  try
+    CalculateInWorkspace;
+    Job.Complete;
+  finally Job.Free end;
+end;
+
+procedure TFreeHydrodyn_Rvrs.CalculateInWorkspace;
 type
   TTable = array[0..16, 0..13] of single;
 
 var
+  ProcessCallerDirectory: string;
+  ProcessCallerCursor: TCursor;
+ 
   I, J, ii: integer;
   Dat: array[1..23] of single;
   Res: array[1..6, 1..20] of single;
@@ -458,6 +473,9 @@ var
 label
   NewSearch;
 begin
+  ProcessCallerDirectory := GetCurrentDirUTF8;
+  ProcessCallerCursor := Screen.Cursor;
+  try
   Units := FFreeship.ProjectSettings.ProjectUnits;
 
   TChartSeries(Chart.Series[0]).Clear;
@@ -524,7 +542,7 @@ begin
   else
   begin
     //  определяем расчетную скорость    и сопротивление
-    Assignfile(FFile, 'resist.dat');
+    Assignfile(FFile, IncludeTrailingPathDelimiter(FFreeship.CalculationDirectory)+'resist.dat');
       {$I-}
     Reset(FFile);
 {$I+}
@@ -627,8 +645,8 @@ begin
 
     //  Определяем текущий каталог с проектами и с данными для расчета IN.
     PathFileOld := GetCurrentDir;
-    ForceDirectoriesUTF8(FFreeship.Preferences.TempDirectory);
-    SetCurrentDirUTF8(FFreeship.Preferences.TempDirectory);
+    ForceDirectoriesUTF8(FFreeship.CalculationDirectory);
+    SetCurrentDirUTF8(FFreeship.CalculationDirectory);
 
     //  Определяем текущий каталог с проектами и результатами расчета resist.dat
     FileToFind := FileSearchUTF8('resist.dat', GetCurrentDir);
@@ -667,7 +685,7 @@ begin
 
     //SysUtils.ExecuteProcess(UTF8ToSys(FExecDirectory + DirectorySeparator+'RVRSSHIP.EXE'), '', []);
     ExecFullName := FExecDirectory + DirectorySeparator+'RVRSSHIP.EXE';
-    ExecuteFreePlugin(FFreeship.Preferences.TempDirectory, ExecFullName);
+    ExecuteFreeCalculation(FFreeship.CalculationDirectory, ExecFullName, fcRvrs);
 
     FileName := 'RVRSRES.dat';
     //  Определяем есть ли файл с результатами расчета RVRSRES.dat. Если TMP4.tsk присутствует значит расчет не закончен
@@ -761,6 +779,10 @@ begin
 
   ResultsMemo.Lines.Add('');
   ResultsMemo.Lines.Add(Space(16) + 'Copyright (c) 2008, Timoshenko V.F.');
+  finally
+    SetCurrentDirUTF8(ProcessCallerDirectory);
+    Screen.Cursor := ProcessCallerCursor;
+  end;
 end;{TFreeHydrodyn_Rvrs.Calculate}
 
 function TFreeHydrodyn_Rvrs.Execute(Freeship: TFreeship; AutoExtract: boolean): boolean;
@@ -790,9 +812,9 @@ begin
   end;
 
 
-  if FileExistsUTF8('RESISTp.dat') { *Converted from FileExists* } then
+  if FileExistsUTF8(IncludeTrailingPathDelimiter(FFreeship.CalculationDirectory)+'RESISTp.dat') { *Converted from FileExists* } then
   begin
-    Assignfile(FFile, 'RESISTp.dat');
+    Assignfile(FFile, IncludeTrailingPathDelimiter(FFreeship.CalculationDirectory)+'RESISTp.dat');
          {$I-}
     Reset(FFile);
 {$I+}
@@ -822,9 +844,9 @@ begin
   //#  D    P/D  Ae/Ao     Z   J     Kt  10*Kq Eta0 EtaR=i1 i2   EtaG   EtaS Ndiag  n_nom    Pe
   // 4.685 0.947 0.550     4 0.587 0.201 0.312 0.602 1.018 1.000 0.990 0.980    2.  118.0  3528.0
 
-  if FileExistsUTF8('Propres.dat') { *Converted from FileExists* } then
+  if FileExistsUTF8(IncludeTrailingPathDelimiter(FFreeship.CalculationDirectory)+'Propres.dat') { *Converted from FileExists* } then
   begin
-    Assignfile(FFile, 'Propres.dat');
+    Assignfile(FFile, IncludeTrailingPathDelimiter(FFreeship.CalculationDirectory)+'Propres.dat');
          {$I-}
     Reset(FFile);
 {$I+}

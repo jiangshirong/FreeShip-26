@@ -3,12 +3,13 @@ object FormSelected: TFormSelected
   Height = 591
   Top = 194
   Width = 512
-  Caption = 'Selected'
+  Caption = 'Selected Object Details'
   ClientHeight = 591
   ClientWidth = 512
   FormStyle = fsStayOnTop
   LCLVersion = '3.2.0.0'
   object pTop: TPanel
+    Visible = False
     Left = 0
     Height = 36
     Top = 0
@@ -20,6 +21,7 @@ object FormSelected: TFormSelected
     ClientWidth = 512
     TabOrder = 0
     object bbClose: TBitBtn
+      Visible = False
       Left = 454
       Height = 36
       Top = 0
@@ -1031,6 +1033,7 @@ object FormSelected: TFormSelected
   object ActionList1: TActionList
     Left = 424
     object aClose: TAction
+      Visible = False
       Caption = 'Close'
       OnExecute = aCloseExecute
     end

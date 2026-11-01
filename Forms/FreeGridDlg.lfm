@@ -7,6 +7,7 @@ object FreeGridDialog: TFreeGridDialog
   Caption = 'Add a grid'
   ClientHeight = 270
   ClientWidth = 554
+  OnCreate = FormCreate
   LCLVersion = '3.2.0.0'
   object Panel2: TPanel
     Left = 0

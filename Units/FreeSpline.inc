@@ -769,6 +769,9 @@ var
   R, G, B: integer;
   Pn,Pn1,Pn2:integer;
   PArray3dc: array of T3DCoordinate;
+  LabelPlacement: TLabelPlacement;
+  LabelText: string;
+  LabelPreferred: TPoint;
 begin
   if not Built then
     Rebuild;
@@ -812,12 +815,13 @@ begin
     end
     else
     begin
-      PArray1 := GetValuesProjected(Viewport);
+      PArray3dc := GetValues;
     end;
     Viewport.SetPenWidth(FPenWidth);
     Viewport.PenColor := Color;
     Viewport.PenStyle := FPenstyle;
-    Viewport.Polyline(PArray1);
+    if ShowCurvature then Viewport.Polyline(PArray1)
+    else Viewport.DrawModelPolyline(PArray3dc);
 
     if ShowPoints then
     begin
@@ -829,7 +833,18 @@ begin
       begin
         Pt := Viewport.Project(Point[I - 1]);
         Viewport.Ellipse(Pt.X - 2, Pt.Y - 2, Pt.X + 2, Pt.Y + 2);
-        Viewport.TextOut(Pt.X + 2, Pt.Y, IntToStr(I));
+        LabelText:=IntToStr(I);
+        if Viewport.Printing or not Viewport.LabelLayout.Active then
+          Viewport.TextOut(Pt.X + 2, Pt.Y, LabelText)
+        else begin
+          LabelPreferred.X:=Pt.X+2; LabelPreferred.Y:=Pt.Y;
+          LabelPlacement:=Viewport.LabelLayout.Place('spline:'+IntToHex(PtrUInt(Self),SizeOf(Pointer)*2)+':'+IntToStr(I),
+            LabelText,Pt,LabelPreferred,Viewport.TextWidth(LabelText),Viewport.TextHeight(LabelText),lkPoint);
+          if LabelPlacement.Visible then begin
+            Viewport.DrawLabelLeader(Pt,LabelPlacement.Rect);
+            Viewport.TextOut(LabelPlacement.Position.X,LabelPlacement.Position.Y,LabelText);
+          end;
+        end;
       end;
     end;
   end

@@ -263,8 +263,8 @@ procedure TFreeProjectSettings.FSetProjectUnits(Val: TFreeUnitType);
 var
   UnitConversionFactor: double;
   ScaleVector: T3DCoordinate;
-  WeightFactor: TFloatType;
-  ThicknessFactor: TFloatType;
+  DensityFactor, MassFactor, ThicknessFactor: Double;
+  KaperDisplacement, PlaningDisplacement: Double;
   I: integer;
   Layer: TFreeSubdivisionLayer;
 begin
@@ -274,28 +274,60 @@ begin
     if FProjectUnits = fuImperial then
     begin
       // Scale from metric to imperial units
-      UnitConversionFactor := 1 / 0.3048;
-      WeightFactor := WeightConversionFactor;
+      UnitConversionFactor := 1 / Foot;
+      DensityFactor := DensityConversionFactor;
+      MassFactor := MetricTonneToLongTon;
       ThicknessFactor := 1 / 25.4;
     end
     else
     begin
       // scale from imperial to metric units
-      UnitConversionFactor := 0.3048;
-      WeightFactor := 1 / WeightConversionFactor;
+      UnitConversionFactor := Foot;
+      DensityFactor := 1 / DensityConversionFactor;
+      MassFactor := 1 / MetricTonneToLongTon;
       ThicknessFactor := 25.4;
     end;
-    FProjectWaterDensity := FProjectWaterDensity * WeightFactor;
+    FProjectWaterDensity := FProjectWaterDensity * DensityFactor;
     for I := 1 to FreeShip.Surface.NumberOfLayers do
     begin
       Layer := FreeShip.Surface.Layer[I - 1];
-      Layer.MaterialDensity := Layer.MaterialDensity * WeightFactor;
+      Layer.MaterialDensity := Layer.MaterialDensity * DensityFactor;
       Layer.Thickness := Layer.Thickness * ThicknessFactor;
     end;
+    // These are coordinates of the same physical planes, not new section positions.
+    // Uniform conversion preserves the normals, including those of diagonal cuts.
+    for I := 0 to FreeShip.NumberOfStations - 1 do
+      FreeShip.Station[I].FPlane.d := FreeShip.Station[I].FPlane.d * UnitConversionFactor;
+    for I := 0 to FreeShip.NumberOfButtocks - 1 do
+      FreeShip.Buttock[I].FPlane.d := FreeShip.Buttock[I].FPlane.d * UnitConversionFactor;
+    for I := 0 to FreeShip.NumberOfWaterlines - 1 do
+      FreeShip.Waterline[I].FPlane.d := FreeShip.Waterline[I].FPlane.d * UnitConversionFactor;
+    for I := 0 to FreeShip.NumberOfDiagonals - 1 do
+      FreeShip.Diagonal[I].FPlane.d := FreeShip.Diagonal[I].FPlane.d * UnitConversionFactor;
+
+    FStartDraft := FStartDraft * UnitConversionFactor;
+    FEndDraft := FEndDraft * UnitConversionFactor;
+    FDraftStep := FDraftStep * UnitConversionFactor;
+    FTrim := FTrim * UnitConversionFactor;
+    FVCG := FVCG * UnitConversionFactor;
+    for I := 0 to High(FStabTrims) do
+      FStabTrims[I] := FStabTrims[I] * UnitConversionFactor;
+    FMinimumDisplacement := FMinimumDisplacement * MassFactor;
+    FMaximumDisplacement := FMaximumDisplacement * MassFactor;
+    FDisplIncrement := FDisplIncrement * MassFactor;
+    for I := 0 to High(FDisplacements) do
+      FDisplacements[I] := FDisplacements[I] * MassFactor;
+
     ScaleVector.X := UnitConversionFactor;
     ScaleVector.Y := UnitConversionFactor;
     ScaleVector.Z := UnitConversionFactor;
+    KaperDisplacement := FreeShip.FResistanceKaperData.Displacement;
+    PlaningDisplacement := FreeShip.FResistancePlaningData.Displacement;
     FreeShip.Edit.Model_Scale(Scalevector, True, True); // Scale and redraw
+    // These two dialogs store mass, unlike the volume inputs in the other
+    // resistance records. Unit conversion must preserve the physical mass.
+    FreeShip.FResistanceKaperData.Displacement := KaperDisplacement * MassFactor;
+    FreeShip.FResistancePlaningData.Displacement := PlaningDisplacement * MassFactor;
   end;
 end;{TFreeProjectSettings.FSetProjectUnits}
 
@@ -380,7 +412,9 @@ var
   Dialog: TFreeProjectSettingsDialog;
 begin
   ProjectPrecision := FreeShip.Precision;
-  Dialog := TFreeProjectSettingsDialog.Create(FreeShip);
+  if FreeShip.FProjectSettingsDialog=nil then
+    FreeShip.FProjectSettingsDialog:=TFreeProjectSettingsDialog.Create(FreeShip);
+  Dialog := TFreeProjectSettingsDialog(FreeShip.FProjectSettingsDialog);
   Dialog.Edit1.Text := ProjectName;
   Dialog.UnitBox.ItemIndex := Ord(ProjectUnits);
   Dialog.PrecisionBox.ItemIndex := Ord(ProjectPrecision);
@@ -449,7 +483,8 @@ begin
     FreeShip.Precision := ProjectPrecision;   //TODO: save and load precision
     FreeShip.Redraw;
   end;
-  FreeAndNil(Dialog);
+  // ShowModal hides the owned dialog. Every subsequent opening binds all
+  // editable project values above; cancelled edits cannot leak into the model.
 end;{TFreeProjectSettings.Edit}
 
 procedure TFreeProjectSettings.LoadBinary(Source: TFreeFilebuffer; Image: TJPegImage);

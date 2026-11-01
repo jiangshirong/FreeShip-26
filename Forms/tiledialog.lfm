@@ -140,6 +140,7 @@ object TileDialog: TTileDialog
       ParentFont = False
       TabOrder = 2
       object bbClose: TBitBtn
+      Visible = False
         Left = 10
         Height = 36
         Top = 2

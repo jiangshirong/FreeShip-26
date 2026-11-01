@@ -4,7 +4,7 @@ object FreeSelectLayersDialog: TFreeSelectLayersDialog
   Top = 179
   Width = 387
   BorderStyle = bsDialog
-  Caption = 'Select layers.'
+  Caption = 'Select layers'
   ClientHeight = 272
   ClientWidth = 387
   Position = poMainFormCenter

@@ -1,4 +1,4 @@
-{#############################################################################################}
+﻿{#############################################################################################}
 {    This code is distributed as part of the FREE!ship project. FREE!ship is an               }
 {    open source surface-modelling program based on subdivision surfaces and intended for     }
 {    designing ships.                                                                         }
@@ -33,10 +33,14 @@ program FreeShip;
 
 {$mode objfpc}{$H+}
 
+{$IFDEF MSWINDOWS}
+{$APPTYPE GUI}
+{$ENDIF}
+
 //{$DEFINE CREATE_TRANSLATION}
 
 uses
-  // this is to load custom libfreehttps.so library. Look to FreeUpdateDlg.pas
+  // Legacy HTTPS library initialization.
   {$IF defined(unix) and (FPC_FULLVERSION < 32000)}
   //cmem,
   {$ifdef unix}cthreads,{$endif}
@@ -126,6 +130,7 @@ uses
 {$endif exclude}
 ;
 {$R *.res}
+{$IFDEF WINDOWS}{$R AppIcon26.res}{$ENDIF}
 
 var ParametersHelp, ShowSplash, InDebugger : boolean; sOpenFile:string='';
 
@@ -298,7 +303,7 @@ begin
    Logger.LogLevel:=LOG_ERROR;
 
    ParametersHelp:=false;
-   ShowSplash:=true;
+   ShowSplash:=false;
    InDebugger:=false;
    sOpenFile := '';
 
@@ -308,6 +313,10 @@ begin
    FormatSettings.DecimalSeparator:='.';
   Application.Scaled:=True;
    Application.Initialize;
+   Application.Title := 'FreeShip_26';
+   {$IFDEF WINDOWS}
+   Application.Icon.LoadFromResourceName(HInstance,'APPICON26');
+   {$ENDIF}
 
    if ParametersHelp then
      begin
@@ -362,6 +371,7 @@ begin
      'FreeShip', True);
 
    SetUserStringsLang;
+   MainForm.RefreshStudioLanguage;
 
    {$ENDIF}
    //ShowTranslatedValues(Mainform);
@@ -371,7 +381,8 @@ begin
 
    //Application.CreateForm(TFreeKeelWizardDialog, FreeKeelWizardDialog);
 
-   Application.OnActivate := MainForm.OnActivate;
+   // Application reactivation must preserve the independently selected window.
+   // MainForm.OnActivate remains bound only to activation of the main form.
 
    {$IFDEF CREATE_TRANSLATION}
       // Create a translation of all the forms and stringvalues in the project

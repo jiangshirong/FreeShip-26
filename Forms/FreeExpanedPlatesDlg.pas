@@ -222,6 +222,12 @@ implementation
 
 uses FreeStringsUnit;
 
+resourcestring
+  rsPlateEdgeErrorHint = 'Unrolled edge length minus original 3D length. Positive means longer; negative means shorter.';
+  rsPlateMaximumAreaHint = 'Largest absolute face area difference between the unrolled plate and the 3D surface.';
+  rsPlateTotalAreaHint = 'Signed area difference: unrolled minus 3D. Positive and negative face differences can cancel.';
+  rsPlateErrorSummary = 'Sum of absolute face area differences: %s %s. Normalized comparison score: %s. These are geometric errors, not material or manufacturing tolerances.';
+
 {$IFnDEF FPC}
   {$R *.dfm}
 
@@ -304,10 +310,20 @@ begin
   end
   else
   begin
-    _Label2.Caption := ': ' + FloatToStrF(Val.MinError, ffFixed, 7, 5);
-    _Label4.Caption := ': ' + FloatToStrF(Val.MaxError, ffFixed, 7, 5);
-    _Label16.Caption := ': ' + FloatToStrF(Val.MaxAreaError, ffFixed, 7, 6);
-    _Label18.Caption := ': ' + FloatToStrF(Val.TotalAreaError, ffFixed, 7, 6);
+    _Label2.Caption := ': ' + FloatToStrF(Val.MinError, ffFixed, 7, 5) + ' ' + LengthStr(Val.Units);
+    _Label4.Caption := ': ' + FloatToStrF(Val.MaxError, ffFixed, 7, 5) + ' ' + LengthStr(Val.Units);
+    _Label16.Caption := ': ' + FloatToStrF(Val.MaxAreaError, ffFixed, 7, 6) + ' ' + AreaStr(Val.Units);
+    _Label18.Caption := ': ' + FloatToStrF(Val.TotalAreaError, ffFixed, 7, 6) + ' ' + AreaStr(Val.Units);
+    _Label2.Hint := rsPlateEdgeErrorHint;
+    _Label4.Hint := rsPlateEdgeErrorHint;
+    _Label16.Hint := rsPlateMaximumAreaHint;
+    _Label18.Hint := rsPlateTotalAreaHint + LineEnding + Format(rsPlateErrorSummary,
+      [FloatToStrF(Val.AbsoluteAreaError, ffFixed, 7, 6), AreaStr(Val.Units),
+       FloatToStrF(Val.NormalizedError, ffGeneral, 7, 5)]);
+    _Label2.ShowHint := True;
+    _Label4.ShowHint := True;
+    _Label16.ShowHint := True;
+    _Label18.ShowHint := True;
     _Label6.Caption := ': ' + Val.Name;
     _Label9.Caption := IntToStr(Val.NumberOfIterations);
     FloatSpinEdit1.Value := Val.Rotation;

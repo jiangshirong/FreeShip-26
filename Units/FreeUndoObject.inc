@@ -31,14 +31,27 @@ var
   I: integer;
   Obj: TFreeUndoObject;
 begin
+  if Owner.FUndoObjects.IndexOf(Self) <> -1 then Exit;
+  // Reserve the new entry before discarding any history. Notify once after the
+  // list and its cursor are consistent, not while individual entries disappear.
+  if Owner.FUndoObjects.Capacity < Owner.FUndoObjects.Count + 1 then
+    Owner.FUndoObjects.Capacity := Owner.FUndoObjects.Count + 1;
   try
     // Add the undo data to the undolist
     if Owner.UndoCount > 0 then
       if Owner.UndoObject[Owner.UndoCount - 1].FIsTempRedoObject then
-        Owner.UndoObject[Owner.UndoCount - 1].Delete;
+      begin
+        Obj := Owner.UndoObject[Owner.UndoCount - 1];
+        Owner.FUndoObjects.Delete(Owner.UndoCount - 1);
+        Obj.Free;
+      end;
     // delete all undo objects after the current one
     for I := FOwner.FUndoObjects.Count downto Owner.FUndoPosition + 1 do
-      Owner.UndoObject[I - 1].Delete;
+    begin
+      Obj := Owner.UndoObject[I - 1];
+      Owner.FUndoObjects.Delete(I - 1);
+      Obj.Free;
+    end;
     Owner.FUndoObjects.Add(self);
     Owner.FUndoPosition := Owner.FUndoObjects.Count;
     while (FOwner.UndoMemory / (1024 * 1024) > Owner.Preferences.MaxUndoMemory) and

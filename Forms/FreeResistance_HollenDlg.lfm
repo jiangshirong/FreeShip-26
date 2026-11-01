@@ -1,4 +1,5 @@
 object FreeResistance_Hollen: TFreeResistance_Hollen
+  OnCreate = FormCreate
   Left = 556
   Height = 1054
   Top = 107
@@ -34,7 +35,7 @@ object FreeResistance_Hollen: TFreeResistance_Hollen
     end
     object ToolButton20: TToolButton
       Left = 15
-      Hint = 'Start the calculation.'
+      Hint = 'Start the calculation'
       Top = 2
       AutoSize = True
       ImageIndex = 3
@@ -42,7 +43,7 @@ object FreeResistance_Hollen: TFreeResistance_Hollen
     end
     object PrintButton: TToolButton
       Left = 77
-      Hint = 'Print the results of the calculation.'
+      Hint = 'Print the results of the calculation'
       Top = 2
       AutoSize = True
       Caption = 'PrintButton'
@@ -59,7 +60,7 @@ object FreeResistance_Hollen: TFreeResistance_Hollen
     end
     object ToolButton25: TToolButton
       Left = 149
-      Hint = 'Close the window and save changes.'
+      Hint = 'Close the window and save changes'
       Top = 2
       AutoSize = True
       ImageIndex = 1
@@ -67,7 +68,7 @@ object FreeResistance_Hollen: TFreeResistance_Hollen
     end
     object ToolButton7: TToolButton
       Left = 211
-      Hint = 'Close window without saving changes.'
+      Hint = 'Close window without saving changes'
       Top = 2
       AutoSize = True
       ImageIndex = 0

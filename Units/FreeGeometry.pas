@@ -36,7 +36,7 @@ uses
 {$IFnDEF FPC}
   JPeg, Windows,
 {$ELSE}
-  LCLIntf, LCLType, LCLProc,
+  LCLIntf, LCLType, LCLProc, LMessages,
 {$ENDIF}
   FasterList,
   MethodList,
@@ -60,12 +60,12 @@ uses
   ExtCtrls,
   ExtDlgs,
 {$IFDEF VER3}
-  LazUTF8,
+  LazUTF8, FreeReportPresentation,
   LazFileUtils,
 {$ELSE}
   FileUtil, //deprecated
 {$ENDIF}
-  FreeBitmapFormatHelper;
+  FreeBitmapFormatHelper, FreeLabelLayout, FreeOverlayReveal;
 
 const // Cursors
 {  crCOLORPICKER_32 = 1;
@@ -99,8 +99,13 @@ const // Cursors
 
 const
   Foot = 0.3048;
-  Lbs = 0.44642857;
-  WeightConversionFactor = (1000 / Lbs) / ((1 / Foot) * (1 / Foot) * (1 / Foot));
+  PoundKilograms = 0.45359237;
+  MetricTonneKilograms = 1000.0;
+  LongTonPounds = 2240.0;
+  Lbs = PoundKilograms; // Compatibility name: kilograms per pound, not tons per pound.
+  DensityConversionFactor = MetricTonneKilograms * Foot * Foot * Foot / PoundKilograms;
+  WeightConversionFactor = DensityConversionFactor; // Historical name for t/m3 -> lb/ft3.
+  MetricTonneToLongTon = MetricTonneKilograms / (LongTonPounds * PoundKilograms);
   IncrementSize = 25;
   // amount of points which is automaticly allocated extra memory for
   Decimals = 4;
@@ -424,6 +429,28 @@ type
   {---------------------------------------------------------------------------------------------------}
   TFreeViewport = class(TCustomPanel)
   private
+    FControlPointCoordinateAxis: Integer;
+    FLabelLayout: TFreeLabelLayout;
+    FOverlayReveal:TOverlayReveal;
+    FWireBase:TBitmap;
+    FWireBaseLines:TRevealLines;
+    FWireBaseKey:string;
+    FWireBaseStart:Integer;
+    FOverlayCollecting:Boolean;
+    FOverlayMarkers:array of record Target:TPoint;Radius:Integer;Color:TColor end;
+    FOverlayMarkerCount:Integer;
+    FAnimationFrameTick,FPointHighlightUntil:QWord;
+    FPointPulse:array of record Key:PtrUInt;Started:QWord end;
+    FLabelHistoryPan: TPoint;
+    FLabelTextClipped: Boolean;
+    FLabelTextRect: TRect;
+    FLabelAnimationTimer: TTimer;
+    FPresentationFrozen, FPresentationBufferValid: Boolean;
+    FPresentationFreezeStart: QWord;
+    FProgressiveTimer: TTimer;
+    FProgressivePreview: Boolean;
+    FProgressiveStart: QWord;
+    FLabelRevealStart: QWord;
     FAngle: TFloatType;
     FDistance: TFloatType;
     // The distance from the model to the camera, determined by the field of view
@@ -433,6 +460,8 @@ type
     FDoubleBuffer: boolean;
     // Double buffering prevents flickering when redrawing the viewport
     FPrinting: boolean;
+    FBitmapExporting: boolean;
+    FDeferredTransformRedraw: boolean;
     // Switch to determine if the viewport is drawing to the screen, or to the printer (or bitmap)
     FPrintResolution: integer;
     // horizontal reolution of the printer
@@ -549,6 +578,7 @@ type
     FAmbientIntencity:single;
     FMouseShift: TShiftState;
   protected
+    procedure WMEraseBkgnd(var Message:TLMEraseBkgnd); message LM_ERASEBKGND;
     procedure Paint; override;
     procedure Resize; override;
     procedure KeyPress(var Key: char); override;
@@ -593,6 +623,9 @@ type
     procedure LineTo(x, y: integer); virtual;
     procedure MoveTo(x, y: integer); virtual;
     procedure Line(x1, y1, x2, y2: integer); virtual;
+    procedure ProjectForDrawing(const P: T3DCoordinate; out X, Y: Double);
+    procedure DrawModelLine(const Point1, Point2: T3DCoordinate);
+    procedure DrawModelPolyline(const Points: array of T3DCoordinate);
     procedure Rectangle(x1, y1, x2, y2: integer); virtual; overload;
     procedure Rectangle(rect: TRect); virtual; overload;
     procedure Ellipse(x1, y1, x2, y2: integer); virtual;
@@ -623,7 +656,32 @@ type
       R1, G1, B1, R2, G2, B2, R3, G3, B3: byte); virtual;//reintroduce;overload;
     function TextWidth(val: string): integer; virtual;
     function TextHeight(val: string): integer; virtual;
+    procedure TextOutLabel(const Placement: TLabelPlacement; const Value: string);
     procedure TextOut(x, y: integer; val: string); virtual;
+    procedure LabelFrameReady(Sender: TObject);
+    function RevealLabelColor(AColor: TColor; Delay: Integer): TColor;
+    procedure SetPresentationFrozen(Value:Boolean);
+    procedure ProgressiveTick(Sender: TObject);
+    procedure LabelAnimationTick(Sender: TObject);
+    procedure SyncLabelHistory;
+    property PresentationFrozen:Boolean read FPresentationFrozen write SetPresentationFrozen;
+    function CaptureOverlayLine(X1,Y1,X2,Y2:Double):Boolean;
+    function AnimationTime:QWord;
+    function OverlayBuildCount:Integer;
+    procedure DrawControlPointMarker(const Target:TPoint; Radius:Integer);
+    procedure InvalidateAnimationBase;
+    function RestoreAnimationBase:Boolean;
+    procedure SaveAnimationBase;
+    procedure BeginOverlayFrame;
+    procedure EndOverlayFrame;
+    procedure BeginProgressiveDisplay;
+    procedure FinishProgressiveDisplay(SkipLabels: Boolean = False);
+    function ProgressiveFraction: Double;
+    function ControlPointRevealed(const Target:TPoint):Boolean;
+    function ControlPointEntranceColor(const Target:TPoint; Base:TColor; Identity:PtrUInt=0):TColor;
+    procedure PreviewFrameReady;
+    property ProgressivePreview: Boolean read FProgressivePreview;
+    procedure DrawLabelLeader(const Anchor: TPoint; const LabelRect: TRect);
     procedure ZoomIn; virtual;
     procedure ZoomExtents; virtual;
     procedure ZoomOut; virtual;
@@ -637,6 +695,9 @@ type
     property BrushStyle: TBrushStyle
       read FGetBrushStyle write FSetBrushStyle;
     property CameraLocation: T3DCoordinate read FCameraLocation write FCameraLocation;
+    // Independent for each view: 0 = off, 1 = X, 2 = Y, 3 = Z.
+    property ControlPointCoordinateAxis: Integer read FControlPointCoordinateAxis write FControlPointCoordinateAxis;
+    property LabelLayout: TFreeLabelLayout read FLabelLayout;
     property DrawingCanvas: TCanvas
       read FDrawingCanvas write FDrawingCanvas;
     property FieldOfView: TFloatType read FFieldOfView;
@@ -660,6 +721,9 @@ type
     property PenWidth: integer
       read FGetPenWidth write FSetPenWidth;
     property Printing: boolean read FGetPrinting;
+    property ExportingBitmap: boolean read FBitmapExporting;
+    property DeferredTransformRedraw: boolean read FDeferredTransformRedraw write FDeferredTransformRedraw;
+    procedure PauseLabelAnimation;
     property PrintResolution: integer read FPrintResolution;
     property PrintScaleFactor: TFloatType read FGetPrintScaleFactor;
     property Scale: TFloatType read FScale;
@@ -761,6 +825,9 @@ type
     FTranslation: T2DCoordinate;
     FMaxAreaError: extended;
     FTotalAreaError: extended;
+    FAbsoluteAreaError: extended;
+    FReferenceArea: extended;
+    FNormalizedError: extended;
     FXGrid: TFloatType;
     FYGrid: TFloatType;
     FCos, FSin: TFloatType;
@@ -868,6 +935,9 @@ type
       read FDimFontSize write FDimFontSize;
     property TotalAreaError: extended
       read FTotalAreaError;
+    property AbsoluteAreaError: extended read FAbsoluteAreaError;
+    property ReferenceArea: extended read FReferenceArea;
+    property NormalizedError: extended read FNormalizedError;
     property Translation: T2DCoordinate
       read FTranslation write FSetTranslation;
     property Units: TFreeUnitType
@@ -1247,6 +1317,7 @@ type
       ControlFace: TFreeSubdivisionControlFace);
     procedure AssignProperties(
       Source: TFreeSubdivisionLayer);
+    function CalculateSurfaceProperties(Report: TStrings): TLayerProperties;
     procedure FindEdgeFaceIntersectionPoints(
       Layer: TFreeSubdivisionLayer; var NewEdge: TFreeSubdivisionControlEdge;
       var NewPoints: TFasterListTFreeSubdivisionControlPoint);
@@ -1463,6 +1534,7 @@ type
     procedure RemoveControlPoint(cp:TFreeSubdivisionControlPoint);
     procedure BreakGroup; virtual;
     constructor Create(Owner: TFreeSubdivisionSurface); override;
+    destructor Destroy; override;
     procedure Delete;
     procedure Draw(Viewport: TFreeViewport);
     procedure LoadBinary(Source: TFreeFileBuffer);
@@ -2022,6 +2094,7 @@ type
               const Destination: TFasterListTFreeSubdivisionFace); //overload; virtual;
     procedure LoadBinary(Source: TFreeFileBuffer);
     procedure LoadFromStream(var LineNr: integer; Strings: TStringList);
+    procedure ExchangeEventHandlers(Other: TFreeSubdivisionSurface);
     procedure LoadVRMLFile(Filename: string);
     function PointExists(P: TFreeSubdivisionControlPoint): boolean;
     procedure Average;
@@ -2338,12 +2411,16 @@ var
 
 procedure Register;
 
+procedure RequireModelIndex(Index, Count: Integer; const FieldName: string);
+function LoadModelCount(Source: TFreeFileBuffer; const FieldName: string;
+  MinimumItemBytes: Integer = 1): Integer;
+
 implementation
 
 //{$R ViewportCursors.res}
 {$R cursors.res}         // new nice cursors with antialiasing
 
-uses FreeStringsUnit,
+uses FreeStringsUnit, FreeSmoothLines,
   VRMLUnit,
   VRML2Unit,
   FreeBackgroundBlendingDlg,
@@ -2351,6 +2428,27 @@ uses FreeStringsUnit,
   FreeSaveImageDlg,
   FreeLogger,
   FreeStringUtils;
+
+procedure RequireModelIndex(Index, Count: Integer; const FieldName: string);
+begin
+  if (Index < 0) or (Index >= Count) then
+    raise EReadError.CreateFmt('Invalid %s index: %d (count %d)',
+      [FieldName, Index, Count]);
+end;
+
+function LoadModelCount(Source: TFreeFileBuffer; const FieldName: string;
+  MinimumItemBytes: Integer): Integer;
+begin
+  Source.LoadInteger(Result);
+  if Result < 0 then
+    raise EReadError.CreateFmt('Invalid %s count: %d', [FieldName, Result]);
+  // Text buffers count lines, while binary buffers count bytes.
+  if not (Source is TFreeTextBuffer) then
+    if (Source.Position > Source.Count) or
+       (Result > (Source.Count - Source.Position) div MinimumItemBytes) then
+      raise EReadError.CreateFmt('Invalid %s count: %d exceeds remaining data',
+        [FieldName, Result]);
+end;
 
 {$I FreeGometry_Functions.inc}
 {$I FreeAlphaBuffer.inc}

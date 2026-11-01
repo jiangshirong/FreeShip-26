@@ -257,6 +257,7 @@ type
     _Label30: TLabel;
     _Label34: TLabel;
     _Label37: TLabel;
+    procedure FormCreate(Sender: TObject);
     procedure ComboBoxChange(Sender: TObject);
     procedure File_ExportData(dat, dan: array of single);
     procedure CheckBox2Click(Sender: TObject);
@@ -399,6 +400,7 @@ type
     Label10Old, Label11Old, Label15Old, Label16Old: string;
     function CorrectInputdata: boolean;
     procedure Calculate;
+    procedure CalculateInWorkspace;
     function Execute(Freeship: TFreeship;
       AutoExtract: boolean): boolean;
     property Bwl: single
@@ -517,7 +519,7 @@ var
 
 implementation
 
-uses FreeStringsUnit,FreeProcess;
+uses FreeCalculationFiles, FreeUiChoices, FreeStringsUnit,FreeProcess;
 
 {$IFnDEF FPC}
   {$R *.dfm}
@@ -525,6 +527,14 @@ uses FreeStringsUnit,FreeProcess;
 {$ELSE}
   {$R *.lfm}
 {$ENDIF}
+
+procedure TFreeResistance_MH.FormCreate(Sender: TObject);
+begin
+  SetResistanceShipTypeChoices(A11Box);
+  SetChoiceLabels(ComboBox, [rsChoiceModelTests, rsChoiceDoubrovskyCat, rsChoiceDoubrovskyTri,
+    rsChoiceHardChineCat, rsChoiceVoytkunsky, rsChoiceMolland, rsChoicePhamHardChine,
+    rsChoiceAlferievRiver, rsChoiceZips, rsChoiceSchwetz, rsChoiceSahoo, rsChoiceGrubisic]);
+end;
 
 function TFreeResistance_MH.CorrectInputdata: boolean;
 begin
@@ -586,6 +596,17 @@ begin
 end;{TFreeResistance_MH.CorrectInputdata}
 
 procedure TFreeResistance_MH.Calculate;
+var Job: TFreeCalculationScope;
+begin
+  if FFreeship = nil then Exit;
+  Job := FFreeship.BeginCalculation(['RESIST.dat','RESISTp.dat','Propres.dat']);
+  try
+    CalculateInWorkspace;
+    Job.Complete;
+  finally Job.Free end;
+end;
+
+procedure TFreeResistance_MH.CalculateInWorkspace;
 var
   ConvertedSpeed: single;
   FroudeNumber: single;
@@ -1027,11 +1048,7 @@ begin
     Speed := Vs[10];
     dVs := (Vs[8] - Vs[1]) / 7;
 
-    PathFileOld := FFreeship.Preferences.InitDirectory; // каталог Freeshipa
-    Assignfile(FFile2, PathFileOld + 'Resistp.dat');
-    {$I-}
-    Rewrite(FFile2);
-{$I+}
+    PathFileOld := IncludeTrailingPathDelimiter(FFreeship.CalculationDirectory); // каталог Freeshipa
 
     for j := 1 to 10 do
       Vs[j] := Vs[1] + dVs * (J - 1);
@@ -1082,18 +1099,7 @@ begin
       if FileExistsUTF8(PathFileOld + 'ostres.tmp')
       { *Converted from FileExists* } then
       begin
-        DeleteFileUTF8(PChar(PathFile + DirectorySeparator+'Resist.dat'));
-        { *Converted from DeleteFile* }
-        DeleteFileUTF8(PChar(PathFile + DirectorySeparator+'Resistp.dat'));
-        { *Converted from DeleteFile* }
-        L := RenameFileUTF8(PChar(PathFileOld + 'Resist.dat'), PChar(
-          PathFile + DirectorySeparator+'Resist.dat'));
-        L := RenameFileUTF8(PChar(PathFileOld + 'Resistp.dat'), PChar(
-          PathFile + DirectorySeparator+'Resistp.dat'));
-        DeleteFileUTF8(PChar(PathFileOld + 'ostres.tmp'));
-        { *Converted from DeleteFile* }
-        DeleteFileUTF8(PChar(PathFileOld + 'Resist.dat'));
-        { *Converted from DeleteFile* }
+        DeleteFileUTF8(PathFileOld + 'ostres.tmp');
       end;
 
     end
@@ -1255,6 +1261,12 @@ begin
 
     Index := 0;
 
+    Assignfile(FFile2, PathFileOld + 'Resistp.dat');
+    {$I+}
+    Rewrite(FFile2);
+    try
+{$I+}
+
     for ispeed := 1 to 10 do
     begin
       Speed := Res[ispeed, 1]; //Vs[ispeed];
@@ -1327,7 +1339,9 @@ begin
       end;
     end;
     //   end;
-    CloseFile(FFile2);
+    finally
+      CloseFile(FFile2);
+    end;
     ResultsMemo.Lines.Add(
       Space(10) + '+-------+-------+-------+--------+--------+--------+---------+--------+---------+');
     ResultsMemo.Lines.Add('');
@@ -1487,8 +1501,7 @@ begin
       for i := 1 to 10 do
         Writeln(FFile2, Res_[i, 1], Res_[i, 2], Res_[i, 3], Res_[i, 4], Res_[i, 5]);
       CloseFile(FFile2);
-      L := RenameFileUTF8(PChar(PathFileOld + 'Resistp.dat'), PChar(
-        PathFile + DirectorySeparator+'Resistp.dat'));
+      // Published by the calculation scope after all output is validated.
       //       DeleteFile(PChar(PathFileOld+'Resistp.dat'));
 
       if flag = 1 then
@@ -1808,6 +1821,9 @@ end;{TFreeResistance_MH.Estimate2BoxClick}
 procedure TFreeResistance_MH.CalculateResistanceOST(Vs: array of single; LCB, Cp: single;
   var Rf, Rr, w, t0, nr: single);
 var
+  ProcessCallerDirectory: string;
+  ProcessCallerCursor: TCursor;
+ 
   Ca, Capp, Caero, Cb, Nrud, Ncalc: single;
   C, Ke_: double;
   Units: TFreeUnitType;
@@ -1832,6 +1848,9 @@ var
   //label NewCatalogSearch;
 
 begin
+  ProcessCallerDirectory := GetCurrentDirUTF8;
+  ProcessCallerCursor := Screen.Cursor;
+  try
   Cb := 0;
   Units := FFreeship.ProjectSettings.ProjectUnits;
 
@@ -2251,8 +2270,8 @@ begin
   //  Определение каталогов и запуск расчета
   PathFile := GetCurrentDirUTF8;
   { *Converted from GetCurrentDir* }// текущий каталог проекта
-  ForceDirectoriesUTF8(FFreeship.Preferences.TempDirectory);
-  SetCurrentDirUTF8(FFreeship.Preferences.TempDirectory);
+  ForceDirectoriesUTF8(FFreeship.CalculationDirectory);
+  SetCurrentDirUTF8(FFreeship.CalculationDirectory);
 
   FExecDirectory := FFreeship.Preferences.ExecDirectory;
 
@@ -2260,11 +2279,15 @@ begin
   // записываем файл данных в каталог Freeshipa
   //SysUtils.ExecuteProcess(UTF8ToSys(FExecDirectory + DirectorySeparator+'hship.EXE'), '', []);
   ExecFullName := FExecDirectory + DirectorySeparator+'hship.EXE';
-  ExecuteFreePlugin(FFreeship.Preferences.TempDirectory, ExecFullName);
+  ExecuteFreeCalculation(FFreeship.CalculationDirectory, ExecFullName, fcHship);
 
   L := SetCurrentDirUTF8(PathFile);
   { *Converted from SetCurrentDir* }// возвращаемся в каталог проекта
 
+  finally
+    SetCurrentDirUTF8(ProcessCallerDirectory);
+    Screen.Cursor := ProcessCallerCursor;
+  end;
 end;{TFreeResistance_MH.CalculateResistanceOST}
 
 procedure TFreeResistance_MH.File_ExportData(dat, dan: array of single);

@@ -72,6 +72,7 @@ type
                                              ButtonClose: TSpeedButton;
     PrintDialog: TPrintDialog;
     SaveDialog: TSaveDialog;
+    procedure FormCreate(Sender: TObject);
                                              procedure GridDrawCell(Sender: TObject; ACol, ARow: Integer;Rect: TRect; State: TGridDrawState);
                                              procedure FormResize(Sender: TObject);
                                              procedure ButtonCloseClick(Sender: TObject);
@@ -79,7 +80,15 @@ type
     procedure ButtonPrintClick(Sender: TObject);
                                            private { Private declarations }
                                               ColWidths : array of Integer;
+                                              FHeaderView:TScrollBox;
+                                              FColumnHints:TStringList;
+                                              FCoefficientNote:string;
+                                              FDatumNote:string;
+    procedure GridCellHint(Sender:TObject;ACol,ARow:Integer;var HintText:string);
                                            public  { Public declarations }
+    destructor Destroy;override;
+    procedure PrepareHeaderView;
+    function HeaderMeaning(ACol,ARow:Integer):string;
                                               function Execute:Boolean;
                                         end;
 
@@ -87,11 +96,81 @@ var FreeHydrostaticsResultsDialog: TFreeHydrostaticsResultsDialog;
 
 implementation
 
+uses Math,FreeReportPresentation,FreeReportTables;
+
 {$IFnDEF FPC}
   {$R *.dfm}
 {$ELSE}
   {$R *.lfm}
 {$ENDIF}
+
+procedure TFreeHydrostaticsResultsDialog.FormCreate(Sender: TObject);
+begin
+  FColumnHints:=TStringList.Create;
+  Grid.ShowHint:=True;Grid.Options:=Grid.Options+[goCellHints];
+  Grid.CellHintPriority:=chpAllNoDefault;Grid.OnGetCellHint:=GridCellHint;
+  EnlargeHydroReport(Self);
+  ButtonClose.Visible:=False;
+  Grid.Font.Name:='Microsoft YaHei UI';Grid.Font.Size:=14;
+  Grid.FixedColor:=RGBToColor(229,240,234);
+  Grid.GridLineColor:=RGBToColor(220,230,224);
+  Grid.DefaultRowHeight:=40;
+  FHeaderView:=THydroReportView.Create(Self);
+  FHeaderView.Parent:=Header.Parent;FHeaderView.Align:=alTop;FHeaderView.Height:=280;
+  Header.Visible:=False;
+  Header.Font.Size:=14;
+  {$IFDEF WINDOWS}
+  // The report is padded with spaces, so use a font with fixed-width digits.
+  // SimHei also provides full-width Chinese glyphs without bitmap strikes.
+  Header.Font.Name := 'Consolas';
+  if Assigned(GlobalFreeship) and
+     SameText(GlobalFreeship.Preferences.Language, 'Chinese') then
+    Header.Font.Name := 'SimHei';
+  Header.Font.Size := 14;
+  Header.Font.Quality := fqCleartypeNatural;
+  {$ENDIF}
+end;
+
+destructor TFreeHydrostaticsResultsDialog.Destroy;
+begin FreeAndNil(FColumnHints);inherited Destroy end;
+
+procedure TFreeHydrostaticsResultsDialog.PrepareHeaderView;
+var VisibleHeader:TStringList;I,J,P,Column:Integer;S,Symbol,Meaning:string;
+begin
+ FColumnHints.Clear;FCoefficientNote:='';FDatumNote:='';
+ VisibleHeader:=TStringList.Create;
+ try
+  VisibleHeader.Assign(Header.Lines);
+  for I:=VisibleHeader.Count-1 downto 0 do begin
+   S:=Trim(VisibleHeader[I]);
+   if S=rs_NOTE_1__Draft__and_all_other_vertical_heights__is_measured_from_point_of_the_hull_Z_0_ then FDatumNote:=S;
+   if (S=rs_NOTE_2__All_calculated_coefficients_based_on_actual_dimensions_of_submerged_body_) or
+      (S=rs_NOTE_2__All_calculated_coefficients_based_on_project_length___draft_and_beam_) then FCoefficientNote:=S;
+   P:=Pos(#9+': ',S);if P=0 then P:=Pos(' : ',S);if P=0 then Continue;
+   Symbol:=Trim(Copy(S,1,P-1));Column:=-1;
+   for J:=0 to Grid.ColCount-1 do if SameText(Symbol,Grid.Cells[J,0]) then Column:=J;
+   // These two column titles are translated; their legacy glossary keys are not.
+   if (Symbol='Volume') and (Grid.ColCount>4) then Column:=4;
+   if (Symbol='Displ.') and (Grid.ColCount>5) then Column:=5;
+   if Column<0 then Continue;
+   Meaning:=Trim(Copy(S,P+3,Length(S)));
+   FColumnHints.Values[IntToStr(Column)]:=Meaning;
+   VisibleHeader.Delete(I);
+  end;
+  THydroReportView(FHeaderView).SetReport(VisibleHeader);
+ finally VisibleHeader.Free end;
+end;
+
+function TFreeHydrostaticsResultsDialog.HeaderMeaning(ACol,ARow:Integer):string;
+begin
+ Result:='';if (ARow<0) or (ARow>1) or (ACol<0) or (ACol>=Grid.ColCount) then Exit;
+ Result:=FColumnHints.Values[IntToStr(ACol)];if Result='' then Result:=Grid.Cells[ACol,0];
+ if (ARow=1) and (Grid.Cells[ACol,1]='[-]') and (FCoefficientNote<>'') then Result:=Result+LineEnding+FCoefficientNote;
+ if (ACol=0) and (FDatumNote<>'') then Result:=Result+LineEnding+FDatumNote;
+end;
+
+procedure TFreeHydrostaticsResultsDialog.GridCellHint(Sender:TObject;ACol,ARow:Integer;var HintText:string);
+begin HintText:=HeaderMeaning(ACol,ARow) end;
 
 procedure TFreeHydrostaticsResultsDialog.GridDrawCell(Sender: TObject;ACol, ARow: Integer; Rect: TRect; State: TGridDrawState);
 var W    : Integer;
@@ -135,17 +214,23 @@ begin
 end;{TFreeHydrostaticsResultsDialog.GridDrawCell}
 
 function TFreeHydrostaticsResultsDialog.Execute:Boolean;
-var I : Integer;
+var I,J,W : Integer;
 begin
    // Store the column width for resizing purposes
    setlength(ColWidths,Grid.ColCount);
-   for I:=1 to Grid.ColCount do ColWidths[I-1]:=Grid.ColWidths[I-1];
+   Grid.Canvas.Font.Assign(Grid.Font);
+   for I:=0 to Grid.ColCount-1 do begin
+     W:=90;for J:=0 to Grid.RowCount-1 do W:=Max(W,Grid.Canvas.TextWidth(Grid.Cells[I,J])+24);
+     ColWidths[I]:=W;Grid.ColWidths[I]:=W;
+   end;
 
    GlobalFreeship.Preferences.LoadImageIntoBitmap(ButtonPrint.Glyph,'Print');
    GlobalFreeship.Preferences.LoadImageIntoBitmap(ButtonSave.Glyph,'Save');
    GlobalFreeship.Preferences.LoadImageIntoBitmap(ButtonClose.Glyph,'Ok');
    //ShowTranslatedValues(Self);
 
+   PrepareReportMemo(Header);
+   PrepareHeaderView;
    ShowModal;
    Result:=modalresult=mrOK;
 end;{TFreeHydrostaticsResultsDialog.Execute}
@@ -157,6 +242,8 @@ var I,Total : Integer;
     Fraction: Double;
 begin
    ButtonClose.Left:=Panel1.Width-ButtonClose.Width-5;
+   if Length(ColWidths)<>Grid.ColCount then Exit;
+   if FHeaderView<>nil then FHeaderView.Height:=Min(300,ClientHeight div 3);
    Total:=0;
    for I:=1 to Grid.ColCount do Inc(Total,ColWidths[I-1]);
    if Total<>0 then
@@ -165,7 +252,7 @@ begin
       for I:=1 to Grid.ColCount do
       begin
          Fraction:=ColWidths[I-1]/Total;// percentage of total width when shown for the first time
-         NewW:=trunc(Fraction*remain);
+         NewW:=Max(ColWidths[I-1],trunc(Fraction*remain));
          Grid.ColWidths[I-1]:=NewW;
       end;
    end;

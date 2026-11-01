@@ -5,7 +5,7 @@ object DXFExport2DDialog: TDXFExport2DDialog
   Width = 640
   AutoSize = True
   BorderStyle = bsDialog
-  Caption = 'Export intersections to DXF as 2D polylines.'
+  Caption = 'Export intersections to DXF as 2D polylines'
   ClientHeight = 200
   ClientWidth = 640
   OnActivate = FormActivate

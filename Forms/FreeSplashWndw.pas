@@ -344,6 +344,8 @@ end;{TFreeSplashWindow.FormClose}
 
 procedure TFreeSplashWindow.FormShow(Sender: TObject);
 begin
+  Caption := 'FreeShip_26 — based on FREE!ship Plus in Lazarus';
+  LabelAppName.Caption := 'FreeShip_26';
   FCounter := 0;
   //Timer.Enabled := True;
 end;{TFreeSplashWindow.FormShow}
@@ -383,14 +385,14 @@ begin
      FileToFind := FileSearch(FManDirectory+DirectorySeparator+man+'.txt',FManDirectory);
 
   if (FileToFind='') and (FLang<>'English') then begin
-     MessageDlg('Manual file "'+man+'" not found in "'+FManDirectory+'" directory'+EOL
-               +'You can visit https://www.gnu.org/licenses/translations.html'+EOL
-               +'English GPL will be opened.',mtInformation,[mbOk],0);
+     MessageDlg(Format(rsLocManualNotFound, [man, FManDirectory])+EOL
+               +rsLocGplTranslationsLink+EOL
+               +rsLocEnglishGplFallback,mtInformation,[mbOk],0);
      man := 'GPL-English.html';
      FileToFind := FileSearch(FManDirectory+DirectorySeparator+man,FManDirectory);
   end;
   if FileToFind='' then begin
-     MessageDlg('Manual file "'+man+'" not found in "'+FManDirectory+'" directory',mtInformation,[mbOk],0);
+     MessageDlg(Format(rsLocManualNotFound, [man, FManDirectory]),mtInformation,[mbOk],0);
      exit;
   end;
 

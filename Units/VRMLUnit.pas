@@ -531,7 +531,7 @@ begin
   else
   begin
     Result := ZERO;
-    MessageDlg('Point index out of bounds in TVRMLCoordinate3.FGetPoint',
+    MessageDlg(rsLocVrml1PointIndex,
       mtError, [mbOK], 0);
   end;
 end;{TVRMLCoordinate3.FGetPoint}
@@ -680,7 +680,7 @@ begin
   else
   begin
     Result := nil;
-    MessageDlg('Face index out of bounds in TVRMLIndexedFaceSet.FGetFace',
+    MessageDlg(rsLocVrml1FaceIndex,
       mtError, [mbOK], 0);
   end;
 end;{TVRMLIndexedFaceSet.FGetFace}
@@ -1017,7 +1017,7 @@ begin
     VRMLVersion := TVRMLList.CheckVRMLFileVersion(Filename);
     if VRMLVersion <> 'VRML V1.0' then
     begin
-      MessageDlg('Not a VRML V1.0 format', mtError, [mbOK], 0);
+      MessageDlg(rsLocVrml1Invalid, mtError, [mbOK], 0);
       exit;
     end;
     try
@@ -1116,7 +1116,7 @@ begin
       MessageDlg(rs_No_meshdata_could_be_imported {UserString[203]} + '.', mtError, [mbOK], 0);
     except
       on E:Exception do
-         MessageDlg('Exception in VRML Load:'+#10+E.Message, mtError, [mbOK], 0);
+         MessageDlg(rsLocVrmlLoadException+#10+E.Message, mtError, [mbOK], 0);
     end;
     //FreeAndNil(VRMLList);
     SubdivisionSurface.IsLoading := false;

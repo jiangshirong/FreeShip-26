@@ -1759,7 +1759,6 @@ begin
         Node.Expanded := True;
         LastNode := Node;
         //Node.Selected := True;
-        writeln(Node.Text);
         if not(otHidden in FObjectTypes) then // MM
         Node := Node.GetFirstVisibleChild
         else Node := Node.GetFirstChild

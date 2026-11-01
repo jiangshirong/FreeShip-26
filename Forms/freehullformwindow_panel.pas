@@ -93,24 +93,10 @@ type
    Mediumtelelens130mm1: TMenuItem;
    LongTeleLens: TAction;
    Longtelelens200mm1: TMenuItem;
-   View1: TMenuItem;
-   Bodyplan1: TMenuItem;
-   Profile1: TMenuItem;
-   Planview1: TMenuItem;
-   Perspective1: TMenuItem;
-   ViewBodyPlan: TAction;
-   ViewProfile: TAction;
-   ViewPlan: TAction;
-   ViewPerspective: TAction;
    ZoomIn: TAction;
-   Zoom1: TMenuItem;
-   ZoomIn1: TMenuItem;
    ZoomExtents: TAction;
    ZoomOut: TAction;
-   Zoomout1: TMenuItem;
-   All1: TMenuItem;
    DeselectAll: TAction;
-   Deselectall1: TMenuItem;
    Print: TAction;
    ShowWireFrame: TAction;
    Mode1: TMenuItem;
@@ -170,10 +156,6 @@ type
    procedure ShortTeleLensExecute(Sender: TObject);
    procedure MediumTeleLensExecute(Sender: TObject);
    procedure LongTeleLensExecute(Sender: TObject);
-   procedure ViewBodyPlanExecute(Sender: TObject);
-   procedure ViewProfileExecute(Sender: TObject);
-   procedure ViewPlanExecute(Sender: TObject);
-   procedure ViewPerspectiveExecute(Sender: TObject);
    procedure FormShow(Sender: TObject);
    procedure ViewportChangeViewType(Sender: TObject);
    procedure ZoomInExecute(Sender: TObject);
@@ -211,10 +193,14 @@ private    { Private declarations }
    FLCLVersion : string;
    FFormState : TFormState;
    FFreeShip         : TFreeShip;
+   FCoordinateMenu: TMenuItem;
+   FBorderPointerActive:Boolean;FBorderPointerCursor:TCursor;
    FPanned           : Boolean;  // Private variable from which can be seen if the popup menu has to be shown or not
    FInitialPosition  : TPoint;   // Initial position of the mouse cursor when the left or right button was pressed
    FAllowPanOrZoom   : Boolean;  // Flag to check whether panning or zooming is allowed or not (not when an item has just been selected)
 
+   function ViewportResizeHit(X,Y:Integer;out PanelPoint:TPoint):Boolean;
+   procedure CoordinateAxisClick(Sender: TObject);
    procedure FSetFreeShip(Val:TFreeShip);
    function FCaptionText:string;
    procedure CreateFreeViewport();
@@ -251,7 +237,7 @@ var FreeHullWindow: TFreeHullWindow;
 
 implementation
 
-uses LResources, LazLoggerBase,
+uses Main, LResources, LazLoggerBase,
      FreeStringsUnit;
 
 {$R *.lfm}
@@ -263,6 +249,10 @@ begin
   result:=getmem(len);
   HexToBin(hex, result, len);
 end;
+
+resourcestring
+  rsShowControlPointCoordinates = 'Show control point coordinates';
+  rsCoordinateAxisOff = 'Off';
 
 {$I freehullformwindow_panel.inc}
 
@@ -378,6 +368,10 @@ end;
 constructor TFreeHullWindow.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
+  CaptionButtons := CaptionButtons - [cbSystemMenu];
+  BorderWidth := 2;
+  InactiveBorderColor := RGB(224, 236, 232);
+  ActiveBorderColor := RGB(17, 119, 109);
   if assigned(OnCreate) then
      OnCreate(Self);
 end;
@@ -412,24 +406,10 @@ begin
   Mediumtelelens130mm1 := FreeHullForm.Mediumtelelens130mm1;
   LongTeleLens := FreeHullForm.LongTeleLens;
   Longtelelens200mm1 := FreeHullForm.Longtelelens200mm1;
-  View1 := FreeHullForm.View1;
-  Bodyplan1 := FreeHullForm.Bodyplan1;
-  Profile1 := FreeHullForm.Profile1;
-  Planview1 := FreeHullForm.Planview1;
-  Perspective1 := FreeHullForm.Perspective1;
-  ViewBodyPlan := FreeHullForm.ViewBodyPlan;
-  ViewProfile := FreeHullForm.ViewProfile;
-  ViewPlan := FreeHullForm.ViewPlan;
-  ViewPerspective := FreeHullForm.ViewPerspective;
   ZoomIn := FreeHullForm.ZoomIn;
-  Zoom1 := FreeHullForm.Zoom1;
-  ZoomIn1 := FreeHullForm.ZoomIn1;
   ZoomExtents := FreeHullForm.ZoomExtents;
   ZoomOut := FreeHullForm.ZoomOut;
-  Zoomout1 := FreeHullForm.Zoomout1;
-  All1 := FreeHullForm.All1;
   DeselectAll := FreeHullForm.DeselectAll;
-  Deselectall1 := FreeHullForm.Deselectall1;
   ImagesHull := FreeHullForm.ImagesHull;
   Print := FreeHullForm.Print;
   ShowWireFrame := FreeHullForm.ShowWireFrame;
@@ -474,10 +454,10 @@ end;
 function TFreeHullWindow.FCaptionText:string;
 begin
    Case Viewport.ViewType of
-      fvBodyplan     : Result:=rs_Bodyplan_view {UserString[215]}+'.';
-      fvProfile      : Result:=rs_Profile_view {UserString[216]}+'.';
-      fvPlan         : Result:=rs_Plan_view {UserString[217]}+'.';
-      fvPerspective  : Result:=rs_Perspective_view {UserString[218]}+'.';
+      fvBodyplan     : Result:=rs_Bodyplan_view {UserString[215]};
+      fvProfile      : Result:=rs_Profile_view {UserString[216]};
+      fvPlan         : Result:=rs_Plan_view {UserString[217]};
+      fvPerspective  : Result:=rs_Perspective_view {UserString[218]};
       else Result:='';
    end;
 end;{TFreeHullWindow.FCaptionText}
@@ -511,16 +491,13 @@ begin
    // Update all menuitems and action
    Print.Enabled:=(Viewport.ViewportMode=vmWireframe) and (Printer<>nil);
    WideLens.Checked:=Viewport.CameraType=ftWide;
-   Camera1.Enabled:=Viewport.Viewtype=fvPerspective;
+   Camera1.Visible:=Viewport.Viewtype=fvPerspective;
+   Light.Visible:=Viewport.ViewportMode<>vmWireframe;
    StandardLens.Checked:=Viewport.CameraType=ftStandard;
    ShortTeleLens.Checked:=Viewport.CameraType=ftShortTele;
    MediumTeleLens.Checked:=Viewport.CameraType=ftMediumTele;
    LongTeleLens.Checked:=Viewport.CameraType=ftFarTele;
    // viewport view
-   ViewBodyplan.Checked:=Viewport.ViewType=fvBodyplan;
-   ViewProfile.Checked:=Viewport.ViewType=fvProfile;
-   ViewPlan.Checked:=Viewport.ViewType=fvPlan;
-   ViewPerspective.Checked:=Viewport.ViewType=fvPerspective;
    // Drawingmode
    ShowWireframe.Checked:=Viewport.ViewportMode=vmWireframe;
    ShowFlatShade.Checked:=Viewport.ViewportMode=vmShade;
@@ -532,6 +509,7 @@ begin
    Backgroundclear.Enabled:=Viewport.BackgroundImage.Bitmap<>nil;
    BackgroundOrigin.Enabled:=(Viewport.ViewType<>fvPerspective) and (Viewport.BackgroundImage.Bitmap<>nil) and (Viewport.BackgroundImage.Visible) and (Viewport.BackgroundImage.ShowInView=Viewport.ViewType);
    BackgroundScale.Enabled:=(Viewport.ViewType<>fvPerspective) and (Viewport.BackgroundImage.Bitmap<>nil) and (Viewport.BackgroundImage.Visible) and (Viewport.BackgroundImage.ShowInView=Viewport.ViewType);
+   BackgroundFrame.Enabled := BackgroundScale.Enabled;
    BackgroundTransparentColor.Enabled:=(Viewport.ViewType<>fvPerspective) and (Viewport.BackgroundImage.Bitmap<>nil) and (Viewport.BackgroundImage.Visible) and (Viewport.BackgroundImage.ShowInView=Viewport.ViewType);
    BackgroundBlending.Enabled:=(Viewport.ViewType<>fvPerspective) and (Viewport.BackgroundImage.Bitmap<>nil) and (Viewport.BackgroundImage.Visible) and (Viewport.BackgroundImage.ShowInView=Viewport.ViewType);
    BackgroundExport.Enabled:=(Viewport.ViewType<>fvPerspective) and (Viewport.BackgroundImage.Bitmap<>nil) and (Viewport.BackgroundImage.Visible) and (Viewport.BackgroundImage.ShowInView=Viewport.ViewType);
@@ -685,9 +663,30 @@ procedure TFreeHullWindow.FormCreate(Sender: TObject);
 {$IFDEF USEOPENGL}
 var VP: TFreeViewportOpenGL;
 {$ENDIF}
-var o:TObject;
+var o:TObject; Item: TMenuItem; I: Integer;
+    Captions: array[0..3] of String;
 begin
   CreateFreeViewport;
+  for I:=0 to 4 do begin
+    Item:=TMenuItem.Create(Self);
+    case I of
+     0:Item.Action:=MainForm.ShowNormals;
+     1:Item.Action:=MainForm.Showcurvature;
+     2:Item.Action:=MainForm.DecreaseCurvatureScale;
+     3:Item.Action:=MainForm.IncreaseCurvatureScale;
+     4:Item.Action:=MainForm.DevelopLayers;
+    end;
+    PopupMenuHull.Items.Add(Item);
+  end;
+  Captions[0]:=rsCoordinateAxisOff; Captions[1]:='X (Ctrl+Alt+X)'; Captions[2]:='Y (Ctrl+Alt+Y)'; Captions[3]:='Z (Ctrl+Alt+Z)';
+  FCoordinateMenu:=TMenuItem.Create(Self);
+  FCoordinateMenu.Caption:=rsShowControlPointCoordinates;
+  PopupMenuHull.Items.Add(FCoordinateMenu);
+  for I:=0 to 3 do begin
+    Item:=TMenuItem.Create(Self); Item.Caption:=Captions[I]; Item.Tag:=I;
+    Item.RadioItem:=True; Item.OnClick:=@CoordinateAxisClick;
+    FCoordinateMenu.Add(Item);
+  end;
   //CreateComponents;
    ScrollBar1.Position:=Round(Viewport.Angle);
    ScrollBar2.Position:=Round(Viewport.Elevation);
@@ -734,9 +733,25 @@ begin
    aAction:=caFree;
 end;{TFreeHullWindow.FormClose}
 
+procedure TFreeHullWindow.CoordinateAxisClick(Sender: TObject);
+begin
+  // An explicit menu choice must not remain hidden behind an entrance or drag cache.
+  Viewport.FinishProgressiveDisplay(True);
+  Viewport.PresentationFrozen:=False;
+  Viewport.ControlPointCoordinateAxis := TMenuItem(Sender).Tag;
+  if (Viewport.ControlPointCoordinateAxis<>0) and Assigned(FFreeShip) then
+    FFreeShip.Visibility.ShowControlNet:=True;
+  Viewport.Refresh;
+end;
+
 procedure TFreeHullWindow.PopupMenuHullPopup(Sender: TObject);
+var I: Integer;
 begin
    UpdateMenu;
+   FCoordinateMenu.Caption := rsShowControlPointCoordinates;
+   FCoordinateMenu.Items[0].Caption := rsCoordinateAxisOff;
+   for I := 0 to FCoordinateMenu.Count - 1 do
+     FCoordinateMenu.Items[I].Checked := I = Viewport.ControlPointCoordinateAxis;
 end;{TFreeHullWindow.PopupMenu1Popup}
 
 procedure TFreeHullWindow.StandardLensExecute(Sender: TObject);
@@ -764,25 +779,9 @@ begin
    Viewport.CameraType:=ftFarTele;
 end;{TFreeHullWindow.LongTeleLensExecute}
 
-procedure TFreeHullWindow.ViewBodyPlanExecute(Sender: TObject);
-begin
-   Viewport.ViewType:=fvBodyplan;
-end;{TFreeHullWindow.ViewBodyPlanExecute}
 
-procedure TFreeHullWindow.ViewProfileExecute(Sender: TObject);
-begin
-   Viewport.ViewType:=fvProfile;
-end;{TFreeHullWindow.ViewProfileExecute}
 
-procedure TFreeHullWindow.ViewPlanExecute(Sender: TObject);
-begin
-   Viewport.ViewType:=fvPlan;
-end;{TFreeHullWindow.ViewPlanExecute}
 
-procedure TFreeHullWindow.ViewPerspectiveExecute(Sender: TObject);
-begin
-   Viewport.ViewType:=fvPerspective;
-end;{TFreeHullWindow.ViewPerspectiveExecute}
 
 procedure TFreeHullWindow.FormShow(Sender: TObject);
 begin
@@ -809,11 +808,29 @@ begin
    Viewport.ZoomOut;
 end;{TFreeHullWindow.ZoomOutExecute}
 
+function TFreeHullWindow.ViewportResizeHit(X,Y:Integer;out PanelPoint:TPoint):Boolean;
+var Grip:Integer;
+begin
+ Grip:=Scale96ToForm(8);
+ PanelPoint:=ScreenToClient(Viewport.ClientToScreen(Point(X,Y)));
+ Result:=(WindowState=wsNormal) and
+   ((X<=Grip) or (X>=Viewport.ClientWidth-Grip) or (Y>=Viewport.ClientHeight-Grip));
+ if Result then begin
+   if X<=Grip then PanelPoint.X:=0
+   else if X>=Viewport.ClientWidth-Grip then PanelPoint.X:=Width-1;
+   if Y>=Viewport.ClientHeight-Grip then PanelPoint.Y:=Height-1;
+ end;
+end;
+
 procedure TFreeHullWindow.ViewportMouseDown(Sender: TObject;Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
 var Select  : Boolean = False;
-    P:T2DCoordinate;
+    P:T2DCoordinate; EdgePoint:TPoint;
     Point:T3DCoordinate;
 begin
+  if (Button=mbLeft) and (Shift=[ssLeft]) and ViewportResizeHit(X,Y,EdgePoint) then begin
+    SetBorderCursor(EdgePoint.X,EdgePoint.Y);
+    BorderMouseDown(Self,Button,Shift,EdgePoint.X,EdgePoint.Y);Exit;
+  end;
   if (Shift <> []) then
     logger.Debug(format('TFreeHullWindow.ViewportMouseDown: %d %d',[X,Y]));
   FInitialPosition.X:=X;
@@ -849,8 +866,17 @@ var P    : TPoint;
     P3D  : T3DCoordinate;
     Str  : string;
 begin
+   if Shift=[] then begin
+     if ViewportResizeHit(X,Y,P) then begin
+       if not FBorderPointerActive then begin FBorderPointerCursor:=Viewport.Cursor;FBorderPointerActive:=True end;
+       BorderMouseMove(Self,Shift,P.X,P.Y);Viewport.Cursor:=Cursor;Exit;
+     end;
+     if FBorderPointerActive then begin Viewport.Cursor:=FBorderPointerCursor;FBorderPointerActive:=False end;
+   end;
    if (Shift <> []) then
      logger.Debug(format('TFreeHullWindow.ViewportMouseMove: %d %d',[X,Y]));
+   if (Shift <> []) and Assigned(FreeShip) and
+      Assigned(FreeShip.ControlpointForm) then FreeShip.ControlpointForm.Hide;
    //if Viewport.ViewType<>fvPerspective then
    begin
       P.X:=X;
@@ -862,10 +888,10 @@ begin
       if abs(P2D.Y)>1e+6 then P2D.Y := 1e+6;
 
       Case Viewport.ViewType of
-         fvBodyplan     : Str:=rs_Bodyplan_view {UserString[215]}+'.';
-         fvProfile      : Str:=rs_Profile_view {UserString[216]}+'.';
-         fvPlan         : Str:=rs_Plan_view {UserString[217]}+'.';
-         fvPerspective  : Str:=rs_Perspective_view {UserString[218]}+'.';
+         fvBodyplan     : Str:=rs_Bodyplan_view {UserString[215]};
+         fvProfile      : Str:=rs_Profile_view {UserString[216]};
+         fvPlan         : Str:=rs_Plan_view {UserString[217]};
+         fvPerspective  : Str:=rs_Perspective_view {UserString[218]};
          else Str:='';
       end;
       Case Viewport.ViewType of
@@ -904,7 +930,7 @@ begin
    end else if (Shift = [ssRight]) and (FAllowPanOrZoom) then
    begin
       // Pan the window left, right, top or bottom
-      if (abs(FInitialPosition.X-X)>4) or (abs(FInitialPosition.Y-Y)>4)  then
+      if (FInitialPosition.X<>X) or (FInitialPosition.Y<>Y) then
       begin
          logger.Debug(format('Pan Window: Cur Pan.X=%d Pan.Y=%d',[Viewport.Pan.X,Viewport.Pan.Y]));
          logger.Debug(format('Pan Window: FInitialPosition.X=%d FInitialPosition.Y=%d',[FInitialPosition.X,FInitialPosition.Y]));
@@ -921,7 +947,7 @@ begin
    else if (Shift = [ssLeft,ssCtrl]) then
     begin
        // Draw selection frame
-       if (abs(FInitialPosition.X-X)>4) or (abs(FInitialPosition.Y-Y)>4)  then
+       if (FInitialPosition.X<>X) or (FInitialPosition.Y<>Y) then
        begin
           Viewport.SelectionFrameRect := Rect(FInitialPosition.X,FInitialPosition.Y, X,Y);
           //Viewport.Rectangle(FInitialPosition.X,FInitialPosition.Y, X,Y);
@@ -1021,7 +1047,25 @@ end;{TFreeHullWindow.SaveAsBitmapExecute}
 
 procedure TFreeHullWindow.ViewportKeyDown(Sender: TObject; var Key: Word;
   Shift: TShiftState);
+var Axis:Integer;
 begin
+   if (Shift=[ssCtrl,ssAlt]) and (Key in [Ord('X'),Ord('Y'),Ord('Z')]) then begin
+     Axis:=Key-Ord('X')+1;
+     if Viewport.ControlPointCoordinateAxis=Axis then Axis:=0;
+     CoordinateAxisClick(FCoordinateMenu.Items[Axis]);
+     Key:=0;Exit;
+   end;
+   if (Shift=[ssCtrl]) and (Key in [Ord('I'),Ord('O')]) then
+   begin
+     if Key=Ord('I') then Viewport.ZoomIn else Viewport.ZoomOut;
+     Key:=0;
+     Exit;
+   end;
+   if (Key=Ord('A')) and (Shift=[ssCtrl]) then begin
+     Freeship.Edit.Selection_ToggleAll;
+     if Application.MainForm is TMainForm then TMainForm(Application.MainForm).UpdateMenu;
+     Key:=0;Exit;
+   end;
    if not Viewport.Focused then
          Viewport.SetFocus;
    Freeship.KeyDown(Sender,Key,Shift);

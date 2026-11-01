@@ -125,6 +125,7 @@ type
     Panel15: TPanel;
     Resultsmemo2: TMemo;
     PrintDialog: TPrintDialog;
+    procedure FormCreate(Sender: TObject);
     procedure ComboBoxClick(Sender: TObject);
     procedure ComboBoxClick1(Sender: TObject);
 
@@ -151,6 +152,7 @@ type
     procedure FSetDat7(val: single);
   public { Public declarations }
     procedure Calculate;
+    procedure CalculateInWorkspace;
     function Execute(Freeship: TFreeship;
       AutoExtract: boolean): boolean;
     property Dat2: single read FGetDat2 write FSetDat2;
@@ -166,7 +168,7 @@ var
 
 implementation
 
-uses FreeStringsUnit,
+uses FreeCalculationFiles, FreeUiChoices, FreeStringsUnit,
   Printers,
   Math,
   FreeProcess;
@@ -178,6 +180,15 @@ uses FreeStringsUnit,
   {$R *.lfm}
 {$ENDIF}
 
+
+procedure TFreePropeller_Task5.FormCreate(Sender: TObject);
+begin
+  SetChoiceLabels(ComboBox, [rsChoiceSeriesB, rsChoiceSeriesT, rsChoiceSeriesM,
+    rsChoiceSeriesZ, rsChoiceSeriesTurbal, rsChoiceSeriesZM, rsChoiceSeriesZV,
+    rsChoiceSeriesE, rsChoiceSeriesVIT, rsChoiceSeriesKA19, rsChoiceSeriesKA470, rsChoiceSeriesSPP]);
+  SetChoiceLabels(ComboBox1, [rsChoiceReservedTitle, rsChoiceReservedTitle,
+    rsChoiceReservedTitle, rsChoiceReservedTitle]);
+end;
 
 function TFreePropeller_Task5.FGetDat2: single;  // n
 begin
@@ -247,10 +258,24 @@ resourcestring
   rsNoResultFile = 'Result file "%s" not found';
 
 procedure TFreePropeller_Task5.Calculate;
+var Job: TFreeCalculationScope;
+begin
+  if FFreeship = nil then Exit;
+  Job := FFreeship.BeginCalculation([]);
+  try
+    CalculateInWorkspace;
+    Job.Complete;
+  finally Job.Free end;
+end;
+
+procedure TFreePropeller_Task5.CalculateInWorkspace;
 type
   TTable = array[0..16, 0..13] of single;
 
 var
+  ProcessCallerDirectory: string;
+  ProcessCallerCursor: TCursor;
+ 
   Units: TFreeUnitType;
   I, J, II: integer;
   Dat: array[1..7] of single;
@@ -274,6 +299,9 @@ var
 //label
   //NewSearch;
 begin
+  ProcessCallerDirectory := GetCurrentDirUTF8;
+  ProcessCallerCursor := Screen.Cursor;
+  try
   Units := FFreeship.ProjectSettings.ProjectUnits;
 
   TChartSeries(Chart.Series[0]).Clear;
@@ -342,8 +370,8 @@ dat7=Velocity Vp
 
     PathFileOld := GetCurrentDirUTF8;
     { *Converted from GetCurrentDir* }// текущий каталог проекта
-    ForceDirectoriesUTF8(FFreeship.Preferences.TempDirectory);
-    SetCurrentDirUTF8(FFreeship.Preferences.TempDirectory);
+    ForceDirectoriesUTF8(FFreeship.CalculationDirectory);
+    SetCurrentDirUTF8(FFreeship.CalculationDirectory);
     FExecDirectory := FFreeship.Preferences.ExecDirectory;
 
     File_ExportData(dat);
@@ -359,10 +387,10 @@ dat7=Velocity Vp
     // Запускаем программу расчета
     if Combobox.ItemIndex = 0 then
       //SysUtils.ExecuteProcess(UTF8ToSys(FExecDirectory + DirectorySeparator+'PROPOL.EXE'), '', [])
-      ExecuteFreePlugin(FFreeship.Preferences.TempDirectory, FExecDirectory + DirectorySeparator+'PROPOL.EXE')
+      ExecuteFreeCalculation(FFreeship.CalculationDirectory, FExecDirectory + DirectorySeparator+'PROPOL.EXE', fcPropol)
      else
       //SysUtils.ExecuteProcess(UTF8ToSys(FExecDirectory + DirectorySeparator+'fppcalc.EXE'), '', []);
-      ExecuteFreePlugin(FFreeship.Preferences.TempDirectory, FExecDirectory + DirectorySeparator+'fppcalc.EXE');
+      ExecuteFreeCalculation(FFreeship.CalculationDirectory, FExecDirectory + DirectorySeparator+'fppcalc.EXE', fcFppcalc);
 
     FileName := 'OUT.';
 
@@ -618,6 +646,10 @@ dat7=Velocity Vp
     ResultsMemo.Lines.Add(Space(14) +
       'Copyright (c) 2000, J.M.J. Journee (PROPOL 03-04-2000)');
   ResultsMemo.Lines.Add(Space(14) + 'Copyright (c) 2008-2013, Timoshenko V.F.');
+  finally
+    SetCurrentDirUTF8(ProcessCallerDirectory);
+    Screen.Cursor := ProcessCallerCursor;
+  end;
 end;{TFreePropeller_Task5.Calculate}
 
 function TFreePropeller_Task5.Execute(Freeship: TFreeship; AutoExtract: boolean): boolean;
@@ -658,24 +690,9 @@ begin
 end;{TFreePropeller_Task5.Execute}
 
 procedure TFreePropeller_Task5.ToolButton17Click(Sender: TObject);
-var
-  pathFile, FileToFind: string;
-  FOpenDirectory, ExecFullName: string;
-  L: boolean;
 begin
-  //  Определяем каталог с программой freeship.exe
-  FOpenDirectory := FFreeship.Preferences.InitDirectory;
-  //      ResultsMemo.Lines.Add(FOpenDirectory+'freeship.exe');
-  PathFile := GetCurrentDirUTF8; { *Converted from GetCurrentDir* }
-  // Переходим в директорию Freeshipa
-  L := SetCurrentDirUTF8(FOpenDirectory); { *Converted from SetCurrentDir* }
-  // Запускаем программу расчета
-  //SysUtils.ExecuteProcess(UTF8ToSys('Exec/DBFview.EXE'), '', []);
-  ExecFullName := FFreeship.Preferences.ExecDirectory + DirectorySeparator+'DBFview.EXE';
-  ExecuteFreePlugin(FFreeship.Preferences.TempDirectory, ExecFullName);
-
-  // Переходим назад в директорию открытого проекта
-  L := SetCurrentDirUTF8(PathFile); { *Converted from SetCurrentDir* }
+  LaunchFreePluginViewer(Self, FFreeship.Preferences.TempDirectory,
+    FFreeship.Preferences.ExecDirectory + DirectorySeparator + 'DBFview.EXE');
 end;{TFreePropeller_Task5.ToolButton17Click}
 
 procedure TFreePropeller_Task5.ToolButton7Click(Sender: TObject);
@@ -871,10 +888,10 @@ begin
   if Combobox.ItemIndex = 0 then
   begin // В серия
     Chart.Title.Text.Text := rs_Open_water_characteristics_of_propeller {UserString[939]} + ' ' + rs_series_of_Troost {UserString[824]};
-    ComboBox1.Items[0] := 'unknown';
-    ComboBox1.Items[1] := 'unknown';
-    ComboBox1.Items[2] := 'unknown';
-    ComboBox1.Items[3] := 'unknown';
+    ComboBox1.Items[0] := rsChoiceUnknown;
+    ComboBox1.Items[1] := rsChoiceUnknown;
+    ComboBox1.Items[2] := rsChoiceUnknown;
+    ComboBox1.Items[3] := rsChoiceUnknown;
     Edit5.Enabled := True;
     Edit3.Enabled := True;
     Calculate;
@@ -887,7 +904,7 @@ begin
     ComboBox1.Items[0] := 'T-4-35';
     ComboBox1.Items[1] := 'T-4-58';
     ComboBox1.Items[2] := 'T-4-75';
-    ComboBox1.Items[3] := 'unknown';
+    ComboBox1.Items[3] := rsChoiceUnknown;
   end;
   if Combobox.ItemIndex = 2 then
   begin  // М серия
@@ -897,7 +914,7 @@ begin
     ComboBox1.Items[0] := 'M-4-65';
     ComboBox1.Items[1] := 'M-4-75';
     ComboBox1.Items[2] := 'M-4-85';
-    ComboBox1.Items[3] := 'unknown';
+    ComboBox1.Items[3] := rsChoiceUnknown;
   end;
   if Combobox.ItemIndex = 3 then
   begin  // Z серия
@@ -906,8 +923,8 @@ begin
     Edit3.Enabled := False;
     ComboBox1.Items[0] := 'Z-4-85';
     ComboBox1.Items[1] := 'Z-4-100';
-    ComboBox1.Items[2] := 'unknown';
-    ComboBox1.Items[3] := 'unknown';
+    ComboBox1.Items[2] := rsChoiceUnknown;
+    ComboBox1.Items[3] := rsChoiceUnknown;
   end;
   if Combobox.ItemIndex = 4 then
   begin  // T серия
@@ -917,7 +934,7 @@ begin
     ComboBox1.Items[0] := 'T-6-68';
     ComboBox1.Items[1] := 'T-7-70';
     ComboBox1.Items[2] := 'T-8-72';
-    ComboBox1.Items[3] := 'unknown';
+    ComboBox1.Items[3] := rsChoiceUnknown;
   end;
   if Combobox.ItemIndex = 5 then
   begin  // ZM серия
@@ -927,7 +944,7 @@ begin
     ComboBox1.Items[0] := 'ZM-5-70';
     ComboBox1.Items[1] := 'ZM-5-85';
     ComboBox1.Items[2] := 'ZM-5-100';
-    ComboBox1.Items[3] := 'unknown';
+    ComboBox1.Items[3] := rsChoiceUnknown;
   end;
   if Combobox.ItemIndex = 6 then
   begin  // ZV серия
@@ -937,7 +954,7 @@ begin
     ComboBox1.Items[0] := 'ZV-3-50';
     ComboBox1.Items[1] := 'ZV-3-80';
     ComboBox1.Items[2] := 'ZV-3-110';
-    ComboBox1.Items[3] := 'unknown';
+    ComboBox1.Items[3] := rsChoiceUnknown;
   end;
   if Combobox.ItemIndex = 7 then
   begin  // E серия
@@ -945,9 +962,9 @@ begin
     Edit5.Enabled := False;
     Edit3.Enabled := False;
     ComboBox1.Items[0] := 'E-4-57';
-    ComboBox1.Items[1] := 'unknown';
-    ComboBox1.Items[2] := 'unknown';
-    ComboBox1.Items[3] := 'unknown';
+    ComboBox1.Items[1] := rsChoiceUnknown;
+    ComboBox1.Items[2] := rsChoiceUnknown;
+    ComboBox1.Items[3] := rsChoiceUnknown;
   end;
   if Combobox.ItemIndex = 8 then
   begin  // VIT серия
@@ -957,7 +974,7 @@ begin
     ComboBox1.Items[0] := 'VIT-4-35';
     ComboBox1.Items[1] := 'VIT-4-58';
     ComboBox1.Items[2] := 'VIT-4-75';
-    ComboBox1.Items[3] := 'unknown';
+    ComboBox1.Items[3] := rsChoiceUnknown;
   end;
   if Combobox.ItemIndex = 9 then
   begin  // Ka серия N19a
@@ -986,8 +1003,8 @@ begin
     Edit3.Enabled := False;
     ComboBox1.Items[0] := 'SPP-5';
     ComboBox1.Items[1] := 'SPP-5+INT';
-    ComboBox1.Items[2] := 'reserved';
-    ComboBox1.Items[3] := 'reserved';
+    ComboBox1.Items[2] := rsChoiceReserved;
+    ComboBox1.Items[3] := rsChoiceReserved;
   end;
 end;{TFreePropeller_Task5.ComboBoxClick}
 

@@ -667,31 +667,36 @@ var
   CP1, CP2: TFreeSubdivisionControlPoint;
   Edge: TFreeSubdivisionEdge;
   Sel: boolean;
+  Points: TFasterListTFreeSubdivisionControlPoint;
 begin
-  ClearSubdivision;
-  Source.LoadInteger(N);
-  FControlPoints.Capacity := N;
-  CP1 := nil;
-  for I := 1 to N do
-  begin
-    Source.LoadInteger(Ind);
-    CP2 := Surface.FControlPoints[ind];
-    FControlPoints.Add(CP2);
-    if I > 1 then
+  N := LoadModelCount(Source, 'curve point', SizeOf(Integer));
+  Points := TFasterListTFreeSubdivisionControlPoint.Create(False, False);
+  try
+    if not (Source is TFreeTextBuffer) then Points.Capacity := N;
+    for I := 1 to N do
     begin
-      Edge := Surface.EdgeExists(CP1, CP2);
-      if Edge <> nil then
-      begin
-        Edge.FCurve := Self;
-      end;
+      Source.LoadInteger(Ind);
+      RequireModelIndex(Ind, Surface.NumberOfControlPoints, 'curve control point');
+      Points.Add(Surface.FControlPoints[Ind]);
     end;
-    CP1 := CP2;
+    Source.LoadBoolean(Sel);
+    ClearSubdivision;
+    FControlPoints.Assign(Points);
+    CP1 := nil;
+    for I := 0 to FControlPoints.Count - 1 do
+    begin
+      CP2 := FControlPoints[I];
+      if I > 0 then
+      begin
+        Edge := Surface.EdgeExists(CP1, CP2);
+        if Edge <> nil then Edge.FCurve := Self;
+      end;
+      CP1 := CP2;
+    end;
+    if Sel then selected := True;
+  finally
+    Points.Free;
   end;
-  //FSubdividedPoints.AddList(TFasterList(FControlPoints));
-  //TODO copy CPs to Ps
-  Source.LoadBoolean(Sel);
-  if Sel then
-    selected := True;
 end;{TFreeSubdivisionControlCurve.LoadBinary}
 
 procedure TFreeSubdivisionControlCurve.Rebuild;

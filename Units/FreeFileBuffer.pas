@@ -40,8 +40,12 @@ type
     FVersion: TFreeFileVersion;
     FData: array of byte;
     FFileName: string;
-    FFile: file;
     FEncoding: string;
+    FLegacyPlaningSize, FLegacyTask2Size, FLegacyTask3Size: Integer;
+    FLegacyCalculationLayout: string;
+    FDiscardLegacyTask5: Boolean;
+    procedure RequireBytes(Size: integer; const DataType: string);
+    procedure RequireRecordBytes(Size: integer); virtual;
     procedure FGrow(size: integer);
     procedure FSetCapacity(val: integer); virtual;
     function FGetCapacity: integer; virtual;
@@ -114,12 +118,16 @@ type
     procedure LoadTFreeMHSeriesResistanceData(var Data: TFreeMHSeriesResistanceData);  virtual;
 
     //procedure Load(var Dest;Size:Integer);       overload;virtual;
+    procedure PrepareLegacyCalculations;
+    property LegacyCalculationLayout: string read FLegacyCalculationLayout;
     constructor Create;
     procedure Clear;         virtual;
     procedure LoadFromFile(Filename: string);      virtual;
+    procedure LoadFromStream(Stream: TStream); virtual;
     procedure Reset; virtual;
     // reset the data before reading
     function SaveToFile(Filename: string):boolean; virtual;
+    procedure SaveToStream(Stream: TStream); virtual;
     function GetPosition:integer; virtual;
     destructor Destroy; override;
     property Capacity: integer read FGetCapacity write FSetCapacity;
@@ -138,6 +146,7 @@ type
     FLines: TStringList;
     FPosition: integer; // this is our position
     FormatSettings: TFormatSettings;
+    procedure RequireRecordBytes(Size: integer); override;
     procedure FSetCapacity(val: integer); override;
     function FGetCapacity: integer; override;
   public
@@ -174,9 +183,11 @@ type
 
     procedure Clear; override;
     procedure LoadFromFile(Filename: string); override;
+    procedure LoadFromStream(Stream: TStream); override;
     procedure Reset; override;
     // reset the data before reading
     function SaveToFile(Filename: string):boolean; override;
+    procedure SaveToStream(Stream: TStream); override;
     function GetPosition:integer; override;
     destructor Destroy; override;
     property Capacity: integer read FGetCapacity write FSetCapacity;
@@ -186,6 +197,46 @@ type
 
 
 implementation
+
+resourcestring
+  rsParsingErrorOutOfFileSize =
+    'Error parsing of file "%s". Reading %s of size %d at position %d that is out of file size %d';
+
+procedure TFreeFileBuffer.RequireBytes(Size: integer; const DataType: string);
+begin
+  // Subtraction avoids overflow when the length comes from a damaged file.
+  if (Size < 0) or (FPosition < 0) or (FPosition > FCount) or
+    (Size > FCount - FPosition) then
+    raise EReadError.CreateFmt(rsParsingErrorOutOfFileSize,
+      [FFileName, DataType, Size, FPosition, FCount]);
+end;
+
+procedure TFreeFileBuffer.RequireRecordBytes(Size: integer);
+begin
+  RequireBytes(Size, 'Record');
+end;
+
+procedure TFreeTextBuffer.RequireRecordBytes(Size: integer);
+begin
+  // Record readers are shared through virtual field readers. Text records use
+  // lines rather than the binary buffer or the binary record's padding bytes.
+end;
+
+procedure WriteBufferFully(Stream: TStream; const Buffer; Count: integer);
+var
+  Written, Requested, Progress: integer;
+begin
+  Written := 0;
+  while Written < Count do
+  begin
+    Requested := Count - Written;
+    if Requested > FileBufferBlockSize then Requested := FileBufferBlockSize;
+    Progress := Stream.Write(PByte(@Buffer)[Written], Requested);
+    if (Progress <= 0) or (Progress > Requested) then
+      raise EWriteError.Create('File write did not complete');
+    Inc(Written, Progress);
+  end;
+end;
 
 
 {---------------------------------------------------------------------------------------------------}
@@ -320,15 +371,19 @@ begin
   Add(JPEGImage.Width);
   Add(JPEGImage.Height);
   Stream := TMemoryStream.Create;
-  JPEGImage.SaveToStream(Stream);
-  Size := Stream.Size;
-  Stream.Position := 0;
-  Add(Size);
-  if Count + Size + 20 > Capacity then
-    FGrow(Size + 20);
-  Stream.Read(FData[FCount], Size);
-  Inc(FCount, Size);
-  FreeAndNil(Stream);
+  try
+    JPEGImage.SaveToStream(Stream);
+    if Stream.Size > High(Integer) - Count - SizeOf(Integer) then
+      raise EWriteError.Create('JPEG data is too large for the file buffer');
+    Size := Stream.Size;
+    Stream.Position := 0;
+    Add(Size);
+    if Count + Size > Capacity then FGrow(Size);
+    if Size > 0 then Stream.ReadBuffer(FData[FCount], Size);
+    Inc(FCount, Size);
+  finally
+    Stream.Free;
+  end;
 end;{TFreeFileBuffer.Add}
 
 procedure TFreeFileBuffer.LoadTJPEGImage(var JPegImage: TJPEGImage);
@@ -339,13 +394,16 @@ begin
   LoadInteger(W);
   LoadInteger(H);
   LoadInteger(Size);
+  RequireBytes(Size, 'JPEG');
   Stream := TMemoryStream.Create;
-  Stream.SetSize(Size);
-  Stream.Write(FData[FPosition], Size);
-  Inc(FPosition, Size);
-  Stream.Position := 0;
-  JPEGImage.LoadFromStream(Stream);
-  FreeAndNil(Stream);
+  try
+    if Size > 0 then Stream.WriteBuffer(FData[FPosition], Size);
+    Stream.Position := 0;
+    JPEGImage.LoadFromStream(Stream);
+    Inc(FPosition, Size);
+  finally
+    Stream.Free;
+  end;
 end;{TFreeFileBuffer.Add}
 
 {
@@ -376,6 +434,7 @@ procedure TFreeFileBuffer.LoadTFreeDelftSeriesResistanceData(var Data: TFreeDelf
 var
   bp: integer;
 begin
+  RequireRecordBytes(SizeOf(Data));
   bp := FPosition;
   with Data do
   begin
@@ -407,6 +466,7 @@ procedure TFreeFileBuffer.LoadTFreeKAPERResistanceData(var Data: TFreeKAPERResis
 var
   bp: integer;
 begin
+  RequireRecordBytes(SizeOf(Data));
   bp := FPosition;
   with Data do
   begin
@@ -428,6 +488,7 @@ procedure TFreeFileBuffer.LoadTFreeHoltrSeriesResistanceData(var Data: TFreeHolt
 var
   bp: integer;
 begin
+  RequireRecordBytes(SizeOf(Data));
   bp := FPosition;
   with Data do
   begin
@@ -484,6 +545,7 @@ procedure TFreeFileBuffer.LoadTFreeOSTSeriesResistanceData(var Data: TFreeOSTSer
 var
   bp: integer;
 begin
+  RequireRecordBytes(SizeOf(Data));
   bp := FPosition;
   with Data do
   begin
@@ -549,6 +611,7 @@ procedure TFreeFileBuffer.LoadTFreeTask1PropellerData(var Data: TFreeTask1Propel
 var
   bp: integer;
 begin
+  RequireRecordBytes(SizeOf(Data));
   bp := FPosition;
   with Data do
   begin
@@ -574,8 +637,12 @@ end;{TFreeFileBuffer.LoadTFreeMHSeriesResistanceData}
 
 procedure TFreeFileBuffer.LoadTFreeTask2PropellerData(var Data: TFreeTask2PropellerData);
 var
-  bp: integer;
+  bp, DiskSize: integer;
 begin
+  DiskSize := FLegacyTask2Size;
+  if (DiskSize = 0) or (Self is TFreeTextBuffer) then DiskSize := SizeOf(Data);
+  RequireRecordBytes(DiskSize);
+  FillChar(Data, SizeOf(Data), 0);
   bp := FPosition;
   with Data do
   begin
@@ -594,6 +661,7 @@ begin
     LoadTFloatType(Dat14);
     LoadTFloatType(Dat15);
     LoadTFloatType(Dat16);
+    if DiskSize >= 104 then begin
     LoadTFloatType(Dat17_1);
     LoadTFloatType(Dat17_2);
     LoadTFloatType(Dat17_3);
@@ -604,15 +672,20 @@ begin
     LoadTFloatType(Dat18_3);
     LoadTFloatType(Dat18_4);
     LoadTFloatType(Dat18_5);
+    end;
     LoadBoolean(Extract);
   end;
-  FPosition := bp + sizeof(Data); //record data can be aligned
+  FPosition := bp + DiskSize; //record data can be aligned
 end;{TFreeFileBuffer.LoadTFreeMHSeriesResistanceData}
 
 procedure TFreeFileBuffer.LoadTFreeTask3PropellerData(var Data: TFreeTask3PropellerData);
 var
-  bp: integer;
+  bp, DiskSize: integer;
 begin
+  DiskSize := FLegacyTask3Size;
+  if (DiskSize = 0) or (Self is TFreeTextBuffer) then DiskSize := SizeOf(Data);
+  RequireRecordBytes(DiskSize);
+  FillChar(Data, SizeOf(Data), 0);
   bp := FPosition;
   with Data do
   begin
@@ -631,16 +704,22 @@ begin
     LoadTFloatType(Dat14);
     LoadTFloatType(Dat15);
     LoadTFloatType(Dat16);
+    if DiskSize >= 68 then begin
     LoadTFloatType(Dat17);
+    end;
     LoadBoolean(Extract);
   end;
-  FPosition := bp + sizeof(Data); //record data can be aligned
+  FPosition := bp + DiskSize; //record data can be aligned
 end;{TFreeFileBuffer.LoadTFreeMHSeriesResistanceData}
 
 procedure TFreeFileBuffer.LoadTFreePlaningResistanceData(var Data: TFreePlaningResistanceData);
 var
-  bp: integer;
+  bp, DiskSize: integer;
 begin
+  DiskSize := FLegacyPlaningSize;
+  if (DiskSize = 0) or (Self is TFreeTextBuffer) then DiskSize := SizeOf(Data);
+  RequireRecordBytes(DiskSize);
+  FillChar(Data, SizeOf(Data), 0);
   bp := FPosition;
   with Data do
   begin
@@ -653,19 +732,24 @@ begin
     LoadTFloatType(WettedSurface);
     LoadTFloatType(At_Ax);
     LoadTFloatType(EntranceAngle);
-    LoadTFloatType(Sa);
-    LoadTFloatType(Caa);
-    LoadTFloatType(Angle);
-    LoadTFloatType(K);
+    if DiskSize >= 48 then begin
+      LoadTFloatType(Sa);
+      LoadTFloatType(Caa);
+    end;
+    if DiskSize >= 56 then begin
+      LoadTFloatType(Angle);
+      LoadTFloatType(K);
+    end;
     LoadBoolean(Extract);
   end;
-  FPosition := bp + sizeof(Data); //record data can be aligned
+  FPosition := bp + DiskSize; //record data can be aligned
 end;{TFreeFileBuffer.LoadTFreeMHSeriesResistanceData}
 
 procedure TFreeFileBuffer.LoadTFreeRvrsPropellerData(var Data: TFreeRvrsPropellerData);
 var
   bp: integer;
 begin
+  RequireRecordBytes(SizeOf(Data));
   bp := FPosition;
   with Data do
   begin
@@ -694,6 +778,7 @@ procedure TFreeFileBuffer.LoadTFreeHollenSeriesResistanceData(var Data: TFreeHol
 var
   bp: integer;
 begin
+  RequireRecordBytes(SizeOf(Data));
   bp := FPosition;
   with Data do
   begin
@@ -750,6 +835,7 @@ procedure TFreeFileBuffer.LoadTFreeTask4PropellerData(var Data: TFreeTask4Propel
 var
   bp: integer;
 begin
+  RequireRecordBytes(SizeOf(Data));
   bp := FPosition;
   with Data do
   begin
@@ -777,7 +863,13 @@ procedure TFreeFileBuffer.LoadTFreeTask5PropellerData(var Data: TFreeTask5Propel
 var
   bp: integer;
 begin
+  RequireRecordBytes(SizeOf(Data));
   bp := FPosition;
+  if FDiscardLegacyTask5 then begin
+    FillChar(Data, SizeOf(Data), 0);
+    Inc(FPosition, SizeOf(Data));
+    Exit;
+  end;
   with Data do
   begin
     LoadTFloatType(Dat2);
@@ -794,6 +886,7 @@ procedure TFreeFileBuffer.LoadTFreeOortmerSeriesResistanceData(var Data: TFreeOo
 var
   bp: integer;
 begin
+  RequireRecordBytes(SizeOf(Data));
   bp := FPosition;
   with Data do
   begin
@@ -850,6 +943,7 @@ procedure TFreeFileBuffer.LoadTFreeFungSeriesResistanceData(var Data: TFreeFungS
 var
   bp: integer;
 begin
+  RequireRecordBytes(SizeOf(Data));
   bp := FPosition;
   with Data do
   begin
@@ -906,6 +1000,7 @@ procedure TFreeFileBuffer.LoadTFreeHydrodynManeuvData(var Data: TFreeHydrodynMan
 var
   bp: integer;
 begin
+  RequireRecordBytes(SizeOf(Data));
   bp := FPosition;
   with Data do
   begin
@@ -937,6 +1032,7 @@ procedure TFreeFileBuffer.LoadTFreeHydrodynTask1Data(var Data: TFreeHydrodynTask
 var
   bp: integer;
 begin
+  RequireRecordBytes(SizeOf(Data));
   bp := FPosition;
   with Data do
   begin
@@ -960,6 +1056,7 @@ procedure TFreeFileBuffer.LoadTFreeRBHSSeriesResistanceData(var Data: TFreeRBHSS
 var
   bp: integer;
 begin
+  RequireRecordBytes(SizeOf(Data));
   bp := FPosition;
   with Data do
   begin
@@ -1025,6 +1122,7 @@ procedure TFreeFileBuffer.LoadTFreeMHSeriesResistanceData(var Data: TFreeMHSerie
 var
   bp: integer;
 begin
+  RequireRecordBytes(SizeOf(Data));
   bp := FPosition;
   with Data do
   begin
@@ -1856,31 +1954,16 @@ begin
 end;{TFreeFileBuffer.LoadTFreeMHSeriesResistanceData}
 
 
-//////////
-resourcestring
-rsParsingErrorOutOfFileSize =
-  'Error parsing of file "%s". Reading %s of size %d at position %d that is out of file size %d.';
-
-
 procedure TFreeFileBuffer.LoadString(var Output: string);
 var
-  I, Size: integer;
-  Ch: char;   S: string;
+  Size: integer;
+  S: string;
 begin
   LoadInteger(Size);
-  Output := '';
-
-  if FPosition + Size > FCount then
-    raise Exception.Create(format(rsParsingErrorOutOfFileSize,
-       [FFileName,'String',Size,FPosition,FCount]) );
-
-  for I := 1 to Size do
-  begin
-    Ch := char(FData[FPosition]);
-    Inc(FPosition);
-    Output := Output + Ch;
-  end;
-  S:=Output;
+  RequireBytes(Size, 'String');
+  SetLength(S, Size);
+  if Size > 0 then Move(FData[FPosition], S[1], Size);
+  Inc(FPosition, Size);
   Output := ConvertEncoding(S,FEncoding,'utf8');
 end;{TFreeFileBuffer.LoadTFreeMHSeriesResistanceData}
 
@@ -1912,9 +1995,7 @@ begin
   Size := 4;
   Output := 0;
 
-  if FPosition + Size > FCount then
-    raise Exception.Create(format(rsParsingErrorOutOfFileSize,
-       [FFileName,'Integer',Size,FPosition,FCount]) );
+  RequireBytes(Size, 'Integer');
 
   Move(FData[FPosition], Output, Size);
   Output := LEtoN(Output);
@@ -1928,9 +2009,7 @@ begin
   Size := 4;
   Output := 0;
 
-  if FPosition + Size > FCount then
-    raise Exception.Create(format(rsParsingErrorOutOfFileSize,
-       [FFileName,'TColor',Size,FPosition,FCount]) );
+  RequireBytes(Size, 'TColor');
 
   Move(FData[FPosition], Output, Size);
   Output := LEtoN(Output);
@@ -1942,6 +2021,9 @@ procedure TFreeFileBuffer.LoadTStrings(var Output: TStrings);
 var i,c: integer; S:String;
 begin
   LoadInteger(c);
+  RequireBytes(0, 'String list');
+  if (c < 0) or (c > (FCount - FPosition) div SizeOf(Integer)) then
+    raise EReadError.Create('Invalid string list count');
   for i:=1 to c do
     begin
     LoadString(S);
@@ -1956,9 +2038,7 @@ var
 begin
   Size := SizeOf(Output);
 
-  if FPosition + Size > FCount then
-    raise Exception.Create(format(rsParsingErrorOutOfFileSize,
-       [FFileName,'TFreeFileVersion',Size,FPosition,FCount]) );
+  RequireBytes(Size, 'TFreeFileVersion');
 
   Move(FData[FPosition], Output, Size);
   Inc(FPosition, Size);
@@ -1971,9 +2051,7 @@ begin
   Size := 1;
   Output := False;
 
-  if FPosition + Size > FCount then
-    raise Exception.Create(format(rsParsingErrorOutOfFileSize,
-       [FFileName,'Boolean',Size,FPosition,FCount]) );
+  RequireBytes(Size, 'Boolean');
 
   Move(FData[FPosition], Output, Size);
   Inc(FPosition, Size);
@@ -2025,9 +2103,7 @@ begin
   Size := SizeOf(Output);
   Output := 0.0;
 
-  if FPosition + Size > FCount then
-    raise Exception.Create(format(rsParsingErrorOutOfFileSize,
-       [FFileName,'TFloatType',Size,FPosition,FCount]) );
+  RequireBytes(Size, 'TFloatType');
 
   Move(FData[FPosition], Output, Size);
   Inc(FPosition, Size);
@@ -2059,9 +2135,7 @@ begin
   Size := SizeOf(Output);
   Output := ZERO;
 
-  if FPosition + Size > FCount then
-    raise Exception.Create(format(rsParsingErrorOutOfFileSize,
-       [FFileName,'TFloatType',Size,FPosition,FCount]) );
+  RequireBytes(Size, 'TFloatType');
 
   Move(FData[FPosition], Output, Size);
   Inc(FPosition, Size);
@@ -2073,9 +2147,7 @@ var
 begin
   Size := SizeOf(Output);
 
-  if FPosition + Size > FCount then
-    raise Exception.Create(format(rsParsingErrorOutOfFileSize,
-       [FFileName,'TFloatType',Size,FPosition,FCount]) );
+  RequireBytes(Size, 'TFloatType');
 
   Move(FData[FPosition], Output, Size);
   Inc(FPosition, Size);
@@ -2163,74 +2235,142 @@ end;{TFreeFileBuffer.Destroy}
 
 procedure TFreeFileBuffer.LoadFromFile(Filename: string);
 var
-  DataLeft: integer;
-  Tmp: integer;
-  Size: integer;
+  Stream: TFileStream;
 begin
   FFileName := Filename;
-  AssignFile(FFile, Filename);
-  //TheStream:=TFileStream.Create(FileName,fmOpenRead or fmShareDenyWrite);
+  Stream := TFileStream.Create(Filename, fmOpenRead or fmShareDenyWrite);
   try
-    system.FileMode := fmOpenRead;
-    system.Reset(FFile,1);
-    FCount := 0;
-    DataLeft := FileSize(FFile);
-    Capacity := DataLeft;
-    FPosition := 0;
-    if DataLeft < 0 then
-      exit;
-    while DataLeft > 0 do
-    begin
-      if DataLeft < FileBufferBlockSize then
-        Size := DataLeft
-      else
-        Size := FileBufferBlockSize;
-      BlockRead(FFile, FData[FCount], Size, Tmp);
-      Dec(DataLeft, Tmp);
-      Inc(FCount, Tmp);
-    end;
+    LoadFromStream(Stream);
   finally
-    Closefile(FFile);
+    Stream.Free;
   end;
-  FFileName := '';
 end;{TFreeFileBuffer.LoadFromFile}
 
+procedure TFreeFileBuffer.LoadFromStream(Stream: TStream);
+var
+  Data: array of Byte;
+  DataSize: Int64;
+  ReadCount, Requested, Progress: integer;
+begin
+  DataSize := Stream.Size - Stream.Position;
+  if (DataSize < 0) or (DataSize > High(Integer)) then
+    raise EReadError.Create('File size is outside the supported buffer range');
+  SetLength(Data, DataSize);
+  ReadCount := 0;
+  while ReadCount < DataSize do
+  begin
+    Requested := DataSize - ReadCount;
+    if Requested > FileBufferBlockSize then Requested := FileBufferBlockSize;
+    Progress := Stream.Read(Data[ReadCount], Requested);
+    if (Progress <= 0) or (Progress > Requested) then
+      raise EReadError.Create('File read did not complete');
+    Inc(ReadCount, Progress);
+  end;
+  // A failed read must not expose a partially filled buffer to the parser.
+  FData := Data;
+  FCount := ReadCount;
+  FCapacity := ReadCount;
+  FPosition := 0;
+end;
+
 // reset the data before reading
+// Delphi Plus wrote whole records while reusing older file-version numbers.
+// These four layouts occur in the distributed Ships corpus. Validate every
+// field and boolean boundary, not just EOF. Padding is deliberately ignored:
+// Delphi did not initialise it. A short layout is still reported to the caller
+// because truncation of an old, unchecksummed format can be indistinguishable.
+procedure TFreeFileBuffer.PrepareLegacyCalculations;
+var Expected, Missing, P: Integer;
+  procedure CheckRecord(FloatCount, BoolCount: Integer);
+  var I, Bits: Integer; V: Single;
+  begin
+    for I := 0 to FloatCount - 1 do begin
+      Move(FData[P + 4 * I], Bits, 4);
+      Move(Bits, V, 4);
+      if (LongWord(Bits) and $7F800000) = $7F800000 then
+        raise EReadError.Create('Non-finite legacy calculation parameter');
+    end;
+    for I := 0 to BoolCount - 1 do
+      if FData[P + 4 * FloatCount + I] > 1 then
+        raise EReadError.Create('Invalid legacy calculation flag');
+    Inc(P, 4 * FloatCount + 4);
+  end;
+begin
+  FLegacyPlaningSize := 56; FLegacyTask2Size := 104; FLegacyTask3Size := 68;
+  FLegacyCalculationLayout := '';
+  FDiscardLegacyTask5 := False;
+  if (Self is TFreeTextBuffer) or (Version < fv270) or (Version > fv305) then Exit;
+  Expected := 176 + 212 + 64 + 104 + 68;
+  if Version >= fv280 then Inc(Expected, 56);
+  if Version >= fv290 then Inc(Expected, 68);
+  if Version >= fv295 then Inc(Expected, 176);
+  if Version >= fv296 then Inc(Expected, 64);
+  if Version >= fv302 then Inc(Expected, 24);
+  Missing := Expected - (FCount - FPosition);
+  if Missing = 0 then Exit;
+  if (Version = fv270) and (Missing in [4,44]) then begin
+    FLegacyTask3Size := 64;
+    if Missing = 44 then FLegacyTask2Size := 64;
+    FLegacyCalculationLayout := 'Propeller Task3: 15 fields';
+    if Missing = 44 then FLegacyCalculationLayout := FLegacyCalculationLayout + '; Task2: 15 fields';
+  end else if (Version >= fv280) and (Missing in [8,16]) then begin
+    FLegacyPlaningSize := 56 - Missing;
+    FLegacyCalculationLayout := 'Planing: ' + IntToStr(FLegacyPlaningSize div 4 - 1) + ' fields';
+  end else
+    raise EReadError.Create('Unrecognised or incomplete legacy calculation data');
+  RequireBytes(FCount - FPosition, 'Legacy calculation data');
+  P := FPosition;
+  CheckRecord(43,2); CheckRecord(52,2); CheckRecord(15,1);
+  CheckRecord(FLegacyTask2Size div 4 - 1,1);
+  CheckRecord(FLegacyTask3Size div 4 - 1,1);
+  if Version >= fv280 then CheckRecord(FLegacyPlaningSize div 4 - 1,1);
+  if Version >= fv290 then CheckRecord(16,1);
+  if Version >= fv295 then CheckRecord(43,2);
+  if Version >= fv296 then CheckRecord(15,1);
+  if Version >= fv302 then begin
+    try
+      CheckRecord(5,1);
+    except
+      on E: EReadError do begin
+        // The original archive includes uninitialised Task5 records (ASCII
+        // paths, image bytes and all-FF NaNs). Do not turn them into results.
+        P := FCount;
+        FDiscardLegacyTask5 := True;
+        FLegacyCalculationLayout := FLegacyCalculationLayout +
+          '; invalid Propeller Task5 parameters reset: enter them again before calculation';
+      end;
+    end;
+  end;
+  if P <> FCount then raise EReadError.Create('Incomplete legacy calculation layout');
+end;
+
 procedure TFreeFileBuffer.Reset;
 begin
+  FLegacyPlaningSize := 56; FLegacyTask2Size := 104; FLegacyTask3Size := 68;
+  FLegacyCalculationLayout := '';
+  FDiscardLegacyTask5 := False;
   FPosition := 0;
 end;{TFreeFileBuffer.Reset}
 
 function TFreeFileBuffer.SaveToFile(Filename: string):boolean;
 var
-  DataWritten: integer;
-  DataLeft: integer;
-  Tmp: integer;
-  Size: integer;
+  Stream: TFileStream;
 begin
-  result:=false;
+  Result := False;
   FFileName := Filename;
+  Stream := TFileStream.Create(Filename, fmCreate);
   try
-    AssignFile(FFile, Filename);
-    Rewrite(FFile, 1);
-    DataWritten := 0;
-    DataLeft := Count;
-    while DataWritten < Count do
-    begin
-      if DataLeft < FileBufferBlockSize then
-        Size := DataLeft
-      else
-        Size := FileBufferBlockSize;
-      BlockWrite(FFile, FData[DataWritten], Size, Tmp);
-      Dec(DataLeft, Tmp);
-      Inc(DataWritten, Tmp);
-    end;
+    SaveToStream(Stream);
   finally
-    Closefile(FFile);
+    Stream.Free;
   end;
-  FFileName := '';
-  result:=true;
+  Result := True;
 end;{TFreeFileBuffer.SaveToFile}
+
+procedure TFreeFileBuffer.SaveToStream(Stream: TStream);
+begin
+  if FCount > 0 then WriteBufferFully(Stream, FData[0], FCount);
+end;
 
 function TFreeFileBuffer.GetPosition:integer;
 begin
@@ -2426,21 +2566,27 @@ procedure TFreeTextBuffer.LoadTJPEGImage(var JPegImage: TJPEGImage);
 var
   Stream: TMemoryStream;
   W, H, Size: integer;
-  PData: PChar;
+  Encoded: string;
 begin
   LoadInteger(W);
   LoadInteger(H);
   LoadInteger(Size);
-  PData := StrAlloc(Size);
+  if (FPosition < 0) or (FPosition >= FLines.Count) then
+    raise EReadError.Create('Missing JPEG data');
+  Encoded := FLines[FPosition];
+  if (Size < 0) or (Size > Length(Encoded) div 2) then
+    raise EReadError.Create('Invalid JPEG data length');
   Stream := TMemoryStream.Create;
-  Stream.SetSize(Size);
-  HexToBin(PChar(FLines[FPosition]), Stream.Memory, Size);
-  //Stream.Write(PData, Size);
-  StrDispose(PData);
-  Stream.Position := 0;
-  JPEGImage.LoadFromStream(Stream);
-  FreeAndNil(Stream);
-  Inc(FPosition);
+  try
+    Stream.SetSize(Size);
+    if (Size > 0) and (HexToBin(PChar(Encoded), Stream.Memory, Size) <> Size) then
+      raise EReadError.Create('Invalid JPEG hexadecimal data');
+    Stream.Position := 0;
+    JPEGImage.LoadFromStream(Stream);
+    Inc(FPosition);
+  finally
+    Stream.Free;
+  end;
 end;{TFreeTextBuffer.Add}
 
 procedure TFreeTextBuffer.LoadInteger(var Output: integer);
@@ -2578,10 +2724,36 @@ end;{TFreeTextBuffer.Destroy}
 
 procedure TFreeTextBuffer.LoadFromFile(Filename: string);
 begin
-  FFileName := Filename;
-  FLines.LoadFromFile(Filename);
-  FPosition := 0;
+  inherited LoadFromFile(Filename);
 end;{TFreeTextBuffer.LoadFromFile}
+
+procedure TFreeTextBuffer.LoadFromStream(Stream: TStream);
+var
+  Bytes: TFreeFileBuffer;
+  Memory: TMemoryStream;
+  Lines, OldLines: TStringList;
+begin
+  Bytes := TFreeFileBuffer.Create;
+  Memory := nil;
+  Lines := nil;
+  try
+    Bytes.LoadFromStream(Stream);
+    Memory := TMemoryStream.Create;
+    Bytes.SaveToStream(Memory);
+    Memory.Position := 0;
+    Lines := TStringList.Create;
+    Lines.LoadFromStream(Memory);
+    OldLines := FLines;
+    FLines := Lines;
+    Lines := nil;
+    OldLines.Free;
+    FPosition := 0;
+  finally
+    Lines.Free;
+    Memory.Free;
+    Bytes.Free;
+  end;
+end;
 
 // reset the data before reading
 procedure TFreeTextBuffer.Reset;
@@ -2591,11 +2763,23 @@ end;{TFreeTextBuffer.Reset}
 
 function TFreeTextBuffer.SaveToFile(Filename: string):boolean;
 begin
-  result:=false;
-  FFileName := Filename;
-  FLines.SaveToFile(Filename);
-  result:=true;
+  Result := inherited SaveToFile(Filename);
 end;{TFreeTextBuffer.SaveToFile}
+
+procedure TFreeTextBuffer.SaveToStream(Stream: TStream);
+var
+  Memory: TMemoryStream;
+begin
+  Memory := TMemoryStream.Create;
+  try
+    FLines.SaveToStream(Memory);
+    if Memory.Size > High(Integer) then
+      raise EWriteError.Create('Text data is too large for the file buffer');
+    if Memory.Size > 0 then WriteBufferFully(Stream, Memory.Memory^, Memory.Size);
+  finally
+    Memory.Free;
+  end;
+end;
 
 function TFreeTextBuffer.GetPosition:integer;
 begin

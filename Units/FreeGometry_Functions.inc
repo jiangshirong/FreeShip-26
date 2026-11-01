@@ -29,6 +29,7 @@ begin
     Result := rs_ft_2 {UserString[465]}
   else
     Result := rs_m_2 {UserString[452]};
+  Result := ReportUnitPowers(Result);
 end;{AreaStr}
 
 // Returns a string value with the length units
@@ -47,6 +48,7 @@ begin
     Result := rs_ft_4 {UserString[467]}
   else
     Result := rs_m_4 {UserString[470]};
+  Result := ReportUnitPowers(Result);
 end;{InertiaStr}
 
 function VolStr(Units: TFreeUnitType): string;
@@ -55,6 +57,7 @@ begin
     Result := rs_ft_3 {UserString[466]}
   else
     Result := rs_m_3 {UserString[453]};
+  Result := ReportUnitPowers(Result);
 end;{VolStr}
 
 function DensStr(Units: TFreeUnitType): string;
@@ -63,6 +66,7 @@ begin
     Result := rs_lbs_ft_3 {UserString[468]}
   else
     Result := rs_t_m_3 {UserString[469]};
+  Result := ReportUnitPowers(Result);
 end;{DensStr}
 
 function ViscStr(Units: TFreeUnitType): string;
@@ -71,6 +75,7 @@ begin
     Result := rs_ft_2_s {UserString[471]}
   else
     Result := rs_m_2_s {UserString[472]};
+  Result := ReportUnitPowers(Result);
 end;{ViscStr}
 
 function DegrStr(Units: TFreeUnitType): string;
@@ -106,6 +111,7 @@ begin
     Result := rs_lbs_ft_3 {UserString[468]}
   else
     Result := rs_t_m_3 {UserString[469]};
+  Result := ReportUnitPowers(Result);
 end;{DensityStr}
 
 function WeightStr(Units: TFreeUnitType): string;
@@ -729,7 +735,7 @@ begin
             Fixed.InsertSpline(Fixed.NumberOfPoints, True, True, Match);
           end
           else
-            messagedlg('Error in comparing minimum values.', mtError, [mbOK], 0);
+            messagedlg(rsLocMinimumComparisonError, mtError, [mbOK], 0);
           // Destroy the matching spline
           List.Delete(MatchIndex - 1);
           FreeAndNil(Match);

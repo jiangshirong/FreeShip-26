@@ -162,27 +162,27 @@ object FreeHullForm: TFreeHullForm
     top = 32
     object StandardLens: TAction
       Category = 'Camera'
-      Caption = 'Standard lens 50mm.'
+      Caption = 'Standard lens 50mm'
       OnExecute = StandardLensExecute
     end
     object WideLens: TAction
       Category = 'Camera'
-      Caption = 'Wide lens 28 mm.'
+      Caption = 'Wide lens 28 mm'
       OnExecute = WideLensExecute
     end
     object ShortTeleLens: TAction
       Category = 'Camera'
-      Caption = 'Short telelens 90 mm.'
+      Caption = 'Short telelens 90 mm'
       OnExecute = ShortTeleLensExecute
     end
     object MediumTeleLens: TAction
       Category = 'Camera'
-      Caption = 'Medium telelens 130 mm.'
+      Caption = 'Medium telelens 130 mm'
       OnExecute = MediumTeleLensExecute
     end
     object LongTeleLens: TAction
       Category = 'Camera'
-      Caption = 'Long telelens 200 mm.'
+      Caption = 'Long telelens 200 mm'
       OnExecute = LongTeleLensExecute
     end
     object ViewBodyPlan: TAction

@@ -4,7 +4,7 @@ object FreeLackenbyDialog: TFreeLackenbyDialog
   Top = 229
   Width = 1000
   BorderStyle = bsSingle
-  Caption = 'Lackenby hullform transformation.'
+  Caption = 'Lackenby hullform transformation'
   ClientHeight = 600
   ClientWidth = 1000
   Position = poOwnerFormCenter
@@ -443,7 +443,7 @@ object FreeLackenbyDialog: TFreeLackenbyDialog
     object Button1: TSpeedButton
       Left = 4
       Height = 30
-      Hint = 'Start the hullform transformation.'
+      Hint = 'Start the hullform transformation'
       Top = 2
       Width = 113
       Align = alLeft

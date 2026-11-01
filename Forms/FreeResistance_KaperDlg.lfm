@@ -3,7 +3,7 @@ object FreeResistance_Kaper: TFreeResistance_Kaper
   Height = 750
   Top = 224
   Width = 1000
-  Caption = 'Kaper resistance calculation.'
+  Caption = 'Kaper resistance calculation'
   ClientHeight = 750
   ClientWidth = 1000
   DesignTimePPI = 120
@@ -36,7 +36,7 @@ object FreeResistance_Kaper: TFreeResistance_Kaper
     end
     object PrintButton: TToolButton
       Left = 15
-      Hint = 'Print the results of the calculation.'
+      Hint = 'Print the results of the calculation'
       Top = 2
       Caption = 'PrintButton'
       ImageIndex = 2
@@ -52,14 +52,14 @@ object FreeResistance_Kaper: TFreeResistance_Kaper
     end
     object ToolButton25: TToolButton
       Left = 87
-      Hint = 'Close the window and save changes.'
+      Hint = 'Close the window and save changes'
       Top = 2
       ImageIndex = 1
       OnClick = ToolButton25Click
     end
     object ToolButton7: TToolButton
       Left = 149
-      Hint = 'Close window without saving changes.'
+      Hint = 'Close window without saving changes'
       Top = 2
       ImageIndex = 0
       OnClick = ToolButton7Click

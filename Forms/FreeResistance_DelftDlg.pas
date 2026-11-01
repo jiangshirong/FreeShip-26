@@ -465,7 +465,7 @@ begin
   Cwp := WlArea / (Lwl * Bwl);
   if (Cwp > 0.85) or (Cp > 0.85) then
   begin
-    MessageDlg('ATTENTION!!! Cp>0,85 or Cwp>0,85', mtError, [mbOK], 0);
+    MessageDlg(rsLocCpLimit, mtError, [mbOK], 0);
     Exit;
   end;
 
@@ -740,7 +740,7 @@ begin
         ResultsMemo.Lines.Add(Space(10) + 'Bwl/Tc  ' + rs_is_outside_valid_domain {UserString[476]} + ' [2.10 ... 4.0]');
       if Lwl / Bwl <= 2 then
       begin
-        MessageDlg('Так как L/B<2, расчет невозможен!!! ',
+        MessageDlg(rs_Calculation_is_NOT_possible__because_L_B_2____,
           mtError, [mbOK], 0);
         exit;
       end;

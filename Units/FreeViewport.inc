@@ -17,6 +17,9 @@ end;{TFreeViewport.FSetAngle}
 
 procedure TFreeViewport.FSetBackgroundMode(val: TFreeViewportBackgroundMode);
 begin
+  if (val <> emNormal) and (val <> emUnsetFrame) and
+    ((FBackgroundImage = nil) or (FBackgroundImage.Bitmap = nil)) then
+    val := emNormal;
   FBackgroundMode := val;
   case FBackGroundMode of
     emSetOrigin: Cursor := crSetOrigin;
@@ -96,9 +99,203 @@ begin
   Result := FDrawingCanvas.TextHeight(val);
 end;
 
-procedure TFreeViewport.TextOut(x, y: integer; val: string);
+const
+  ControlPointSweepDuration=1000;
+  ControlPointHighlightDuration=650;
+
+function TFreeViewport.RevealLabelColor(AColor: TColor; Delay: Integer): TColor;
+var P:Double; C,B:TColor;
 begin
-  FDrawingCanvas.TextOut(x, y, val);
+  Result:=AColor;
+  if Printing or (FLabelRevealStart=0) then Exit;
+  P:=Max(0.0,Min(1.0,(Int64(AnimationTime-FLabelRevealStart)-ControlPointSweepDuration-Delay)/260.0));
+  P:=1-Sqr(1-P);
+  C:=ColorToRGB(AColor); B:=ColorToRGB(Color);
+  Result:=RGBToColor(Round((B and 255)*(1-P)+(C and 255)*P),
+    Round(((B shr 8) and 255)*(1-P)+((C shr 8) and 255)*P),
+    Round(((B shr 16) and 255)*(1-P)+((C shr 16) and 255)*P));
+end;
+
+procedure TFreeViewport.TextOutLabel(const Placement: TLabelPlacement; const Value: string);
+begin
+  FLabelTextRect:=Placement.Rect; FLabelTextClipped:=True;
+  try TextOut(Placement.Position.X,Placement.Position.Y,Value)
+  finally FLabelTextClipped:=False end;
+end;
+
+procedure TFreeViewport.TextOut(x, y: integer; val: string);
+var Saved,C:TColor; Delay:Integer; P:Double; R:TRect; Style:TTextStyle;
+begin
+  Saved:=FDrawingCanvas.Font.Color; Delay:=0;
+  if (val<>'') and (val[1] in ['0'..'9','-','+']) then Delay:=140;
+  C:=ColorToRGB(RevealLabelColor(Saved,Delay));
+  FDrawingCanvas.Font.Color:=C;
+  try
+    if not Printing and ((FLabelRevealStart<>0) or FLabelTextClipped) then begin
+      P:=Max(0.0,Min(1.0,(Int64(AnimationTime-FLabelRevealStart)-ControlPointSweepDuration-Delay)/260.0));
+      if (FLabelRevealStart=0) or ((val<>'') and (val[1] in ['0'..'9','-','+'])) then P:=1
+      else P:=1-Power(1-P,3);
+      R.Left:=x; R.Top:=y; R.Right:=x+Round(FDrawingCanvas.TextWidth(val)*P); R.Bottom:=y+FDrawingCanvas.TextHeight(val);
+      if FLabelTextClipped then begin
+        R.Left:=Max(R.Left,FLabelTextRect.Left); R.Right:=Min(R.Right,FLabelTextRect.Right);
+        R.Top:=Max(R.Top,FLabelTextRect.Top); R.Bottom:=Min(R.Bottom,FLabelTextRect.Bottom);
+      end;
+      if (R.Right>R.Left) and (R.Bottom>R.Top) then begin
+        Style:=FDrawingCanvas.TextStyle; Style.SingleLine:=True; Style.Clipping:=True;
+        Style.ShowPrefix:=False; Style.Wordbreak:=False; Style.Alignment:=taLeftJustify; Style.Layout:=tlTop;
+        FDrawingCanvas.TextRect(R,x,y,val,Style);
+      end;
+    end else FDrawingCanvas.TextOut(x,y,val);
+  finally FDrawingCanvas.Font.Color:=Saved end;
+end;
+
+procedure TFreeViewport.SyncLabelHistory;
+begin
+  FLabelLayout.TranslateHistory(FPan.X-FLabelHistoryPan.X,FPan.Y-FLabelHistoryPan.Y);
+  FLabelHistoryPan:=FPan;
+end;
+
+procedure TFreeViewport.SetPresentationFrozen(Value:Boolean);
+var Paused:QWord;I:Integer;
+begin
+  if FPresentationFrozen=Value then Exit;
+  FPresentationFrozen:=Value;
+  if Value then begin
+    FPresentationFreezeStart:=GetTickCount64;
+    FLabelAnimationTimer.Enabled:=False; FProgressiveTimer.Enabled:=False;
+  end else begin
+    Paused:=GetTickCount64-FPresentationFreezeStart;
+    if FProgressiveStart<>0 then Inc(FProgressiveStart,Paused);
+    if FLabelRevealStart<>0 then Inc(FLabelRevealStart,Paused);
+    for I:=0 to High(FPointPulse) do Inc(FPointPulse[I].Started,Paused);
+    if FPointHighlightUntil<>0 then Inc(FPointHighlightUntil,Paused);
+    FAnimationFrameTick:=0;
+    FProgressiveTimer.Enabled:=FProgressivePreview or (FLabelRevealStart<>0);
+    Invalidate;
+  end;
+end;
+
+procedure TFreeViewport.WMEraseBkgnd(var Message:TLMEraseBkgnd);
+begin
+  // The viewport paints a complete buffered frame; do not flash a blank panel
+  // (including its inherited Caption) ahead of that frame.
+  Message.Result:=1;
+end;
+
+procedure TFreeViewport.BeginProgressiveDisplay;
+begin
+  if Printing then Exit;
+  InvalidateAnimationBase;
+  FProgressiveTimer.Enabled:=False;
+  FProgressivePreview:=True; FPresentationBufferValid:=False;
+  FProgressiveStart:=0; FLabelRevealStart:=0;
+  FAnimationFrameTick:=0;FPointHighlightUntil:=0;SetLength(FPointPulse,0);
+  Invalidate;
+end;
+
+procedure TFreeViewport.PreviewFrameReady;
+begin
+  // Advance only after a preview has actually been drawn, not while parsing.
+  if FProgressivePreview and not Printing then FProgressiveTimer.Enabled:=True;
+end;
+
+procedure TFreeViewport.FinishProgressiveDisplay(SkipLabels: Boolean);
+begin
+  InvalidateAnimationBase;
+  FProgressivePreview:=False;
+  FAnimationFrameTick:=0;FPointHighlightUntil:=0;SetLength(FPointPulse,0);
+  if SkipLabels then FLabelRevealStart:=0 else FLabelRevealStart:=GetTickCount64;
+  FProgressiveTimer.Enabled:=not SkipLabels;
+  Invalidate;
+end;
+
+function TFreeViewport.ProgressiveFraction: Double;
+begin
+  if FProgressiveStart=0 then FProgressiveStart:=GetTickCount64;
+  Result:=Min(1.0,(GetTickCount64-FProgressiveStart)/550.0);
+end;
+
+function TFreeViewport.ControlPointRevealed(const Target:TPoint):Boolean;
+var Progress:Double;
+begin
+  Result:=True;
+  if Printing or (FLabelRevealStart=0) then Exit;
+  Progress:=Min(1.0,(AnimationTime-FLabelRevealStart)/ControlPointSweepDuration);
+  // A screen-space sweep reveals stationary markers from right to left in every view.
+  Result:=(Progress>=1) or (Target.X>=ClientWidth*(1-Progress));
+end;
+
+function TFreeViewport.OverlayBuildCount:Integer;
+begin Result:=FOverlayReveal.BuildCount end;
+
+function TFreeViewport.AnimationTime:QWord;
+begin
+ if FAnimationFrameTick<>0 then Result:=FAnimationFrameTick else Result:=GetTickCount64;
+end;
+function TFreeViewport.ControlPointEntranceColor(const Target:TPoint; Base:TColor; Identity:PtrUInt):TColor;
+var Age,Amount,P:Double;C,H:TColor;I,N:Integer;Started,NowTick:QWord;
+begin
+ Result:=Base;
+ if Printing or (FLabelRevealStart=0) or not ControlPointRevealed(Target) then Exit;
+ NowTick:=AnimationTime;
+ if Identity=0 then Identity:=PtrUInt(Cardinal(Target.X) xor (Cardinal(Target.Y) shl 16))+1;
+ Started:=0;
+ for I:=0 to High(FPointPulse) do if FPointPulse[I].Key=Identity then begin Started:=FPointPulse[I].Started;Break end;
+ if Started=0 then begin
+  N:=Length(FPointPulse);SetLength(FPointPulse,N+1);Started:=NowTick;
+  FPointPulse[N].Key:=Identity;FPointPulse[N].Started:=Started;
+  FPointHighlightUntil:=Max(FPointHighlightUntil,Started+ControlPointHighlightDuration);
+ end;
+ Age:=Int64(NowTick-Started);
+ P:=Max(0.0,Min(1.0,(Age-100)/(ControlPointHighlightDuration-100)));
+ Amount:=1-P*P*(3-2*P);
+ C:=ColorToRGB(Base);H:=RGBToColor(255,155,20);
+ Result:=RGBToColor(Round((C and 255)*(1-Amount)+(H and 255)*Amount),
+  Round(((C shr 8) and 255)*(1-Amount)+((H shr 8) and 255)*Amount),
+  Round(((C shr 16) and 255)*(1-Amount)+((H shr 16) and 255)*Amount));
+end;
+
+procedure TFreeViewport.ProgressiveTick(Sender: TObject);
+begin
+  if FProgressivePreview then begin
+    if ProgressiveFraction>=1 then FinishProgressiveDisplay;
+  end else if (FLabelRevealStart<>0) and (GetTickCount64-FLabelRevealStart>=ControlPointSweepDuration+420) and
+      (FAnimationFrameTick>=FPointHighlightUntil) and
+      (FAnimationFrameTick>=FLabelRevealStart+ControlPointSweepDuration) then begin
+    FLabelRevealStart:=0;FAnimationFrameTick:=0;SetLength(FPointPulse,0); FProgressiveTimer.Enabled:=False;
+    InvalidateAnimationBase;
+  end;
+  Invalidate;
+end;
+
+procedure TFreeViewport.PauseLabelAnimation;
+begin
+  FLabelAnimationTimer.Enabled := False;
+end;
+
+procedure TFreeViewport.LabelFrameReady(Sender: TObject);
+begin
+  FLabelAnimationTimer.Enabled := FLabelLayout.Animating and not Printing;
+end;
+
+procedure TFreeViewport.LabelAnimationTick(Sender: TObject);
+begin
+  if FLabelLayout.Animating and Visible then Invalidate
+  else FLabelAnimationTimer.Enabled := False;
+end;
+
+procedure TFreeViewport.DrawLabelLeader(const Anchor: TPoint; const LabelRect: TRect);
+var X, Y: integer; SavedPen: TPen;
+begin
+  X:=Max(LabelRect.Left,Min(Anchor.X,LabelRect.Right));
+  Y:=Max(LabelRect.Top,Min(Anchor.Y,LabelRect.Bottom));
+  if Hypot(X-Anchor.X,Y-Anchor.Y)<28 then Exit;
+  SavedPen:=TPen.Create; SavedPen.Assign(FDrawingCanvas.Pen);
+  try
+    FDrawingCanvas.Pen.Color:=RevealLabelColor(FDrawingCanvas.Font.Color,140);
+    FDrawingCanvas.Pen.Width:=1; FDrawingCanvas.Pen.Style:=psSolid;
+    FDrawingCanvas.MoveTo(Anchor.X,Anchor.Y); FDrawingCanvas.LineTo(X,Y);
+  finally FDrawingCanvas.Pen.Assign(SavedPen); SavedPen.Free end;
 end;
 
 
@@ -154,15 +351,14 @@ begin
   if (FPan.X <> Val.X) or (FPan.Y <> Val.Y) then
   begin
     FPan := Val;
-    Refresh;
+    Invalidate;
   end;
 end;{TFreeViewport.FSetPan}
 
 procedure TFreeViewport.FSetPenColor(Val: TColor);
 begin
-  if FDrawingcanvas.Pen.Color <> val then
-    FDrawingcanvas.Pen.Color := Val;
-end;{TFreeViewport.FSetPenColor}
+  if FDrawingcanvas.Pen.Color<>Val then FDrawingcanvas.Pen.Color:=Val;
+end;
 
 procedure TFreeViewport.FSetBrushColor(Val: TColor);
 begin
@@ -178,8 +374,8 @@ end;{TFreeViewport.FSetFontColor}
 
 procedure TFreeViewport.FSetFontName(val: string);
 begin
-  if Uppercase(FDrawingcanvas.Font.Name) <> uppercase(Name) then
-    FDrawingcanvas.Font.Name := Name;
+  if not SameText(FDrawingcanvas.Font.Name, val) then
+    FDrawingcanvas.Font.Name := val;
 end;{TFreeViewport.FSetFontName}
 
 procedure TFreeViewport.FSetFontSize(val: integer);
@@ -396,8 +592,16 @@ begin
   end;
 end;{TFreeViewport.FVertScrollbarChange}
 
+function BoundedViewportZoom(Value:TFloatType):TFloatType;
+begin
+ // Relative to the fitted model: 10% overview through 20x detail.
+ if IsNan(Value) then Result:=1.0
+ else Result:=Max(0.1,Min(20.0,Value));
+end;
+
 procedure TFreeViewport.FSetZoom(val: TFloatType);
 begin
+  val:=BoundedViewportZoom(val);
   if FZoom = val then exit;
   FZoom := val;
 end;
@@ -430,6 +634,17 @@ begin
   BorderStyle := bsSingle;
   BorderWidth := 0;
 
+  FProgressiveTimer:=TTimer.Create(Self);
+  FProgressiveTimer.Enabled:=False;
+  FProgressiveTimer.Interval:=16;
+  FProgressiveTimer.OnTimer:=ProgressiveTick;
+  FLabelLayout := TFreeLabelLayout.Create;
+  FOverlayReveal:=TOverlayReveal.Create;
+  FLabelAnimationTimer := TTimer.Create(Self);
+  FLabelAnimationTimer.Enabled := False;
+  FLabelAnimationTimer.Interval := 16;
+  FLabelAnimationTimer.OnTimer := LabelAnimationTick;
+  FLabelLayout.OnFrameReady := LabelFrameReady;
   FPrinting := False;
   FBackgroundMode := emNormal;
   FMargin := 0.0;
@@ -517,6 +732,11 @@ end;
 
 destructor TFreeViewport.Destroy;
 begin
+  FreeAndNil(FProgressiveTimer);
+  FreeAndNil(FLabelAnimationTimer);
+  FreeAndNil(FLabelLayout);
+  InvalidateAnimationBase;
+  FreeAndNil(FOverlayReveal);
   DetachEventHandlers;
   if Assigned(FDrawingBuffer) then
     FreeAndNil(FDrawingBuffer);
@@ -1293,7 +1513,10 @@ var
   N: T3DCoordinate;
   P,P0,PC,p1,p2,p3: TPoint;
 begin
-  inherited;
+  if FPresentationFrozen and FPresentationBufferValid and not Printing then begin
+    Canvas.StretchDraw(ClientRect,FDrawingBuffer);
+    Exit;
+  end;
   if (not (csDestroying in ComponentState)) and
     (not (csLoading in ComponentState)) and
     (not (csReading in ComponentState)) and
@@ -1381,6 +1604,7 @@ begin
         // Copy buffer to screen
         //Bitblt(OldCanvas.Handle,0,0,FDestinationWidth,FDestinationHeight,FDrawingBuffer.Canvas.Handle,0,0,SRCCOPY);
         OldCanvas.Draw(0, 0, FDrawingBuffer);
+        FPresentationBufferValid:=True;
         FDrawingCanvas := OldCanvas;
       end;
     end;
@@ -1438,14 +1662,145 @@ begin
   FDrawingCanvas.MoveTo(x, y);
 end;
 
-procedure TFreeViewport.LineTo(x, y: integer);
+procedure TFreeViewport.DrawControlPointMarker(const Target:TPoint; Radius:Integer);
+var SavedColor:TColor;SavedStyle:TBrushStyle;
 begin
-  FDrawingCanvas.LineTo(x, y);
+ if Radius<1 then Exit;
+ if FOverlayCollecting then begin
+  if FOverlayMarkerCount=Length(FOverlayMarkers) then
+    SetLength(FOverlayMarkers,Max(64,Length(FOverlayMarkers)*2));
+  FOverlayMarkers[FOverlayMarkerCount].Target:=Target;
+  FOverlayMarkers[FOverlayMarkerCount].Radius:=Radius;
+  FOverlayMarkers[FOverlayMarkerCount].Color:=FDrawingCanvas.Pen.Color;
+  Inc(FOverlayMarkerCount);
+ end;
+ SavedColor:=FDrawingCanvas.Brush.Color;SavedStyle:=FDrawingCanvas.Brush.Style;
+ try
+  FDrawingCanvas.Brush.Color:=FDrawingCanvas.Pen.Color;FDrawingCanvas.Brush.Style:=bsSolid;
+  FDrawingCanvas.FillRect(Target.X-Radius,Target.Y-Radius,Target.X+Radius,Target.Y+Radius);
+ finally FDrawingCanvas.Brush.Color:=SavedColor;FDrawingCanvas.Brush.Style:=SavedStyle end;
+end;
+
+procedure TFreeViewport.InvalidateAnimationBase;
+begin FreeAndNil(FWireBase);FWireBaseKey:='';SetLength(FWireBaseLines,0) end;
+function TFreeViewport.RestoreAnimationBase:Boolean;
+var Key:string;
+begin
+ Result:=False;
+ if not FOverlayCollecting or Printing or (ViewportMode<>vmWireframe) then Exit;
+ Key:=Format('%d:%d:%d:%d:%.12g:%.12g:%.12g:%.12g:%d:%d:%d',
+ [ClientWidth,ClientHeight,FPan.X,FPan.Y,FZoom,FScale,FAngle,FElevation,FScreencenter.X,FScreencenter.Y,Ord(ViewType)]);
+ if Key<>FWireBaseKey then begin InvalidateAnimationBase;FWireBaseKey:=Key end;
+ FWireBaseStart:=FOverlayReveal.PendingCount;
+ if FWireBase=nil then Exit;
+ FDrawingCanvas.Draw(0,0,FWireBase);FOverlayReveal.Append(FWireBaseLines);Result:=True;
+end;
+procedure TFreeViewport.SaveAnimationBase;
+begin
+ if not FOverlayCollecting or Printing or (ViewportMode<>vmWireframe) or (FWireBase<>nil) then Exit;
+ FWireBase:=TBitmap.Create;FWireBase.PixelFormat:=pf24bit;FWireBase.SetSize(ClientWidth,ClientHeight);
+ FWireBase.Canvas.CopyRect(Rect(0,0,ClientWidth,ClientHeight),FDrawingCanvas,Rect(0,0,ClientWidth,ClientHeight));
+ FWireBaseLines:=FOverlayReveal.PendingTail(FWireBaseStart);
+end;
+procedure TFreeViewport.BeginOverlayFrame;
+begin
+ FAnimationFrameTick:=GetTickCount64;
+ FOverlayMarkerCount:=0;
+ FOverlayCollecting:=not Printing and (FLabelRevealStart<>0);
+ if FOverlayCollecting then FOverlayReveal.BeginFrame;
+end;
+procedure TFreeViewport.EndOverlayFrame;
+var I:Integer;SavedPenColor:TColor;
+begin
+ if not FOverlayCollecting then Exit;FOverlayCollecting:=False;
+ FOverlayReveal.Draw(FDrawingCanvas,Min(1.0,(AnimationTime-FLabelRevealStart)/1300.0),Point(ClientWidth div 2,ClientHeight div 2));
+ // Deferred reveal lines must not cover markers that normally paint above them.
+ SavedPenColor:=FDrawingCanvas.Pen.Color;
+ try
+  for I:=0 to FOverlayMarkerCount-1 do begin
+   FDrawingCanvas.Pen.Color:=FOverlayMarkers[I].Color;
+   DrawControlPointMarker(FOverlayMarkers[I].Target,FOverlayMarkers[I].Radius);
+  end;
+ finally FDrawingCanvas.Pen.Color:=SavedPenColor end;
+end;
+function TFreeViewport.CaptureOverlayLine(X1,Y1,X2,Y2:Double):Boolean;
+var C:TColor;R,G,B:Integer;
+begin
+ Result:=False;if not FOverlayCollecting then Exit;
+ C:=ColorToRGB(FDrawingCanvas.Pen.Color);R:=C and 255;G:=(C shr 8) and 255;B:=(C shr 16) and 255;
+ Result:=((R>=70) and (R>G*1.8) and (R>B*1.5)) or ((B>=70) and (B>R*1.8) and (B>G*1.3));
+ if Result then FOverlayReveal.AddLine(X1,Y1,X2,Y2,FDrawingCanvas.Pen.Color,FDrawingCanvas.Pen.Width,FDrawingCanvas.Pen.Style);
+end;
+
+procedure TFreeViewport.LineTo(x, y: integer);
+var Previous: TPoint;
+begin
+  Previous := FDrawingCanvas.PenPos;
+  if CaptureOverlayLine(Previous.X,Previous.Y,x,y) then begin FDrawingCanvas.MoveTo(x,y);Exit end;
+  if (not FPrinting) and DrawSmoothLine(FDrawingCanvas, Previous.X, Previous.Y, x, y) then
+    FDrawingCanvas.MoveTo(x, y)
+  else
+    FDrawingCanvas.LineTo(x, y);
 end;
 
 procedure TFreeViewport.Line(x1, y1, x2, y2: integer);
 begin
-  FDrawingCanvas.Line(x1, y1, x2, y2);
+  if CaptureOverlayLine(x1,y1,x2,y2) then begin FDrawingCanvas.MoveTo(x2,y2);Exit end;
+  if (not FPrinting) and DrawSmoothLine(FDrawingCanvas, x1, y1, x2, y2) then
+    FDrawingCanvas.MoveTo(x2, y2)
+  else
+    FDrawingCanvas.Line(x1, y1, x2, y2);
+end;
+
+procedure TFreeViewport.ProjectForDrawing(const P: T3DCoordinate; out X, Y: Double);
+var Rotated: T3DCoordinate; Projected: T2DCoordinate; Distance: TFloatType;
+begin
+  Rotated := RotatedPoint(P);
+  Distance := FCameralocation.X - Rotated.X;
+  Projected.X := FCameralocation.X * Rotated.Y / Distance;
+  Projected.Y := FCameralocation.X * Rotated.Z / Distance;
+  X := FPan.X + FScreencenter.X + FZoom * FScale * Projected.X;
+  Y := FPan.Y + FScreencenter.Y - FZoom * FScale * Projected.Y;
+end;
+
+procedure TFreeViewport.DrawModelLine(const Point1, Point2: T3DCoordinate);
+var X1, Y1, X2, Y2: Double;
+    A, B: TPoint;
+begin
+  ProjectForDrawing(Point1, X1, Y1);
+  ProjectForDrawing(Point2, X2, Y2);
+  if CaptureOverlayLine(X1,Y1,X2,Y2) then begin FDrawingCanvas.MoveTo(Round(X2),Round(Y2));Exit end;
+  if (not FPrinting) and DrawSmoothLine(FDrawingCanvas, X1, Y1, X2, Y2) then
+    FDrawingCanvas.MoveTo(Round(X2), Round(Y2))
+  else
+  begin
+    A := Project(Point1);
+    B := Project(Point2);
+    FDrawingCanvas.MoveTo(A.X, A.Y);
+    FDrawingCanvas.LineTo(B.X, B.Y);
+  end;
+end;
+
+procedure TFreeViewport.DrawModelPolyline(const Points: array of T3DCoordinate);
+var I: Integer;
+    FloatPoints: array of TSmoothPoint;
+    ScreenPoints: array of TPoint;
+begin
+  if Length(Points) < 2 then Exit;
+  if not FPrinting then
+  begin
+    SetLength(FloatPoints, Length(Points));
+    for I := 0 to High(Points) do
+      ProjectForDrawing(Points[I], FloatPoints[I].X, FloatPoints[I].Y);
+    if CaptureOverlayLine(FloatPoints[0].X,FloatPoints[0].Y,FloatPoints[1].X,FloatPoints[1].Y) then begin
+      for I:=2 to High(FloatPoints) do CaptureOverlayLine(FloatPoints[I-1].X,FloatPoints[I-1].Y,FloatPoints[I].X,FloatPoints[I].Y);
+      Exit;
+    end;
+    if DrawSmoothFloatPolyline(FDrawingCanvas, FloatPoints) then Exit;
+  end;
+  SetLength(ScreenPoints, Length(Points));
+  for I := 0 to High(Points) do ScreenPoints[I] := Project(Points[I]);
+  FDrawingCanvas.Polyline(ScreenPoints);
 end;
 
 procedure TFreeViewport.Rectangle(x1, y1, x2, y2: integer);
@@ -1472,8 +1827,15 @@ end;
 
 
 procedure TFreeViewport.Polyline(const Points: array of TPoint);
+var I:Integer;
 begin
-  FDrawingCanvas.Polyline(points);
+  if Length(Points)<2 then Exit;
+  if CaptureOverlayLine(Points[0].X,Points[0].Y,Points[1].X,Points[1].Y) then begin
+    for I:=2 to High(Points) do CaptureOverlayLine(Points[I-1].X,Points[I-1].Y,Points[I].X,Points[I].Y);
+    Exit;
+  end;
+  if FPrinting or not DrawSmoothPolyline(FDrawingCanvas, Points) then
+    FDrawingCanvas.Polyline(Points);
 end;
 
 procedure TFreeViewport.Polygon(const Points: array of TPoint);
@@ -1501,7 +1863,11 @@ var
   Dialog: TSaveImageDialog;
   OK: boolean;
   TargetImage:TImage;
+  PreviousExporting: Boolean;
 begin
+  PreviousExporting := FBitmapExporting;
+  FBitmapExporting := True;
+  try
   if ShowDialog then
   begin
     Dialog := TSaveImageDialog.Create(self);
@@ -1509,6 +1875,7 @@ begin
     Dialog.SetImageSizes(ClientWidth,ClientHeight);
     Dialog.Filename := Filename;
     OK := Dialog.Execute;
+    if OK then Filename := Dialog.Filename;
   end
   else
   begin
@@ -1574,6 +1941,9 @@ begin
   end;
   if ShowDialog then
     FreeAndNil(Dialog);
+  finally
+    FBitmapExporting := PreviousExporting;
+  end;
 end;{TFreeViewport.SaveAsBitmap}
 
 procedure TFreeViewport.Resize;
@@ -1622,6 +1992,7 @@ var
   YVal: TFloatType;
   OK: boolean;
 begin
+  if FProgressivePreview or (FLabelRevealStart<>0) then FinishProgressiveDisplay(True);
   FMouseShift := Shift;
   inherited;
   if (Shift <> []) then
@@ -1769,6 +2140,9 @@ var
   W,H,X0,Y0,dX,dY: Longint;
   bgiRect: TRect;
 begin
+  if (FBackgroundMode <> emNormal) and
+    ((FBackgroundImage = nil) or (FBackgroundImage.Bitmap = nil)) then
+    BackgroundMode := emNormal;
   if FMouseShift <> Shift then // Mouse Move came before Mouse Down
      exit;
   inherited;
@@ -1977,6 +2351,7 @@ var
   Mid: TPoint;
   mouseDX, mouseDY: LongInt;
 begin
+  if FProgressivePreview or (FLabelRevealStart<>0) then FinishProgressiveDisplay(True);
   Result := inherited DoMousewheel(Shift, Wheeldelta, Mousepos);
    {$IFDEF WIN32}// We need to bring ScreenToClient in MDF mode, not a case for X11
   MousePos := self.ScreenToClient(MousePos);
@@ -1997,24 +2372,17 @@ begin
     mouseDX := MousePos.X - Mid.X;
     mouseDY := MousePos.Y - Mid.Y;
 
-    if WheelDelta > 0 then
-    begin
-      FZoom := FZoom * Factor;
-      NewPan.X := round(Pan.X * Factor);
-      NewPan.Y := round(Pan.Y * Factor);
-      FPan.X := FPan.X - round((mouseDX*Factor - mouseDX) - (NewPan.X - Pan.X));
-      FPan.Y := FPan.Y - round((mouseDY*Factor - mouseDY) - (NewPan.Y - Pan.Y));
-      Refresh;
-    end
-    else
-    begin
-      FZoom := FZoom / Factor;
-      NewPan.X := round(Pan.X / Factor);
-      NewPan.Y := round(Pan.Y / Factor);
-      FPan.X := FPan.X - round((mouseDX/Factor - mouseDX) - (NewPan.X - Pan.X));
-      FPan.Y := FPan.Y - round((mouseDY/Factor - mouseDY) - (NewPan.Y - Pan.Y));
-      Refresh;
-    end;
+    if WheelDelta=0 then Exit;
+    if WheelDelta<0 then Factor:=1/Factor;
+    Factor:=BoundedViewportZoom(FZoom*Factor)/FZoom;
+    if Abs(Factor-1)<1E-12 then Exit;
+    FZoom:=BoundedViewportZoom(FZoom*Factor);
+    NewPan.X:=Round(Pan.X*Factor);NewPan.Y:=Round(Pan.Y*Factor);
+    FPan.X:=FPan.X-Round((mouseDX*Factor-mouseDX)-(NewPan.X-Pan.X));
+    FPan.Y:=FPan.Y-Round((mouseDY*Factor-mouseDY)-(NewPan.Y-Pan.Y));
+    if FDeferredTransformRedraw then
+    begin Invalidate; Result := True end
+    else Refresh;
   {$endif}
   end;
 end;{TFreeViewport.DoMouseWheel}
@@ -2872,20 +3240,24 @@ begin
 end;{TFreeViewport.ZoomExtents}
 
 procedure TFreeViewport.ZoomIn;
+var Ratio,NewZoom:TFloatType;
 begin
-  FZoom := FZoom * Zoomfactor;
-  FPan.X := round(Zoomfactor * FPan.X);
-  FPan.Y := round(Zoomfactor * FPan.Y);
-  BackgroundImage.invalidate;
-  Refresh;
-end;{TFreeViewport.ZoomIn}
+  NewZoom:=BoundedViewportZoom(FZoom*Zoomfactor);
+  if NewZoom=FZoom then Exit;
+  Ratio:=NewZoom/FZoom;FZoom:=NewZoom;
+  FPan.X:=Round(Ratio*FPan.X);FPan.Y:=Round(Ratio*FPan.Y);
+  BackgroundImage.Invalidate;
+  if FDeferredTransformRedraw then Invalidate else Refresh;
+end;
 
 procedure TFreeViewport.ZoomOut;
+var Ratio,NewZoom:TFloatType;
 begin
-  FZoom := FZoom / Zoomfactor;
-  FPan.X := round(FPan.X / Zoomfactor);
-  FPan.Y := round(FPan.Y / Zoomfactor);
-  BackgroundImage.invalidate;
-  Refresh;
+  NewZoom:=BoundedViewportZoom(FZoom/Zoomfactor);
+  if NewZoom=FZoom then Exit;
+  Ratio:=NewZoom/FZoom;FZoom:=NewZoom;
+  FPan.X:=Round(Ratio*FPan.X);FPan.Y:=Round(Ratio*FPan.Y);
+  BackgroundImage.Invalidate;
+  if FDeferredTransformRedraw then Invalidate else Refresh;
 end;{TFreeViewport.ZoomOut}
 

@@ -2466,7 +2466,7 @@ begin
       until (Faces.Count = 0) or (Ind = Backup.Count);
       if Faces.Count <> 0 then
       begin
-        MessageDlg('Could not establish the entire grid!', mtError, [mbOK], 0);
+        MessageDlg(rsLocGridIncomplete, mtError, [mbOK], 0);
       end;
       FreeAndNil(Faces);
     finally
@@ -3453,6 +3453,7 @@ procedure TFreeSubdivisionSurface.Draw(Viewport: TFreeViewport);
 var
   I: integer; //t:DWord;
   Edge: TFreeSubdivisionEdge;
+  PreviousFont: TFont;
 begin
   if FIsBuilding then exit; // no double entries
 
@@ -3469,23 +3470,42 @@ begin
     inherited Draw(Viewport);
 
   //t := LclIntf.GetTickCount;
-  for i := 0 to NumberOfLayers-1 do
-    Layer[i].Draw(Viewport);
-  //t := LclIntf.GetTickCount - t;
-
-  Viewport.AlphaBuffer.Draw;
+  if not Viewport.RestoreAnimationBase then begin
+    for i := 0 to NumberOfLayers-1 do
+      Layer[i].Draw(Viewport);
+    Viewport.AlphaBuffer.Draw;
+    if ShowControlNet then
+      for I := 0 to NumberOfControlEdges-1 do begin
+        Edge := ControlEdge[I];
+        Edge.Draw(False, Viewport);
+      end;
+    Viewport.SaveAnimationBase;
+  end;
 
   if ShowControlNet then
   begin
-    for I := 0 to NumberOfControlEdges-1 do
+    // Restore the shared drawing font after the coordinate labels have been drawn.
+    PreviousFont := nil;
+    if Viewport.ControlPointCoordinateAxis <> 0 then
     begin
-      Edge := ControlEdge[I];
-      Edge.Draw(False, Viewport);
+      PreviousFont := TFont.Create;
+      PreviousFont.Assign(Viewport.DrawingCanvas.Font);
     end;
-
-    for I := 0 to NumberOfControlPoints-1 do
-      if ControlPoint[I].Visible then
-        ControlPoint[I].Draw(Viewport);
+    try
+      // Selected points have priority when dense labels compete for space.
+      for I := 0 to NumberOfControlPoints-1 do
+        if ControlPoint[I].Visible and ControlPoint[I].Selected then
+          ControlPoint[I].Draw(Viewport);
+      for I := 0 to NumberOfControlPoints-1 do
+        if ControlPoint[I].Visible and not ControlPoint[I].Selected then
+          ControlPoint[I].Draw(Viewport);
+    finally
+      if PreviousFont <> nil then
+      begin
+        Viewport.DrawingCanvas.Font.Assign(PreviousFont);
+        PreviousFont.Free;
+      end;
+    end;
 
     for i:=0 to FControlPointGroups.Count-1 do
       if FControlPointGroups[i].Visible then
@@ -4205,6 +4225,44 @@ begin
   FreeAndNil(TmpEdges);
 end;{TFreeSubdivisionSurface.IsolateEdges}
 
+procedure TFreeSubdivisionSurface.ExchangeEventHandlers(Other: TFreeSubdivisionSurface);
+var
+  Notify: TNotifyEvent;
+  LayerChanged: TChangeActiveLayerEvent;
+  Progress: TProgressEvent;
+  List: TMethodList<TNotifyEvent>;
+begin
+  if (Other = nil) or (Other = Self) then Exit;
+  // The listeners belong to the UI, not to the hull being replaced.
+  Notify := FOnChangeLayerData;
+  FOnChangeLayerData := Other.FOnChangeLayerData;
+  Other.FOnChangeLayerData := Notify;
+  LayerChanged := FOnChangeActiveLayer;
+  FOnChangeActiveLayer := Other.FOnChangeActiveLayer;
+  Other.FOnChangeActiveLayer := LayerChanged;
+  Progress := FOnFaceRebuilt;
+  FOnFaceRebuilt := Other.FOnFaceRebuilt;
+  Other.FOnFaceRebuilt := Progress;
+  List := FOnSelectItemListeners;
+  FOnSelectItemListeners := Other.FOnSelectItemListeners;
+  Other.FOnSelectItemListeners := List;
+  List := FOnChangeItemListeners;
+  FOnChangeItemListeners := Other.FOnChangeItemListeners;
+  Other.FOnChangeItemListeners := List;
+  List := FOnChangeActiveControlPointListeners;
+  FOnChangeActiveControlPointListeners := Other.FOnChangeActiveControlPointListeners;
+  Other.FOnChangeActiveControlPointListeners := List;
+  List := FOnChangeActiveControlEdgeListeners;
+  FOnChangeActiveControlEdgeListeners := Other.FOnChangeActiveControlEdgeListeners;
+  Other.FOnChangeActiveControlEdgeListeners := List;
+  List := FOnChangeActiveControlFaceListeners;
+  FOnChangeActiveControlFaceListeners := Other.FOnChangeActiveControlFaceListeners;
+  Other.FOnChangeActiveControlFaceListeners := List;
+  List := FOnChangeActiveControlCurveListeners;
+  FOnChangeActiveControlCurveListeners := Other.FOnChangeActiveControlCurveListeners;
+  Other.FOnChangeActiveControlCurveListeners := List;
+end;
+
 procedure TFreeSubdivisionSurface.LoadBinary(Source: TFreeFileBuffer);
 var
   I, N: integer;
@@ -4213,20 +4271,25 @@ var
   Face: TFreeSubdivisionControlFace;
   Curve: TFreeSubdivisionControlCurve;
   Layer: TFreeSubdivisionLayer;
-  saveOnSelectItem:TNotifyEvent=nil;
-  FIsLoading: Boolean;
-begin
-  FIsLoading := true;
+  WasLoading: Boolean;
 
+  procedure ReadCount(const FieldName: string);
+  begin
+    N := LoadModelCount(Source, FieldName);
+  end;
+begin
+  WasLoading := FIsLoading;
+  FIsLoading := true;
+  try
   // First load layerdata
-  Source.LoadInteger(N);
+  ReadCount('layer');
   if N <> 0 then
   begin
     // Delete current layers and load new ones
     for I := 1 to NumberOfLayers do
       self.Layer[I - 1].Free;
     FLayers.Clear;
-    FLayers.Capacity := N;
+    if not (Source is TFreeTextBuffer) then FLayers.Capacity := N;
     for I := 1 to N do
     begin
       Layer := AddNewLayer;
@@ -4241,64 +4304,67 @@ begin
     FOnChangeLayerData(self);
   // Read index of active layer
   Source.LoadInteger(N);
+  RequireModelIndex(N, NumberOfLayers, 'active layer');
   ActiveLayer := self.Layer[N];
   if assigned(FOnChangeActiveLayer) then
     FOnChangeActiveLayer(self, self.Layer[0]);
   // Read controlpoints
-  Source.LoadInteger(N);
-  FControlPoints.Capacity := N;
+  ReadCount('control point');
+  if not (Source is TFreeTextBuffer) then FControlPoints.Capacity := N;
   for I := 1 to N do
   begin
     Point := TFreeSubdivisionControlPoint.Create(self);
+    FControlPoints.Add(Point);
     Point.LoadBinary(Source);
     //Point.Name:=IntToStr(I-1); //for debug. assign point numbers (as they are in file) as names
-    FControlPoints.Add(Point);
   end;
   // Read controlEdges
-  Source.LoadInteger(N);
-  FControlEdges.Capacity := N;
+  ReadCount('control edge');
+  if not (Source is TFreeTextBuffer) then FControlEdges.Capacity := N;
   for I := 1 to N do
   begin
     Edge := TFreeSubdivisionControlEdge.Create(self);
+    FControlEdges.Add(Edge);
     Edge.FControlEdge := True;
     Edge.LoadBinary(Source);
-    FControlEdges.Add(Edge);
   end;
   if Source.Version >= fv195 then
   begin
     // Load controlcurves
-    Source.LoadInteger(N);
-    FControlCurves.Capacity := N;
+    ReadCount('control curve');
+    if not (Source is TFreeTextBuffer) then FControlCurves.Capacity := N;
     for I := 1 to N do
     begin
       Curve := TFreeSubdivisionControlCurve.Create(self);
-      Curve.LoadBinary(Source);
       FControlCurves.Add(Curve);
+      Curve.LoadBinary(Source);
     end;
   end;
 
   // Read controlFaces
-  Source.LoadInteger(N);
-  FControlFaces.Capacity := N;
+  ReadCount('control face');
+  if not (Source is TFreeTextBuffer) then FControlFaces.Capacity := N;
   for I := 1 to N do
   begin
     Face := TFreeSubdivisionControlFace.Create(self);
-    Face.LoadBinary(Source);
     FControlFaces.Add(Face);
+    Face.LoadBinary(Source);
   end;
 
   Built := False;
   FInitialized := True;
 
   if not self.CheckIntegrity
-    then ShowMessage('Loaded Model integrity corruption');
+    then ShowMessage(rsLocLoadedModelIntegrity);
 
   if assigned(FOnChangeLayerData) then
     FOnChangeLayerData(self);
   if assigned(FOnChangeActiveLayer) then
     FOnChangeActiveLayer(self, self.Layer[0]);
 
-  FIsLoading := false;
+  finally
+    FIsLoading := WasLoading;
+  end;
 end;{TFreeSubdivisionSurface.LoadBinary}
 
 procedure TFreeSubdivisionSurface.LoadFromStream(var LineNr: integer; Strings: TStringList);
@@ -4508,7 +4574,7 @@ begin
         + '.', mtError, [mbOK], 0);
     except
       on E:Exception do
-         MessageDlg('Exception in VRML Load:'+#10+E.Message, mtError, [mbOK], 0);
+         MessageDlg(rsLocVrmlLoadException+#10+E.Message, mtError, [mbOK], 0);
     end;
     FreeAndNil(VRMLList);
     FIsLoading := false;
@@ -4583,7 +4649,7 @@ begin
   if FIsBuilding then exit; // no double entries
   FIsBuilding:=true;
   FBuilt := false;
-
+  try
   ClearCurvesSubdivision; //this should be called before ClearFaces
   // moved here from SetBuild
   ClearFaces;
@@ -4610,7 +4676,7 @@ begin
     end;
 
     if not self.CheckIntegrity
-      then ShowMessage('Before build Model integrity corruption');
+      then ShowMessage(rsLocBeforeBuildIntegrity);
 
     while (FCurrentSubdivisionLevel < FDesiredSubdivisionlevel) do
     begin
@@ -4679,11 +4745,13 @@ begin
   end;
 
   if not self.CheckIntegrity
-    then ShowMessage('After Build Model integrity corruption');
+    then ShowMessage(rsLocAfterBuildIntegrity);
 
-  FIsBuilding:=false;
   FBuilt := true;
-  FRebuildRequested := false;
+  finally
+    FIsBuilding := false;
+    FRebuildRequested := false;
+  end;
 end;{TFreeSubdivisionSurface.Rebuild}
 
 procedure TFreeSubdivisionSurface.Average;

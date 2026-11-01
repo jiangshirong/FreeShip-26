@@ -4,7 +4,7 @@ object FreeBackgroundBlendDialog: TFreeBackgroundBlendDialog
   Top = 270
   Width = 300
   BorderStyle = bsDialog
-  Caption = 'Background blending.'
+  Caption = 'Background blending'
   ChildSizing.EnlargeHorizontal = crsHomogenousSpaceResize
   ChildSizing.EnlargeVertical = crsHomogenousSpaceResize
   ChildSizing.Layout = cclLeftToRightThenTopToBottom

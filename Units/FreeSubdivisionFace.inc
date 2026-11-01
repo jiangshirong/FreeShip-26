@@ -336,7 +336,7 @@ var
 
      end else
      begin
-        Showmessage('Error in TFreeSubdivisionFace.Subdivide');
+        Showmessage(rsLocFaceSubdivisionError);
      end;
   end; //EdgeCheck
 

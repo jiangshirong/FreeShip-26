@@ -142,6 +142,7 @@ type
     ScrollBar1: TScrollBar;
     ScrollBar2: TScrollBar;
     Viewport: TFreeViewport;
+    procedure FormCreate(Sender: TObject);
     procedure ComboBoxClick(Sender: TObject);
     procedure Label23Resize(Sender: TObject);
     procedure OKbuttonClick(Sender: TObject);
@@ -252,12 +253,21 @@ var
 
 implementation
 
+uses FreeUiChoices;
+
+
 {$IFnDEF FPC}
   {$R *.dfm}
 
 {$ELSE}
   {$R *.lfm}
 {$ENDIF}
+
+procedure TFreeAddMassOutputDialog.FormCreate(Sender: TObject);
+begin
+  SetChoiceLabels(ComboBox, [rsChoiceAnyObject, rsChoiceUnderwaterVehicle,
+    rsChoiceDisplacementSeaShips, rsChoiceDisplacementRiverShips]);
+end;
 
 procedure TFreeAddMassOutputDialog.FBuildOffsets;
 var
@@ -632,7 +642,7 @@ begin
   FFreeship := Freeship;
   Units := FFreeship.ProjectSettings.ProjectUnits;
   if Units = fuImperial then
-    MessageDlg('Imperial system units in this program is NOT support !!!',
+    MessageDlg(rs_This_is_version_of_program_work_with_metric_system_units_only,
       mtInformation, [mbOK], 0)//        MessageDlg(rs_This_is_version_of_program_work_with_metric_system_units_only {UserString[754]},mtInformation,[mbOk],0);
     //        exit;
   ;

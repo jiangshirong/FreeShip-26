@@ -29,7 +29,7 @@ object FreeMirrorPlaneDialog: TFreeMirrorPlaneDialog
       Height = 107
       Top = 10
       Width = 255
-      Caption = '3D Mirror plane. '
+      Caption = '3D Mirror plane '
       ClientHeight = 79
       ClientWidth = 251
       Color = clForm

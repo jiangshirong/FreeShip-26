@@ -191,6 +191,7 @@ type
 				Dat    : array[1..22] of single;
 				I3,I4,I5,H,Lwl,Bwl,Cb,LCB,Tc,Z0 : single;
                                  procedure Calculate;
+    procedure CalculateInWorkspace;
                                  function Execute(Freeship:TFreeship;AutoExtract:Boolean):Boolean;
                                  property Dat2    : Single read FGetDat2 write FSetDat2;
                                  property Dat3    : Single read FGetDat3 write FSetDat3;
@@ -217,9 +218,12 @@ var FreeHydrodyn_Maneuv: TFreeHydrodyn_Maneuv;
 
 implementation
 
-uses FreeStringsUnit,
+uses FreeCalculationFiles, FreeStringsUnit,
      Printers,FreeProcess;
 {$R *.lfm}
+
+resourcestring
+  rsManeuvResultMissing = 'External calculation finished without result file "%s": %s';
 
 
 function TFreeHydrodyn_Maneuv.FGetDat2:single;
@@ -429,9 +433,23 @@ begin
 end;{TFreeHydrodyn_Maneuv.FSetDat20}
 
 procedure TFreeHydrodyn_Maneuv.Calculate;
+var Job: TFreeCalculationScope;
+begin
+  if FFreeship = nil then Exit;
+  Job := FFreeship.BeginCalculation([]);
+  try
+    CalculateInWorkspace;
+    Job.Complete;
+  finally Job.Free end;
+end;
+
+procedure TFreeHydrodyn_Maneuv.CalculateInWorkspace;
 Type TTable = array[0..16,0..13] of single;
 
-var Units  : TFreeUnitType;
+var
+  ProcessCallerDirectory: string;
+  ProcessCallerCursor: TCursor;
+  Units  : TFreeUnitType;
     I,J,II,len        : Integer;
     Ist1,Ist2,Ist3    : Integer;	
     Jst1,Jst2,Jst3    : Integer;		
@@ -446,9 +464,11 @@ var Units  : TFreeUnitType;
     FileToFind         : string;
     FInitDirectory     , ExecFullName: string;
     STR_               : array[1..200] of string;		
-    label NewSearch;	
 
 begin
+  ProcessCallerDirectory := GetCurrentDirUTF8;
+  ProcessCallerCursor := Screen.Cursor;
+  try
    Units:=FFreeship.ProjectSettings.ProjectUnits;
 
    ResultsMemo.Clear;
@@ -597,24 +617,21 @@ dat20 = 'Rudder Angle [degrees]'
 //  Определяем текущий каталог с проектами и с данными для расчета IN.
       FileToFind := FileSearch('INM.', GetCurrentDir);
 	  if FileToFind<>'INM.' then begin
-	    MessageDlg('Нет файла исходных данных для расчета!!!',mtError,[mbOk],0); 
+	    MessageDlg(rs_Have_not_input_file_for_calculation_is_here___,mtError,[mbOk],0); 
 		exit;
 	  end;		  
 
 // Запускаем программу расчета
       //SysUtils.ExecuteProcess(UTF8ToSys('Exec/ManeuvPP.EXE'), '', []);
       ExecFullName := FFreeship.Preferences.ExecDirectory + DirectorySeparator+'ManeuvPP.EXE';
-      ExecuteFreePlugin(FFreeship.Preferences.TempDirectory, ExecFullName);
+      ExecuteFreeCalculation(FFreeship.CalculationDirectory, ExecFullName, fcManeuv);
       FileName:='OUT.';
-//  Определяем есть ли файл с результатами расчета OUT. Если INM. присутствует значит расчет не закончен
+      // ExecuteFreePlugin waits for termination. A missing file cannot appear
+      // later from that process, so do not wait forever after a zero exit.
+      if not FileExistsUTF8(FileName) then
+        raise EInOutError.CreateFmt(rsManeuvResultMissing, [FileName, ExecFullName]);
+      begin
 
-NewSearch:    FileToFind := FileSearch('OUT.', GetCurrentDir);
-	  if FileToFind<>'OUT.' then begin
-	     sleep(500);
-	     goto NewSearch;
-		 end 
-		 else begin
-		 
 // Вывод результатов расчета  
          ResultsMemo.Lines.Add('');
       Assignfile(FFile,'OUT.');
@@ -666,6 +683,10 @@ NewSearch:    FileToFind := FileSearch('OUT.', GetCurrentDir);
      for  i:=1260 to 1271 do ResultsMemo.Lines.Add(Space(16)+Userstring(i));
        end;
  end; 
+  finally
+    SetCurrentDirUTF8(ProcessCallerDirectory);
+    Screen.Cursor := ProcessCallerCursor;
+  end;
 end;{TFreeHydrodyn_Maneuv.Calculate}
 
 function TFreeHydrodyn_Maneuv.Execute(Freeship:TFreeship;AutoExtract:Boolean):Boolean;

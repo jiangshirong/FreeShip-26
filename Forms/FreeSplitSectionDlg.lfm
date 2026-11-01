@@ -21,6 +21,7 @@ object FreeSplitSectionDialog: TFreeSplitSectionDialog
     ClientWidth = 600
     TabOrder = 0
     object BitBtn1: TBitBtn
+      Visible = False
       Left = 538
       Height = 36
       Top = 4

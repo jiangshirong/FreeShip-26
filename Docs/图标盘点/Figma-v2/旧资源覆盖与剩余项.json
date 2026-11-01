@@ -1,0 +1,644 @@
+[
+  {
+    "legacy_key": "ActionShowBothSides",
+    "design_key": "BothSides",
+    "status": "mapped",
+    "source": "Forms\\FreeKeelWizardDlg.lfm:FreeKeelWizardDialog/Panel2/PageControl/TabSheet1/ViewToolbar/sbShowBothSides"
+  },
+  {
+    "legacy_key": "ActionShowControlNet",
+    "design_key": "ControlNet",
+    "status": "mapped",
+    "source": "Forms\\FreeKeelWizardDlg.lfm:FreeKeelWizardDialog/Panel2/PageControl/TabSheet1/ViewToolbar/sbShowControlNet"
+  },
+  {
+    "legacy_key": "ActionShowInteriorEdges",
+    "design_key": "InteriorEdges",
+    "status": "mapped",
+    "source": "Forms\\FreeKeelWizardDlg.lfm:FreeKeelWizardDialog/Panel2/PageControl/TabSheet1/ViewToolbar/sbShowInteriorEdges"
+  },
+  {
+    "legacy_key": "ActiveLayerColor",
+    "design_key": "FillColor",
+    "status": "mapped",
+    "source": "Forms\\Main.lfm:MainForm/ActionList1/ActiveLayerColor | Forms\\Main.lfm:MainForm/MainMenu1/Layer1/Activelayercolor1"
+  },
+  {
+    "legacy_key": "AddOne",
+    "design_key": "AddOne",
+    "status": "mapped",
+    "source": "Forms\\FreeIntersectionDlg.lfm:FreeIntersectionDialog/ToolBar1/tbAddOne | Forms\\FreeIntersectionDlg.lfm:FreeIntersectionDialog/ActionList1/AddOne"
+  },
+  {
+    "legacy_key": "AddRange",
+    "design_key": "AddRange",
+    "status": "mapped",
+    "source": "Forms\\FreeIntersectionDlg.lfm:FreeIntersectionDialog/ToolBar1/tbAddRange | Forms\\FreeIntersectionDlg.lfm:FreeIntersectionDialog/ActionList1/AddRange"
+  },
+  {
+    "legacy_key": "BackgroundExport",
+    "design_key": null,
+    "status": "removed-or-legacy-entry-not-reintroduced",
+    "source": "Forms\\freehullformwindow_form.lfm:FreeHullForm/PopupMenuHull/Backgroundimage2/Export1 | Forms\\freehullformwindow_form.lfm:FreeHullForm/ActionListHull/BackgroundExport | Forms\\freehullformwindow_panel.lfm:FreeHullWindow/PopupMenuHull/Backgroundimage2/Export1 | Forms\\freehullformwindow_panel.lfm:FreeHullWindow/ActionListHull/BackgroundExport"
+  },
+  {
+    "legacy_key": "BothSides",
+    "design_key": "BothSides",
+    "status": "mapped",
+    "source": "Forms\\Main.lfm:MainForm/PanelMain/ToolBarVisibility/ToolButton10 | Forms\\Main.lfm:MainForm/ActionList1/BothSides | Forms\\Main.lfm:MainForm/MainMenu1/Visibility1/Showbothsides1"
+  },
+  {
+    "legacy_key": "Calculate",
+    "design_key": "Calculate",
+    "status": "mapped",
+    "source": "Forms\\FreeCrosscurvesDlg.pas:222 | Forms\\FreeHydrodyn_RVRSDlg.pas:783 | Forms\\FreeHydrodyn_Task1Dlg.pas:677 | Forms\\FreeLackenbyDlg.pas:813 | Forms\\FreePropeller_Task1Dlg.pas:930 | Forms\\FreePropeller_Task2Dlg.pas:1217 | Forms\\FreePropeller_Task3Dlg.pas:1053 | Forms\\FreePropeller_Task4Dlg.pas:737 | Forms\\FreePropeller_Task5Dlg.pas:646 | Forms\\FreeResistance_DelftDlg.pas:1064 | Forms\\FreeResistance_FungLeibDlg.pas:1742 | Forms\\FreeResistance_HollenDlg.pas:1765 | Forms\\FreeResistance_HoltrDlg.pas:1874 | Forms\\FreeResistance_KaperDlg.pas:722 | Forms\\FreeResistance_MHDlg.pas:1594 | Forms\\FreeResistance_OortmerDlg.pas:1905 | Forms\\FreeResistance_OSTDlg.pas:1656 | Forms\\FreeResistance_PlaningDlg.pas:2563 | Forms\\FreeResistance_RBHSDlg.pas:1606"
+  },
+  {
+    "legacy_key": "Cancel",
+    "design_key": "Cancel",
+    "status": "mapped",
+    "source": "Forms\\EnterThemeNameDlg.pas:48 | Forms\\Free2DDXFExportDlg.pas:220 | Forms\\FreeAddMassOutputDlg.pas:652 | Forms\\FreeBackgroundBlendingDlg.pas:102 | Forms\\FreeBackgroundToleranceDlg.pas:51 | Forms\\FreeCrosscurvesDlg.pas:219 | Forms\\FreeCylinderDlg.pas:145 | Forms\\FreeEmptyModelChooserDlg.pas:98 | Forms\\FreeExtrudeDlg.pas:144 | Forms\\FreeGridDlg.pas:138 | Forms\\FreeHydrodyn_RVRSDlg.pas:780 | Forms\\FreeHydrodyn_Task1Dlg.pas:674 | Forms\\FreeInsertPlaneDlg.pas:161 | Forms\\FreeIntersectLayerDlg.pas:166 | Forms\\FreeKeelWizardDlg.pas:1704 | Forms\\FreeLackenbyDlg.pas:815 | Forms\\FreeNewModelDlg.pas:188 | Forms\\FreePreferencesDlg.pas:353 | Forms\\FreeProjectSettingsDlg.pas:407 | Forms\\FreePropeller_Task1Dlg.pas:927 | Forms\\FreePropeller_Task2Dlg.pas:1214 | Forms\\FreePropeller_Task3Dlg.pas:1050 | Forms\\FreePropeller_Task4Dlg.pas:734 | Forms\\FreePropeller_Task5Dlg.pas:643 | Forms\\FreeResistance_DelftDlg.pas:1061 | Forms\\FreeResistance_FungLeibDlg.pas:1739 | Forms\\FreeResistance_HollenDlg.pas:1762 | Forms\\FreeResistance_HoltrDlg.pas:1871 | Forms\\FreeResistance_KaperDlg.pas:719 | Forms\\FreeResistance_MHDlg.pas:1591 | Forms\\FreeResistance_OortmerDlg.pas:1902 | Forms\\FreeResistance_OSTDlg.pas:1653 | Forms\\FreeResistance_PlaningDlg.pas:2560 | Forms\\FreeResistance_RBHSDlg.pas:1603 | Forms\\FreeRotateDlg.pas:134 | Forms\\FreeRotateDlgM.pas:152 | Forms\\FreeSaveImageDlg.pas:181 | Forms\\FreeSelectLayersDlg.pas:224 | Forms\\FreeUndoHistoryDlg.pas:181"
+  },
+  {
+    "legacy_key": "CascadeWindow",
+    "design_key": null,
+    "status": "removed-or-legacy-entry-not-reintroduced",
+    "source": "Forms\\Main.lfm:MainForm/ActionList1/CascadeWindow | Forms\\Main.lfm:MainForm/MainMenu1/Window1/Cascade1"
+  },
+  {
+    "legacy_key": "CloseDialog",
+    "design_key": null,
+    "status": "removed-or-legacy-entry-not-reintroduced",
+    "source": "Forms\\FreeExpanedPlatesDlg.lfm:FreeExpanedplatesDialog/ToolBar1/ToolButton22 | Forms\\FreeExpanedPlatesDlg.lfm:FreeExpanedplatesDialog/ActionList1/CloseDialog | Forms\\FreeIntersectionDlg.lfm:FreeIntersectionDialog/ToolBar1/tbCloseDialog | Forms\\FreeIntersectionDlg.lfm:FreeIntersectionDialog/ActionList1/CloseDialog"
+  },
+  {
+    "legacy_key": "Delete",
+    "design_key": "Delete",
+    "status": "mapped",
+    "source": "Forms\\Main.lfm:MainForm/PanelMain/ToolBarEdit/ToolButtonDelete | Forms\\Main.lfm:MainForm/ActionList1/Delete | Forms\\Main.lfm:MainForm/MainMenu1/Edit1/Delete1"
+  },
+  {
+    "legacy_key": "DeleteAll",
+    "design_key": "DeleteAll",
+    "status": "mapped",
+    "source": "Forms\\FreeIntersectionDlg.lfm:FreeIntersectionDialog/ActionList1/DeleteAll"
+  },
+  {
+    "legacy_key": "DeleteEmptyLayers",
+    "design_key": "DeleteEmptyLayers",
+    "status": "mapped",
+    "source": "Forms\\Main.lfm:MainForm/PanelMain/ToolBarLayers/ToolButton34 | Forms\\Main.lfm:MainForm/ActionList1/DeleteEmptyLayers | Forms\\Main.lfm:MainForm/MainMenu1/Layer1/Deleteempty1 | Forms\\FreeLayerDlg.pas:224"
+  },
+  {
+    "legacy_key": "DeleteMarkers",
+    "design_key": "Delete",
+    "status": "mapped",
+    "source": "Forms\\Main.lfm:MainForm/ActionList1/DeleteMarkers | Forms\\Main.lfm:MainForm/MainMenu1/ools1/Markers2/Deletemarkers1"
+  },
+  {
+    "legacy_key": "DeleteSelected",
+    "design_key": "DeleteSelected",
+    "status": "mapped",
+    "source": "Forms\\FreeIntersectionDlg.lfm:FreeIntersectionDialog/ToolBar1/tbDeleteSelected | Forms\\FreeIntersectionDlg.lfm:FreeIntersectionDialog/ActionList1/DeleteSelected"
+  },
+  {
+    "legacy_key": "DeselectAll",
+    "design_key": "DeselectAll",
+    "status": "mapped",
+    "source": "Forms\\Main.lfm:MainForm/PanelMain/ToolBarEdit/ToolButtonSelect | Forms\\Main.lfm:MainForm/ActionList1/DeselectAll | Forms\\Main.lfm:MainForm/MainMenu1/Selection1/Clearselection1"
+  },
+  {
+    "legacy_key": "EdgeCollapse",
+    "design_key": "Collapse",
+    "status": "mapped",
+    "source": "Forms\\Main.lfm:MainForm/PanelMain/ToolBarEdges/ToolButton13 | Forms\\Main.lfm:MainForm/ActionList1/EdgeCollapse | Forms\\Main.lfm:MainForm/MainMenu1/Edge1/Collapse1"
+  },
+  {
+    "legacy_key": "EdgeCrease",
+    "design_key": "CreaseEdge",
+    "status": "mapped",
+    "source": "Forms\\Main.lfm:MainForm/PanelMain/ToolBarEdges/ToolButton17 | Forms\\Main.lfm:MainForm/ActionList1/EdgeCrease | Forms\\Main.lfm:MainForm/MainMenu1/Edge1/Crease1"
+  },
+  {
+    "legacy_key": "EdgeExtrude",
+    "design_key": "ExtrudeEdge",
+    "status": "mapped",
+    "source": "Forms\\Main.lfm:MainForm/PanelMain/ToolBarEdges/ToolButton27 | Forms\\Main.lfm:MainForm/ActionList1/EdgeExtrude | Forms\\Main.lfm:MainForm/MainMenu1/Edge1/Extrude1"
+  },
+  {
+    "legacy_key": "EdgeSplit",
+    "design_key": "SplitEdge",
+    "status": "mapped",
+    "source": "Forms\\Main.lfm:MainForm/PanelMain/ToolBarEdges/ToolButton29 | Forms\\Main.lfm:MainForm/ActionList1/EdgeSplit | Forms\\Main.lfm:MainForm/MainMenu1/Edge1/Split1"
+  },
+  {
+    "legacy_key": "ExitProgram",
+    "design_key": null,
+    "status": "removed-or-legacy-entry-not-reintroduced",
+    "source": "Forms\\Main.lfm:MainForm/PanelMain/ToolBarFile/ToolButton3 | Forms\\Main.lfm:MainForm/ActionList1/ExitProgram | Forms\\FreeLayerDlg.pas:222"
+  },
+  {
+    "legacy_key": "ExportAddMass",
+    "design_key": "ExportFile",
+    "status": "mapped",
+    "source": "Forms\\Main.lfm:MainForm/ActionList1/ExportAddMass | Forms\\Main.lfm:MainForm/MainMenu1/Calculations1/HydrodynTask/AddMassCFD1"
+  },
+  {
+    "legacy_key": "ExportArchimedes",
+    "design_key": "ExportFile",
+    "status": "mapped",
+    "source": "Forms\\Main.lfm:MainForm/ActionList1/ExportArchimedes | Forms\\Main.lfm:MainForm/MainMenu1/File1/Export1/ArchimedesMB1"
+  },
+  {
+    "legacy_key": "ExportDXF",
+    "design_key": "ExportFile",
+    "status": "mapped",
+    "source": "Forms\\FreeExpanedPlatesDlg.lfm:FreeExpanedplatesDialog/ToolBar1/ToolButton13 | Forms\\FreeExpanedPlatesDlg.lfm:FreeExpanedplatesDialog/ActionList1/ExportDXF | Forms\\FreeLinesplanFrme.lfm:FreeLinesplanFrame/ToolBar1/ToolButton13 | Forms\\FreeLinesplanFrme.lfm:FreeLinesplanFrame/ActionList1/ExportDXF"
+  },
+  {
+    "legacy_key": "ExportDXF2DPolylines",
+    "design_key": "ExportFile",
+    "status": "mapped",
+    "source": "Forms\\Main.lfm:MainForm/ActionList1/ExportDXF2DPolylines | Forms\\Main.lfm:MainForm/MainMenu1/File1/Export1/DXF2DPolylines1"
+  },
+  {
+    "legacy_key": "ExportDXF3DPolylines",
+    "design_key": "ExportFile",
+    "status": "mapped",
+    "source": "Forms\\Main.lfm:MainForm/ActionList1/ExportDXF3DPolylines | Forms\\Main.lfm:MainForm/MainMenu1/File1/Export1/ExportDXFPolylines1"
+  },
+  {
+    "legacy_key": "ExportDXFFaces",
+    "design_key": "ExportFile",
+    "status": "mapped",
+    "source": "Forms\\Main.lfm:MainForm/ActionList1/ExportDXFFaces | Forms\\Main.lfm:MainForm/MainMenu1/File1/Export1/DXF3Dfaces1"
+  },
+  {
+    "legacy_key": "ExportGHS",
+    "design_key": "ExportFile",
+    "status": "mapped",
+    "source": "Forms\\Main.lfm:MainForm/ActionList1/ExportGHS | Forms\\Main.lfm:MainForm/MainMenu1/File1/Export1/GHS1"
+  },
+  {
+    "legacy_key": "ExportIGES",
+    "design_key": "ExportFile",
+    "status": "mapped",
+    "source": "Forms\\Main.lfm:MainForm/ActionList1/ExportIGES | Forms\\Main.lfm:MainForm/MainMenu1/File1/Export1/IGES1"
+  },
+  {
+    "legacy_key": "ExportMichlet",
+    "design_key": "ExportFile",
+    "status": "mapped",
+    "source": "Forms\\Main.lfm:MainForm/ActionList1/ExportMichlet | Forms\\Main.lfm:MainForm/MainMenu1/File1/Export1/MichletCFD1"
+  },
+  {
+    "legacy_key": "ExportPAM",
+    "design_key": "ExportFile",
+    "status": "mapped",
+    "source": "Forms\\Main.lfm:MainForm/ActionList1/ExportPAM | Forms\\Main.lfm:MainForm/MainMenu1/File1/Export1/PAM1"
+  },
+  {
+    "legacy_key": "ExportTextFile",
+    "design_key": "ExportFile",
+    "status": "mapped",
+    "source": "Forms\\FreeExpanedPlatesDlg.lfm:FreeExpanedplatesDialog/ToolBar1/ToolButton6 | Forms\\FreeExpanedPlatesDlg.lfm:FreeExpanedplatesDialog/ActionList1/ExportTextFile"
+  },
+  {
+    "legacy_key": "FileSave",
+    "design_key": "SaveFile",
+    "status": "mapped",
+    "source": "Forms\\Main.lfm:MainForm/PanelMain/ToolBarFile/ToolButton38 | Forms\\Main.lfm:MainForm/ActionList1/FileSave | Forms\\Main.lfm:MainForm/MainMenu1/File1/Save2"
+  },
+  {
+    "legacy_key": "FileSaveas",
+    "design_key": "SaveAs",
+    "status": "mapped",
+    "source": "Forms\\Main.lfm:MainForm/ActionList1/FileSaveas | Forms\\Main.lfm:MainForm/MainMenu1/File1/Save1"
+  },
+  {
+    "legacy_key": "ImportBackGround",
+    "design_key": null,
+    "status": "removed-or-legacy-entry-not-reintroduced",
+    "source": "Forms\\freehullformwindow_form.lfm:FreeHullForm/PopupMenuHull/Backgroundimage2/Backgroundimage1 | Forms\\freehullformwindow_form.lfm:FreeHullForm/ActionListHull/ImportBackGround | Forms\\freehullformwindow_panel.lfm:FreeHullWindow/PopupMenuHull/Backgroundimage2/Backgroundimage1 | Forms\\freehullformwindow_panel.lfm:FreeHullWindow/ActionListHull/ImportBackGround"
+  },
+  {
+    "legacy_key": "ImportCarene",
+    "design_key": "OpenFile",
+    "status": "mapped",
+    "source": "Forms\\Main.lfm:MainForm/ActionList1/ImportCarene | Forms\\Main.lfm:MainForm/MainMenu1/File1/Import1/Carenefile1"
+  },
+  {
+    "legacy_key": "ImportHullFile",
+    "design_key": "OpenFile",
+    "status": "mapped",
+    "source": "Forms\\Main.lfm:MainForm/ActionList1/ImportHullFile | Forms\\Main.lfm:MainForm/MainMenu1/File1/Import1/Carlssonhulfile1"
+  },
+  {
+    "legacy_key": "ImportMarkers",
+    "design_key": "Markers",
+    "status": "mapped",
+    "source": "Forms\\Main.lfm:MainForm/ActionList1/ImportMarkers | Forms\\Main.lfm:MainForm/MainMenu1/ools1/Markers2/Import2"
+  },
+  {
+    "legacy_key": "ImportMichletWaves",
+    "design_key": "Flowlines",
+    "status": "mapped",
+    "source": "Forms\\Main.lfm:MainForm/ActionList1/ImportMichletWaves | Forms\\Main.lfm:MainForm/MainMenu1/File1/Import1/ImportMichletWaves1"
+  },
+  {
+    "legacy_key": "ImportPolyCad",
+    "design_key": "OpenFile",
+    "status": "mapped",
+    "source": "Forms\\Main.lfm:MainForm/ActionList1/ImportPolyCad | Forms\\Main.lfm:MainForm/MainMenu1/File1/Import1/PolyCad1"
+  },
+  {
+    "legacy_key": "InsertPlane",
+    "design_key": null,
+    "status": "not_in_this_batch",
+    "source": "Forms\\Main.lfm:MainForm/PanelMain/ToolBarPoints/ToolButton41 | Forms\\Main.lfm:MainForm/ActionList1/InsertPlane | Forms\\Main.lfm:MainForm/MainMenu1/Point1/InsertPlane1"
+  },
+  {
+    "legacy_key": "IntersectionDialog",
+    "design_key": "Sections",
+    "status": "mapped",
+    "source": "Forms\\Main.lfm:MainForm/PanelMain/ToolBarLayers/ToolButton26 | Forms\\Main.lfm:MainForm/ActionList1/IntersectionDialog | Forms\\Main.lfm:MainForm/MainMenu1/Calculations1/Intersections1"
+  },
+  {
+    "legacy_key": "InvertFace",
+    "design_key": "InvertFace",
+    "status": "mapped",
+    "source": "Forms\\Main.lfm:MainForm/PanelMain/ToolBarFaces/ToolButton32 | Forms\\Main.lfm:MainForm/ActionList1/InvertFace | Forms\\Main.lfm:MainForm/MainMenu1/Face1/Invert1"
+  },
+  {
+    "legacy_key": "KeelRudderWizard",
+    "design_key": null,
+    "status": "not_in_this_batch",
+    "source": "Forms\\Main.lfm:MainForm/ActionList1/KeelRudderWizard | Forms\\Main.lfm:MainForm/MainMenu1/ools1/Deleteempty3"
+  },
+  {
+    "legacy_key": "LayerAutoGroup",
+    "design_key": "LayerAutoGroup",
+    "status": "mapped",
+    "source": "Forms\\Main.lfm:MainForm/PanelMain/ToolBarLayers/ToolButton6 | Forms\\Main.lfm:MainForm/ActionList1/LayerAutoGroup | Forms\\Main.lfm:MainForm/MainMenu1/Layer1/Autogroup1"
+  },
+  {
+    "legacy_key": "LayerDialog",
+    "design_key": "Layers",
+    "status": "mapped",
+    "source": "Forms\\Main.lfm:MainForm/PanelMain/ToolBarLayers/ToolButton33 | Forms\\Main.lfm:MainForm/ActionList1/LayerDialog | Forms\\Main.lfm:MainForm/MainMenu1/Layer1/Deleteempty2"
+  },
+  {
+    "legacy_key": "LayerIntersection",
+    "design_key": null,
+    "status": "not_in_this_batch",
+    "source": "Forms\\Main.lfm:MainForm/PanelMain/ToolBarPoints/ToolButton47 | Forms\\Main.lfm:MainForm/ActionList1/LayerIntersection | Forms\\Main.lfm:MainForm/MainMenu1/Point1/Saveas1"
+  },
+  {
+    "legacy_key": "LayerVisibilityDialog",
+    "design_key": "LayerVisibility",
+    "status": "mapped",
+    "source": "Forms\\Main.lfm:MainForm/PanelMain/ToolBarLayers/ToolButton1 | Forms\\Main.lfm:MainForm/ActionList1/LayerVisibilityDialog | Forms\\Main.lfm:MainForm/MainMenu1/Layer1/miShowLayerVisibilityDialog"
+  },
+  {
+    "legacy_key": "LoadFile",
+    "design_key": "OpenFile",
+    "status": "mapped",
+    "source": "Forms\\Main.lfm:MainForm/PanelMain/ToolBarFile/ToolButtonOpenFile | Forms\\Main.lfm:MainForm/ActionList1/LoadFile | Forms\\Main.lfm:MainForm/MainMenu1/File1/Open"
+  },
+  {
+    "legacy_key": "MirrorPlanView",
+    "design_key": "MirrorPlanView",
+    "status": "mapped",
+    "source": "Forms\\FreeLinesplanFrme.lfm:FreeLinesplanFrame/ToolBar1/ToolButton4 | Forms\\FreeLinesplanFrme.lfm:FreeLinesplanFrame/ActionList1/MirrorPlanView"
+  },
+  {
+    "legacy_key": "MoveDown",
+    "design_key": "MoveDown",
+    "status": "mapped",
+    "source": "Forms\\FreeLayerDlg.pas:226"
+  },
+  {
+    "legacy_key": "MoveUp",
+    "design_key": "MoveUp",
+    "status": "mapped",
+    "source": "Forms\\FreeLayerDlg.pas:225"
+  },
+  {
+    "legacy_key": "NewCurve",
+    "design_key": "NewCurve",
+    "status": "mapped",
+    "source": "Forms\\Main.lfm:MainForm/PanelMain/ToolBarCurves/ToolButton40 | Forms\\Main.lfm:MainForm/ActionList1/NewCurve | Forms\\Main.lfm:MainForm/MainMenu1/Curve1/AddCurve1"
+  },
+  {
+    "legacy_key": "NewEdge",
+    "design_key": "Edge",
+    "status": "mapped",
+    "source": "Forms\\Main.lfm:MainForm/PanelMain/ToolBarEdges/ToolButton16 | Forms\\Main.lfm:MainForm/ActionList1/NewEdge | Forms\\Main.lfm:MainForm/MainMenu1/Edge1/New2"
+  },
+  {
+    "legacy_key": "NewFace",
+    "design_key": "Face",
+    "status": "mapped",
+    "source": "Forms\\Main.lfm:MainForm/PanelMain/ToolBarFaces/ToolButton24 | Forms\\Main.lfm:MainForm/ActionList1/NewFace | Forms\\Main.lfm:MainForm/MainMenu1/Face1/New4"
+  },
+  {
+    "legacy_key": "NewLayer",
+    "design_key": "NewLayer",
+    "status": "mapped",
+    "source": "Forms\\Main.lfm:MainForm/PanelMain/ToolBarLayers/ToolButton5 | Forms\\Main.lfm:MainForm/ActionList1/NewLayer | Forms\\Main.lfm:MainForm/MainMenu1/Layer1/New1 | Forms\\FreeLayerDlg.pas:223"
+  },
+  {
+    "legacy_key": "NewModel",
+    "design_key": "NewFile",
+    "status": "mapped",
+    "source": "Forms\\Main.lfm:MainForm/PanelMain/ToolBarFile/ToolButton20 | Forms\\Main.lfm:MainForm/ActionList1/NewModel | Forms\\Main.lfm:MainForm/MainMenu1/File1/New3"
+  },
+  {
+    "legacy_key": "NewWindow",
+    "design_key": null,
+    "status": "removed-or-legacy-entry-not-reintroduced",
+    "source": "Forms\\Main.lfm:MainForm/ActionList1/NewWindow | Forms\\Main.lfm:MainForm/MainMenu1/Window1/NewWindow1"
+  },
+  {
+    "legacy_key": "Ok",
+    "design_key": "Confirm",
+    "status": "mapped",
+    "source": "Forms\\EnterThemeNameDlg.pas:47 | Forms\\Free2DDXFExportDlg.pas:219 | Forms\\FreeAddMassOutputDlg.pas:651 | Forms\\FreeBackgroundBlendingDlg.pas:101 | Forms\\FreeBackgroundToleranceDlg.pas:50 | Forms\\FreeCrosscurvesDlg.pas:220 | Forms\\FreeCylinderDlg.pas:144 | Forms\\FreeEmptyModelChooserDlg.pas:97 | Forms\\FreeExtrudeDlg.pas:143 | Forms\\FreeGridDlg.pas:137 | Forms\\FreeHydrodyn_RVRSDlg.pas:781 | Forms\\FreeHydrodyn_Task1Dlg.pas:675 | Forms\\FreeHydrostaticsDlg.pas:157 | Forms\\FreeHydrostaticsResultsDlg.pas:161 | Forms\\FreeInsertPlaneDlg.pas:160 | Forms\\FreeIntersectLayerDlg.pas:165 | Forms\\FreeKeelWizardDlg.pas:1703 | Forms\\FreeLackenbyDlg.pas:814 | Forms\\FreeNewModelDlg.pas:187 | Forms\\FreePreferencesDlg.pas:352 | Forms\\FreeProjectSettingsDlg.pas:406 | Forms\\FreePropeller_Task1Dlg.pas:928 | Forms\\FreePropeller_Task2Dlg.pas:1215 | Forms\\FreePropeller_Task3Dlg.pas:1051 | Forms\\FreePropeller_Task4Dlg.pas:735 | Forms\\FreePropeller_Task5Dlg.pas:644 | Forms\\FreeResistance_DelftDlg.pas:1062 | Forms\\FreeResistance_FungLeibDlg.pas:1740 | Forms\\FreeResistance_HollenDlg.pas:1763 | Forms\\FreeResistance_HoltrDlg.pas:1872 | Forms\\FreeResistance_KaperDlg.pas:720 | Forms\\FreeResistance_MHDlg.pas:1592 | Forms\\FreeResistance_OortmerDlg.pas:1903 | Forms\\FreeResistance_OSTDlg.pas:1654 | Forms\\FreeResistance_PlaningDlg.pas:2561 | Forms\\FreeResistance_RBHSDlg.pas:1604 | Forms\\FreeRotateDlg.pas:133 | Forms\\FreeRotateDlgM.pas:151 | Forms\\FreeSaveImageDlg.pas:180 | Forms\\FreeSelectLayersDlg.pas:223 | Forms\\FreeUndoHistoryDlg.pas:180"
+  },
+  {
+    "legacy_key": "PointAlighnPermanently",
+    "design_key": "AlignPoints",
+    "status": "mapped",
+    "source": "Forms\\Main.lfm:MainForm/ActionList1/PointAlighnPermanently | Forms\\Main.lfm:MainForm/MainMenu1/Point1/MenuItemPointAlignPermanently"
+  },
+  {
+    "legacy_key": "PointAlign",
+    "design_key": "AlignPoints",
+    "status": "mapped",
+    "source": "Forms\\Main.lfm:MainForm/PanelMain/ToolBarPoints/ToolButton45 | Forms\\Main.lfm:MainForm/ActionList1/PointAlign | Forms\\Main.lfm:MainForm/MainMenu1/Point1/Projectline1"
+  },
+  {
+    "legacy_key": "PointCollapse",
+    "design_key": "Collapse",
+    "status": "mapped",
+    "source": "Forms\\Main.lfm:MainForm/PanelMain/ToolBarPoints/ToolButton18 | Forms\\Main.lfm:MainForm/ActionList1/PointCollapse | Forms\\Main.lfm:MainForm/MainMenu1/Point1/PointCollapse1"
+  },
+  {
+    "legacy_key": "PointsLock",
+    "design_key": "Lock",
+    "status": "mapped",
+    "source": "Forms\\Main.lfm:MainForm/PanelMain/ToolBarPoints/ToolButton42 | Forms\\Main.lfm:MainForm/ActionList1/PointsLock | Forms\\Main.lfm:MainForm/MainMenu1/Point1/PointsLock1"
+  },
+  {
+    "legacy_key": "PointsUnlock",
+    "design_key": "Unlock",
+    "status": "mapped",
+    "source": "Forms\\Main.lfm:MainForm/PanelMain/ToolBarPoints/ToolButton43 | Forms\\Main.lfm:MainForm/ActionList1/PointsUnlock | Forms\\Main.lfm:MainForm/MainMenu1/Point1/Unlockpoints1"
+  },
+  {
+    "legacy_key": "PointsUnlockAll",
+    "design_key": "Unlock",
+    "status": "mapped",
+    "source": "Forms\\Main.lfm:MainForm/PanelMain/ToolBarPoints/ToolButton44 | Forms\\Main.lfm:MainForm/ActionList1/PointsUnlockAll | Forms\\Main.lfm:MainForm/MainMenu1/Point1/Unlockallpoints1"
+  },
+  {
+    "legacy_key": "Print",
+    "design_key": "Print",
+    "status": "mapped",
+    "source": "Forms\\FreeExpanedPlatesDlg.lfm:FreeExpanedplatesDialog/ToolBar1/ToolButton25 | Forms\\FreeExpanedPlatesDlg.lfm:FreeExpanedplatesDialog/ActionList1/Print | Forms\\freehullformwindow_form.lfm:FreeHullForm/PopupMenuHull/Print1 | Forms\\freehullformwindow_form.lfm:FreeHullForm/ActionListHull/Print | Forms\\freehullformwindow_panel.lfm:FreeHullWindow/PopupMenuHull/Print1 | Forms\\freehullformwindow_panel.lfm:FreeHullWindow/ActionListHull/Print | Forms\\FreeLinesplanFrme.lfm:FreeLinesplanFrame/ToolBar1/ToolButton1 | Forms\\FreeLinesplanFrme.lfm:FreeLinesplanFrame/ActionList1/Print | Forms\\FreeCrosscurvesDlg.pas:221 | Forms\\FreeHydrodyn_RVRSDlg.pas:782 | Forms\\FreeHydrodyn_Task1Dlg.pas:676 | Forms\\FreeHydrostaticsDlg.pas:155 | Forms\\FreeHydrostaticsResultsDlg.pas:159 | Forms\\FreePropeller_Task1Dlg.pas:929 | Forms\\FreePropeller_Task2Dlg.pas:1216 | Forms\\FreePropeller_Task3Dlg.pas:1052 | Forms\\FreePropeller_Task4Dlg.pas:736 | Forms\\FreePropeller_Task5Dlg.pas:645 | Forms\\FreeResistance_DelftDlg.pas:1063 | Forms\\FreeResistance_FungLeibDlg.pas:1741 | Forms\\FreeResistance_HollenDlg.pas:1764 | Forms\\FreeResistance_HoltrDlg.pas:1873 | Forms\\FreeResistance_KaperDlg.pas:721 | Forms\\FreeResistance_MHDlg.pas:1593 | Forms\\FreeResistance_OortmerDlg.pas:1904 | Forms\\FreeResistance_OSTDlg.pas:1655 | Forms\\FreeResistance_PlaningDlg.pas:2562 | Forms\\FreeResistance_RBHSDlg.pas:1605"
+  },
+  {
+    "legacy_key": "Redo",
+    "design_key": "Redo",
+    "status": "mapped",
+    "source": "Forms\\Main.lfm:MainForm/PanelMain/ToolBarEdit/ToolButtonRedo | Forms\\Main.lfm:MainForm/ActionList1/Redo | Forms\\Main.lfm:MainForm/MainMenu1/Edit1/Archimedes1"
+  },
+  {
+    "legacy_key": "RotateCCW1",
+    "design_key": "RotateCCW",
+    "status": "mapped",
+    "source": "Forms\\FreeExpanedPlatesDlg.lfm:FreeExpanedplatesDialog/ToolBar1/ToolButton11 | Forms\\FreeExpanedPlatesDlg.lfm:FreeExpanedplatesDialog/ActionList1/RotateCCW1"
+  },
+  {
+    "legacy_key": "RotateCCW5",
+    "design_key": "RotateCCW",
+    "status": "mapped",
+    "source": "Forms\\FreeExpanedPlatesDlg.lfm:FreeExpanedplatesDialog/ToolBar1/ToolButton1 | Forms\\FreeExpanedPlatesDlg.lfm:FreeExpanedplatesDialog/ActionList1/RotateCCW5"
+  },
+  {
+    "legacy_key": "RotateCCW90",
+    "design_key": "RotateCCW",
+    "status": "mapped",
+    "source": "Forms\\FreeExpanedPlatesDlg.lfm:FreeExpanedplatesDialog/ToolBar1/ToolButton20 | Forms\\FreeExpanedPlatesDlg.lfm:FreeExpanedplatesDialog/ActionList1/RotateCCW90"
+  },
+  {
+    "legacy_key": "RotateCW1",
+    "design_key": "RotateCW",
+    "status": "mapped",
+    "source": "Forms\\FreeExpanedPlatesDlg.lfm:FreeExpanedplatesDialog/ToolBar1/ToolButton12 | Forms\\FreeExpanedPlatesDlg.lfm:FreeExpanedplatesDialog/ActionList1/RotateCW1"
+  },
+  {
+    "legacy_key": "RotateCW5",
+    "design_key": "RotateCW",
+    "status": "mapped",
+    "source": "Forms\\FreeExpanedPlatesDlg.lfm:FreeExpanedplatesDialog/ToolBar1/ToolButton2 | Forms\\FreeExpanedPlatesDlg.lfm:FreeExpanedplatesDialog/ActionList1/RotateCW5"
+  },
+  {
+    "legacy_key": "RotateCW90",
+    "design_key": "RotateCW",
+    "status": "mapped",
+    "source": "Forms\\FreeExpanedPlatesDlg.lfm:FreeExpanedplatesDialog/ToolBar1/ToolButton3 | Forms\\FreeExpanedPlatesDlg.lfm:FreeExpanedplatesDialog/ActionList1/RotateCW90"
+  },
+  {
+    "legacy_key": "Save",
+    "design_key": "SaveFile",
+    "status": "mapped",
+    "source": "Forms\\FreeHydrostaticsDlg.pas:156 | Forms\\FreeHydrostaticsResultsDlg.pas:160"
+  },
+  {
+    "legacy_key": "SaveBitmap",
+    "design_key": "ExportImage",
+    "status": "mapped",
+    "source": "Forms\\FreeExpanedPlatesDlg.lfm:FreeExpanedplatesDialog/ToolBar1/ToolButton7 | Forms\\FreeExpanedPlatesDlg.lfm:FreeExpanedplatesDialog/ActionList1/SaveBitmap | Forms\\FreeLinesplanFrme.lfm:FreeLinesplanFrame/ToolBar1/ToolButton7 | Forms\\FreeLinesplanFrme.lfm:FreeLinesplanFrame/ActionList1/SaveBitmap"
+  },
+  {
+    "legacy_key": "SelectAll",
+    "design_key": "SelectAll",
+    "status": "mapped",
+    "source": "Forms\\Main.lfm:MainForm/ActionList1/SelectAll | Forms\\Main.lfm:MainForm/MainMenu1/Selection1/Selectall1"
+  },
+  {
+    "legacy_key": "ShowButtocks",
+    "design_key": "Buttocks",
+    "status": "mapped",
+    "source": "Forms\\FreeExpanedPlatesDlg.lfm:FreeExpanedplatesDialog/ToolBar1/ToolButton16 | Forms\\FreeExpanedPlatesDlg.lfm:FreeExpanedplatesDialog/ActionList1/ShowButtocks | Forms\\FreeIntersectionDlg.lfm:FreeIntersectionDialog/ToolBar1/tbButtocks | Forms\\FreeIntersectionDlg.lfm:FreeIntersectionDialog/ActionList1/ShowButtocks | Forms\\Main.lfm:MainForm/PanelMain/ToolBarVisibility/ToolButton22 | Forms\\Main.lfm:MainForm/ActionList1/ShowButtocks | Forms\\Main.lfm:MainForm/MainMenu1/Visibility1/Buttocks1"
+  },
+  {
+    "legacy_key": "ShowControlCurves",
+    "design_key": null,
+    "status": "not_in_this_batch",
+    "source": "Forms\\Main.lfm:MainForm/PanelMain/ToolBarVisibility/ToolButton2 | Forms\\Main.lfm:MainForm/ActionList1/ShowControlCurves | Forms\\Main.lfm:MainForm/MainMenu1/Visibility1/Controlcurves1"
+  },
+  {
+    "legacy_key": "ShowControlNet",
+    "design_key": "ControlNet",
+    "status": "mapped",
+    "source": "Forms\\Main.lfm:MainForm/PanelMain/ToolBarVisibility/ToolButton8 | Forms\\Main.lfm:MainForm/ActionList1/ShowControlNet | Forms\\Main.lfm:MainForm/MainMenu1/Visibility1/ShowControlNet1"
+  },
+  {
+    "legacy_key": "ShowDiagonals",
+    "design_key": "Diagonals",
+    "status": "mapped",
+    "source": "Forms\\FreeExpanedPlatesDlg.lfm:FreeExpanedplatesDialog/ToolBar1/ToolButton24 | Forms\\FreeExpanedPlatesDlg.lfm:FreeExpanedplatesDialog/ActionList1/ShowDiagonals | Forms\\FreeIntersectionDlg.lfm:FreeIntersectionDialog/ToolBar1/tbDiagonals | Forms\\FreeIntersectionDlg.lfm:FreeIntersectionDialog/ActionList1/ShowDiagonals | Forms\\Main.lfm:MainForm/PanelMain/ToolBarVisibility/ToolButton35 | Forms\\Main.lfm:MainForm/ActionList1/ShowDiagonals | Forms\\Main.lfm:MainForm/MainMenu1/Visibility1/Diagonals1"
+  },
+  {
+    "legacy_key": "ShowDimensions",
+    "design_key": "Dimensions",
+    "status": "mapped",
+    "source": "Forms\\FreeExpanedPlatesDlg.lfm:FreeExpanedplatesDialog/ToolBar1/ToolButton26 | Forms\\FreeExpanedPlatesDlg.lfm:FreeExpanedplatesDialog/ActionList1/ShowDimensions"
+  },
+  {
+    "legacy_key": "ShowErrorEdges",
+    "design_key": "CheckEdges",
+    "status": "mapped",
+    "source": "Forms\\FreeExpanedPlatesDlg.lfm:FreeExpanedplatesDialog/ToolBar1/ToolButton23 | Forms\\FreeExpanedPlatesDlg.lfm:FreeExpanedplatesDialog/ActionList1/ShowErrorEdges"
+  },
+  {
+    "legacy_key": "ShowFillColor",
+    "design_key": "FillColor",
+    "status": "mapped",
+    "source": "Forms\\FreeExpanedPlatesDlg.lfm:FreeExpanedplatesDialog/ToolBar1/ToolButton19 | Forms\\FreeExpanedPlatesDlg.lfm:FreeExpanedplatesDialog/ActionList1/ShowFillColor | Forms\\FreeLinesplanFrme.lfm:FreeLinesplanFrame/ToolBar1/ToolButton19 | Forms\\FreeLinesplanFrme.lfm:FreeLinesplanFrame/ActionList1/ShowFillColor"
+  },
+  {
+    "legacy_key": "ShowFlowlines",
+    "design_key": "Flowlines",
+    "status": "mapped",
+    "source": "Forms\\Main.lfm:MainForm/PanelMain/ToolBarVisibility/ToolButton48 | Forms\\Main.lfm:MainForm/ActionList1/ShowFlowlines | Forms\\Main.lfm:MainForm/MainMenu1/Visibility1/Flowlines1"
+  },
+  {
+    "legacy_key": "ShowFreeObjects",
+    "design_key": "FreeObjects",
+    "status": "mapped",
+    "source": "Forms\\Main.lfm:MainForm/PanelMain/ToolBarVisibility/tbShowFreeObjects | Forms\\Main.lfm:MainForm/ActionList1/ShowFreeObjects | Forms\\Main.lfm:MainForm/MainMenu1/Visibility1/miShowFreeObjects"
+  },
+  {
+    "legacy_key": "ShowGrid",
+    "design_key": "Grid",
+    "status": "mapped",
+    "source": "Forms\\Main.lfm:MainForm/PanelMain/ToolBarVisibility/ToolButton31 | Forms\\Main.lfm:MainForm/ActionList1/ShowGrid | Forms\\Main.lfm:MainForm/MainMenu1/Visibility1/Analyzesurface2"
+  },
+  {
+    "legacy_key": "ShowHydrostatics",
+    "design_key": "Hydrostatics",
+    "status": "mapped",
+    "source": "Forms\\Main.lfm:MainForm/PanelMain/ToolBarVisibility/ToolButton46 | Forms\\Main.lfm:MainForm/ActionList1/ShowHydrostatics | Forms\\Main.lfm:MainForm/MainMenu1/Visibility1/Hydrostaticdata1"
+  },
+  {
+    "legacy_key": "ShowInteriorEdges",
+    "design_key": "InteriorEdges",
+    "status": "mapped",
+    "source": "Forms\\FreeExpanedPlatesDlg.lfm:FreeExpanedplatesDialog/ToolBar1/ToolButton18 | Forms\\FreeExpanedPlatesDlg.lfm:FreeExpanedplatesDialog/ActionList1/ShowInteriorEdges | Forms\\Main.lfm:MainForm/PanelMain/ToolBarVisibility/ToolButton9 | Forms\\Main.lfm:MainForm/ActionList1/ShowInteriorEdges | Forms\\Main.lfm:MainForm/MainMenu1/Visibility1/ShowInteriorEdges1"
+  },
+  {
+    "legacy_key": "ShowLinesplan",
+    "design_key": "LinesPlan",
+    "status": "mapped",
+    "source": "Forms\\Main.lfm:MainForm/ActionList1/ShowLinesplan | Forms\\Main.lfm:MainForm/MainMenu1/Project1/Linesplan1"
+  },
+  {
+    "legacy_key": "ShowMarkers",
+    "design_key": "Markers",
+    "status": "mapped",
+    "source": "Forms\\Main.lfm:MainForm/PanelMain/ToolBarVisibility/ToolButton36 | Forms\\Main.lfm:MainForm/ActionList1/ShowMarkers | Forms\\Main.lfm:MainForm/MainMenu1/Visibility1/Markers1"
+  },
+  {
+    "legacy_key": "ShowMonochrome",
+    "design_key": "Monochrome",
+    "status": "mapped",
+    "source": "Forms\\FreeLinesplanFrme.lfm:FreeLinesplanFrame/ToolBar1/ToolButton3 | Forms\\FreeLinesplanFrme.lfm:FreeLinesplanFrame/ActionList1/ShowMonochrome"
+  },
+  {
+    "legacy_key": "ShowNormals",
+    "design_key": "Normals",
+    "status": "mapped",
+    "source": "Forms\\Main.lfm:MainForm/PanelMain/ToolBarVisibility/ToolButton30 | Forms\\Main.lfm:MainForm/ActionList1/ShowNormals | Forms\\Main.lfm:MainForm/MainMenu1/Visibility1/Normals1"
+  },
+  {
+    "legacy_key": "ShowPartName",
+    "design_key": "PartName",
+    "status": "mapped",
+    "source": "Forms\\FreeExpanedPlatesDlg.lfm:FreeExpanedplatesDialog/ToolBar1/ToolButton27 | Forms\\FreeExpanedPlatesDlg.lfm:FreeExpanedplatesDialog/ActionList1/ShowPartName"
+  },
+  {
+    "legacy_key": "ShowStations",
+    "design_key": "Stations",
+    "status": "mapped",
+    "source": "Forms\\FreeExpanedPlatesDlg.lfm:FreeExpanedplatesDialog/ToolBar1/ToolButton15 | Forms\\FreeExpanedPlatesDlg.lfm:FreeExpanedplatesDialog/ActionList1/ShowStations | Forms\\FreeIntersectionDlg.lfm:FreeIntersectionDialog/ToolBar1/tbStations | Forms\\FreeIntersectionDlg.lfm:FreeIntersectionDialog/ActionList1/ShowStations | Forms\\Main.lfm:MainForm/PanelMain/ToolBarVisibility/ToolButton21 | Forms\\Main.lfm:MainForm/ActionList1/ShowStations | Forms\\Main.lfm:MainForm/MainMenu1/Visibility1/Stations1"
+  },
+  {
+    "legacy_key": "ShowSubmergedArea",
+    "design_key": null,
+    "status": "not_in_this_batch",
+    "source": "Forms\\FreeExpanedPlatesDlg.lfm:FreeExpanedplatesDialog/ToolBar1/ToolButton4 | Forms\\FreeExpanedPlatesDlg.lfm:FreeExpanedplatesDialog/ActionList1/ShowSubmergedArea"
+  },
+  {
+    "legacy_key": "ShowWaterlines",
+    "design_key": "Waterlines",
+    "status": "mapped",
+    "source": "Forms\\FreeExpanedPlatesDlg.lfm:FreeExpanedplatesDialog/ToolBar1/ToolButton17 | Forms\\FreeExpanedPlatesDlg.lfm:FreeExpanedplatesDialog/ActionList1/ShowWaterlines | Forms\\FreeIntersectionDlg.lfm:FreeIntersectionDialog/ToolBar1/tbWaterlines | Forms\\FreeIntersectionDlg.lfm:FreeIntersectionDialog/ActionList1/ShowWaterlines | Forms\\Main.lfm:MainForm/PanelMain/ToolBarVisibility/ToolButton23 | Forms\\Main.lfm:MainForm/ActionList1/ShowWaterlines | Forms\\Main.lfm:MainForm/MainMenu1/Visibility1/Waterlines1"
+  },
+  {
+    "legacy_key": "Showcurvature",
+    "design_key": "Curvature",
+    "status": "mapped",
+    "source": "Forms\\Main.lfm:MainForm/PanelMain/ToolBarVisibility/ToolButton37 | Forms\\Main.lfm:MainForm/ActionList1/Showcurvature | Forms\\Main.lfm:MainForm/MainMenu1/Visibility1/Curvature1"
+  },
+  {
+    "legacy_key": "SplitSection50pct",
+    "design_key": "SplitSection",
+    "status": "mapped",
+    "source": "Forms\\Main.lfm:MainForm/ActionList1/SplitSection50pct"
+  },
+  {
+    "legacy_key": "SplitSectionDialog",
+    "design_key": "SplitSection",
+    "status": "mapped",
+    "source": "Forms\\Main.lfm:MainForm/PanelMain/ToolBarVisibility/ToolButton39 | Forms\\Main.lfm:MainForm/ActionList1/SplitSectionDialog | Forms\\Main.lfm:MainForm/MainMenu1/Visibility1/miSetSplitSection"
+  },
+  {
+    "legacy_key": "TileWindow",
+    "design_key": null,
+    "status": "removed-or-legacy-entry-not-reintroduced",
+    "source": "Forms\\Main.lfm:MainForm/ActionList1/TileWindow | Forms\\Main.lfm:MainForm/MainMenu1/Window1/Tile1"
+  },
+  {
+    "legacy_key": "Undo",
+    "design_key": "Undo",
+    "status": "mapped",
+    "source": "Forms\\Main.lfm:MainForm/PanelMain/ToolBarEdit/ToolButtonUndo | Forms\\Main.lfm:MainForm/ActionList1/Undo | Forms\\Main.lfm:MainForm/MainMenu1/Edit1/Undo1"
+  },
+  {
+    "legacy_key": "UseLights",
+    "design_key": "Lighting",
+    "status": "mapped",
+    "source": "Forms\\FreeLinesplanFrme.lfm:FreeLinesplanFrame/ToolBar1/ToolButton2 | Forms\\FreeLinesplanFrme.lfm:FreeLinesplanFrame/ActionList1/UseLights"
+  },
+  {
+    "legacy_key": "ZoomExtents",
+    "design_key": "FitView",
+    "status": "mapped",
+    "source": "Forms\\FreeExpanedPlatesDlg.lfm:FreeExpanedplatesDialog/ToolBar1/ToolButton5 | Forms\\FreeExpanedPlatesDlg.lfm:FreeExpanedplatesDialog/ActionList1/ZoomExtents | Forms\\freehullformwindow_form.lfm:FreeHullForm/PopupMenuHull/Zoom1/All1 | Forms\\freehullformwindow_form.lfm:FreeHullForm/ActionListHull/ZoomExtents | Forms\\freehullformwindow_panel.lfm:FreeHullWindow/ActionListHull/ZoomExtents | Forms\\FreeLinesplanFrme.lfm:FreeLinesplanFrame/ToolBar1/ToolButton5 | Forms\\FreeLinesplanFrme.lfm:FreeLinesplanFrame/ActionList1/ZoomExtents"
+  },
+  {
+    "legacy_key": "ZoomIn",
+    "design_key": "ZoomIn",
+    "status": "mapped",
+    "source": "Forms\\FreeExpanedPlatesDlg.lfm:FreeExpanedplatesDialog/ToolBar1/ToolButton8 | Forms\\FreeExpanedPlatesDlg.lfm:FreeExpanedplatesDialog/ActionList1/ZoomIn | Forms\\freehullformwindow_form.lfm:FreeHullForm/PopupMenuHull/Zoom1/ZoomIn1 | Forms\\freehullformwindow_form.lfm:FreeHullForm/ActionListHull/ZoomIn | Forms\\freehullformwindow_panel.lfm:FreeHullWindow/ActionListHull/ZoomIn | Forms\\FreeLinesplanFrme.lfm:FreeLinesplanFrame/ToolBar1/ToolButton8 | Forms\\FreeLinesplanFrme.lfm:FreeLinesplanFrame/ActionList1/ZoomIn"
+  },
+  {
+    "legacy_key": "ZoomOut",
+    "design_key": "ZoomOut",
+    "status": "mapped",
+    "source": "Forms\\FreeExpanedPlatesDlg.lfm:FreeExpanedplatesDialog/ToolBar1/ToolButton9 | Forms\\FreeExpanedPlatesDlg.lfm:FreeExpanedplatesDialog/ActionList1/ZoomOut | Forms\\freehullformwindow_form.lfm:FreeHullForm/PopupMenuHull/Zoom1/Zoomout1 | Forms\\freehullformwindow_form.lfm:FreeHullForm/ActionListHull/ZoomOut | Forms\\freehullformwindow_panel.lfm:FreeHullWindow/ActionListHull/ZoomOut | Forms\\FreeLinesplanFrme.lfm:FreeLinesplanFrame/ToolBar1/ToolButton9 | Forms\\FreeLinesplanFrme.lfm:FreeLinesplanFrame/ActionList1/ZoomOut"
+  }
+]

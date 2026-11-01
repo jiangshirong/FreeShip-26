@@ -5,6 +5,13 @@
 {   Container class for all editing commandsns for the hull                                         }
 {---------------------------------------------------------------------------------------------------}
 
+resourcestring
+  rsEditAssembledPatches = 'Assembled %d patches';
+  rsEditExportedSurfaces = 'Exported %d surfaces';
+  rsEditInputDataError = 'Input data error!!!';
+  rsEditCouldNotAccessFile = 'Could not access %s';
+  rsEditErrorOnLine = 'Error on line %d in file %s';
+
 function TFreeEdit.FGetRecentFile(Index: integer): string;
 begin
   if index >= FRecentFiles.Count then exit;
@@ -83,12 +90,13 @@ end;{TFreeEdit.BackgroundImage_Delete}
 // browse for and open a backgroundimage
 procedure TFreeEdit.BackgroundImage_Open(Viewport: TFreeViewport);
 var
-  I: integer;
-  Data: TFreebackgroundImagedata;
+  I, PreviousImageIndex: integer;
+  Data, Loaded: TFreebackgroundImagedata;
   Dialog: TOpenPictureDialog;
   Pt: TPoint;
   P2D: T2DCoordinate;
   Bmp: TBitmap;
+  PreviousImage: TJPEGImage;
 begin
   Data := nil;
   for I := 1 to FreeShip.NumberofBackgroundImages do
@@ -100,6 +108,9 @@ begin
       exit;
 
   Dialog := TOpenPictureDialog.Create(Viewport);
+  Loaded := nil;
+  Bmp := nil;
+  try
   Dialog.InitialDir := FreeShip.Preferences.ImportDirectory;
   Dialog.Filter := createDialogFilter(rsImageFiles, ['jpg', 'bmp'], False)
    +'|'+createDialogFilter(rsJPEGFiles, ['jpg'], False)
@@ -108,47 +119,67 @@ begin
     //Dialog.Options := [ofHideReadOnly];
   if Dialog.Execute then
   begin
-    if Data = nil then
-    begin
-      Data := TFreeBackgroundImageData.Create(FFreeShip);
-      FFreeShip.FBackgroundImages.Add(Data);
-    end;
-    Data.Clear;
+    Loaded := TFreeBackgroundImageData.Create(FFreeShip);
+    Loaded.Clear;
     if Uppercase(ExtractFileExt(Dialog.Filename)) = '.JPG' then
     begin
-      Data.FImageData.LoadFromFile(Dialog.FileName);
-      Data.FQuality := Data.FImageData.CompressionQuality;
+      Loaded.FImageData.LoadFromFile(Dialog.FileName);
+      Loaded.FQuality := Loaded.FImageData.CompressionQuality;
     end
     else
     begin
       Bmp := TBitmap.Create;
       Bmp.LoadFromFile(Dialog.Filename);
-      Data.FImageData.Assign(Bmp);
-      FreeAndNil(Bmp);
-      Data.FQuality := 100;
+      Loaded.FImageData.Assign(Bmp);
+      Loaded.FQuality := 100;
     end;
-    if not Data.FImageData.Empty then
+    if Loaded.FImageData.Empty or (Loaded.FImageData.Width <= 0) or
+      (Loaded.FImageData.Height <= 0) then
+      raise EReadError.Create('The background image has no pixels');
+    Loaded.FAssignedView := Viewport.ViewType;
+    Loaded.FOrigin.X := 0;
+    Loaded.FOrigin.Y := Loaded.FImageData.Height;
+    if Data = nil then PreviousImageIndex := FreeShip.NumberofBackgroundImages - 1
+    else PreviousImageIndex := FreeShip.NumberofBackgroundImages - 2;
+    if PreviousImageIndex >= 0 then
+      Loaded.FScale := FreeShip.BackgroundImage[PreviousImageIndex].FScale
+    else
     begin
-      Data.FAssignedView := Viewport.ViewType;
-      Data.FOrigin.X := 0;
-      Data.FOrigin.Y := Data.FImageData.Height;
-      if FreeShip.NumberofBackgroundImages > 1 then
-        Data.FScale := FreeShip.BackgroundImage[FreeShip.NumberofBackgroundImages -
-          2].FScale// use same scale as previous images
-
-      else
-      begin
-        // calculate scale
-        Pt := Viewport.Project(ZERO);
-        Pt.X := Viewport.ClientWidth;
-        P2D := Viewport.ProjectBackTo2D(Pt);
-        Data.FScale := P2D.X / Data.FImageData.Width;
-      end;
-      Data.UpdateViews;
+      Pt := Viewport.Project(ZERO);
+      Pt.X := Viewport.ClientWidth;
+      P2D := Viewport.ProjectBackTo2D(Pt);
+      Loaded.FScale := P2D.X / Loaded.FImageData.Width;
     end;
+    // Commit only after both decoding and placement have succeeded.
+    if Data = nil then
+    begin
+      FFreeShip.FBackgroundImages.Add(Loaded);
+      Data := Loaded;
+      Loaded := nil;
+    end
+    else
+    begin
+      PreviousImage := Data.FImageData;
+      Data.FImageData := Loaded.FImageData;
+      Loaded.FImageData := PreviousImage;
+      Data.FAssignedView := Loaded.FAssignedView;
+      Data.FQuality := Loaded.FQuality;
+      Data.FOrigin := Loaded.FOrigin;
+      Data.FScale := Loaded.FScale;
+      Data.FBlendingValue := Loaded.FBlendingValue;
+      Data.FTransparent := Loaded.FTransparent;
+      Data.FTransparentColor := Loaded.FTransparentColor;
+      Data.FVisible := Loaded.FVisible;
+      Data.FTolerance := Loaded.FTolerance;
+    end;
+    Data.UpdateViews;
     FreeShip.FileChanged := True;
   end;
-  FreeAndNil(Dialog);
+  finally
+    Bmp.Free;
+    Loaded.Free;
+    Dialog.Free;
+  end;
 
 end;{TFreeEdit.BackgroundImage_Open}
 
@@ -180,7 +211,12 @@ begin
     UndoObject.FEditMode := FreeShip.EditMode;
     UndoObject.FFilenameSet := FreeShip.FFilenameSet;
     UndoObject.FIsTempRedoObject := True;
-    FreeShip.SaveProject(UndoObject.FUndoData);
+    try
+      FreeShip.SaveProject(UndoObject.FUndoData);
+    except
+      UndoObject.Free;
+      raise;
+    end;
     UndoObject.Accept;
   finally
     // Restore the original fileversion
@@ -197,7 +233,6 @@ var
   UndoObject: TFreeUndoObject;
   Version: TFreeFileVersion;
   Preview: boolean;
-  I: integer;
 begin
   UndoObject := TFreeUndoObject.Create(FreeShip);
   Result := UndoObject;
@@ -206,9 +241,8 @@ begin
   Version := FreeShip.FileVersion;
   Preview := FreeShip.ProjectSettings.SavePreview;
   try
-    // delete all undo objects after the current one
-    for I := FFreeShip.FUndoObjects.Count downto FreeShip.FUndoPosition + 1 do
-      FreeShip.UndoObject[I - 1].Delete;
+    // Preparing a snapshot must not discard the existing redo branch.
+    // Accept is the point where a new operation joins the history.
     // Temp. set to the latest fileversion so that no data will be lost
     FreeShip.FFileVersion := Currentversion;
     // Temp. disable saving of preview image
@@ -217,7 +251,12 @@ begin
     UndoObject.FFileName := FreeShip.Filename;
     UndoObject.FEditMode := FreeShip.EditMode;
     UndoObject.FFilenameSet := FreeShip.FFilenameSet;
-    FreeShip.SaveProject(UndoObject.FUndoData);
+    try
+      FreeShip.SaveProject(UndoObject.FUndoData);
+    except
+      UndoObject.Free;
+      raise;
+    end;
     if Accept then
       UndoObject.Accept;
   finally
@@ -581,7 +620,7 @@ begin
     end;
     Layer_DeleteEmpty(True);
     Freeship.RebuildModel;
-    ShowMessage('Assembled ' + IntToStr(NAssembled) + ' patches');
+    ShowMessage(Format(rsEditAssembledPatches, [NAssembled]));
   end;
   FreeAndNil(Layers);
 end;{TFreeEdit.Face_Assemble}
@@ -982,7 +1021,7 @@ begin
     if Proceed then
     begin
       Dialog := TFreeRotateMDialog.Create(FreeShip);
-      Dialog.Caption := 'Rotate';
+      Dialog.Caption := rs_rotate;
       //ShowTranslatedValues(Dialog);
       Dialog.XValue := 0.0;
       Dialog.YValue := 0.0;
@@ -1088,7 +1127,7 @@ begin
     if Proceed then
     begin
       Dialog := TFreeRotateDialog.Create(FreeShip);
-      Dialog.Caption := 'Scale';
+      Dialog.Caption := rs_scale;
       //ShowTranslatedValues(Dialog);
       Dialog.XValue := 1.0;
       Dialog.YValue := 1.0;
@@ -1195,7 +1234,7 @@ begin
     if Proceed then
     begin
       Dialog := TFreeRotateDialog.Create(FreeShip);
-      Dialog.Caption := 'Move';
+      Dialog.Caption := rs_move;
       //ShowTranslatedValues(Dialog);
       Dialog.XValue := 0.0;
       Dialog.YValue := 0.0;
@@ -2122,7 +2161,7 @@ begin
       try
         Strings.SaveToFile(ChangeFileExt(Dialog.FileName, '.dxf'));
       except
-        MessageDlg('Could not access ' + ChangeFileExt(Dialog.FileName, '.dxf'),
+        MessageDlg(Format(rsEditCouldNotAccessFile, [ChangeFileExt(Dialog.FileName, '.dxf')]),
           mtError, [mbOK], 0);
       end;
     finally
@@ -2512,6 +2551,13 @@ begin
 end;{TFreeEdit.File_ExportPart}
 
 procedure TFreeEdit.File_Export_AddMass;
+var Job:TFreeCalculationScope;
+begin
+  Job:=FreeShip.BeginCalculation([]);
+  try ExportAddedMassInWorkspace finally Job.Free end;
+end;
+
+procedure TFreeEdit.ExportAddedMassInWorkspace;
 var
   Dialog: TFreeAddMassOutputDialog;
   HydObject: TFreeHydrostaticCalc;
@@ -2611,7 +2657,7 @@ begin
           II := II + 1;
           if II > 35 then
           begin
-            MessageDlg('Input data error!!!', mtError, [mbOK], 0);
+    MessageDlg(rsEditInputDataError, mtError, [mbOK], 0);
             goto NewCalc;
           end;
           goto NewSearch;
@@ -2785,7 +2831,7 @@ begin
               II := II + 1;
               if II > 35 then
               begin
-                MessageDlg('Input data error!!!', mtError, [mbOK], 0);
+    MessageDlg(rsEditInputDataError, mtError, [mbOK], 0);
                 goto NewCalc;
               end;
               goto NewSearch1;
@@ -2958,11 +3004,16 @@ end;{TFreeEdit.File_Export_AddMass}
 // Execute AddedMass
 procedure TFreeEdit.File_Execute_AddMass;
 var
+  ProcessCallerDirectory: string;
+  ProcessCallerCursor: TCursor;
   FileToFind: string;
   FExecDirectory, FTempDirectory, OldDir, ExecFullName: string;
 begin
+  ProcessCallerDirectory := GetCurrentDirUTF8;
+  ProcessCallerCursor := Screen.Cursor;
+  try
   OldDir := GetCurrentDirUTF8;
-  FTempDirectory := FreeShip.Preferences.TempDirectory;
+  FTempDirectory := FreeShip.CalculationDirectory;
   SetCurrentDirUTF8(FTempDirectory);
   DeleteFileUTF8('OUTA.'); { *Converted from DeleteFile* }
   //  Определяем каталог с программой Add_Mass.EXE
@@ -2988,13 +3039,17 @@ begin
     exit;
   end;
   ShowMessage('        HydroNShIp_AddedMass v1.03'#13#10#13#10 +
-    '                      Calculating...'#13#10#13#10 +
+    '                      '+rsLocCalculating+#13#10#13#10 +
     'Copyright (c) 2008-2009, Timoshenko V.F.');
   //SysUtils.ExecuteProcess(FExecDirectory + DirectorySeparator+'Add_Mass.EXE', '', []);
   ExecFullName := FExecDirectory + DirectorySeparator+'Add_Mass.EXE';
-  ExecuteFreePlugin(FFreeship.Preferences.TempDirectory, ExecFullName);
+  ExecuteFreeCalculation(FFreeship.CalculationDirectory, ExecFullName, fcAddedMass);
   // may be it needs to wait the out file and to rename it to something meningful?
   SetCurrentDirUTF8(OldDir);
+  finally
+    SetCurrentDirUTF8(ProcessCallerDirectory);
+    Screen.Cursor := ProcessCallerCursor;
+  end;
 end;{TFreeEdit.File_Output_AddMass}
 
 
@@ -3579,7 +3634,7 @@ begin
       if NSurfaces > 0 then
       begin
         IGESList.SaveToFile(ChangeFileExt(Dialog.Filename, '.igs'));
-        MessageDlg('Exported ' + IntToStr(NSurfaces) + ' surfaces.',
+        MessageDlg(Format(rsEditExportedSurfaces, [NSurfaces]),
           mtInformation, [mbOK], 0);
       end
       else
@@ -4263,11 +4318,16 @@ begin
                 C3 := Child.Point[L - 1].Coordinate;
                 AddFacet(C1, C2, C3);
 
-                // mirror points, starboard to port
-                C1.Y := -C1.Y;
-                C2.Y := -C2.Y;
-                C3.Y := -C3.Y;
-                AddFacet(C3, C2, C1);
+                // Only symmetric layers need the other half. A facet already
+                // on the symmetry plane must not be emitted twice.
+                if Layer.Symmetric and
+                  ((C1.Y <> 0.0) or (C2.Y <> 0.0) or (C3.Y <> 0.0)) then
+                begin
+                  C1.Y := -C1.Y;
+                  C2.Y := -C2.Y;
+                  C3.Y := -C3.Y;
+                  AddFacet(C3, C2, C1);
+                end;
               end;
             end;
           end;
@@ -4711,8 +4771,8 @@ begin
           else
             FreeAndNil(Spline);
         except
-          MessageDlg('Error on line ' + IntToStr(LineNr) + ' in file ' +
-            Opendialog.Filename, mtError, [mbOK], 0);
+          MessageDlg(Format(rsEditErrorOnLine, [LineNr, Opendialog.Filename]),
+            mtError, [mbOK], 0);
         end;
         FreeShip.ImportChines(8, Chines);
         FreeAndNil(Chines);
@@ -5671,11 +5731,16 @@ begin
 end;{TFreeEdit.File_ImportVRML}
 
 procedure TFreeEdit.OnFaceRebuilt (Sender: TObject; current:integer; total:integer);
-var P:integer;
+var P:integer; IsMainProgress: boolean;
 begin
-  if FProgressBar = nil then exit;
+  if (FProgressBar = nil) or (total <= 0) then exit;
+  IsMainProgress := Assigned(Main.MainForm) and
+    (FProgressBar = Main.MainForm.ProgressBarMain);
+  // The studio UI deliberately hides the legacy status bar. Rebuild callbacks
+  // must not resurrect it: changing client height makes all four panes jump.
+  if IsMainProgress and not Main.MainForm.StatusBar.Visible then Exit;
   P := current * 10 div total;
-  if P<>FProgressBar.Position then
+  if (P<>FProgressBar.Position) or (current=1) or (current=total) then
     begin
     FProgressBar.Max := 10;
     FProgressBar.Position  := P;
@@ -5684,6 +5749,11 @@ begin
     Main.MainForm.LabelProgress.Refresh;
     Application.ProcessMessages;
     end;
+  if IsMainProgress and (current >= total) then
+  begin
+    FProgressBar.Position := 0;
+    Main.MainForm.LabelProgress.Caption := '';
+  end;
 end;
 
 function TFreeEdit.getPreviewImage(aFileName: string): TJPegImage;
@@ -5838,7 +5908,6 @@ begin
     Assigned(Dlg.PreviewImage.Picture.Bitmap) then
   begin
     //ShowMessage(FN);
-    writeln('jpg sz:', jpg.Width, 'x', jpg.Height);
     Dlg.PreviewImage.Picture.Bitmap.Assign(Jpg);
     Dlg.DoAutofit;
     Dlg.PreviewImage.Refresh;
@@ -5866,58 +5935,39 @@ resourcestring
   rsFreeShipFiles = 'FreeShip files';
   rsFreeShipTextFiles = 'FreeShip Text files';
   rsFreeShipBinaryFiles = 'FreeShip Binary files';
+  rsOpenFileCaption = 'FreeShip: Open file';
+  rsUnsupportedModelFormat = 'Please choose a .fbm or .ftm file';
 
 procedure TFreeEdit.File_Load;
 var
-  Answer: word;
-  OpenDialog: TFreeFilePreviewDialog; //TFreeOpenDialog; //TOpenDialog;
-  //Places:TListItems;
-  w, h: integer;
+  OpenDialog: TOpenDialog;
+  SelectedFile, Ext: string;
 begin
-  OpenDialog := TFreeFilePreviewDialog.Create(FreeShip);
-  OpenDialog.Caption := 'FreeShip: Open file';
-  OpenDialog.Filter :=
-    createDialogFilter(rsFreeShipFiles, ['fbm', 'ftm'], False)
-    + '|' + createDialogFilter(rsFreeShipTextFiles, ['ftm'], False)
-    + '|' + createDialogFilter(rsFreeShipBinaryFiles, ['fbm']);
-  OpenDialog.FilterIndex := 0;
-  //Opendialog.Options:=[ofHideReadOnly];
-  Opendialog.OnPreview := @OnFilePreview;
-  Opendialog.addPlace(FileDialogPlaceLast, FreeShip.Preferences.LastDirectory);
-  Opendialog.addPlace(FileDialogPlaceMyShips, FreeShip.Preferences.OpenDirectory);
-  Opendialog.addPlace(FileDialogPlaceMyImport, FreeShip.Preferences.ImportDirectory);
-  Opendialog.addPlace(FileDialogPlaceGlobalShips, FreeShip.Preferences.GlobalOpenDirectory);
-  Opendialog.addPlace(FileDialogPlaceGlobalImport,
-    FreeShip.Preferences.GlobalImportDirectory);
-  Opendialog.FileDialogMode := fdmOpen;
-  Opendialog.ShellListView.ReadOnly := True;
-  //Opendialog.ShellListView.AutoWidthLastColumn := True;
-  Opendialog.ShellListView.AutoWidthLastColumn := False;
-  Opendialog.AutoFit := True;
-  OpenDialog.CurrentPath := FreeShip.Preferences.LastDirectory;
-  OpenDialog.LocaleDir := FreeShip.Preferences.GlobalAppDataDirectory;
-
-  //Places:=Opendialog.GetPlaces;
-  if OpenDialog.Execute then
-  begin
-    if not CheckIfChangedAndAskToSave() then
+  FreeShip.IsLoadError := True;
+  OpenDialog := TOpenDialog.Create(FreeShip);
+  try
+    OpenDialog.Title := rsOpenFileCaption;
+    OpenDialog.Filter := createDialogFilter(rsFreeShipFiles, ['fbm', 'ftm'], False)
+      + '|' + createDialogFilter(rsFreeShipTextFiles, ['ftm'], False)
+      + '|' + createDialogFilter(rsFreeShipBinaryFiles, ['fbm'], False);
+    OpenDialog.FilterIndex := 1;
+    OpenDialog.Options := [ofFileMustExist, ofPathMustExist, ofHideReadOnly, ofEnableSizing];
+    OpenDialog.InitialDir := FreeShip.Preferences.LastDirectory;
+    if not OpenDialog.Execute then Exit;
+    SelectedFile := OpenDialog.FileName;
+    Ext := LowerCase(ExtractFileExt(SelectedFile));
+    if (Ext <> '.fbm') and (Ext <> '.ftm') then
     begin
-      FreeAndNil(OpenDialog);
-      exit;
+      MessageDlg(rsUnsupportedModelFormat, mtWarning, [mbOK], 0);
+      Exit;
     end;
-
-    FreeShip.ClearUndo;
-    FreeShip.Clear;
-    FreeShip.Surface.ClearSelection;
-    FreeShip.Surface.ClearFaces;
-    FreeShip.Surface.Clear;
-    File_Load(Opendialog.AbsoluteFileName);   // Load everything into memory
-    FreeShip.Preferences.LastDirectory := ExtractFilePath(Opendialog.AbsoluteFileName);
+    if not CheckIfChangedAndAskToSave() then Exit;
+    File_Load(SelectedFile);
+    if not FreeShip.IsLoadError then
+      FreeShip.Preferences.LastDirectory := ExtractFilePath(SelectedFile);
+  finally
+    OpenDialog.Free;
   end;
-  //PreviewFrm.Close;
-  //PreviewFrm.Free;
-
-  FreeAndNil(Opendialog);
 
   if FileExistsUTF8('Resist.dat') { *Converted from FileExists* } then
     DeleteFileUTF8('Resist.dat'); { *Converted from DeleteFile* }
@@ -5925,24 +5975,18 @@ begin
     DeleteFileUTF8('RESISTp.dat'); { *Converted from DeleteFile* }
   if FileExistsUTF8('Vint1.dat') { *Converted from FileExists* } then
     DeleteFileUTF8('Vint1.dat'); { *Converted from DeleteFile* }
-  if FileExistsUTF8('SACs.txt') { *Converted from FileExists* } then
-    DeleteFileUTF8('SACs.txt'); { *Converted from DeleteFile* }
-  if FileExistsUTF8('Bonjean.txt') { *Converted from FileExists* } then
-    DeleteFileUTF8('Bonjean.txt'); { *Converted from DeleteFile* }
-  if FileExistsUTF8('Weights.txt') { *Converted from FileExists* } then
-    DeleteFileUTF8('Weights.txt'); { *Converted from DeleteFile* }
-  if FileExistsUTF8('Sterns.txt') { *Converted from FileExists* } then
-    DeleteFileUTF8('Sterns.txt'); { *Converted from DeleteFile* }
 end;{TFreeEdit.File_Load}
 
-resourcestring rsFailedToLoadProject = 'Failed to load project: %s'#10'Error: %s'#10;
+resourcestring
+  rsLegacyCalculationImport = 'This file uses an older calculation-parameter layout. Existing fields were retained; fields absent from this layout are zero. Check calculation settings before use. Old FBM files have no checksum, so matching a layout cannot prove the file is undamaged. Save to a new file to preserve the original.';
+  rsFailedToLoadProject = 'Failed to load project: %s'#10'Error: %s'#10;
 
 procedure TFreeEdit.File_Load(FileName: string);
 var
   Source: TFreeFileBuffer;
   ext: string;
   i:integer;
-  b:boolean;
+  b, LoadSucceeded:boolean;
   ErrMsg:String;
 
   function IsSaveable(fn:string):boolean;
@@ -5953,7 +5997,7 @@ var
     result:=false;
     if not FileExistsUTF8(fn) then exit;
     dir := ExtractFilePath(fn);
-    tmpFileName := SysUtils.GetTempFileName(dir,'.tmp~');
+    tmpFileName := GetTempFileNameUTF8(dir,'.tmp~');
     fh := FileCreateUTF8(tmpFileName);
     if fh = INVALID_HANDLE_VALUE then exit;
     try
@@ -5972,7 +6016,9 @@ var
   end;
 
 begin
+  FreeShip.IsLoadError := True;
   if FileName = '' then exit;
+  LoadSucceeded := False;
   Ext := LowerCase(ExtractFileExt(FileName));
   if Ext = '.fbm' then
     Source := TFreeFileBuffer.Create
@@ -5983,21 +6029,15 @@ begin
     raise Exception.Create('Unsupported file format: ' + Ext);
 
   try
-    FreeShip.Surface.Clearselection;  // Make sure no items are selected
-    FreeShip.FSelectedFlowlines.Clear;
-    FreeShip.FSelectedMarkers.Clear;
-
-    FreeShip.ModelIsLoaded := False;
-    FreeShip.FileIsReadOnly := True;
-
     try
       Source.LoadFromFile(FileName);    // Load everything into memory
       //FreeShip.Preferences.OpenDirectory := ExtractFilePath(FileName);
       //FreeShip.Filename:=ChangeFileExt(FileName,'.fbm');
-      FreeShip.Filename := FileName;
       //My correction
       //      MessageDlg('Begin Loading *.fbm',mtError,[mbOk],0);
-      FreeShip.LoadProject(Source);
+      b:=IsSaveable(FileName);
+      FreeShip.LoadProject(Source, False);
+      FreeShip.Filename := FileName;
       // Now read the information from memory
       //My correction
       //      MessageDlg('Loading *.fbm ended',mtError,[mbOk],0);
@@ -6008,8 +6048,9 @@ begin
       FreeShip.FFilenameSet := True;
       FreeShip.FStopAskingForFileVersion := False;
       FreeShip.ModelIsLoaded := True;
-      b:=IsSaveable(FileName);
-      FreeShip.FileIsReadOnly := not b;
+      FreeShip.FileIsReadOnly := (not b) or (FreeShip.LegacyCalculationLayout <> '');
+      FreeShip.IsLoadError := False;
+      LoadSucceeded := True;
     except
       on E:Exception do
       begin
@@ -6023,11 +6064,20 @@ begin
     end;
   finally
     FreeAndNil(Source);
-    if FreeShip.ModelIsLoaded then
-       AddToRecentFiles(FileName);
-    Undo_Clear;
   end;
-  FreeShip.FileChanged := False;
+  if LoadSucceeded then
+  begin
+    Undo_Clear;
+    FreeShip.UpdateLoadedProject;
+    AddToRecentFiles(FileName);
+    FreeShip.Edit.Selection_Clear;
+    for i:=0 to FreeShip.NumberOfViewports-1 do
+      FreeShip.Viewport[i].BeginProgressiveDisplay;
+    FreeShip.FileChanged := False;
+    if FreeShip.LegacyCalculationLayout <> '' then
+      MessageDlg(rsLegacyCalculationImport + LineEnding + FreeShip.LegacyCalculationLayout,
+        mtWarning, [mbOK], 0);
+  end;
 end;{TFreeEdit.File_Load}
 
 resourcestring
@@ -6039,37 +6089,27 @@ resourcestring
 // save as FREE!ship file without prompting for a filename (must already been set)
 function TFreeEdit.File_Save:boolean;
 var
-  Backup: string;
   Destination: TFreeFileBuffer;
   Str, Ext: string;
   Answer: word;
-  fAttr:longint;  fh:THandle;
-  MinFileVersion: TFreeFileVersion;
+  MinFileVersion, PreviousVersion: TFreeFileVersion;
+  PreviousChanged: Boolean;
 begin
   result := false;
-{  if FileExistsUTF8(FreeShip.Filename) then
-  begin
-    fh:=FileOpenUTF8(FreeShip.Filename, fmOpenWrite);
-    if fh = 0 then FreeShip.ModelIsReadOnly := true;
-    FileClose(fh);
-  end
-  else
-  begin
-    fh:=FileCreateUTF8(FreeShip.Filename);
-    if fh = 0 then FreeShip.ModelIsReadOnly := true;
-    FileClose(fh);
-  end; }
 
   if not FreeShip.FilenameSet or FreeShip.FileIsReadOnly then
   begin
-    FreeShip.FilenameSet := false;
     result := File_SaveAs;
     exit;
   end;
   if not FreeShip.FilenameSet then
     exit;
 
+  PreviousVersion := FreeShip.FileVersion;
+  PreviousChanged := FreeShip.FileChanged;
   MinFileVersion := FreeShip.DetectMinFileVersion;
+  if (FreeShip.LegacyCalculationLayout <> '') and (MinFileVersion < fv335) then
+    MinFileVersion := fv335;
 
   if (FreeShip.FileVersion < MinFileVersion) //and (not FreeShip.FStopAskingForFileVersion)
   then
@@ -6086,142 +6126,109 @@ begin
   end
   else FreeShip.FileVersion := MinFileVersion;
 
-  FreeShip.FFilenameSet := True;
-  // Check if the file already exists
-  if FileExistsUTF8(FreeShip.Filename) then
-  begin
-    Backup := ChangeFileExt(FreeShip.Filename, '.Bak');
-    // First check for a backup, and delete when present
-    if FileExistsUTF8(Backup)  then
-      if not DeleteFileUTF8(Backup) then
-      begin
-        MessageDlg(rsUnableDeleteBackupFile+' '+Backup, mtError, [mbOK], 0);
-        FreeShip.FileIsReadOnly:=true;
-        result := false;
-        exit;
-      end;
-    // Then create a backup of the old file
-    if not RenameFileUTF8(FreeShip.Filename, Backup) then
-    begin
-      MessageDlg(rsUnableCreateBackupFile+' '+Backup, mtError, [mbOK], 0);
-      FreeShip.FileIsReadOnly:=true;
-      result := false;
-      exit;
-    end;
-  end;
-  Ext := ExtractFileExt(FreeShip.Filename);
-  if Ext = '.fbm' then
-    Destination := TFreeFileBuffer.Create
-  else
-    Destination := TFreeTextBuffer.Create;
-  Destination.Encoding := FreeShip.Preferences.FbmEncoding;
-  FreeShip.SaveProject(Destination);
+  Destination := nil;
   try
-    result := Destination.SaveToFile(FreeShip.Filename);
-    FreeShip.FileChanged:=false;
-    FreeAndNil(Destination);
+    try
+      Ext := LowerCase(ExtractFileExt(FreeShip.Filename));
+      if Ext = '.fbm' then
+        Destination := TFreeFileBuffer.Create
+      else
+        Destination := TFreeTextBuffer.Create;
+      Destination.Encoding := FreeShip.Preferences.FbmEncoding;
+      FreeShip.SaveProject(Destination);
+      SaveProjectFile(Destination, FreeShip.Filename);
+      Result := True;
+    except on E: Exception do
+      begin
+        FreeShip.FFileVersion := PreviousVersion;
+        FreeShip.FileChanged := PreviousChanged;
+        MessageDlg(rsUnableToSaveFile + ' ' + FreeShip.Filename + LineEnding +
+          E.Message, mtError, [mbOK], 0);
+      end;
+    end;
+  finally
+    Destination.Free;
+  end;
+  if Result then
+  begin
+    FreeShip.FileChanged := False;
     FreeShip.Preferences.LastDirectory := ExtractFilePath(FreeShip.FileName);
     AddToRecentFiles(FreeShip.FileName);
-  except on E:Exception do
-    begin
-    FreeAndNil(Destination);
-    result := false;
-    MessageDlg(rsUnableToSaveFile+' '+FreeShip.Filename+'\n'
-    +'Exception class: ' + E.ClassName+'\n'
-    +'Message: ' + E.Message+'\n'
-    , mtError, [mbOK], 0);
-    end;
   end;
 end;{TFreeEdit.File_Save}
 
 procedure TFreeEdit.SaveDialogTypeChange(Sender: TObject);
-var
-  FName, Ext: string;
-  SD: TSaveDialog;
-  {$IFDEF LCLGTK2}
-  Widget: PGtkWidget;
-  {$ENDIF}
 begin
-  SD := TSaveDialog(Sender);
-  with SD do
-  begin
-    if DirectoryExists(FileName) then // FileName is Empty
-      exit;
-    case FilterIndex of
-      1: Ext := '.ftm';
-      2: Ext := '.fbm';
-    end;
-    FName := ChangeFileExt(ExtractFileName(FileName), Ext);
-    FileName := FName;
-
-    {$IFDEF LCLGTK2}
-    Widget := {%H-}PGtkWidget(Handle);
-    gtk_file_chooser_set_current_name(PGtkFileChooser(Widget), PChar(FName));
-    {$ENDIF}
-
-    {$IFDEF LCLWIN32}
-    SendMessage(GetParent(Handle), CDM_SETCONTROLTEXT, 1152, LParam(PChar(FName)));
-    {$ENDIF}
-  end;
+  if TSaveDialog(Sender).FilterIndex = 2 then
+    TSaveDialog(Sender).DefaultExt := 'ftm'
+  else
+    TSaveDialog(Sender).DefaultExt := 'fbm';
 end;
 
-resourcestring rsSaveFile = 'Save file';
+resourcestring rsConfirmReplaceFile = 'The file already exists. Replace it?';
+rsSaveFile = 'Save file';
 rs3DTextFile = '3D text file';
 rs_CannotCreateDirectory = 'Cannot create directory: ';
 
 function TFreeEdit.File_SaveAs:boolean;
 var
-  I: integer;
-  Dir: string;
-  SaveDialog: TFreeFilePreviewDialog; //TFreeOpenDialog; //TOpenDialog;
-  //Places:TListItems;
-  w, h: integer;
+  SaveDialog: TSaveDialog;
   Preferences: TFreePreferences;
+  SelectedFile, Ext, PreviousFileName: string;
+  PreviousFilenameSet, PreviousReadOnly: boolean;
 begin
-  result := false;
+  Result := False;
   Preferences := FreeShip.Preferences;
-  Dir := Preferences.LastDirectory;
-  if not DirectoryExistsUTF8(Dir) and not ForceDirectoriesUTF8(Dir) then
-    MessageDlg(rs_CannotCreateDirectory + Dir, mtWarning, [mbOK], 0);
-
-  SaveDialog := TFreeFilePreviewDialog.Create(FreeShip);
-  with SaveDialog do
-  begin
-    Caption := 'FreeShip:'+rsSaveFile;
-    CurrentPath := Preferences.SaveDirectory;
-    Filter := FileDialogFilterFreeship + '|' + FileDialogFilterFreeshipText +
-      '|' + FileDialogFilterFreeshipBinary;
-    FilterIndex := 0;
-    OnPreview := @OnFilePreview;
-    addPlace(FileDialogPlaceLast, Preferences.LastDirectory);
-    addPlace(FileDialogPlaceMyShips, Preferences.SaveDirectory);
-    FileDialogMode := fdmSave;
-    ShellListView.ReadOnly := True;
-  end;
-
-  //FreeShip.Filename := ChangeFileExt(FreeShip.Filename, '.ftm');
-  Savedialog.FileName := ExtractFilename(ChangeFileExt(FreeShip.Filename, '.ftm'));
-  //Savedialog.Options := [ofOverwritePrompt, ofHideReadOnly];
-  //Savedialog.OnTypeChange := SaveDialogTypeChange;
-  SaveDialog.LocaleDir := Preferences.GlobalAppDataDirectory + DirectorySeparator + 'locale';
-  if SaveDialog.Execute then
-  begin
-    //FreeShip.Preferences.SaveDirectory := ExtractFilePath(SaveDialog.AbsoluteFileName);
+  PreviousFileName := FreeShip.Filename;
+  PreviousFilenameSet := FreeShip.FilenameSet;
+  PreviousReadOnly := FreeShip.FileIsReadOnly;
+  SaveDialog := TSaveDialog.Create(FreeShip);
+  try
+    SaveDialog.Title := 'FreeShip: ' + rsSaveFile;
+    SaveDialog.InitialDir := Preferences.LastDirectory;
+    SaveDialog.Filter := createDialogFilter(rsFreeShipBinaryFiles, ['fbm'], False)
+      + '|' + createDialogFilter(rsFreeShipTextFiles, ['ftm'], False);
+    SaveDialog.Options := [ofOverwritePrompt, ofPathMustExist, ofHideReadOnly, ofEnableSizing];
+    Ext := LowerCase(ExtractFileExt(FreeShip.Filename));
+    if Ext = '.ftm' then SaveDialog.FilterIndex := 2 else SaveDialog.FilterIndex := 1;
+    if (Ext <> '.fbm') and (Ext <> '.ftm') then Ext := '.fbm';
+    SaveDialog.FileName := ExtractFileName(ChangeFileExt(FreeShip.Filename, ''));
+    if (FreeShip.LegacyCalculationLayout <> '') and FreeShip.FileIsReadOnly then
+      SaveDialog.FileName := SaveDialog.FileName + '-converted';
+    // Add the extension after selection so the chosen type controls the format.
+    SaveDialog.DefaultExt := '';
+    if not SaveDialog.Execute then Exit;
+    SelectedFile := SaveDialog.FileName;
+    Ext := LowerCase(ExtractFileExt(SelectedFile));
+    if Ext = '' then
+    begin
+      if SaveDialog.FilterIndex = 2 then SelectedFile := SelectedFile + '.ftm'
+      else SelectedFile := SelectedFile + '.fbm';
+      Ext := LowerCase(ExtractFileExt(SelectedFile));
+      if FileExistsUTF8(SelectedFile) and
+         (MessageDlg(rsConfirmReplaceFile + #10 + SelectedFile, mtConfirmation, [mbYes, mbNo], 0) <> mrYes) then Exit;
+    end;
+    if (Ext <> '.fbm') and (Ext <> '.ftm') then
+    begin
+      MessageDlg(rsUnableToSaveFile + ': .fbm / .ftm', mtError, [mbOK], 0);
+      Exit;
+    end;
     if CurrentVersion > FreeShip.FileVersion then
       FreeShip.FStopAskingForFileVersion := False;
-    FFreeShip.Filename := SaveDialog.AbsoluteFileName;
-    FFreeShip.FFilenameSet := True;
-    FFreeShip.FileIsReadOnly := False;
-{    I := SaveDialog.FilterIndex;
-    case I of
-      1: FreeShip.Filename := ChangeFileExt(Savedialog.Filename, '.ftm');
-      2: FreeShip.Filename := ChangeFileExt(Savedialog.Filename, '.fbm');
-    end; }
-    result := File_Save;
-    if result then
-       FreeShip.Preferences.LastDirectory := ExtractFilePath(SaveDialog.AbsoluteFileName);
+    FreeShip.Filename := SelectedFile;
+    FreeShip.FFilenameSet := True;
+    FreeShip.FileIsReadOnly := False;
+    Result := File_Save;
+    if Result then Preferences.LastDirectory := ExtractFilePath(SelectedFile)
+    else
+    begin
+      FreeShip.Filename := PreviousFileName;
+      FreeShip.FilenameSet := PreviousFilenameSet;
+      FreeShip.FileIsReadOnly := PreviousReadOnly;
+    end;
+  finally
+    SaveDialog.Free;
   end;
-  SaveDialog.Free;
 end;{TFreeEdit.FileDestroy_SaveAs}
 
 procedure TFreeEdit.Flowline_Add(Source: T2DCoordinate; View: TFreeviewType);
@@ -7931,7 +7938,7 @@ begin
     end;
 
   if not IsIntegrityOk then
-    ShowMessage('Layers integrity is not Ok. Enable logs and check logs output. Further processing is not safe.');
+    ShowMessage(rsLocLayerIntegrity);
 {
   for i:=0 to FreeShip.Surface.NumberOfControlFaces-1 do
     IsIntegrityOk := IsIntegrityOk and FreeShip.Surface.ControlFace[i].CheckIntegrity;
@@ -8130,9 +8137,10 @@ procedure TFreeEdit.Model_LackenbyTransformation;
 var
   Dialog: TFreeLackenbyDialog;
   vUndo: TFreeUndoObject;
-  UndoIndex: integer;
+  SavedHistory, DialogHistory: TFasterListTFreeUndoObject;
+  SavedPosition, SavedPreviousPosition: integer;
   I: integer;
-  Modified: boolean;
+  Modified, Accepted: boolean;
 begin
   if not FreeShip.ProjectSettings.FMainparticularsHasBeenset then
   begin
@@ -8140,27 +8148,49 @@ begin
     exit;
   end;
   Dialog := TFreeLackenbyDialog.Create(FreeShip);
-  //ShowTranslatedValues(Dialog);
-  vUndo := CreateUndoObject(rs_Lackenby_tranformation {UserString[159]}, False);
-  UndoIndex := FreeShip.UndoCount;
-  if Dialog.Execute(FreeShip, Modified) then
-  begin
-    for I := FreeShip.UndoCount downto UndoIndex + 1 do
-      FreeShip.UndoObject[I - 1].Delete;
-    if not Modified then
-      vUndo.Delete
-    else
-      vUndo.Accept;
-  end
-  else
-  begin
-    for I := FreeShip.UndoCount downto UndoIndex + 1 do
-      FreeShip.UndoObject[I - 1].Delete;
-    if Modified then
+  vUndo := nil;
+  try
+    vUndo := CreateUndoObject(rs_Lackenby_tranformation {UserString[159]}, False);
+    DialogHistory := TFasterListTFreeUndoObject.Create;
+    SavedHistory := FreeShip.FUndoObjects;
+    SavedPosition := FreeShip.FUndoPosition;
+    SavedPreviousPosition := FreeShip.FPreviousUndoPosition;
+    FreeShip.FUndoObjects := DialogHistory;
+    FreeShip.FUndoPosition := 0;
+    FreeShip.FPreviousUndoPosition := -1;
+    Modified := False;
+    try
+      try
+        // The dialog can accept several intermediate transformations. Keep
+        // their history private until the user accepts the complete operation.
+        Accepted := Dialog.Execute(FreeShip, Modified);
+      finally
+        FreeShip.FUndoObjects := SavedHistory;
+        FreeShip.FUndoPosition := SavedPosition;
+        FreeShip.FPreviousUndoPosition := SavedPreviousPosition;
+        for I := DialogHistory.Count - 1 downto 0 do
+          DialogHistory[I].Free;
+        DialogHistory.Free;
+      end;
+    except
       vUndo.Restore;
-    vUndo.Delete;
+      raise;
+    end;
+    if Accepted and Modified then
+    begin
+      try
+        vUndo.Accept;
+      except
+        if FreeShip.FUndoObjects.IndexOf(vUndo) = -1 then vUndo.Restore;
+        raise;
+      end;
+    end
+    else vUndo.Restore;
+  finally
+    if (vUndo <> nil) and (FreeShip.FUndoObjects.IndexOf(vUndo) = -1) then
+      vUndo.Delete;
+    Dialog.Free;
   end;
-  FreeAndNil(Dialog);
 end;{TFreeEdit.Model_LackenbyTransformation}
 
 // Scale the entire model and all equivalent data such as stations etc.
@@ -8203,7 +8233,7 @@ begin
     abs(FreeShip.ProjectSettings.ProjectDraft * Scalevector.Z);
   if not FreeShip.ProjectSettings.FUseDefaultSplitSectionLocation then
     FreeShip.ProjectSettings.ProjectSplitSectionLocation :=
-      abs(FreeShip.ProjectSettings.ProjectSplitSectionLocation * ScaleVector.X);
+      FreeShip.ProjectSettings.ProjectSplitSectionLocation * ScaleVector.X;
 
   // Update markers
   if AdjustMarkers then
@@ -10382,6 +10412,19 @@ begin
       FreeShip.Flowline[I - 1].Selected := True;
   Freeship.ReDraw;
 end;{TFreeEdit.Selection_SelectAll}
+
+// UI select-all toggle; keep Selection_SelectAll idempotent for internal callers.
+procedure TFreeEdit.Selection_ToggleAll;
+var I:Integer;AnyVisible,AllSelected:Boolean;
+begin
+ AnyVisible:=False;AllSelected:=True;
+ for I:=0 to FreeShip.Surface.NumberOfControlPoints-1 do
+  if FreeShip.Surface.ControlPoint[I].Visible then begin
+   AnyVisible:=True;
+   if not FreeShip.Surface.ControlPoint[I].Selected then AllSelected:=False;
+  end;
+ if AnyVisible and AllSelected then Selection_Clear else Selection_SelectAll;
+end;
 
 // Select all control points
 procedure TFreeEdit.Selection_SelectAllControlPoints;

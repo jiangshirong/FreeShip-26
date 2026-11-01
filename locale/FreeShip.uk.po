@@ -28,7 +28,7 @@ msgstr "Кути"
 #, fuzzy
 msgctxt "freecontrolpointfrm.rslength"
 msgid "Length"
-msgstr "Довж."
+msgstr "Довж"
 
 #: freecontrolpointfrm.rsnameisnotunique
 msgid "Name Is Not Unique"
@@ -56,7 +56,9 @@ msgstr ""
 
 #: freefilebuffer.rsparsingerroroutoffilesize
 #, object-pascal-format
-msgid "Error parsing of file \"%s\". Reading %s of size %d at position %d that is out of file size %d."
+msgid ""
+"Error parsing of file \"%s\". Reading %s of size %d at position %d that is "
+"out of file size %d"
 msgstr ""
 
 #: freefilepreviewdialog.hintdblclicktofitsize
@@ -158,15 +160,17 @@ msgid "--log-error   : log level is Error. Only Error messages logged"
 msgstr ""
 
 #: freeship.usageline05
-msgid "--log-warning : log level is Warning. Only Error and Warning messages logged"
+msgid ""
+"--log-warning : log level is Warning. Only Error and Warning messages logged"
 msgstr ""
 
 #: freeship.usageline06
-msgid "--log-info    : log level is Info. Error, Warning and Info messages logged"
+msgid ""
+"--log-info    : log level is Info. Error, Warning and Info messages logged"
 msgstr ""
 
 #: freeship.usageline07
-msgid "--log-debug   : log level is Debug. All messages logged."
+msgid "--log-debug   : log level is Debug. All messages logged"
 msgstr ""
 
 #: freeship.usageline08
@@ -174,7 +178,8 @@ msgid "--log-file=<logfile> : filename of the log file"
 msgstr ""
 
 #: freeship.usageline09
-msgid "--nosplash-I-ACCEPT-GPLv3-TERMS-AND-CONDITIONS : turn off splash screen."
+msgid ""
+"--nosplash-I-ACCEPT-GPLv3-TERMS-AND-CONDITIONS : turn off splash screen"
 msgstr ""
 
 #: freeship.usageline10
@@ -328,7 +333,9 @@ msgstr ""
 
 #: freeshipunit.rssavewithhigherfileversion
 #, object-pascal-format
-msgid "The current file version is %s.%sDo you want to save the file as version %s ?"
+msgid ""
+"The current file version is %s.%sDo you want to save the file as version %s "
+"?"
 msgstr ""
 
 #: freeshipunit.rssplitsection
@@ -402,11 +409,17 @@ msgid "Version"
 msgstr "Версія"
 
 #: freestringsunit.rs_1_1_1_r_m_isherwood___wind__resistance_of__merchant__ships___proceedings__of__royal
-msgid "1.1.1 R.M.Isherwood, \"Wind  Resistance of  Merchant  Ships\", Proceedings  of  Royal"
-msgstr "1.1.1 R.M. Isherwood,\"Wind Resistance of Merchant Ships\",Proceedings of Royal"
+msgid ""
+"1.1.1 R.M.Isherwood, \"Wind  Resistance of  Merchant  Ships\", Proceedings  "
+"of  Royal"
+msgstr ""
+"1.1.1 R.M. Isherwood,\"Wind Resistance of Merchant Ships\",Proceedings of "
+"Royal"
 
 #: freestringsunit.rs_1_1___this_wind_resistance_prediction_method_in_this_program_has_been_described_by_
-msgid "1.1   This wind resistance prediction method in this program has been described by:"
+msgid ""
+"1.1   This wind resistance prediction method in this program has been "
+"described by:"
 msgstr "1.1   Цей метод розрахунка вітрового опору розроблен згідно статті:"
 
 #: freestringsunit.rs_1_2___needed_input_data_parameters_
@@ -426,23 +439,28 @@ msgid "2-screw rudder slender/thick"
 msgstr "Стерна за 2-мя гвинтами"
 
 #: freestringsunit.rs_2__input_datas_are_outside_valid_domain_or_catalog_is_not_valid_
-msgid "2. Input datas are outside valid domain or catalog is not valid."
-msgstr "2. Невірні ісходні дані або каталог."
+msgid "2. Input datas are outside valid domain or catalog is not valid"
+msgstr "2. Невірні ісходні дані або каталог"
 
 #: freestringsunit.rs_3__this_is_very_slow_computer__fcpu___800_mhz_
-msgid "3. This is very slow computer, Fcpu < 800 MHz."
-msgstr "3. Занадто повільний комп'ютер, Fcpu < 800 МГц."
+msgid "3. This is very slow computer, Fcpu < 800 MHz"
+msgstr "3. Занадто повільний комп'ютер, Fcpu < 800 МГц"
 
 #: freestringsunit.rs_4_brass_altmntfe__5_bronze_neva_60__6_bronze_neva_70__7_stainless_steel__8_duralumin_
-msgid "4-brass Al+Mn+Fe; 5-bronze Neva-60; 6-bronze Neva-70; 7-stainless steel; 8-duralumin."
-msgstr "4-латунь Ламцж 67-5-2-2; 5-бронза Нева-60; 6-Нева-70; 7-сталь нерж. 1Х14НД; 8-дюралюм."
+msgid ""
+"4-brass Al+Mn+Fe; 5-bronze Neva-60; 6-bronze Neva-70; 7-stainless steel; "
+"8-duralumin"
+msgstr ""
+"4-латунь Ламцж 67-5-2-2; 5-бронза Нева-60; 6-Нева-70; 7-сталь нерж. 1Х14НД; "
+"8-дюралюм"
 
 #: freestringsunit.rs_4__cpu_is_loaded_more_80__another_processes_
-msgid "4. CPU is loaded more 80% another processes."
-msgstr "4. ЦПУ завантажен на 80% й більше іншими процесами."
+msgid "4. CPU is loaded more 80% another processes"
+msgstr "4. ЦПУ завантажен на 80% й більше іншими процесами"
 
 #: freestringsunit.rs_5_standart_deviation_of_database_for_typical_resistance_hollenbach_s_method_
-msgid "5.Standart deviation of database for typical resistance Hollenbach's method:"
+msgid ""
+"5.Standart deviation of database for typical resistance Hollenbach's method:"
 msgstr "5.Діапазони параметрів випробуваних моделей суден:"
 
 #: freestringsunit.rs_aae___
@@ -462,8 +480,8 @@ msgid "Acceleration time [min (sec)]"
 msgstr "Час розгону, хв (c)"
 
 #: freestringsunit.rs_acceleration__free_and_active_brake_calculation_
-msgid "Acceleration, free and active brake calculation."
-msgstr "Розгін судна."
+msgid "Acceleration, free and active brake calculation"
+msgstr "Розгін судна"
 
 #: freestringsunit.rs_according_to_john_winters
 msgid "according to John Winters"
@@ -474,8 +492,8 @@ msgid "according to modeling experiment"
 msgstr "експериментальним даним"
 
 #: freestringsunit.rs_active_brake_of_ship_
-msgid "Active brake of ship."
-msgstr "Активне гальмування (реверс) судна."
+msgid "Active brake of ship"
+msgstr "Активне гальмування (реверс) судна"
 
 #: freestringsunit.rs_active_brake_of_ship_calculation__reverse_
 msgid "Active brake of ship calculation (reverse)"
@@ -495,7 +513,8 @@ msgstr "Коефіцієнти приєднаних мас для річкови
 
 #: freestringsunit.rs_added_masses_coefficients_for_riverships_and_ships_with_cb____0_8_
 #, fuzzy
-#| msgid "Added masses Coefficients for riverships and ships with Cb >= 0,8:"
+#| msgid ""
+#| "Added masses Coefficients for riverships and ships with Cb >= 0,8:"
 msgid "Added masses Coefficients for riverships and ships with Cb >= 0.8:"
 msgstr "Коефіциєнти приєднаних мас для річкових й повних суден з Сb >= 0,8:"
 
@@ -547,7 +566,7 @@ msgstr "Додати один батокс"
 msgid "Add one diagonal"
 msgstr "Додати одну рибину"
 
-#: freestringsunit.rs_add_one_station
+#: freestringsunit.rs_add_one_station tfreeintersectiondialog.addone.hint
 msgid "Add one station"
 msgstr "Додати один шпангоут"
 
@@ -584,8 +603,8 @@ msgid "Aerodynamic forces and moment without drift:"
 msgstr "Аеродинамічні сили і момент без урахування дрейфу:"
 
 #: freestringsunit.rs_ae_aooo___1_3_you_must_to_increase_dp_
-msgid "Ae/Ao** > 1.3 You must to increase Dp."
-msgstr "Ae/Ao** > 1.3 Необхідно збільшити Dp."
+msgid "Ae/Ao** > 1.3 You must to increase Dp"
+msgstr "Ae/Ao** > 1.3 Необхідно збільшити Dp"
 
 #: freestringsunit.rs_ae_ao_is_out_of_limits_for_this_diagram___
 msgid "Ae/Ao is out of limits for this diagram!!!"
@@ -738,7 +757,8 @@ msgid "AS   - Lateral projected area of superstructure [m2];"
 msgstr "AS   - бокова проекція площі надбудови, м2;"
 
 #: freestringsunit.rs_attention__weight_of_a_ship_and_displacement_are_difference_more_then_10___
-msgid "Attention: Weight of a ship and displacement are difference more then 10% !"
+msgid ""
+"Attention: Weight of a ship and displacement are difference more then 10% !"
 msgstr "Увага: Вага судна й водотоннажність відрізняються більш ніж на 10% !"
 
 #: freestringsunit.rs_attention____
@@ -746,20 +766,25 @@ msgid "ATTENTION!!!_"
 msgstr "УВАГА!!!_"
 
 #: freestringsunit.rs_attention____calculated_diameter_of_propeller_is_bigger_then_limited_diameter_dp_lim_
-msgid "ATTENTION!!! Calculated diameter of propeller is bigger then limited diameter Dp_lim="
+msgid ""
+"ATTENTION!!! Calculated diameter of propeller is bigger then limited "
+"diameter Dp_lim="
 msgstr "УВАГА!!! Розрахунковий діаметр ГГ більш ніж граничний діаметр Dpr="
 
 #: freestringsunit.rs_attention____calculation_for_sea_vessels_by_holtrop_1988_method_
-msgid "ATTENTION!!! Calculation for sea vessels by Holtrop-1988 method."
-msgstr "Увага!!! Далі розрахунок для морських суден за методом Холтропа-1988(84)."
+msgid "ATTENTION!!! Calculation for sea vessels by Holtrop-1988 method"
+msgstr ""
+"Увага!!! Далі розрахунок для морських суден за методом Холтропа-1988(84)"
 
 #: freestringsunit.rs_attention____ho__
 msgid "ATTENTION!!! ho ="
 msgstr "УВАГА!!! Початкова поперечна метацентрична висота ho ="
 
 #: freestringsunit.rs_attention____increase_number_of_propellers_or_decrease_estimate_speed_
-msgid "ATTENTION!!! Increase number of propellers or decrease estimate speed."
-msgstr "УВАГА!!! Збільшить кількість гребних гвинтів або зменьшить розрахункову швидкість."
+msgid "ATTENTION!!! Increase number of propellers or decrease estimate speed"
+msgstr ""
+"УВАГА!!! Збільшить кількість гребних гвинтів або зменьшить розрахункову "
+"швидкість"
 
 #: freestringsunit.rs_attention____limit_of_power_in_freeware_free_shipt_is_reached___
 msgid "ATTENTION!!! Limit of power in freeware Free!ship+ is reached!!!"
@@ -774,18 +799,25 @@ msgid "ATTENTION!!! Porpoising regime !!!"
 msgstr "УВАГА!!! Нестабільний режим глісирування!!!"
 
 #: freestringsunit.rs_attention____stopped_acceleration_calculation__because_steady_engine_rpm
-msgid "ATTENTION!!! Stopped acceleration calculation, because steady engine RPM"
-msgstr "УВАГА!!! Розрахунок розгону препинен, бо встановлена розрахункова частота обертання"
+msgid ""
+"ATTENTION!!! Stopped acceleration calculation, because steady engine RPM"
+msgstr ""
+"УВАГА!!! Розрахунок розгону препинен, бо встановлена розрахункова частота "
+"обертання"
 
 #: freestringsunit.rs_attention____teta0___60_
 #, fuzzy
 #| msgid "ATTENTION!!! Teta0 < 60#176"
 msgid "ATTENTION!!! Teta0 < 60°"
-msgstr "УВАГА!!! Кут заходу ДСО менше 60°."
+msgstr "УВАГА!!! Кут заходу ДСО менше 60°"
 
 #: freestringsunit.rs_attention____the_number_of_propeller_diagram_more_then_11_is_accessed_in_pro_version_only___
-msgid "ATTENTION!!! The number of propeller diagram more then 11 is accessed in Pro version only!!!"
-msgstr "УВАГА!!! Серії гвинтових діаграм з номерами більше 11 доступні тільки FREE!ship+ Pro версії!!!"
+msgid ""
+"ATTENTION!!! The number of propeller diagram more then 11 is accessed in Pro"
+" version only!!!"
+msgstr ""
+"УВАГА!!! Серії гвинтових діаграм з номерами більше 11 доступні тільки "
+"FREE!ship+ Pro версії!!!"
 
 #: freestringsunit.rs_attention____the_power_of_engine_is_very_high_
 msgid "ATTENTION!!! The power of engine is very high!"
@@ -796,11 +828,16 @@ msgid "ATTENTION!!! The power of engine is very low!"
 msgstr "УВАГА!!! Потужність двигуна занадто мала!"
 
 #: freestringsunit.rs_attention____the_waiting_speed_is_outside_valid_domain_of_calculated_speed___
-msgid "ATTENTION!!! The waiting speed is outside valid domain of calculated speed!!!"
-msgstr "УВАГА!!! Очікувана швидкість задана поза діапазоном розрахованих швидкостей!!!"
+msgid ""
+"ATTENTION!!! The waiting speed is outside valid domain of calculated "
+"speed!!!"
+msgstr ""
+"УВАГА!!! Очікувана швидкість задана поза діапазоном розрахованих "
+"швидкостей!!!"
 
 #: freestringsunit.rs_attention____this_is_diagram_of_propeller_accessed_in_pro_version_only___
-msgid "ATTENTION!!! This is diagram of propeller accessed in Pro version only!!!"
+msgid ""
+"ATTENTION!!! This is diagram of propeller accessed in Pro version only!!!"
 msgstr "УВАГА!!! Ця серія діаграм  доступна тільки в FREE!ship+ Pro версії!!!"
 
 #: freestringsunit.rs_attention____this_is_propeller_with_cavitation_
@@ -812,16 +849,22 @@ msgid "ATTENTION!!! This is series NOT correct for this project!"
 msgstr "УВАГА!!! Ця серія або метод НЕ підходить для розрахунку проекту!"
 
 #: freestringsunit.rs_attention_____power_is_out_valid_domain_30_____400_bhp_per_unit_for_used_diagram_
-msgid "ATTENTION !!! Power is out valid domain 30 ... 400 BHP per unit for used diagram."
-msgstr "УВАГА!!! Потужність поза припустимого діапазона 30 ... 400 к.с. на один рушій."
+msgid ""
+"ATTENTION !!! Power is out valid domain 30 ... 400 BHP per unit for used "
+"diagram"
+msgstr ""
+"УВАГА!!! Потужність поза припустимого діапазона 30 ... 400 к.с. на один "
+"рушій"
 
 #: freestringsunit.rs_attention_____vs_is_out_valid_domain_0_____40_knots_for_used_diagram_
-msgid "ATTENTION !!! Vs is out valid domain 0 ... 40 knots for used diagram."
-msgstr "УВАГА!!! Vs поза припустимого діапазона 0 ... 40 вузл для цієї діаграми водометів."
+msgid "ATTENTION !!! Vs is out valid domain 0 ... 40 knots for used diagram"
+msgstr ""
+"УВАГА!!! Vs поза припустимого діапазона 0 ... 40 вузл для цієї діаграми "
+"водометів"
 
 #: freestringsunit.rs_at_least_two_layers_are_needed_to_perform_this_operation_
-msgid "At least two layers are needed to perform this operation."
-msgstr "Мінімум два шари потрібно, щоб виконати дану операцію."
+msgid "At least two layers are needed to perform this operation"
+msgstr "Мінімум два шари потрібно, щоб виконати дану операцію"
 
 #: freestringsunit.rs_average_chordlength
 msgctxt "freestringsunit.rs_average_chordlength"
@@ -849,12 +892,13 @@ msgid "Because Cwp=0, this wetted area is NOT right!!!"
 msgstr "Тому що Cwp=0, то розрахована площа змоченої поверхні НЕ точна!!!"
 
 #: freestringsunit.rs_because_extrapolation_is_used__can_be_some_errores_
-msgid "Because extrapolation is used, can be some errores."
-msgstr "Увага!!! Застосовуємо екстраполяцію - можуть бути помилки й неточності."
+msgid "Because extrapolation is used, can be some errores"
+msgstr ""
+"Увага!!! Застосовуємо екстраполяцію - можуть бути помилки й неточності"
 
 #: freestringsunit.rs_bhp
 msgid "BHP"
-msgstr "к.с."
+msgstr "к.с"
 
 #: freestringsunit.rs_bilge_keels
 msgctxt "freestringsunit.rs_bilge_keels"
@@ -896,7 +940,7 @@ msgstr "Коефіцієнт бульбообразності"
 
 #: freestringsunit.rs_bulb_area_on_fp
 msgid "Bulb area on FP"
-msgstr "Площа бульба на носовому перпендикул."
+msgstr "Площа бульба на носовому перпендикул"
 
 #: freestringsunit.rs_bulb_section_area_at_station_0__m_2_____
 msgid "Bulb Section Area at Station 0 (m^2)   ="
@@ -1120,12 +1164,19 @@ msgid "Calculations of resistance and power by D.Savitsky method"
 msgstr "Розрахунок опору та потужності глісера за методом Д.Савитського"
 
 #: freestringsunit.rs_calculations_of_resistance_and_power_for_planing_ships_by_lyubomirov_i_p__formulaes
-msgid "Calculations of resistance and power for planing ships by Lyubomirov I.P. formulaes"
-msgstr "Розрахунок буксировочного опору й потужності глісера по формулах І.П.Любомирова"
+msgid ""
+"Calculations of resistance and power for planing ships by Lyubomirov I.P. "
+"formulaes"
+msgstr ""
+"Розрахунок буксировочного опору й потужності глісера по формулах "
+"І.П.Любомирова"
 
 #: freestringsunit.rs_calculations_of_resistance_and_power_for_planing_ships_by_sedov_l_i__method
-msgid "Calculations of resistance and power for planing ships by Sedov L.I. method"
-msgstr "Розрахунок опору й потужності глісера за методом Л.І.Седова і О.С.Перельмутра"
+msgid ""
+"Calculations of resistance and power for planing ships by Sedov L.I. method"
+msgstr ""
+"Розрахунок опору й потужності глісера за методом Л.І.Седова і "
+"О.С.Перельмутра"
 
 #: freestringsunit.rs_calculation_aborted
 msgid "Calculation aborted"
@@ -1152,7 +1203,9 @@ msgid "Calculation of propeller for selected engine"
 msgstr "Розрахунок оптимального гребного гвинта для обраного двигуна"
 
 #: freestringsunit.rs_calculation_of_propeller_is_stop__because_np_set_zero_in_resistance_calculation_
-msgid "Calculation of propeller is stop, because Np set zero in resistance calculation!"
+msgid ""
+"Calculation of propeller is stop, because Np set zero in resistance "
+"calculation!"
 msgstr "Розрахунок ГГ неможлив, бо Np=0 у розрахунку опору !"
 
 #: freestringsunit.rs_calculation_of_propeller_on_cavitation_by_a_method_of_papmehl_
@@ -1161,7 +1214,8 @@ msgstr "Розрахунок гребного гвинта на кавітаці
 
 #: freestringsunit.rs_calculation_of_propeller_on_cavitation_by_s_hoenherr_s_method_
 #, fuzzy
-#| msgid "Calculation of propeller on cavitation by S#241hoenherr's method:"
+#| msgid ""
+#| "Calculation of propeller on cavitation by S#241hoenherr's method:"
 msgid "Calculation of propeller on cavitation by SÃÂ±hoenherr's method:"
 msgstr "Розрахунок ГГ на кавітацію по методу Шенхерра:"
 
@@ -1170,7 +1224,9 @@ msgid "Calculation of propeller on general strength for r/D=0.3:"
 msgstr "Розрахунок гребного гвинта на загальну міцність для r/D=0.3:"
 
 #: freestringsunit.rs_calculation_of_resistance_for_keeled_yacht_by_holtrop_s_method_is_impossible___
-msgid "Calculation of resistance for keeled yacht by Holtrop's method is impossible!!!"
+msgid ""
+"Calculation of resistance for keeled yacht by Holtrop's method is "
+"impossible!!!"
 msgstr "Розрахунок кілевих яхт по методу Холтропа неможлив!!!"
 
 #: freestringsunit.rs_calculation_of_the_propeller_elements_for_main_engine_selection
@@ -1186,8 +1242,10 @@ msgid "Calculation optimal elements of propeller for engine selection"
 msgstr "Розрахунок елементів гребного гвинта для вибору  двигуна"
 
 #: freestringsunit.rs_calculation_ssd__dsd_and_weather_criteria_is_available_in_metric_system_
-msgid "Calculation SSD, DSD and weather criteria is available in metric system!"
-msgstr "Розрахунок ДСО, ДДО й критерію погоди тільки у метричної системі одиниць!"
+msgid ""
+"Calculation SSD, DSD and weather criteria is available in metric system!"
+msgstr ""
+"Розрахунок ДСО, ДДО й критерію погоди тільки у метричної системі одиниць!"
 
 #: freestringsunit.rs_cavitation_number_sigma__________________
 msgid "Cavitation Number Sigma                 ="
@@ -1219,7 +1277,7 @@ msgstr "Виберіть папку куди Ви хочете зберегти 
 
 #: freestringsunit.rs_click_button_for_start_selection_of_engine
 msgid "Click button for start selection of engine"
-msgstr "Кликни кнопку для вибору двигуна."
+msgstr "Кликни кнопку для вибору двигуна"
 
 #: freestringsunit.rs_close_hull
 msgid "Close hull"
@@ -1267,16 +1325,16 @@ msgid "Conference on Hydrodynamics of High Speed Craft, RINA, Nov. 1999"
 msgstr "Conference on Hydrodynamics of High Speed Craft, RINA, Nov. 1999"
 
 #: freestringsunit.rs_controlface_s__could_be_removed_
-msgid "controlface(s) could be removed."
-msgstr "controlface(s) можуть бути переміщені."
+msgid "controlface(s) could be removed"
+msgstr "controlface(s) можуть бути переміщені"
 
 #: freestringsunit.rs_controllable_reversible_pitch_propeller
 msgid "Controllable-Reversible-Pitch Propeller"
 msgstr "Гвинт регульованого кроку"
 
 #: freestringsunit.rs_controlpoints_s__could_be_removed_
-msgid "controlpoints(s) could be removed."
-msgstr "controlpoints(s) можуть бути переміщені."
+msgid "controlpoints(s) could be removed"
+msgstr "controlpoints(s) можуть бути переміщені"
 
 #: freestringsunit.rs_corner
 msgid "corner"
@@ -1295,8 +1353,8 @@ msgid "Could not calculate limitpoint"
 msgstr "Неможливо розрахувати граничну точку"
 
 #: freestringsunit.rs_could_not_export_surfaces_
-msgid "Could not export surfaces."
-msgstr "Неможливо експортувати поверхні."
+msgid "Could not export surfaces"
+msgstr "Неможливо експортувати поверхні"
 
 #: freestringsunit.rs_could_not_find_edge
 msgid "Could not find edge"
@@ -1311,8 +1369,8 @@ msgid "Could not load program preferences from the following location"
 msgstr "Неможливо завантажити установки програми із зазначеної папки"
 
 #: freestringsunit.rs_could_not_open_the_file_
-msgid "Could not open the file."
-msgstr "Не можу відкрити файл."
+msgid "Could not open the file"
+msgstr "Не можу відкрити файл"
 
 #: freestringsunit.rs_could_not_save_program_preferences_to_the_following_location
 msgid "Could not save program preferences to the following location"
@@ -1376,6 +1434,7 @@ msgid "Delete all diagonals"
 msgstr "Видалити все рибини"
 
 #: freestringsunit.rs_delete_all_stations
+#: tfreeintersectiondialog.deleteall.hint
 msgid "Delete all stations"
 msgstr "Видалити всі шпангоути"
 
@@ -1414,11 +1473,13 @@ msgstr "Проектна осадка"
 
 #: freestringsunit.rs_design_length
 msgid "Design length"
-msgstr "Довжина між перпенд."
+msgstr "Довжина між перпенд"
 
 #: freestringsunit.rs_design_margin_has_been_included_in_rt__pe__and_req_thr___rt__1_t__
-msgid "Design Margin Has Been Included in RT, PE, and REQ.THR = RT/(1-t)."
-msgstr "Додаток до буксировочному опору Rt, потужності Pe й тягі T = Rt/(1-t) має бути також врахован."
+msgid "Design Margin Has Been Included in RT, PE, and REQ.THR = RT/(1-t)"
+msgstr ""
+"Додаток до буксировочному опору Rt, потужності Pe й тягі T = Rt/(1-t) має "
+"бути також врахован"
 
 #: freestringsunit.rs_design_margin_on_rt_pe_req_thr__________
 msgid "Design Margin on RT,PE,REQ.THR (%)     ="
@@ -1456,8 +1517,8 @@ msgid "Displacement"
 msgstr "Водотоннажність"
 
 #: freestringsunit.rs_displacement_step_can_not_be_zero_
-msgid "Displacement step can not be zero."
-msgstr "Крок водотоннажності не може бути 0."
+msgid "Displacement step can not be zero"
+msgstr "Крок водотоннажності не може бути 0"
 
 #: freestringsunit.rs_distance
 msgctxt "freestringsunit.rs_distance"
@@ -1490,7 +1551,8 @@ msgstr "Підвищення Ц.Т. площі вітрильності над �
 
 #: freestringsunit.rs_distance__miles___speed__knots___frequency_of_propeller_no0_1__1_min_
 #, fuzzy
-#| msgid "Distance [miles]; Speed [knots]; Frequency of propeller n*0,1 [1/min]"
+#| msgid ""
+#| "Distance [miles]; Speed [knots]; Frequency of propeller n*0,1 [1/min]"
 msgid "Distance [miles]; Speed [knots]; Frequency of propeller n*0.1 [1/min]"
 msgstr "Шлях, м.миль; Швидкість, вузл; Частота обертання ГГ n*0.1, об/хв"
 
@@ -1560,11 +1622,11 @@ msgid "Draft hull"
 msgstr "Осадка корпуса"
 
 #: freestringsunit.rs_draft_on_f_a_
-msgid "Draft on F.A."
+msgid "Draft on F.A"
 msgstr "Осадка кормою"
 
 #: freestringsunit.rs_draft_on_f_p_
-msgid "Draft on F.P."
+msgid "Draft on F.P"
 msgstr "Осадка носом"
 
 #: freestringsunit.rs_draft_on_midship
@@ -1720,43 +1782,59 @@ msgstr "Файл конфігурації Resist.cnf відсутній або �
 
 #: freestringsunit.rs_final_calculations_of_resistance_and_power_by_clement_blount_s_method
 msgid "Final calculations of resistance and power by Clement-Blount's method"
-msgstr "Результати розрахунка опору та потужності глісера за методом Клемента-Блаунта"
+msgstr ""
+"Результати розрахунка опору та потужності глісера за методом Клемента-"
+"Блаунта"
 
 #: freestringsunit.rs_final_calculations_of_resistance_and_power_by_clement_poup_s_method
 msgid "Final calculations of resistance and power by Clement-Poup's method"
-msgstr "Результати розрахунка опору та потужності глісера за методом Клемента-Поупа"
+msgstr ""
+"Результати розрахунка опору та потужності глісера за методом Клемента-Поупа"
 
 #: freestringsunit.rs_final_calculations_of_resistance_and_power_by_compton_s_method
 msgid "Final calculations of resistance and power by Compton's method"
 msgstr "Результати розрахунку опору і потужності глісера за методом Комптона"
 
 #: freestringsunit.rs_final_calculations_of_resistance_and_power_by_mercier_and_savitsky_s_method
-msgid "Final calculations of resistance and power by Mercier and Savitsky's method"
-msgstr "Результати розрахунка опору та потужності глісера за методом Мерсієра-Савитського"
+msgid ""
+"Final calculations of resistance and power by Mercier and Savitsky's method"
+msgstr ""
+"Результати розрахунка опору та потужності глісера за методом Мерсієра-"
+"Савитського"
 
 #: freestringsunit.rs_final_calculations_of_resistance_and_power_by_method_fung_leibman_1995
 msgid "Final calculations of resistance and power by method Fung-Leibman 1995"
-msgstr "Результати розрахунка буксировочної потужності і опору за методом Fung-Leibman 1995"
+msgstr ""
+"Результати розрахунка буксировочної потужності і опору за методом Fung-"
+"Leibman 1995"
 
 #: freestringsunit.rs_final_calculations_of_resistance_and_power_by_method_hollenbach_1998
 msgid "Final calculations of resistance and power by method Hollenbach-1998"
-msgstr "Результати розрахунку буксировочной потужності й опору за методом Hollenbach-1998"
+msgstr ""
+"Результати розрахунку буксировочной потужності й опору за методом "
+"Hollenbach-1998"
 
 #: freestringsunit.rs_final_calculations_of_resistance_and_power_by_method_van_oortmerssen_1971
-msgid "Final calculations of resistance and power by method van Oortmerssen-1971"
-msgstr "Результати розрахунка буксировочної потужності і опору по van Oortmerssen-1971"
+msgid ""
+"Final calculations of resistance and power by method van Oortmerssen-1971"
+msgstr ""
+"Результати розрахунка буксировочної потужності і опору по van "
+"Oortmerssen-1971"
 
 #: freestringsunit.rs_final_calculations_of_resistance_and_power_by_m_bunkov_method
 msgid "Final calculations of resistance and power by M.Bunkov method"
-msgstr "Результати розрахунка опору та потужності глісера за методом М.Бунькова"
+msgstr ""
+"Результати розрахунка опору та потужності глісера за методом М.Бунькова"
 
 #: freestringsunit.rs_final_calculations_of_resistance_and_power_by_radojcic_s_method
 msgid "Final calculations of resistance and power by Radojcic's method"
 msgstr "Результати розрахунку опору і потужності глісера за методом Радойчича"
 
 #: freestringsunit.rs_final_calculations_of_resistance_and_power_by_ridgeley_nevitt_1967_method
-msgid "Final calculations of resistance and power by Ridgeley-Nevitt-1967 method"
-msgstr "Результати розрахунку опору і потужності по методу Ridgeley-Nevitt-1967"
+msgid ""
+"Final calculations of resistance and power by Ridgeley-Nevitt-1967 method"
+msgstr ""
+"Результати розрахунку опору і потужності по методу Ridgeley-Nevitt-1967"
 
 #: freestringsunit.rs_final_calculations_of_resistance_and_power_by_robinson_s_method
 msgid "Final calculations of resistance and power by Robinson's method"
@@ -1780,7 +1858,9 @@ msgstr "Результати розрахунку буксировочной п�
 
 #: freestringsunit.rs_final_calculations_of_resistance_by_a_method_holtrop_1988
 msgid "Final calculations of resistance by a method Holtrop-1988"
-msgstr "Результати розрахунку буксировочной потужності й опору за методом Холтропа-1988(84)"
+msgstr ""
+"Результати розрахунку буксировочной потужності й опору за методом "
+"Холтропа-1988(84)"
 
 #: freestringsunit.rs_fixed_pitch_propeller
 msgid "Fixed-Pitch Propeller"
@@ -1795,8 +1875,8 @@ msgid "for"
 msgstr "для"
 
 #: freestringsunit.rs_forward_line_with_dwl_
-msgid "forward line with DWL."
-msgstr "скрізь точку перетинання лінії форштевня з конструктивною ватерлінією."
+msgid "forward line with DWL"
+msgstr "скрізь точку перетинання лінії форштевня з конструктивною ватерлінією"
 
 #: freestringsunit.rs_for_calculation_is_in_free_ship_directory___
 msgid "for calculation is in Free!Ship directory!!!"
@@ -1827,8 +1907,8 @@ msgid "FPP in nozzle VIT series"
 msgstr ""
 
 #: freestringsunit.rs_free_brake_of_ship_
-msgid "Free brake of ship."
-msgstr "Вільне гальмування судна."
+msgid "Free brake of ship"
+msgstr "Вільне гальмування судна"
 
 #: freestringsunit.rs_free_brake_of_ship_calculation
 msgid "Free brake of ship calculation"
@@ -1860,7 +1940,9 @@ msgstr "Частота обертання ГГ, об/хв"
 
 #: freestringsunit.rs_frv_is_outside_valid_domain_1_____4___used_extrapolation_for_r_ap
 msgid "FrV is outside valid domain 1 ... 4 , used extrapolation for R_ap"
-msgstr "Fr виходить із діапазону 1...4 , використаємо екстраполяцію при розрахунку R_ap"
+msgstr ""
+"Fr виходить із діапазону 1...4 , використаємо екстраполяцію при розрахунку "
+"R_ap"
 
 #: freestringsunit.rs_ft
 msgid "ft"
@@ -2190,7 +2272,7 @@ msgid ""
 "4. Fugino  M., \"Maneuverability in Restricted Waters: State of the Art\", The Uni-\n"
 "versity of Michigan NAME Report No. 184, Aug., 1976.\n"
 "5. Inoue, S., Hirano, M., and Kijima, K., \"Hydrodynamic Derivatives on Ship Mano-\n"
-"evring\", International Shipbuilding Progress, Vol. 28, No. 321, 1981."
+"evring\", International Shipbuilding Progress, Vol. 28, No. 321, 1981"
 msgstr ""
 "Maneuvering Prediction Program (MPP-1.3)\n"
 "M. G. Parsons, December, 1994\n"
@@ -2304,7 +2386,7 @@ msgstr ""
 "4. Fugino  M., \"Maneuverability in Restricted Waters: State of the Art\", The Uni-\n"
 "versity of Michigan NAME Report No. 184, Aug., 1976.\n"
 "5. Inoue, S., Hirano, M., and Kijima, K., \"Hydrodynamic Derivatives on Ship Mano-\n"
-"evring\", International Shipbuilding Progress, Vol. 28, No. 321, 1981."
+"evring\", International Shipbuilding Progress, Vol. 28, No. 321, 1981"
 
 #: freestringsunit.rs_hydrodin_rvrs_note
 msgid ""
@@ -2437,7 +2519,7 @@ msgid ""
 "Cy = Fy/(0.5*RHOA*Vr^2*AT)+-1.96*Stand_Err(Y)    - lateral force coefficient;\n"
 "Cmz= Mz/(0.5*RHOA*Vr^2*AT*SLOA)+-1.96*Stand_Err(Mz) - yawing moment coefficient,\n"
 "RHOA - density of air;\n"
-"Vr   - RMS of relative wind speed between water level and top of superstructure."
+"Vr   - RMS of relative wind speed between water level and top of superstructure"
 msgstr ""
 "AT   - лобова проекція площі вітрильності вище КВЛ, м2;\n"
 "S    - довжина періметру площі вітрильності без ватерлінії та тонких тіл (щогли), м2;\n"
@@ -2464,7 +2546,7 @@ msgstr ""
 "Cy=Fy/(0.5*RHOA*Vr^2*AT)+-1.96*Stand_Err(Y)    - коефіцієнт поперечної сили;\n"
 "Cmz=Mz/(0.5*RHOA*Vr^2*AT*SLOA)+-1.96*Stand_Err(Mz) - коефіцієнт момента рискання,\n"
 "де : RHOA - питома маса повiтря, кг/м^3;\n"
-"Vr - середня швидкiсть вiтру мiж ВЛ і ВП надбудови, м/с."
+"Vr - середня швидкiсть вiтру мiж ВЛ і ВП надбудови, м/с"
 
 #: freestringsunit.rs_hydrodin_task2_note
 msgctxt "freestringsunit.rs_hydrodin_task2_note"
@@ -2540,7 +2622,7 @@ msgid ""
 "2.Parsons, M. G., \"Optimization Methods for Use in Computer-Aided Ship Design,\" Proceedings\n"
 "of the First SNAME STAR Symposium, 1975.\n"
 "3.Comstock,J.P. (Ed.), Principles of Naval Architecture, Vol. II, 1988  Edition, SNAME, New\n"
-"York, p.182."
+"York, p.182"
 msgstr ""
 "AT   - лобова проекція площі вітрильності вище КВЛ, м2;\n"
 "S    - довжина періметру площі вітрильності без ватерлінії та тонких тіл (щогли), м2;\n"
@@ -2567,7 +2649,7 @@ msgstr ""
 "Cy=Fy/(0.5*RHOA*Vr^2*AT)+-1.96*Stand_Err(Y)    - коефіцієнт поперечної сили;\n"
 "Cmz=Mz/(0.5*RHOA*Vr^2*AT*SLOA)+-1.96*Stand_Err(Mz) - коефіцієнт момента рискання,\n"
 "де : RHOA - питома маса повiтря, кг/м^3;\n"
-"Vr - середня швидкiсть вiтру мiж ВЛ і ВП надбудови, м/с."
+"Vr - середня швидкiсть вiтру мiж ВЛ і ВП надбудови, м/с"
 
 #: freestringsunit.rs_hydronship_addedmass_note
 #, fuzzy
@@ -2628,7 +2710,7 @@ msgid ""
 "NKI, 1993. - p. 22-27.\n"
 "3. Korotkin A.I. Prisoedinennie massy sudna: Spravochnik.-L.:Sudostroenie,1986,312pp.\n"
 "4. Hofman A.D. Dvigitelno-rulevoy kompleks i manevrirovanie sudna: Spravochnik. -\n"
-"L.:Sudostroenie,1988,360pp."
+"L.:Sudostroenie,1988,360pp"
 msgstr ""
 "HydroNShIp_AddedMass v1.03 - це CFD програмне забеспечення розрахунка  інерційних\n"
 "характеристик суден, безкоштовне  для  навчання  й  некомерційного використання.\n"
@@ -2657,11 +2739,15 @@ msgstr ""
 "Николаев, НКИ, 1993. – c. 22-27.\n"
 "3. Короткин А.И. Присоединенные массы судна:Справочник.-Л.:Судостроение,1986,312c.\n"
 "4. Гофман А.Д. Движительно-рулевой комплекс и маневрирование судна: Справочник. -\n"
-"Л.:Судостроение,1988,360c."
+"Л.:Судостроение,1988,360c"
 
 #: freestringsunit.rs_hydrostatics_calculation_is_not_possible__because_there_is_leak_point_under_dwl___
-msgid "Hydrostatics calculation is not possible, because there is leak point under DWL!!!"
-msgstr "Розрахунок гідростатики неможлив або невірний, так як є точки утікання нижче КВЛ !!!"
+msgid ""
+"Hydrostatics calculation is not possible, because there is leak point under "
+"DWL!!!"
+msgstr ""
+"Розрахунок гідростатики неможлив або невірний, так як є точки утікання нижче"
+" КВЛ !!!"
 
 #: freestringsunit.rs_if_sigmab_4___1____
 msgid "If SigmaB/4 > 1 ==>"
@@ -2776,12 +2862,12 @@ msgid "insert plane intersections"
 msgstr "вставити вид перетинань"
 
 #: freestringsunit.rs_institution_of_naval_architects__1973_
-msgid "Institution of Naval Architects, 1973."
-msgstr "Institution of Naval Architects, 1973."
+msgid "Institution of Naval Architects, 1973"
+msgstr "Institution of Naval Architects, 1973"
 
 #: freestringsunit.rs_invalid_contour_distance_
-msgid "Invalid contour distance."
-msgstr "Невірна контурна відстань."
+msgid "Invalid contour distance"
+msgstr "Невірна контурна відстань"
 
 #: freestringsunit.rs_invalid_coordinate
 msgid "Invalid coordinate"
@@ -2824,8 +2910,8 @@ msgid "Invalid z-coordinate in surface"
 msgstr "Невірна z-координата поверхні"
 
 #: freestringsunit.rs_is_lower_then_critical__increase_engine_power_
-msgid "is lower then critical. Increase engine power."
-msgstr "двигуна нижче критичної. Збільшить потужність двигуна."
+msgid "is lower then critical. Increase engine power"
+msgstr "двигуна нижче критичної. Збільшить потужність двигуна"
 
 #: freestringsunit.rs_is_no_valid_numeric_input
 msgid "is no valid numeric input"
@@ -3026,7 +3112,7 @@ msgstr "точок витоку"
 #: freestringsunit.rs_length
 msgctxt "freestringsunit.rs_length"
 msgid "Length"
-msgstr "Довж."
+msgstr "Довж"
 
 #: freestringsunit.rs_length_of_cylindrical_body__m
 msgid "Length of cylindrical body, m"
@@ -3061,16 +3147,24 @@ msgid "Limit diameter of propeller [m]"
 msgstr "Граничний діаметр ГГ, м"
 
 #: freestringsunit.rs_limit_of_power_in_freeware_free_shipt_is_reached_or_increase_diameter_of_propeller___
-msgid "Limit of power in freeware Free!ship+ is reached or increase diameter of propeller!!!"
-msgstr "Досягнута межа по потужності для freeware Free!ship+ або збільшить діаметр гвинта!!!"
+msgid ""
+"Limit of power in freeware Free!ship+ is reached or increase diameter of "
+"propeller!!!"
+msgstr ""
+"Досягнута межа по потужності для freeware Free!ship+ або збільшить діаметр "
+"гвинта!!!"
 
 #: freestringsunit.rs_limit_of_speed_in_freeware_free_shipt_is_reached___
 msgid "Limit of speed in freeware Free!ship+ is reached!!!"
 msgstr "Максимум швидкості для freeware FREE!ship+ досягнут!!!"
 
 #: freestringsunit.rs_lnumlcharact_lmeas_l________________________m_e_a_n_i_n_g_s________________________l
-msgid "|Num|Charact.|Meas.|                        M E A N I N G S                        |"
-msgstr "|Nпп|Величина|Розм.|                        З Н А Ч Е Н И Я                        |"
+msgid ""
+"|Num|Charact.|Meas.|                        M E A N I N G S"
+"                        |"
+msgstr ""
+"|Nпп|Величина|Розм.|                        З Н А Ч Е Н И Я"
+"                        |"
 
 #: freestringsunit.rs_location
 msgid "Location"
@@ -3086,7 +3180,7 @@ msgstr "захват точки"
 
 #: freestringsunit.rs_longitudinal_center_of_buoyancy
 msgid "Longitudinal center of buoyancy"
-msgstr "Абсциса Ц.В."
+msgstr "Абсциса Ц.В"
 
 #: freestringsunit.rs_longitudinal_center_of_effort
 msgid "Longitudinal center of effort"
@@ -3109,8 +3203,12 @@ msgid "Longitudinal transverse metacenter"
 msgstr "Апліката поздовжнього метацентра"
 
 #: freestringsunit.rs_lpropeller_s_metal_l___1___l___2___l___3___l___4___l___5___l___6___l___7___l___8___l
-msgid "|Propeller's metal:|   1   |   2   |   3   |   4   |   5   |   6   |   7   |   8   |"
-msgstr "|  Тип металу ГГ:  |   1   |   2   |   3   |   4   |   5   |   6   |   7   |   8   |"
+msgid ""
+"|Propeller's metal:|   1   |   2   |   3   |   4   |   5   |   6   |   7   |"
+"   8   |"
+msgstr ""
+"|  Тип металу ГГ:  |   1   |   2   |   3   |   4   |   5   |   6   |   7   |"
+"   8   |"
 
 #: freestringsunit.rs_lwl_bwl_is_outside_valid_domain
 msgid "Lwl/Bwl is outside valid domain"
@@ -3157,8 +3255,10 @@ msgid "| 9 | F      |[m2] |"
 msgstr "| 9 | F      | м2  |"
 
 #: freestringsunit.rs_l_character___l___________________t____________________t__twin_screw_ship__l
-msgid "| Character.  |-------------------+--------------------+  Twin-screw ship  |"
-msgstr "| Параметр    |-------------------+--------------------+   Двохгвинтове    |"
+msgid ""
+"| Character.  |-------------------+--------------------+  Twin-screw ship  |"
+msgstr ""
+"| Параметр    |-------------------+--------------------+   Двохгвинтове    |"
 
 #: freestringsunit.rs_l_d________l___m____l
 msgid "| D        |  [m]   |"
@@ -3194,9 +3294,12 @@ msgstr "| Kt       |   -    |"
 
 #: freestringsunit.rs_l_l_voo0_3333_l__4_490_____6_008__l__5_450_____7_047___l__4_405_____7_265__l
 #, fuzzy
-#| msgid "| L/V**0,3333 |  4,490 ... 6,008  |  5,450 ... 7,047   |  4,405 ... 7,265  |"
-msgid "| L/V**0.3333 |  4.490 ... 6.008  |  5.450 ... 7.047   |  4.405 ... 7.265  |"
-msgstr "| L/V**0,3333 |  4,490 ... 6,008  |  5,450 ... 7,047   |  4,405 ... 7,265  |"
+#| msgid ""
+#| "| L/V**0,3333 |  4,490 ... 6,008  |  5,450 ... 7,047   |  4,405 ... 7,265  |"
+msgid ""
+"| L/V**0.3333 |  4.490 ... 6.008  |  5.450 ... 7.047   |  4.405 ... 7.265  |"
+msgstr ""
+"| L/V**0,3333 |  4,490 ... 6,008  |  5,450 ... 7,047   |  4,405 ... 7,265  |"
 
 #: freestringsunit.rs_l_n________l_1_min__l
 msgid "| n        |[1/min] |"
@@ -3227,24 +3330,44 @@ msgid "| R        |  [kN]  |"
 msgstr "| R        |   кН   |"
 
 #: freestringsunit.rs_l_speed_l_speed_l_fr_v__l___r_f__l___r_r__l___r_t__l__power__l__r_t_e_l_power_e_l
-msgid "| Speed | Speed | Fr_V  |   R_f  |   R_r  |   R_T  |  Power  |  R_T_e | Power_e |"
-msgstr "|  Vs   |  Vms  | Fr_V  |   R_f  |   R_r  |   R_T  |    Pe   |  R_T_e |   Pe_e  |"
+msgid ""
+"| Speed | Speed | Fr_V  |   R_f  |   R_r  |   R_T  |  Power  |  R_T_e | "
+"Power_e |"
+msgstr ""
+"|  Vs   |  Vms  | Fr_V  |   R_f  |   R_r  |   R_T  |    Pe   |  R_T_e |   "
+"Pe_e  |"
 
 #: freestringsunit.rs_l_speed_l_speed_l__fr___l___r_f__l___r_r__l___r_t__l__power__l__r_t_e_l_power_e_l
-msgid "| Speed | Speed |  Fr   |   R_f  |   R_r  |   R_T  |  Power  |  R_T_e | Power_e |"
-msgstr "|  Vs   |  Vms  |  Fr   |   R_f  |   R_r  |   R_T  |    Pe   |  R_T_e |   Pe_e  |"
+msgid ""
+"| Speed | Speed |  Fr   |   R_f  |   R_r  |   R_T  |  Power  |  R_T_e | "
+"Power_e |"
+msgstr ""
+"|  Vs   |  Vms  |  Fr   |   R_f  |   R_r  |   R_T  |    Pe   |  R_T_e |   "
+"Pe_e  |"
 
 #: freestringsunit.rs_l_speed_l_speed_l__fr___l___r_f__l___r_r__l___r_t__l__power__l___wt__l___t___l
-msgid "| Speed | Speed |  Fr   |   R_f  |   R_r  |   R_T  |  Power  |   Wt  |   t   |"
-msgstr "|  Vs   |  Vms  |  Fr   |   R_f  |   R_r  |   R_T  |    Pe   |   Wt  |   t   |"
+msgid ""
+"| Speed | Speed |  Fr   |   R_f  |   R_r  |   R_T  |  Power  |   Wt  |   t"
+"   |"
+msgstr ""
+"|  Vs   |  Vms  |  Fr   |   R_f  |   R_r  |   R_T  |    Pe   |   Wt  |   t"
+"   |"
 
 #: freestringsunit.rs_l_speed_l_speed_l__fr___l___r_f___l___r_r___l____r_t____l__power__l_cp_opt__l_lcb_opt_l
-msgid "| Speed | Speed |  Fr   |   R_f   |   R_r   |    R_T    |  Power  | Cp opt. | LCB opt |"
-msgstr "|  Vs   |  Vms  |  Fr   |   R_f   |   R_r   |    R_T    |    Pe   | Cp opt. | LCB opt |"
+msgid ""
+"| Speed | Speed |  Fr   |   R_f   |   R_r   |    R_T    |  Power  | Cp opt. "
+"| LCB opt |"
+msgstr ""
+"|  Vs   |  Vms  |  Fr   |   R_f   |   R_r   |    R_T    |    Pe   | Cp opt. "
+"| LCB opt |"
 
 #: freestringsunit.rs_l_speed_l_speed_l__fr___l___r_v__l___r_r__l___r_t__l__power__l__r_t_e_l_power_e_l
-msgid "| Speed | Speed |  Fr   |   R_v  |   R_r  |   R_T  |  Power  |  R_T_e | Power_e |"
-msgstr "|  Vs   |  Vms  |  Fr   |   R_v  |   R_r  |   R_T  |    Pe   |  R_T_e |   Pe_e  |"
+msgid ""
+"| Speed | Speed |  Fr   |   R_v  |   R_r  |   R_T  |  Power  |  R_T_e | "
+"Power_e |"
+msgstr ""
+"|  Vs   |  Vms  |  Fr   |   R_v  |   R_r  |   R_T  |    Pe   |  R_T_e |   "
+"Pe_e  |"
 
 #: freestringsunit.rs_l_speed_l_speed_l__s_l__l_r_frict_l_r_resid_l_r_total_l_spilman_l
 msgid "| Speed | Speed |  S/L  | R frict.| R resid.| R total | Spilman |"
@@ -3283,28 +3406,52 @@ msgid "|  [kn] | [m/s] | ratio |   [N]   |   [N]   |   [N]   |   [N]   |"
 msgstr "|  вузл |  м/с  |   -   |    Н    |    Н    |    Н    |    Н    |"
 
 #: freestringsunit.rs_l___kn__l__m_s__l_______l___kn___l___kn___l____kn__l____kw___l____kn__l____kw___l
-msgid "|  [kn] | [m/s] |  [-]  |  [kN]  |  [kN]  |   [kN] |   [kW]  |   [kN] |   [kW]  |"
-msgstr "|  вузл |  м/с  |   -   |   кН   |   кН   |   кН   |   кВт   |   кН   |   кВт   |"
+msgid ""
+"|  [kn] | [m/s] |  [-]  |  [kN]  |  [kN]  |   [kN] |   [kW]  |   [kN] |   "
+"[kW]  |"
+msgstr ""
+"|  вузл |  м/с  |   -   |   кН   |   кН   |   кН   |   кВт   |   кН   |   "
+"кВт   |"
 
 #: freestringsunit.rs_l___kn__l__m_s__l_______l___kn___l___kn___l____kn__l____kw___l_______l_______l
-msgid "|  [kn] | [m/s] |  [-]  |  [kN]  |  [kN]  |   [kN] |   [kW]  |  [-]  |  [-]  |"
-msgstr "| вузл  |  м/с  |   -   |   кН   |   кН   |   кН   |   кВт   |   -   |   -   |"
+msgid ""
+"|  [kn] | [m/s] |  [-]  |  [kN]  |  [kN]  |   [kN] |   [kW]  |  [-]  |  [-]"
+"  |"
+msgstr ""
+"| вузл  |  м/с  |   -   |   кН   |   кН   |   кН   |   кВт   |   -   |   -"
+"   |"
 
 #: freestringsunit.rs_l___kn__l__m_s__l_______l___kn____l___kn____l____kn_____l____kw___l_________l_________l
-msgid "|  [kn] | [m/s] |  [-]  |  [kN]   |  [kN]   |   [kN]    |   [kW]  |   [-]   |   [%]   |"
-msgstr "| вузл  |  м/с  |   -   |   кН    |   кН    |    кН     |   кВт   |   -     |    %    |"
+msgid ""
+"|  [kn] | [m/s] |  [-]  |  [kN]   |  [kN]   |   [kN]    |   [kW]  |   [-]   "
+"|   [%]   |"
+msgstr ""
+"| вузл  |  м/с  |   -   |   кН    |   кН    |    кН     |   кВт   |   -     "
+"|    %    |"
 
 #: freestringsunit.rs_l___kn__l__m_s__l_______l____n___l____n___l____n___l____w____l____n___l____w____l
-msgid "|  [kn] | [m/s] |  [-]  |   [N]  |   [N]  |   [N]  |   [W]   |   [N]  |   [W]   |"
-msgstr "|  вузл |  м/с  |   -   |    Н   |    Н   |    Н   |    Вт   |    Н   |    Вт   |"
+msgid ""
+"|  [kn] | [m/s] |  [-]  |   [N]  |   [N]  |   [N]  |   [W]   |   [N]  |   "
+"[W]   |"
+msgstr ""
+"|  вузл |  м/с  |   -   |    Н   |    Н   |    Н   |    Вт   |    Н   |    "
+"Вт   |"
 
 #: freestringsunit.rs_l___kn__l__m_s__l_______l____n___l____n___l____n___l____w____l_______l_______l
-msgid "|  [kn] | [m/s] |  [-]  |   [N]  |   [N]  |   [N]  |   [W]   |  [-]  |  [-]  |"
-msgstr "| вузл  |  м/с  |   -   |    Н   |    Н   |    Н   |    Вт   |   -   |   -   |"
+msgid ""
+"|  [kn] | [m/s] |  [-]  |   [N]  |   [N]  |   [N]  |   [W]   |  [-]  |  [-]"
+"  |"
+msgstr ""
+"| вузл  |  м/с  |   -   |    Н   |    Н   |    Н   |    Вт   |   -   |   -"
+"   |"
 
 #: freestringsunit.rs_l___kn__l__m_s__l_______l____n____l____n____l_____n_____l____w____l_________l_________l
-msgid "|  [kn] | [m/s] |  [-]  |   [N]   |   [N]   |    [N]    |   [W]   |   [-]   |   [%]   |"
-msgstr "| вузл  |  м/с  |   -   |    Н    |    Н    |     Н     |    Вт   |   -     |    %    |"
+msgid ""
+"|  [kn] | [m/s] |  [-]  |   [N]   |   [N]   |    [N]    |   [W]   |   [-]   "
+"|   [%]   |"
+msgstr ""
+"| вузл  |  м/с  |   -   |    Н    |    Н    |     Н     |    Вт   |   -     "
+"|    %    |"
 
 #: freestringsunit.rs_l___kn__l_______l__degr_l___kn____l___kn____l___kn____l___kw____l
 msgid "|  [kn] |   -   | [degr]|  [kN]   |  [kN]   |  [kN]   |  [kW]   |"
@@ -3327,24 +3474,38 @@ msgid "|  [kn] |   -   |   -   |  [lbf]  |  [lbf]  |  [lbf]  |  [ehp]  |"
 msgstr "| вузл  |   -   |   -   |  фунтів |  фунтів |  фунтів |   к.с.  |"
 
 #: freestringsunit.rs_l___kn___l___m_s__l________l___kn___l___kn___l___kn___l___kw___l___kn___l___kw___l
-msgid "|   kn   |   m/s  |    -   |   kN   |   kN   |   kN   |   kW   |   kN   |   kW   |"
-msgstr "|  вузл  |   м/с  |    -   |   кН   |   кН   |   кН   |  кВт   |   кН   |  кВт   |"
+msgid ""
+"|   kn   |   m/s  |    -   |   kN   |   kN   |   kN   |   kW   |   kN   |   "
+"kW   |"
+msgstr ""
+"|  вузл  |   м/с  |    -   |   кН   |   кН   |   кН   |  кВт   |   кН   |  "
+"кВт   |"
 
 #: freestringsunit.rs_l___kn___l___m_s__l________l____n___l____n___l____n___l___w____l____n___l___w____l
-msgid "|   kn   |   m/s  |    -   |    N   |    N   |    N   |   W    |    N   |   W    |"
-msgstr "|  вузл  |   м/с  |    -   |    Н   |    Н   |    Н   |   Вт   |    Н   |   Вт   |"
+msgid ""
+"|   kn   |   m/s  |    -   |    N   |    N   |    N   |   W    |    N   |   "
+"W    |"
+msgstr ""
+"|  вузл  |   м/с  |    -   |    Н   |    Н   |    Н   |   Вт   |    Н   |   "
+"Вт   |"
 
 #: freestringsunit.rs_l___los_lwl___l__1_000_____1_050__l__1_000_____1_050___l__1_000_____1_050__l
 #, fuzzy
-#| msgid "|   Los/Lwl   |  1,000 ... 1,050  |  1,000 ... 1,050   |  1,000 ... 1,050  |"
-msgid "|   Los/Lwl   |  1.000 ... 1.050  |  1.000 ... 1.050   |  1.000 ... 1.050  |"
-msgstr "|   Los/Lwl   |  1,000 ... 1,050  |  1,000 ... 1,050   |  1,000 ... 1,050  |"
+#| msgid ""
+#| "|   Los/Lwl   |  1,000 ... 1,050  |  1,000 ... 1,050   |  1,000 ... 1,050  |"
+msgid ""
+"|   Los/Lwl   |  1.000 ... 1.050  |  1.000 ... 1.050   |  1.000 ... 1.050  |"
+msgstr ""
+"|   Los/Lwl   |  1,000 ... 1,050  |  1,000 ... 1,050   |  1,000 ... 1,050  |"
 
 #: freestringsunit.rs_l___lwl_l_____l__1_000_____1_055__l__0_945_____1_000___l__1_000_____1_070__l
 #, fuzzy
-#| msgid "|   Lwl/L     |  1,000 ... 1,055  |  0,945 ... 1,000   |  1,000 ... 1,070  |"
-msgid "|   Lwl/L     |  1.000 ... 1.055  |  0.945 ... 1.000   |  1.000 ... 1.070  |"
-msgstr "|   Lwl/L     |  1,000 ... 1,055  |  0,945 ... 1,000   |  1,000 ... 1,070  |"
+#| msgid ""
+#| "|   Lwl/L     |  1,000 ... 1,055  |  0,945 ... 1,000   |  1,000 ... 1,070  |"
+msgid ""
+"|   Lwl/L     |  1.000 ... 1.055  |  0.945 ... 1.000   |  1.000 ... 1.070  |"
+msgstr ""
+"|   Lwl/L     |  1,000 ... 1,055  |  0,945 ... 1,000   |  1,000 ... 1,070  |"
 
 #: freestringsunit.rs_l___value__l______________m_e_a_n_i_n_g_s_______________l
 msgid "|   Value  |              M E A N I N G S               |"
@@ -3371,14 +3532,21 @@ msgid "|   Vs  |  FrV  |  Tau  |   R_f   |   R_p   |   R_t   |   Pe    |"
 msgstr "|   Vs  |  FrV  |  Tau  |   R_f   |   R_p   |   R_t   |   Pe    |"
 
 #: freestringsunit.rs_l___vs___l___vms__l___fr___l___r_f__l___r_r__l___r_t__l___pe___l__r_t_e_l__pe_e__l
-msgid "|   Vs   |   Vms  |   Fr   |   R_f  |   R_r  |   R_T  |   Pe   |  R_T_e |  Pe_e  |"
-msgstr "|   Vs   |   Vms  |   Fr   |   R_f  |   R_r  |   R_T  |   Pe   |  R_T_e |  Pe_e  |"
+msgid ""
+"|   Vs   |   Vms  |   Fr   |   R_f  |   R_r  |   R_T  |   Pe   |  R_T_e |  "
+"Pe_e  |"
+msgstr ""
+"|   Vs   |   Vms  |   Fr   |   R_f  |   R_r  |   R_T  |   Pe   |  R_T_e |  "
+"Pe_e  |"
 
 #: freestringsunit.rs_l____dp_ta____l__0_430_____0_840__l__0_655_____1_050___l__0_495_____0_860__l
 #, fuzzy
-#| msgid "|    Dp/Ta    |  0,430 ... 0,840  |  0,655 ... 1,050   |  0,495 ... 0,860  |"
-msgid "|    Dp/Ta    |  0.430 ... 0.840  |  0.655 ... 1.050   |  0.495 ... 0.860  |"
-msgstr "|    Dp/Ta    |  0,430 ... 0,840  |  0,655 ... 1,050   |  0,495 ... 0,860  |"
+#| msgid ""
+#| "|    Dp/Ta    |  0,430 ... 0,840  |  0,655 ... 1,050   |  0,495 ... 0,860  |"
+msgid ""
+"|    Dp/Ta    |  0.430 ... 0.840  |  0.655 ... 1.050   |  0.495 ... 0.860  |"
+msgstr ""
+"|    Dp/Ta    |  0,430 ... 0,840  |  0,655 ... 1,050   |  0,495 ... 0,860  |"
 
 #: freestringsunit.rs_l____jb____l________l
 msgid "|    Jb    |   -    |"
@@ -3442,29 +3610,42 @@ msgstr "|    vs    |   вуз  |"
 
 #: freestringsunit.rs_l_____b_t_____l__1_989_____4_002__l__2_967_____6_120___l__2_308_____6_110__l
 #, fuzzy
-#| msgid "|     B/T     |  1,989 ... 4,002  |  2,967 ... 6,120   |  2,308 ... 6,110  |"
-msgid "|     B/T     |  1.989 ... 4.002  |  2.967 ... 6.120   |  2.308 ... 6.110  |"
-msgstr "|     B/T     |  1,989 ... 4,002  |  2,967 ... 6,120   |  2,308 ... 6,110  |"
+#| msgid ""
+#| "|     B/T     |  1,989 ... 4,002  |  2,967 ... 6,120   |  2,308 ... 6,110  |"
+msgid ""
+"|     B/T     |  1.989 ... 4.002  |  2.967 ... 6.120   |  2.308 ... 6.110  |"
+msgstr ""
+"|     B/T     |  1,989 ... 4,002  |  2,967 ... 6,120   |  2,308 ... 6,110  |"
 
 #: freestringsunit.rs_l_____cb______l__0_601_____0_830__l__0_559_____0_790___l__0_512_____0_775__l
 #, fuzzy
-#| msgid "|     Cb      |  0,601 ... 0,830  |  0,559 ... 0,790   |  0,512 ... 0,775  |"
-msgid "|     Cb      |  0.601 ... 0.830  |  0.559 ... 0.790   |  0.512 ... 0.775  |"
-msgstr "|     Cb      |  0,601 ... 0,830  |  0,559 ... 0,790   |  0,512 ... 0,775  |"
+#| msgid ""
+#| "|     Cb      |  0,601 ... 0,830  |  0,559 ... 0,790   |  0,512 ... 0,775  |"
+msgid ""
+"|     Cb      |  0.601 ... 0.830  |  0.559 ... 0.790   |  0.512 ... 0.775  |"
+msgstr ""
+"|     Cb      |  0,601 ... 0,830  |  0,559 ... 0,790   |  0,512 ... 0,775  |"
 
 #: freestringsunit.rs_l_____l_b_____l__4_710_____7_106__l__4_949_____6_623___l__3_960_____7_130__l
 #, fuzzy
-#| msgid "|     L/B     |  4,710 ... 7,106  |  4,949 ... 6,623   |  3,960 ... 7,130  |"
-msgid "|     L/B     |  4.710 ... 7.106  |  4.949 ... 6.623   |  3.960 ... 7.130  |"
-msgstr "|     L/B     |  4,710 ... 7,106  |  4,949 ... 6,623   |  3,960 ... 7,130  |"
+#| msgid ""
+#| "|     L/B     |  4,710 ... 7,106  |  4,949 ... 6,623   |  3,960 ... 7,130  |"
+msgid ""
+"|     L/B     |  4.710 ... 7.106  |  4.949 ... 6.623   |  3.960 ... 7.130  |"
+msgstr ""
+"|     L/B     |  4,710 ... 7,106  |  4,949 ... 6,623   |  3,960 ... 7,130  |"
 
 #: freestringsunit.rs_l_____________l____design_draft___l___ballast_draft____l___________________l
-msgid "|             |    Design draft   |   Ballast draft    |                   |"
-msgstr "|             | У повному вантажі |     У баласті      |                   |"
+msgid ""
+"|             |    Design draft   |   Ballast draft    |                   |"
+msgstr ""
+"|             | У повному вантажі |     У баласті      |                   |"
 
 #: freestringsunit.rs_l_____________l____________single_screw_ship___________l___________________l
-msgid "|             |            Single-screw ship           |                   |"
-msgstr "|             |             Одногвинтове               |                   |"
+msgid ""
+"|             |            Single-screw ship           |                   |"
+msgstr ""
+"|             |             Одногвинтове               |                   |"
 
 #: freestringsunit.rs_m
 msgctxt "freestringsunit.rs_m"
@@ -3603,8 +3784,8 @@ msgid "mm"
 msgstr "мм"
 
 #: freestringsunit.rs_model_is_ok_
-msgid "Model is ok."
-msgstr "Mодель - Оk."
+msgid "Model is ok"
+msgstr "Mодель - Оk"
 
 #: freestringsunit.rs_modified
 msgid "modified"
@@ -3648,12 +3829,17 @@ msgid "N"
 msgstr "Н"
 
 #: freestringsunit.rs_need_enable_automoving_model_to_baseline_or_set_new_project_draft_
-msgid "Need enable automoving model to baseline or set new project draft."
-msgstr "Необхідно включити автомат переміщення моделі до ОЛ або задати нову осадку."
+msgid "Need enable automoving model to baseline or set new project draft"
+msgstr ""
+"Необхідно включити автомат переміщення моделі до ОЛ або задати нову осадку"
 
 #: freestringsunit.rs_need_restart_calculation__design_hydrostatics__for_model_displacement_balance___
-msgid "Need restart calculation \"Design hydrostatics\" for model displacement balance..."
-msgstr "Необхідно перезапустити \"Розрахунок гідростатики\" щоб удиферентувати модель..."
+msgid ""
+"Need restart calculation \"Design hydrostatics\" for model displacement "
+"balance..."
+msgstr ""
+"Необхідно перезапустити \"Розрахунок гідростатики\" щоб удиферентувати "
+"модель..."
 
 #: freestringsunit.rs_new_controlcurve
 msgid "new controlcurve"
@@ -3700,44 +3886,70 @@ msgid "Note 1: Calculated number of hull surface areas  :"
 msgstr "Примітка 1: Розрахункове число площадок розбивки  :"
 
 #: freestringsunit.rs_note_1__draft__and_all_other_vertical_heights__is_measured_from_point_of_the_hull_z_0_
-msgid "NOTE 1: Draft (and all other vertical heights) is measured from point of the hull Z=0."
-msgstr "Примітка 1: Осадка (й всі інші верт. висоти) обмірювані від точки корпуса Z=0!"
+msgid ""
+"NOTE 1: Draft (and all other vertical heights) is measured from point of the"
+" hull Z=0"
+msgstr ""
+"Примітка 1: Осадка (й всі інші верт. висоти) обмірювані від точки корпуса "
+"Z=0!"
 
 #: freestringsunit.rs_note_2__added_masses_are_be_devided_on____________
 msgid "Note 2: Added masses are be devided on           :"
 msgstr "Примітка 2: Приєднані маси віднесені до           :"
 
 #: freestringsunit.rs_note_2__all_calculated_coefficients_based_on_actual_dimensions_of_submerged_body_
-msgid "NOTE 2: All calculated coefficients based on actual dimensions of submerged body."
-msgstr "Примітка 2: Всі розраховані коефіцієнти засновані на дійсних розмірах зануреного тіла."
+msgid ""
+"NOTE 2: All calculated coefficients based on actual dimensions of submerged "
+"body"
+msgstr ""
+"Примітка 2: Всі розраховані коефіцієнти засновані на дійсних розмірах "
+"зануреного тіла"
 
 #: freestringsunit.rs_note_2__all_calculated_coefficients_based_on_project_length___draft_and_beam_
-msgid "NOTE 2: All calculated coefficients based on project length), draft and beam."
-msgstr "Примітка 2: Всі розраховані коефіцієнти засновані на проектних довжині, ширині й осадці."
+msgid ""
+"NOTE 2: All calculated coefficients based on project length), draft and beam"
+msgstr ""
+"Примітка 2: Всі розраховані коефіцієнти засновані на проектних довжині, "
+"ширині й осадці"
 
 #: freestringsunit.rs_note_3__the_bulb_characteristics_was_calculated_right__if_f_p__is_through_point_of_intersection
-msgid "Note 3: The bulb characteristics was calculated right, if F.P. is through point of intersection"
-msgstr "Примітка 3: Хар-ки бульба визначаються вірно, якщо носовий перпендикуляр проходить"
+msgid ""
+"Note 3: The bulb characteristics was calculated right, if F.P. is through "
+"point of intersection"
+msgstr ""
+"Примітка 3: Хар-ки бульба визначаються вірно, якщо носовий перпендикуляр "
+"проходить"
 
 #: freestringsunit.rs_note__appendage_resistance_is_calculated_for_stationary_engine
 msgid "NOTE: Appendage resistance is calculated for stationary engine"
-msgstr "Примітка: Опір виступаючих частин розраховано як зі стаціонарним двигуном"
+msgstr ""
+"Примітка: Опір виступаючих частин розраховано як зі стаціонарним двигуном"
 
 #: freestringsunit.rs_note__coefficients_wt__t_and_etar_were_calculated_by_formulaes_of_method_holtrop_
-msgid "NOTE: Coefficients Wt, t and EtaR were calculated by formulaes of method Holtrop-"
-msgstr "Примітка: Коефіцієнти Wt, t й EtaR розраховані по формулах методом Holtrop-"
+msgid ""
+"NOTE: Coefficients Wt, t and EtaR were calculated by formulaes of method "
+"Holtrop-"
+msgstr ""
+"Примітка: Коефіцієнти Wt, t й EtaR розраховані по формулах методом Holtrop-"
 
 #: freestringsunit.rs_note__coefficients__wt_t_nr_cp_opt_lcb_opt__are_calculated_for_speed_vs__
-msgid "Note: Coefficients (Wt,t,nr,Cp_opt,Lcb_opt) are calculated for speed Vs ="
-msgstr "Примітка: Коефіцієнти (Wt,t,nr,Cp_opt,Lcb_opt) наведені для швидкості Vs ="
+msgid ""
+"Note: Coefficients (Wt,t,nr,Cp_opt,Lcb_opt) are calculated for speed Vs ="
+msgstr ""
+"Примітка: Коефіцієнти (Wt,t,nr,Cp_opt,Lcb_opt) наведені для швидкості Vs ="
 
 #: freestringsunit.rs_note__in_parentheses_the_minimum_values_of_demanded_parameters_are_specified
-msgid "Note: In parentheses the minimum values of demanded parameters are specified"
+msgid ""
+"Note: In parentheses the minimum values of demanded parameters are specified"
 msgstr "Примітка: У лапках вказані мінімальні значення потрібних параметрів"
 
 #: freestringsunit.rs_note__propeller_s_metal___1_brass_mntfe__2_bronze_altfe_h9_4_4__3_carbon_steel_
-msgid "Note: Propeller's metal:  1-brass Mn+Fe; 2-bronze Al+Fe H9-4-4; 3-carbon steel;"
-msgstr "Примітка: Метал ГГ  1-латунь Лмцж 55-3-1; 2-бронза Браж Н9-4-4; 3-сталь вуглецева 25Л;"
+msgid ""
+"Note: Propeller's metal:  1-brass Mn+Fe; 2-bronze Al+Fe H9-4-4; 3-carbon "
+"steel;"
+msgstr ""
+"Примітка: Метал ГГ  1-латунь Лмцж 55-3-1; 2-бронза Браж Н9-4-4; 3-сталь "
+"вуглецева 25Л;"
 
 #: freestringsunit.rs_not_all_points_could_be_added_while_collapsing_edge
 msgid "Not all points could be added while collapsing edge"
@@ -3748,20 +3960,20 @@ msgid "not modified"
 msgstr "не модифіковано"
 
 #: freestringsunit.rs_no_faces_could_be_removed_
-msgid "No faces could be removed."
-msgstr "Немає фасок для переміщення."
+msgid "No faces could be removed"
+msgstr "Немає фасок для переміщення"
 
 #: freestringsunit.rs_no_geometry_imported_
-msgid "No geometry imported."
-msgstr "Немає імпортованої геометрії."
+msgid "No geometry imported"
+msgstr "Немає імпортованої геометрії"
 
 #: freestringsunit.rs_no_intersection_points_found_
-msgid "No intersection points found."
-msgstr "Не знайдені точки перетинань."
+msgid "No intersection points found"
+msgstr "Не знайдені точки перетинань"
 
 #: freestringsunit.rs_no_markers_could_be_imported_
-msgid "No markers could be imported."
-msgstr "Немає маркерів для імпорту."
+msgid "No markers could be imported"
+msgstr "Немає маркерів для імпорту"
 
 #: freestringsunit.rs_no_meshdata_could_be_imported
 msgid "No meshdata could be imported"
@@ -3790,7 +4002,8 @@ msgstr "Кількість лопатей"
 
 #: freestringsunit.rs_number_of_blades_is_out_of_limits_for_this_diagram___
 msgid "Number of blades is out of limits for this diagram!!!"
-msgstr "Кількість лопатей поза припустимими межами для цієї гвинтової діаграми!!!"
+msgstr ""
+"Кількість лопатей поза припустимими межами для цієї гвинтової діаграми!!!"
 
 #: freestringsunit.rs_number_of_columns
 msgid "Number of columns"
@@ -3835,12 +4048,14 @@ msgid "number of station for SAC calculation must be < 100!"
 msgstr "кількість шпангоутів до розрахунку СПШ має бути не більше 100!"
 
 #: freestringsunit.rs_off__bow________________error________________error________________error
-msgid "OFF  BOW                ERROR                ERROR                ERROR"
-msgstr "і вітром                похибка              похибка              похибка"
+msgid ""
+"OFF  BOW                ERROR                ERROR                ERROR"
+msgstr ""
+"і вітром                похибка              похибка              похибка"
 
 #: freestringsunit.rs_ok__propeller_is_not_cavitate_
-msgid "OK! Propeller is not cavitate."
-msgstr "OK! Кавітація відсутня."
+msgid "OK! Propeller is not cavitate"
+msgstr "OK! Кавітація відсутня"
 
 #: freestringsunit.rs_old_backup_could_not_be_removed_
 msgid "Old backup could not be removed!"
@@ -3912,8 +4127,8 @@ msgid "points"
 msgstr "точки"
 
 #: freestringsunit.rs_points_removed_
-msgid "points removed."
-msgstr "точки вилучені."
+msgid "points removed"
+msgstr "точки вилучені"
 
 #: freestringsunit.rs_points_unlocked
 msgid "points unlocked"
@@ -3925,8 +4140,11 @@ msgid "point move"
 msgstr "переміщення точки"
 
 #: freestringsunit.rs_possible_inaccurate_ssd_calculation__increase_the_maximum_angle_of_heel_
-msgid "Possible inaccurate SSD calculation: Increase the maximum angle of heel!"
-msgstr "Розрахунок ДСО неточний - внутрішній об'єм, можливо, не замкнений, або збільшить Zg!"
+msgid ""
+"Possible inaccurate SSD calculation: Increase the maximum angle of heel!"
+msgstr ""
+"Розрахунок ДСО неточний - внутрішній об'єм, можливо, не замкнений, або "
+"збільшить Zg!"
 
 #: freestringsunit.rs_power
 msgctxt "freestringsunit.rs_power"
@@ -3963,28 +4181,46 @@ msgid "Profile view"
 msgstr "Бік"
 
 #: freestringsunit.rs_program_of_aerodynamics_characteristics_calculation_for_merchant_ships_
-msgid "Program of aerodynamics characteristics calculation for merchant ships."
-msgstr "Програма розрахунка аеродинамічних характеристик суден торгового флота"
+msgid "Program of aerodynamics characteristics calculation for merchant ships"
+msgstr ""
+"Програма розрахунка аеродинамічних характеристик суден торгового флота"
 
 #: freestringsunit.rs_program_of_resistance_and_power_prediction_for_naval_ships__nuos_ukraine_2010_
-msgid "Program of resistance and power prediction for naval ships (NUoS,Ukraine,2010)"
-msgstr "Розрахунок опору війскових кораблів за методом Fung-Leibman 1995 (доц. Тимошенко В.Ф.,НУК,2010)"
+msgid ""
+"Program of resistance and power prediction for naval ships "
+"(NUoS,Ukraine,2010)"
+msgstr ""
+"Розрахунок опору війскових кораблів за методом Fung-Leibman 1995 (доц. "
+"Тимошенко В.Ф.,НУК,2010)"
 
 #: freestringsunit.rs_program_of_resistance_and_power_prediction_for_tugs_and_trawlers__nuos__ukraine_2009_
-msgid "Program of resistance and power prediction for tugs and trawlers (NUoS, Ukraine,2009)"
-msgstr "Розрахунок опору малих суден (буксирів і траулерів) по van Oortmerssen-1971 (доц. Тимошенко В.Ф.,НУК,2009)"
+msgid ""
+"Program of resistance and power prediction for tugs and trawlers (NUoS, "
+"Ukraine,2009)"
+msgstr ""
+"Розрахунок опору малих суден (буксирів і траулерів) по van Oortmerssen-1971 "
+"(доц. Тимошенко В.Ф.,НУК,2009)"
 
 #: freestringsunit.rs_program_of_resistance_prediction_for_cargo_ships_by_hollenbach_1998_method__nuos__ukraine_
-msgid "Program of resistance prediction for cargo ships by Hollenbach-1998 method (NUoS, Ukraine)"
-msgstr "Розрахунок опору вантажних суден методом Hollenbach-1998 (доц. Тимошенко В.Ф., НУК,2008)"
+msgid ""
+"Program of resistance prediction for cargo ships by Hollenbach-1998 method "
+"(NUoS, Ukraine)"
+msgstr ""
+"Розрахунок опору вантажних суден методом Hollenbach-1998 (доц. Тимошенко "
+"В.Ф., НУК,2008)"
 
 #: freestringsunit.rs_program_of_resistance_prediction_for_displacement_ships_hydronship_v1_08__nuos__ukraine_
-msgid "Program of resistance prediction for displacement ships HydroNShIp v1.08 (NUoS, Ukraine)"
-msgstr "Розрахунок опору та потужності водотоннажних суден HydroNShIp v1.08 (НУК, Україна)"
+msgid ""
+"Program of resistance prediction for displacement ships HydroNShIp v1.08 "
+"(NUoS, Ukraine)"
+msgstr ""
+"Розрахунок опору та потужності водотоннажних суден HydroNShIp v1.08 (НУК, "
+"Україна)"
 
 #: freestringsunit.rs_program_of_resistance_prediction_planing_and_pre_planing_ships
 msgid "Program of resistance prediction planing and pre-planing ships"
-msgstr "Розрахунок буксировочного опору та потужності глісера у перехідному режимі"
+msgstr ""
+"Розрахунок буксировочного опору та потужності глісера у перехідному режимі"
 
 #: freestringsunit.rs_project
 msgctxt "freestringsunit.rs_project"
@@ -4020,12 +4256,12 @@ msgid "Propeller Expanded Area Ratio Ae/Ao    ="
 msgstr "Дискове відношення Ae/Ao                ="
 
 #: freestringsunit.rs_propeller_is_a_strong_in_non_uniform_flow_
-msgid "Propeller is a strong in non-uniform flow."
-msgstr "OK! Міцність ГГ у неоднорідному потоці забезпечена."
+msgid "Propeller is a strong in non-uniform flow"
+msgstr "OK! Міцність ГГ у неоднорідному потоці забезпечена"
 
 #: freestringsunit.rs_propeller_is_a_strong_in_uniform_flow_
-msgid "Propeller is a strong in uniform flow."
-msgstr "OK! Міцність ГГ в однорідному потоці забезпечена."
+msgid "Propeller is a strong in uniform flow"
+msgstr "OK! Міцність ГГ в однорідному потоці забезпечена"
 
 #: freestringsunit.rs_propeller_open_water_efficiency_eta0_____
 msgid "Propeller Open Water Efficiency Eta0    ="
@@ -4103,7 +4339,7 @@ msgid ""
 "\n"
 "Note: More information see in book: Raschet Hodkosti nudvodnych vodoizmeschayuschich sudov:\n"
 "Uchebnoe posobie/ M.B.Slizghevski, Yu.M.Korol, M.G.Sokolik, V.F.Timoshenko;\n"
-"Under common redaction by Prof. M.B.Slizghevski.-Nikolaev, NUoS, 2004.-192p."
+"Under common redaction by Prof. M.B.Slizghevski.-Nikolaev, NUoS, 2004.-192p"
 msgstr ""
 
 #: freestringsunit.rs_propeller_task2_note
@@ -4202,7 +4438,7 @@ msgid ""
 "\n"
 "Note: More information see in book: Raschet Hodkosti nudvodnych vodoizmeschayuschich sudov:\n"
 "Uchebnoe posobie/ M.B.Slizghevski, Yu.M.Korol, M.G.Sokolik, V.F.Timoshenko;\n"
-"Under common redaction by Prof. M.B.Slizghevski.-Nikolaev, NUoS, 2004.-192p."
+"Under common redaction by Prof. M.B.Slizghevski.-Nikolaev, NUoS, 2004.-192p"
 msgstr ""
 "Таблиця.        Середні значення ККД валопровода, редуктора й передачі\n"
 "----------------------------------+-------------------------------------+\n"
@@ -4249,7 +4485,7 @@ msgstr ""
 "\n"
 "Примітка: Більш докладну інформацію див. у книзі: Розрахунок ходовості надводних водотоннажних\n"
 "суден:Навчальний посібник/ М.Б.Сліжевський, Ю.М.Король, М.Г.Соколик, В.Ф.Тимошенко; Під общ. ред.\n"
-"проф. М.Б.Сліжевського.-Миколаїв, НУК, 2004.-192с."
+"проф. М.Б.Сліжевського.-Миколаїв, НУК, 2004.-192с"
 
 #: freestringsunit.rs_propeller_task4_note
 msgctxt "freestringsunit.rs_propeller_task4_note"
@@ -4325,7 +4561,7 @@ msgid ""
 "2.Parsons, M. G., \"Optimization Methods for Use in Computer-Aided Ship Design,\" Proceedings\n"
 "of the First SNAME STAR Symposium, 1975.\n"
 "3.Comstock,J.P. (Ed.), Principles of Naval Architecture, Vol. II, 1988  Edition, SNAME, New\n"
-"York, p.182."
+"York, p.182"
 msgstr ""
 "PROPELLER OPTIMIZATION PROGRAM (POP.1.5)\n"
 "M. Парсонз, Грудень, 1994\n"
@@ -4398,7 +4634,7 @@ msgstr ""
 "ningen B-Screw Series\", International Shipbuilding Progress,Vol.22,No.251,July,1975.\n"
 "2.Parsons M.G., \"Optimization Methods for Use in Computer-Aided Ship Design\", Proce-\n"
 "edings of the First SNAME STAR Symposium, 1975.\n"
-"3.Comstock J.P.,Principles of Naval Architecture,Vol.II,1988 Edition,SNAME,New York,p.182."
+"3.Comstock J.P.,Principles of Naval Architecture,Vol.II,1988 Edition,SNAME,New York,p.182"
 
 #: freestringsunit.rs_propeller_task5_note
 #, fuzzy
@@ -4516,8 +4752,10 @@ msgid "Redo"
 msgstr "Redo"
 
 #: freestringsunit.rs_rel_wind_______coeff____stand_______coeff____stand_______coeff____stand
-msgid "REL WIND       COEFF    STAND       COEFF    STAND       COEFF    STAND"
-msgstr "між ДП            Cx     Станд         Cy     Станд         Mz     Станд"
+msgid ""
+"REL WIND       COEFF    STAND       COEFF    STAND       COEFF    STAND"
+msgstr ""
+"між ДП            Cx     Станд         Cy     Станд         Mz     Станд"
 
 #: freestringsunit.rs_remaining_resistance_components__n__
 msgid "Remaining Resistance Components (N):"
@@ -4560,7 +4798,7 @@ msgstr "Опір"
 
 #: freestringsunit.rs_resistanceo0_1__lbf___power__ehp_
 msgid "Resistance*0.1 [lbf]; Power [ehp]"
-msgstr "Опір*0.1, фунтів; Потужність, к.с."
+msgstr "Опір*0.1, фунтів; Потужність, к.с"
 
 #: freestringsunit.rs_resistanceo10__kn___power__kw_
 msgid "Resistance*10 [kN]; Power [kW]"
@@ -4576,11 +4814,16 @@ msgstr "Опір визначається за"
 
 #: freestringsunit.rs_resistance_and_power_for_small_displacement_ships_by_ubc_1993_method
 msgid "Resistance and power for small displacement ships by UBC-1993 method"
-msgstr "Розрахунок опору буксирів й траулерів по методу UBC-1993 (доц. Тимошенко В.Ф.,НУК,2012)"
+msgstr ""
+"Розрахунок опору буксирів й траулерів по методу UBC-1993 (доц. Тимошенко "
+"В.Ф.,НУК,2012)"
 
 #: freestringsunit.rs_resistance_and_power_of_tugs_and_trawlers_by_ridgeley_nevitt_1967_method
-msgid "Resistance and power of tugs and trawlers by Ridgeley-Nevitt-1967 method"
-msgstr "Розрахунок опору буксирів й траулерів по Ridgeley-Nevitt-1967 (доц. Тимошенко В.Ф.,НУК,2012)"
+msgid ""
+"Resistance and power of tugs and trawlers by Ridgeley-Nevitt-1967 method"
+msgstr ""
+"Розрахунок опору буксирів й траулерів по Ridgeley-Nevitt-1967 (доц. "
+"Тимошенко В.Ф.,НУК,2012)"
 
 #: freestringsunit.rs_resistance_and_power_planing_ships_by_clement_blount_method
 msgid "Resistance and power planing ships by Clement-Blount method"
@@ -4604,7 +4847,8 @@ msgstr "Розрахунок опору та потужності глісера
 
 #: freestringsunit.rs_resistance_and_power_planing_ships_by_robinson_s_method__wolfson_1999_
 msgid "Resistance and power planing ships by Robinson's method (Wolfson-1999)"
-msgstr "Розрахунок опору та потужності глісера за методом Робінсона (Wolfson-1999)"
+msgstr ""
+"Розрахунок опору та потужності глісера за методом Робінсона (Wolfson-1999)"
 
 #: freestringsunit.rs_resistance_and_power_pre_planing_ships_by_method_of_mercier_savitsky
 msgid "Resistance and power pre-planing ships by method of Mercier-Savitsky"
@@ -4742,8 +4986,12 @@ msgstr ""
 #: freestringsunit.rs_resistance_holtrop_note_p4
 #, fuzzy
 msgctxt "freestringsunit.rs_resistance_holtrop_note_p4"
-msgid "4.If wetted surface area S is set as 0, then S to calculate by formulae from method of Holtrop."
-msgstr "4.Якщо площа змоченої поверхні S = 0, то розрахунок S по формулі методом Холтропа."
+msgid ""
+"4.If wetted surface area S is set as 0, then S to calculate by formulae from"
+" method of Holtrop"
+msgstr ""
+"4.Якщо площа змоченої поверхні S = 0, то розрахунок S по формулі методом "
+"Холтропа"
 
 #: freestringsunit.rs_resistance_holtrop_note_p5
 #, fuzzy
@@ -4757,12 +5005,12 @@ msgid ""
 "5.The wetted area of transom you can determine from sectional areas curve on Profile View or\n"
 "from \"Design hydrostatics\" output.\n"
 "The wetted area of bulbous on F.P. is analogous determination.\n"
-"The CoG wetted bulb area h_b to determine on \"Bodyplan view\" visually."
+"The CoG wetted bulb area h_b to determine on \"Bodyplan view\" visually"
 msgstr ""
 "5.Площу зануреної частини транця на тихій воді можна визначити по СПШ на проекції \"Бік\",\n"
 "попередньо включивши \"Розрахунок СПШ і ц.т.\"\n"
 "Площу зануреної частини бульба на носовому перпендикулярі можна визначити аналогічно по СПШ\n"
-"На проекції \"Корпус\" візуально визначити ц.т. площі бульба й висоту його від кільової лінії."
+"На проекції \"Корпус\" візуально визначити ц.т. площі бульба й висоту його від кільової лінії"
 
 #: freestringsunit.rs_resistance_holtrop_note_p6
 #, fuzzy
@@ -4774,23 +5022,25 @@ msgctxt "freestringsunit.rs_resistance_holtrop_note_p6"
 msgid ""
 "6.Propeller number Np is set for power prediction and for interaction propeller and hull.\n"
 "For Np=0 the wake fraction Wt and thrust deduction t is calculated as for highspeed sailing\n"
-"ships."
+"ships"
 msgstr ""
 "6.Кількість гребних гвинтів Np необхідно задавати для розрахунку коефіцієнтів взаємодії\n"
 "гребного гвинта й корпуса. При Np=0 коефіцієнт побіжного потоку Wt і коефіцієнт засмоктуван-\n"
-"ня t визначаються як для швидкісних вітрильних суден."
+"ня t визначаються як для швидкісних вітрильних суден"
 
 #: freestringsunit.rs_resistance_holtrop_note_p7
 msgid ""
 "7.Propeller diameter D with one-screw is <= 0.8*Ta, and for twin-screw <= 0.7*Ta.\n"
-"Expanded blade area ratio Ae/Ao is calculate from condition, when cavitation be absent."
+"Expanded blade area ratio Ae/Ao is calculate from condition, when cavitation be absent"
 msgstr ""
 
 #: freestringsunit.rs_resistance_holtrop_note_p8
 #, fuzzy
 msgctxt "freestringsunit.rs_resistance_holtrop_note_p8"
-msgid "8.Absolutely rougness of hull less 150 mkm one can don't set."
-msgstr "8.Абсолютна шорсткість корпуса до 150 мкм не впливає на опір і можна не задавати."
+msgid "8.Absolutely rougness of hull less 150 mkm one can don't set"
+msgstr ""
+"8.Абсолютна шорсткість корпуса до 150 мкм не впливає на опір і можна не "
+"задавати"
 
 #: freestringsunit.rs_resistance_holtrop_note_p9
 #, fuzzy
@@ -4805,13 +5055,13 @@ msgid ""
 "9.1   Holtrop J., Mennen G.G.J., \"An  Approximate  Power  Prediction  Method\", \"International\n"
 "Shipbuilding Progress, Vol.29, No.335, July, 1982.\n"
 "9.2   Holtrop J., \"A Statistical Reanalysis of Resistance and Propulsion Data, \"International\n"
-"Shipbuilding Progress, Vol.31, No.363, Nov., 1984.\n"
+"Shipbuilding Progress, Vol.31, No.363, Nov., 1984\n"
 msgstr ""
 "9.Бiльше зi статистичним методом Холтропа можна ознайомиться:\n"
 "9.1   Holtrop J., & Mennen G.G.J., \"An  Approximate Power  Prediction Method\",  International\n"
 "Shipbuilding Progress, Vol.29, No.335, July, 1982.\n"
 "9.2   Holtrop J., \"A Statistical Reanalysis of Resistance and Propulsion Data\", International\n"
-"Shipbuilding Progress, Vol.31, No.363, Nov., 1984.\n"
+"Shipbuilding Progress, Vol.31, No.363, Nov., 1984\n"
 
 #: freestringsunit.rs_resistance_mh_note
 #, fuzzy
@@ -5178,7 +5428,7 @@ msgid ""
 "- type of ships - any displacement ships;\n"
 "- Nser = 0 ;\n"
 "NOTE: You must to set the coefficient of residual resistance Cr in function of Froude number Fr\n"
-"Cr=f(Fr), where is Fr=v/(g*L)^0,5."
+"Cr=f(Fr), where is Fr=v/(g*L)^0,5"
 msgstr ""
 "1.В'язкість за замовчуванням визначається для морської води із питомою масою 1025 кг/м^3 при температурі\n"
 "15 °С. Можна змінити температуру й питому масу: Проект-Установки проекту-Гідростатика\n"
@@ -5365,7 +5615,7 @@ msgstr ""
 "- типи суден - будь-які водотоннажні судна;\n"
 "- Nser = 0 ;\n"
 "Примітка: Необхідно задати залежність коефіцієнта залишкового опору у функції\n"
-"числа Фруда Cr=f(Fr), де Fr=v/(g*L)^0,5."
+"числа Фруда Cr=f(Fr), де Fr=v/(g*L)^0,5"
 
 #: freestringsunit.rs_resistance_oortmer_note_p1
 #, fuzzy
@@ -5505,8 +5755,12 @@ msgstr ""
 "| Число Фруда,                        Fr     |   0.20 ... 0.50      |"
 
 #: freestringsunit.rs_resistance_prediction_for_sea_vessels__according_to_associate_prof__timoshenko
-msgid "Resistance prediction for sea vessels, according to Associate Prof. Timoshenko"
-msgstr "Розрахунок опору морських суден методом Холтропа (доц. Тимошенко В.Ф., НУК, 2007)"
+msgid ""
+"Resistance prediction for sea vessels, according to Associate Prof. "
+"Timoshenko"
+msgstr ""
+"Розрахунок опору морських суден методом Холтропа (доц. Тимошенко В.Ф., НУК, "
+"2007)"
 
 #: freestringsunit.rs_resistance__effective_power__propulsion_factors_and_required_thrust
 msgid "Resistance, Effective Power, Propulsion Factors and Required Thrust"
@@ -5527,7 +5781,8 @@ msgstr "Результати розрахунку елементів гребн�
 
 #: freestringsunit.rs_results_of_calculation_propeller_elements_for_selected_engine
 msgid "Results of calculation propeller elements for selected engine"
-msgstr "Результати розрахунку оптимального гребного гвинта для обраного двигуна"
+msgstr ""
+"Результати розрахунку оптимального гребного гвинта для обраного двигуна"
 
 #: freestringsunit.rs_results_of_optimisation_
 msgid "Results of optimisation:"
@@ -5554,12 +5809,20 @@ msgid "Righting lever transverse static stability  GZ_teta"
 msgstr "Плече поперечної статичної остійності   L_teta"
 
 #: freestringsunit.rs_robinson_john___performance_prediction_of_chine_and_round_bilge_hull_forms___international
-msgid "Robinson John, \"Performance Prediction of Chine and Round Bilge Hull Forms\", International"
-msgstr "Robinson John, \"Performance Prediction of Chine and Round Bilge Hull Forms\", International"
+msgid ""
+"Robinson John, \"Performance Prediction of Chine and Round Bilge Hull "
+"Forms\", International"
+msgstr ""
+"Robinson John, \"Performance Prediction of Chine and Round Bilge Hull "
+"Forms\", International"
 
 #: freestringsunit.rs_roger_h_compton___resistance_of_a_systemic_series_of_semiplaning_transom_stern_hulls__
-msgid "Roger H.Compton, \"Resistance of a Systemic Series of Semiplaning Transom-Stern Hulls\","
-msgstr "Roger H.Compton, \"Resistance of a Systemic Series of Semiplaning Transom-Stern Hulls\","
+msgid ""
+"Roger H.Compton, \"Resistance of a Systemic Series of Semiplaning Transom-"
+"Stern Hulls\","
+msgstr ""
+"Roger H.Compton, \"Resistance of a Systemic Series of Semiplaning Transom-"
+"Stern Hulls\","
 
 #: freestringsunit.rs_rotate
 msgid "rotate"
@@ -5660,7 +5923,7 @@ msgid "Shaft brackets area"
 msgstr "Кронштейн гребного вала"
 
 #: freestringsunit.rs_shaf_effic_ogearbox_effic_
-msgid "Shaf effic.*Gearbox effic."
+msgid "Shaf effic.*Gearbox effic"
 msgstr "ККД_валопровода*ККД_редуктора"
 
 #: freestringsunit.rs_ship_speed_vk__knots___________________
@@ -5730,8 +5993,11 @@ msgid "Stabiliser fins area"
 msgstr "Скулові стабілізатори"
 
 #: freestringsunit.rs_stability_calculation_according_to_the_rules_of_the_river_register_of_shipping_of_ukraine_
-msgid "Stability calculation according to the rules of the River Register of Shipping of Ukraine:"
-msgstr "Розрахунок остійності по правилам Річкового Регістра Судноплавання України:"
+msgid ""
+"Stability calculation according to the rules of the River Register of "
+"Shipping of Ukraine:"
+msgstr ""
+"Розрахунок остійності по правилам Річкового Регістра Судноплавання України:"
 
 #: freestringsunit.rs_stability_calculation_results
 msgid "Stability calculation results"
@@ -5808,8 +6074,8 @@ msgid "Test stability coefficient"
 msgstr "Перевірний коефіцієнт остійності"
 
 #: freestringsunit.rs_there_is_already_one_backgroundimage_assigned_to_this_view_
-msgid "There is already one backgroundimage assigned to this view."
-msgstr "Вже є один фоновий малюнок для цього виду."
+msgid "There is already one backgroundimage assigned to this view"
+msgstr "Вже є один фоновий малюнок для цього виду"
 
 #: freestringsunit.rs_there_is_no_submersion
 msgid "There is no submersion"
@@ -5836,7 +6102,8 @@ msgid "The following items were corrected"
 msgstr "Наступні елементи були відкореговані"
 
 #: freestringsunit.rs_the_following_layer_properties_are_calculated_for_both_sides_of_the_ship
-msgid "The following layer properties are calculated for both sides of the ship"
+msgid ""
+"The following layer properties are calculated for both sides of the ship"
 msgstr "Властивості шарів були розраховані для обох бортів судна"
 
 #: freestringsunit.rs_the_model_already_contains_markers__do_you_want_to_delete_those_
@@ -5848,7 +6115,9 @@ msgid "The model contains a total of"
 msgstr "Модель містить усього"
 
 #: freestringsunit.rs_the_selection_contains_locked_points_that_will_not_be_affected_by_this_operation
-msgid "The selection contains locked points that will not be affected by this operation"
+msgid ""
+"The selection contains locked points that will not be affected by this "
+"operation"
 msgstr "Вибірка містить locked точки, які можуть бути порушені цією операцією"
 
 #: freestringsunit.rs_the_vessel_does_not_correspond_to_any_category_of_navigation____
@@ -5861,8 +6130,12 @@ msgid "Thickness"
 msgstr "Товщина"
 
 #: freestringsunit.rs_this_calculation_method_is_here___series_by_oct_5_0181_75_and_other_methods____
-msgid "This calculation method is here: \"Series by OCT 5.0181-75 and other methods...\""
-msgstr "Розрахунок по цьому методу шукайте тут: \"Серії по OCT 5.0181-75 й інші методи...\""
+msgid ""
+"This calculation method is here: \"Series by OCT 5.0181-75 and other "
+"methods...\""
+msgstr ""
+"Розрахунок по цьому методу шукайте тут: \"Серії по OCT 5.0181-75 й інші "
+"методи...\""
 
 #: freestringsunit.rs_this_file_was_created_with_a_later_version_of_free_ship_
 msgid "This file was created with a later version of FREE!ship!"
@@ -5870,7 +6143,7 @@ msgstr "Цей файл був створений у більш новій ве�
 
 #: freestringsunit.rs_this_is_diagram_of_propeller_access_in_pro_version_only
 msgid "This is diagram of propeller access in Pro version only"
-msgstr "Ця гвинтова діаграма доступна тільки в Free!ship+ Pro."
+msgstr "Ця гвинтова діаграма доступна тільки в Free!ship+ Pro"
 
 #: freestringsunit.rs_this_is_not_a_valid_free_ship_file_
 msgid "This is not a valid FREE!ship file!"
@@ -5909,7 +6182,8 @@ msgid "This is version of program work with metric system units only"
 msgstr "Ця версія програми працює тількі у метрічній системі одиниць (СИ)"
 
 #: freestringsunit.rs_this_model_contains_locked_points_that_will_be_modified_by_this_operation
-msgid "This model contains locked points that will be modified by this operation"
+msgid ""
+"This model contains locked points that will be modified by this operation"
 msgstr "Ця модель містить locked точки які будуть модифіковані цією операцією"
 
 #: freestringsunit.rs_thrust_coefficient_and_torque__kt__10okq
@@ -6012,7 +6286,7 @@ msgstr "Толерантність прозорості"
 
 #: freestringsunit.rs_transverse_center_of_buoyancy
 msgid "Transverse center of buoyancy"
-msgstr "Ордината Ц.В."
+msgstr "Ордината Ц.В"
 
 #: freestringsunit.rs_transverse_metacentric_radius
 msgid "Transverse metacentric radius"
@@ -6076,20 +6350,26 @@ msgid "t/m^3"
 msgstr "т/м^3"
 
 #: freestringsunit.rs_t___t________t_____t_______t_______t_______t_______t_______t_______t_______t_______t
-msgid "+---+--------+-----+-------+-------+-------+-------+-------+-------+-------+-------+"
-msgstr "+---+--------+-----+-------+-------+-------+-------+-------+-------+-------+-------+"
+msgid ""
+"+---+--------+-----+-------+-------+-------+-------+-------+-------+-------+-------+"
+msgstr ""
+"+---+--------+-----+-------+-------+-------+-------+-------+-------+-------+-------+"
 
 #: freestringsunit.rs_t___t________t_____t_______________________________________________________________t
-msgid "+---+--------+-----+---------------------------------------------------------------+"
-msgstr "+---+--------+-----+---------------------------------------------------------------+"
+msgid ""
+"+---+--------+-----+---------------------------------------------------------------+"
+msgstr ""
+"+---+--------+-----+---------------------------------------------------------------+"
 
 #: freestringsunit.rs_t_______t_______t_______t_________t_________t_________t_________t
 msgid "+-------+-------+-------+---------+---------+---------+---------+"
 msgstr "+-------+-------+-------+---------+---------+---------+---------+"
 
 #: freestringsunit.rs_t________t________t________t________t________t________t________t________t________t
-msgid "+--------+--------+--------+--------+--------+--------+--------+--------+--------+"
-msgstr "+--------+--------+--------+--------+--------+--------+--------+--------+--------+"
+msgid ""
+"+--------+--------+--------+--------+--------+--------+--------+--------+--------+"
+msgstr ""
+"+--------+--------+--------+--------+--------+--------+--------+--------+--------+"
 
 #: freestringsunit.rs_t__________t________t________t________t________t________t
 msgid "+----------+--------+--------+--------+--------+--------+"
@@ -6108,12 +6388,16 @@ msgid "+----------+--------------------------------------------+"
 msgstr "+----------+--------------------------------------------+"
 
 #: freestringsunit.rs_t_____________t___________________t____________________t___________________t
-msgid "+-------------+-------------------+--------------------+-------------------+"
-msgstr "+-------------+-------------------+--------------------+-------------------+"
+msgid ""
+"+-------------+-------------------+--------------------+-------------------+"
+msgstr ""
+"+-------------+-------------------+--------------------+-------------------+"
 
 #: freestringsunit.rs_t_____________t________________________________________t___________________t
-msgid "+-------------+----------------------------------------+-------------------+"
-msgstr "+-------------+----------------------------------------+-------------------+"
+msgid ""
+"+-------------+----------------------------------------+-------------------+"
+msgstr ""
+"+-------------+----------------------------------------+-------------------+"
 
 #: freestringsunit.rs_t_________________t______________t_____________t
 msgid "+-----------------+--------------+-------------+"
@@ -6191,7 +6475,7 @@ msgstr "Апліката Ц.Т. площі бульба, м           ="
 
 #: freestringsunit.rs_vertical_center_of_buoyancy
 msgid "Vertical center of buoyancy"
-msgstr "Апліката Ц.В."
+msgstr "Апліката Ц.В"
 
 #: freestringsunit.rs_vertical_center_of_effort
 msgid "Vertical center of effort"
@@ -6222,16 +6506,22 @@ msgid "Vp   ="
 msgstr "Vp     ="
 
 #: freestringsunit.rs_v_kts____rfok1______rapp______rw_________rb_______rtr_______ra_______rair
-msgid "V(kts)   RF*K1      RAPP      RW         RB       RTR       RA       RAIR"
-msgstr "V(узл)   Rf*K1      Rapp      Rw         Rb       Rtr       Ra        Rair"
+msgid ""
+"V(kts)   RF*K1      RAPP      RW         RB       RTR       RA       RAIR"
+msgstr ""
+"V(узл)   Rf*K1      Rapp      Rw         Rb       Rtr       Ra        Rair"
 
 #: freestringsunit.rs_v_kts____rt_n______pe_kw_______w________t_____req_thr_n_____etah______etar
-msgid "V(kts)   RT(N)     PE(kW)      w        t     REQ.THR(N)    EtaH      EtaR"
-msgstr "V(узл)   Rt(Н)     Pe(кВт)     Wt        t      тяга T(Н)    EtaH      EtaR"
+msgid ""
+"V(kts)   RT(N)     PE(kW)      w        t     REQ.THR(N)    EtaH      EtaR"
+msgstr ""
+"V(узл)   Rt(Н)     Pe(кВт)     Wt        t      тяга T(Н)    EtaH      EtaR"
 
 #: freestringsunit.rs_v_kts_____v_m_s_______fn_____slratio_____cf________cr________ca_______rf
-msgid "V(kts)    V(m/s)      FN     SLRATIO     CF        CR        CA       RF"
-msgstr "V(узл)    V(м/с)      Fr     SLRATIO     Cf        Cr        Ca       Rf"
+msgid ""
+"V(kts)    V(m/s)      FN     SLRATIO     CF        CR        CA       RF"
+msgstr ""
+"V(узл)    V(м/с)      Fr     SLRATIO     Cf        Cr        Ca       Rf"
 
 #: freestringsunit.rs_w
 msgid "W"
@@ -6336,7 +6626,9 @@ msgstr "Змочена поверхня"
 
 #: freestringsunit.rs_wetted_area_by_holtrop_formulae_is_not_right__because_cwp_0____
 msgid "Wetted area by Holtrop formulae is NOT right, because Cwp=0 !!!"
-msgstr "Тому що Cwp=0, то площа змоченої поверхні, що розрахована по Холтропу НЕ точна!!!"
+msgstr ""
+"Тому що Cwp=0, то площа змоченої поверхні, що розрахована по Холтропу НЕ "
+"точна!!!"
 
 #: freestringsunit.rs_wetted_surface_area
 msgctxt "freestringsunit.rs_wetted_surface_area"
@@ -6365,10 +6657,12 @@ msgstr "Абсциса  Ц.Т. площі вітрильності"
 
 #: freestringsunit.rs_x_of_cog
 msgid "X of CoG"
-msgstr "Абсциса Ц.Т."
+msgstr "Абсциса Ц.Т"
 
 #: freestringsunit.rs_yachtres__resistance_prediction_for_sailing_yachts__according_to_prof__gerritsma
-msgid "YachtRes, resistance prediction for sailing yachts, according to Prof. Gerritsma"
+msgid ""
+"YachtRes, resistance prediction for sailing yachts, according to Prof. "
+"Gerritsma"
 msgstr "Визначення опору для морських суден і вітрильних яхт (проф.Gerritsma)"
 
 #: freestringsunit.rs_you_have_to_set_the_mainparticulars_first_
@@ -6376,16 +6670,20 @@ msgid "You have to set the mainparticulars first!"
 msgstr "Ви повинні спочатку встановити головні розмірення!"
 
 #: freestringsunit.rs_you_must_to_increase_ae_ao__may_be_cavitation_and_or_destruction_of_propeller_
-msgid "You must to increase Ae/Ao! May be cavitation and/or destruction of propeller."
-msgstr "Необхідно збільшити Ae/Ao! Можлива кавітація й/або руйнування ГГ."
+msgid ""
+"You must to increase Ae/Ao! May be cavitation and/or destruction of "
+"propeller"
+msgstr "Необхідно збільшити Ae/Ao! Можлива кавітація й/або руйнування ГГ"
 
 #: freestringsunit.rs_you_must_to_increase_number_of_blades_until
 msgid "You must to increase number of blades until"
 msgstr "Необхідно збільшити число лопатей до"
 
 #: freestringsunit.rs_you_need_to_select_at_least_3_controlpoints_to_create_a_new_controlface
-msgid "You need to select at least 3 controlpoints to create a new controlface"
-msgstr "Вам потрібно вибрати мінімум 3 controlpoints для створення нової controlface"
+msgid ""
+"You need to select at least 3 controlpoints to create a new controlface"
+msgstr ""
+"Вам потрібно вибрати мінімум 3 controlpoints для створення нової controlface"
 
 #: freestringsunit.rs_y_coordinate
 msgid "Y coordinate"
@@ -6417,7 +6715,8 @@ msgstr "Апліката Ц.Т. площі вітрильності"
 
 #: freestringsunit.rs__degr_________________________________________________________________
 msgid "(degr)          (-)      (-)         (-)      (-)         (-)      (-)"
-msgstr "(град)           (-)      (-)         (-)      (-)         (-)      (-)"
+msgstr ""
+"(град)           (-)      (-)         (-)      (-)         (-)      (-)"
 
 #: freestringsunit.rs___by_curve_of_propeller_optimal_frequency
 msgid "- by curve of propeller optimal frequency"
@@ -6449,17 +6748,27 @@ msgstr "- з урахуванням хвилеутворення та мілко
 
 #: freestringsunit.rs__________form____appendage___wave_______bulb____transom_correlation_air_drag
 #, fuzzy
-#| msgid "#160        Form    Appendage   Wave       Bulb    Transom Correlation Air Drag"
-msgid "         Form    Appendage   Wave       Bulb    Transom Correlation Air Drag"
-msgstr "Швидкість Форми Виступ.частин Хвильове Бульба   Транця  Кореляційне Повітр.опір"
+#| msgid ""
+#| "#160        Form    Appendage   Wave       Bulb    Transom Correlation Air "
+#| "Drag"
+msgid ""
+"         Form    Appendage   Wave       Bulb    Transom Correlation Air Drag"
+msgstr ""
+"Швидкість Форми Виступ.частин Хвильове Бульба   Транця  Кореляційне "
+"Повітр.опір"
 
 #: freestringsunit.rs__________________long_force____________lat_force__________yaw_moment____
-msgid ".................LONG FORCE............LAT FORCE..........YAW MOMENT...."
-msgstr ".............Повздовжня сила........Поперечна сила........Момент рискання...."
+msgid ""
+".................LONG FORCE............LAT FORCE..........YAW MOMENT...."
+msgstr ""
+".............Повздовжня сила........Поперечна сила........Момент "
+"рискання...."
 
 #: freestringsunit.rs_______________________________________________________________________________________________
-msgid "----------------------------------------------------------------------------------------------"
-msgstr "--------------------------------------------------------------------------------------------"
+msgid ""
+"----------------------------------------------------------------------------------------------"
+msgstr ""
+"--------------------------------------------------------------------------------------------"
 
 #: freestringutils.rsallfiles
 msgctxt "freestringutils.rsallfiles"
@@ -6476,24 +6785,6 @@ msgstr ""
 
 #: freestringutils.rsjpegfiles
 msgid "JPEG files"
-msgstr ""
-
-#: freeupdatedlg.rscurrentversion
-msgid "Current Version"
-msgstr ""
-
-#: freeupdatedlg.rsknownsslexception
-#, object-pascal-format
-msgid ""
-"Exception class: %s Message: %s\n"
-"Possibly missing OpenSSL DLLs: libeay32.dll, ssleay32.dll.\n"
-"You can download these from http://wiki.overbyte.eu/wiki/index.php/ICS_Download#Download_OpenSSL_Binaries_.28required_for_SSL-enabled_components.29\n"
-"Please use latest binaries for SSL v1.0 \"OpenSSL Binaries Win-64 v1.0.*\".\n"
-"Place libeay32.dll and ssleay32.dll into directory where FreeShip.exe is installed.\n"
-"Usually it is C:\\Program Files\\FreeShip\\.\n"
-"FreeShip is currently compatible with libssl v1.0 only.\n"
-"You have to check for updates traditional way at Download page.\n"
-"Click link below."
 msgstr ""
 
 #: main.rsexitconfirmation
@@ -6587,15 +6878,15 @@ msgid "Name"
 msgstr ""
 
 #: tfreecontrolpointform.labelx.caption
-msgid "X-coord."
+msgid "X-coord"
 msgstr ""
 
 #: tfreecontrolpointform.labely.caption
-msgid "Y-coord."
+msgid "Y-coord"
 msgstr ""
 
 #: tfreecontrolpointform.labelz.caption
-msgid "Z-coord."
+msgid "Z-coord"
 msgstr ""
 
 #: tfreecontrolpointform.speedbuttonremoveanchorpoint.caption
@@ -6783,7 +7074,7 @@ msgstr "Камера"
 
 #: tfreehullwindow.caption
 msgid "FreeHullWindow"
-msgstr "3D вид."
+msgstr "3D вид"
 
 #: tfreehullwindow.deselectall.caption
 msgid "Deselect all     Esc"
@@ -6794,12 +7085,12 @@ msgid "Load"
 msgstr "Завантажити"
 
 #: tfreehullwindow.longtelelens.caption
-msgid "Long telelens 200 mm."
-msgstr "Довгофокусний об'єктив 200 мм."
+msgid "Long telelens 200 mm"
+msgstr "Довгофокусний об'єктив 200 мм"
 
 #: tfreehullwindow.mediumtelelens.caption
-msgid "Medium telelens 130 mm."
-msgstr "Середньофокусний об'єктив 130 мм."
+msgid "Medium telelens 130 mm"
+msgstr "Середньофокусний об'єктив 130 мм"
 
 #: tfreehullwindow.mode1.caption
 msgid "Mode"
@@ -6810,7 +7101,7 @@ msgctxt "tfreehullwindow.print.caption"
 msgid "Print"
 msgstr "Друк"
 
-#: tfreehullwindow.saveasbitmap.caption
+#: tfreehullwindow.saveasbitmap.caption tsaveimagedialog.caption
 msgid "Save image"
 msgstr "Зберегти зображення"
 
@@ -6819,8 +7110,8 @@ msgid "Zebra shading"
 msgstr "Зеброве зафарбування"
 
 #: tfreehullwindow.shorttelelens.caption
-msgid "Short telelens 90 mm."
-msgstr "Короткофокусний об'єктив 90 мм."
+msgid "Short telelens 90 mm"
+msgstr "Короткофокусний об'єктив 90 мм"
 
 #: tfreehullwindow.showdevelopablity.caption
 msgid "Developablity check"
@@ -6841,8 +7132,8 @@ msgid "Wireframe"
 msgstr "Дротова модель"
 
 #: tfreehullwindow.standardlens.caption
-msgid "Standard lens 50mm."
-msgstr "Стандартні лінзи 50мм."
+msgid "Standard lens 50mm"
+msgstr "Стандартні лінзи 50мм"
 
 #: tfreehullwindow.view1.caption
 msgid "View"
@@ -6867,8 +7158,8 @@ msgid "Profile"
 msgstr "Бік"
 
 #: tfreehullwindow.widelens.caption
-msgid "Wide lens 28 mm."
-msgstr "Широкі лінзи 28 мм."
+msgid "Wide lens 28 mm"
+msgstr "Широкі лінзи 28 мм"
 
 #: tfreehullwindow.zoom1.caption
 msgid "Zoom"
@@ -6893,16 +7184,12 @@ msgstr "Зменшити"
 msgid "Add..."
 msgstr ""
 
-#: tfreeintersectiondialog.addone.hint
-msgid "Add one station."
-msgstr ""
-
 #: tfreeintersectiondialog.addrange.caption
 msgid "Range"
 msgstr ""
 
 #: tfreeintersectiondialog.addrange.hint
-msgid "Add a whole range of intersection curves."
+msgid "Add a whole range of intersection curves"
 msgstr ""
 
 #: tfreeintersectiondialog.caption
@@ -6914,15 +7201,11 @@ msgid "CloseDialog"
 msgstr ""
 
 #: tfreeintersectiondialog.closedialog.hint
-msgid "Close this dialog."
+msgid "Close this dialog"
 msgstr ""
 
 #: tfreeintersectiondialog.deleteall.caption
 msgid "Delete all"
-msgstr ""
-
-#: tfreeintersectiondialog.deleteall.hint
-msgid "Delete all stations."
 msgstr ""
 
 #: tfreeintersectiondialog.deleteselected.caption
@@ -7008,7 +7291,7 @@ msgid "Buttocks"
 msgstr "Батокси"
 
 #: tfreeintersectiondialog.showbuttocks.hint
-msgid "Switch to view or add buttocks."
+msgid "Switch to view or add buttocks"
 msgstr ""
 
 #: tfreeintersectiondialog.showdiagonals.caption
@@ -7018,7 +7301,7 @@ msgid "Diagonals"
 msgstr "Рибини"
 
 #: tfreeintersectiondialog.showdiagonals.hint
-msgid "Switch to view or add diagonals."
+msgid "Switch to view or add diagonals"
 msgstr ""
 
 #: tfreeintersectiondialog.showstations.caption
@@ -7028,7 +7311,7 @@ msgid "Stations"
 msgstr "Шпангоути"
 
 #: tfreeintersectiondialog.showstations.hint
-msgid "Switch to view or add stations."
+msgid "Switch to view or add stations"
 msgstr ""
 
 #: tfreeintersectiondialog.showwaterlines.caption
@@ -7038,7 +7321,7 @@ msgid "Waterlines"
 msgstr "Ватерлінії"
 
 #: tfreeintersectiondialog.showwaterlines.hint
-msgid "Switch to view or add waterlines."
+msgid "Switch to view or add waterlines"
 msgstr ""
 
 #: tfreeintersectiondialog.toolbar1.caption
@@ -7203,7 +7486,7 @@ msgstr ""
 #, fuzzy
 msgctxt "tfreekeelwizarddialog.label14.caption"
 msgid "Length"
-msgstr "Довж."
+msgstr "Довж"
 
 #: tfreekeelwizarddialog.label15.caption
 msgid "Effective aspect ratio"
@@ -7722,7 +8005,7 @@ msgid "Graphics"
 msgstr ""
 
 #: tfreepropeller_task5.caption
-msgid "Calculation of Open Water Characteristics of Screw Propeller."
+msgid "Calculation of Open Water Characteristics of Screw Propeller"
 msgstr ""
 
 #: tfreepropeller_task5.checkbox2.caption
@@ -7782,8 +8065,8 @@ msgstr ""
 #: tfreepropeller_task5.printbutton.hint
 #, fuzzy
 msgctxt "tfreepropeller_task5.printbutton.hint"
-msgid "Print the results of the calculation."
-msgstr "Друк результатів розрахунку."
+msgid "Print the results of the calculation"
+msgstr "Друк результатів розрахунку"
 
 #: tfreepropeller_task5.tabsheet1.caption
 #, fuzzy
@@ -7810,14 +8093,14 @@ msgstr ""
 #: tfreepropeller_task5.toolbutton25.hint
 #, fuzzy
 msgctxt "tfreepropeller_task5.toolbutton25.hint"
-msgid "Close the window and save changes."
-msgstr "Закрити вікно й зберегти зміни."
+msgid "Close the window and save changes"
+msgstr "Закрити вікно й зберегти зміни"
 
 #: tfreepropeller_task5.toolbutton7.hint
 #, fuzzy
 msgctxt "tfreepropeller_task5.toolbutton7.hint"
-msgid "Close window without saving changes."
-msgstr "Закрити вікно без збереження."
+msgid "Close window without saving changes"
+msgstr "Закрити вікно без збереження"
 
 #: tfreepropeller_task5._toolbutton10.caption
 msgctxt "tfreepropeller_task5._toolbutton10.caption"
@@ -7989,8 +8272,8 @@ msgstr ""
 #: tfreeresistance_delft.printbutton.hint
 #, fuzzy
 msgctxt "tfreeresistance_delft.printbutton.hint"
-msgid "Print the results of the calculation."
-msgstr "Друк результатів розрахунку."
+msgid "Print the results of the calculation"
+msgstr "Друк результатів розрахунку"
 
 #: tfreeresistance_delft.results.caption
 #, fuzzy
@@ -8005,20 +8288,20 @@ msgstr ""
 
 #: tfreeresistance_delft.toolbutton20.hint
 msgctxt "tfreeresistance_delft.toolbutton20.hint"
-msgid "Start the calculation."
+msgid "Start the calculation"
 msgstr ""
 
 #: tfreeresistance_delft.toolbutton25.hint
 #, fuzzy
 msgctxt "tfreeresistance_delft.toolbutton25.hint"
-msgid "Close the window and save changes."
-msgstr "Закрити вікно й зберегти зміни."
+msgid "Close the window and save changes"
+msgstr "Закрити вікно й зберегти зміни"
 
 #: tfreeresistance_delft.toolbutton7.hint
 #, fuzzy
 msgctxt "tfreeresistance_delft.toolbutton7.hint"
-msgid "Close window without saving changes."
-msgstr "Закрити вікно без збереження."
+msgid "Close window without saving changes"
+msgstr "Закрити вікно без збереження"
 
 #: tfreeresistance_delft._label10.caption
 msgctxt "tfreeresistance_delft._label10.caption"
@@ -8444,8 +8727,8 @@ msgstr ""
 #: tfreeresistance_fungleib.printbutton.hint
 #, fuzzy
 msgctxt "tfreeresistance_fungleib.printbutton.hint"
-msgid "Print the results of the calculation."
-msgstr "Друк результатів розрахунку."
+msgid "Print the results of the calculation"
+msgstr "Друк результатів розрахунку"
 
 #: tfreeresistance_fungleib.results.caption
 #, fuzzy
@@ -8465,20 +8748,20 @@ msgstr ""
 
 #: tfreeresistance_fungleib.toolbutton20.hint
 msgctxt "tfreeresistance_fungleib.toolbutton20.hint"
-msgid "Start the calculation."
+msgid "Start the calculation"
 msgstr ""
 
 #: tfreeresistance_fungleib.toolbutton25.hint
 #, fuzzy
 msgctxt "tfreeresistance_fungleib.toolbutton25.hint"
-msgid "Close the window and save changes."
-msgstr "Закрити вікно й зберегти зміни."
+msgid "Close the window and save changes"
+msgstr "Закрити вікно й зберегти зміни"
 
 #: tfreeresistance_fungleib.toolbutton7.hint
 #, fuzzy
 msgctxt "tfreeresistance_fungleib.toolbutton7.hint"
-msgid "Close window without saving changes."
-msgstr "Закрити вікно без збереження."
+msgid "Close window without saving changes"
+msgstr "Закрити вікно без збереження"
 
 #: tfreeresistance_fungleib._label10.caption
 msgctxt "tfreeresistance_fungleib._label10.caption"
@@ -8882,8 +9165,8 @@ msgstr ""
 #: tfreeresistance_hollen.printbutton.hint
 #, fuzzy
 msgctxt "tfreeresistance_hollen.printbutton.hint"
-msgid "Print the results of the calculation."
-msgstr "Друк результатів розрахунку."
+msgid "Print the results of the calculation"
+msgstr "Друк результатів розрахунку"
 
 #: tfreeresistance_hollen.results.caption
 #, fuzzy
@@ -8903,20 +9186,20 @@ msgstr ""
 
 #: tfreeresistance_hollen.toolbutton20.hint
 msgctxt "tfreeresistance_hollen.toolbutton20.hint"
-msgid "Start the calculation."
+msgid "Start the calculation"
 msgstr ""
 
 #: tfreeresistance_hollen.toolbutton25.hint
 #, fuzzy
 msgctxt "tfreeresistance_hollen.toolbutton25.hint"
-msgid "Close the window and save changes."
-msgstr "Закрити вікно й зберегти зміни."
+msgid "Close the window and save changes"
+msgstr "Закрити вікно й зберегти зміни"
 
 #: tfreeresistance_hollen.toolbutton7.hint
 #, fuzzy
 msgctxt "tfreeresistance_hollen.toolbutton7.hint"
-msgid "Close window without saving changes."
-msgstr "Закрити вікно без збереження."
+msgid "Close window without saving changes"
+msgstr "Закрити вікно без збереження"
 
 #: tfreeresistance_hollen._label10.caption
 msgctxt "tfreeresistance_hollen._label10.caption"
@@ -9332,20 +9615,20 @@ msgstr ""
 
 #: tfreeresistance_holtr.tbcalculate.hint
 msgctxt "tfreeresistance_holtr.tbcalculate.hint"
-msgid "Start the calculation."
+msgid "Start the calculation"
 msgstr ""
 
 #: tfreeresistance_holtr.tbclose.hint
 #, fuzzy
 msgctxt "tfreeresistance_holtr.tbclose.hint"
-msgid "Close window without saving changes."
-msgstr "Закрити вікно без збереження."
+msgid "Close window without saving changes"
+msgstr "Закрити вікно без збереження"
 
 #: tfreeresistance_holtr.tbclosesave.hint
 #, fuzzy
 msgctxt "tfreeresistance_holtr.tbclosesave.hint"
-msgid "Close the window and save changes."
-msgstr "Закрити вікно й зберегти зміни."
+msgid "Close the window and save changes"
+msgstr "Закрити вікно й зберегти зміни"
 
 #: tfreeresistance_holtr.tbprint.caption
 msgid "tbPrint"
@@ -9354,8 +9637,8 @@ msgstr ""
 #: tfreeresistance_holtr.tbprint.hint
 #, fuzzy
 msgctxt "tfreeresistance_holtr.tbprint.hint"
-msgid "Print the results of the calculation."
-msgstr "Друк результатів розрахунку."
+msgid "Print the results of the calculation"
+msgstr "Друк результатів розрахунку"
 
 #: tfreeresistance_holtr.toolbar1.caption
 msgctxt "tfreeresistance_holtr.toolbar1.caption"
@@ -9433,8 +9716,8 @@ msgid "_ToolButton14"
 msgstr ""
 
 #: tfreeresistance_kaper.caption
-msgid "Kaper resistance calculation."
-msgstr "Розрахунок опору за методом Kaper для каное."
+msgid "Kaper resistance calculation"
+msgstr "Розрахунок опору за методом Kaper для каное"
 
 #: tfreeresistance_kaper.chart.axislist[0].title.caption
 msgctxt "tfreeresistance_kaper.chart.axislist[0].title.caption"
@@ -9482,7 +9765,7 @@ msgstr ""
 
 #: tfreeresistance_kaper.label15.caption
 msgid "Half entrance angle"
-msgstr "Половина кута загостр."
+msgstr "Половина кута загостр"
 
 #: tfreeresistance_kaper.label16.caption
 msgctxt "tfreeresistance_kaper.label16.caption"
@@ -9541,8 +9824,8 @@ msgstr ""
 
 #: tfreeresistance_kaper.printbutton.hint
 msgctxt "tfreeresistance_kaper.printbutton.hint"
-msgid "Print the results of the calculation."
-msgstr "Друк результатів розрахунку."
+msgid "Print the results of the calculation"
+msgstr "Друк результатів розрахунку"
 
 #: tfreeresistance_kaper.tabsheet1.caption
 #, fuzzy
@@ -9562,13 +9845,13 @@ msgstr ""
 
 #: tfreeresistance_kaper.toolbutton25.hint
 msgctxt "tfreeresistance_kaper.toolbutton25.hint"
-msgid "Close the window and save changes."
-msgstr "Закрити вікно й зберегти зміни."
+msgid "Close the window and save changes"
+msgstr "Закрити вікно й зберегти зміни"
 
 #: tfreeresistance_kaper.toolbutton7.hint
 msgctxt "tfreeresistance_kaper.toolbutton7.hint"
-msgid "Close window without saving changes."
-msgstr "Закрити вікно без збереження."
+msgid "Close window without saving changes"
+msgstr "Закрити вікно без збереження"
 
 #: tfreeresistance_kaper._toolbutton10.caption
 msgctxt "tfreeresistance_kaper._toolbutton10.caption"
@@ -9916,8 +10199,8 @@ msgstr ""
 #: tfreeresistance_mh.printbutton.hint
 #, fuzzy
 msgctxt "tfreeresistance_mh.printbutton.hint"
-msgid "Print the results of the calculation."
-msgstr "Друк результатів розрахунку."
+msgid "Print the results of the calculation"
+msgstr "Друк результатів розрахунку"
 
 #: tfreeresistance_mh.results.caption
 #, fuzzy
@@ -9937,20 +10220,20 @@ msgstr ""
 
 #: tfreeresistance_mh.toolbutton20.hint
 msgctxt "tfreeresistance_mh.toolbutton20.hint"
-msgid "Start the calculation."
+msgid "Start the calculation"
 msgstr ""
 
 #: tfreeresistance_mh.toolbutton25.hint
 #, fuzzy
 msgctxt "tfreeresistance_mh.toolbutton25.hint"
-msgid "Close the window and save changes."
-msgstr "Закрити вікно й зберегти зміни."
+msgid "Close the window and save changes"
+msgstr "Закрити вікно й зберегти зміни"
 
 #: tfreeresistance_mh.toolbutton7.hint
 #, fuzzy
 msgctxt "tfreeresistance_mh.toolbutton7.hint"
-msgid "Close window without saving changes."
-msgstr "Закрити вікно без збереження."
+msgid "Close window without saving changes"
+msgstr "Закрити вікно без збереження"
 
 #: tfreeresistance_mh._label10.caption
 msgctxt "tfreeresistance_mh._label10.caption"
@@ -10363,8 +10646,8 @@ msgstr ""
 #: tfreeresistance_oortmer.printbutton.hint
 #, fuzzy
 msgctxt "tfreeresistance_oortmer.printbutton.hint"
-msgid "Print the results of the calculation."
-msgstr "Друк результатів розрахунку."
+msgid "Print the results of the calculation"
+msgstr "Друк результатів розрахунку"
 
 #: tfreeresistance_oortmer.results.caption
 #, fuzzy
@@ -10384,20 +10667,20 @@ msgstr ""
 
 #: tfreeresistance_oortmer.toolbutton20.hint
 msgctxt "tfreeresistance_oortmer.toolbutton20.hint"
-msgid "Start the calculation."
+msgid "Start the calculation"
 msgstr ""
 
 #: tfreeresistance_oortmer.toolbutton25.hint
 #, fuzzy
 msgctxt "tfreeresistance_oortmer.toolbutton25.hint"
-msgid "Close the window and save changes."
-msgstr "Закрити вікно й зберегти зміни."
+msgid "Close the window and save changes"
+msgstr "Закрити вікно й зберегти зміни"
 
 #: tfreeresistance_oortmer.toolbutton7.hint
 #, fuzzy
 msgctxt "tfreeresistance_oortmer.toolbutton7.hint"
-msgid "Close window without saving changes."
-msgstr "Закрити вікно без збереження."
+msgid "Close window without saving changes"
+msgstr "Закрити вікно без збереження"
 
 #: tfreeresistance_oortmer._label10.caption
 msgctxt "tfreeresistance_oortmer._label10.caption"
@@ -10808,8 +11091,8 @@ msgstr ""
 #: tfreeresistance_ost.printbutton.hint
 #, fuzzy
 msgctxt "tfreeresistance_ost.printbutton.hint"
-msgid "Print the results of the calculation."
-msgstr "Друк результатів розрахунку."
+msgid "Print the results of the calculation"
+msgstr "Друк результатів розрахунку"
 
 #: tfreeresistance_ost.results.caption
 #, fuzzy
@@ -10829,20 +11112,20 @@ msgstr ""
 
 #: tfreeresistance_ost.toolbutton20.hint
 msgctxt "tfreeresistance_ost.toolbutton20.hint"
-msgid "Start the calculation."
+msgid "Start the calculation"
 msgstr ""
 
 #: tfreeresistance_ost.toolbutton25.hint
 #, fuzzy
 msgctxt "tfreeresistance_ost.toolbutton25.hint"
-msgid "Close the window and save changes."
-msgstr "Закрити вікно й зберегти зміни."
+msgid "Close the window and save changes"
+msgstr "Закрити вікно й зберегти зміни"
 
 #: tfreeresistance_ost.toolbutton7.hint
 #, fuzzy
 msgctxt "tfreeresistance_ost.toolbutton7.hint"
-msgid "Close window without saving changes."
-msgstr "Закрити вікно без збереження."
+msgid "Close window without saving changes"
+msgstr "Закрити вікно без збереження"
 
 #: tfreeresistance_ost._label10.caption
 msgctxt "tfreeresistance_ost._label10.caption"
@@ -10915,7 +11198,7 @@ msgid "_ToolButton14"
 msgstr ""
 
 #: tfreeresistance_planing.caption
-msgid "Planing resistance calculation."
+msgid "Planing resistance calculation"
 msgstr ""
 
 #: tfreeresistance_planing.checkbox2.caption
@@ -11123,8 +11406,8 @@ msgstr ""
 #: tfreeresistance_planing.printbutton.hint
 #, fuzzy
 msgctxt "tfreeresistance_planing.printbutton.hint"
-msgid "Print the results of the calculation."
-msgstr "Друк результатів розрахунку."
+msgid "Print the results of the calculation"
+msgstr "Друк результатів розрахунку"
 
 #: tfreeresistance_planing.tabsheet1.caption
 #, fuzzy
@@ -11146,14 +11429,14 @@ msgstr ""
 #: tfreeresistance_planing.toolbutton25.hint
 #, fuzzy
 msgctxt "tfreeresistance_planing.toolbutton25.hint"
-msgid "Close the window and save changes."
-msgstr "Закрити вікно й зберегти зміни."
+msgid "Close the window and save changes"
+msgstr "Закрити вікно й зберегти зміни"
 
 #: tfreeresistance_planing.toolbutton7.hint
 #, fuzzy
 msgctxt "tfreeresistance_planing.toolbutton7.hint"
-msgid "Close window without saving changes."
-msgstr "Закрити вікно без збереження."
+msgid "Close window without saving changes"
+msgstr "Закрити вікно без збереження"
 
 #: tfreeresistance_planing._toolbutton10.caption
 msgctxt "tfreeresistance_planing._toolbutton10.caption"
@@ -11504,8 +11787,8 @@ msgstr ""
 #: tfreeresistance_rbhs.printbutton.hint
 #, fuzzy
 msgctxt "tfreeresistance_rbhs.printbutton.hint"
-msgid "Print the results of the calculation."
-msgstr "Друк результатів розрахунку."
+msgid "Print the results of the calculation"
+msgstr "Друк результатів розрахунку"
 
 #: tfreeresistance_rbhs.results.caption
 #, fuzzy
@@ -11525,20 +11808,20 @@ msgstr ""
 
 #: tfreeresistance_rbhs.toolbutton20.hint
 msgctxt "tfreeresistance_rbhs.toolbutton20.hint"
-msgid "Start the calculation."
+msgid "Start the calculation"
 msgstr ""
 
 #: tfreeresistance_rbhs.toolbutton25.hint
 #, fuzzy
 msgctxt "tfreeresistance_rbhs.toolbutton25.hint"
-msgid "Close the window and save changes."
-msgstr "Закрити вікно й зберегти зміни."
+msgid "Close the window and save changes"
+msgstr "Закрити вікно й зберегти зміни"
 
 #: tfreeresistance_rbhs.toolbutton7.hint
 #, fuzzy
 msgctxt "tfreeresistance_rbhs.toolbutton7.hint"
-msgid "Close window without saving changes."
-msgstr "Закрити вікно без збереження."
+msgid "Close window without saving changes"
+msgstr "Закрити вікно без збереження"
 
 #: tfreeresistance_rbhs._label10.caption
 msgctxt "tfreeresistance_rbhs._label10.caption"
@@ -11633,14 +11916,17 @@ msgid "I accept License terms and conditions"
 msgstr ""
 
 #: tfreesplashwindow.label2.caption
-msgid "Copyright © 2007-2013,Timoshenko V.F."
+msgid "Copyright © 2007-2013,Timoshenko V.F"
 msgstr ""
 
 #: tfreesplashwindow.label3.caption
 #, fuzzy
 #| msgid "Copyright © 2015+, Mark Malakanov"
 msgid "Copyright © 2015+, Mark Malakanov"
-msgstr "FREE!ship comes with ABSOLUTELY NO WARRANTY. This is free software, and you are welcome to redistribute it under the conditions of the GNU General Public License (GPL) Version 2, June 1991"
+msgstr ""
+"FREE!ship comes with ABSOLUTELY NO WARRANTY. This is free software, and you "
+"are welcome to redistribute it under the conditions of the GNU General "
+"Public License (GPL) Version 2, June 1991"
 
 #: tfreesplashwindow.label4.caption
 msgid "Please accept License terms and conditions"
@@ -11657,7 +11943,10 @@ msgid "Build"
 msgstr ""
 
 #: tfreesplashwindow.labelcondition.caption
-msgid "This is free software, and you are welcome to redistribute it under the conditions of the GNU General Public License (GPL) Version 3,  29 June 2007 or later"
+msgid ""
+"This is free software, and you are welcome to redistribute it under the "
+"conditions of the GNU General Public License (GPL) Version 3,  29 June 2007 "
+"or later"
 msgstr ""
 
 #: tfreesplashwindow.labelrelease.caption
@@ -11670,7 +11959,14 @@ msgid "Version 0.00"
 msgstr ""
 
 #: tfreesplashwindow.labelwarranty.caption
-msgid "THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE."
+msgid ""
+"THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR"
+" IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, "
+"FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE "
+"AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER "
+"LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING "
+"FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS"
+" IN THE SOFTWARE"
 msgstr ""
 
 #: tfreesplashwindow._label2.caption
@@ -11681,72 +11977,8 @@ msgstr ""
 msgid "Translated by: M. van Engeland"
 msgstr ""
 
-#: tfreeupdateform.actioncheckupdate.caption
-msgctxt "tfreeupdateform.actioncheckupdate.caption"
-msgid "Check Update"
-msgstr ""
-
-#: tfreeupdateform.bitbtn2.caption
-msgctxt "tfreeupdateform.bitbtn2.caption"
-msgid "Close"
-msgstr ""
-
-#: tfreeupdateform.caption
-msgid "Check updates"
-msgstr ""
-
-#: tfreeupdateform.label1.caption
-msgid "Current Version:"
-msgstr ""
-
-#: tfreeupdateform.label3.caption
-msgctxt "tfreeupdateform.label3.caption"
-msgid "What's new"
-msgstr ""
-
-#: tfreeupdateform.label4.caption
-msgid "Download link:"
-msgstr ""
-
-#: tfreeupdateform.label6.caption
-msgid "Download page:"
-msgstr ""
-
-#: tfreeupdateform.labelcurrentversion.caption
-msgid "1.2.3.4"
-msgstr ""
-
-#: tfreeupdateform.labeldownloadlink.caption
-msgid "LabelDownloadLink"
-msgstr ""
-
-#: tfreeupdateform.labeldownloadpage.caption
-msgid "LabelDownloadPage"
-msgstr ""
-
-#: tfreeupdateform.labelnewversion.caption
-msgid "LabelNewVersion"
-msgstr ""
-
-#: tfreeupdateform.labelnewversionavailable.caption
-msgid "New version available:"
-msgstr ""
-
-#: tfreeupdateform.labelnewversiondate.caption
-msgid "LabelNewVersionDate"
-msgstr ""
-
-#: tfreeupdateform.speedbutton1.hint
-msgid "Refresh"
-msgstr ""
-
 #: tmainform.aboutaction.caption
 msgid "AboutAction"
-msgstr ""
-
-#: tmainform.actioncheckupdates.caption
-msgctxt "tmainform.actioncheckupdates.caption"
-msgid "Check for updates"
 msgstr ""
 
 #: tmainform.activelayercolor.caption
@@ -11755,8 +11987,8 @@ msgstr "Кольори активного шару"
 
 #: tmainform.activelayercolor.hint
 msgctxt "tmainform.activelayercolor.hint"
-msgid "Change the color of the currently active layer."
-msgstr "Змінити кольори активного шару."
+msgid "Change the color of the currently active layer"
+msgstr "Змінити кольори активного шару"
 
 #: tmainform.addcylinder.caption
 msgid "Add cylinder..."
@@ -11777,8 +12009,8 @@ msgid "Add"
 msgstr "Додати"
 
 #: tmainform.addpoint.hint
-msgid "Add a new controlpoint to the model."
-msgstr "Додати нову точку у модель."
+msgid "Add a new controlpoint to the model"
+msgstr "Додати нову точку у модель"
 
 #: tmainform.addpointtogroup.caption
 msgid "Add Point To Group"
@@ -11815,8 +12047,8 @@ msgid "Check model"
 msgstr "Перевірка моделі"
 
 #: tmainform.checkmodel.hint
-msgid "Check the model for errors and inconsitencies."
-msgstr "Перевірка моделі на помилки й несумісності."
+msgid "Check the model for errors and inconsitencies"
+msgstr "Перевірка моделі на помилки й несумісності"
 
 #: tmainform.clearundo.caption
 msgctxt "tmainform.clearundo.caption"
@@ -11826,8 +12058,8 @@ msgstr "Очистити"
 #: tmainform.colorbutton1.hint
 #, fuzzy
 msgctxt "tmainform.colorbutton1.hint"
-msgid "Change the color of the currently active layer."
-msgstr "Змінити кольори активного шару."
+msgid "Change the color of the currently active layer"
+msgstr "Змінити кольори активного шару"
 
 #: tmainform.crosscurves.caption
 #, fuzzy
@@ -11854,24 +12086,24 @@ msgid "Delete"
 msgstr "Видалення"
 
 #: tmainform.delete.hint
-msgid "Delete all selected items."
-msgstr "Видалити все обране."
+msgid "Delete all selected items"
+msgstr "Видалити все обране"
 
 #: tmainform.deleteemptylayers.caption
 msgid "Delete empty"
 msgstr "Видалити порожні"
 
 #: tmainform.deleteemptylayers.hint
-msgid "Delete empty layers from the model."
-msgstr "Видалити порожні шари з моделі."
+msgid "Delete empty layers from the model"
+msgstr "Видалити порожні шари з моделі"
 
 #: tmainform.deletemarkers.caption
 msgid "Delete all markers"
 msgstr "Видалити всі маркери"
 
 #: tmainform.deletemarkers.hint
-msgid "Delete all markers from the model."
-msgstr "Видалити всі маркери з моделі."
+msgid "Delete all markers from the model"
+msgstr "Видалити всі маркери з моделі"
 
 #: tmainform.deselectall.caption
 msgctxt "tmainform.deselectall.caption"
@@ -11889,8 +12121,8 @@ msgid "Design hydrostatics"
 msgstr "Розрахунок гідростатики"
 
 #: tmainform.designhydrostatics.hint
-msgid "Calculate hydrostatics for the design condition."
-msgstr "Розрахунок гідростатики для проектних умов."
+msgid "Calculate hydrostatics for the design condition"
+msgstr "Розрахунок гідростатики для проектних умов"
 
 #: tmainform.developlayers.caption
 msgid "Develop plates"
@@ -11906,8 +12138,8 @@ msgid "Collapse"
 msgstr "Колапс"
 
 #: tmainform.edgecollapse.hint
-msgid "Remove an edge by merging the two connected faces into one new face."
-msgstr "Видалення крайки злиттям двох обраних поверхонь в одну нову."
+msgid "Remove an edge by merging the two connected faces into one new face"
+msgstr "Видалення крайки злиттям двох обраних поверхонь в одну нову"
 
 #: tmainform.edgecrease.caption
 msgctxt "tmainform.edgecrease.caption"
@@ -11915,24 +12147,25 @@ msgid "Crease"
 msgstr "Лінії зламування"
 
 #: tmainform.edgecrease.hint
-msgid "Switch selected edges between normal or crease edges (knuckle lines)."
-msgstr "Перемикач обраних крайок між нормальними й крайками злому (knuckle lines)."
+msgid "Switch selected edges between normal or crease edges (knuckle lines)"
+msgstr ""
+"Перемикач обраних крайок між нормальними й крайками злому (knuckle lines)"
 
 #: tmainform.edgeextrude.caption
 msgid "Extrude..."
 msgstr "Добування..."
 
 #: tmainform.edgeextrude.hint
-msgid "Create new controlfaces by extruding selected boundary edges."
-msgstr "Створити нову поверхню видавлюючи обрані граничні крайки."
+msgid "Create new controlfaces by extruding selected boundary edges"
+msgstr "Створити нову поверхню видавлюючи обрані граничні крайки"
 
 #: tmainform.edgesplit.caption
 msgid "Split"
 msgstr "Розщеплення"
 
 #: tmainform.edgesplit.hint
-msgid "Create new controlpoints by splitting an controledge into two."
-msgstr "Створити нові контрольні точки розщеплюючи контрольну крайку на дві."
+msgid "Create new controlpoints by splitting an controledge into two"
+msgstr "Створити нові контрольні точки розщеплюючи контрольну крайку на дві"
 
 #: tmainform.edit1.caption
 msgid "Edit"
@@ -11976,24 +12209,24 @@ msgid "DXF 2D Polylines..."
 msgstr "DXF 2D Polylines..."
 
 #: tmainform.exportdxf2dpolylines.hint
-msgid "Export all lines as 2D polylines."
-msgstr "Експорт всіх ліній як 2D полілінії."
+msgid "Export all lines as 2D polylines"
+msgstr "Експорт всіх ліній як 2D полілінії"
 
 #: tmainform.exportdxf3dpolylines.caption
 msgid "DXF 3D Polylines..."
 msgstr "DXF 3D Polylines..."
 
 #: tmainform.exportdxf3dpolylines.hint
-msgid "Export all lines as 3D polylines."
-msgstr "Експорт всіх ліній як 3D полілінії."
+msgid "Export all lines as 3D polylines"
+msgstr "Експорт всіх ліній як 3D полілінії"
 
 #: tmainform.exportdxffaces.caption
 msgid "DXF 3D mesh..."
 msgstr "DXF 3D mesh..."
 
 #: tmainform.exportdxffaces.hint
-msgid "Export all faces to a 3D DXF file."
-msgstr "Експорт всіх граней в 3D DXF файл."
+msgid "Export all faces to a 3D DXF file"
+msgstr "Експорт всіх граней в 3D DXF файл"
 
 #: tmainform.exportfef.caption
 msgctxt "tmainform.exportfef.caption"
@@ -12001,8 +12234,8 @@ msgid "FEF file..."
 msgstr "FEF файл..."
 
 #: tmainform.exportfef.hint
-msgid "Export to a FEF (Freeship Exchange Format) hull."
-msgstr "Експорт в FEF (Freeship Exchange Format) корпус."
+msgid "Export to a FEF (Freeship Exchange Format) hull"
+msgstr "Експорт в FEF (Freeship Exchange Format) корпус"
 
 #: tmainform.exportghs.caption
 msgid "GHS..."
@@ -12051,33 +12284,16 @@ msgid "Save"
 msgstr "Зберегти"
 
 #: tmainform.filesave.hint
-msgid "Save file without prompting for the filename."
-msgstr "Зберегти файл без запиту шляху для імені."
+msgid "Save file without prompting for the filename"
+msgstr "Зберегти файл без запиту шляху для імені"
 
 #: tmainform.filesaveas.caption
 msgid "Save as..."
 msgstr "Зберегти як ..."
 
 #: tmainform.filesaveas.hint
-msgid "Prompt for filename and save file."
-msgstr "Шлях та ім'я для збереження файлу."
-
-#: tmainform.help1.caption
-msgctxt "tmainform.help1.caption"
-msgid "Help"
-msgstr ""
-
-#: tmainform.helpabout.caption
-msgid "About"
-msgstr ""
-
-#: tmainform.helpaction.caption
-msgid "HelpAction"
-msgstr ""
-
-#: tmainform.helpcontents.caption
-msgid "Contents"
-msgstr ""
+msgid "Prompt for filename and save file"
+msgstr "Шлях та ім'я для збереження файлу"
 
 #: tmainform.hydrodynmaneuv_.caption
 msgid "HydrodynManeuv"
@@ -12108,8 +12324,8 @@ msgid "Hydrostatics..."
 msgstr "Криві елементів ТК"
 
 #: tmainform.hydrostaticsdialog.hint
-msgid "Calculate hydrostatics for a range of inputdata."
-msgstr "Розрахунок гідростатики за вихідним даними."
+msgid "Calculate hydrostatics for a range of inputdata"
+msgstr "Розрахунок гідростатики за вихідним даними"
 
 #: tmainform.import1.caption
 msgctxt "tmainform.import1.caption"
@@ -12121,8 +12337,8 @@ msgid "Bodyplan..."
 msgstr "Корпус..."
 
 #: tmainform.importbodyplan.hint
-msgid "Import a bodyplan and fit a surface."
-msgstr "Імпорт у корпус і на поверхню."
+msgid "Import a bodyplan and fit a surface"
+msgstr "Імпорт у корпус і на поверхню"
 
 #: tmainform.importcarene.caption
 msgid "Carene XYZ file..."
@@ -12138,8 +12354,8 @@ msgid "FEF file..."
 msgstr "FEF файл..."
 
 #: tmainform.importfef.hint
-msgid "Import a FEF (Freeship Exchange Format) hull."
-msgstr "Імпорт із FEF (Freeship Exchange Format) корпус."
+msgid "Import a FEF (Freeship Exchange Format) hull"
+msgstr "Імпорт із FEF (Freeship Exchange Format) корпус"
 
 #: tmainform.importhullfile.caption
 msgid "Carlson .hul file..."
@@ -12172,8 +12388,8 @@ msgid "VRML..."
 msgstr "VRML *.WRL"
 
 #: tmainform.importvrml.hint
-msgid "Import a VRML 1.0 file."
-msgstr "Імпорт VRML 1.0 файлу."
+msgid "Import a VRML 1.0 file"
+msgstr "Імпорт VRML 1.0 файлу"
 
 #: tmainform.increasecurvaturescale.caption
 msgid "Incr. curvature scale"
@@ -12188,24 +12404,24 @@ msgid "Insert plane..."
 msgstr "Вставити точки..."
 
 #: tmainform.insertplane.hint
-msgid "Insert multiple new points on a 3D oriented plane."
-msgstr "Вставка багатьох нових точок в 3D."
+msgid "Insert multiple new points on a 3D oriented plane"
+msgstr "Вставка багатьох нових точок в 3D"
 
 #: tmainform.intersectiondialog.caption
 msgid "Intersections..."
 msgstr "Перетинання..."
 
 #: tmainform.intersectiondialog.hint
-msgid "Show the window to add stations, buttocks, waterlines and diagonals."
-msgstr "Показ вікна для додавання шпангоутів, батоксів, ватерліній і рибин."
+msgid "Show the window to add stations, buttocks, waterlines and diagonals"
+msgstr "Показ вікна для додавання шпангоутів, батоксів, ватерліній і рибин"
 
 #: tmainform.invertface.caption
 msgid "Invert"
 msgstr "Переклацання нормалей"
 
 #: tmainform.invertface.hint
-msgid "Flip the normal direction of the selected controlfaces."
-msgstr "Переклацнути нормалі на обраних гранях."
+msgid "Flip the normal direction of the selected controlfaces"
+msgstr "Переклацнути нормалі на обраних гранях"
 
 #: tmainform.keelrudderwizard.caption
 msgctxt "tmainform.keelrudderwizard.caption"
@@ -12213,8 +12429,8 @@ msgid "Keel and rudder wizard"
 msgstr "Кіль і стерно"
 
 #: tmainform.keelrudderwizard.hint
-msgid "Create a default rudder or keel."
-msgstr "Створити стерно або кіль."
+msgid "Create a default rudder or keel"
+msgstr "Створити стерно або кіль"
 
 #: tmainform.labeldistance.caption
 msgid "distance : "
@@ -12229,7 +12445,7 @@ msgid "LabelProgress"
 msgstr ""
 
 #: tmainform.labelundomemory.caption
-msgid "Undo memory : 0 kb."
+msgid "Undo memory : 0 kb"
 msgstr ""
 
 #: tmainform.layer1.caption
@@ -12243,8 +12459,8 @@ msgid "Auto group"
 msgstr "Автогрупування"
 
 #: tmainform.layerautogroup.hint
-msgid "Automatic grouping of connected controlfaces into a new layer."
-msgstr "Автоматичне групування обраних граней у новий шар."
+msgid "Automatic grouping of connected controlfaces into a new layer"
+msgstr "Автоматичне групування обраних граней у новий шар"
 
 #: tmainform.layerbox.text
 msgid "LayerBox"
@@ -12255,16 +12471,16 @@ msgid "Dialog"
 msgstr "Діалогове вікно властивостей шарів"
 
 #: tmainform.layerdialog.hint
-msgid "Show the window with layer properties."
-msgstr "Показ вікна із властивостями шарів."
+msgid "Show the window with layer properties"
+msgstr "Показ вікна із властивостями шарів"
 
 #: tmainform.layerintersection.caption
 msgid "Intersect layers..."
 msgstr "Перетинання шарів..."
 
 #: tmainform.layerintersection.hint
-msgid "Find the intersection of two layers."
-msgstr "Знайти перетинання двох шарів."
+msgid "Find the intersection of two layers"
+msgstr "Знайти перетинання двох шарів"
 
 #: tmainform.layervisibilitydialog.caption
 msgid "Layer visibility dialog"
@@ -12279,8 +12495,8 @@ msgid "Open..."
 msgstr "Відкрити..."
 
 #: tmainform.loadfile.hint
-msgid "Open a new file."
-msgstr "Відкрити новий файл."
+msgid "Open a new file"
+msgstr "Відкрити новий файл"
 
 #: tmainform.markers2.caption
 msgctxt "tmainform.markers2.caption"
@@ -12305,8 +12521,8 @@ msgid "Move..."
 msgstr "Переміщення..."
 
 #: tmainform.movemodel.hint
-msgid "Move the entire model."
-msgstr "Перемістити всю модель."
+msgid "Move the entire model"
+msgstr "Перемістити всю модель"
 
 #: tmainform.newcurve.caption
 msgctxt "tmainform.newcurve.caption"
@@ -12314,16 +12530,16 @@ msgid "New"
 msgstr "Нова"
 
 #: tmainform.newcurve.hint
-msgid "Add a new curve to selected edges."
-msgstr "Додати нову криву до обраних ребер."
+msgid "Add a new curve to selected edges"
+msgstr "Додати нову криву до обраних ребер"
 
 #: tmainform.newedge.caption
 msgid "Insert"
 msgstr "Вставка"
 
 #: tmainform.newedge.hint
-msgid "Split a face by inserting a new edge between to selected points."
-msgstr "Розщепити поверхню вставкою нової крайки між обраними точками."
+msgid "Split a face by inserting a new edge between to selected points"
+msgstr "Розщепити поверхню вставкою нової крайки між обраними точками"
 
 #: tmainform.newface.caption
 msgctxt "tmainform.newface.caption"
@@ -12331,8 +12547,8 @@ msgid "New"
 msgstr "Новий"
 
 #: tmainform.newface.hint
-msgid "Create a new controlface from selected controlpoints."
-msgstr "Створити нову поверхню із обраних контрольних точок."
+msgid "Create a new controlface from selected controlpoints"
+msgstr "Створити нову поверхню із обраних контрольних точок"
 
 #: tmainform.newlayer.caption
 msgctxt "tmainform.newlayer.caption"
@@ -12340,16 +12556,16 @@ msgid "New"
 msgstr "Новий"
 
 #: tmainform.newlayer.hint
-msgid "Add a new empty layer to the model."
-msgstr "Додавання нового шару."
+msgid "Add a new empty layer to the model"
+msgstr "Додавання нового шару"
 
 #: tmainform.newmodel.caption
 msgid "New..."
 msgstr "Нова..."
 
 #: tmainform.newmodel.hint
-msgid "Start a new model."
-msgstr "Створити нову модель."
+msgid "Start a new model"
+msgstr "Створити нову модель"
 
 #: tmainform.newwindow.caption
 msgid "New window"
@@ -12372,8 +12588,11 @@ msgid "Align"
 msgstr "Випрямлення"
 
 #: tmainform.pointalign.hint
-msgid "Project selected points on a straight line through the first and last selected point."
-msgstr "Спроектувати обрані точки на пряму лінію через першу та останню обрані точки."
+msgid ""
+"Project selected points on a straight line through the first and last "
+"selected point"
+msgstr ""
+"Спроектувати обрані точки на пряму лінію через першу та останню обрані точки"
 
 #: tmainform.pointanchor.caption
 msgctxt "tmainform.pointanchor.caption"
@@ -12386,8 +12605,8 @@ msgid "Collapse"
 msgstr "Колапс"
 
 #: tmainform.pointcollapse.hint
-msgid "Merge two selected edges by removing their common controlpoint."
-msgstr "Злити дві обрані крайки, видаляючи загальні точки."
+msgid "Merge two selected edges by removing their common controlpoint"
+msgstr "Злити дві обрані крайки, видаляючи загальні точки"
 
 #: tmainform.pointextrude.caption
 msgid "Extrude points"
@@ -12406,24 +12625,24 @@ msgid "Lock points"
 msgstr "Захват точок"
 
 #: tmainform.pointslock.hint
-msgid "Lock all selected controlpoints."
-msgstr "Захват всіх обраних точок керування."
+msgid "Lock all selected controlpoints"
+msgstr "Захват всіх обраних точок керування"
 
 #: tmainform.pointsunlock.caption
 msgid "Unlock points"
 msgstr "Звільнити точки"
 
 #: tmainform.pointsunlock.hint
-msgid "Unlock all selected controlpoints."
-msgstr "Звільнити всі обрані точки керування."
+msgid "Unlock all selected controlpoints"
+msgstr "Звільнити всі обрані точки керування"
 
 #: tmainform.pointsunlockall.caption
 msgid "Unlock all points"
 msgstr "Звільнити всі точки"
 
 #: tmainform.pointsunlockall.hint
-msgid "Unlock all locked controlpoints."
-msgstr "Звільнити всі захоплені точки керування."
+msgid "Unlock all locked controlpoints"
+msgstr "Звільнити всі захоплені точки керування"
 
 #: tmainform.preferences.caption
 msgid "Preferences"
@@ -12483,16 +12702,16 @@ msgid "Redo"
 msgstr "Redo"
 
 #: tmainform.redo.hint
-msgid "Undo the previous modification."
-msgstr "Повернути останню модифікацію."
+msgid "Undo the previous modification"
+msgstr "Повернути останню модифікацію"
 
 #: tmainform.removenegative.caption
 msgid "Remove negative"
 msgstr "Видалити негатив"
 
 #: tmainform.removenegative.hint
-msgid "Removes all faces on the starbaordside of the hull."
-msgstr "Забрати всі грані із правого борта."
+msgid "Removes all faces on the starbaordside of the hull"
+msgstr "Забрати всі грані із правого борта"
 
 #: tmainform.removeunusedpoints.caption
 msgid "Remove unused points"
@@ -12549,15 +12768,15 @@ msgid "Rotate..."
 msgstr "Обертання..."
 
 #: tmainform.rotatemodel.hint
-msgid "Rotate selected items."
-msgstr "Обертати обрані елементи."
+msgid "Rotate selected items"
+msgstr "Обертати обрані елементи"
 
 #: tmainform.rotatemodelm.caption
 msgid "Heeling and/or trimming..."
 msgstr "Кренувати й диферентувати..."
 
 #: tmainform.rotatemodelm.hint
-msgid "Rotate all model items."
+msgid "Rotate all model items"
 msgstr "Кренувати й диферентувати модель"
 
 #: tmainform.scalemodel.caption
@@ -12565,8 +12784,8 @@ msgid "Scale..."
 msgstr "Масштабування..."
 
 #: tmainform.scalemodel.hint
-msgid "Scale selected items."
-msgstr "Масштабування обрані елементи."
+msgid "Scale selected items"
+msgstr "Масштабування обрані елементи"
 
 #: tmainform.selectall.caption
 msgid "Select all"
@@ -12601,8 +12820,8 @@ msgid "Buttocks"
 msgstr "Батокси"
 
 #: tmainform.showbuttocks.hint
-msgid "Toggle buttocks visibility on or off."
-msgstr "Зробити батокси видимими чи ні."
+msgid "Toggle buttocks visibility on or off"
+msgstr "Зробити батокси видимими чи ні"
 
 #: tmainform.showcontrolcurves.caption
 msgctxt "tmainform.showcontrolcurves.caption"
@@ -12610,16 +12829,16 @@ msgid "Control curves"
 msgstr "Криві контролю"
 
 #: tmainform.showcontrolcurves.hint
-msgid "Show control curves."
-msgstr "Показ кривих контролю."
+msgid "Show control curves"
+msgstr "Показ кривих контролю"
 
 #: tmainform.showcontrolnet.caption
 msgid "Control net"
 msgstr "Контрольна сітка"
 
 #: tmainform.showcontrolnet.hint
-msgid "Show control net."
-msgstr "Показ контрольної сітки."
+msgid "Show control net"
+msgstr "Показ контрольної сітки"
 
 #: tmainform.showcurvature.caption
 msgctxt "tmainform.showcurvature.caption"
@@ -12627,8 +12846,8 @@ msgid "Curvature"
 msgstr "Кривизни"
 
 #: tmainform.showcurvature.hint
-msgid "Show curvature plot of intersectionlines."
-msgstr "Показ графіка кривизн ліній ТК."
+msgid "Show curvature plot of intersectionlines"
+msgstr "Показ графіка кривизн ліній ТК"
 
 #: tmainform.showdiagonals.caption
 #, fuzzy
@@ -12637,16 +12856,16 @@ msgid "Diagonals"
 msgstr "Рибини"
 
 #: tmainform.showdiagonals.hint
-msgid "Toggle diagonals visibility on or off."
-msgstr "Зробити рибини або діагоналі видимими."
+msgid "Toggle diagonals visibility on or off"
+msgstr "Зробити рибини або діагоналі видимими"
 
 #: tmainform.showflowlines.caption
 msgid "Flowlines"
 msgstr "Лінії струму"
 
 #: tmainform.showflowlines.hint
-msgid "Show flowlines around the hull."
-msgstr "Показ ліній струму на корпусі."
+msgid "Show flowlines around the hull"
+msgstr "Показ ліній струму на корпусі"
 
 #: tmainform.showfreeobjects.caption
 msgid "Show free objects"
@@ -12661,16 +12880,16 @@ msgid "Grid"
 msgstr "Координатна сітка"
 
 #: tmainform.showgrid.hint
-msgid "Show grid of intersections in plan, profile and bodyplan view."
-msgstr "Показ сітки перетинань на проекціях Бік, Напівширота й Корпус."
+msgid "Show grid of intersections in plan, profile and bodyplan view"
+msgstr "Показ сітки перетинань на проекціях Бік, Напівширота й Корпус"
 
 #: tmainform.showhydrostatics.caption
 msgid "Hydrostatic features"
 msgstr "Гідростатичні параметри"
 
 #: tmainform.showhydrostatics.hint
-msgid "Show certain hydrostatic key properties in the model."
-msgstr "Розрахунок СПШ і Ц.Т."
+msgid "Show certain hydrostatic key properties in the model"
+msgstr "Розрахунок СПШ і Ц.Т"
 
 #: tmainform.showinterioredges.caption
 msgctxt "tmainform.showinterioredges.caption"
@@ -12679,8 +12898,8 @@ msgstr "Внутрішні грані"
 
 #: tmainform.showinterioredges.hint
 msgctxt "tmainform.showinterioredges.hint"
-msgid "Show interior edges."
-msgstr "Показ внутрішніх граней."
+msgid "Show interior edges"
+msgstr "Показ внутрішніх граней"
 
 #: tmainform.showlinesplan.caption
 msgid "Linesplan"
@@ -12692,16 +12911,16 @@ msgid "Markers"
 msgstr "Маркери"
 
 #: tmainform.showmarkers.hint
-msgid "Show markers."
-msgstr "Показ маркерів."
+msgid "Show markers"
+msgstr "Показ маркерів"
 
 #: tmainform.shownormals.caption
 msgid "Normals"
 msgstr "Нормалі"
 
 #: tmainform.shownormals.hint
-msgid "Show normals of selected controlfaces."
-msgstr "Показ нормалей на обраних поверхнях."
+msgid "Show normals of selected controlfaces"
+msgstr "Показ нормалей на обраних поверхнях"
 
 #: tmainform.showstations.caption
 #, fuzzy
@@ -12710,8 +12929,8 @@ msgid "Stations"
 msgstr "Шпангоути"
 
 #: tmainform.showstations.hint
-msgid "Toggle stations visibility on or off."
-msgstr "Зробити шпангоути видимими чи ні."
+msgid "Toggle stations visibility on or off"
+msgstr "Зробити шпангоути видимими чи ні"
 
 #: tmainform.showundohistory.caption
 msgid "Browse..."
@@ -12724,8 +12943,8 @@ msgid "Waterlines"
 msgstr "Ватерлінії"
 
 #: tmainform.showwaterlines.hint
-msgid "Toggle waterlines visibility on or off."
-msgstr "Зробити ватерлінії видимими чи ні."
+msgid "Toggle waterlines visibility on or off"
+msgstr "Зробити ватерлінії видимими чи ні"
 
 #: tmainform.spineditfontsize.hint
 msgctxt "tmainform.spineditfontsize.hint"
@@ -12808,8 +13027,8 @@ msgid "Undo"
 msgstr "Undo"
 
 #: tmainform.undo.hint
-msgid "Undo the last modification."
-msgstr "Повернути останню модифікацію."
+msgid "Undo the last modification"
+msgstr "Повернути останню модифікацію"
 
 #: tmainform.undohistory1.caption
 msgid "Undo history"
@@ -12831,10 +13050,6 @@ msgstr ""
 #: tsaveimagedialog.bitbtn2.caption
 msgctxt "tsaveimagedialog.bitbtn2.caption"
 msgid "Cancel"
-msgstr ""
-
-#: tsaveimagedialog.caption
-msgid "Save image."
 msgstr ""
 
 #: tsaveimagedialog.edit3.text
@@ -12921,4 +13136,3 @@ msgstr ""
 #: ttiledialog.toppanel.caption
 msgid "Recent projects"
 msgstr ""
-

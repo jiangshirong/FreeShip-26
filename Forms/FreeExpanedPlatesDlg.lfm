@@ -36,6 +36,7 @@ object FreeExpanedplatesDialog: TFreeExpanedplatesDialog
         Height = 216
         Top = 0
         Width = 288
+        AutoSize = True
         BevelOuter = bvNone
         ChildSizing.LeftRightSpacing = 10
         ChildSizing.TopBottomSpacing = 10
@@ -399,7 +400,7 @@ object FreeExpanedplatesDialog: TFreeExpanedplatesDialog
     end
     object ToolButton26: TToolButton
       Left = 368
-      Hint = 'Show dimensions of the unfolded plates.'
+      Hint = 'Show dimensions of the unfolded plates'
       Top = 2
       Action = ShowDimensions
       AutoSize = True
@@ -478,6 +479,7 @@ object FreeExpanedplatesDialog: TFreeExpanedplatesDialog
       Style = tbsSeparator
     end
     object ToolButton22: TToolButton
+      Visible = False
       Left = 614
       Top = 2
       Action = CloseDialog
@@ -503,7 +505,7 @@ object FreeExpanedplatesDialog: TFreeExpanedplatesDialog
     object ZoomExtents: TAction
       Category = 'Zoom'
       Caption = 'Extents'
-      Hint = 'Zoom all.'
+      Hint = 'Zoom all'
       ImageIndex = 0
       OnExecute = ZoomExtentsExecute
       ShortCut = 16449
@@ -511,35 +513,35 @@ object FreeExpanedplatesDialog: TFreeExpanedplatesDialog
     object RotateCCW5: TAction
       Category = 'Rotate'
       Caption = '-5'
-      Hint = 'Rotate part 5 degr. counter clockwise.'
+      Hint = 'Rotate part 5 degr. counter clockwise'
       ImageIndex = 1
       OnExecute = RotateCCW5Execute
     end
     object RotateCCW90: TAction
       Category = 'Rotate'
       Caption = '-90'
-      Hint = 'Rotate part 90 degr. counter clockwise.'
+      Hint = 'Rotate part 90 degr. counter clockwise'
       ImageIndex = 2
       OnExecute = RotateCCW90Execute
     end
     object RotateCW5: TAction
       Category = 'Rotate'
       Caption = '+5'
-      Hint = 'Rotate part 5 degr. clockwise.'
+      Hint = 'Rotate part 5 degr. clockwise'
       ImageIndex = 3
       OnExecute = RotateCW5Execute
     end
     object RotateCW90: TAction
       Category = 'Rotate'
       Caption = '+90'
-      Hint = 'Rotate part 90 degr. clockwise.'
+      Hint = 'Rotate part 90 degr. clockwise'
       ImageIndex = 4
       OnExecute = RotateCW90Execute
     end
     object ZoomOut: TAction
       Category = 'Zoom'
       Caption = 'Zoom out'
-      Hint = 'Zoom out.'
+      Hint = 'Zoom out'
       ImageIndex = 6
       OnExecute = ZoomOutExecute
       ShortCut = 16463
@@ -555,63 +557,63 @@ object FreeExpanedplatesDialog: TFreeExpanedplatesDialog
     object RotateCCW1: TAction
       Category = 'Rotate'
       Caption = '-1'
-      Hint = 'Rotate part 1 degr. counter clockwise.'
+      Hint = 'Rotate part 1 degr. counter clockwise'
       ImageIndex = 8
       OnExecute = RotateCCW1Execute
     end
     object RotateCW1: TAction
       Category = 'Rotate'
       Caption = '+1'
-      Hint = 'Rotate part 1 degr. clockwise.'
+      Hint = 'Rotate part 1 degr. clockwise'
       ImageIndex = 9
       OnExecute = RotateCW1Execute
     end
     object SaveBitmap: TAction
       Category = 'Export'
       Caption = 'Save bitmap'
-      Hint = 'Save the current layout as a bitmap.'
+      Hint = 'Save the current layout as a bitmap'
       ImageIndex = 10
       OnExecute = SaveBitmapExecute
     end
     object ExportDXF: TAction
       Category = 'Export'
       Caption = 'DXF'
-      Hint = 'Export the visible plates to a DXF file.'
+      Hint = 'Export the visible plates to a DXF file'
       ImageIndex = 11
       OnExecute = ExportDXFExecute
     end
     object ShowButtocks: TAction
       Category = 'Visibility'
       Caption = 'Buttocks'
-      Hint = 'Show buttocks on developed plates.'
+      Hint = 'Show buttocks on developed plates'
       ImageIndex = 12
       OnExecute = ShowButtocksExecute
     end
     object ShowWaterlines: TAction
       Category = 'Visibility'
       Caption = 'Waterlines'
-      Hint = 'Show waterlines on developed plates.'
+      Hint = 'Show waterlines on developed plates'
       ImageIndex = 13
       OnExecute = ShowWaterlinesExecute
     end
     object ShowStations: TAction
       Category = 'Visibility'
       Caption = 'Stations'
-      Hint = 'Show stations on developed plates.'
+      Hint = 'Show stations on developed plates'
       ImageIndex = 14
       OnExecute = ShowStationsExecute
     end
     object ShowInteriorEdges: TAction
       Category = 'Visibility'
       Caption = 'Interior edges'
-      Hint = 'Show interior edges.'
+      Hint = 'Show interior edges'
       ImageIndex = 15
       OnExecute = ShowInteriorEdgesExecute
     end
     object ShowFillColor: TAction
       Category = 'Visibility'
       Caption = 'Solid'
-      Hint = 'Show plates with fillcolor.'
+      Hint = 'Show plates with fillcolor'
       ImageIndex = 16
       OnExecute = ShowFillColorExecute
     end
@@ -619,21 +621,21 @@ object FreeExpanedplatesDialog: TFreeExpanedplatesDialog
       Category = 'Visibility'
       Caption = 'ShowErrorEdges'
       Checked = True
-      Hint = 'Highlight compressed or stretched edges.'
+      Hint = 'Highlight compressed or stretched edges'
       ImageIndex = 18
       OnExecute = ShowErrorEdgesExecute
     end
     object ShowDiagonals: TAction
       Category = 'Visibility'
       Caption = 'Diagonals'
-      Hint = 'Show diagonals on developed plates.'
+      Hint = 'Show diagonals on developed plates'
       ImageIndex = 19
       OnExecute = ShowDiagonalsExecute
     end
     object Print: TAction
       Category = 'Export'
       Caption = 'Print'
-      Hint = 'Send unfolded plates to printer or plotter.'
+      Hint = 'Send unfolded plates to printer or plotter'
       ImageIndex = 20
       OnExecute = PrintExecute
     end
@@ -641,7 +643,7 @@ object FreeExpanedplatesDialog: TFreeExpanedplatesDialog
       Category = 'Visibility'
       Caption = 'ShowDimensions'
       Checked = True
-      Hint = 'Show dimensions at grid intersections.'
+      Hint = 'Show dimensions at grid intersections'
       ImageIndex = 21
       OnExecute = ShowDimensionsExecute
     end
@@ -649,25 +651,26 @@ object FreeExpanedplatesDialog: TFreeExpanedplatesDialog
       Category = 'Visibility'
       Caption = 'Part name'
       Checked = True
-      Hint = 'Show the name of each developed part.'
+      Hint = 'Show the name of each developed part'
       ImageIndex = 22
       OnExecute = ShowPartNameExecute
     end
     object ShowSubmergedArea: TAction
       Category = 'Visibility'
       Caption = 'ShowSubmergedArea'
-      Hint = 'Show the submerged surface areas in a different color.'
+      Hint = 'Show the submerged surface areas in a different color'
       ImageIndex = 23
       OnExecute = ShowSubmergedAreaExecute
     end
     object ExportTextFile: TAction
       Category = 'Export'
       Caption = 'Text file'
-      Hint = 'Export the visible plates to a TXT file.'
+      Hint = 'Export the visible plates to a TXT file'
       ImageIndex = 24
       OnExecute = ExportTextFileExecute
     end
     object CloseDialog: TAction
+      Visible = False
       Category = 'Dialog'
       Caption = 'Close Dialog'
       Hint = 'Close Dialog'

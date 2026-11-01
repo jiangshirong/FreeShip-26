@@ -4,7 +4,7 @@ object SaveImageDialog: TSaveImageDialog
   Top = 453
   Width = 400
   BorderStyle = bsDialog
-  Caption = 'Save image.'
+  Caption = 'Save image'
   ClientHeight = 200
   ClientWidth = 400
   OnCreate = FormCreate

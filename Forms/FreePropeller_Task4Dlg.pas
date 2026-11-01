@@ -141,6 +141,7 @@ type
     procedure ToolButton25Click(Sender: TObject);
     procedure ToolButton7Click(Sender: TObject);
     procedure ToolButton17Click(Sender: TObject);
+    procedure DatabaseViewerClosed(ExitCode: Integer);
     procedure Edit1AfterSetValue(Sender: TObject);
     procedure PrintButtonClick(Sender: TObject);
     procedure CheckBox2Click(Sender: TObject);
@@ -178,6 +179,7 @@ type
     procedure FSetDat16(val: single);
   public { Public declarations }
     procedure Calculate;
+    procedure CalculateInWorkspace;
     function Execute(Freeship: TFreeship;
       AutoExtract: boolean): boolean;
     property Dat2: single read FGetDat2 write FSetDat2;
@@ -209,7 +211,7 @@ var
 
 implementation
 
-uses FreeStringsUnit,
+uses FreeCalculationFiles, FreeStringsUnit,
   Printers,
   Math,
   FreeProcess;
@@ -399,10 +401,24 @@ begin
 end;{TFreePropeller_Task4.FSetDat16}
 
 procedure TFreePropeller_Task4.Calculate;
+var Job: TFreeCalculationScope;
+begin
+  if FFreeship = nil then Exit;
+  Job := FFreeship.BeginCalculation([]);
+  try
+    CalculateInWorkspace;
+    Job.Complete;
+  finally Job.Free end;
+end;
+
+procedure TFreePropeller_Task4.CalculateInWorkspace;
 type
   TTable = array[0..16, 0..13] of single;
 
 var
+  ProcessCallerDirectory: string;
+  ProcessCallerCursor: TCursor;
+ 
   Units: TFreeUnitType;
   I, J, II, JJ: integer;
   Dat: array[1..20] of single;
@@ -423,6 +439,9 @@ label
   NewSearch;
 
 begin
+  ProcessCallerDirectory := GetCurrentDirUTF8;
+  ProcessCallerCursor := Screen.Cursor;
+  try
   if FFreeship = nil then
     exit;
   Units := FFreeship.ProjectSettings.ProjectUnits;
@@ -512,8 +531,8 @@ dat16=EtaM
 
     PathFileOld := GetCurrentDirUTF8;
     { *Converted from GetCurrentDir* }// текущий каталог проекта
-    ForceDirectoriesUTF8(FFreeship.Preferences.TempDirectory);
-    SetCurrentDirUTF8(FFreeship.Preferences.TempDirectory);
+    ForceDirectoriesUTF8(FFreeship.CalculationDirectory);
+    SetCurrentDirUTF8(FFreeship.CalculationDirectory);
 
     FExecDirectory := FFreeship.Preferences.ExecDirectory;
 
@@ -523,14 +542,14 @@ dat16=EtaM
     FileToFind := FileSearchUTF8('INO.', GetCurrentDir); { *Converted from FileSearch* }
     if FileToFind <> 'INO.' then
     begin
-      MessageDlg('Нет файла исходных данных для расчета!!!', mtError, [mbOK], 0);
+      MessageDlg(rs_Have_not_input_file_for_calculation_is_here___, mtError, [mbOK], 0);
       exit;
     end;
 
     // Запускаем программу расчета
     //SysUtils.ExecuteProcess(UTF8ToSys(FExecDirectory + DirectorySeparator+'PropPred.EXE'), '', []);
     ExecFullName := FExecDirectory + DirectorySeparator+'PropPred.EXE';
-    ExecuteFreePlugin(FFreeship.Preferences.TempDirectory, ExecFullName);
+    ExecuteFreeCalculation(FFreeship.CalculationDirectory, ExecFullName, fcPropeller4);
 
     FileName := 'OUT.';
     //  Определяем есть ли файл с результатами расчета OUT. Если INO. присутствует значит расчет не закончен
@@ -719,6 +738,10 @@ dat16=EtaM
   CloseFile(FFile);
   if FileExistsUTF8('POPGR.') { *Converted from FileExists* } then
     DeleteFileUTF8('POPGR.'); { *Converted from DeleteFile* }
+  finally
+    SetCurrentDirUTF8(ProcessCallerDirectory);
+    Screen.Cursor := ProcessCallerCursor;
+  end;
 end;{TFreePropeller_Task4.Calculate}
 
 function TFreePropeller_Task4.Execute(Freeship: TFreeship; AutoExtract: boolean): boolean;
@@ -758,26 +781,23 @@ begin
   Result := modalResult = mrOk;
 end;{TFreePropeller_Task4.Execute}
 
-procedure TFreePropeller_Task4.ToolButton17Click(Sender: TObject);
-var
-  pathFile, FileToFind: string;
-  FExecDirectory, ExecFullName: string;
-  L: boolean;
+procedure TFreePropeller_Task4.DatabaseViewerClosed(ExitCode: Integer);
 begin
-  //  Определяем каталог с программой freeship.exe
-  FExecDirectory := FFreeship.Preferences.ExecDirectory;
-  //      ResultsMemo.Lines.Add(FOpenDirectory+'freeship.exe');
-  PathFile := GetCurrentDirUTF8; { *Converted from GetCurrentDir* }
-  // Переходим в директорию Freeshipa
-  L := SetCurrentDirUTF8(FFreeship.Preferences.TempDirectory);
-  { *Converted from SetCurrentDir* }
-  // Запускаем программу расчета
-  //SysUtils.ExecuteProcess(UTF8ToSys(FExecDirectory + DirectorySeparator+'DBFview.EXE'), '', []);
-  ExecFullName := FExecDirectory + DirectorySeparator+'DBFview.EXE';
-  ExecuteFreePlugin(FFreeship.Preferences.TempDirectory, ExecFullName);
-  // Переходим назад в директорию открытого проекта
-  L := SetCurrentDirUTF8(PathFile); { *Converted from SetCurrentDir* }
-  Calculate;
+  ToolButton17.Enabled := True;
+  if ExitCode = 0 then Calculate;
+end;
+
+procedure TFreePropeller_Task4.ToolButton17Click(Sender: TObject);
+begin
+  ToolButton17.Enabled := False;
+  try
+    LaunchFreePluginViewer(Self, FFreeship.Preferences.TempDirectory,
+      FFreeship.Preferences.ExecDirectory + DirectorySeparator + 'DBFview.EXE',
+      DatabaseViewerClosed);
+  except
+    ToolButton17.Enabled := True;
+    raise;
+  end;
 end;{TFreePropeller_Task4.ToolButton17Click}
 
 procedure TFreePropeller_Task4.ToolButton7Click(Sender: TObject);

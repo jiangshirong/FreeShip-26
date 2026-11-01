@@ -76,6 +76,8 @@ type TFreeMatrixError= class(Exception);
 
 implementation
 
+uses FreeStringsUnit;
+
 { ######################### TFreeMatrix ######################### }
 procedure TFreeMatrix.Add(Matrix:TFreeMatrix);
 var Source  : TFreeMatrixRow;
@@ -92,7 +94,7 @@ begin
          Target:=FRows[I];
          for J:=0 to ColCount-1 do Target[J]:=Target[J]+Source[J];
       end;
-   end else Raise TFreeMatrixError.Create('Matrix size does not match in Add');
+   end else Raise TFreeMatrixError.Create(rsLocMatrixAddMismatch);
 end;{TFreeMatrix.Add}
 
 procedure TFreeMatrix.Assign(Matrix:TFreeMatrix);
@@ -113,7 +115,7 @@ begin
    if (Col>=0) and (Col<FNoColumns) and
       (Row>=0) and (Row<FNoRows) then Result:=FRows[Row][Col] else
    begin
-      Raise TFreeMatrixError.Create('Error in accesing matrix');
+      Raise TFreeMatrixError.Create(rsLocMatrixAccessError);
    end;
 end;{TFreeMatrix.FGetValue}
 
@@ -123,7 +125,7 @@ begin
       (Row>=0) and (Row<FNoRows) then
       begin
          FRows[Row][Col]:=Value;
-      end else Raise TFreeMatrixError.Create('Error in accesing matrix');
+      end else Raise TFreeMatrixError.Create(rsLocMatrixAccessError);
 end;{TFreeMatrix.FSetValue}
 
 procedure TFreeMatrix.Clear;
@@ -155,7 +157,7 @@ begin
    begin
       Fill(0.0);
       for I:=0 to RowCount-1 do Value[I,I]:=1.0;
-   end else Raise TFreeMatrixError.Create('Matrix must be square to create identity');
+   end else Raise TFreeMatrixError.Create(rsLocMatrixIdentitySquare);
 end;{TFreeMatrix.CreateIdentity}
 
 destructor TFreeMatrix.Destroy;
@@ -294,19 +296,19 @@ begin
             Result:=Inverted;
          end else
          begin
-            //MessageDlg('Matrix could not be solved.',mtError,[mbok],0);
+            //MessageDlg('Matrix could not be solved',mtError,[mbok],0);
             Inverted.Destroy;
          end;
          Assign(Back);
          Back.Destroy;
-      end else MessageDlg('Matrix size must match to be solved',mtError,[mbOk],0);
-   end else MessageDlg('Matrix must be square to invert',mtError,[mbOK],0);
+      end else MessageDlg(rsLocMatrixSizeMismatch,mtError,[mbOk],0);
+   end else MessageDlg(rsLocMatrixSquareInvert,mtError,[mbOK],0);
 end;{TFreeMatrix.Invert}
 
 function TFreeMatrix.Multiply(Matrix:TFreeMatrix):TFreeMatrix;
 var i,j,k : integer;
 begin
-   if ColCount<>Matrix.RowCount then raise TFreeMatrixError.Create('Matrix size do not match in multiply') else
+   if ColCount<>Matrix.RowCount then raise TFreeMatrixError.Create(rsLocMatrixMultiplyMismatch) else
    begin
       Result:=TFreeMatrix.Create;
       Result.SetSize(Matrix.ColCount,RowCount);
@@ -443,9 +445,9 @@ begin
 
             end;
             Result:=True;
-         end else MessageDlg('Matrix could not be solved.',mtError,[mbok],0);
-      end else MessageDlg('Matrix size must match to be solved',mtError,[mbOk],0);
-   end else MessageDlg('Matrix must be square to be solved',mtError,[mbOk],0);
+         end else MessageDlg(rsLocMatrixUnsolvable,mtError,[mbok],0);
+      end else MessageDlg(rsLocMatrixSizeMismatch,mtError,[mbOk],0);
+   end else MessageDlg(rsLocMatrixSquareSolve,mtError,[mbOk],0);
 end;{TFreeMatrix.Solve}
 
 function TFreeMatrix.Gauss(Matrix:TFreeMatrix;var Solution:TFreeMatrix):Boolean;
@@ -526,9 +528,9 @@ begin
                end;
             end;
             Result:=True;
-         end else MessageDlg('Matrix could not be solved.',mtError,[mbok],0);
-      end else MessageDlg('Matrix size must match to be solved',mtError,[mbOk],0);
-   end else MessageDlg('Matrix must be square to be solved',mtError,[mbOk],0);
+         end else MessageDlg(rsLocMatrixUnsolvable,mtError,[mbok],0);
+      end else MessageDlg(rsLocMatrixSizeMismatch,mtError,[mbOk],0);
+   end else MessageDlg(rsLocMatrixSquareSolve,mtError,[mbOk],0);
 end;{TFreeMatrix.Gauss}
 
 function TFreeMatrix.GaussJordan(Matrix:TFreeMatrix;var Solution:TFreeMatrix):Boolean;
@@ -550,7 +552,7 @@ begin
          Result:=True;
          Inverted.Destroy;
       end;
-   end else MessageDlg('Matrix must be square to be solved',mtError,[mbOk],0);
+   end else MessageDlg(rsLocMatrixSquareSolve,mtError,[mbOk],0);
 end;{TFreeMatrix.GaussJordan}
 
 procedure TFreeMatrix.Subtract(Matrix:TFreeMatrix);
@@ -566,7 +568,7 @@ begin
          Target:=FRows[I];
          for J:=0 to ColCount-1 do Target[J]:=Target[J]-Source[J];
       end;
-   end else Raise TFreeMatrixError.Create('Matrix size does not match in Subtract');
+   end else Raise TFreeMatrixError.Create(rsLocMatrixSubtractMismatch);
 end;{TFreeMatrix.Subtract}
 
 procedure TFreeMatrix.Transpose;

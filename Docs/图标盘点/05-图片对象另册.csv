@@ -1,0 +1,6 @@
+﻿文件,控件,类型,标题,行号,说明
+Forms\FreeAboutDlg.lfm,Image1,TImage,'FREE!ship About',74,图片资源；可能是图示/Logo/预览，不直接计为操作图标
+Forms\FreeMichletOutputDlg.lfm,Image1,TImage,'Michlet file generator.',1195,图片资源；可能是图示/Logo/预览，不直接计为操作图标
+Forms\FreeMichletOutputDlg.lfm,Image2,TImage,'Michlet file generator.',1384,图片资源；可能是图示/Logo/预览，不直接计为操作图标
+Forms\FreeSplashWndw.lfm,Image1,TImage,'FREE!ship Plus',22,图片资源；可能是图示/Logo/预览，不直接计为操作图标
+Forms\FreeSplashWndw.lfm,Image2,TImage,'FREE!ship Plus',2548,图片资源；可能是图示/Logo/预览，不直接计为操作图标

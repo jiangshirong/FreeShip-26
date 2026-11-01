@@ -29,7 +29,7 @@ object FreeInsertPlaneDialog: TFreeInsertPlaneDialog
       Top = 35
       Width = 327
       AutoSize = True
-      Caption = 'Insert multiple vertices on a plane.  '
+      Caption = 'Insert multiple vertices on a plane  '
       ChildSizing.EnlargeHorizontal = crsHomogenousChildResize
       ChildSizing.Layout = cclLeftToRightThenTopToBottom
       ChildSizing.ControlsPerLine = 1

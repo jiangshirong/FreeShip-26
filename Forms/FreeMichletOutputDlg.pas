@@ -167,6 +167,7 @@ type
     ScrollBar1: TScrollBar;
     ScrollBar2: TScrollBar;
     Viewport: TFreeViewport;
+    procedure FormCreate(Sender: TObject);
     procedure OKbuttonClick(Sender: TObject);
     procedure CancelButtonClick(Sender: TObject);
     procedure ViewportRequestExtents(Sender: TObject;
@@ -308,12 +309,21 @@ var
 
 implementation
 
+uses FreeUiChoices, FreeStringsUnit;
+
+
 {$IFnDEF FPC}
   {$R *.dfm}
 
 {$ELSE}
   {$R *.lfm}
 {$ENDIF}
+
+procedure TFreeMichletOutputDialog.FormCreate(Sender: TObject);
+begin
+  SetRadioChoiceLabels(Group1, [rsChoiceNone, 'ITTC 1957', 'Grigson']);
+  SetRadioChoiceLabels(Group2, [rsChoiceNone, rsChoiceDual]);
+end;
 
 procedure TFreeMichletOutputDialog.FBuildOffsets;
 var

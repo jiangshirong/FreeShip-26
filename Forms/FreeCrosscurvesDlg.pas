@@ -142,6 +142,7 @@ type
     ToolButton2: TToolButton;
     SaveButton: TToolButton;
     SaveDialog: TSaveDialog;
+    procedure FormCreate(Sender: TObject);
     procedure FreeNumInput5_AfterSetValue(
       Sender: TObject);
     procedure FreeNumInput6_AfterSetValue(
@@ -191,11 +192,22 @@ var
 
 implementation
 
-uses FreeStringsUnit;
+uses FreeStringsUnit, FreeUiChoices;
 
 {$R *.lfm}
 
-resourcestring Amplitude_of_heel_angle__2_0_degrees____ = 'Amplitude of heel angle <2.0 degrees !!!';
+resourcestring
+  Amplitude_of_heel_angle__2_0_degrees____ = 'Amplitude of heel angle <2.0 degrees !!!';
+  rsCrossAnglesCount = 'Angles count %d is less than table column count %d. Results may be incorrect';
+  rsCrossImpossible = 'Calculation is impossible: ho-dh<0 !';
+  rsCrossTooManyAngles = 'Number of heel angles are more than 100 !!!';
+
+procedure TFreeCrosscurvesDialog.FormCreate(Sender: TObject);
+begin
+  SetChoiceLabels(ComboBox, [rsChoiceUnlimitedArea, 'R1', 'R2', 'R2-RSN', 'R3', 'R3-RSN']);
+  SetChoiceLabels(ComboBox1, [rsChoiceRussianRegistry2010, rsChoiceRussianRegistry1996,
+    rsChoiceGiss, rsChoiceUkrainianRegistry2005]);
+end;
 
 function TFreeCrosscurvesDialog.Execute(Freeship: TFreeship): boolean;
 begin
@@ -857,8 +869,7 @@ begin
     I0 := 0;
     if length(Angles) < (Grid.Colcount - 1)    // by MM
     then
-      MessageDlg('Angles count ' + IntToStr(length(Angles)) +
-        ' is less than table gol count ' + IntToStr(Grid.Colcount) + '. Will be error',
+      MessageDlg(Format(rsCrossAnglesCount, [length(Angles), Grid.Colcount]),
         mtInformation, [mbOK], 0);
 
 
@@ -1056,7 +1067,7 @@ begin
           Tk := 2 * c * B / sqrt(h0 - dh)
         else
         begin
-          MessageDlg('Calculation is impossible: ho-dh<0 !', mtInformation, [mbOK], 0);
+          MessageDlg(rsCrossImpossible, mtInformation, [mbOK], 0);
           exit;
         end;
         //    S=f(Tk)
@@ -1171,7 +1182,7 @@ begin
 
         if NHeel > 100 then
         begin
-          MessageDlg('Number of heel angles are more than 100 !!!', mtInformation, [mbOK], 0);
+          MessageDlg(rsCrossTooManyAngles, mtInformation, [mbOK], 0);
           exit;
         end;
 

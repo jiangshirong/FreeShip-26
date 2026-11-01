@@ -159,6 +159,7 @@ type
                                  procedure FSetDat12(val:single);
                               public { Public declarations }
                                  procedure Calculate;
+    procedure CalculateInWorkspace;
                                  function Execute(Freeship:TFreeship;AutoExtract:Boolean):Boolean;
                                  property Dat2    : Single read FGetDat2 write FSetDat2;
                                  property Dat3    : Single read FGetDat3 write FSetDat3;
@@ -177,7 +178,7 @@ var FreeHydrodyn_Task1: TFreeHydrodyn_Task1;
 
 implementation
 
-uses FreeStringsUnit,
+uses FreeCalculationFiles, FreeStringsUnit,
      Printers,
      Math,
      FreeProcess;
@@ -311,9 +312,23 @@ end;{TFreeHydrodyn_Task1.FSetDat12}
 
 
 procedure TFreeHydrodyn_Task1.Calculate;
+var Job: TFreeCalculationScope;
+begin
+  if FFreeship = nil then Exit;
+  Job := FFreeship.BeginCalculation([]);
+  try
+    CalculateInWorkspace;
+    Job.Complete;
+  finally Job.Free end;
+end;
+
+procedure TFreeHydrodyn_Task1.CalculateInWorkspace;
 Type TTable = array[0..16,0..13] of single;
 
-var Units  : TFreeUnitType;
+var
+  ProcessCallerDirectory: string;
+  ProcessCallerCursor: TCursor;
+  Units  : TFreeUnitType;
     I,J,II,N,JJ: Integer;
     Dat       : array[1..9] of single;
     Resal     : array[1..40] of single;  
@@ -338,6 +353,9 @@ var Units  : TFreeUnitType;
     label NewSearch;	
 
 begin
+  ProcessCallerDirectory := GetCurrentDirUTF8;
+  ProcessCallerCursor := Screen.Cursor;
+  try
    Units:=FFreeship.ProjectSettings.ProjectUnits;
 
    TChartSeries(Chart.Series[0]).Clear;
@@ -405,8 +423,8 @@ begin
   if dat9<12 then begin  
 
     PathFileOld:=GetCurrentDir;
-    ForceDirectoriesUTF8(FFreeship.Preferences.TempDirectory);
-    SetCurrentDirUTF8(FFreeship.Preferences.TempDirectory);
+    ForceDirectoriesUTF8(FFreeship.CalculationDirectory);
+    SetCurrentDirUTF8(FFreeship.CalculationDirectory);
 
     File_ExportData(dat); 
 
@@ -418,14 +436,14 @@ begin
     //  Определяем текущий каталог с проектами и с данными для расчета IN.
     FileToFind := FileSearchUTF8('INO.',GetCurrentDir); { *Converted from FileSearch* }
 	  if FileToFind<>'INO.' then begin
-	    MessageDlg('Нет файла исходных данных для расчета!!!',mtError,[mbOk],0); 
+	    MessageDlg(rs_Have_not_input_file_for_calculation_is_here___,mtError,[mbOk],0); 
 		  exit;
 	  end;		  
 
     // Запускаем программу расчета
     //SysUtils.ExecuteProcess(UTF8ToSys(FExecDirectory+DirectorySeparator+'Ishercof.EXE'), '', []);
     ExecFullName := FExecDirectory + DirectorySeparator+'Ishercof.EXE';
-    ExecuteFreePlugin(FFreeship.Preferences.TempDirectory, ExecFullName);
+    ExecuteFreeCalculation(FFreeship.CalculationDirectory, ExecFullName, fcIshercof);
 
     FileName:='OUT.';
 //  Определяем есть ли файл с результатами расчета OUT. Если INO. присутствует значит расчет не закончен
@@ -661,6 +679,10 @@ STR0[8]:='NUMBER OF GROUPS OF MASTS, ETC. ..... M :';
           ResultsMemo.Lines.Add(' ');
          end;
          ResultsMemo.Lines.Add(Space(16)+'Copyright (c) 2009-2012, Timoshenko V.F.');
+  finally
+    SetCurrentDirUTF8(ProcessCallerDirectory);
+    Screen.Cursor := ProcessCallerCursor;
+  end;
 end;{TFreeHydrodyn_Task1.Calculate}
 
 function TFreeHydrodyn_Task1.Execute(Freeship:TFreeship;AutoExtract:Boolean):Boolean;

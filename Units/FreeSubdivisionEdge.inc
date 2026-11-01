@@ -564,7 +564,6 @@ end;{TFreeSubdivisionEdge.DistanceToCursor}
 procedure TFreeSubdivisionEdge.Draw(DrawMirror: boolean; Viewport: TFreeViewport);
 var
   P1, P2, M: T3DCoordinate;
-  Pt1, Pt2: TPoint;
 begin
   P1 := StartPoint.FCoordinate;
   P2 := EndPoint.FCoordinate;
@@ -581,32 +580,20 @@ begin
       if P1.X <= Surface.SplitSectionLocation then
       begin
         // P2 lies on port
-        Pt1 := Viewport.Project(P2);
-        Pt2 := Viewport.Project(M);
-        Viewport.MoveTo(Pt1.X, Pt1.Y);
-        Viewport.LineTo(Pt2.X, Pt2.Y);
+        Viewport.DrawModelLine(P2, M);
         // P1 lies on starboard
         P1.Y := -P1.Y;
         M.Y := -M.Y;
-        Pt1 := Viewport.Project(P1);
-        Pt2 := Viewport.Project(M);
-        Viewport.MoveTo(Pt1.X, Pt1.Y);
-        Viewport.LineTo(Pt2.X, Pt2.Y);
+        Viewport.DrawModelLine(P1, M);
       end
       else
       begin
         // P1 lies on port
-        Pt1 := Viewport.Project(P1);
-        Pt2 := Viewport.Project(M);
-        Viewport.MoveTo(Pt1.X, Pt1.Y);
-        Viewport.LineTo(Pt2.X, Pt2.Y);
+        Viewport.DrawModelLine(P1, M);
         // P2 lies on starboard
         P2.Y := -P2.Y;
         M.Y := -M.Y;
-        Pt1 := Viewport.Project(P2);
-        Pt2 := Viewport.Project(M);
-        Viewport.MoveTo(Pt1.X, Pt1.Y);
-        Viewport.LineTo(Pt2.X, Pt2.Y);
+        Viewport.DrawModelLine(P2, M);
 
       end;
     end
@@ -616,27 +603,18 @@ begin
         P1.Y := -P1.Y;
       if P2.X <= Surface.SplitSectionLocation then
         P2.Y := -P2.Y;
-      Pt1 := Viewport.Project(P1);
-      Pt2 := Viewport.Project(P2);
-      Viewport.MoveTo(Pt1.X, Pt1.Y);
-      Viewport.LineTo(Pt2.X, Pt2.Y);
+      Viewport.DrawModelLine(P1, P2);
     end;
 
   end
   else
   begin
-    Pt1 := Viewport.Project(P1);
-    Pt2 := Viewport.Project(P2);
-    Viewport.MoveTo(Pt1.X, Pt1.Y);
-    Viewport.LineTo(Pt2.X, Pt2.Y);
+    Viewport.DrawModelLine(P1, P2);
     if DrawMirror then
     begin
       P1.Y := -P1.Y;
       P2.Y := -P2.Y;
-      Pt1 := Viewport.Project(P1);
-      Pt2 := Viewport.Project(P2);
-      Viewport.MoveTo(Pt1.X, Pt1.Y);
-      Viewport.LineTo(Pt2.X, Pt2.Y);
+      Viewport.DrawModelLine(P1, P2);
     end;
   end;
 end;{TFreeSubdivisionEdge.Draw}

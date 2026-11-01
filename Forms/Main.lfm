@@ -60,7 +60,7 @@ object MainForm: TMainForm
         Height = 26
         Top = 5
         Width = 184
-        Caption = 'Undo memory : 0 kb.'
+        Caption = 'Undo memory : 0 kb'
         Layout = tlCenter
         ParentColor = False
         ParentFont = False
@@ -433,7 +433,7 @@ object MainForm: TMainForm
         Tag = 3
         Left = 63
         Height = 16
-        Hint = 'Change the color of the currently active layer.'
+        Hint = 'Change the color of the currently active layer'
         Top = 0
         Width = 25
         BorderWidth = 2
@@ -710,19 +710,19 @@ object MainForm: TMainForm
     object ExportFEF: TAction
       Category = 'Export'
       Caption = 'FEF file...'
-      Hint = 'Export to a FEF (Freeship Exchange Format) hull.'
+      Hint = 'Export to a FEF (Freeship Exchange Format) hull'
       OnExecute = ExportFEFExecute
     end
     object ImportFEF: TAction
       Category = 'Import'
       Caption = 'FEF file...'
-      Hint = 'Import a FEF (Freeship Exchange Format) hull.'
+      Hint = 'Import a FEF (Freeship Exchange Format) hull'
       OnExecute = ImportFEFExecute
     end
     object LoadFile: TAction
       Category = 'File'
       Caption = 'Open...'
-      Hint = 'Open a new file.'
+      Hint = 'Open a new file'
       ImageIndex = 0
       OnExecute = LoadFileExecute
     end
@@ -742,7 +742,7 @@ object MainForm: TMainForm
     object ExportDXF2DPolylines: TAction
       Category = 'Export'
       Caption = 'DXF 2D Polylines...'
-      Hint = 'Export all lines as 2D polylines.'
+      Hint = 'Export all lines as 2D polylines'
       ImageIndex = 27
       OnExecute = ExportDXF2DPolylinesExecute
     end
@@ -754,14 +754,14 @@ object MainForm: TMainForm
     object ShowControlNet: TAction
       Category = 'Visibility'
       Caption = 'Control net'
-      Hint = 'Show control net.'
+      Hint = 'Show control net'
       ImageIndex = 2
       OnExecute = ShowControlNetExecute
     end
     object ShowInteriorEdges: TAction
       Category = 'Visibility'
       Caption = 'Interior edges'
-      Hint = 'Show interior edges.'
+      Hint = 'Show interior edges'
       ImageIndex = 3
       OnExecute = ShowInteriorEdgesExecute
     end
@@ -793,7 +793,7 @@ object MainForm: TMainForm
     object FileSaveas: TAction
       Category = 'File'
       Caption = 'Save as...'
-      Hint = 'Prompt for filename and save file.'
+      Hint = 'Prompt for filename and save file'
       ImageIndex = 39
       OnExecute = FileSaveasExecute
     end
@@ -807,21 +807,21 @@ object MainForm: TMainForm
     object LayerAutoGroup: TAction
       Category = 'Layer'
       Caption = 'Auto group'
-      Hint = 'Automatic grouping of connected controlfaces into a new layer.'
+      Hint = 'Automatic grouping of connected controlfaces into a new layer'
       ImageIndex = 6
       OnExecute = LayerAutoGroupExecute
     end
     object NewLayer: TAction
       Category = 'Layer'
       Caption = 'New'
-      Hint = 'Add a new empty layer to the model.'
+      Hint = 'Add a new empty layer to the model'
       ImageIndex = 7
       OnExecute = NewLayerExecute
     end
     object Delete: TAction
       Category = 'Edit'
       Caption = 'Delete'
-      Hint = 'Delete all selected items.'
+      Hint = 'Delete all selected items'
       ImageIndex = 8
       OnExecute = DeleteExecute
       ShortCut = 16472
@@ -829,14 +829,14 @@ object MainForm: TMainForm
     object EdgeCollapse: TAction
       Category = 'Edge'
       Caption = 'Collapse'
-      Hint = 'Remove an edge by merging the two connected faces into one new face.'
+      Hint = 'Remove an edge by merging the two connected faces into one new face'
       ImageIndex = 9
       OnExecute = EdgeCollapseExecute
     end
     object NewEdge: TAction
       Category = 'Edge'
       Caption = 'Insert'
-      Hint = 'Split a face by inserting a new edge between to selected points.'
+      Hint = 'Split a face by inserting a new edge between to selected points'
       ImageIndex = 10
       OnExecute = NewEdgeExecute
       ShortCut = 69
@@ -844,7 +844,7 @@ object MainForm: TMainForm
     object EdgeCrease: TAction
       Category = 'Edge'
       Caption = 'Crease'
-      Hint = 'Switch selected edges between normal or crease edges (knuckle lines).'
+      Hint = 'Switch selected edges between normal or crease edges (knuckle lines)'
       ImageIndex = 11
       OnExecute = EdgeCreaseExecute
     end
@@ -858,28 +858,28 @@ object MainForm: TMainForm
     object PointCollapse: TAction
       Category = 'Point'
       Caption = 'Collapse'
-      Hint = 'Merge two selected edges by removing their common controlpoint.'
+      Hint = 'Merge two selected edges by removing their common controlpoint'
       ImageIndex = 12
       OnExecute = PointCollapseExecute
     end
     object ActiveLayerColor: TAction
       Category = 'Layer'
       Caption = 'Active layer color'
-      Hint = 'Change the color of the currently active layer.'
+      Hint = 'Change the color of the currently active layer'
       ImageIndex = 25
       OnExecute = ActiveLayerColorExecute
     end
     object DeleteEmptyLayers: TAction
       Category = 'Layer'
       Caption = 'Delete empty'
-      Hint = 'Delete empty layers from the model.'
+      Hint = 'Delete empty layers from the model'
       ImageIndex = 29
       OnExecute = DeleteEmptyLayersExecute
     end
     object LayerDialog: TAction
       Category = 'Layer'
       Caption = 'Dialog'
-      Hint = 'Show the window with layer properties.'
+      Hint = 'Show the window with layer properties'
       ImageIndex = 24
       OnExecute = LayerDialogExecute
       ShortCut = 16460
@@ -887,7 +887,7 @@ object MainForm: TMainForm
     object NewModel: TAction
       Category = 'File'
       Caption = 'New...'
-      Hint = 'Start a new model.'
+      Hint = 'Start a new model'
       ImageIndex = 13
       OnExecute = NewModelExecute
       ShortCut = 16462
@@ -895,49 +895,49 @@ object MainForm: TMainForm
     object ShowStations: TAction
       Category = 'Visibility'
       Caption = 'Stations'
-      Hint = 'Toggle stations visibility on or off.'
+      Hint = 'Toggle stations visibility on or off'
       ImageIndex = 15
       OnExecute = ShowStationsExecute
     end
     object ShowButtocks: TAction
       Category = 'Visibility'
       Caption = 'Buttocks'
-      Hint = 'Toggle buttocks visibility on or off.'
+      Hint = 'Toggle buttocks visibility on or off'
       ImageIndex = 16
       OnExecute = ShowButtocksExecute
     end
     object ShowWaterlines: TAction
       Category = 'Visibility'
       Caption = 'Waterlines'
-      Hint = 'Toggle waterlines visibility on or off.'
+      Hint = 'Toggle waterlines visibility on or off'
       ImageIndex = 17
       OnExecute = ShowWaterlinesExecute
     end
     object NewFace: TAction
       Category = 'Face'
       Caption = 'New'
-      Hint = 'Create a new controlface from selected controlpoints.'
+      Hint = 'Create a new controlface from selected controlpoints'
       ImageIndex = 18
       OnExecute = NewFaceExecute
     end
     object IntersectionDialog: TAction
       Category = 'Edit'
       Caption = 'Intersections...'
-      Hint = 'Show the window to add stations, buttocks, waterlines and diagonals.'
+      Hint = 'Show the window to add stations, buttocks, waterlines and diagonals'
       ImageIndex = 14
       OnExecute = IntersectionDialogExecute
     end
     object EdgeExtrude: TAction
       Category = 'Edge'
       Caption = 'Extrude...'
-      Hint = 'Create new controlfaces by extruding selected boundary edges.'
+      Hint = 'Create new controlfaces by extruding selected boundary edges'
       ImageIndex = 19
       OnExecute = EdgeExtrudeExecute
     end
     object EdgeSplit: TAction
       Category = 'Edge'
       Caption = 'Split'
-      Hint = 'Create new controlpoints by splitting an controledge into two.'
+      Hint = 'Create new controlpoints by splitting an controledge into two'
       ImageIndex = 20
       OnExecute = EdgeSplitExecute
       ShortCut = 83
@@ -950,63 +950,63 @@ object MainForm: TMainForm
     object CheckModel: TAction
       Category = 'Tools'
       Caption = 'Check model'
-      Hint = 'Check the model for errors and inconsitencies.'
+      Hint = 'Check the model for errors and inconsitencies'
       OnExecute = CheckModelExecute
     end
     object ShowNormals: TAction
       Category = 'Visibility'
       Caption = 'Normals'
-      Hint = 'Show normals of selected controlfaces.'
+      Hint = 'Show normals of selected controlfaces'
       ImageIndex = 21
       OnExecute = ShowNormalsExecute
     end
     object DesignHydrostatics: TAction
       Category = 'Calculate'
       Caption = 'Design hydrostatics'
-      Hint = 'Calculate hydrostatics for the design condition.'
+      Hint = 'Calculate hydrostatics for the design condition'
       OnExecute = DesignHydrostaticsExecute
     end
     object ImportVRML: TAction
       Category = 'Import'
       Caption = 'VRML...'
-      Hint = 'Import a VRML 1.0 file.'
+      Hint = 'Import a VRML 1.0 file'
       OnExecute = ImportVRMLExecute
     end
     object RemoveNegative: TAction
       Category = 'Tools'
       Caption = 'Remove negative'
-      Hint = 'Removes all faces on the starbaordside of the hull.'
+      Hint = 'Removes all faces on the starbaordside of the hull'
       OnExecute = RemoveNegativeExecute
     end
     object RotateModel: TAction
       Category = 'Transform'
       Caption = 'Rotate...'
-      Hint = 'Rotate selected items.'
+      Hint = 'Rotate selected items'
       OnExecute = RotateModelExecute
     end
     object RotateModelM: TAction
       Category = 'Transform'
       Caption = 'Heeling and/or trimming...'
-      Hint = 'Rotate all model items.'
+      Hint = 'Rotate all model items'
       OnExecute = RotateModelMExecute
     end
     object ScaleModel: TAction
       Category = 'Transform'
       Caption = 'Scale...'
-      Hint = 'Scale selected items.'
+      Hint = 'Scale selected items'
       OnExecute = ScaleModelExecute
     end
     object ShowGrid: TAction
       Category = 'Visibility'
       Caption = 'Grid'
-      Hint = 'Show grid of intersections in plan, profile and bodyplan view.'
+      Hint = 'Show grid of intersections in plan, profile and bodyplan view'
       ImageIndex = 22
       OnExecute = ShowGridExecute
     end
     object Undo: TAction
       Category = 'Edit'
       Caption = 'Undo'
-      Hint = 'Undo the last modification.'
+      Hint = 'Undo the last modification'
       ImageIndex = 56
       OnExecute = UndoExecute
       ShortCut = 16474
@@ -1014,7 +1014,7 @@ object MainForm: TMainForm
     object HydrostaticsDialog: TAction
       Category = 'Calculate'
       Caption = 'Hydrostatics...'
-      Hint = 'Calculate hydrostatics for a range of inputdata.'
+      Hint = 'Calculate hydrostatics for a range of inputdata'
       OnExecute = HydrostaticsDialogExecute
     end
     object ExportObj: TAction
@@ -1025,7 +1025,7 @@ object MainForm: TMainForm
     object InvertFace: TAction
       Category = 'Face'
       Caption = 'Invert'
-      Hint = 'Flip the normal direction of the selected controlfaces.'
+      Hint = 'Flip the normal direction of the selected controlfaces'
       ImageIndex = 23
       OnExecute = InvertFaceExecute
     end
@@ -1037,20 +1037,20 @@ object MainForm: TMainForm
     object ImportBodyplan: TAction
       Category = 'Import'
       Caption = 'Bodyplan...'
-      Hint = 'Import a bodyplan and fit a surface.'
+      Hint = 'Import a bodyplan and fit a surface'
       OnExecute = ImportBodyplanExecute
     end
     object ExportDXF3DPolylines: TAction
       Category = 'Export'
       Caption = 'DXF 3D Polylines...'
-      Hint = 'Export all lines as 3D polylines.'
+      Hint = 'Export all lines as 3D polylines'
       ImageIndex = 27
       OnExecute = ExportDXF3DPolylinesExecute
     end
     object ExportDXFFaces: TAction
       Category = 'Export'
       Caption = 'DXF 3D mesh...'
-      Hint = 'Export all faces to a 3D DXF file.'
+      Hint = 'Export all faces to a 3D DXF file'
       ImageIndex = 27
       OnExecute = ExportDXFFacesExecute
     end
@@ -1068,13 +1068,13 @@ object MainForm: TMainForm
     object MoveModel: TAction
       Category = 'Transform'
       Caption = 'Move...'
-      Hint = 'Move the entire model.'
+      Hint = 'Move the entire model'
       OnExecute = MoveModelExecute
     end
     object AddPoint: TAction
       Category = 'Point'
       Caption = 'Add'
-      Hint = 'Add a new controlpoint to the model.'
+      Hint = 'Add a new controlpoint to the model'
       OnExecute = AddPointExecute
       ShortCut = 80
     end
@@ -1099,21 +1099,21 @@ object MainForm: TMainForm
     object ShowDiagonals: TAction
       Category = 'Visibility'
       Caption = 'Diagonals'
-      Hint = 'Toggle diagonals visibility on or off.'
+      Hint = 'Toggle diagonals visibility on or off'
       ImageIndex = 30
       OnExecute = ShowDiagonalsExecute
     end
     object ShowMarkers: TAction
       Category = 'Visibility'
       Caption = 'Markers'
-      Hint = 'Show markers.'
+      Hint = 'Show markers'
       ImageIndex = 36
       OnExecute = ShowMarkersExecute
     end
     object DeleteMarkers: TAction
       Category = 'Tools'
       Caption = 'Delete all markers'
-      Hint = 'Delete all markers from the model.'
+      Hint = 'Delete all markers from the model'
       ImageIndex = 37
       OnExecute = DeleteMarkersExecute
     end
@@ -1125,7 +1125,7 @@ object MainForm: TMainForm
     object Showcurvature: TAction
       Category = 'Visibility'
       Caption = 'Curvature'
-      Hint = 'Show curvature plot of intersectionlines.'
+      Hint = 'Show curvature plot of intersectionlines'
       ImageIndex = 38
       OnExecute = ShowcurvatureExecute
     end
@@ -1139,7 +1139,7 @@ object MainForm: TMainForm
     object FileSave: TAction
       Category = 'File'
       Caption = 'Save'
-      Hint = 'Save file without prompting for the filename.'
+      Hint = 'Save file without prompting for the filename'
       ImageIndex = 5
       OnExecute = FileSaveExecute
       ShortCut = 16467
@@ -1152,42 +1152,42 @@ object MainForm: TMainForm
     object ShowControlCurves: TAction
       Category = 'Visibility'
       Caption = 'Control curves'
-      Hint = 'Show control curves.'
+      Hint = 'Show control curves'
       ImageIndex = 40
       OnExecute = ShowControlCurvesExecute
     end
     object NewCurve: TAction
       Category = 'Curve'
       Caption = 'New'
-      Hint = 'Add a new curve to selected edges.'
+      Hint = 'Add a new curve to selected edges'
       ImageIndex = 41
       OnExecute = NewCurveExecute
     end
     object InsertPlane: TAction
       Category = 'Point'
       Caption = 'Insert plane...'
-      Hint = 'Insert multiple new points on a 3D oriented plane.'
+      Hint = 'Insert multiple new points on a 3D oriented plane'
       ImageIndex = 42
       OnExecute = InsertPlaneExecute
     end
     object PointsLock: TAction
       Category = 'Point'
       Caption = 'Lock points'
-      Hint = 'Lock all selected controlpoints.'
+      Hint = 'Lock all selected controlpoints'
       ImageIndex = 44
       OnExecute = PointsLockExecute
     end
     object PointsUnlock: TAction
       Category = 'Point'
       Caption = 'Unlock points'
-      Hint = 'Unlock all selected controlpoints.'
+      Hint = 'Unlock all selected controlpoints'
       ImageIndex = 43
       OnExecute = PointsUnlockExecute
     end
     object PointsUnlockAll: TAction
       Category = 'Point'
       Caption = 'Unlock all points'
-      Hint = 'Unlock all locked controlpoints.'
+      Hint = 'Unlock all locked controlpoints'
       ImageIndex = 45
       OnExecute = PointsUnlockAllExecute
     end
@@ -1317,7 +1317,7 @@ object MainForm: TMainForm
     object PointAlign: TAction
       Category = 'Point'
       Caption = 'Align'
-      Hint = 'Project selected points on a straight line through the first and last selected point.'
+      Hint = 'Project selected points on a straight line through the first and last selected point'
       ImageIndex = 48
       OnExecute = PointAlignExecute
     end
@@ -1330,7 +1330,7 @@ object MainForm: TMainForm
     object ShowHydrostatics: TAction
       Category = 'Visibility'
       Caption = 'Hydrostatic features'
-      Hint = 'Show certain hydrostatic key properties in the model.'
+      Hint = 'Show certain hydrostatic key properties in the model'
       ImageIndex = 49
       OnExecute = ShowHydrostaticsExecute
     end
@@ -1363,21 +1363,21 @@ object MainForm: TMainForm
     object LayerIntersection: TAction
       Category = 'Point'
       Caption = 'Intersect layers...'
-      Hint = 'Find the intersection of two layers.'
+      Hint = 'Find the intersection of two layers'
       ImageIndex = 51
       OnExecute = LayerIntersectionExecute
     end
     object KeelRudderWizard: TAction
       Category = 'Tools'
       Caption = 'Keel and rudder wizard'
-      Hint = 'Create a default rudder or keel.'
+      Hint = 'Create a default rudder or keel'
       ImageIndex = 52
       OnExecute = KeelRudderWizardExecute
     end
     object Redo: TAction
       Category = 'Edit'
       Caption = 'Redo'
-      Hint = 'Undo the previous modification.'
+      Hint = 'Undo the previous modification'
       ImageIndex = 57
       OnExecute = RedoExecute
       ShortCut = 16466
@@ -1418,7 +1418,7 @@ object MainForm: TMainForm
     object ShowFlowlines: TAction
       Category = 'Visibility'
       Caption = 'Flowlines'
-      Hint = 'Show flowlines around the hull.'
+      Hint = 'Show flowlines around the hull'
       ImageIndex = 55
       OnExecute = ShowFlowlinesExecute
     end
@@ -1443,11 +1443,6 @@ object MainForm: TMainForm
       Category = 'Calculate'
       Caption = 'Cross curves'
       OnExecute = CrossCurvesExecute
-    end
-    object HelpAction: THelpAction
-      Category = 'Help'
-      Caption = 'HelpAction'
-      OnExecute = Help1Click
     end
     object AboutAction: TAction
       Caption = 'AboutAction'
@@ -1484,11 +1479,6 @@ object MainForm: TMainForm
       Category = 'Tools'
       Caption = 'Add flow line'
       OnExecute = AddFlowLineExecute
-    end
-    object ActionCheckUpdates: TAction
-      Category = 'Help'
-      Caption = 'Check for updates'
-      OnExecute = ActionCheckUpdatesExecute
     end
     object AddGridPanel: TAction
       Category = 'Tools'
@@ -1535,7 +1525,7 @@ object MainForm: TMainForm
     end
     object SelectionDialog: TAction
       Category = 'Selection'
-      Caption = 'Selection Dialog'
+      Caption = 'Selected Object Details'
       OnExecute = SelectionDialogExecute
     end
     object ImportSTL: TAction
@@ -2121,15 +2111,6 @@ object MainForm: TMainForm
           Action = ExportPAM
         end
       end
-      object ExitProgram1: TMenuItem
-        Action = ExitProgram
-      end
-      object N2: TMenuItem
-        Caption = '-'
-      end
-      object Preferences1: TMenuItem
-        Action = Preferences
-      end
       object N4: TMenuItem
         Caption = '-'
       end
@@ -2384,6 +2365,12 @@ object MainForm: TMainForm
       object MenuItem1: TMenuItem
         Caption = 'Add flow line'
       end
+      object N2: TMenuItem
+        Caption = '-'
+      end
+      object Preferences1: TMenuItem
+        Action = Preferences
+      end
     end
     object ransform1: TMenuItem
       Caption = 'Transform'
@@ -2509,22 +2496,6 @@ object MainForm: TMainForm
       end
       object N1: TMenuItem
         Caption = '-'
-      end
-    end
-    object Help1: TMenuItem
-      Caption = 'Help'
-      ShortCut = 112
-      object HelpContents: TMenuItem
-        Action = HelpAction
-        Caption = 'Contents'
-        ShortCut = 112
-      end
-      object CheckUpdates: TMenuItem
-        Action = ActionCheckUpdates
-      end
-      object HelpAbout: TMenuItem
-        Action = AboutAction
-        Caption = 'About'
       end
     end
   end

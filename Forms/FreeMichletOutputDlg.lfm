@@ -1,9 +1,10 @@
 object FreeMichletOutputDialog: TFreeMichletOutputDialog
+  OnCreate = FormCreate
   Left = 581
   Height = 600
   Top = 158
   Width = 800
-  Caption = 'Michlet file generator.'
+  Caption = 'Michlet file generator'
   ClientHeight = 600
   ClientWidth = 800
   OnResize = FormResize
@@ -329,7 +330,7 @@ object FreeMichletOutputDialog: TFreeMichletOutputDialog
             Height = 208
             Top = 10
             Width = 302
-            Caption = 'Hullform configuration.  '
+            Caption = 'Hullform configuration  '
             ChildSizing.TopBottomSpacing = 10
             ChildSizing.VerticalSpacing = 2
             ChildSizing.Layout = cclLeftToRightThenTopToBottom
@@ -768,7 +769,7 @@ object FreeMichletOutputDialog: TFreeMichletOutputDialog
               Top = 142
               Width = 485
               AutoFill = True
-              Caption = 'Skin friction method. '
+              Caption = 'Skin friction method '
               ChildSizing.LeftRightSpacing = 6
               ChildSizing.EnlargeHorizontal = crsHomogenousChildResize
               ChildSizing.EnlargeVertical = crsHomogenousChildResize
@@ -845,7 +846,7 @@ object FreeMichletOutputDialog: TFreeMichletOutputDialog
             Top = 10
             Width = 297
             AutoSize = True
-            Caption = 'Sectorial cut. '
+            Caption = 'Sectorial cut '
             ChildSizing.HorizontalSpacing = 10
             ChildSizing.Layout = cclLeftToRightThenTopToBottom
             ChildSizing.ControlsPerLine = 2
@@ -1005,7 +1006,7 @@ object FreeMichletOutputDialog: TFreeMichletOutputDialog
             Top = 236
             Width = 297
             AutoSize = True
-            Caption = 'Rectangular cut. '
+            Caption = 'Rectangular cut '
             ChildSizing.HorizontalSpacing = 10
             ChildSizing.Layout = cclLeftToRightThenTopToBottom
             ChildSizing.ControlsPerLine = 2

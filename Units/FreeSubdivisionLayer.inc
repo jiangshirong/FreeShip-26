@@ -38,11 +38,17 @@ begin
 end;{TFreeSubdivisionLayer.FGetLayerIndex}
 
 function TFreeSubdivisionLayer.FGetSurfaceProperties: TLayerProperties;
+begin
+  Result := CalculateSurfaceProperties(nil);
+end;
+
+function TFreeSubdivisionLayer.CalculateSurfaceProperties(Report: TStrings): TLayerProperties;
 var
-  I, J, K, II: integer;
+  I, J, K: integer;
   Coeff, Xmin, Xmax: single;
+  WriteReport: boolean;
+  Line, Part: string;
   Child: TFreeSubdivisionFace;
-  ffile: textfile;
   Area: TFloatType;
   Center: T3DCoordinate;
 
@@ -64,21 +70,18 @@ var
   end;{ProcessTriangle}
 
 begin
-  II := 0;
   Coeff := Thickness * MaterialDensity;
+  WriteReport := Assigned(Report) and (Coeff > 0) and (Count > 0);
   Fillchar(Result, SizeOf(Result), 0);
-  if FileExists('Weights.txt') { *Converted from FileExists* } and (coeff > 0) then
+  if WriteReport then
   begin
-    Assignfile(FFile, 'Weights.txt');
-    Append(FFile);
-    II := 1;
     if Symmetric then
     begin
-      writeln(ffile, Count: 4, Items[0].ChildCount: 4, ' 2');
+      Str(Count:4, Line); Str(Items[0].ChildCount:4, Part);
+      Report.Add(Line + Part + ' 2');
       Coeff := Coeff * 2;
     end
-    else
-      writeln(ffile, IntToStr(Count) + ' ' + IntToStr(Items[0].ChildCount) + ' 1');
+    else Report.Add(IntToStr(Count) + ' ' + IntToStr(Items[0].ChildCount) + ' 1');
   end;
   for I := 1 to Count do
   begin
@@ -88,37 +91,31 @@ begin
       for K := 3 to Child.NumberOfpoints do
         ProcessTriangle(Child.Point[0].Coordinate, Child.Point[K - 2].Coordinate,
           Child.Point[K - 1].Coordinate);
-      if ii = 1 then
+      if WriteReport and (Child.NumberOfPoints >= 3) then
       begin
-        if Child.NumberOfpoints = 3 then
+        // Keep the historical table format and its last-triangle values.
+        Str(Center.X:7:3, Line); Str(Center.Y:7:3, Part); Line := Line + Part;
+        Str(Center.Z:7:3, Part); Line := Line + Part;
+        if Area * Coeff > 10000 then Str(Area * Coeff:10:1, Part)
+        else Str(Area * Coeff:10:3, Part);
+        Line := Line + Part;
+        if Child.NumberOfPoints = 3 then
         begin
-          Xmin := Child.Point[0].Coordinate.X;
-          Xmax := Child.Point[0].Coordinate.X;
-          if Child.Point[1].Coordinate.X > Xmax then
-            Xmax := Child.Point[1].Coordinate.X;
-          if Child.Point[2].Coordinate.X > Xmax then
-            Xmax := Child.Point[2].Coordinate.X;
-          if Child.Point[1].Coordinate.X < Xmin then
-            Xmin := Child.Point[1].Coordinate.X;
-          if Child.Point[2].Coordinate.X < Xmin then
-            Xmin := Child.Point[2].Coordinate.X;
-          if area * coeff > 10000 then
-            Write(ffile, Center.X: 7: 3, Center.Y: 7: 3, Center.Z: 7: 3, Area * Coeff: 10: 1)
-          else
-            Write(ffile, Center.X: 7: 3, Center.Y: 7: 3, Center.Z: 7: 3, Area * Coeff: 10: 3);
-          writeln(ffile, Xmin: 8: 3, Xmax: 8: 3, ' 3');
+          Xmin := Min(Child.Point[0].Coordinate.X,
+            Min(Child.Point[1].Coordinate.X, Child.Point[2].Coordinate.X));
+          Xmax := Max(Child.Point[0].Coordinate.X,
+            Max(Child.Point[1].Coordinate.X, Child.Point[2].Coordinate.X));
+          Str(Xmin:8:3, Part); Line := Line + Part;
+          Str(Xmax:8:3, Part); Line := Line + Part + ' 3';
         end
         else
         begin
-          if area * coeff > 10000 then
-            writeln(ffile, Center.X: 7: 3, Center.Y: 7: 3, Center.Z: 7: 3, Area * Coeff: 10: 1,
-              (Child.Point[0].Coordinate.X + Child.Point[3].Coordinate.X) / 2: 8: 3,
-              (Child.Point[1].Coordinate.X + Child.Point[2].Coordinate.X) / 2: 8: 3, ' 4')
-          else
-            writeln(ffile, Center.X: 7: 3, Center.Y: 7: 3, Center.Z: 7: 3, Area * Coeff: 10: 3,
-              (Child.Point[0].Coordinate.X + Child.Point[3].Coordinate.X) / 2: 8: 3,
-              (Child.Point[1].Coordinate.X + Child.Point[2].Coordinate.X) / 2: 8: 3, ' 4');
+          Str((Child.Point[0].Coordinate.X + Child.Point[3].Coordinate.X) / 2:8:3, Part);
+          Line := Line + Part;
+          Str((Child.Point[1].Coordinate.X + Child.Point[2].Coordinate.X) / 2:8:3, Part);
+          Line := Line + Part + ' 4';
         end;
+        Report.Add(Line);
       end;
     end;
   end;
@@ -137,14 +134,16 @@ begin
     end;
     Result.Weight := Result.SurfaceArea * Thickness * MaterialDensity;
   end;
-  if ii = 1 then
+  if WriteReport then
   begin
-    writeln(ffile, Result.SurfaceCenterOfGravity.X: 7: 3,
-      Result.SurfaceCenterOfGravity.Y: 7: 3, Result.SurfaceCenterOfGravity.Z: 7: 3,
-      Result.SurfaceArea * Thickness * MaterialDensity: 12: 1, Thickness: 8: 3, MaterialDensity: 8: 3);
-    closefile(ffile);
+    Str(Result.SurfaceCenterOfGravity.X:7:3, Line);
+    Str(Result.SurfaceCenterOfGravity.Y:7:3, Part); Line := Line + Part;
+    Str(Result.SurfaceCenterOfGravity.Z:7:3, Part); Line := Line + Part;
+    Str(Result.SurfaceArea * Thickness * MaterialDensity:12:1, Part); Line := Line + Part;
+    Str(Thickness:8:3, Part); Line := Line + Part;
+    Str(MaterialDensity:8:3, Part); Report.Add(Line + Part);
   end;
-end;{TFreeSubdivisionLayer.FGetSurfaceProperties}
+end;{TFreeSubdivisionLayer.CalculateSurfaceProperties}
 
 procedure TFreeSubdivisionLayer.FSetFDevelopable(Val: boolean);
 begin
@@ -963,6 +962,7 @@ begin
     end
     else
     begin
+
       Viewport.Canvas.AntialiasingMode:=amOn; // MM 04/22/2019 10:30:47 AM. added
       if Surface.ShowInteriorEdges then
       begin

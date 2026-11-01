@@ -1,4 +1,5 @@
 object FreeResistance_RBHS: TFreeResistance_RBHS
+  OnCreate = FormCreate
   Left = 192
   Height = 925
   Top = 64
@@ -1891,14 +1892,14 @@ object FreeResistance_RBHS: TFreeResistance_RBHS
     end
     object ToolButton20: TToolButton
       Left = 15
-      Hint = 'Start the calculation.'
+      Hint = 'Start the calculation'
       Top = 2
       ImageIndex = 3
       OnClick = ToolButton20Click
     end
     object PrintButton: TToolButton
       Left = 77
-      Hint = 'Print the results of the calculation.'
+      Hint = 'Print the results of the calculation'
       Top = 2
       Caption = 'PrintButton'
       ImageIndex = 2
@@ -1914,14 +1915,14 @@ object FreeResistance_RBHS: TFreeResistance_RBHS
     end
     object ToolButton25: TToolButton
       Left = 149
-      Hint = 'Close the window and save changes.'
+      Hint = 'Close the window and save changes'
       Top = 2
       ImageIndex = 1
       OnClick = ToolButton25Click
     end
     object ToolButton7: TToolButton
       Left = 211
-      Hint = 'Close window without saving changes.'
+      Hint = 'Close window without saving changes'
       Top = 2
       ImageIndex = 0
       OnClick = ToolButton7Click

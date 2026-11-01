@@ -121,7 +121,9 @@ begin
    panel := MDIPanels[i];
    if Assigned(panel) then
      begin
+     panel.WindowState:=wsNormal;
      panel.SetBounds(L+(c*W), T+(r*H), W, H);
+     panel.NormalBounds:=panel.BoundsRect;
      inc(c);
      if c >= cols then begin c:=0; inc(r); end;
      end;

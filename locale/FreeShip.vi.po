@@ -10,7 +10,7 @@ msgstr ""
 "Language: Vietnamese\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
-"Content-Transfer-Encoding: 8bit"
+"Content-Transfer-Encoding: 8bit\n"
 
 #: freecontrolpointfrm.rsangle
 #, fuzzy
@@ -56,7 +56,9 @@ msgstr ""
 
 #: freefilebuffer.rsparsingerroroutoffilesize
 #, object-pascal-format
-msgid "Error parsing of file \"%s\". Reading %s of size %d at position %d that is out of file size %d."
+msgid ""
+"Error parsing of file \"%s\". Reading %s of size %d at position %d that is "
+"out of file size %d"
 msgstr ""
 
 #: freefilepreviewdialog.hintdblclicktofitsize
@@ -158,15 +160,17 @@ msgid "--log-error   : log level is Error. Only Error messages logged"
 msgstr ""
 
 #: freeship.usageline05
-msgid "--log-warning : log level is Warning. Only Error and Warning messages logged"
+msgid ""
+"--log-warning : log level is Warning. Only Error and Warning messages logged"
 msgstr ""
 
 #: freeship.usageline06
-msgid "--log-info    : log level is Info. Error, Warning and Info messages logged"
+msgid ""
+"--log-info    : log level is Info. Error, Warning and Info messages logged"
 msgstr ""
 
 #: freeship.usageline07
-msgid "--log-debug   : log level is Debug. All messages logged."
+msgid "--log-debug   : log level is Debug. All messages logged"
 msgstr ""
 
 #: freeship.usageline08
@@ -174,7 +178,8 @@ msgid "--log-file=<logfile> : filename of the log file"
 msgstr ""
 
 #: freeship.usageline09
-msgid "--nosplash-I-ACCEPT-GPLv3-TERMS-AND-CONDITIONS : turn off splash screen."
+msgid ""
+"--nosplash-I-ACCEPT-GPLv3-TERMS-AND-CONDITIONS : turn off splash screen"
 msgstr ""
 
 #: freeship.usageline10
@@ -328,7 +333,9 @@ msgstr ""
 
 #: freeshipunit.rssavewithhigherfileversion
 #, object-pascal-format
-msgid "The current file version is %s.%sDo you want to save the file as version %s ?"
+msgid ""
+"The current file version is %s.%sDo you want to save the file as version %s "
+"?"
 msgstr ""
 
 #: freeshipunit.rssplitsection
@@ -402,12 +409,19 @@ msgid "Version"
 msgstr "Phien ban"
 
 #: freestringsunit.rs_1_1_1_r_m_isherwood___wind__resistance_of__merchant__ships___proceedings__of__royal
-msgid "1.1.1 R.M.Isherwood, \"Wind  Resistance of  Merchant  Ships\", Proceedings  of  Royal"
-msgstr "1.1.1 R.M. Isherwood, \"Wind  Resistance  of  Merchant  Ships\", Proceedings  of  Royal"
+msgid ""
+"1.1.1 R.M.Isherwood, \"Wind  Resistance of  Merchant  Ships\", Proceedings  "
+"of  Royal"
+msgstr ""
+"1.1.1 R.M. Isherwood, \"Wind  Resistance  of  Merchant  Ships\", Proceedings"
+"  of  Royal"
 
 #: freestringsunit.rs_1_1___this_wind_resistance_prediction_method_in_this_program_has_been_described_by_
-msgid "1.1   This wind resistance prediction method in this program has been described by:"
-msgstr "1.1   Phuong phap tinh toan suc can cua gio nay duoc neu ra trong bai bao:"
+msgid ""
+"1.1   This wind resistance prediction method in this program has been "
+"described by:"
+msgstr ""
+"1.1   Phuong phap tinh toan suc can cua gio nay duoc neu ra trong bai bao:"
 
 #: freestringsunit.rs_1_2___needed_input_data_parameters_
 msgid "1.2   Needed input data parameters:"
@@ -426,23 +440,28 @@ msgid "2-screw rudder slender/thick"
 msgstr "Banh lai sau 2 chan vit"
 
 #: freestringsunit.rs_2__input_datas_are_outside_valid_domain_or_catalog_is_not_valid_
-msgid "2. Input datas are outside valid domain or catalog is not valid."
-msgstr "2. Du lieu goc khong chuan xac."
+msgid "2. Input datas are outside valid domain or catalog is not valid"
+msgstr "2. Du lieu goc khong chuan xac"
 
 #: freestringsunit.rs_3__this_is_very_slow_computer__fcpu___800_mhz_
-msgid "3. This is very slow computer, Fcpu < 800 MHz."
-msgstr "3. Toc do xu li cau may qua cham, Fcpu < 800 mĂö."
+msgid "3. This is very slow computer, Fcpu < 800 MHz"
+msgstr "3. Toc do xu li cau may qua cham, Fcpu < 800 mĂö"
 
 #: freestringsunit.rs_4_brass_altmntfe__5_bronze_neva_60__6_bronze_neva_70__7_stainless_steel__8_duralumin_
-msgid "4-brass Al+Mn+Fe; 5-bronze Neva-60; 6-bronze Neva-70; 7-stainless steel; 8-duralumin."
-msgstr "4-dong thau Al+Mn+Fe; 5-dong thiec Neva-60; 6-Dong thiec Neva-70; 7-Thep khong gi 1Ơ14ÍÄ; 8-Hop kim nhom."
+msgid ""
+"4-brass Al+Mn+Fe; 5-bronze Neva-60; 6-bronze Neva-70; 7-stainless steel; "
+"8-duralumin"
+msgstr ""
+"4-dong thau Al+Mn+Fe; 5-dong thiec Neva-60; 6-Dong thiec Neva-70; 7-Thep "
+"khong gi 1Ơ14ÍÄ; 8-Hop kim nhom"
 
 #: freestringsunit.rs_4__cpu_is_loaded_more_80__another_processes_
-msgid "4. CPU is loaded more 80% another processes."
+msgid "4. CPU is loaded more 80% another processes"
 msgstr "4. CPU da su dung het 80% cho cac chuong trinh khac"
 
 #: freestringsunit.rs_5_standart_deviation_of_database_for_typical_resistance_hollenbach_s_method_
-msgid "5.Standart deviation of database for typical resistance Hollenbach's method:"
+msgid ""
+"5.Standart deviation of database for typical resistance Hollenbach's method:"
 msgstr "5.Khoang cac thong so cua model thu tau:"
 
 #: freestringsunit.rs_aae___
@@ -462,8 +481,8 @@ msgid "Acceleration time [min (sec)]"
 msgstr "Thoi gian tang toc, min (s)"
 
 #: freestringsunit.rs_acceleration__free_and_active_brake_calculation_
-msgid "Acceleration, free and active brake calculation."
-msgstr "Tang toc, ham phanh va quay tau."
+msgid "Acceleration, free and active brake calculation"
+msgstr "Tang toc, ham phanh va quay tau"
 
 #: freestringsunit.rs_according_to_john_winters
 msgid "according to John Winters"
@@ -474,8 +493,8 @@ msgid "according to modeling experiment"
 msgstr "So lieu thuc nghiem"
 
 #: freestringsunit.rs_active_brake_of_ship_
-msgid "Active brake of ship."
-msgstr "Phanh ham chu dong (quay) tau."
+msgid "Active brake of ship"
+msgstr "Phanh ham chu dong (quay) tau"
 
 #: freestringsunit.rs_active_brake_of_ship_calculation__reverse_
 msgid "Active brake of ship calculation (reverse)"
@@ -495,9 +514,12 @@ msgstr "he so khoi luong lien ket cho tau song:"
 
 #: freestringsunit.rs_added_masses_coefficients_for_riverships_and_ships_with_cb____0_8_
 #, fuzzy
-#| msgid "Added masses Coefficients for riverships and ships with Cb >= 0,8:"
+#| msgid ""
+#| "Added masses Coefficients for riverships and ships with Cb >= 0,8:"
 msgid "Added masses Coefficients for riverships and ships with Cb >= 0.8:"
-msgstr "he so cho khoi luong lien ket cua tau song va tau co he so beo chung lon Ñb >= 0,8:"
+msgstr ""
+"he so cho khoi luong lien ket cua tau song va tau co he so beo chung lon Ñb "
+">= 0,8:"
 
 #: freestringsunit.rs_added_masses_coefficients_for_seaships_by_folmulae__4__
 msgid "Added masses Coefficients for seaships by folmulae [4]:"
@@ -547,7 +569,7 @@ msgstr "Them mot duong bien dang doc"
 msgid "Add one diagonal"
 msgstr "Them mot duong cheo"
 
-#: freestringsunit.rs_add_one_station
+#: freestringsunit.rs_add_one_station tfreeintersectiondialog.addone.hint
 msgid "Add one station"
 msgstr "Them mot suon"
 
@@ -584,8 +606,8 @@ msgid "Aerodynamic forces and moment without drift:"
 msgstr "Aerodynamic forces and moment without drift:"
 
 #: freestringsunit.rs_ae_aooo___1_3_you_must_to_increase_dp_
-msgid "Ae/Ao** > 1.3 You must to increase Dp."
-msgstr "Ae/Ao** > 1.3 Can thiet phai tang Dp."
+msgid "Ae/Ao** > 1.3 You must to increase Dp"
+msgstr "Ae/Ao** > 1.3 Can thiet phai tang Dp"
 
 #: freestringsunit.rs_ae_ao_is_out_of_limits_for_this_diagram___
 msgid "Ae/Ao is out of limits for this diagram!!!"
@@ -738,7 +760,8 @@ msgid "AS   - Lateral projected area of superstructure [m2];"
 msgstr "AS   - dien tich hinh chieu canh cua thuong tang tau, m2;"
 
 #: freestringsunit.rs_attention__weight_of_a_ship_and_displacement_are_difference_more_then_10___
-msgid "Attention: Weight of a ship and displacement are difference more then 10% !"
+msgid ""
+"Attention: Weight of a ship and displacement are difference more then 10% !"
 msgstr "LUU Y: Khoi luong tau va luong chiem nuoc chenh nhau hon 10% !"
 
 #: freestringsunit.rs_attention____
@@ -746,24 +769,31 @@ msgid "ATTENTION!!!_"
 msgstr "LUU Y!!!_"
 
 #: freestringsunit.rs_attention____calculated_diameter_of_propeller_is_bigger_then_limited_diameter_dp_lim_
-msgid "ATTENTION!!! Calculated diameter of propeller is bigger then limited diameter Dp_lim="
-msgstr "ATTENTION!!! Calculated diameter of propeller is bigger then limited diameter Dp_lim="
+msgid ""
+"ATTENTION!!! Calculated diameter of propeller is bigger then limited "
+"diameter Dp_lim="
+msgstr ""
+"ATTENTION!!! Calculated diameter of propeller is bigger then limited "
+"diameter Dp_lim="
 
 #: freestringsunit.rs_attention____calculation_for_sea_vessels_by_holtrop_1988_method_
-msgid "ATTENTION!!! Calculation for sea vessels by Holtrop-1988 method."
-msgstr "Luu y!!! Tiep theo tinh toan cho tau bien theo phuong phap Holtrop-1988(84)."
+msgid "ATTENTION!!! Calculation for sea vessels by Holtrop-1988 method"
+msgstr ""
+"Luu y!!! Tiep theo tinh toan cho tau bien theo phuong phap Holtrop-1988(84)"
 
 #: freestringsunit.rs_attention____ho__
 msgid "ATTENTION!!! ho ="
 msgstr "LUU Y!!! Chieu cao tam nghieng ngang ban dau ho ="
 
 #: freestringsunit.rs_attention____increase_number_of_propellers_or_decrease_estimate_speed_
-msgid "ATTENTION!!! Increase number of propellers or decrease estimate speed."
-msgstr "LUU Y!!! Tang so luong chan vit hoac giam van toc tinh."
+msgid "ATTENTION!!! Increase number of propellers or decrease estimate speed"
+msgstr "LUU Y!!! Tang so luong chan vit hoac giam van toc tinh"
 
 #: freestringsunit.rs_attention____limit_of_power_in_freeware_free_shipt_is_reached___
 msgid "ATTENTION!!! Limit of power in freeware Free!ship+ is reached!!!"
-msgstr "LUU Y!!! Da dat toi gioi han cong suat trong phien ban mien phi FREE!ship+ !!!"
+msgstr ""
+"LUU Y!!! Da dat toi gioi han cong suat trong phien ban mien phi FREE!ship+ "
+"!!!"
 
 #: freestringsunit.rs_attention____l_max__
 msgid "ATTENTION!!! l_max <"
@@ -774,18 +804,24 @@ msgid "ATTENTION!!! Porpoising regime !!!"
 msgstr "LUU Y!!! Che do luot khong on dinh (nhay coc)!!!"
 
 #: freestringsunit.rs_attention____stopped_acceleration_calculation__because_steady_engine_rpm
-msgid "ATTENTION!!! Stopped acceleration calculation, because steady engine RPM"
-msgstr "LUU Y!!! Tinh quang duong tang toc ket thuc, boi tan suat quay cua dong co"
+msgid ""
+"ATTENTION!!! Stopped acceleration calculation, because steady engine RPM"
+msgstr ""
+"LUU Y!!! Tinh quang duong tang toc ket thuc, boi tan suat quay cua dong co"
 
 #: freestringsunit.rs_attention____teta0___60_
 #, fuzzy
 #| msgid "ATTENTION!!! Teta0 < 60#176"
 msgid "ATTENTION!!! Teta0 < 60°"
-msgstr "LUU Y!!! Goc teta0<60°."
+msgstr "LUU Y!!! Goc teta0<60°"
 
 #: freestringsunit.rs_attention____the_number_of_propeller_diagram_more_then_11_is_accessed_in_pro_version_only___
-msgid "ATTENTION!!! The number of propeller diagram more then 11 is accessed in Pro version only!!!"
-msgstr "LUU Y!!! Seri bieu do chan vit voi so lon hon 11 chi co trong phien ban FREE!ship+ Pro!!!"
+msgid ""
+"ATTENTION!!! The number of propeller diagram more then 11 is accessed in Pro"
+" version only!!!"
+msgstr ""
+"LUU Y!!! Seri bieu do chan vit voi so lon hon 11 chi co trong phien ban "
+"FREE!ship+ Pro!!!"
 
 #: freestringsunit.rs_attention____the_power_of_engine_is_very_high_
 msgid "ATTENTION!!! The power of engine is very high!"
@@ -796,11 +832,14 @@ msgid "ATTENTION!!! The power of engine is very low!"
 msgstr "LUU Y!!! Cong suat may qua nho!"
 
 #: freestringsunit.rs_attention____the_waiting_speed_is_outside_valid_domain_of_calculated_speed___
-msgid "ATTENTION!!! The waiting speed is outside valid domain of calculated speed!!!"
+msgid ""
+"ATTENTION!!! The waiting speed is outside valid domain of calculated "
+"speed!!!"
 msgstr "LUU Y!!!Van toc du kien nam ngoai khoang van toc tinh toan!!!"
 
 #: freestringsunit.rs_attention____this_is_diagram_of_propeller_accessed_in_pro_version_only___
-msgid "ATTENTION!!! This is diagram of propeller accessed in Pro version only!!!"
+msgid ""
+"ATTENTION!!! This is diagram of propeller accessed in Pro version only!!!"
 msgstr "LUU Y!!! Seri nay chi co trong phien ban FREE!ship+ Pro!!!"
 
 #: freestringsunit.rs_attention____this_is_propeller_with_cavitation_
@@ -812,16 +851,21 @@ msgid "ATTENTION!!! This is series NOT correct for this project!"
 msgstr "LUU Y!!! Seri hoac phuong phap nay khong thich hop cho du an nay!"
 
 #: freestringsunit.rs_attention_____power_is_out_valid_domain_30_____400_bhp_per_unit_for_used_diagram_
-msgid "ATTENTION !!! Power is out valid domain 30 ... 400 BHP per unit for used diagram."
-msgstr "LUU Y!!!Cong suat nam ngoai khoang gia tri cho phep 30 ... 400 hp cho dong co."
+msgid ""
+"ATTENTION !!! Power is out valid domain 30 ... 400 BHP per unit for used "
+"diagram"
+msgstr ""
+"LUU Y!!!Cong suat nam ngoai khoang gia tri cho phep 30 ... 400 hp cho dong "
+"co"
 
 #: freestringsunit.rs_attention_____vs_is_out_valid_domain_0_____40_knots_for_used_diagram_
-msgid "ATTENTION !!! Vs is out valid domain 0 ... 40 knots for used diagram."
-msgstr "LUU Y!!! Vs nam ngoai khoang gia tri cho phep 0 ... 40 kn cho bieu do nay."
+msgid "ATTENTION !!! Vs is out valid domain 0 ... 40 knots for used diagram"
+msgstr ""
+"LUU Y!!! Vs nam ngoai khoang gia tri cho phep 0 ... 40 kn cho bieu do nay"
 
 #: freestringsunit.rs_at_least_two_layers_are_needed_to_perform_this_operation_
-msgid "At least two layers are needed to perform this operation."
-msgstr "Can toi thieu hai lop de thuc hien thao tac nay."
+msgid "At least two layers are needed to perform this operation"
+msgstr "Can toi thieu hai lop de thuc hien thao tac nay"
 
 #: freestringsunit.rs_average_chordlength
 msgctxt "freestringsunit.rs_average_chordlength"
@@ -849,8 +893,8 @@ msgid "Because Cwp=0, this wetted area is NOT right!!!"
 msgstr "Do Cwp=0, nen dien tich phan mat ngap nuoc khong chinh xac!!!"
 
 #: freestringsunit.rs_because_extrapolation_is_used__can_be_some_errores_
-msgid "Because extrapolation is used, can be some errores."
-msgstr "Luu y!!! Ap dung phep ngoai suy co the dan den ket qua sai."
+msgid "Because extrapolation is used, can be some errores"
+msgstr "Luu y!!! Ap dung phep ngoai suy co the dan den ket qua sai"
 
 #: freestringsunit.rs_bhp
 msgid "BHP"
@@ -884,7 +928,8 @@ msgstr "Brake power [kW]              Pb ="
 
 #: freestringsunit.rs_breadth______________________________br__
 msgid "BREADTH ............................ BR :"
-msgstr "Chieu rong....................................................... BR :"
+msgstr ""
+"Chieu rong....................................................... BR :"
 
 #: freestringsunit.rs_bulbous_characteristics
 msgid "Bulbous characteristics"
@@ -896,7 +941,7 @@ msgstr "he so cua mui qua le"
 
 #: freestringsunit.rs_bulb_area_on_fp
 msgid "Bulb area on FP"
-msgstr "Dien tich phan mui qua le o duong vuong goc mui."
+msgstr "Dien tich phan mui qua le o duong vuong goc mui"
 
 #: freestringsunit.rs_bulb_section_area_at_station_0__m_2_____
 msgid "Bulb Section Area at Station 0 (m^2)   ="
@@ -1120,12 +1165,17 @@ msgid "Calculations of resistance and power by D.Savitsky method"
 msgstr "Suc can va cong suat cua tau luot theo phuong phap Savitsky"
 
 #: freestringsunit.rs_calculations_of_resistance_and_power_for_planing_ships_by_lyubomirov_i_p__formulaes
-msgid "Calculations of resistance and power for planing ships by Lyubomirov I.P. formulaes"
-msgstr "Tinh suc can va cong suat cua tau luot theo cong thuc cua Lyubomirov I.P."
+msgid ""
+"Calculations of resistance and power for planing ships by Lyubomirov I.P. "
+"formulaes"
+msgstr ""
+"Tinh suc can va cong suat cua tau luot theo cong thuc cua Lyubomirov I.P"
 
 #: freestringsunit.rs_calculations_of_resistance_and_power_for_planing_ships_by_sedov_l_i__method
-msgid "Calculations of resistance and power for planing ships by Sedov L.I. method"
-msgstr "Suc can va cong suat cua tau luot theo phuong phap cua Sedov-Perelmutr"
+msgid ""
+"Calculations of resistance and power for planing ships by Sedov L.I. method"
+msgstr ""
+"Suc can va cong suat cua tau luot theo phuong phap cua Sedov-Perelmutr"
 
 #: freestringsunit.rs_calculation_aborted
 msgid "Calculation aborted"
@@ -1152,7 +1202,9 @@ msgid "Calculation of propeller for selected engine"
 msgstr "Tinh toan chan vit toi uu de lua chon dong co"
 
 #: freestringsunit.rs_calculation_of_propeller_is_stop__because_np_set_zero_in_resistance_calculation_
-msgid "Calculation of propeller is stop, because Np set zero in resistance calculation!"
+msgid ""
+"Calculation of propeller is stop, because Np set zero in resistance "
+"calculation!"
 msgstr "Khong the tinh toan chan vit duoc boi vi Np=0 !"
 
 #: freestringsunit.rs_calculation_of_propeller_on_cavitation_by_a_method_of_papmehl_
@@ -1161,7 +1213,8 @@ msgstr "Tinh toan chan vit cho hien tuong xam thuc theo phuong phap Papmehl:"
 
 #: freestringsunit.rs_calculation_of_propeller_on_cavitation_by_s_hoenherr_s_method_
 #, fuzzy
-#| msgid "Calculation of propeller on cavitation by S#241hoenherr's method:"
+#| msgid ""
+#| "Calculation of propeller on cavitation by S#241hoenherr's method:"
 msgid "Calculation of propeller on cavitation by SÃÂ±hoenherr's method:"
 msgstr "Calculation of propeller on cavitation by Shoenherr's method:"
 
@@ -1170,8 +1223,12 @@ msgid "Calculation of propeller on general strength for r/D=0.3:"
 msgstr "Tinh chan vit cho do ben chung khi r/D=0.3:"
 
 #: freestringsunit.rs_calculation_of_resistance_for_keeled_yacht_by_holtrop_s_method_is_impossible___
-msgid "Calculation of resistance for keeled yacht by Holtrop's method is impossible!!!"
-msgstr "Calculation of resistance for keeled yacht by Holtrop's method is impossible!!!"
+msgid ""
+"Calculation of resistance for keeled yacht by Holtrop's method is "
+"impossible!!!"
+msgstr ""
+"Calculation of resistance for keeled yacht by Holtrop's method is "
+"impossible!!!"
 
 #: freestringsunit.rs_calculation_of_the_propeller_elements_for_main_engine_selection
 msgid "Calculation of the propeller elements for main engine selection"
@@ -1186,8 +1243,10 @@ msgid "Calculation optimal elements of propeller for engine selection"
 msgstr "Tinh toan cac thanh phan cua chan vit de lua chon dong co"
 
 #: freestringsunit.rs_calculation_ssd__dsd_and_weather_criteria_is_available_in_metric_system_
-msgid "Calculation SSD, DSD and weather criteria is available in metric system!"
-msgstr "Calculation SSD, DSD and weather criteria is available in metric system!"
+msgid ""
+"Calculation SSD, DSD and weather criteria is available in metric system!"
+msgstr ""
+"Calculation SSD, DSD and weather criteria is available in metric system!"
 
 #: freestringsunit.rs_cavitation_number_sigma__________________
 msgid "Cavitation Number Sigma                 ="
@@ -1219,7 +1278,7 @@ msgstr "Chi duong dan ban muon luu file dxf:"
 
 #: freestringsunit.rs_click_button_for_start_selection_of_engine
 msgid "Click button for start selection of engine"
-msgstr "Nhan nut de lua chon dong co."
+msgstr "Nhan nut de lua chon dong co"
 
 #: freestringsunit.rs_close_hull
 msgid "Close hull"
@@ -1267,16 +1326,16 @@ msgid "Conference on Hydrodynamics of High Speed Craft, RINA, Nov. 1999"
 msgstr "Conference on Hydrodynamics of High Speed Craft, RINA, Nov. 1999"
 
 #: freestringsunit.rs_controlface_s__could_be_removed_
-msgid "controlface(s) could be removed."
-msgstr "Mat xac minh co the bi dich chuyen."
+msgid "controlface(s) could be removed"
+msgstr "Mat xac minh co the bi dich chuyen"
 
 #: freestringsunit.rs_controllable_reversible_pitch_propeller
 msgid "Controllable-Reversible-Pitch Propeller"
 msgstr "Chan vit bien buoc"
 
 #: freestringsunit.rs_controlpoints_s__could_be_removed_
-msgid "controlpoints(s) could be removed."
-msgstr "Diem xac minh co the bi dich chuyen."
+msgid "controlpoints(s) could be removed"
+msgstr "Diem xac minh co the bi dich chuyen"
 
 #: freestringsunit.rs_corner
 msgid "corner"
@@ -1295,8 +1354,8 @@ msgid "Could not calculate limitpoint"
 msgstr "Khong the tinh duoc diem gioi han"
 
 #: freestringsunit.rs_could_not_export_surfaces_
-msgid "Could not export surfaces."
-msgstr "Khong the xuat duoc mat phang."
+msgid "Could not export surfaces"
+msgstr "Khong the xuat duoc mat phang"
 
 #: freestringsunit.rs_could_not_find_edge
 msgid "Could not find edge"
@@ -1311,8 +1370,8 @@ msgid "Could not load program preferences from the following location"
 msgstr "Khong the tai duoc cac thiet lap tu duong dan nay"
 
 #: freestringsunit.rs_could_not_open_the_file_
-msgid "Could not open the file."
-msgstr "Khong the mo duoc file."
+msgid "Could not open the file"
+msgstr "Khong the mo duoc file"
 
 #: freestringsunit.rs_could_not_save_program_preferences_to_the_following_location
 msgid "Could not save program preferences to the following location"
@@ -1376,6 +1435,7 @@ msgid "Delete all diagonals"
 msgstr "Xoa toan bo cac duong cheo"
 
 #: freestringsunit.rs_delete_all_stations
+#: tfreeintersectiondialog.deleteall.hint
 msgid "Delete all stations"
 msgstr "Xoa tat ca cac suon"
 
@@ -1417,8 +1477,10 @@ msgid "Design length"
 msgstr "Chieu dai giua hai duong vuong goc"
 
 #: freestringsunit.rs_design_margin_has_been_included_in_rt__pe__and_req_thr___rt__1_t__
-msgid "Design Margin Has Been Included in RT, PE, and REQ.THR = RT/(1-t)."
-msgstr "Phan them cho suc can Rt, cong suat Pe va luc keo T = Rt/(1-t) cung can phai duoc tinh den."
+msgid "Design Margin Has Been Included in RT, PE, and REQ.THR = RT/(1-t)"
+msgstr ""
+"Phan them cho suc can Rt, cong suat Pe va luc keo T = Rt/(1-t) cung can phai"
+" duoc tinh den"
 
 #: freestringsunit.rs_design_margin_on_rt_pe_req_thr__________
 msgid "Design Margin on RT,PE,REQ.THR (%)     ="
@@ -1456,8 +1518,8 @@ msgid "Displacement"
 msgstr "Luong chiem nuoc cua  tau"
 
 #: freestringsunit.rs_displacement_step_can_not_be_zero_
-msgid "Displacement step can not be zero."
-msgstr "Buoc cua luong chiem nuoc khong the bang 0."
+msgid "Displacement step can not be zero"
+msgstr "Buoc cua luong chiem nuoc khong the bang 0"
 
 #: freestringsunit.rs_distance
 msgctxt "freestringsunit.rs_distance"
@@ -1478,7 +1540,8 @@ msgstr "Khoang cach ngan nhat tu truc chan vit toi trong tam tau"
 
 #: freestringsunit.rs_distance_from_bow_to_centroid_________c__
 msgid "DISTANCE FROM BOW TO CENTROID ....... C :"
-msgstr "Khoang cach tu duong vuong goc mui toi trong tam cua phan chan gio C :"
+msgstr ""
+"Khoang cach tu duong vuong goc mui toi trong tam cua phan chan gio C :"
 
 #: freestringsunit.rs_distance_from_bow__fp__to_wind_area_cog
 msgid "Distance from bow (FP) to wind area CoG"
@@ -1490,7 +1553,8 @@ msgstr "Phan nho cao cua trong tam phan chan gio so voi duong nuoc thiet ke"
 
 #: freestringsunit.rs_distance__miles___speed__knots___frequency_of_propeller_no0_1__1_min_
 #, fuzzy
-#| msgid "Distance [miles]; Speed [knots]; Frequency of propeller n*0,1 [1/min]"
+#| msgid ""
+#| "Distance [miles]; Speed [knots]; Frequency of propeller n*0,1 [1/min]"
 msgid "Distance [miles]; Speed [knots]; Frequency of propeller n*0.1 [1/min]"
 msgstr "Quang duong, miles; Van toc, kn; Tan so quay chan vit n*0.1, vong/p"
 
@@ -1560,11 +1624,11 @@ msgid "Draft hull"
 msgstr "Luong mon nuoc cua tau"
 
 #: freestringsunit.rs_draft_on_f_a_
-msgid "Draft on F.A."
+msgid "Draft on F.A"
 msgstr "Luong mon nuoc duoi"
 
 #: freestringsunit.rs_draft_on_f_p_
-msgid "Draft on F.P."
+msgid "Draft on F.P"
 msgstr "Luong mon nuoc mui"
 
 #: freestringsunit.rs_draft_on_midship
@@ -1720,43 +1784,55 @@ msgstr "File Resist.cnf khong ton tai hoac bi loi!!!"
 
 #: freestringsunit.rs_final_calculations_of_resistance_and_power_by_clement_blount_s_method
 msgid "Final calculations of resistance and power by Clement-Blount's method"
-msgstr "Ket qua tinh toan suc can va suc keo cua tau luot theo phuong phap Clement-Blount"
+msgstr ""
+"Ket qua tinh toan suc can va suc keo cua tau luot theo phuong phap Clement-"
+"Blount"
 
 #: freestringsunit.rs_final_calculations_of_resistance_and_power_by_clement_poup_s_method
 msgid "Final calculations of resistance and power by Clement-Poup's method"
-msgstr "Ket qua tinh toan suc can va suc keo cua tau luot theo phuong phap Clement-Poup"
+msgstr ""
+"Ket qua tinh toan suc can va suc keo cua tau luot theo phuong phap Clement-"
+"Poup"
 
 #: freestringsunit.rs_final_calculations_of_resistance_and_power_by_compton_s_method
 msgid "Final calculations of resistance and power by Compton's method"
 msgstr "Final calculations of resistance and power by Compton's method"
 
 #: freestringsunit.rs_final_calculations_of_resistance_and_power_by_mercier_and_savitsky_s_method
-msgid "Final calculations of resistance and power by Mercier and Savitsky's method"
-msgstr "Ket qua tinh toan suc can va cong suat keo theo phuong phap Mersier-Savitsky"
+msgid ""
+"Final calculations of resistance and power by Mercier and Savitsky's method"
+msgstr ""
+"Ket qua tinh toan suc can va cong suat keo theo phuong phap Mersier-Savitsky"
 
 #: freestringsunit.rs_final_calculations_of_resistance_and_power_by_method_fung_leibman_1995
 msgid "Final calculations of resistance and power by method Fung-Leibman 1995"
-msgstr "Ket qua tinh toan suc can va cong suat theo phuong phap Fung-Leibman 1995"
+msgstr ""
+"Ket qua tinh toan suc can va cong suat theo phuong phap Fung-Leibman 1995"
 
 #: freestringsunit.rs_final_calculations_of_resistance_and_power_by_method_hollenbach_1998
 msgid "Final calculations of resistance and power by method Hollenbach-1998"
-msgstr "Ket qua tinh toan suc can va cong suat keo theo phuong phap Hollenbach-1998"
+msgstr ""
+"Ket qua tinh toan suc can va cong suat keo theo phuong phap Hollenbach-1998"
 
 #: freestringsunit.rs_final_calculations_of_resistance_and_power_by_method_van_oortmerssen_1971
-msgid "Final calculations of resistance and power by method van Oortmerssen-1971"
+msgid ""
+"Final calculations of resistance and power by method van Oortmerssen-1971"
 msgstr "Ket qua tinh toan suc can va cong suat keo theo van Oortmerssen-1971"
 
 #: freestringsunit.rs_final_calculations_of_resistance_and_power_by_m_bunkov_method
 msgid "Final calculations of resistance and power by M.Bunkov method"
-msgstr "Ket qua tinh toan suc can va suc keo cua tau luot theo phuong phap Bunkov"
+msgstr ""
+"Ket qua tinh toan suc can va suc keo cua tau luot theo phuong phap Bunkov"
 
 #: freestringsunit.rs_final_calculations_of_resistance_and_power_by_radojcic_s_method
 msgid "Final calculations of resistance and power by Radojcic's method"
 msgstr "Final calculations of resistance and power by Radojcic's method"
 
 #: freestringsunit.rs_final_calculations_of_resistance_and_power_by_ridgeley_nevitt_1967_method
-msgid "Final calculations of resistance and power by Ridgeley-Nevitt-1967 method"
-msgstr "Final calculations of resistance and power by Ridgeley-Nevitt-1967 method"
+msgid ""
+"Final calculations of resistance and power by Ridgeley-Nevitt-1967 method"
+msgstr ""
+"Final calculations of resistance and power by Ridgeley-Nevitt-1967 method"
 
 #: freestringsunit.rs_final_calculations_of_resistance_and_power_by_robinson_s_method
 msgid "Final calculations of resistance and power by Robinson's method"
@@ -1780,7 +1856,8 @@ msgstr "Ket qua tinh toan cong suat keo va suc can nuoc theo phuong phap"
 
 #: freestringsunit.rs_final_calculations_of_resistance_by_a_method_holtrop_1988
 msgid "Final calculations of resistance by a method Holtrop-1988"
-msgstr "Ket qua tinh toan cong suat day va suc can theo phuong phap Holtrop-1988(84)"
+msgstr ""
+"Ket qua tinh toan cong suat day va suc can theo phuong phap Holtrop-1988(84)"
 
 #: freestringsunit.rs_fixed_pitch_propeller
 msgid "Fixed-Pitch Propeller"
@@ -1795,8 +1872,8 @@ msgid "for"
 msgstr "cho"
 
 #: freestringsunit.rs_forward_line_with_dwl_
-msgid "forward line with DWL."
-msgstr "giao cua duong song mui voi duong nuoc thiet ke."
+msgid "forward line with DWL"
+msgstr "giao cua duong song mui voi duong nuoc thiet ke"
 
 #: freestringsunit.rs_for_calculation_is_in_free_ship_directory___
 msgid "for calculation is in Free!Ship directory!!!"
@@ -1827,8 +1904,8 @@ msgid "FPP in nozzle VIT series"
 msgstr ""
 
 #: freestringsunit.rs_free_brake_of_ship_
-msgid "Free brake of ship."
-msgstr "Phanh ham tu do tau."
+msgid "Free brake of ship"
+msgstr "Phanh ham tu do tau"
 
 #: freestringsunit.rs_free_brake_of_ship_calculation
 msgid "Free brake of ship calculation"
@@ -1860,7 +1937,8 @@ msgstr "Tan suat quay cua chan vit, vong/p"
 
 #: freestringsunit.rs_frv_is_outside_valid_domain_1_____4___used_extrapolation_for_r_ap
 msgid "FrV is outside valid domain 1 ... 4 , used extrapolation for R_ap"
-msgstr "FrV nam ngoai khoang 1 ... 4 , su dung phep ngoai suy de tinh tinh R_ap"
+msgstr ""
+"FrV nam ngoai khoang 1 ... 4 , su dung phep ngoai suy de tinh tinh R_ap"
 
 #: freestringsunit.rs_ft
 msgid "ft"
@@ -2190,7 +2268,7 @@ msgid ""
 "4. Fugino  M., \"Maneuverability in Restricted Waters: State of the Art\", The Uni-\n"
 "versity of Michigan NAME Report No. 184, Aug., 1976.\n"
 "5. Inoue, S., Hirano, M., and Kijima, K., \"Hydrodynamic Derivatives on Ship Mano-\n"
-"evring\", International Shipbuilding Progress, Vol. 28, No. 321, 1981."
+"evring\", International Shipbuilding Progress, Vol. 28, No. 321, 1981"
 msgstr ""
 "Maneuvering Prediction Program (MPP-1.3)\n"
 "M. G. Parsons, December, 1994\n"
@@ -2304,7 +2382,7 @@ msgstr ""
 "4. Fugino  M., \"Maneuverability in Restricted Waters: State of the Art\", The Uni-\n"
 "versity of Michigan NAME Report No. 184, Aug., 1976.\n"
 "5. Inoue, S., Hirano, M., and Kijima, K., \"Hydrodynamic Derivatives on Ship Mano-\n"
-"evring\", International Shipbuilding Progress, Vol. 28, No. 321, 1981."
+"evring\", International Shipbuilding Progress, Vol. 28, No. 321, 1981"
 
 #: freestringsunit.rs_hydrodin_rvrs_note
 #, fuzzy
@@ -2525,7 +2603,7 @@ msgid ""
 "Cy = Fy/(0.5*RHOA*Vr^2*AT)+-1.96*Stand_Err(Y)    - lateral force coefficient;\n"
 "Cmz= Mz/(0.5*RHOA*Vr^2*AT*SLOA)+-1.96*Stand_Err(Mz) - yawing moment coefficient,\n"
 "RHOA - density of air;\n"
-"Vr   - RMS of relative wind speed between water level and top of superstructure."
+"Vr   - RMS of relative wind speed between water level and top of superstructure"
 msgstr ""
 "Chuong trinh tinh cac thong so khi dong hoc cua tau buon\n"
 "1.1   Phuong phap tinh toan suc can cua gio nay duoc neu ra trong bai bao:\n"
@@ -2561,7 +2639,7 @@ msgstr ""
 "Cy =Fy/(0.5*RHOA*Vr^2*AT)+-1.96*Stand_Err(Y)      - he so luc theo chieu ngang;\n"
 "Cmz=Mz/(0.5*RHOA*Vr^2*AT*SLOA)+-1.96*Stand_Err(N) - he so momen dao lai,\n"
 "trong do: RHOA - ti trong cua khong khi, kg/m^3;\n"
-"Vr - van toc trung binh tuong doi cua gio giua duong nuoc va boong thuong tang chinh, m/ñ."
+"Vr - van toc trung binh tuong doi cua gio giua duong nuoc va boong thuong tang chinh, m/ñ"
 
 #: freestringsunit.rs_hydrodin_task2_note
 msgctxt "freestringsunit.rs_hydrodin_task2_note"
@@ -2637,7 +2715,7 @@ msgid ""
 "2.Parsons, M. G., \"Optimization Methods for Use in Computer-Aided Ship Design,\" Proceedings\n"
 "of the First SNAME STAR Symposium, 1975.\n"
 "3.Comstock,J.P. (Ed.), Principles of Naval Architecture, Vol. II, 1988  Edition, SNAME, New\n"
-"York, p.182."
+"York, p.182"
 msgstr ""
 "AT   - dien tich hinh chieu dung cua phan chan gio tren duong nuoc thiet ke, m2;\n"
 "S    - chu vi cua phan mat chan gio tren hinh chieu canh, bao gom ca duong nuoc va cac vat mong (cot buom), m;\n"
@@ -2664,7 +2742,7 @@ msgstr ""
 "Cy =Fy/(0.5*RHOA*Vr^2*AT)+-1.96*Stand_Err(Y)      - he so luc theo chieu ngang;\n"
 "Cmz=Mz/(0.5*RHOA*Vr^2*AT*SLOA)+-1.96*Stand_Err(N) - he so momen dao lai,\n"
 "trong do: RHOA - ti trong cua khong khi, kg/m^3;\n"
-"Vr - van toc trung binh tuong doi cua gio giua duong nuoc va boong thuong tang chinh, m/ñ."
+"Vr - van toc trung binh tuong doi cua gio giua duong nuoc va boong thuong tang chinh, m/ñ"
 
 #: freestringsunit.rs_hydronship_addedmass_note
 #, fuzzy
@@ -2725,7 +2803,7 @@ msgid ""
 "NKI, 1993. - p. 22-27.\n"
 "3. Korotkin A.I. Prisoedinennie massy sudna: Spravochnik.-L.:Sudostroenie,1986,312pp.\n"
 "4. Hofman A.D. Dvigitelno-rulevoy kompleks i manevrirovanie sudna: Spravochnik. -\n"
-"L.:Sudostroenie,1988,360pp."
+"L.:Sudostroenie,1988,360pp"
 msgstr ""
 "HydroNShIp_AddedMass v1.03 - la chuong trinh tinh toan cac thong so quan tinh quan tinh cua tau bang\n"
 "phuong phap CFD, mien phi danh cho hoc tap va cac muc dich phi thuong mai.\n"
@@ -2754,11 +2832,15 @@ msgstr ""
 "Íèêîëàåâ, ÍÊÈ, 1993. – c. 22-27.\n"
 "3. Êîđị̂êèí À.È. Ïđèñîåäèíåííûå ́àññû ñóäíà:Ñïđàâî÷íèê.-Ë.:Ñóäîṇ̃đîåíèå,1986,312c.\n"
 "4. Ăîốàí À.Ä. Äâèæẹ̀åëüíî-đóëåâîé êî́ïëåêñ è ́àíåâđèđîâàíèå ñóäíà: Ñïđàâî÷íèê. -\n"
-"Ë.:Ñóäîṇ̃đîåíèå,1988,360c."
+"Ë.:Ñóäîṇ̃đîåíèå,1988,360c"
 
 #: freestringsunit.rs_hydrostatics_calculation_is_not_possible__because_there_is_leak_point_under_dwl___
-msgid "Hydrostatics calculation is not possible, because there is leak point under DWL!!!"
-msgstr "Khong the tinh tinh thuy tinh hoac ket qua tinh toan se khong chinh xac,  boi vi xuat hien diem ro ri nam phia duoi duong nuoc chinh!!!"
+msgid ""
+"Hydrostatics calculation is not possible, because there is leak point under "
+"DWL!!!"
+msgstr ""
+"Khong the tinh tinh thuy tinh hoac ket qua tinh toan se khong chinh xac,  "
+"boi vi xuat hien diem ro ri nam phia duoi duong nuoc chinh!!!"
 
 #: freestringsunit.rs_if_sigmab_4___1____
 msgid "If SigmaB/4 > 1 ==>"
@@ -2873,12 +2955,12 @@ msgid "insert plane intersections"
 msgstr "Chen hinh giao nhau"
 
 #: freestringsunit.rs_institution_of_naval_architects__1973_
-msgid "Institution of Naval Architects, 1973."
-msgstr "Institution of Naval Architects, 1973."
+msgid "Institution of Naval Architects, 1973"
+msgstr "Institution of Naval Architects, 1973"
 
 #: freestringsunit.rs_invalid_contour_distance_
-msgid "Invalid contour distance."
-msgstr "Khoang cach duong bien khong chinh xac."
+msgid "Invalid contour distance"
+msgstr "Khoang cach duong bien khong chinh xac"
 
 #: freestringsunit.rs_invalid_coordinate
 msgid "Invalid coordinate"
@@ -2921,8 +3003,8 @@ msgid "Invalid z-coordinate in surface"
 msgstr "Cao do khong chuan cua mat phang"
 
 #: freestringsunit.rs_is_lower_then_critical__increase_engine_power_
-msgid "is lower then critical. Increase engine power."
-msgstr "thap hon gia tri toi han. Tang cong suat dong co."
+msgid "is lower then critical. Increase engine power"
+msgstr "thap hon gia tri toi han. Tang cong suat dong co"
 
 #: freestringsunit.rs_is_no_valid_numeric_input
 msgid "is no valid numeric input"
@@ -3067,11 +3149,13 @@ msgstr "Tinh chat cua phan ngap nuoc"
 
 #: freestringsunit.rs_lateral_projected_wind_area__________al__
 msgid "LATERAL PROJECTED WIND AREA ........ AL :"
-msgstr "Dien tich hinh chieu canh cua phan chan gio.......................AL :"
+msgstr ""
+"Dien tich hinh chieu canh cua phan chan gio.......................AL :"
 
 #: freestringsunit.rs_lateral_proj__area_of_superstructure_as__
 msgid "LATERAL PROJ. AREA OF SUPERSTRUCTURE AS :"
-msgstr "Dien tich hinh chieu canh cua thuong tang tau.................... AS :"
+msgstr ""
+"Dien tich hinh chieu canh cua thuong tang tau.................... AS :"
 
 #: freestringsunit.rs_lateral_wind_area
 msgid "Lateral wind area"
@@ -3131,7 +3215,8 @@ msgstr "Chieu dai phan than lang tru, m"
 
 #: freestringsunit.rs_length_of_perimeter___________________s__
 msgid "LENGTH OF PERIMETER ................. S :"
-msgstr "Chu vi.............................................................S :"
+msgstr ""
+"Chu vi.............................................................S :"
 
 #: freestringsunit.rs_length_of_waterline_lwl__m______________
 msgid "Length of Waterline LWL (m)            ="
@@ -3143,7 +3228,8 @@ msgstr "Chieu dai duong nuoc            "
 
 #: freestringsunit.rs_length_overall_____________________sloa__
 msgid "LENGTH OVERALL ................... SLOA :"
-msgstr "Chieu dai cua tau...............................................SLOA :"
+msgstr ""
+"Chieu dai cua tau...............................................SLOA :"
 
 #: freestringsunit.rs_length_over_all
 msgid "Length over all"
@@ -3158,16 +3244,24 @@ msgid "Limit diameter of propeller [m]"
 msgstr "Duong kinh gioi han cua chan vit, m                               "
 
 #: freestringsunit.rs_limit_of_power_in_freeware_free_shipt_is_reached_or_increase_diameter_of_propeller___
-msgid "Limit of power in freeware Free!ship+ is reached or increase diameter of propeller!!!"
-msgstr "Gioi han ve cong suat trong phien ban freeware Free!ship+ da dat toi hoac tang duong kinh cua chan vit!!!"
+msgid ""
+"Limit of power in freeware Free!ship+ is reached or increase diameter of "
+"propeller!!!"
+msgstr ""
+"Gioi han ve cong suat trong phien ban freeware Free!ship+ da dat toi hoac "
+"tang duong kinh cua chan vit!!!"
 
 #: freestringsunit.rs_limit_of_speed_in_freeware_free_shipt_is_reached___
 msgid "Limit of speed in freeware Free!ship+ is reached!!!"
 msgstr "Da dat toi van toc lon nhat cua phien ban mien phi FREE!ship+ !!!"
 
 #: freestringsunit.rs_lnumlcharact_lmeas_l________________________m_e_a_n_i_n_g_s________________________l
-msgid "|Num|Charact.|Meas.|                        M E A N I N G S                        |"
-msgstr "|¹  |Dai luong  |K.thuoc|                       GIA TRI                                |"
+msgid ""
+"|Num|Charact.|Meas.|                        M E A N I N G S"
+"                        |"
+msgstr ""
+"|¹  |Dai luong  |K.thuoc|                       GIA TRI"
+"                                |"
 
 #: freestringsunit.rs_location
 msgid "Location"
@@ -3183,7 +3277,7 @@ msgstr "Bat diem"
 
 #: freestringsunit.rs_longitudinal_center_of_buoyancy
 msgid "Longitudinal center of buoyancy"
-msgstr "Hoanh do trong tam noi."
+msgstr "Hoanh do trong tam noi"
 
 #: freestringsunit.rs_longitudinal_center_of_effort
 msgid "Longitudinal center of effort"
@@ -3206,8 +3300,12 @@ msgid "Longitudinal transverse metacenter"
 msgstr "Cao do cua tam nghueng doc"
 
 #: freestringsunit.rs_lpropeller_s_metal_l___1___l___2___l___3___l___4___l___5___l___6___l___7___l___8___l
-msgid "|Propeller's metal:|   1   |   2   |   3   |   4   |   5   |   6   |   7   |   8   |"
-msgstr "|Loai vat lieu cua chan vit= 1 |   2   |   3   |   4   |   5   |   6   |   7   |   8   |"
+msgid ""
+"|Propeller's metal:|   1   |   2   |   3   |   4   |   5   |   6   |   7   |"
+"   8   |"
+msgstr ""
+"|Loai vat lieu cua chan vit= 1 |   2   |   3   |   4   |   5   |   6   |   7"
+"   |   8   |"
 
 #: freestringsunit.rs_lwl_bwl_is_outside_valid_domain
 msgid "Lwl/Bwl is outside valid domain"
@@ -3254,8 +3352,11 @@ msgid "| 9 | F      |[m2] |"
 msgstr "| 9 |     F     |  m2   |"
 
 #: freestringsunit.rs_l_character___l___________________t____________________t__twin_screw_ship__l
-msgid "| Character.  |-------------------+--------------------+  Twin-screw ship  |"
-msgstr "| Thong so    |-------------------+---------------------|                   |"
+msgid ""
+"| Character.  |-------------------+--------------------+  Twin-screw ship  |"
+msgstr ""
+"| Thong so    |-------------------+---------------------|                   "
+"|"
 
 #: freestringsunit.rs_l_d________l___m____l
 msgid "| D        |  [m]   |"
@@ -3291,9 +3392,13 @@ msgstr "| Kt       |   -    |"
 
 #: freestringsunit.rs_l_l_voo0_3333_l__4_490_____6_008__l__5_450_____7_047___l__4_405_____7_265__l
 #, fuzzy
-#| msgid "| L/V**0,3333 |  4,490 ... 6,008  |  5,450 ... 7,047   |  4,405 ... 7,265  |"
-msgid "| L/V**0.3333 |  4.490 ... 6.008  |  5.450 ... 7.047   |  4.405 ... 7.265  |"
-msgstr "| L/V**0,3333 | 4,490 ... 6,008   |  5,450 ... 7,047    |  4,405 ... 7,265  |"
+#| msgid ""
+#| "| L/V**0,3333 |  4,490 ... 6,008  |  5,450 ... 7,047   |  4,405 ... 7,265  |"
+msgid ""
+"| L/V**0.3333 |  4.490 ... 6.008  |  5.450 ... 7.047   |  4.405 ... 7.265  |"
+msgstr ""
+"| L/V**0,3333 | 4,490 ... 6,008   |  5,450 ... 7,047    |  4,405 ... 7,265  "
+"|"
 
 #: freestringsunit.rs_l_n________l_1_min__l
 msgid "| n        |[1/min] |"
@@ -3324,23 +3429,41 @@ msgid "| R        |  [kN]  |"
 msgstr "| R        |   kN   |"
 
 #: freestringsunit.rs_l_speed_l_speed_l_fr_v__l___r_f__l___r_r__l___r_t__l__power__l__r_t_e_l_power_e_l
-msgid "| Speed | Speed | Fr_V  |   R_f  |   R_r  |   R_T  |  Power  |  R_T_e | Power_e |"
-msgstr "|  Vs   |  Vms  |  Fr_V |   R_f  |   R_r  |   R_T  |    Pe   |  R_T_e |   Pe_e  |"
+msgid ""
+"| Speed | Speed | Fr_V  |   R_f  |   R_r  |   R_T  |  Power  |  R_T_e | "
+"Power_e |"
+msgstr ""
+"|  Vs   |  Vms  |  Fr_V |   R_f  |   R_r  |   R_T  |    Pe   |  R_T_e |   "
+"Pe_e  |"
 
 #: freestringsunit.rs_l_speed_l_speed_l__fr___l___r_f__l___r_r__l___r_t__l__power__l__r_t_e_l_power_e_l
-msgid "| Speed | Speed |  Fr   |   R_f  |   R_r  |   R_T  |  Power  |  R_T_e | Power_e |"
-msgstr "|  Vs   |  Vms  |   Fr  |   R_f  |   R_r  |   R_T  |    Pe   |  R_T_e |   Pe_e  |"
+msgid ""
+"| Speed | Speed |  Fr   |   R_f  |   R_r  |   R_T  |  Power  |  R_T_e | "
+"Power_e |"
+msgstr ""
+"|  Vs   |  Vms  |   Fr  |   R_f  |   R_r  |   R_T  |    Pe   |  R_T_e |   "
+"Pe_e  |"
 
 #: freestringsunit.rs_l_speed_l_speed_l__fr___l___r_f__l___r_r__l___r_t__l__power__l___wt__l___t___l
-msgid "| Speed | Speed |  Fr   |   R_f  |   R_r  |   R_T  |  Power  |   Wt  |   t   |"
-msgstr "| Speed | Speed |  Fr   |   R_f  |   R_r  |   R_T  |  Power  |   Wt  |   t   |"
+msgid ""
+"| Speed | Speed |  Fr   |   R_f  |   R_r  |   R_T  |  Power  |   Wt  |   t"
+"   |"
+msgstr ""
+"| Speed | Speed |  Fr   |   R_f  |   R_r  |   R_T  |  Power  |   Wt  |   t"
+"   |"
 
 #: freestringsunit.rs_l_speed_l_speed_l__fr___l___r_f___l___r_r___l____r_t____l__power__l_cp_opt__l_lcb_opt_l
-msgid "| Speed | Speed |  Fr   |   R_f   |   R_r   |    R_T    |  Power  | Cp opt. | LCB opt |"
-msgstr "| Speed | Speed |  Fr   |   R_f   |   R_r   |    R_T    |  Power  | Cp opt. | LCB opt |"
+msgid ""
+"| Speed | Speed |  Fr   |   R_f   |   R_r   |    R_T    |  Power  | Cp opt. "
+"| LCB opt |"
+msgstr ""
+"| Speed | Speed |  Fr   |   R_f   |   R_r   |    R_T    |  Power  | Cp opt. "
+"| LCB opt |"
 
 #: freestringsunit.rs_l_speed_l_speed_l__fr___l___r_v__l___r_r__l___r_t__l__power__l__r_t_e_l_power_e_l
-msgid "| Speed | Speed |  Fr   |   R_v  |   R_r  |   R_T  |  Power  |  R_T_e | Power_e |"
+msgid ""
+"| Speed | Speed |  Fr   |   R_v  |   R_r  |   R_T  |  Power  |  R_T_e | "
+"Power_e |"
 msgstr "Theo phuong phap Hollenbach-1998"
 
 #: freestringsunit.rs_l_speed_l_speed_l__s_l__l_r_frict_l_r_resid_l_r_total_l_spilman_l
@@ -3369,7 +3492,8 @@ msgstr "|Dai luong |K.thuoc |                      Gia tri               |"
 
 #: freestringsunit.rs_l__value___lmeasureml_______________m_e_a_n_i_n_g_s______________l
 msgid "|  Value   |Measurem|               M E A N I N G S              |"
-msgstr "| Dai luong  | K.thuoc   |              GIA TRI                      |"
+msgstr ""
+"| Dai luong  | K.thuoc   |              GIA TRI                      |"
 
 #: freestringsunit.rs_l___kn__l__ft_s_l_ratio_l___lbs___l___lbs___l___lbs___l___lbs___l
 msgid "|  [kn] | [ft/s]| ratio |  [lbs]  |  [lbs]  |  [lbs]  |  [lbs]  |"
@@ -3380,28 +3504,52 @@ msgid "|  [kn] | [m/s] | ratio |   [N]   |   [N]   |   [N]   |   [N]   |"
 msgstr "|  kn   |  m/ñ  |   -   |     N   |     N   |    N    |    N    |"
 
 #: freestringsunit.rs_l___kn__l__m_s__l_______l___kn___l___kn___l____kn__l____kw___l____kn__l____kw___l
-msgid "|  [kn] | [m/s] |  [-]  |  [kN]  |  [kN]  |   [kN] |   [kW]  |   [kN] |   [kW]  |"
-msgstr "|  kn   |  m/ñ  |   -   |   kN   |   kN   |   kN   |    kW   |   kN   |   kW    |"
+msgid ""
+"|  [kn] | [m/s] |  [-]  |  [kN]  |  [kN]  |   [kN] |   [kW]  |   [kN] |   "
+"[kW]  |"
+msgstr ""
+"|  kn   |  m/ñ  |   -   |   kN   |   kN   |   kN   |    kW   |   kN   |   kW"
+"    |"
 
 #: freestringsunit.rs_l___kn__l__m_s__l_______l___kn___l___kn___l____kn__l____kw___l_______l_______l
-msgid "|  [kn] | [m/s] |  [-]  |  [kN]  |  [kN]  |   [kN] |   [kW]  |  [-]  |  [-]  |"
-msgstr "|  [kn] | [m/s] |  [-]  |  [kN]  |  [kN]  |   [kN] |   [kW]  |  [-]  |  [-]  |"
+msgid ""
+"|  [kn] | [m/s] |  [-]  |  [kN]  |  [kN]  |   [kN] |   [kW]  |  [-]  |  [-]"
+"  |"
+msgstr ""
+"|  [kn] | [m/s] |  [-]  |  [kN]  |  [kN]  |   [kN] |   [kW]  |  [-]  |  [-]"
+"  |"
 
 #: freestringsunit.rs_l___kn__l__m_s__l_______l___kn____l___kn____l____kn_____l____kw___l_________l_________l
-msgid "|  [kn] | [m/s] |  [-]  |  [kN]   |  [kN]   |   [kN]    |   [kW]  |   [-]   |   [%]   |"
-msgstr "|  [kn] | [m/s] |  [-]  |  [kN]   |  [kN]   |   [kN]    |   [kW]  |   [-]   |   [%]   |"
+msgid ""
+"|  [kn] | [m/s] |  [-]  |  [kN]   |  [kN]   |   [kN]    |   [kW]  |   [-]   "
+"|   [%]   |"
+msgstr ""
+"|  [kn] | [m/s] |  [-]  |  [kN]   |  [kN]   |   [kN]    |   [kW]  |   [-]   "
+"|   [%]   |"
 
 #: freestringsunit.rs_l___kn__l__m_s__l_______l____n___l____n___l____n___l____w____l____n___l____w____l
-msgid "|  [kn] | [m/s] |  [-]  |   [N]  |   [N]  |   [N]  |   [W]   |   [N]  |   [W]   |"
-msgstr "|  kn   |  m/ñ  |   -   |   N    |   N    |    N   |     W   |   N    |    W    |"
+msgid ""
+"|  [kn] | [m/s] |  [-]  |   [N]  |   [N]  |   [N]  |   [W]   |   [N]  |   "
+"[W]   |"
+msgstr ""
+"|  kn   |  m/ñ  |   -   |   N    |   N    |    N   |     W   |   N    |    W"
+"    |"
 
 #: freestringsunit.rs_l___kn__l__m_s__l_______l____n___l____n___l____n___l____w____l_______l_______l
-msgid "|  [kn] | [m/s] |  [-]  |   [N]  |   [N]  |   [N]  |   [W]   |  [-]  |  [-]  |"
-msgstr "|  [kn] | [m/s] |  [-]  |   [N]  |   [N]  |   [N]  |   [W]   |  [-]  |  [-]  |"
+msgid ""
+"|  [kn] | [m/s] |  [-]  |   [N]  |   [N]  |   [N]  |   [W]   |  [-]  |  [-]"
+"  |"
+msgstr ""
+"|  [kn] | [m/s] |  [-]  |   [N]  |   [N]  |   [N]  |   [W]   |  [-]  |  [-]"
+"  |"
 
 #: freestringsunit.rs_l___kn__l__m_s__l_______l____n____l____n____l_____n_____l____w____l_________l_________l
-msgid "|  [kn] | [m/s] |  [-]  |   [N]   |   [N]   |    [N]    |   [W]   |   [-]   |   [%]   |"
-msgstr "|  [kn] | [m/s] |  [-]  |   [N]   |   [N]   |    [N]    |   [W]   |   [-]   |   [%]   |"
+msgid ""
+"|  [kn] | [m/s] |  [-]  |   [N]   |   [N]   |    [N]    |   [W]   |   [-]   "
+"|   [%]   |"
+msgstr ""
+"|  [kn] | [m/s] |  [-]  |   [N]   |   [N]   |    [N]    |   [W]   |   [-]   "
+"|   [%]   |"
 
 #: freestringsunit.rs_l___kn__l_______l__degr_l___kn____l___kn____l___kn____l___kw____l
 msgid "|  [kn] |   -   | [degr]|  [kN]   |  [kN]   |  [kN]   |  [kW]   |"
@@ -3424,24 +3572,40 @@ msgid "|  [kn] |   -   |   -   |  [lbf]  |  [lbf]  |  [lbf]  |  [ehp]  |"
 msgstr "|  kn   |   -   |   -   |   lbs   |    lbs  |   lbs   |   hp    |"
 
 #: freestringsunit.rs_l___kn___l___m_s__l________l___kn___l___kn___l___kn___l___kw___l___kn___l___kw___l
-msgid "|   kn   |   m/s  |    -   |   kN   |   kN   |   kN   |   kW   |   kN   |   kW   |"
-msgstr "|   kn   |   m/ñ  |    -   |   kN   |   kN   |   kN   |  kW    |   kN   |   kW   |"
+msgid ""
+"|   kn   |   m/s  |    -   |   kN   |   kN   |   kN   |   kW   |   kN   |   "
+"kW   |"
+msgstr ""
+"|   kn   |   m/ñ  |    -   |   kN   |   kN   |   kN   |  kW    |   kN   |   "
+"kW   |"
 
 #: freestringsunit.rs_l___kn___l___m_s__l________l____n___l____n___l____n___l___w____l____n___l___w____l
-msgid "|   kn   |   m/s  |    -   |    N   |    N   |    N   |   W    |    N   |   W    |"
-msgstr "|   kn   |   m/ñ  |    -   |    N   |    N   |    N   |   W    |    N   |   W    |"
+msgid ""
+"|   kn   |   m/s  |    -   |    N   |    N   |    N   |   W    |    N   |   "
+"W    |"
+msgstr ""
+"|   kn   |   m/ñ  |    -   |    N   |    N   |    N   |   W    |    N   |   "
+"W    |"
 
 #: freestringsunit.rs_l___los_lwl___l__1_000_____1_050__l__1_000_____1_050___l__1_000_____1_050__l
 #, fuzzy
-#| msgid "|   Los/Lwl   |  1,000 ... 1,050  |  1,000 ... 1,050   |  1,000 ... 1,050  |"
-msgid "|   Los/Lwl   |  1.000 ... 1.050  |  1.000 ... 1.050   |  1.000 ... 1.050  |"
-msgstr "|   Los/Lwl   |  1,000 ... 1,050  |  1,000 ... 1,050    |  1,000 ... 1,050  |"
+#| msgid ""
+#| "|   Los/Lwl   |  1,000 ... 1,050  |  1,000 ... 1,050   |  1,000 ... 1,050  |"
+msgid ""
+"|   Los/Lwl   |  1.000 ... 1.050  |  1.000 ... 1.050   |  1.000 ... 1.050  |"
+msgstr ""
+"|   Los/Lwl   |  1,000 ... 1,050  |  1,000 ... 1,050    |  1,000 ... 1,050  "
+"|"
 
 #: freestringsunit.rs_l___lwl_l_____l__1_000_____1_055__l__0_945_____1_000___l__1_000_____1_070__l
 #, fuzzy
-#| msgid "|   Lwl/L     |  1,000 ... 1,055  |  0,945 ... 1,000   |  1,000 ... 1,070  |"
-msgid "|   Lwl/L     |  1.000 ... 1.055  |  0.945 ... 1.000   |  1.000 ... 1.070  |"
-msgstr "|   Lwl/L     |  1,000 ... 1,055  |  0,945 ... 1,000    |  1,000 ... 1,070  |"
+#| msgid ""
+#| "|   Lwl/L     |  1,000 ... 1,055  |  0,945 ... 1,000   |  1,000 ... 1,070  |"
+msgid ""
+"|   Lwl/L     |  1.000 ... 1.055  |  0.945 ... 1.000   |  1.000 ... 1.070  |"
+msgstr ""
+"|   Lwl/L     |  1,000 ... 1,055  |  0,945 ... 1,000    |  1,000 ... 1,070  "
+"|"
 
 #: freestringsunit.rs_l___value__l______________m_e_a_n_i_n_g_s_______________l
 msgid "|   Value  |              M E A N I N G S               |"
@@ -3468,14 +3632,22 @@ msgid "|   Vs  |  FrV  |  Tau  |   R_f   |   R_p   |   R_t   |   Pe    |"
 msgstr "|   Vs  |  FrV  |  Tau  |   R_f   |   R_p   |   R_t   |   Pe    |"
 
 #: freestringsunit.rs_l___vs___l___vms__l___fr___l___r_f__l___r_r__l___r_t__l___pe___l__r_t_e_l__pe_e__l
-msgid "|   Vs   |   Vms  |   Fr   |   R_f  |   R_r  |   R_T  |   Pe   |  R_T_e |  Pe_e  |"
-msgstr "|   Vs   |   Vms  |   Fr   |   R_f  |   R_r  |   R_T  |   Pe   |  R_T_e |  Pe_e  |"
+msgid ""
+"|   Vs   |   Vms  |   Fr   |   R_f  |   R_r  |   R_T  |   Pe   |  R_T_e |  "
+"Pe_e  |"
+msgstr ""
+"|   Vs   |   Vms  |   Fr   |   R_f  |   R_r  |   R_T  |   Pe   |  R_T_e |  "
+"Pe_e  |"
 
 #: freestringsunit.rs_l____dp_ta____l__0_430_____0_840__l__0_655_____1_050___l__0_495_____0_860__l
 #, fuzzy
-#| msgid "|    Dp/Ta    |  0,430 ... 0,840  |  0,655 ... 1,050   |  0,495 ... 0,860  |"
-msgid "|    Dp/Ta    |  0.430 ... 0.840  |  0.655 ... 1.050   |  0.495 ... 0.860  |"
-msgstr "|    Dp/Ta    |  0,430 ... 0,840  |  0,655 ... 1,050    |  0,495 ... 0,860  |"
+#| msgid ""
+#| "|    Dp/Ta    |  0,430 ... 0,840  |  0,655 ... 1,050   |  0,495 ... 0,860  |"
+msgid ""
+"|    Dp/Ta    |  0.430 ... 0.840  |  0.655 ... 1.050   |  0.495 ... 0.860  |"
+msgstr ""
+"|    Dp/Ta    |  0,430 ... 0,840  |  0,655 ... 1,050    |  0,495 ... 0,860  "
+"|"
 
 #: freestringsunit.rs_l____jb____l________l
 msgid "|    Jb    |   -    |"
@@ -3539,29 +3711,47 @@ msgstr "|    vs    |   kn   |"
 
 #: freestringsunit.rs_l_____b_t_____l__1_989_____4_002__l__2_967_____6_120___l__2_308_____6_110__l
 #, fuzzy
-#| msgid "|     B/T     |  1,989 ... 4,002  |  2,967 ... 6,120   |  2,308 ... 6,110  |"
-msgid "|     B/T     |  1.989 ... 4.002  |  2.967 ... 6.120   |  2.308 ... 6.110  |"
-msgstr "|     B/T     |  1,989 ... 4,002  |  2,967 ... 6,120    |  2,308 ... 6,110  |"
+#| msgid ""
+#| "|     B/T     |  1,989 ... 4,002  |  2,967 ... 6,120   |  2,308 ... 6,110  |"
+msgid ""
+"|     B/T     |  1.989 ... 4.002  |  2.967 ... 6.120   |  2.308 ... 6.110  |"
+msgstr ""
+"|     B/T     |  1,989 ... 4,002  |  2,967 ... 6,120    |  2,308 ... 6,110  "
+"|"
 
 #: freestringsunit.rs_l_____cb______l__0_601_____0_830__l__0_559_____0_790___l__0_512_____0_775__l
 #, fuzzy
-#| msgid "|     Cb      |  0,601 ... 0,830  |  0,559 ... 0,790   |  0,512 ... 0,775  |"
-msgid "|     Cb      |  0.601 ... 0.830  |  0.559 ... 0.790   |  0.512 ... 0.775  |"
-msgstr "|     Cb      |  0,601 ... 0,830  |  0,559 ... 0,790    |  0,512 ... 0,775  |"
+#| msgid ""
+#| "|     Cb      |  0,601 ... 0,830  |  0,559 ... 0,790   |  0,512 ... 0,775  |"
+msgid ""
+"|     Cb      |  0.601 ... 0.830  |  0.559 ... 0.790   |  0.512 ... 0.775  |"
+msgstr ""
+"|     Cb      |  0,601 ... 0,830  |  0,559 ... 0,790    |  0,512 ... 0,775  "
+"|"
 
 #: freestringsunit.rs_l_____l_b_____l__4_710_____7_106__l__4_949_____6_623___l__3_960_____7_130__l
 #, fuzzy
-#| msgid "|     L/B     |  4,710 ... 7,106  |  4,949 ... 6,623   |  3,960 ... 7,130  |"
-msgid "|     L/B     |  4.710 ... 7.106  |  4.949 ... 6.623   |  3.960 ... 7.130  |"
-msgstr "|     L/B     |  4,710 ... 7,106  |  4,949 ... 6,623    |  3,960 ... 7,130  |"
+#| msgid ""
+#| "|     L/B     |  4,710 ... 7,106  |  4,949 ... 6,623   |  3,960 ... 7,130  |"
+msgid ""
+"|     L/B     |  4.710 ... 7.106  |  4.949 ... 6.623   |  3.960 ... 7.130  |"
+msgstr ""
+"|     L/B     |  4,710 ... 7,106  |  4,949 ... 6,623    |  3,960 ... 7,130  "
+"|"
 
 #: freestringsunit.rs_l_____________l____design_draft___l___ballast_draft____l___________________l
-msgid "|             |    Design draft   |   Ballast draft    |                   |"
-msgstr "|             |   Day tai         |     Tai dan         |                   |"
+msgid ""
+"|             |    Design draft   |   Ballast draft    |                   |"
+msgstr ""
+"|             |   Day tai         |     Tai dan         |                   "
+"|"
 
 #: freestringsunit.rs_l_____________l____________single_screw_ship___________l___________________l
-msgid "|             |            Single-screw ship           |                   |"
-msgstr "|             |             Mot chan vit                |   Hai chan vit    |"
+msgid ""
+"|             |            Single-screw ship           |                   |"
+msgstr ""
+"|             |             Mot chan vit                |   Hai chan vit    "
+"|"
 
 #: freestringsunit.rs_m
 msgctxt "freestringsunit.rs_m"
@@ -3700,8 +3890,8 @@ msgid "mm"
 msgstr "mm"
 
 #: freestringsunit.rs_model_is_ok_
-msgid "Model is ok."
-msgstr "Mîdel - Îk."
+msgid "Model is ok"
+msgstr "Mîdel - Îk"
 
 #: freestringsunit.rs_modified
 msgid "modified"
@@ -3745,12 +3935,16 @@ msgid "N"
 msgstr "N"
 
 #: freestringsunit.rs_need_enable_automoving_model_to_baseline_or_set_new_project_draft_
-msgid "Need enable automoving model to baseline or set new project draft."
-msgstr "Need enable automoving model to baseline or set new project draft."
+msgid "Need enable automoving model to baseline or set new project draft"
+msgstr "Need enable automoving model to baseline or set new project draft"
 
 #: freestringsunit.rs_need_restart_calculation__design_hydrostatics__for_model_displacement_balance___
-msgid "Need restart calculation \"Design hydrostatics\" for model displacement balance..."
-msgstr "Need restart calculation \"Design hydrostatics\" for model displacement balance..."
+msgid ""
+"Need restart calculation \"Design hydrostatics\" for model displacement "
+"balance..."
+msgstr ""
+"Need restart calculation \"Design hydrostatics\" for model displacement "
+"balance..."
 
 #: freestringsunit.rs_new_controlcurve
 msgid "new controlcurve"
@@ -3797,44 +3991,70 @@ msgid "Note 1: Calculated number of hull surface areas  :"
 msgstr "Luu y 1: So luong mat phang duoc chia:"
 
 #: freestringsunit.rs_note_1__draft__and_all_other_vertical_heights__is_measured_from_point_of_the_hull_z_0_
-msgid "NOTE 1: Draft (and all other vertical heights) is measured from point of the hull Z=0."
-msgstr "Luu chu 1: luong mon nuoc ( va tat ca cac chieu cao khac) tinh tu diem thap nhat cua vo tau!"
+msgid ""
+"NOTE 1: Draft (and all other vertical heights) is measured from point of the"
+" hull Z=0"
+msgstr ""
+"Luu chu 1: luong mon nuoc ( va tat ca cac chieu cao khac) tinh tu diem thap "
+"nhat cua vo tau!"
 
 #: freestringsunit.rs_note_2__added_masses_are_be_devided_on____________
 msgid "Note 2: Added masses are be devided on           :"
 msgstr "Luu y 2: Khoi luong lien ket duoc chia ra lam:"
 
 #: freestringsunit.rs_note_2__all_calculated_coefficients_based_on_actual_dimensions_of_submerged_body_
-msgid "NOTE 2: All calculated coefficients based on actual dimensions of submerged body."
-msgstr "Luu chu 2: Tat ca cac he so tinh toan deu dua tren cac kich thuoc thuc te cua tau ngap trong nuoc."
+msgid ""
+"NOTE 2: All calculated coefficients based on actual dimensions of submerged "
+"body"
+msgstr ""
+"Luu chu 2: Tat ca cac he so tinh toan deu dua tren cac kich thuoc thuc te "
+"cua tau ngap trong nuoc"
 
 #: freestringsunit.rs_note_2__all_calculated_coefficients_based_on_project_length___draft_and_beam_
-msgid "NOTE 2: All calculated coefficients based on project length), draft and beam."
-msgstr "Luu chu 2: Tat ca cac he so tinh toan deu dua tren chieu dai, chieu rong va luong mon nuoc cua du an."
+msgid ""
+"NOTE 2: All calculated coefficients based on project length), draft and beam"
+msgstr ""
+"Luu chu 2: Tat ca cac he so tinh toan deu dua tren chieu dai, chieu rong va "
+"luong mon nuoc cua du an"
 
 #: freestringsunit.rs_note_3__the_bulb_characteristics_was_calculated_right__if_f_p__is_through_point_of_intersection
-msgid "Note 3: The bulb characteristics was calculated right, if F.P. is through point of intersection"
-msgstr "Luu y 3: Cac thong so cua mui qua le duoc xac dinh chuan xac, neu duong vuong goc mui di qua diem"
+msgid ""
+"Note 3: The bulb characteristics was calculated right, if F.P. is through "
+"point of intersection"
+msgstr ""
+"Luu y 3: Cac thong so cua mui qua le duoc xac dinh chuan xac, neu duong "
+"vuong goc mui di qua diem"
 
 #: freestringsunit.rs_note__appendage_resistance_is_calculated_for_stationary_engine
 msgid "NOTE: Appendage resistance is calculated for stationary engine"
 msgstr "Luu y: Luc can cua phan them duoc tinh trong truong hop dong co dung"
 
 #: freestringsunit.rs_note__coefficients_wt__t_and_etar_were_calculated_by_formulaes_of_method_holtrop_
-msgid "NOTE: Coefficients Wt, t and EtaR were calculated by formulaes of method Holtrop-"
-msgstr "Luu y: cac he so Wt, t va ETAr tinh theo cac cong thuc cua phuong phap Holtrop-"
+msgid ""
+"NOTE: Coefficients Wt, t and EtaR were calculated by formulaes of method "
+"Holtrop-"
+msgstr ""
+"Luu y: cac he so Wt, t va ETAr tinh theo cac cong thuc cua phuong phap "
+"Holtrop-"
 
 #: freestringsunit.rs_note__coefficients__wt_t_nr_cp_opt_lcb_opt__are_calculated_for_speed_vs__
-msgid "Note: Coefficients (Wt,t,nr,Cp_opt,Lcb_opt) are calculated for speed Vs ="
+msgid ""
+"Note: Coefficients (Wt,t,nr,Cp_opt,Lcb_opt) are calculated for speed Vs ="
 msgstr "Luu y: Cac he so (Wt,t,nr,Cp_opt,Lcb_opt) duoc tinh cho van toc Vs ="
 
 #: freestringsunit.rs_note__in_parentheses_the_minimum_values_of_demanded_parameters_are_specified
-msgid "Note: In parentheses the minimum values of demanded parameters are specified"
-msgstr "Note: In parentheses the minimum values of demanded parameters are specified"
+msgid ""
+"Note: In parentheses the minimum values of demanded parameters are specified"
+msgstr ""
+"Note: In parentheses the minimum values of demanded parameters are specified"
 
 #: freestringsunit.rs_note__propeller_s_metal___1_brass_mntfe__2_bronze_altfe_h9_4_4__3_carbon_steel_
-msgid "Note: Propeller's metal:  1-brass Mn+Fe; 2-bronze Al+Fe H9-4-4; 3-carbon steel;"
-msgstr "Luu y: Kim loai lam chan vit: 1-dong thau Mn+Fe; 2-dong thiec Al+Fe Í9-4-4; 3-thep hop kim;"
+msgid ""
+"Note: Propeller's metal:  1-brass Mn+Fe; 2-bronze Al+Fe H9-4-4; 3-carbon "
+"steel;"
+msgstr ""
+"Luu y: Kim loai lam chan vit: 1-dong thau Mn+Fe; 2-dong thiec Al+Fe Í9-4-4; "
+"3-thep hop kim;"
 
 #: freestringsunit.rs_not_all_points_could_be_added_while_collapsing_edge
 msgid "Not all points could be added while collapsing edge"
@@ -3845,20 +4065,20 @@ msgid "not modified"
 msgstr "khong thay doi"
 
 #: freestringsunit.rs_no_faces_could_be_removed_
-msgid "No faces could be removed."
-msgstr "khong co mat de dich chuyen."
+msgid "No faces could be removed"
+msgstr "khong co mat de dich chuyen"
 
 #: freestringsunit.rs_no_geometry_imported_
-msgid "No geometry imported."
-msgstr "khong co hinh duoc nhap."
+msgid "No geometry imported"
+msgstr "khong co hinh duoc nhap"
 
 #: freestringsunit.rs_no_intersection_points_found_
-msgid "No intersection points found."
-msgstr "khong tim thay diem giao nhau."
+msgid "No intersection points found"
+msgstr "khong tim thay diem giao nhau"
 
 #: freestringsunit.rs_no_markers_could_be_imported_
-msgid "No markers could be imported."
-msgstr "Khong co diem moc de nhap."
+msgid "No markers could be imported"
+msgstr "Khong co diem moc de nhap"
 
 #: freestringsunit.rs_no_meshdata_could_be_imported
 msgid "No meshdata could be imported"
@@ -3932,12 +4152,14 @@ msgid "number of station for SAC calculation must be < 100!"
 msgstr "number of station for SAC calculation must be < 100!"
 
 #: freestringsunit.rs_off__bow________________error________________error________________error
-msgid "OFF  BOW                ERROR                ERROR                ERROR"
-msgstr "OFF  BOW                ERROR                ERROR                ERROR"
+msgid ""
+"OFF  BOW                ERROR                ERROR                ERROR"
+msgstr ""
+"OFF  BOW                ERROR                ERROR                ERROR"
 
 #: freestringsunit.rs_ok__propeller_is_not_cavitate_
-msgid "OK! Propeller is not cavitate."
-msgstr "OK! Propeller is not cavitate."
+msgid "OK! Propeller is not cavitate"
+msgstr "OK! Propeller is not cavitate"
 
 #: freestringsunit.rs_old_backup_could_not_be_removed_
 msgid "Old backup could not be removed!"
@@ -4009,8 +4231,8 @@ msgid "points"
 msgstr "diem"
 
 #: freestringsunit.rs_points_removed_
-msgid "points removed."
-msgstr "diem da xoa."
+msgid "points removed"
+msgstr "diem da xoa"
 
 #: freestringsunit.rs_points_unlocked
 msgid "points unlocked"
@@ -4022,7 +4244,8 @@ msgid "point move"
 msgstr "dich chuyen diem"
 
 #: freestringsunit.rs_possible_inaccurate_ssd_calculation__increase_the_maximum_angle_of_heel_
-msgid "Possible inaccurate SSD calculation: Increase the maximum angle of heel!"
+msgid ""
+"Possible inaccurate SSD calculation: Increase the maximum angle of heel!"
 msgstr "Tinh SSD khong chinh xac: internal volume do not close, hoac tang Zg!"
 
 #: freestringsunit.rs_power
@@ -4060,24 +4283,40 @@ msgid "Profile view"
 msgstr "Hinh chieu dung"
 
 #: freestringsunit.rs_program_of_aerodynamics_characteristics_calculation_for_merchant_ships_
-msgid "Program of aerodynamics characteristics calculation for merchant ships."
+msgid "Program of aerodynamics characteristics calculation for merchant ships"
 msgstr "Chuong trinh tinh cac thong so khi dong hoc cua tau buon"
 
 #: freestringsunit.rs_program_of_resistance_and_power_prediction_for_naval_ships__nuos_ukraine_2010_
-msgid "Program of resistance and power prediction for naval ships (NUoS,Ukraine,2010)"
-msgstr "Tinh suc can cua tau chien theo phuong phap Fung-Leibman 1995 (p.gs. Timoshenko V.F.,NUoS,2010)"
+msgid ""
+"Program of resistance and power prediction for naval ships "
+"(NUoS,Ukraine,2010)"
+msgstr ""
+"Tinh suc can cua tau chien theo phuong phap Fung-Leibman 1995 (p.gs. "
+"Timoshenko V.F.,NUoS,2010)"
 
 #: freestringsunit.rs_program_of_resistance_and_power_prediction_for_tugs_and_trawlers__nuos__ukraine_2009_
-msgid "Program of resistance and power prediction for tugs and trawlers (NUoS, Ukraine,2009)"
-msgstr "Tinh suc can cua tau keo va tau ca theo phuong phap van Oortmerssen-1971 (p.gs. Timoshenko V.F.,NUoS,2009)"
+msgid ""
+"Program of resistance and power prediction for tugs and trawlers (NUoS, "
+"Ukraine,2009)"
+msgstr ""
+"Tinh suc can cua tau keo va tau ca theo phuong phap van Oortmerssen-1971 "
+"(p.gs. Timoshenko V.F.,NUoS,2009)"
 
 #: freestringsunit.rs_program_of_resistance_prediction_for_cargo_ships_by_hollenbach_1998_method__nuos__ukraine_
-msgid "Program of resistance prediction for cargo ships by Hollenbach-1998 method (NUoS, Ukraine)"
-msgstr "Tinh suc can cua tau hang theo phuong phap Hollenbach-1998 (P.gs ̉imoshenko V.F.,NUoS, Ukraine)"
+msgid ""
+"Program of resistance prediction for cargo ships by Hollenbach-1998 method "
+"(NUoS, Ukraine)"
+msgstr ""
+"Tinh suc can cua tau hang theo phuong phap Hollenbach-1998 (P.gs ̉imoshenko "
+"V.F.,NUoS, Ukraine)"
 
 #: freestringsunit.rs_program_of_resistance_prediction_for_displacement_ships_hydronship_v1_08__nuos__ukraine_
-msgid "Program of resistance prediction for displacement ships HydroNShIp v1.08 (NUoS, Ukraine)"
-msgstr "Tinh toan suc can va cong suat cho tau bien bang HydroNShIp v1.06 (Nuos, Ucraine)"
+msgid ""
+"Program of resistance prediction for displacement ships HydroNShIp v1.08 "
+"(NUoS, Ukraine)"
+msgstr ""
+"Tinh toan suc can va cong suat cho tau bien bang HydroNShIp v1.06 (Nuos, "
+"Ucraine)"
 
 #: freestringsunit.rs_program_of_resistance_prediction_planing_and_pre_planing_ships
 msgid "Program of resistance prediction planing and pre-planing ships"
@@ -4117,12 +4356,12 @@ msgid "Propeller Expanded Area Ratio Ae/Ao    ="
 msgstr "ti le dia (disk ratio) Ae/Ao                                ="
 
 #: freestringsunit.rs_propeller_is_a_strong_in_non_uniform_flow_
-msgid "Propeller is a strong in non-uniform flow."
-msgstr "OK! Do ben cua chan vit trong dong chay khong dong nhat duoc dam bao."
+msgid "Propeller is a strong in non-uniform flow"
+msgstr "OK! Do ben cua chan vit trong dong chay khong dong nhat duoc dam bao"
 
 #: freestringsunit.rs_propeller_is_a_strong_in_uniform_flow_
-msgid "Propeller is a strong in uniform flow."
-msgstr "OK! Do ben cua chan vit trong dong chay dong nhat duoc dam bao."
+msgid "Propeller is a strong in uniform flow"
+msgstr "OK! Do ben cua chan vit trong dong chay dong nhat duoc dam bao"
 
 #: freestringsunit.rs_propeller_open_water_efficiency_eta0_____
 msgid "Propeller Open Water Efficiency Eta0    ="
@@ -4200,7 +4439,7 @@ msgid ""
 "\n"
 "Note: More information see in book: Raschet Hodkosti nudvodnych vodoizmeschayuschich sudov:\n"
 "Uchebnoe posobie/ M.B.Slizghevski, Yu.M.Korol, M.G.Sokolik, V.F.Timoshenko;\n"
-"Under common redaction by Prof. M.B.Slizghevski.-Nikolaev, NUoS, 2004.-192p."
+"Under common redaction by Prof. M.B.Slizghevski.-Nikolaev, NUoS, 2004.-192p"
 msgstr ""
 
 #: freestringsunit.rs_propeller_task2_note
@@ -4299,7 +4538,7 @@ msgid ""
 "\n"
 "Note: More information see in book: Raschet Hodkosti nudvodnych vodoizmeschayuschich sudov:\n"
 "Uchebnoe posobie/ M.B.Slizghevski, Yu.M.Korol, M.G.Sokolik, V.F.Timoshenko;\n"
-"Under common redaction by Prof. M.B.Slizghevski.-Nikolaev, NUoS, 2004.-192p."
+"Under common redaction by Prof. M.B.Slizghevski.-Nikolaev, NUoS, 2004.-192p"
 msgstr ""
 "Bang. Gia tri trung binh cua he so lam viec co ich truc chan vit, bo phan truyen dong va hop so\n"
 "----------------------------------+--------------------------------------\n"
@@ -4346,7 +4585,7 @@ msgstr ""
 "\n"
 "Luu y: Thong tin cu the hon xem trong cuon: Đàñ÷ạ̊ ơîäêîṇ̃è íàäâîäíûơ âîäîèḉåùà₫ùèơ\n"
 "ñóäîâ:Ó÷åáíîå ïîñîáèå/ Í.Á.Ñëèæåâñêèé, ̃.̀.Êîđîëü, ̀.Ă.Ñîêîëèê, Â.Ô.̉è́îøåíêî; Ïîä îáù. đåä.\n"
-"ïđîô. Í.Á.Ñëèæåâñêîăî.-Íèêîëàåâ, ÍÓÊ, 2004.-192ñ."
+"ïđîô. Í.Á.Ñëèæåâñêîăî.-Íèêîëàåâ, ÍÓÊ, 2004.-192ñ"
 
 #: freestringsunit.rs_propeller_task4_note
 msgctxt "freestringsunit.rs_propeller_task4_note"
@@ -4422,7 +4661,7 @@ msgid ""
 "2.Parsons, M. G., \"Optimization Methods for Use in Computer-Aided Ship Design,\" Proceedings\n"
 "of the First SNAME STAR Symposium, 1975.\n"
 "3.Comstock,J.P. (Ed.), Principles of Naval Architecture, Vol. II, 1988  Edition, SNAME, New\n"
-"York, p.182."
+"York, p.182"
 msgstr ""
 "PROPELLER OPTIMIZATION PROGRAM (POP.1.5)\n"
 "M. G. Parsons, December, 1994\n"
@@ -4495,7 +4734,7 @@ msgstr ""
 "ningen B-Screw Series,\"International Shipbuilding Progress,Vol.22,No.251, July, 1975.\n"
 "2.Parsons M. G., \"Optimization Methods for Use in Computer-Aided Ship Design, \"Proce-\n"
 "edings of the First SNAME STAR Symposium, 1975.\n"
-"3.Comstock J.P.,Principles of Naval Architecture,Vol.II,1988 Edition,SNAME,New York,p.182."
+"3.Comstock J.P.,Principles of Naval Architecture,Vol.II,1988 Edition,SNAME,New York,p.182"
 
 #: freestringsunit.rs_propeller_task5_note
 #, fuzzy
@@ -4566,7 +4805,7 @@ msgstr ""
 "va ca buoc tuong doi toi uu, hieu suat lam viec lon nhat cua chan vit seri B.\n"
 "1.5   Cac thong so cua chan vit seri B co the duoc dua ra trong cac gioi han sau:\n"
 "1.5.1    3 <= Nblade <= 7;  0,3 <=  Ae/Ao <= 1,05;  0,5 <=  P/Dp  <= 1,40 ;\n"
-"1.6   Khoang buoc tuong doi: 0 <=  Jp=Vp/n/Dp <= 1,6.\n"
+"1.6   Khoang buoc tuong doi: 0 <=  Jp=Vp/n/Dp <= 1,6\n"
 "\n"
 "\n"
 "\n"
@@ -4612,8 +4851,10 @@ msgid "Redo"
 msgstr "Lam lai"
 
 #: freestringsunit.rs_rel_wind_______coeff____stand_______coeff____stand_______coeff____stand
-msgid "REL WIND       COEFF    STAND       COEFF    STAND       COEFF    STAND"
-msgstr "REL WIND       COEFF    STAND       COEFF    STAND       COEFF    STAND"
+msgid ""
+"REL WIND       COEFF    STAND       COEFF    STAND       COEFF    STAND"
+msgstr ""
+"REL WIND       COEFF    STAND       COEFF    STAND       COEFF    STAND"
 
 #: freestringsunit.rs_remaining_resistance_components__n__
 msgid "Remaining Resistance Components (N):"
@@ -4656,7 +4897,7 @@ msgstr "Luc can"
 
 #: freestringsunit.rs_resistanceo0_1__lbf___power__ehp_
 msgid "Resistance*0.1 [lbf]; Power [ehp]"
-msgstr "Suc can*0.1, lbs; Cong suat, suc ngua."
+msgstr "Suc can*0.1, lbs; Cong suat, suc ngua"
 
 #: freestringsunit.rs_resistanceo10__kn___power__kw_
 msgid "Resistance*10 [kN]; Power [kW]"
@@ -4675,8 +4916,10 @@ msgid "Resistance and power for small displacement ships by UBC-1993 method"
 msgstr "Resistance and power for small displacement ships by UBC-1993 method"
 
 #: freestringsunit.rs_resistance_and_power_of_tugs_and_trawlers_by_ridgeley_nevitt_1967_method
-msgid "Resistance and power of tugs and trawlers by Ridgeley-Nevitt-1967 method"
-msgstr "Resistance and power of tugs and trawlers by Ridgeley-Nevitt-1967 method"
+msgid ""
+"Resistance and power of tugs and trawlers by Ridgeley-Nevitt-1967 method"
+msgstr ""
+"Resistance and power of tugs and trawlers by Ridgeley-Nevitt-1967 method"
 
 #: freestringsunit.rs_resistance_and_power_planing_ships_by_clement_blount_method
 msgid "Resistance and power planing ships by Clement-Blount method"
@@ -4700,7 +4943,8 @@ msgstr "Resistance and power planing ships by Radojcic method"
 
 #: freestringsunit.rs_resistance_and_power_planing_ships_by_robinson_s_method__wolfson_1999_
 msgid "Resistance and power planing ships by Robinson's method (Wolfson-1999)"
-msgstr "Resistance and power planing ships by Robinson's method (Wolfson-1999)"
+msgstr ""
+"Resistance and power planing ships by Robinson's method (Wolfson-1999)"
 
 #: freestringsunit.rs_resistance_and_power_pre_planing_ships_by_method_of_mercier_savitsky
 msgid "Resistance and power pre-planing ships by method of Mercier-Savitsky"
@@ -4837,8 +5081,12 @@ msgstr ""
 #: freestringsunit.rs_resistance_holtrop_note_p4
 #, fuzzy
 msgctxt "freestringsunit.rs_resistance_holtrop_note_p4"
-msgid "4.If wetted surface area S is set as 0, then S to calculate by formulae from method of Holtrop."
-msgstr "4.Neu dien tich phan ngap nuoc S = 0, thi tinh toan S theo cong thuc cua phuong phap Holtrop."
+msgid ""
+"4.If wetted surface area S is set as 0, then S to calculate by formulae from"
+" method of Holtrop"
+msgstr ""
+"4.Neu dien tich phan ngap nuoc S = 0, thi tinh toan S theo cong thuc cua "
+"phuong phap Holtrop"
 
 #: freestringsunit.rs_resistance_holtrop_note_p5
 #, fuzzy
@@ -4852,7 +5100,7 @@ msgid ""
 "5.The wetted area of transom you can determine from sectional areas curve on Profile View or\n"
 "from \"Design hydrostatics\" output.\n"
 "The wetted area of bulbous on F.P. is analogous determination.\n"
-"The CoG wetted bulb area h_b to determine on \"Bodyplan view\" visually."
+"The CoG wetted bulb area h_b to determine on \"Bodyplan view\" visually"
 msgstr ""
 "5.Dien tich phan duoi ngap nuoc lang co the tinh theo duong cong dien tich tren hinh chieu canh,\n"
 "bat so bo \"Tinh toan dien tich suon va trong tam\"\n"
@@ -4869,23 +5117,25 @@ msgctxt "freestringsunit.rs_resistance_holtrop_note_p6"
 msgid ""
 "6.Propeller number Np is set for power prediction and for interaction propeller and hull.\n"
 "For Np=0 the wake fraction Wt and thrust deduction t is calculated as for highspeed sailing\n"
-"ships."
+"ships"
 msgstr ""
 "6.So luong chan vit Np can phai nhap vao de tinh toi he so anh huong\n"
 "chan vit va vo tau. Khi Np=0 he so dong hut theo Wt va he so hut\n"
-"t xac dinh nhu la doi voi thuyen buom cao toc."
+"t xac dinh nhu la doi voi thuyen buom cao toc"
 
 #: freestringsunit.rs_resistance_holtrop_note_p7
 msgid ""
 "7.Propeller diameter D with one-screw is <= 0.8*Ta, and for twin-screw <= 0.7*Ta.\n"
-"Expanded blade area ratio Ae/Ao is calculate from condition, when cavitation be absent."
+"Expanded blade area ratio Ae/Ao is calculate from condition, when cavitation be absent"
 msgstr ""
 
 #: freestringsunit.rs_resistance_holtrop_note_p8
 #, fuzzy
 msgctxt "freestringsunit.rs_resistance_holtrop_note_p8"
-msgid "8.Absolutely rougness of hull less 150 mkm one can don't set."
-msgstr "8.Do nham tuyet doi cua vo tau  nho hon 150 mkm khong anh huong toi van toc va co the khong can nhap."
+msgid "8.Absolutely rougness of hull less 150 mkm one can don't set"
+msgstr ""
+"8.Do nham tuyet doi cua vo tau  nho hon 150 mkm khong anh huong toi van toc "
+"va co the khong can nhap"
 
 #: freestringsunit.rs_resistance_holtrop_note_p9
 #, fuzzy
@@ -4900,13 +5150,13 @@ msgid ""
 "9.1   Holtrop J., Mennen G.G.J., \"An  Approximate  Power  Prediction  Method\", \"International\n"
 "Shipbuilding Progress, Vol.29, No.335, July, 1982.\n"
 "9.2   Holtrop J., \"A Statistical Reanalysis of Resistance and Propulsion Data, \"International\n"
-"Shipbuilding Progress, Vol.31, No.363, Nov., 1984.\n"
+"Shipbuilding Progress, Vol.31, No.363, Nov., 1984\n"
 msgstr ""
 "9.Cac thong tin cu the hon theo phuong phap thong ke Holtrop co the tim thay tai:\n"
 "9.1   Holtrop J., & Mennen G.G.J., \"An  Approximate Power  Prediction Method\",  International\n"
 "Shipbuilding Progress, Vol.29, No.335, July, 1982.\n"
 "9.2   Holtrop J., \"A Statistical Reanalysis of Resistance and Propulsion Data\", International\n"
-"Shipbuilding Progress, Vol.31, No.363, Nov., 1984.\n"
+"Shipbuilding Progress, Vol.31, No.363, Nov., 1984\n"
 
 #: freestringsunit.rs_resistance_mh_note
 #, fuzzy
@@ -5273,7 +5523,7 @@ msgid ""
 "- type of ships - any displacement ships;\n"
 "- Nser = 0 ;\n"
 "NOTE: You must to set the coefficient of residual resistance Cr in function of Froude number Fr\n"
-"Cr=f(Fr), where is Fr=v/(g*L)^0,5."
+"Cr=f(Fr), where is Fr=v/(g*L)^0,5"
 msgstr ""
 "1.Do nhot theo mac dinh duoc xac dinh cho nuoc bien ti trong 1025 kg/m^3 o nhiet do\n"
 "15 °Ñ. Co the thay doi nhiet do va ti trong: Du an-Thiet lap du an-Thuy tinh\n"
@@ -5460,7 +5710,7 @@ msgstr ""
 "- Kieu tau - bat ki kieu tau chiem nuoc nao;\n"
 "- Nser = 0 ;\n"
 "Luu y: Can phai nhap moi lien he giua he so suc can du duoi dang ham cua\n"
-"so Frude Cr=f(Fr), trong do Fr=v/(g*L)^0,5."
+"so Frude Cr=f(Fr), trong do Fr=v/(g*L)^0,5"
 
 #: freestringsunit.rs_resistance_oortmer_note_p1
 #, fuzzy
@@ -5600,8 +5850,12 @@ msgstr ""
 "| Froude number,           Fr |   0.20 ... 0.50      |"
 
 #: freestringsunit.rs_resistance_prediction_for_sea_vessels__according_to_associate_prof__timoshenko
-msgid "Resistance prediction for sea vessels, according to Associate Prof. Timoshenko"
-msgstr "Tinh toan suc can cua tau bien theo phuong phap Holtrop (pho giao su. Timoshenko, NUoS, 2007)"
+msgid ""
+"Resistance prediction for sea vessels, according to Associate Prof. "
+"Timoshenko"
+msgstr ""
+"Tinh toan suc can cua tau bien theo phuong phap Holtrop (pho giao su. "
+"Timoshenko, NUoS, 2007)"
 
 #: freestringsunit.rs_resistance__effective_power__propulsion_factors_and_required_thrust
 msgid "Resistance, Effective Power, Propulsion Factors and Required Thrust"
@@ -5649,12 +5903,20 @@ msgid "Righting lever transverse static stability  GZ_teta"
 msgstr "Righting lever transverse static stability  GZ_teta"
 
 #: freestringsunit.rs_robinson_john___performance_prediction_of_chine_and_round_bilge_hull_forms___international
-msgid "Robinson John, \"Performance Prediction of Chine and Round Bilge Hull Forms\", International"
-msgstr "Robinson John, \"Performance Prediction of Chine and Round Bilge Hull Forms\", International"
+msgid ""
+"Robinson John, \"Performance Prediction of Chine and Round Bilge Hull "
+"Forms\", International"
+msgstr ""
+"Robinson John, \"Performance Prediction of Chine and Round Bilge Hull "
+"Forms\", International"
 
 #: freestringsunit.rs_roger_h_compton___resistance_of_a_systemic_series_of_semiplaning_transom_stern_hulls__
-msgid "Roger H.Compton, \"Resistance of a Systemic Series of Semiplaning Transom-Stern Hulls\","
-msgstr "Roger H.Compton, \"Resistance of a Systemic Series of Semiplaning Transom-Stern Hulls\","
+msgid ""
+"Roger H.Compton, \"Resistance of a Systemic Series of Semiplaning Transom-"
+"Stern Hulls\","
+msgstr ""
+"Roger H.Compton, \"Resistance of a Systemic Series of Semiplaning Transom-"
+"Stern Hulls\","
 
 #: freestringsunit.rs_rotate
 msgid "rotate"
@@ -5755,7 +6017,7 @@ msgid "Shaft brackets area"
 msgstr "U truc chan vit"
 
 #: freestringsunit.rs_shaf_effic_ogearbox_effic_
-msgid "Shaf effic.*Gearbox effic."
+msgid "Shaf effic.*Gearbox effic"
 msgstr "hieu suat lam viec co ich cua truc chan vit, cua bo phan truyen dong"
 
 #: freestringsunit.rs_ship_speed_vk__knots___________________
@@ -5825,8 +6087,12 @@ msgid "Stabiliser fins area"
 msgstr "Thiet bi on dinh song tau"
 
 #: freestringsunit.rs_stability_calculation_according_to_the_rules_of_the_river_register_of_shipping_of_ukraine_
-msgid "Stability calculation according to the rules of the River Register of Shipping of Ukraine:"
-msgstr "Stability calculation according to the rules of the River Register of Shipping of Ukraine:"
+msgid ""
+"Stability calculation according to the rules of the River Register of "
+"Shipping of Ukraine:"
+msgstr ""
+"Stability calculation according to the rules of the River Register of "
+"Shipping of Ukraine:"
 
 #: freestringsunit.rs_stability_calculation_results
 msgid "Stability calculation results"
@@ -5903,8 +6169,8 @@ msgid "Test stability coefficient"
 msgstr "Test stability coefficient"
 
 #: freestringsunit.rs_there_is_already_one_backgroundimage_assigned_to_this_view_
-msgid "There is already one backgroundimage assigned to this view."
-msgstr "Da co mot hinh nen cho goc nhin nay."
+msgid "There is already one backgroundimage assigned to this view"
+msgstr "Da co mot hinh nen cho goc nhin nay"
 
 #: freestringsunit.rs_there_is_no_submersion
 msgid "There is no submersion"
@@ -5931,7 +6197,8 @@ msgid "The following items were corrected"
 msgstr "Nhung thanh phan sau day da duoc chinh sua"
 
 #: freestringsunit.rs_the_following_layer_properties_are_calculated_for_both_sides_of_the_ship
-msgid "The following layer properties are calculated for both sides of the ship"
+msgid ""
+"The following layer properties are calculated for both sides of the ship"
 msgstr "Cac tinh chat cua lop duoc tinh cho ca hai man cua tau"
 
 #: freestringsunit.rs_the_model_already_contains_markers__do_you_want_to_delete_those_
@@ -5943,8 +6210,11 @@ msgid "The model contains a total of"
 msgstr "Model chua tat ca"
 
 #: freestringsunit.rs_the_selection_contains_locked_points_that_will_not_be_affected_by_this_operation
-msgid "The selection contains locked points that will not be affected by this operation"
-msgstr "Lua chon co chua diem khoa ma chung khong bi anh huong boi thao tac nay"
+msgid ""
+"The selection contains locked points that will not be affected by this "
+"operation"
+msgstr ""
+"Lua chon co chua diem khoa ma chung khong bi anh huong boi thao tac nay"
 
 #: freestringsunit.rs_the_vessel_does_not_correspond_to_any_category_of_navigation____
 msgid "The vessel does not correspond to any category of navigation !!!"
@@ -5956,8 +6226,12 @@ msgid "Thickness"
 msgstr "Do day"
 
 #: freestringsunit.rs_this_calculation_method_is_here___series_by_oct_5_0181_75_and_other_methods____
-msgid "This calculation method is here: \"Series by OCT 5.0181-75 and other methods...\""
-msgstr "This calculation method is here: \"Series by OCT 5.0181-75 and other methods...\""
+msgid ""
+"This calculation method is here: \"Series by OCT 5.0181-75 and other "
+"methods...\""
+msgstr ""
+"This calculation method is here: \"Series by OCT 5.0181-75 and other "
+"methods...\""
 
 #: freestringsunit.rs_this_file_was_created_with_a_later_version_of_free_ship_
 msgid "This file was created with a later version of FREE!ship!"
@@ -5965,7 +6239,7 @@ msgstr "File nay duoc tao boi phien ban FREE!ship sau!"
 
 #: freestringsunit.rs_this_is_diagram_of_propeller_access_in_pro_version_only
 msgid "This is diagram of propeller access in Pro version only"
-msgstr "Bieu do chan vit nay chi co trong Free!ship+ Pro."
+msgstr "Bieu do chan vit nay chi co trong Free!ship+ Pro"
 
 #: freestringsunit.rs_this_is_not_a_valid_free_ship_file_
 msgid "This is not a valid FREE!ship file!"
@@ -5985,11 +6259,12 @@ msgstr ""
 
 #: freestringsunit.rs_this_is_propeller_not_a_strong_in_non_uniform_flow_
 msgid "This is propeller not a strong in non-uniform flow!"
-msgstr "Do ben cua chan vit trong dong chay khong dong nhat KHONG duoc dam bao."
+msgstr ""
+"Do ben cua chan vit trong dong chay khong dong nhat KHONG duoc dam bao"
 
 #: freestringsunit.rs_this_is_propeller_not_a_strong_in_uniform_flow_
 msgid "This is propeller not a strong in uniform flow!"
-msgstr "Do ben cua chan vit trong dong chay dong nhat KHONG duoc dam bao."
+msgstr "Do ben cua chan vit trong dong chay dong nhat KHONG duoc dam bao"
 
 #: freestringsunit.rs_this_is_series_have_not_datas_of_prototype_in_bd_now___
 msgid "This is series have NOT datas of prototype in BD now!!!"
@@ -6004,7 +6279,8 @@ msgid "This is version of program work with metric system units only"
 msgstr "Chuong trinh nay chi hoat dong trong he don vi met (SI)"
 
 #: freestringsunit.rs_this_model_contains_locked_points_that_will_be_modified_by_this_operation
-msgid "This model contains locked points that will be modified by this operation"
+msgid ""
+"This model contains locked points that will be modified by this operation"
 msgstr "Model nay cua cac diem khoa va chung se bi thay doi boi thao tac nay"
 
 #: freestringsunit.rs_thrust_coefficient_and_torque__kt__10okq
@@ -6107,7 +6383,7 @@ msgstr "Dung sai cua do trong suot"
 
 #: freestringsunit.rs_transverse_center_of_buoyancy
 msgid "Transverse center of buoyancy"
-msgstr "Toa do trong tam."
+msgstr "Toa do trong tam"
 
 #: freestringsunit.rs_transverse_metacentric_radius
 msgid "Transverse metacentric radius"
@@ -6125,7 +6401,8 @@ msgstr "Transverse moment of stability for heel angle=30°"
 
 #: freestringsunit.rs_transverse_projected_wind_area_______at__
 msgid "TRANSVERSE PROJECTED WIND AREA ..... AT :"
-msgstr "Dien tich hinh chieu mat cua phan chan gio   .................... AT :"
+msgstr ""
+"Dien tich hinh chieu mat cua phan chan gio   .................... AT :"
 
 #: freestringsunit.rs_transverse_righting_lever_for_heeling_angle_30_
 #, fuzzy
@@ -6147,7 +6424,8 @@ msgstr "Type and series of propeller"
 
 #: freestringsunit.rs_type_of_a_ship_or_number_of_masts_____m__
 msgid "TYPE OF A SHIP OR NUMBER OF MASTS.... M :"
-msgstr "Loai tau hoac nhom................................................ M :"
+msgstr ""
+"Loai tau hoac nhom................................................ M :"
 
 #: freestringsunit.rs_type_of_a_ship__1_15_
 msgid "Type of a ship (1-15)"
@@ -6171,20 +6449,26 @@ msgid "t/m^3"
 msgstr "t/m^3"
 
 #: freestringsunit.rs_t___t________t_____t_______t_______t_______t_______t_______t_______t_______t_______t
-msgid "+---+--------+-----+-------+-------+-------+-------+-------+-------+-------+-------+"
-msgstr "+---+-----------+-------+------+-------+-------+-------+-------+-------+-------+-------+"
+msgid ""
+"+---+--------+-----+-------+-------+-------+-------+-------+-------+-------+-------+"
+msgstr ""
+"+---+-----------+-------+------+-------+-------+-------+-------+-------+-------+-------+"
 
 #: freestringsunit.rs_t___t________t_____t_______________________________________________________________t
-msgid "+---+--------+-----+---------------------------------------------------------------+"
-msgstr "+---+-----------+-------+--------------------------------------------------------------+"
+msgid ""
+"+---+--------+-----+---------------------------------------------------------------+"
+msgstr ""
+"+---+-----------+-------+--------------------------------------------------------------+"
 
 #: freestringsunit.rs_t_______t_______t_______t_________t_________t_________t_________t
 msgid "+-------+-------+-------+---------+---------+---------+---------+"
 msgstr "+-------+-------+-------+---------+---------+---------+---------+"
 
 #: freestringsunit.rs_t________t________t________t________t________t________t________t________t________t
-msgid "+--------+--------+--------+--------+--------+--------+--------+--------+--------+"
-msgstr "+--------+--------+--------+--------+--------+--------+--------+--------+--------+"
+msgid ""
+"+--------+--------+--------+--------+--------+--------+--------+--------+--------+"
+msgstr ""
+"+--------+--------+--------+--------+--------+--------+--------+--------+--------+"
 
 #: freestringsunit.rs_t__________t________t________t________t________t________t
 msgid "+----------+--------+--------+--------+--------+--------+"
@@ -6192,23 +6476,29 @@ msgstr "+----------+--------+--------+--------+--------+--------+"
 
 #: freestringsunit.rs_t__________t________t________t________t________t________t________t
 msgid "+----------+--------+--------+--------+--------+--------+--------+"
-msgstr "+------------+-----------+-------+--------+--------+--------+--------+"
+msgstr ""
+"+------------+-----------+-------+--------+--------+--------+--------+"
 
 #: freestringsunit.rs_t__________t________t____________________________________________t
 msgid "+----------+--------+--------------------------------------------+"
-msgstr "+------------+-----------+-------------------------------------------+"
+msgstr ""
+"+------------+-----------+-------------------------------------------+"
 
 #: freestringsunit.rs_t__________t____________________________________________t
 msgid "+----------+--------------------------------------------+"
 msgstr "+----------+--------------------------------------------+"
 
 #: freestringsunit.rs_t_____________t___________________t____________________t___________________t
-msgid "+-------------+-------------------+--------------------+-------------------+"
-msgstr "+-------------+-------------------+---------------------+-------------------+"
+msgid ""
+"+-------------+-------------------+--------------------+-------------------+"
+msgstr ""
+"+-------------+-------------------+---------------------+-------------------+"
 
 #: freestringsunit.rs_t_____________t________________________________________t___________________t
-msgid "+-------------+----------------------------------------+-------------------+"
-msgstr "+-------------+-----------------------------------------+-------------------+"
+msgid ""
+"+-------------+----------------------------------------+-------------------+"
+msgstr ""
+"+-------------+-----------------------------------------+-------------------+"
 
 #: freestringsunit.rs_t_________________t______________t_____________t
 msgid "+-----------------+--------------+-------------+"
@@ -6317,16 +6607,22 @@ msgid "Vp   ="
 msgstr "Vp     ="
 
 #: freestringsunit.rs_v_kts____rfok1______rapp______rw_________rb_______rtr_______ra_______rair
-msgid "V(kts)   RF*K1      RAPP      RW         RB       RTR       RA       RAIR"
-msgstr "V(kn)   Rf*K1      Rapp      Rw         Rb       Rtr       Ra        Rair"
+msgid ""
+"V(kts)   RF*K1      RAPP      RW         RB       RTR       RA       RAIR"
+msgstr ""
+"V(kn)   Rf*K1      Rapp      Rw         Rb       Rtr       Ra        Rair"
 
 #: freestringsunit.rs_v_kts____rt_n______pe_kw_______w________t_____req_thr_n_____etah______etar
-msgid "V(kts)   RT(N)     PE(kW)      w        t     REQ.THR(N)    EtaH      EtaR"
-msgstr "V(kn)   Rt(N)     Pe(kW)     Wt        t      su keo T(N)    ETAh      ETAr"
+msgid ""
+"V(kts)   RT(N)     PE(kW)      w        t     REQ.THR(N)    EtaH      EtaR"
+msgstr ""
+"V(kn)   Rt(N)     Pe(kW)     Wt        t      su keo T(N)    ETAh      ETAr"
 
 #: freestringsunit.rs_v_kts_____v_m_s_______fn_____slratio_____cf________cr________ca_______rf
-msgid "V(kts)    V(m/s)      FN     SLRATIO     CF        CR        CA       RF"
-msgstr "V(kn)    V(m/s)      Fr     SLRATIO     Cf        Cr        Ca       Rf"
+msgid ""
+"V(kts)    V(m/s)      FN     SLRATIO     CF        CR        CA       RF"
+msgstr ""
+"V(kn)    V(m/s)      Fr     SLRATIO     Cf        Cr        Ca       Rf"
 
 #: freestringsunit.rs_w
 msgid "W"
@@ -6431,7 +6727,9 @@ msgstr "Dien tich phan ngap nuoc"
 
 #: freestringsunit.rs_wetted_area_by_holtrop_formulae_is_not_right__because_cwp_0____
 msgid "Wetted area by Holtrop formulae is NOT right, because Cwp=0 !!!"
-msgstr "Boi vi Cwp=0, nen dien tich mat ngap nuoc tinh theo cong thuc Holtrop khong chinh xac!!!"
+msgstr ""
+"Boi vi Cwp=0, nen dien tich mat ngap nuoc tinh theo cong thuc Holtrop khong "
+"chinh xac!!!"
 
 #: freestringsunit.rs_wetted_surface_area
 msgctxt "freestringsunit.rs_wetted_surface_area"
@@ -6460,10 +6758,12 @@ msgstr "X coordinate of wind area CoG"
 
 #: freestringsunit.rs_x_of_cog
 msgid "X of CoG"
-msgstr "Hoanh do cua trong tam."
+msgstr "Hoanh do cua trong tam"
 
 #: freestringsunit.rs_yachtres__resistance_prediction_for_sailing_yachts__according_to_prof__gerritsma
-msgid "YachtRes, resistance prediction for sailing yachts, according to Prof. Gerritsma"
+msgid ""
+"YachtRes, resistance prediction for sailing yachts, according to Prof. "
+"Gerritsma"
 msgstr "Xac dinh luc can cua tau bien va thuyen buom (prof.Gerritsma)"
 
 #: freestringsunit.rs_you_have_to_set_the_mainparticulars_first_
@@ -6471,15 +6771,20 @@ msgid "You have to set the mainparticulars first!"
 msgstr "Dau tien ban phai xac lap kich thuoc chinh!"
 
 #: freestringsunit.rs_you_must_to_increase_ae_ao__may_be_cavitation_and_or_destruction_of_propeller_
-msgid "You must to increase Ae/Ao! May be cavitation and/or destruction of propeller."
-msgstr "Can thiet phai tang Ae/Ao! Co the xuat hien hien tuong xam thuc va/hoac pha hong chan vit."
+msgid ""
+"You must to increase Ae/Ao! May be cavitation and/or destruction of "
+"propeller"
+msgstr ""
+"Can thiet phai tang Ae/Ao! Co the xuat hien hien tuong xam thuc va/hoac pha "
+"hong chan vit"
 
 #: freestringsunit.rs_you_must_to_increase_number_of_blades_until
 msgid "You must to increase number of blades until"
 msgstr "Can thiet phai tang so luong canh chan vit len toi"
 
 #: freestringsunit.rs_you_need_to_select_at_least_3_controlpoints_to_create_a_new_controlface
-msgid "You need to select at least 3 controlpoints to create a new controlface"
+msgid ""
+"You need to select at least 3 controlpoints to create a new controlface"
 msgstr "Ban can chon it nhat 3 diem de tao mat phang xac minh moi"
 
 #: freestringsunit.rs_y_coordinate
@@ -6512,7 +6817,8 @@ msgstr "Z coordinate of wind area CoG"
 
 #: freestringsunit.rs__degr_________________________________________________________________
 msgid "(degr)          (-)      (-)         (-)      (-)         (-)      (-)"
-msgstr "(degr)          (-)      (-)         (-)      (-)         (-)      (-)"
+msgstr ""
+"(degr)          (-)      (-)         (-)      (-)         (-)      (-)"
 
 #: freestringsunit.rs___by_curve_of_propeller_optimal_frequency
 msgid "- by curve of propeller optimal frequency"
@@ -6544,17 +6850,26 @@ msgstr "- co tinh den qua trinh tao song va nuoc nong"
 
 #: freestringsunit.rs__________form____appendage___wave_______bulb____transom_correlation_air_drag
 #, fuzzy
-#| msgid "#160        Form    Appendage   Wave       Bulb    Transom Correlation Air Drag"
-msgid "         Form    Appendage   Wave       Bulb    Transom Correlation Air Drag"
-msgstr "Van toc Hinh dang phan them Song  Mui qua le   Duoi Tuong quan Khong khi."
+#| msgid ""
+#| "#160        Form    Appendage   Wave       Bulb    Transom Correlation Air "
+#| "Drag"
+msgid ""
+"         Form    Appendage   Wave       Bulb    Transom Correlation Air Drag"
+msgstr ""
+"Van toc Hinh dang phan them Song  Mui qua le   Duoi Tuong quan Khong khi"
 
 #: freestringsunit.rs__________________long_force____________lat_force__________yaw_moment____
-msgid ".................LONG FORCE............LAT FORCE..........YAW MOMENT...."
-msgstr "..............Luc doc.................Luc ngang................Momen lech...."
+msgid ""
+".................LONG FORCE............LAT FORCE..........YAW MOMENT...."
+msgstr ""
+"..............Luc doc.................Luc ngang................Momen "
+"lech...."
 
 #: freestringsunit.rs_______________________________________________________________________________________________
-msgid "----------------------------------------------------------------------------------------------"
-msgstr "----------------------------------------------------------------------------------------------"
+msgid ""
+"----------------------------------------------------------------------------------------------"
+msgstr ""
+"----------------------------------------------------------------------------------------------"
 
 #: freestringutils.rsallfiles
 msgctxt "freestringutils.rsallfiles"
@@ -6571,24 +6886,6 @@ msgstr ""
 
 #: freestringutils.rsjpegfiles
 msgid "JPEG files"
-msgstr ""
-
-#: freeupdatedlg.rscurrentversion
-msgid "Current Version"
-msgstr ""
-
-#: freeupdatedlg.rsknownsslexception
-#, object-pascal-format
-msgid ""
-"Exception class: %s Message: %s\n"
-"Possibly missing OpenSSL DLLs: libeay32.dll, ssleay32.dll.\n"
-"You can download these from http://wiki.overbyte.eu/wiki/index.php/ICS_Download#Download_OpenSSL_Binaries_.28required_for_SSL-enabled_components.29\n"
-"Please use latest binaries for SSL v1.0 \"OpenSSL Binaries Win-64 v1.0.*\".\n"
-"Place libeay32.dll and ssleay32.dll into directory where FreeShip.exe is installed.\n"
-"Usually it is C:\\Program Files\\FreeShip\\.\n"
-"FreeShip is currently compatible with libssl v1.0 only.\n"
-"You have to check for updates traditional way at Download page.\n"
-"Click link below."
 msgstr ""
 
 #: main.rsexitconfirmation
@@ -6682,16 +6979,16 @@ msgid "Name"
 msgstr "Ten"
 
 #: tfreecontrolpointform.labelx.caption
-msgid "X-coord."
-msgstr "Toa do X."
+msgid "X-coord"
+msgstr "Toa do X"
 
 #: tfreecontrolpointform.labely.caption
-msgid "Y-coord."
-msgstr "Toa do Y."
+msgid "Y-coord"
+msgstr "Toa do Y"
 
 #: tfreecontrolpointform.labelz.caption
-msgid "Z-coord."
-msgstr "Toa do Z."
+msgid "Z-coord"
+msgstr "Toa do Z"
 
 #: tfreecontrolpointform.speedbuttonremoveanchorpoint.caption
 msgctxt "tfreecontrolpointform.speedbuttonremoveanchorpoint.caption"
@@ -6878,7 +7175,7 @@ msgstr "Camera"
 
 #: tfreehullwindow.caption
 msgid "FreeHullWindow"
-msgstr "Goc nhin 3D."
+msgstr "Goc nhin 3D"
 
 #: tfreehullwindow.deselectall.caption
 msgid "Deselect all     Esc"
@@ -6889,12 +7186,12 @@ msgid "Load"
 msgstr "Tai du lieu vao"
 
 #: tfreehullwindow.longtelelens.caption
-msgid "Long telelens 200 mm."
-msgstr "tieu cu dai (Long telelens) 200 mm."
+msgid "Long telelens 200 mm"
+msgstr "tieu cu dai (Long telelens) 200 mm"
 
 #: tfreehullwindow.mediumtelelens.caption
-msgid "Medium telelens 130 mm."
-msgstr "tieu cu trung binh (Medium telelens) 130 mm."
+msgid "Medium telelens 130 mm"
+msgstr "tieu cu trung binh (Medium telelens) 130 mm"
 
 #: tfreehullwindow.mode1.caption
 msgid "Mode"
@@ -6905,7 +7202,7 @@ msgctxt "tfreehullwindow.print.caption"
 msgid "Print"
 msgstr "In"
 
-#: tfreehullwindow.saveasbitmap.caption
+#: tfreehullwindow.saveasbitmap.caption tsaveimagedialog.caption
 msgid "Save image"
 msgstr "Luu hinh anh"
 
@@ -6914,8 +7211,8 @@ msgid "Zebra shading"
 msgstr "Danh bong dang ngua van"
 
 #: tfreehullwindow.shorttelelens.caption
-msgid "Short telelens 90 mm."
-msgstr "tieu cu ngan (Short telelens) 90 mm."
+msgid "Short telelens 90 mm"
+msgstr "tieu cu ngan (Short telelens) 90 mm"
 
 #: tfreehullwindow.showdevelopablity.caption
 msgid "Developablity check"
@@ -6936,8 +7233,8 @@ msgid "Wireframe"
 msgstr "Model khung day"
 
 #: tfreehullwindow.standardlens.caption
-msgid "Standard lens 50mm."
-msgstr "Tieu cu chuan 50mm."
+msgid "Standard lens 50mm"
+msgstr "Tieu cu chuan 50mm"
 
 #: tfreehullwindow.view1.caption
 msgid "View"
@@ -6962,8 +7259,8 @@ msgid "Profile"
 msgstr "Dung"
 
 #: tfreehullwindow.widelens.caption
-msgid "Wide lens 28 mm."
-msgstr "Tieu cu rong 28 mm."
+msgid "Wide lens 28 mm"
+msgstr "Tieu cu rong 28 mm"
 
 #: tfreehullwindow.zoom1.caption
 msgid "Zoom"
@@ -6988,17 +7285,13 @@ msgstr "Thu nho"
 msgid "Add..."
 msgstr "Them..."
 
-#: tfreeintersectiondialog.addone.hint
-msgid "Add one station."
-msgstr "Them suon."
-
 #: tfreeintersectiondialog.addrange.caption
 msgid "Range"
 msgstr "Sap xep"
 
 #: tfreeintersectiondialog.addrange.hint
-msgid "Add a whole range of intersection curves."
-msgstr "Them mot hang cac duong cong giao nhau."
+msgid "Add a whole range of intersection curves"
+msgstr "Them mot hang cac duong cong giao nhau"
 
 #: tfreeintersectiondialog.caption
 msgid "Intersections"
@@ -7009,16 +7302,12 @@ msgid "CloseDialog"
 msgstr "Dong hop thoai"
 
 #: tfreeintersectiondialog.closedialog.hint
-msgid "Close this dialog."
-msgstr "Dong hop thoai."
+msgid "Close this dialog"
+msgstr "Dong hop thoai"
 
 #: tfreeintersectiondialog.deleteall.caption
 msgid "Delete all"
 msgstr "Xoa toan bo"
-
-#: tfreeintersectiondialog.deleteall.hint
-msgid "Delete all stations."
-msgstr "Xoa toan bo suon."
 
 #: tfreeintersectiondialog.deleteselected.caption
 msgid "DeleteSelected"
@@ -7103,7 +7392,7 @@ msgid "Buttocks"
 msgstr "Duong bien dang doc"
 
 #: tfreeintersectiondialog.showbuttocks.hint
-msgid "Switch to view or add buttocks."
+msgid "Switch to view or add buttocks"
 msgstr "Chuyen sang che do quan sat hoac them cac duong bien dang doc"
 
 #: tfreeintersectiondialog.showdiagonals.caption
@@ -7113,8 +7402,8 @@ msgid "Diagonals"
 msgstr "Duong cheo"
 
 #: tfreeintersectiondialog.showdiagonals.hint
-msgid "Switch to view or add diagonals."
-msgstr "Chuyen sang quan sat hoac them duong cheo."
+msgid "Switch to view or add diagonals"
+msgstr "Chuyen sang quan sat hoac them duong cheo"
 
 #: tfreeintersectiondialog.showstations.caption
 #, fuzzy
@@ -7123,8 +7412,8 @@ msgid "Stations"
 msgstr "Suon"
 
 #: tfreeintersectiondialog.showstations.hint
-msgid "Switch to view or add stations."
-msgstr "Chuyen sang che do quan sat hoac them suon."
+msgid "Switch to view or add stations"
+msgstr "Chuyen sang che do quan sat hoac them suon"
 
 #: tfreeintersectiondialog.showwaterlines.caption
 #, fuzzy
@@ -7133,8 +7422,8 @@ msgid "Waterlines"
 msgstr "Duong nuoc"
 
 #: tfreeintersectiondialog.showwaterlines.hint
-msgid "Switch to view or add waterlines."
-msgstr "Chuyen sang che do quan sat hoac them duong nuoc."
+msgid "Switch to view or add waterlines"
+msgstr "Chuyen sang che do quan sat hoac them duong nuoc"
 
 #: tfreeintersectiondialog.toolbar1.caption
 msgctxt "tfreeintersectiondialog.toolbar1.caption"
@@ -7254,7 +7543,7 @@ msgstr ""
 #: tfreekeelwizarddialog.comboboxsubdivisionlevel.text
 msgctxt "tfreekeelwizarddialog.comboboxsubdivisionlevel.text"
 msgid "Medium"
-msgstr "Trung binh."
+msgstr "Trung binh"
 
 #: tfreekeelwizarddialog.groupbox1.caption
 msgctxt "tfreekeelwizarddialog.groupbox1.caption"
@@ -7739,7 +8028,7 @@ msgstr ""
 
 #: tfreepreferencesdialog.label4.caption
 msgid "Regular control edges"
-msgstr "Cac canh xac minh deu dan."
+msgstr "Cac canh xac minh deu dan"
 
 #: tfreepreferencesdialog.label5.caption
 msgid "Crease edges (control)"
@@ -7751,7 +8040,7 @@ msgstr "Cac canh gay (ben trong)"
 
 #: tfreepreferencesdialog.label7.caption
 msgid "Regular control points"
-msgstr "Cac diem xac minh deu dan."
+msgstr "Cac diem xac minh deu dan"
 
 #: tfreepreferencesdialog.label8.caption
 msgid "Crease points"
@@ -7817,7 +8106,7 @@ msgid "Graphics"
 msgstr ""
 
 #: tfreepropeller_task5.caption
-msgid "Calculation of Open Water Characteristics of Screw Propeller."
+msgid "Calculation of Open Water Characteristics of Screw Propeller"
 msgstr ""
 
 #: tfreepropeller_task5.checkbox2.caption
@@ -7877,8 +8166,8 @@ msgstr ""
 #: tfreepropeller_task5.printbutton.hint
 #, fuzzy
 msgctxt "tfreepropeller_task5.printbutton.hint"
-msgid "Print the results of the calculation."
-msgstr "Print the results of the calculation."
+msgid "Print the results of the calculation"
+msgstr "Print the results of the calculation"
 
 #: tfreepropeller_task5.tabsheet1.caption
 #, fuzzy
@@ -7905,14 +8194,14 @@ msgstr ""
 #: tfreepropeller_task5.toolbutton25.hint
 #, fuzzy
 msgctxt "tfreepropeller_task5.toolbutton25.hint"
-msgid "Close the window and save changes."
-msgstr "Close the window and save changes."
+msgid "Close the window and save changes"
+msgstr "Close the window and save changes"
 
 #: tfreepropeller_task5.toolbutton7.hint
 #, fuzzy
 msgctxt "tfreepropeller_task5.toolbutton7.hint"
-msgid "Close window without saving changes."
-msgstr "Close window without saving changes."
+msgid "Close window without saving changes"
+msgstr "Close window without saving changes"
 
 #: tfreepropeller_task5._toolbutton10.caption
 msgctxt "tfreepropeller_task5._toolbutton10.caption"
@@ -8084,8 +8373,8 @@ msgstr ""
 #: tfreeresistance_delft.printbutton.hint
 #, fuzzy
 msgctxt "tfreeresistance_delft.printbutton.hint"
-msgid "Print the results of the calculation."
-msgstr "Print the results of the calculation."
+msgid "Print the results of the calculation"
+msgstr "Print the results of the calculation"
 
 #: tfreeresistance_delft.results.caption
 #, fuzzy
@@ -8100,20 +8389,20 @@ msgstr ""
 
 #: tfreeresistance_delft.toolbutton20.hint
 msgctxt "tfreeresistance_delft.toolbutton20.hint"
-msgid "Start the calculation."
-msgstr "Start the calculation."
+msgid "Start the calculation"
+msgstr "Start the calculation"
 
 #: tfreeresistance_delft.toolbutton25.hint
 #, fuzzy
 msgctxt "tfreeresistance_delft.toolbutton25.hint"
-msgid "Close the window and save changes."
-msgstr "Close the window and save changes."
+msgid "Close the window and save changes"
+msgstr "Close the window and save changes"
 
 #: tfreeresistance_delft.toolbutton7.hint
 #, fuzzy
 msgctxt "tfreeresistance_delft.toolbutton7.hint"
-msgid "Close window without saving changes."
-msgstr "Close window without saving changes."
+msgid "Close window without saving changes"
+msgstr "Close window without saving changes"
 
 #: tfreeresistance_delft._label10.caption
 msgctxt "tfreeresistance_delft._label10.caption"
@@ -8539,8 +8828,8 @@ msgstr ""
 #: tfreeresistance_fungleib.printbutton.hint
 #, fuzzy
 msgctxt "tfreeresistance_fungleib.printbutton.hint"
-msgid "Print the results of the calculation."
-msgstr "Print the results of the calculation."
+msgid "Print the results of the calculation"
+msgstr "Print the results of the calculation"
 
 #: tfreeresistance_fungleib.results.caption
 #, fuzzy
@@ -8560,20 +8849,20 @@ msgstr ""
 
 #: tfreeresistance_fungleib.toolbutton20.hint
 msgctxt "tfreeresistance_fungleib.toolbutton20.hint"
-msgid "Start the calculation."
-msgstr "Start the calculation."
+msgid "Start the calculation"
+msgstr "Start the calculation"
 
 #: tfreeresistance_fungleib.toolbutton25.hint
 #, fuzzy
 msgctxt "tfreeresistance_fungleib.toolbutton25.hint"
-msgid "Close the window and save changes."
-msgstr "Close the window and save changes."
+msgid "Close the window and save changes"
+msgstr "Close the window and save changes"
 
 #: tfreeresistance_fungleib.toolbutton7.hint
 #, fuzzy
 msgctxt "tfreeresistance_fungleib.toolbutton7.hint"
-msgid "Close window without saving changes."
-msgstr "Close window without saving changes."
+msgid "Close window without saving changes"
+msgstr "Close window without saving changes"
 
 #: tfreeresistance_fungleib._label10.caption
 msgctxt "tfreeresistance_fungleib._label10.caption"
@@ -8977,8 +9266,8 @@ msgstr ""
 #: tfreeresistance_hollen.printbutton.hint
 #, fuzzy
 msgctxt "tfreeresistance_hollen.printbutton.hint"
-msgid "Print the results of the calculation."
-msgstr "Print the results of the calculation."
+msgid "Print the results of the calculation"
+msgstr "Print the results of the calculation"
 
 #: tfreeresistance_hollen.results.caption
 #, fuzzy
@@ -8998,20 +9287,20 @@ msgstr ""
 
 #: tfreeresistance_hollen.toolbutton20.hint
 msgctxt "tfreeresistance_hollen.toolbutton20.hint"
-msgid "Start the calculation."
-msgstr "Start the calculation."
+msgid "Start the calculation"
+msgstr "Start the calculation"
 
 #: tfreeresistance_hollen.toolbutton25.hint
 #, fuzzy
 msgctxt "tfreeresistance_hollen.toolbutton25.hint"
-msgid "Close the window and save changes."
-msgstr "Close the window and save changes."
+msgid "Close the window and save changes"
+msgstr "Close the window and save changes"
 
 #: tfreeresistance_hollen.toolbutton7.hint
 #, fuzzy
 msgctxt "tfreeresistance_hollen.toolbutton7.hint"
-msgid "Close window without saving changes."
-msgstr "Close window without saving changes."
+msgid "Close window without saving changes"
+msgstr "Close window without saving changes"
 
 #: tfreeresistance_hollen._label10.caption
 msgctxt "tfreeresistance_hollen._label10.caption"
@@ -9427,20 +9716,20 @@ msgstr "Tro giup"
 
 #: tfreeresistance_holtr.tbcalculate.hint
 msgctxt "tfreeresistance_holtr.tbcalculate.hint"
-msgid "Start the calculation."
-msgstr "Start the calculation."
+msgid "Start the calculation"
+msgstr "Start the calculation"
 
 #: tfreeresistance_holtr.tbclose.hint
 #, fuzzy
 msgctxt "tfreeresistance_holtr.tbclose.hint"
-msgid "Close window without saving changes."
-msgstr "Close window without saving changes."
+msgid "Close window without saving changes"
+msgstr "Close window without saving changes"
 
 #: tfreeresistance_holtr.tbclosesave.hint
 #, fuzzy
 msgctxt "tfreeresistance_holtr.tbclosesave.hint"
-msgid "Close the window and save changes."
-msgstr "Close the window and save changes."
+msgid "Close the window and save changes"
+msgstr "Close the window and save changes"
 
 #: tfreeresistance_holtr.tbprint.caption
 msgid "tbPrint"
@@ -9449,8 +9738,8 @@ msgstr ""
 #: tfreeresistance_holtr.tbprint.hint
 #, fuzzy
 msgctxt "tfreeresistance_holtr.tbprint.hint"
-msgid "Print the results of the calculation."
-msgstr "Print the results of the calculation."
+msgid "Print the results of the calculation"
+msgstr "Print the results of the calculation"
 
 #: tfreeresistance_holtr.toolbar1.caption
 msgctxt "tfreeresistance_holtr.toolbar1.caption"
@@ -9528,8 +9817,8 @@ msgid "_ToolButton14"
 msgstr ""
 
 #: tfreeresistance_kaper.caption
-msgid "Kaper resistance calculation."
-msgstr "Tinh luc can theo phuong phap Kaper cho cano."
+msgid "Kaper resistance calculation"
+msgstr "Tinh luc can theo phuong phap Kaper cho cano"
 
 #: tfreeresistance_kaper.chart.axislist[0].title.caption
 msgctxt "tfreeresistance_kaper.chart.axislist[0].title.caption"
@@ -9577,7 +9866,7 @@ msgstr ""
 
 #: tfreeresistance_kaper.label15.caption
 msgid "Half entrance angle"
-msgstr "Mot nua goc au tau."
+msgstr "Mot nua goc au tau"
 
 #: tfreeresistance_kaper.label16.caption
 msgctxt "tfreeresistance_kaper.label16.caption"
@@ -9636,8 +9925,8 @@ msgstr ""
 
 #: tfreeresistance_kaper.printbutton.hint
 msgctxt "tfreeresistance_kaper.printbutton.hint"
-msgid "Print the results of the calculation."
-msgstr "Print the results of the calculation."
+msgid "Print the results of the calculation"
+msgstr "Print the results of the calculation"
 
 #: tfreeresistance_kaper.tabsheet1.caption
 #, fuzzy
@@ -9657,13 +9946,13 @@ msgstr ""
 
 #: tfreeresistance_kaper.toolbutton25.hint
 msgctxt "tfreeresistance_kaper.toolbutton25.hint"
-msgid "Close the window and save changes."
-msgstr "Close the window and save changes."
+msgid "Close the window and save changes"
+msgstr "Close the window and save changes"
 
 #: tfreeresistance_kaper.toolbutton7.hint
 msgctxt "tfreeresistance_kaper.toolbutton7.hint"
-msgid "Close window without saving changes."
-msgstr "Close window without saving changes."
+msgid "Close window without saving changes"
+msgstr "Close window without saving changes"
 
 #: tfreeresistance_kaper._toolbutton10.caption
 msgctxt "tfreeresistance_kaper._toolbutton10.caption"
@@ -10011,8 +10300,8 @@ msgstr ""
 #: tfreeresistance_mh.printbutton.hint
 #, fuzzy
 msgctxt "tfreeresistance_mh.printbutton.hint"
-msgid "Print the results of the calculation."
-msgstr "Print the results of the calculation."
+msgid "Print the results of the calculation"
+msgstr "Print the results of the calculation"
 
 #: tfreeresistance_mh.results.caption
 #, fuzzy
@@ -10032,20 +10321,20 @@ msgstr ""
 
 #: tfreeresistance_mh.toolbutton20.hint
 msgctxt "tfreeresistance_mh.toolbutton20.hint"
-msgid "Start the calculation."
-msgstr "Start the calculation."
+msgid "Start the calculation"
+msgstr "Start the calculation"
 
 #: tfreeresistance_mh.toolbutton25.hint
 #, fuzzy
 msgctxt "tfreeresistance_mh.toolbutton25.hint"
-msgid "Close the window and save changes."
-msgstr "Close the window and save changes."
+msgid "Close the window and save changes"
+msgstr "Close the window and save changes"
 
 #: tfreeresistance_mh.toolbutton7.hint
 #, fuzzy
 msgctxt "tfreeresistance_mh.toolbutton7.hint"
-msgid "Close window without saving changes."
-msgstr "Close window without saving changes."
+msgid "Close window without saving changes"
+msgstr "Close window without saving changes"
 
 #: tfreeresistance_mh._label10.caption
 msgctxt "tfreeresistance_mh._label10.caption"
@@ -10458,8 +10747,8 @@ msgstr ""
 #: tfreeresistance_oortmer.printbutton.hint
 #, fuzzy
 msgctxt "tfreeresistance_oortmer.printbutton.hint"
-msgid "Print the results of the calculation."
-msgstr "Print the results of the calculation."
+msgid "Print the results of the calculation"
+msgstr "Print the results of the calculation"
 
 #: tfreeresistance_oortmer.results.caption
 #, fuzzy
@@ -10479,20 +10768,20 @@ msgstr ""
 
 #: tfreeresistance_oortmer.toolbutton20.hint
 msgctxt "tfreeresistance_oortmer.toolbutton20.hint"
-msgid "Start the calculation."
-msgstr "Start the calculation."
+msgid "Start the calculation"
+msgstr "Start the calculation"
 
 #: tfreeresistance_oortmer.toolbutton25.hint
 #, fuzzy
 msgctxt "tfreeresistance_oortmer.toolbutton25.hint"
-msgid "Close the window and save changes."
-msgstr "Close the window and save changes."
+msgid "Close the window and save changes"
+msgstr "Close the window and save changes"
 
 #: tfreeresistance_oortmer.toolbutton7.hint
 #, fuzzy
 msgctxt "tfreeresistance_oortmer.toolbutton7.hint"
-msgid "Close window without saving changes."
-msgstr "Close window without saving changes."
+msgid "Close window without saving changes"
+msgstr "Close window without saving changes"
 
 #: tfreeresistance_oortmer._label10.caption
 msgctxt "tfreeresistance_oortmer._label10.caption"
@@ -10903,8 +11192,8 @@ msgstr ""
 #: tfreeresistance_ost.printbutton.hint
 #, fuzzy
 msgctxt "tfreeresistance_ost.printbutton.hint"
-msgid "Print the results of the calculation."
-msgstr "Print the results of the calculation."
+msgid "Print the results of the calculation"
+msgstr "Print the results of the calculation"
 
 #: tfreeresistance_ost.results.caption
 #, fuzzy
@@ -10924,20 +11213,20 @@ msgstr ""
 
 #: tfreeresistance_ost.toolbutton20.hint
 msgctxt "tfreeresistance_ost.toolbutton20.hint"
-msgid "Start the calculation."
-msgstr "Start the calculation."
+msgid "Start the calculation"
+msgstr "Start the calculation"
 
 #: tfreeresistance_ost.toolbutton25.hint
 #, fuzzy
 msgctxt "tfreeresistance_ost.toolbutton25.hint"
-msgid "Close the window and save changes."
-msgstr "Close the window and save changes."
+msgid "Close the window and save changes"
+msgstr "Close the window and save changes"
 
 #: tfreeresistance_ost.toolbutton7.hint
 #, fuzzy
 msgctxt "tfreeresistance_ost.toolbutton7.hint"
-msgid "Close window without saving changes."
-msgstr "Close window without saving changes."
+msgid "Close window without saving changes"
+msgstr "Close window without saving changes"
 
 #: tfreeresistance_ost._label10.caption
 msgctxt "tfreeresistance_ost._label10.caption"
@@ -11010,7 +11299,7 @@ msgid "_ToolButton14"
 msgstr ""
 
 #: tfreeresistance_planing.caption
-msgid "Planing resistance calculation."
+msgid "Planing resistance calculation"
 msgstr ""
 
 #: tfreeresistance_planing.checkbox2.caption
@@ -11218,8 +11507,8 @@ msgstr ""
 #: tfreeresistance_planing.printbutton.hint
 #, fuzzy
 msgctxt "tfreeresistance_planing.printbutton.hint"
-msgid "Print the results of the calculation."
-msgstr "Print the results of the calculation."
+msgid "Print the results of the calculation"
+msgstr "Print the results of the calculation"
 
 #: tfreeresistance_planing.tabsheet1.caption
 #, fuzzy
@@ -11241,14 +11530,14 @@ msgstr ""
 #: tfreeresistance_planing.toolbutton25.hint
 #, fuzzy
 msgctxt "tfreeresistance_planing.toolbutton25.hint"
-msgid "Close the window and save changes."
-msgstr "Close the window and save changes."
+msgid "Close the window and save changes"
+msgstr "Close the window and save changes"
 
 #: tfreeresistance_planing.toolbutton7.hint
 #, fuzzy
 msgctxt "tfreeresistance_planing.toolbutton7.hint"
-msgid "Close window without saving changes."
-msgstr "Close window without saving changes."
+msgid "Close window without saving changes"
+msgstr "Close window without saving changes"
 
 #: tfreeresistance_planing._toolbutton10.caption
 msgctxt "tfreeresistance_planing._toolbutton10.caption"
@@ -11599,8 +11888,8 @@ msgstr ""
 #: tfreeresistance_rbhs.printbutton.hint
 #, fuzzy
 msgctxt "tfreeresistance_rbhs.printbutton.hint"
-msgid "Print the results of the calculation."
-msgstr "Print the results of the calculation."
+msgid "Print the results of the calculation"
+msgstr "Print the results of the calculation"
 
 #: tfreeresistance_rbhs.results.caption
 #, fuzzy
@@ -11620,20 +11909,20 @@ msgstr ""
 
 #: tfreeresistance_rbhs.toolbutton20.hint
 msgctxt "tfreeresistance_rbhs.toolbutton20.hint"
-msgid "Start the calculation."
-msgstr "Start the calculation."
+msgid "Start the calculation"
+msgstr "Start the calculation"
 
 #: tfreeresistance_rbhs.toolbutton25.hint
 #, fuzzy
 msgctxt "tfreeresistance_rbhs.toolbutton25.hint"
-msgid "Close the window and save changes."
-msgstr "Close the window and save changes."
+msgid "Close the window and save changes"
+msgstr "Close the window and save changes"
 
 #: tfreeresistance_rbhs.toolbutton7.hint
 #, fuzzy
 msgctxt "tfreeresistance_rbhs.toolbutton7.hint"
-msgid "Close window without saving changes."
-msgstr "Close window without saving changes."
+msgid "Close window without saving changes"
+msgstr "Close window without saving changes"
 
 #: tfreeresistance_rbhs._label10.caption
 msgctxt "tfreeresistance_rbhs._label10.caption"
@@ -11728,14 +12017,17 @@ msgid "I accept License terms and conditions"
 msgstr ""
 
 #: tfreesplashwindow.label2.caption
-msgid "Copyright © 2007-2013,Timoshenko V.F."
+msgid "Copyright © 2007-2013,Timoshenko V.F"
 msgstr ""
 
 #: tfreesplashwindow.label3.caption
 #, fuzzy
 #| msgid "Copyright © 2015+, Mark Malakanov"
 msgid "Copyright © 2015+, Mark Malakanov"
-msgstr "FREE!ship comes with ABSOLUTELY NO WARRANTY. This is free software, and you are welcome to redistribute it under the conditions of the GNU General Public License (GPL) Version 2, June 1991"
+msgstr ""
+"FREE!ship comes with ABSOLUTELY NO WARRANTY. This is free software, and you "
+"are welcome to redistribute it under the conditions of the GNU General "
+"Public License (GPL) Version 2, June 1991"
 
 #: tfreesplashwindow.label4.caption
 msgid "Please accept License terms and conditions"
@@ -11752,7 +12044,10 @@ msgid "Build"
 msgstr ""
 
 #: tfreesplashwindow.labelcondition.caption
-msgid "This is free software, and you are welcome to redistribute it under the conditions of the GNU General Public License (GPL) Version 3,  29 June 2007 or later"
+msgid ""
+"This is free software, and you are welcome to redistribute it under the "
+"conditions of the GNU General Public License (GPL) Version 3,  29 June 2007 "
+"or later"
 msgstr ""
 
 #: tfreesplashwindow.labelrelease.caption
@@ -11765,7 +12060,14 @@ msgid "Version 0.00"
 msgstr ""
 
 #: tfreesplashwindow.labelwarranty.caption
-msgid "THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE."
+msgid ""
+"THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR"
+" IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, "
+"FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE "
+"AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER "
+"LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING "
+"FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS"
+" IN THE SOFTWARE"
 msgstr ""
 
 #: tfreesplashwindow._label2.caption
@@ -11776,72 +12078,8 @@ msgstr ""
 msgid "Translated by: M. van Engeland"
 msgstr ""
 
-#: tfreeupdateform.actioncheckupdate.caption
-msgctxt "tfreeupdateform.actioncheckupdate.caption"
-msgid "Check Update"
-msgstr ""
-
-#: tfreeupdateform.bitbtn2.caption
-msgctxt "tfreeupdateform.bitbtn2.caption"
-msgid "Close"
-msgstr "Dong"
-
-#: tfreeupdateform.caption
-msgid "Check updates"
-msgstr ""
-
-#: tfreeupdateform.label1.caption
-msgid "Current Version:"
-msgstr ""
-
-#: tfreeupdateform.label3.caption
-msgctxt "tfreeupdateform.label3.caption"
-msgid "What's new"
-msgstr ""
-
-#: tfreeupdateform.label4.caption
-msgid "Download link:"
-msgstr ""
-
-#: tfreeupdateform.label6.caption
-msgid "Download page:"
-msgstr ""
-
-#: tfreeupdateform.labelcurrentversion.caption
-msgid "1.2.3.4"
-msgstr ""
-
-#: tfreeupdateform.labeldownloadlink.caption
-msgid "LabelDownloadLink"
-msgstr ""
-
-#: tfreeupdateform.labeldownloadpage.caption
-msgid "LabelDownloadPage"
-msgstr ""
-
-#: tfreeupdateform.labelnewversion.caption
-msgid "LabelNewVersion"
-msgstr ""
-
-#: tfreeupdateform.labelnewversionavailable.caption
-msgid "New version available:"
-msgstr ""
-
-#: tfreeupdateform.labelnewversiondate.caption
-msgid "LabelNewVersionDate"
-msgstr ""
-
-#: tfreeupdateform.speedbutton1.hint
-msgid "Refresh"
-msgstr ""
-
 #: tmainform.aboutaction.caption
 msgid "AboutAction"
-msgstr ""
-
-#: tmainform.actioncheckupdates.caption
-msgctxt "tmainform.actioncheckupdates.caption"
-msgid "Check for updates"
 msgstr ""
 
 #: tmainform.activelayercolor.caption
@@ -11850,8 +12088,8 @@ msgstr "Mau cua lop kich hoat"
 
 #: tmainform.activelayercolor.hint
 msgctxt "tmainform.activelayercolor.hint"
-msgid "Change the color of the currently active layer."
-msgstr "Thay doi mau cua lop kich hoat."
+msgid "Change the color of the currently active layer"
+msgstr "Thay doi mau cua lop kich hoat"
 
 #: tmainform.addcylinder.caption
 msgid "Add cylinder..."
@@ -11872,8 +12110,8 @@ msgid "Add"
 msgstr "Them"
 
 #: tmainform.addpoint.hint
-msgid "Add a new controlpoint to the model."
-msgstr "Them mot diem vao model."
+msgid "Add a new controlpoint to the model"
+msgstr "Them mot diem vao model"
 
 #: tmainform.addpointtogroup.caption
 msgid "Add Point To Group"
@@ -11903,15 +12141,15 @@ msgstr ""
 #: tmainform.cbprecision.text
 msgctxt "tmainform.cbprecision.text"
 msgid "Medium"
-msgstr "Trung binh."
+msgstr "Trung binh"
 
 #: tmainform.checkmodel.caption
 msgid "Check model"
 msgstr "Kiem tra model"
 
 #: tmainform.checkmodel.hint
-msgid "Check the model for errors and inconsitencies."
-msgstr "Kiem tra loi hoac su mau thuan cua model."
+msgid "Check the model for errors and inconsitencies"
+msgstr "Kiem tra loi hoac su mau thuan cua model"
 
 #: tmainform.clearundo.caption
 msgctxt "tmainform.clearundo.caption"
@@ -11921,8 +12159,8 @@ msgstr "Xoa"
 #: tmainform.colorbutton1.hint
 #, fuzzy
 msgctxt "tmainform.colorbutton1.hint"
-msgid "Change the color of the currently active layer."
-msgstr "Thay doi mau cua lop kich hoat."
+msgid "Change the color of the currently active layer"
+msgstr "Thay doi mau cua lop kich hoat"
 
 #: tmainform.crosscurves.caption
 #, fuzzy
@@ -11949,24 +12187,24 @@ msgid "Delete"
 msgstr "Xoa"
 
 #: tmainform.delete.hint
-msgid "Delete all selected items."
-msgstr "Xoa tat ca cac muc da chon."
+msgid "Delete all selected items"
+msgstr "Xoa tat ca cac muc da chon"
 
 #: tmainform.deleteemptylayers.caption
 msgid "Delete empty"
 msgstr "Xoa rong"
 
 #: tmainform.deleteemptylayers.hint
-msgid "Delete empty layers from the model."
-msgstr "Xoa tat ca cac lop rong cua model."
+msgid "Delete empty layers from the model"
+msgstr "Xoa tat ca cac lop rong cua model"
 
 #: tmainform.deletemarkers.caption
 msgid "Delete all markers"
 msgstr "Xoa tat ca cac dau moc"
 
 #: tmainform.deletemarkers.hint
-msgid "Delete all markers from the model."
-msgstr "Xoa tat ca cac dau moc tu model."
+msgid "Delete all markers from the model"
+msgstr "Xoa tat ca cac dau moc tu model"
 
 #: tmainform.deselectall.caption
 msgctxt "tmainform.deselectall.caption"
@@ -11984,8 +12222,8 @@ msgid "Design hydrostatics"
 msgstr "Tinh thuy tinh"
 
 #: tmainform.designhydrostatics.hint
-msgid "Calculate hydrostatics for the design condition."
-msgstr "Tinh tinh thuy tinh trong cac dieu kien cua du an."
+msgid "Calculate hydrostatics for the design condition"
+msgstr "Tinh tinh thuy tinh trong cac dieu kien cua du an"
 
 #: tmainform.developlayers.caption
 msgid "Develop plates"
@@ -12001,8 +12239,8 @@ msgid "Collapse"
 msgstr "Lam gay"
 
 #: tmainform.edgecollapse.hint
-msgid "Remove an edge by merging the two connected faces into one new face."
-msgstr "Xoa mot canh bang cach nhap hai mat phang duoc chon vao mot."
+msgid "Remove an edge by merging the two connected faces into one new face"
+msgstr "Xoa mot canh bang cach nhap hai mat phang duoc chon vao mot"
 
 #: tmainform.edgecrease.caption
 msgctxt "tmainform.edgecrease.caption"
@@ -12010,24 +12248,26 @@ msgid "Crease"
 msgstr "Duong gay khuc"
 
 #: tmainform.edgecrease.hint
-msgid "Switch selected edges between normal or crease edges (knuckle lines)."
-msgstr "Doi cac canh duoc chon giua cac duong vuong goc hoac duong gay khuc (knuckle lines)."
+msgid "Switch selected edges between normal or crease edges (knuckle lines)"
+msgstr ""
+"Doi cac canh duoc chon giua cac duong vuong goc hoac duong gay khuc (knuckle"
+" lines)"
 
 #: tmainform.edgeextrude.caption
 msgid "Extrude..."
 msgstr "Keo ra..."
 
 #: tmainform.edgeextrude.hint
-msgid "Create new controlfaces by extruding selected boundary edges."
-msgstr "Tao mat phang moi bang cach keo cac canh duoc chon."
+msgid "Create new controlfaces by extruding selected boundary edges"
+msgstr "Tao mat phang moi bang cach keo cac canh duoc chon"
 
 #: tmainform.edgesplit.caption
 msgid "Split"
 msgstr "Tach"
 
 #: tmainform.edgesplit.hint
-msgid "Create new controlpoints by splitting an controledge into two."
-msgstr "Tao cac diem xac minh moi bang cach chia canh xac minh ra lam hai."
+msgid "Create new controlpoints by splitting an controledge into two"
+msgstr "Tao cac diem xac minh moi bang cach chia canh xac minh ra lam hai"
 
 #: tmainform.edit1.caption
 msgid "Edit"
@@ -12071,24 +12311,24 @@ msgid "DXF 2D Polylines..."
 msgstr "Hinh nhieu net 2D DXF..."
 
 #: tmainform.exportdxf2dpolylines.hint
-msgid "Export all lines as 2D polylines."
-msgstr "Xuat tat ca cac duong thang ra duoi dang hinh nhieu net 2D."
+msgid "Export all lines as 2D polylines"
+msgstr "Xuat tat ca cac duong thang ra duoi dang hinh nhieu net 2D"
 
 #: tmainform.exportdxf3dpolylines.caption
 msgid "DXF 3D Polylines..."
 msgstr "Hinh nhieu net 3D dang DXF..."
 
 #: tmainform.exportdxf3dpolylines.hint
-msgid "Export all lines as 3D polylines."
-msgstr "Xuat tat ca cac duong thang ra dang duong nhieu net 3D."
+msgid "Export all lines as 3D polylines"
+msgstr "Xuat tat ca cac duong thang ra dang duong nhieu net 3D"
 
 #: tmainform.exportdxffaces.caption
 msgid "DXF 3D mesh..."
 msgstr "Mat luoi 3D DXF..."
 
 #: tmainform.exportdxffaces.hint
-msgid "Export all faces to a 3D DXF file."
-msgstr "Xuat tat ca cac mat ra dang file 3D DXF."
+msgid "Export all faces to a 3D DXF file"
+msgstr "Xuat tat ca cac mat ra dang file 3D DXF"
 
 #: tmainform.exportfef.caption
 msgctxt "tmainform.exportfef.caption"
@@ -12096,8 +12336,8 @@ msgid "FEF file..."
 msgstr "file FEF..."
 
 #: tmainform.exportfef.hint
-msgid "Export to a FEF (Freeship Exchange Format) hull."
-msgstr "Xuat vo tau ra dinh dang FEF (Freeship Exchange Format)."
+msgid "Export to a FEF (Freeship Exchange Format) hull"
+msgstr "Xuat vo tau ra dinh dang FEF (Freeship Exchange Format)"
 
 #: tmainform.exportghs.caption
 msgid "GHS..."
@@ -12146,33 +12386,16 @@ msgid "Save"
 msgstr "Luu"
 
 #: tmainform.filesave.hint
-msgid "Save file without prompting for the filename."
-msgstr "Luu file khong chi duong dan."
+msgid "Save file without prompting for the filename"
+msgstr "Luu file khong chi duong dan"
 
 #: tmainform.filesaveas.caption
 msgid "Save as..."
 msgstr "Luu duoi dang..."
 
 #: tmainform.filesaveas.hint
-msgid "Prompt for filename and save file."
-msgstr "Duong dan va ten de luu file."
-
-#: tmainform.help1.caption
-msgctxt "tmainform.help1.caption"
-msgid "Help"
-msgstr "Tro giup"
-
-#: tmainform.helpabout.caption
-msgid "About"
-msgstr "Thong tin"
-
-#: tmainform.helpaction.caption
-msgid "HelpAction"
-msgstr ""
-
-#: tmainform.helpcontents.caption
-msgid "Contents"
-msgstr ""
+msgid "Prompt for filename and save file"
+msgstr "Duong dan va ten de luu file"
 
 #: tmainform.hydrodynmaneuv_.caption
 msgid "HydrodynManeuv"
@@ -12200,11 +12423,11 @@ msgstr ""
 
 #: tmainform.hydrostaticsdialog.caption
 msgid "Hydrostatics..."
-msgstr "Duong cong tuyen hinh."
+msgstr "Duong cong tuyen hinh"
 
 #: tmainform.hydrostaticsdialog.hint
-msgid "Calculate hydrostatics for a range of inputdata."
-msgstr "Tinh tinh thuy tinh theo cac du lieu ban dau."
+msgid "Calculate hydrostatics for a range of inputdata"
+msgstr "Tinh tinh thuy tinh theo cac du lieu ban dau"
 
 #: tmainform.import1.caption
 msgctxt "tmainform.import1.caption"
@@ -12216,8 +12439,9 @@ msgid "Bodyplan..."
 msgstr "Hinh chieu canh..."
 
 #: tmainform.importbodyplan.hint
-msgid "Import a bodyplan and fit a surface."
-msgstr "Nhap hinh chieu canh len mat phang (Import a bodyplan and fit a surface)"
+msgid "Import a bodyplan and fit a surface"
+msgstr ""
+"Nhap hinh chieu canh len mat phang (Import a bodyplan and fit a surface)"
 
 #: tmainform.importcarene.caption
 msgid "Carene XYZ file..."
@@ -12233,8 +12457,8 @@ msgid "FEF file..."
 msgstr "file FEF..."
 
 #: tmainform.importfef.hint
-msgid "Import a FEF (Freeship Exchange Format) hull."
-msgstr "Nhap vo tu dinh dang FEF (Freeship Exchange Format)."
+msgid "Import a FEF (Freeship Exchange Format) hull"
+msgstr "Nhap vo tu dinh dang FEF (Freeship Exchange Format)"
 
 #: tmainform.importhullfile.caption
 msgid "Carlson .hul file..."
@@ -12267,8 +12491,8 @@ msgid "VRML..."
 msgstr "VRML *.WRL"
 
 #: tmainform.importvrml.hint
-msgid "Import a VRML 1.0 file."
-msgstr "Nhap file VRML 1.0."
+msgid "Import a VRML 1.0 file"
+msgstr "Nhap file VRML 1.0"
 
 #: tmainform.increasecurvaturescale.caption
 msgid "Incr. curvature scale"
@@ -12283,24 +12507,26 @@ msgid "Insert plane..."
 msgstr "Chen diem..."
 
 #: tmainform.insertplane.hint
-msgid "Insert multiple new points on a 3D oriented plane."
-msgstr "Chen nhieu diem moi vao mat 3D."
+msgid "Insert multiple new points on a 3D oriented plane"
+msgstr "Chen nhieu diem moi vao mat 3D"
 
 #: tmainform.intersectiondialog.caption
 msgid "Intersections..."
 msgstr "Giao nhau..."
 
 #: tmainform.intersectiondialog.hint
-msgid "Show the window to add stations, buttocks, waterlines and diagonals."
-msgstr "Hien thi cua so de them suon, duong bien dang doc, duong nuoc va duong cheo (diagonals)."
+msgid "Show the window to add stations, buttocks, waterlines and diagonals"
+msgstr ""
+"Hien thi cua so de them suon, duong bien dang doc, duong nuoc va duong cheo "
+"(diagonals)"
 
 #: tmainform.invertface.caption
 msgid "Invert"
 msgstr "Doi chieu phap tuyen"
 
 #: tmainform.invertface.hint
-msgid "Flip the normal direction of the selected controlfaces."
-msgstr "Doi chieu phap tuyen cua cac mat phang duoc chon."
+msgid "Flip the normal direction of the selected controlfaces"
+msgstr "Doi chieu phap tuyen cua cac mat phang duoc chon"
 
 #: tmainform.keelrudderwizard.caption
 msgctxt "tmainform.keelrudderwizard.caption"
@@ -12308,8 +12534,8 @@ msgid "Keel and rudder wizard"
 msgstr "Nhap cac thong so cua song man tau, mui qua le va banh lai"
 
 #: tmainform.keelrudderwizard.hint
-msgid "Create a default rudder or keel."
-msgstr "Tao song doc hoac banh lai."
+msgid "Create a default rudder or keel"
+msgstr "Tao song doc hoac banh lai"
 
 #: tmainform.labeldistance.caption
 msgid "distance : "
@@ -12324,8 +12550,8 @@ msgid "LabelProgress"
 msgstr ""
 
 #: tmainform.labelundomemory.caption
-msgid "Undo memory : 0 kb."
-msgstr "Dung luong khong su dung (Undo memory): 0 kb."
+msgid "Undo memory : 0 kb"
+msgstr "Dung luong khong su dung (Undo memory): 0 kb"
 
 #: tmainform.layer1.caption
 #, fuzzy
@@ -12338,8 +12564,8 @@ msgid "Auto group"
 msgstr "Nhom tu dong (Auto group)"
 
 #: tmainform.layerautogroup.hint
-msgid "Automatic grouping of connected controlfaces into a new layer."
-msgstr "Tu dong nhom cac mat lien ket da chon vao mot lop moi."
+msgid "Automatic grouping of connected controlfaces into a new layer"
+msgstr "Tu dong nhom cac mat lien ket da chon vao mot lop moi"
 
 #: tmainform.layerbox.text
 msgid "LayerBox"
@@ -12350,16 +12576,16 @@ msgid "Dialog"
 msgstr "Cua so doi thoai"
 
 #: tmainform.layerdialog.hint
-msgid "Show the window with layer properties."
-msgstr "Hien thi cua so cung voi cac thuoc tinh cua lop."
+msgid "Show the window with layer properties"
+msgstr "Hien thi cua so cung voi cac thuoc tinh cua lop"
 
 #: tmainform.layerintersection.caption
 msgid "Intersect layers..."
 msgstr "Giao cac lop..."
 
 #: tmainform.layerintersection.hint
-msgid "Find the intersection of two layers."
-msgstr "Tim giao cua hai lop."
+msgid "Find the intersection of two layers"
+msgstr "Tim giao cua hai lop"
 
 #: tmainform.layervisibilitydialog.caption
 msgid "Layer visibility dialog"
@@ -12374,8 +12600,8 @@ msgid "Open..."
 msgstr "Mo file cu..."
 
 #: tmainform.loadfile.hint
-msgid "Open a new file."
-msgstr "Mo file moi."
+msgid "Open a new file"
+msgstr "Mo file moi"
 
 #: tmainform.markers2.caption
 msgctxt "tmainform.markers2.caption"
@@ -12400,8 +12626,8 @@ msgid "Move..."
 msgstr "Dich chuyen..."
 
 #: tmainform.movemodel.hint
-msgid "Move the entire model."
-msgstr "Dich chuyen toan bo model."
+msgid "Move the entire model"
+msgstr "Dich chuyen toan bo model"
 
 #: tmainform.newcurve.caption
 msgctxt "tmainform.newcurve.caption"
@@ -12409,16 +12635,16 @@ msgid "New"
 msgstr "Moi"
 
 #: tmainform.newcurve.hint
-msgid "Add a new curve to selected edges."
-msgstr "Them duong cong moi vao cac canh duoc chon."
+msgid "Add a new curve to selected edges"
+msgstr "Them duong cong moi vao cac canh duoc chon"
 
 #: tmainform.newedge.caption
 msgid "Insert"
 msgstr "Chen vao"
 
 #: tmainform.newedge.hint
-msgid "Split a face by inserting a new edge between to selected points."
-msgstr "Chia mat phang bang cach chen mot canh vao giua cac diem duoc chon."
+msgid "Split a face by inserting a new edge between to selected points"
+msgstr "Chia mat phang bang cach chen mot canh vao giua cac diem duoc chon"
 
 #: tmainform.newface.caption
 msgctxt "tmainform.newface.caption"
@@ -12426,8 +12652,8 @@ msgid "New"
 msgstr "Moi"
 
 #: tmainform.newface.hint
-msgid "Create a new controlface from selected controlpoints."
-msgstr "Tao mat phang moi tu cac diem xac minh."
+msgid "Create a new controlface from selected controlpoints"
+msgstr "Tao mat phang moi tu cac diem xac minh"
 
 #: tmainform.newlayer.caption
 msgctxt "tmainform.newlayer.caption"
@@ -12435,16 +12661,16 @@ msgid "New"
 msgstr "Moi"
 
 #: tmainform.newlayer.hint
-msgid "Add a new empty layer to the model."
-msgstr "Them lop moi."
+msgid "Add a new empty layer to the model"
+msgstr "Them lop moi"
 
 #: tmainform.newmodel.caption
 msgid "New..."
 msgstr "Moi..."
 
 #: tmainform.newmodel.hint
-msgid "Start a new model."
-msgstr "Tao model moi."
+msgid "Start a new model"
+msgstr "Tao model moi"
 
 #: tmainform.newwindow.caption
 msgid "New window"
@@ -12467,8 +12693,12 @@ msgid "Align"
 msgstr "Chinh thang"
 
 #: tmainform.pointalign.hint
-msgid "Project selected points on a straight line through the first and last selected point."
-msgstr "Chieu tat ca cac diem duoc chon vao mot duong thang qua diem dau va diem cuoi duoc chon."
+msgid ""
+"Project selected points on a straight line through the first and last "
+"selected point"
+msgstr ""
+"Chieu tat ca cac diem duoc chon vao mot duong thang qua diem dau va diem "
+"cuoi duoc chon"
 
 #: tmainform.pointanchor.caption
 msgctxt "tmainform.pointanchor.caption"
@@ -12481,8 +12711,8 @@ msgid "Collapse"
 msgstr "Lam gay"
 
 #: tmainform.pointcollapse.hint
-msgid "Merge two selected edges by removing their common controlpoint."
-msgstr "Nhap hai canh duoc chon, xoa cac diem chung."
+msgid "Merge two selected edges by removing their common controlpoint"
+msgstr "Nhap hai canh duoc chon, xoa cac diem chung"
 
 #: tmainform.pointextrude.caption
 msgid "Extrude points"
@@ -12501,24 +12731,24 @@ msgid "Lock points"
 msgstr "Khoa diem"
 
 #: tmainform.pointslock.hint
-msgid "Lock all selected controlpoints."
-msgstr "Khoa tat ca cac diem kiem soat duoc chon."
+msgid "Lock all selected controlpoints"
+msgstr "Khoa tat ca cac diem kiem soat duoc chon"
 
 #: tmainform.pointsunlock.caption
 msgid "Unlock points"
 msgstr "Giai khoa tat ca cac diem"
 
 #: tmainform.pointsunlock.hint
-msgid "Unlock all selected controlpoints."
-msgstr "Giai khoa tat ca cac diem kiem soat duoc chon."
+msgid "Unlock all selected controlpoints"
+msgstr "Giai khoa tat ca cac diem kiem soat duoc chon"
 
 #: tmainform.pointsunlockall.caption
 msgid "Unlock all points"
 msgstr "Giai khoa tat ca cac diem"
 
 #: tmainform.pointsunlockall.hint
-msgid "Unlock all locked controlpoints."
-msgstr "Giai khoa tat ca cac diem khoa kiem soat."
+msgid "Unlock all locked controlpoints"
+msgstr "Giai khoa tat ca cac diem khoa kiem soat"
 
 #: tmainform.preferences.caption
 msgid "Preferences"
@@ -12578,16 +12808,16 @@ msgid "Redo"
 msgstr "Lam lai"
 
 #: tmainform.redo.hint
-msgid "Undo the previous modification."
-msgstr "Quay lai trang thai truoc."
+msgid "Undo the previous modification"
+msgstr "Quay lai trang thai truoc"
 
 #: tmainform.removenegative.caption
 msgid "Remove negative"
 msgstr "Xoa phan tieu cuc (Remove negative)"
 
 #: tmainform.removenegative.hint
-msgid "Removes all faces on the starbaordside of the hull."
-msgstr "Xoa tat ca cac mat o man phai."
+msgid "Removes all faces on the starbaordside of the hull"
+msgstr "Xoa tat ca cac mat o man phai"
 
 #: tmainform.removeunusedpoints.caption
 msgid "Remove unused points"
@@ -12644,24 +12874,24 @@ msgid "Rotate..."
 msgstr "Quay..."
 
 #: tmainform.rotatemodel.hint
-msgid "Rotate selected items."
-msgstr "Quay cac phan tu duoc chon."
+msgid "Rotate selected items"
+msgstr "Quay cac phan tu duoc chon"
 
 #: tmainform.rotatemodelm.caption
 msgid "Heeling and/or trimming..."
 msgstr "Heeling and/or triming..."
 
 #: tmainform.rotatemodelm.hint
-msgid "Rotate all model items."
-msgstr "Inclined waterline view. SSD calculation."
+msgid "Rotate all model items"
+msgstr "Inclined waterline view. SSD calculation"
 
 #: tmainform.scalemodel.caption
 msgid "Scale..."
 msgstr "Thay doi ti le..."
 
 #: tmainform.scalemodel.hint
-msgid "Scale selected items."
-msgstr "Thay doi ti le cac phan tu duoc chon."
+msgid "Scale selected items"
+msgstr "Thay doi ti le cac phan tu duoc chon"
 
 #: tmainform.selectall.caption
 msgid "Select all"
@@ -12696,8 +12926,8 @@ msgid "Buttocks"
 msgstr "Duong bien dang doc"
 
 #: tmainform.showbuttocks.hint
-msgid "Toggle buttocks visibility on or off."
-msgstr "Hien thi hoac an cac duong bien dang doc."
+msgid "Toggle buttocks visibility on or off"
+msgstr "Hien thi hoac an cac duong bien dang doc"
 
 #: tmainform.showcontrolcurves.caption
 msgctxt "tmainform.showcontrolcurves.caption"
@@ -12705,16 +12935,16 @@ msgid "Control curves"
 msgstr "Duong cong xac minh"
 
 #: tmainform.showcontrolcurves.hint
-msgid "Show control curves."
-msgstr "Hien thi duong cong xac minh."
+msgid "Show control curves"
+msgstr "Hien thi duong cong xac minh"
 
 #: tmainform.showcontrolnet.caption
 msgid "Control net"
 msgstr "Luoi xac minh"
 
 #: tmainform.showcontrolnet.hint
-msgid "Show control net."
-msgstr "Hien thi luoi xac minh."
+msgid "Show control net"
+msgstr "Hien thi luoi xac minh"
 
 #: tmainform.showcurvature.caption
 msgctxt "tmainform.showcurvature.caption"
@@ -12722,8 +12952,8 @@ msgid "Curvature"
 msgstr "Duong cong"
 
 #: tmainform.showcurvature.hint
-msgid "Show curvature plot of intersectionlines."
-msgstr "Hien thi duong cong giao nhau cua ban ve tuyen hinh."
+msgid "Show curvature plot of intersectionlines"
+msgstr "Hien thi duong cong giao nhau cua ban ve tuyen hinh"
 
 #: tmainform.showdiagonals.caption
 #, fuzzy
@@ -12732,7 +12962,7 @@ msgid "Diagonals"
 msgstr "Duong cheo"
 
 #: tmainform.showdiagonals.hint
-msgid "Toggle diagonals visibility on or off."
+msgid "Toggle diagonals visibility on or off"
 msgstr "Hien ti cac duong cheo"
 
 #: tmainform.showflowlines.caption
@@ -12740,8 +12970,8 @@ msgid "Flowlines"
 msgstr "Dong chay"
 
 #: tmainform.showflowlines.hint
-msgid "Show flowlines around the hull."
-msgstr "Hien thi dong chay quanh than vo."
+msgid "Show flowlines around the hull"
+msgstr "Hien thi dong chay quanh than vo"
 
 #: tmainform.showfreeobjects.caption
 msgid "Show free objects"
@@ -12756,16 +12986,16 @@ msgid "Grid"
 msgstr "Luoi toa do"
 
 #: tmainform.showgrid.hint
-msgid "Show grid of intersections in plan, profile and bodyplan view."
-msgstr "Hien thi luoi giao nhau tren hinh chieu dung, bang va hinh chieu canh."
+msgid "Show grid of intersections in plan, profile and bodyplan view"
+msgstr "Hien thi luoi giao nhau tren hinh chieu dung, bang va hinh chieu canh"
 
 #: tmainform.showhydrostatics.caption
 msgid "Hydrostatic features"
 msgstr "Cac thong so cua tinh thuy tinh"
 
 #: tmainform.showhydrostatics.hint
-msgid "Show certain hydrostatic key properties in the model."
-msgstr "Tinh toan cac duong cong tuyen hinh."
+msgid "Show certain hydrostatic key properties in the model"
+msgstr "Tinh toan cac duong cong tuyen hinh"
 
 #: tmainform.showinterioredges.caption
 msgctxt "tmainform.showinterioredges.caption"
@@ -12774,8 +13004,8 @@ msgstr "Cac canh ben trong"
 
 #: tmainform.showinterioredges.hint
 msgctxt "tmainform.showinterioredges.hint"
-msgid "Show interior edges."
-msgstr "Hien thi cac canh ben trong."
+msgid "Show interior edges"
+msgstr "Hien thi cac canh ben trong"
 
 #: tmainform.showlinesplan.caption
 msgid "Linesplan"
@@ -12787,16 +13017,16 @@ msgid "Markers"
 msgstr "Diem dau"
 
 #: tmainform.showmarkers.hint
-msgid "Show markers."
-msgstr "Hien thi dau moc."
+msgid "Show markers"
+msgstr "Hien thi dau moc"
 
 #: tmainform.shownormals.caption
 msgid "Normals"
 msgstr "Duong phap tuyen"
 
 #: tmainform.shownormals.hint
-msgid "Show normals of selected controlfaces."
-msgstr "Hien thi duong phap tuyen cua cac mat phang duoc chon."
+msgid "Show normals of selected controlfaces"
+msgstr "Hien thi duong phap tuyen cua cac mat phang duoc chon"
 
 #: tmainform.showstations.caption
 #, fuzzy
@@ -12805,8 +13035,8 @@ msgid "Stations"
 msgstr "Suon"
 
 #: tmainform.showstations.hint
-msgid "Toggle stations visibility on or off."
-msgstr "Lam cho suon hien hoac an."
+msgid "Toggle stations visibility on or off"
+msgstr "Lam cho suon hien hoac an"
 
 #: tmainform.showundohistory.caption
 msgid "Browse..."
@@ -12819,8 +13049,8 @@ msgid "Waterlines"
 msgstr "Duong nuoc"
 
 #: tmainform.showwaterlines.hint
-msgid "Toggle waterlines visibility on or off."
-msgstr "Lam cho duong nuoc hien hoac an."
+msgid "Toggle waterlines visibility on or off"
+msgstr "Lam cho duong nuoc hien hoac an"
 
 #: tmainform.spineditfontsize.hint
 msgctxt "tmainform.spineditfontsize.hint"
@@ -12903,8 +13133,8 @@ msgid "Undo"
 msgstr "Lam nguoc lai"
 
 #: tmainform.undo.hint
-msgid "Undo the last modification."
-msgstr "Quay lai phien ban hieu chinh cuoi cung."
+msgid "Undo the last modification"
+msgstr "Quay lai phien ban hieu chinh cuoi cung"
 
 #: tmainform.undohistory1.caption
 msgid "Undo history"
@@ -12927,10 +13157,6 @@ msgstr "OK"
 msgctxt "tsaveimagedialog.bitbtn2.caption"
 msgid "Cancel"
 msgstr "Cancel"
-
-#: tsaveimagedialog.caption
-msgid "Save image."
-msgstr "Luu hinh."
 
 #: tsaveimagedialog.edit3.text
 msgctxt "tsaveimagedialog.edit3.text"
@@ -13016,4 +13242,3 @@ msgstr ""
 #: ttiledialog.toppanel.caption
 msgid "Recent projects"
 msgstr ""
-

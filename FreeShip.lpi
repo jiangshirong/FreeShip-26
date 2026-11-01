@@ -10,7 +10,7 @@
         <CompatibilityMode Value="True"/>
       </Flags>
       <SessionStorage Value="InProjectDir"/>
-      <Title Value="FreeShip"/>
+      <Title Value="FreeShip_26"/>
       <Scaled Value="True"/>
       <UseAppBundle Value="False"/>
       <ResourceType Value="res"/>
@@ -35,7 +35,7 @@
       <RevisionNr Value="3"/>
       <BuildNr Value="543"/>
       <Attributes pvaDebug="True" pvaPreRelease="True" pvaPatched="True"/>
-      <StringTable LegalCopyright="GPLv3" OriginalFilename="FreeShip" ProductName="FREE!ship" ProductVersion="4.4"/>
+      <StringTable LegalCopyright="GPLv3" OriginalFilename="FreeShip" ProductName="FreeShip_26" ProductVersion="4.4"/>
     </VersionInfo>
     <MacroValues Count="1">
       <Macro1 Name="LazVer" Value="3.2.0"/>
@@ -311,6 +311,7 @@
             </Debugging>
             <LinkSmart Value="True"/>
             <Options>
+              <Win32><GraphicApplication Value="True"/></Win32>
               <LinkerOptions Value="-vd"/>
             </Options>
           </Linking>
@@ -421,7 +422,7 @@
         <PackageName Value="LCL"/>
       </Item4>
     </RequiredPackages>
-    <Units Count="132">
+    <Units Count="131">
       <Unit0>
         <Filename Value="FreeShip.dpr"/>
         <IsPartOfProject Value="True"/>
@@ -1084,69 +1085,62 @@
         <IsPartOfProject Value="True"/>
       </Unit120>
       <Unit121>
-        <Filename Value="Forms/FreeUpdateDlg.pas"/>
-        <IsPartOfProject Value="True"/>
-        <ComponentName Value="FreeUpdateForm"/>
-        <HasResources Value="True"/>
-        <ResourceBaseClass Value="Form"/>
-      </Unit121>
-      <Unit122>
         <Filename Value="Forms/FreeExceptionDlg.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="ExceptionDlg"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-      </Unit122>
-      <Unit123>
+      </Unit121>
+      <Unit122>
         <Filename Value="Forms/FreeSplitSectionDlg.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="FreeSplitSectionDialog"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-      </Unit123>
-      <Unit124>
+      </Unit122>
+      <Unit123>
         <Filename Value="Forms/FreeLayerVisibilityDlg.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="FreeLayerVisibilityDialog"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-      </Unit124>
-      <Unit125>
+      </Unit123>
+      <Unit124>
         <Filename Value="Forms/FreeSelectedDlg.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="FormSelected"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-      </Unit125>
-      <Unit126>
+      </Unit124>
+      <Unit125>
         <Filename Value="Forms/methodlist.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="MethodList"/>
-      </Unit126>
-      <Unit127>
+      </Unit125>
+      <Unit126>
         <Filename Value="Forms/FreeDeleteDlg.pas"/>
         <IsPartOfProject Value="True"/>
         <ComponentName Value="FreeDeleteDialog"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-      </Unit127>
-      <Unit128>
+      </Unit126>
+      <Unit127>
         <Filename Value="Units/ribbontoolbarmgr.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="RibbonToolBarMgr"/>
+      </Unit127>
+      <Unit128>
+        <Filename Value="Units/VRML2Unit.pas"/>
+        <IsPartOfProject Value="True"/>
       </Unit128>
       <Unit129>
-        <Filename Value="Units/VRML2Unit.pas"/>
+        <Filename Value="GITLastChangeRevision.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit129>
       <Unit130>
-        <Filename Value="GITLastChangeRevision.inc"/>
-        <IsPartOfProject Value="True"/>
-      </Unit130>
-      <Unit131>
         <Filename Value="GitCommit.inc"/>
         <IsPartOfProject Value="True"/>
-      </Unit131>
+      </Unit130>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

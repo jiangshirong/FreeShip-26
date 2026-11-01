@@ -215,6 +215,7 @@ type
     Wt, t, nr, Rho, Dpr: single;
     PathFile, PathFileOld, FileToFind, FileName: string;
     procedure Calculate;
+    procedure CalculateInWorkspace;
     function Execute(Freeship: TFreeship;
       AutoExtract: boolean): boolean;
     property Dat2: single read FGetDat2 write FSetDat2;
@@ -266,7 +267,7 @@ var
 
 implementation
 
-uses FreeStringsUnit,
+uses FreeCalculationFiles, FreeStringsUnit,
   Printers,
   Math, FreeProcess;
 
@@ -561,6 +562,17 @@ end;{TFreePropeller_Task2.FSetDat18_5}
 
 
 procedure TFreePropeller_Task2.Calculate;
+var Job: TFreeCalculationScope;
+begin
+  if FFreeship = nil then Exit;
+  Job := FFreeship.BeginCalculation(['Propres.dat']);
+  try
+    CalculateInWorkspace;
+    Job.Complete;
+  finally Job.Free end;
+end;
+
+procedure TFreePropeller_Task2.CalculateInWorkspace;
 type
   TTable = array[0..16, 0..13] of single;
 const
@@ -571,6 +583,9 @@ const
   // предел текуч Н/мм^2 ЛМцЖ 55-3-1 = 195; БрАЖ Н9-4-4 = 215; сталь углеродистая 25Л = 224;
   // ЛАМцЖ 67-5-2-2 = 242; Нева-60 = 272; Нева-70 = 292;  нержавейка 1Х14НД = 438; дюраль = 430.
 var
+  ProcessCallerDirectory: string;
+  ProcessCallerCursor: TCursor;
+ 
   I, J, ij, ires: integer;
   Dat: array[1..15] of single;
   Dat1: array[1..10] of single;
@@ -598,6 +613,9 @@ label
 label
   StartHere;
 begin
+  ProcessCallerDirectory := GetCurrentDirUTF8;
+  ProcessCallerCursor := Screen.Cursor;
+  try
   ires := 10;
   TChartSeries(Chart.Series[0]).Clear;
   TChartSeries(Chart.Series[1]).Clear;
@@ -851,8 +869,8 @@ begin
   PathFileOld := GetCurrentDir;
 
   StartHere:
-    ForceDirectoriesUTF8(FFreeship.Preferences.TempDirectory);
-  SetCurrentDirUTF8(FFreeship.Preferences.TempDirectory);
+    ForceDirectoriesUTF8(FFreeship.CalculationDirectory);
+  SetCurrentDirUTF8(FFreeship.CalculationDirectory);
 
   File_ExportData(dat, dat1);
 
@@ -863,7 +881,7 @@ begin
         res[I, J] := 0.;
     Ntask := 2.;
 
-    PathFileOld := FFreeship.Preferences.InitDirectory; // каталог Freeshipa
+    PathFileOld := IncludeTrailingPathDelimiter(FFreeship.CalculationDirectory); // каталог Freeshipa
     //  Определяем каталог с программой CalcProp.exe
     FExecDirectory := FFreeship.Preferences.ExecDirectory;
 
@@ -878,7 +896,7 @@ begin
 
     //SysUtils.ExecuteProcess(UTF8ToSys(FExecDirectory + DirectorySeparator+'CALCPROP.EXE'), '', []);
     ExecFullName := FExecDirectory + DirectorySeparator+'CALCPROP.EXE';
-    ExecuteFreePlugin(FFreeship.Preferences.TempDirectory, ExecFullName);
+    ExecuteFreeCalculation(FFreeship.CalculationDirectory, ExecFullName, fcPropeller2);
 
     FileName := 'RES2.tsk';
     //  Определяем есть ли файл с результатами расчета RES2.tsk. Если TMP2.tsk присутствует значит расчет не закончен
@@ -1005,7 +1023,7 @@ begin
     end;
   // Записываем результаты расчета в файл
 
-  Assignfile(FFile, 'Propres.dat');
+  Assignfile(FFile, IncludeTrailingPathDelimiter(FFreeship.CalculationDirectory)+'Propres.dat');
      {$I-}
   ReWrite(FFile);
 {$I+}
@@ -1200,6 +1218,10 @@ begin
     ResultsMemo.Lines.Add(Space(10) + rs_If_SigmaB_4___1____ {UserString[994]} + ' ' + rs_ATTENTION____ {UserString[450]} + ' ' + rs_This_is_propeller_not_a_strong_in_non_uniform_flow_ {UserString[932]});
   ResultsMemo.Lines.Add('');
   ResultsMemo.Lines.Add(Space(10) + 'Copyright (c) 2007-2013, Timoshenko V.F.');
+  finally
+    SetCurrentDirUTF8(ProcessCallerDirectory);
+    Screen.Cursor := ProcessCallerCursor;
+  end;
 end;{TFreePropeller_Task2.Calculate}
 
 function TFreePropeller_Task2.Execute(Freeship: TFreeship; AutoExtract: boolean): boolean;
@@ -1276,10 +1298,11 @@ var
   DatVR: array[1..5, 1..5] of single;
   TMP: single;
 begin
+  if FFreeship = nil then Exit;
 
-  if FileExistsUTF8('RESISTp.dat') { *Converted from FileExists* } then
+  if FileExistsUTF8(IncludeTrailingPathDelimiter(FFreeship.CalculationDirectory)+'RESISTp.dat') { *Converted from FileExists* } then
   begin
-    Assignfile(FFile, 'RESISTp.dat');
+    Assignfile(FFile, IncludeTrailingPathDelimiter(FFreeship.CalculationDirectory)+'RESISTp.dat');
          {$I-}
     Reset(FFile);
 {$I+}

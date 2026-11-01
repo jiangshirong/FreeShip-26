@@ -150,6 +150,7 @@ type
     procedure Edit6EditingDone(Sender: TObject);
     procedure Panel4Click(Sender: TObject);
     procedure UnitboxChange(Sender: TObject);
+    procedure FormCreate(Sender: TObject);
     procedure SplitSectionLocationEditingDone(Sender: TObject);
     procedure Edit26EditingDone(Sender: TObject);
     procedure Edit27EditingDone(Sender: TObject);
@@ -208,6 +209,8 @@ var
 
 implementation
 
+uses FreeUiChoices;
+
 
 {$IFnDEF FPC}
   {$R *.dfm}
@@ -215,6 +218,13 @@ implementation
 {$ELSE}
   {$R *.lfm}
 {$ENDIF}
+
+procedure TFREEProjectSettingsDialog.FormCreate(Sender: TObject);
+begin
+  SetChoiceLabels(UnitBox, [rsChoiceMetric, rsChoiceImperial]);
+  SetChoiceLabels(PrecisionBox, [rsChoiceLow, rsChoiceMedium, rsChoiceHigh, rsChoiceHighest]);
+  SetChoiceLabels(ComboBox1, [rsChoiceProjectDimensions, rsChoiceSubmergedDimensions]);
+end;
 
 function TFREEProjectSettingsDialog.FGetConversionFactor: double;
 begin
@@ -386,6 +396,10 @@ end;{TFREEProjectSettingsDialog.FSetUnitCaptions}
 
 function TFREEProjectSettingsDialog.Execute: boolean;
 begin
+  // A cached dialog may have been created in a different interface language.
+  SetChoiceLabels(UnitBox, [rsChoiceMetric, rsChoiceImperial]);
+  SetChoiceLabels(PrecisionBox, [rsChoiceLow, rsChoiceMedium, rsChoiceHigh, rsChoiceHighest]);
+  SetChoiceLabels(ComboBox1, [rsChoiceProjectDimensions, rsChoiceSubmergedDimensions]);
   Conversionfactor := FGetConversionFactor;
   checkbox11.Checked := True;
   checkbox12.Checked := True;
@@ -397,6 +411,7 @@ begin
   GlobalFreeship.Preferences.LoadImageIntoBitmap(BitBtn2.Glyph, 'Cancel');
   //ShowTranslatedValues(Self);
 
+  ModalResult := mrNone;
   ShowModal;
   Result := Modalresult = mrOk;
 end;{TFREEProjectSettingsDialog.Execute}

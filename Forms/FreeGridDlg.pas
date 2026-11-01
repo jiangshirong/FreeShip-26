@@ -89,6 +89,7 @@ type
     lbUnit2: TLabel;
     procedure OKButtonClick(Sender: TObject);
     procedure CancelButtonClick(Sender: TObject);
+    procedure FormCreate(Sender: TObject);
     procedure BitBtn1Click(Sender: TObject);
     procedure BitBtn2Click(Sender: TObject);
   private   { Private declarations }
@@ -103,11 +104,19 @@ type
 var FreeGridDialog: TFreeGridDialog;
 
 implementation
+
+uses FreeUiChoices;
+
 {$IFnDEF FPC}
   {$R *.lfm}
 {$ELSE}
   {$R *.lfm}
 {$ENDIF}
+
+procedure TFreeGridDialog.FormCreate(Sender: TObject);
+begin
+  SetChoiceLabels(Plane, [rsChoiceHorizontal, rsChoiceLateral, rsChoiceTransverse]);
+end;
 
 function TFreeGridDialog.GetStartPoint: T3DCoordinate;
 begin

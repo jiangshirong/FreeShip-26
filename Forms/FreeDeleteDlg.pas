@@ -46,6 +46,16 @@ implementation
 
 {$R *.lfm}
 
+resourcestring
+  rsDeleteTotal = 'Total: %d';
+  rsDeletePoint = 'Point';
+  rsDeleteGroup = 'Group';
+  rsDeleteEdge = 'Edge';
+  rsDeleteFace = 'Face';
+  rsDeleteCurve = 'Curve';
+  rsDeleteMarker = 'Marker';
+  rsDeleteFlowline = 'Flowline';
+
 { TFreeDeleteDialog }
 
 procedure TFreeDeleteDialog.CheckBox1Click(Sender: TObject);
@@ -112,7 +122,7 @@ begin
     C := sgObjects.Cells[0,i];
     if C = '0' then inc(N);
     end;
-  lbTotalNumber.Caption := format('Total: %d',[N]);
+  lbTotalNumber.Caption := format(rsDeleteTotal,[N]);
   bbDelete.Enabled := N > 0;
 end;
 
@@ -137,13 +147,13 @@ begin
   sgObjects.BeginUpdate;
   sgObjects.RowCount := N + 1;
 
-  lbTotalNumber.Caption := format('Total: %d',[N]);
+  lbTotalNumber.Caption := format(rsDeleteTotal,[N]);
   r:=1;
   for i:=0 to FreeShip.Surface.NumberOfSelectedControlPoints-1 do
   begin
     CP := FFreeShip.Surface.SelectedControlPoint[i];
     sgObjects.Cells[0,r] := '1';
-    sgObjects.Cells[1,r] := 'Point';
+    sgObjects.Cells[1,r] := rsDeletePoint;
     sgObjects.Cells[2,r] := format('[%d]',[CP.Id]);
     sgObjects.Objects[2,r] := CP;
     sgObjects.Cells[3,r] := CP.Name;
@@ -155,7 +165,7 @@ begin
     CPG := FFreeShip.Surface.SelectedControlPointGroup[i];
     r:=i+1;
     sgObjects.Cells[0,r] := '1';
-    sgObjects.Cells[1,r] := 'Group';
+    sgObjects.Cells[1,r] := rsDeleteGroup;
     sgObjects.Cells[2,r] := format('[%d]',[CPG.Id]);
     sgObjects.Objects[2,r] := CPG;
     sgObjects.Cells[3,r] := CPG.Name;
@@ -166,7 +176,7 @@ begin
   begin
     CE := FFreeShip.Surface.SelectedControlEdge[i];
     sgObjects.Cells[0,r] := '1';
-    sgObjects.Cells[1,r] := 'Edge';
+    sgObjects.Cells[1,r] := rsDeleteEdge;
     sgObjects.Cells[2,r] := format('[%d]',[CE.Id]);
     sgObjects.Objects[2,r] := CE;
     sgObjects.Cells[3,r] := CE.Name;
@@ -177,7 +187,7 @@ begin
   begin
     CF := FFreeShip.Surface.SelectedControlFace[i];
     sgObjects.Cells[0,r] := '1';
-    sgObjects.Cells[1,r] := 'Face';
+    sgObjects.Cells[1,r] := rsDeleteFace;
     sgObjects.Cells[2,r] := format('[%d]',[CF.Id]);
     sgObjects.Objects[2,r] := CF;
     sgObjects.Cells[3,r] := CF.Name;
@@ -188,7 +198,7 @@ begin
   begin
     CC := FFreeShip.Surface.SelectedControlCurve[i];
     sgObjects.Cells[0,r] := '1';
-    sgObjects.Cells[1,r] := 'Curve';
+    sgObjects.Cells[1,r] := rsDeleteCurve;
     sgObjects.Cells[2,r] := format('[%d]',[CC.Id]);
     sgObjects.Objects[2,r] := CC;
     sgObjects.Cells[3,r] := CC.Name;
@@ -199,7 +209,7 @@ begin
   begin
     M := FFreeShip.SelectedMarker[i];
     sgObjects.Cells[0,r] := '1';
-    sgObjects.Cells[1,r] := 'Marker';
+    sgObjects.Cells[1,r] := rsDeleteMarker;
     sgObjects.Cells[2,r] := format('[%d]',[M.Id]);
     sgObjects.Objects[2,r] := M;
     sgObjects.Cells[3,r] := M.Name;
@@ -210,7 +220,7 @@ begin
   begin
     FL := FFreeShip.SelectedFlowline[i];
     sgObjects.Cells[0,r] := '1';
-    sgObjects.Cells[1,r] := 'Flowline';
+    sgObjects.Cells[1,r] := rsDeleteFlowline;
     sgObjects.Cells[2,r] := format('[%d]',[FL.Id]);
     sgObjects.Objects[2,r] := FL;
     sgObjects.Cells[3,r] := FL.Name;

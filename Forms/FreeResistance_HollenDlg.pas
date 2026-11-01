@@ -241,6 +241,7 @@ type
     _Label20: TLabel;
     _Label30: TLabel;
     _Label34: TLabel;
+    procedure FormCreate(Sender: TObject);
     procedure File_ExportData(dat, dan: array of single);
     procedure File_ExportDataKe(dat, dan: array of single);
     procedure CheckBox2Click(Sender: TObject);
@@ -357,6 +358,7 @@ type
     PathFile, PathFileOld, FileToFind, FileName: string;
     function CorrectInputdata: boolean;
     procedure Calculate;
+    procedure CalculateInWorkspace;
     function Execute(Freeship: TFreeship; AutoExtract: boolean): boolean;
     property Bwl: single read FGetBwl write FSetBwl;
     property Cp: single read FGetCp write FSetCp;
@@ -412,7 +414,7 @@ var
 
 implementation
 
-uses FreeStringsUnit,
+uses FreeCalculationFiles, FreeUiChoices, FreeStringsUnit,
      FreeLogger, FreeProcess;
 
 {$IFnDEF FPC}
@@ -421,6 +423,11 @@ uses FreeStringsUnit,
 {$ELSE}
   {$R *.lfm}
 {$ENDIF}
+
+procedure TFreeResistance_Hollen.FormCreate(Sender: TObject);
+begin
+  SetResistanceShipTypeChoices(A11Box);
+end;
 
 function TFreeResistance_Hollen.CorrectInputdata: boolean;
 begin
@@ -485,7 +492,7 @@ begin
   Cwp := WlArea / (Lwl * Bwl);
   if (Cwp = 1) or (Cp = 1) then
   begin
-    MessageDlg('Error: Cp=1 or Cwp=1', mtError, [mbOK], 0);
+    MessageDlg(rs_Error__Cp_1_or_Cwp_1, mtError, [mbOK], 0);
     Exit;
   end;
 
@@ -493,7 +500,21 @@ begin
 end;{TFreeResistance_Hollen.CorrectInputdata}
 
 procedure TFreeResistance_Hollen.Calculate;
+var Job: TFreeCalculationScope;
+begin
+  if FFreeship = nil then Exit;
+  Job := FFreeship.BeginCalculation(['RESIST.dat','RESISTp.dat','Propres.dat']);
+  try
+    CalculateInWorkspace;
+    Job.Complete;
+  finally Job.Free end;
+end;
+
+procedure TFreeResistance_Hollen.CalculateInWorkspace;
 var
+  ProcessCallerDirectory: string;
+  ProcessCallerCursor: TCursor;
+ 
   ConvertedSpeed: single;
   FroudeNumber: single;
   Rf, Rr, Rt, flag: single;
@@ -528,6 +549,9 @@ var
 label
   NewSearch1;
 begin
+  ProcessCallerDirectory := GetCurrentDirUTF8;
+  ProcessCallerCursor := Screen.Cursor;
+  try
   Vs[1] := StartSpeed;
   Vs[4] := EndSpeed;
   Vs[5] := StepSpeed;
@@ -844,8 +868,8 @@ DP_TA       0.430–0.840 0.655–1.050 0.495–0.860
     ConvertedSpeed := Speed * 1852 / 3600;
 
     PathFileOld := GetCurrentDir;
-    ForceDirectoriesUTF8(FFreeship.Preferences.TempDirectory);
-    SetCurrentDirUTF8(FFreeship.Preferences.TempDirectory);
+    ForceDirectoriesUTF8(FFreeship.CalculationDirectory);
+    SetCurrentDirUTF8(FFreeship.CalculationDirectory);
 
     CalculateResistanceHollen(ConvertedSpeed, LCB, Cp, Rf, Rr, w, t0, nr);
 
@@ -867,7 +891,7 @@ DP_TA       0.430–0.840 0.655–1.050 0.495–0.860
 
       //SysUtils.ExecuteProcess(UTF8ToSys(FExecDirectory + DirectorySeparator+'HOLLENBH.EXE'), '', []);
       ExecFullName := FExecDirectory + DirectorySeparator+'HOLLENBH.EXE';
-      ExecuteFreePlugin(FFreeship.Preferences.TempDirectory, ExecFullName);
+      ExecuteFreeCalculation(FFreeship.CalculationDirectory, ExecFullName, fcHollen);
 
       FileName := 'hollenba.res';
       //  Определяем есть ли файл с результатами расчета HOLLENBA.res. Если TMP5.tsk присутствует значит расчет не закончен
@@ -933,8 +957,8 @@ DP_TA       0.430–0.840 0.655–1.050 0.495–0.860
       if Ke = 0 then
       begin
 
-        ForceDirectoriesUTF8(FFreeship.Preferences.TempDirectory);
-        SetCurrentDirUTF8(FFreeship.Preferences.TempDirectory);
+        ForceDirectoriesUTF8(FFreeship.CalculationDirectory);
+        SetCurrentDirUTF8(FFreeship.CalculationDirectory);
         //  Определяем каталог с программой Freeship.EXE
         FInitDirectory := FFreeship.Preferences.InitDirectory;
         FExecDirectory := FFreeship.Preferences.ExecDirectory;
@@ -944,14 +968,14 @@ DP_TA       0.430–0.840 0.655–1.050 0.495–0.860
         { *Converted from FileSearch* }
         if FileToFind <> 'TMPke.txt' then
         begin
-          MessageDlg('Нет файла исходных данных для расчета!!!', mtError, [mbOK], 0);
+          MessageDlg(rs_Have_not_input_file_for_calculation_is_here___, mtError, [mbOK], 0);
           exit;
         end;
 
         // Запускаем программу расчета
         //SysUtils.ExecuteProcess(UTF8ToSys(FExecDirectory + DirectorySeparator+'SeaMargn.EXE'), '', []);
         ExecFullName := FExecDirectory + DirectorySeparator+'SeaMargn.EXE';
-        ExecuteFreePlugin(FFreeship.Preferences.TempDirectory, ExecFullName);
+        ExecuteFreeCalculation(FFreeship.CalculationDirectory, ExecFullName, fcSeaMargin);
 
 
         FileName := 'OUT.TXT';
@@ -1016,7 +1040,7 @@ DP_TA       0.430–0.840 0.655–1.050 0.495–0.860
       end;
     end;
     // Записываем результаты расчета в Resistp.dat для 10 скоростей
-    Assignfile(FFile, 'RESISTp.dat');
+    Assignfile(FFile, IncludeTrailingPathDelimiter(FFreeship.CalculationDirectory)+'RESISTp.dat');
          //{$I-}
     Rewrite(FFile);
 //{$I+}
@@ -1038,7 +1062,7 @@ DP_TA       0.430–0.840 0.655–1.050 0.495–0.860
     end;
     CloseFile(FFile);
     // Записываем результаты расчета в Resist.dat для 5 скоростей
-    Assignfile(FFile, 'RESIST.dat');
+    Assignfile(FFile, IncludeTrailingPathDelimiter(FFreeship.CalculationDirectory)+'RESIST.dat');
           //{$I-}
     Rewrite(FFile);
 //{$I+}
@@ -1255,6 +1279,10 @@ DP_TA       0.430–0.840 0.655–1.050 0.495–0.860
     PrintButton.Enabled := True;
 
     SetCurrentDirUTF8(PathFileOld);
+  end;
+  finally
+    SetCurrentDirUTF8(ProcessCallerDirectory);
+    Screen.Cursor := ProcessCallerCursor;
   end;
 end;{TFreeResistance_Delft.Calculate}
 

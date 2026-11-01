@@ -76,6 +76,7 @@ type
     SpinEdit2: TSpinEdit;
     procedure BitBtn1Click(Sender: TObject);
     procedure BitBtn2Click(Sender: TObject);
+    procedure FormCreate(Sender: TObject);
   private   { Private declarations }
     function FGetBreadth: single;
     function FGetDraft: single;
@@ -106,12 +107,19 @@ var
 
 implementation
 
+uses FreeUiChoices;
+
 {$IFnDEF FPC}
   {$R *.dfm}
 
 {$ELSE}
   {$R *.lfm}
 {$ENDIF}
+
+procedure TFreeNewModelDialog.FormCreate(Sender: TObject);
+begin
+  SetChoiceLabels(ComboBox1, [rs_Meters, rs_Feet]);
+end;
 
 function TFreeNewModelDialog.FGetLength: single;
 begin

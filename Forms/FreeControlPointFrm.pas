@@ -142,6 +142,7 @@ type
       procedure FSetActiveControlPointCorner(isCorner: boolean);
    public   { Public declarations }
       procedure Reload;
+      procedure RefreshPointCaption;
       property ActiveControlPoint   : TFreeSubdivisionControlPoint read FActiveControlPoint write FSetActiveControlPoint;
       property FreeShip             : TComponent read FFreeShip write FFreeShip;
       //property FreeShip : TFreeShip read FFreeShip write FFreeShip;
@@ -167,6 +168,7 @@ const cDegree=#$C2#$B0; //UTF8 degree sign
       cGamma='γ'; //#$CE#$B3;
 }
 resourcestring
+  rsPointLabel = 'Point';
   rsAngle = 'Angle';
   rsAngles = 'Angles';
   rsLength = 'Length';
@@ -213,7 +215,7 @@ begin
      R:=0.0;
      EditDistance.Value:=0.0;
 
-     Self.Caption := 'Point['+IntToStr(FActiveControlPoint.Id) +']:'+FActiveControlPoint.Name;
+     RefreshPointCaption;
                    {+ ' ('+FloatToStr(FActiveControlPoint.Coordinate.X)
                      +','+FloatToStr(FActiveControlPoint.Coordinate.Y)
                      +','+FloatToStr(FActiveControlPoint.Coordinate.Z)
@@ -407,11 +409,11 @@ begin
             if (FActiveControlPoint.LinearConstraintPointA<>nil) then
               if (FActiveControlPoint.LinearConstraintPointA.Name > '') then
                EditLinearConstraintA.Text := FActiveControlPoint.LinearConstraintPointA.Name
-               else EditLinearConstraintA.Text := 'Point['+IntToStr(FActiveControlPoint.LinearConstraintPointA.Id)+']';
+               else EditLinearConstraintA.Text := rsPointLabel+'['+IntToStr(FActiveControlPoint.LinearConstraintPointA.Id)+']';
             if (FActiveControlPoint.LinearConstraintPointB<>nil) then
               if (FActiveControlPoint.LinearConstraintPointB.Name > '') then
                EditLinearConstraintB.Text := FActiveControlPoint.LinearConstraintPointB.Name
-               else EditLinearConstraintB.Text := 'Point['+IntToStr(FActiveControlPoint.LinearConstraintPointB.Id)+']';
+               else EditLinearConstraintB.Text := rsPointLabel+'['+IntToStr(FActiveControlPoint.LinearConstraintPointB.Id)+']';
           end
         else
           GroupBoxLinearConstraint.Visible := false;
@@ -425,7 +427,7 @@ begin
             EditAnchorPoint.Text := '';
             if (FActiveControlPoint.AnchorPoint.Name > '') then
              EditAnchorPoint.Text := FActiveControlPoint.AnchorPoint.Name
-             else EditAnchorPoint.Text := 'Point['+IntToStr(FActiveControlPoint.AnchorPoint.Id)+']';
+             else EditAnchorPoint.Text := rsPointLabel+'['+IntToStr(FActiveControlPoint.AnchorPoint.Id)+']';
           end
         else
           GroupBoxAnchorConstraint.Visible := false;
@@ -439,6 +441,23 @@ end;{TFreeControlPointForm.FSetActiveControlPoint}
 procedure TFreeControlPointForm.Reload;
 begin
   FSetActiveControlPoint(ActiveControlPoint);
+end;
+
+procedure TFreeControlPointForm.RefreshPointCaption;
+var I,W:Integer; L:TLabel;
+begin
+  DisableAlign;
+  try
+    for I:=0 to ComponentCount-1 do
+      if Components[I] is TLabel then begin
+        L:=TLabel(Components[I]);Canvas.Font.Assign(L.Font);
+        W:=Canvas.TextWidth(L.Caption)+Scale96ToForm(4);
+        L.Constraints.MinWidth:=W;
+        L.Width:=W;
+      end;
+  finally EnableAlign end;
+  if FActiveControlPoint <> nil then
+    Caption := rsPointLabel + '[' + IntToStr(FActiveControlPoint.Id) + ']:' + FActiveControlPoint.Name;
 end;
 
 procedure TFreeControlPointForm.OrdinateEditorChange(Sender: TObject);
@@ -993,12 +1012,34 @@ begin
 end;
 
 procedure TFreeControlPointForm.FormCreate(Sender: TObject);
+var I: integer;
 begin
+  AlphaBlend := False;
+  Color := clWhite;
+  Font.Name := 'Microsoft YaHei UI';
+  Font.Size := 9;
+  for I := 0 to ComponentCount - 1 do
+  begin
+    if Components[I] is TLabel then TLabel(Components[I]).ParentFont := True
+    else if Components[I] is TFloatSpinEdit then TFloatSpinEdit(Components[I]).ParentFont := True
+    else if Components[I] is TEdit then TEdit(Components[I]).ParentFont := True
+    else if Components[I] is TCheckBox then TCheckBox(Components[I]).ParentFont := True
+    else if Components[I] is TGroupBox then TGroupBox(Components[I]).ParentFont := True;
+    if Components[I] is TPanel then
+      with TPanel(Components[I]) do
+      begin
+        ParentFont := True;
+        ParentBackground := False;
+        ParentColor := False;
+        Color := clWhite;
+        BevelOuter := bvNone;
+      end;
+  end;
 end;
 
 procedure TFreeControlPointForm.FormShow(Sender: TObject);
 begin
-  Caption := Caption;
+  RefreshPointCaption;
 end;
 
 procedure TFreeControlPointForm.SpeedButton1Click(Sender: TObject);

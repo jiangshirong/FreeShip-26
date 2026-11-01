@@ -1,4 +1,4 @@
-{#############################################################################################}
+﻿{#############################################################################################}
 {    This code is distributed as part of the FREE!ship project. FREE!ship is an               }
 {    open source surface-modelling program based on subdivision surfaces and intended for     }
 {    designing ships.                                                                         }
@@ -40,7 +40,7 @@ uses
 {$IFNDEF LCL}
   jpeg, ShellAPI, Windows,
 {$ELSE}
-  LCLIntf, LCLType,
+  {$IFDEF MSWINDOWS}Windows,{$ENDIF} LCLIntf, LCLType, LMessages,
 {$ENDIF}
 
 {$IFDEF VER3}
@@ -107,11 +107,9 @@ type
      MenuItem2: TMenuItem;
      PointsCoincide: TAction;
      AddGridPanel: TAction;
-     ActionCheckUpdates: TAction;
      AddFlowLine: TAction;
      LayerBox: TComboBox;
      MenuItem1: TMenuItem;
-     CheckUpdates: TMenuItem;
      miAddGridPanel: TMenuItem;
      SelectAllControlPoints: TAction;
      ColorButton1: TColorButton;
@@ -121,9 +119,6 @@ type
      PointAlighnPermanently: TAction;
      AddPointToGroup: TAction;
      FontDialog1: TFontDialog;
-     HelpAction: THelpAction;
-     HelpContents: TMenuItem;
-     HelpAbout: TMenuItem;
      LabelProgress: TLabel;
      LabelNumbers: TLabel;
      LabelDistance: TLabel;
@@ -153,7 +148,6 @@ type
     MainMenu1                  : TMainMenu;
     File1                      : TMenuItem;
     Open       : TMenuItem;
-    ExitProgram1               : TMenuItem;
     ToolBarCurves: TToolBar;
     ToolBarFaces: TToolBar;
     ToolBarFile: TToolBar;
@@ -246,7 +240,6 @@ type
     EdgeExtrude: TAction;
     ToolButton27: TToolButton;
     Extrude1: TMenuItem;
-    Help1: TMenuItem;
     EdgeSplit: TAction;
     ToolButton29: TToolButton;
     Split1: TMenuItem;
@@ -475,7 +468,6 @@ type
     //FMDIChildList : TList;
     FMDIPanelManager: TMDIPanelManager;
 
-    procedure ActionCheckUpdatesExecute(Sender: TObject);
     procedure AddFlowLineExecute(Sender: TObject);
     procedure AddGridPanelExecute(Sender: TObject);
     procedure AddPointToGroupExecute(Sender: TObject);
@@ -540,7 +532,6 @@ type
     procedure IntersectionDialogExecute(Sender: TObject);
     procedure EdgeExtrudeExecute(Sender: TObject);
     procedure About1Click(Sender: TObject);
-    procedure Help1Click(Sender: TObject);
     procedure EdgeSplitExecute(Sender: TObject);
     procedure ExportFEFExecute(Sender: TObject);
     procedure EditProjectSettingsExecute(Sender: TObject);
@@ -650,6 +641,24 @@ type
     procedure SetAllActionsEnabled(val : boolean);
     procedure InitiallyLoadModel;
    private    { Private declarations }
+      FStudioBar: TPanel;
+      FNativeLanguageHotkey: boolean;
+      FStudioAbout: TSpeedButton;
+      FStudioImages: TImageList;
+      FStudioMenu: TPopupMenu;
+      FStudioMoveStep: TMenuItem;
+      FQuickLanguagePoll: TTimer;
+      FQuickLanguageHeld: Boolean;
+      FStudioOverflowMenu: TPopupMenu;
+      FStudioOverflow: TSpeedButton;
+      FStudioCalculationsMenu: TPopupMenu;
+      FStudioFeatureMenus:array[0..18] of TPopupMenu;
+      FStudioButtons: array[0..18] of TSpeedButton;
+      FStudioGroups: array[0..5] of TPanel;
+      FStudioWindowButtons:array[0..3] of TSpeedButton;
+      FStudioViewButtons: array[0..2] of TSpeedButton;
+      FStudioResizing: boolean;
+      FStudioClientWidth, FStudioClientHeight: integer;
       FAllToolbarsControlsWidth : integer;
       FToolBarFileControlsWidth : integer;
       FToolBarVisibilityControlsWidth : integer;
@@ -664,6 +673,30 @@ type
       FSplitSectionDialog: TFreeSplitSectionDialog;
 
 
+      procedure CreateStudioBar;
+      procedure StudioBarResize(Sender: TObject);
+      procedure StudioClientResize(Sender: TObject);
+      procedure StudioWindowMotion(Sender: TObject);
+      procedure StudioViewClick(Sender: TObject);
+      procedure StudioMenuClick(Sender: TObject);
+      procedure StudioCalculationsClick(Sender: TObject);
+      procedure StudioFeatureClick(Sender:TObject);
+      procedure StudioMenuShortcut(var Msg: TLMKey; var Handled: Boolean);
+      procedure StudioKeyDownBefore(Sender: TObject; var Key: Word; Shift: TShiftState);
+      procedure TraceLanguageShortcut(const EventText: string);
+      procedure NativeLanguageActivated(Sender: TObject);
+      procedure NativeLanguageDeactivated(Sender: TObject);
+      procedure RefreshNativeLanguageHotkey;
+      procedure WMQuickLanguage(var Msg: TLMessage); message $0312;
+      procedure StudioOverflowClick(Sender: TObject);
+      procedure StudioOverflowPopup(Sender: TObject);
+      procedure StudioOverflowExecute(Sender: TObject);
+      procedure StudioWindowToggle(Sender:TObject);
+      procedure StudioWindowVisibility(Sender:TObject);
+      procedure StudioWindowExpand(Sender:TObject);
+      procedure StudioDismissViews(Sender:TObject;Msg:Cardinal);
+      procedure UpdateStudioViewButtons;
+      procedure DismissPointEditorOnInput(Sender: TObject; Msg: Cardinal);
       procedure FLoadRecentFile(sender:TObject);
       procedure FreeLayerVisibilityDialogChange(Sender: TObject);
       procedure FreeShipChangeLayerData(Sender: TObject);
@@ -679,6 +712,7 @@ type
       procedure HullformWindowOnDeactivate(Sender:TObject);
       procedure HullformWindowOnClose(Sender:TObject; var CloseAction: TCloseAction);
 
+      procedure CreateWnd; override;
       procedure CloseHullWindows;
       procedure FOpenHullWindows;   // Creates 4 different views on the hullform
    public     { Public declarations }
@@ -697,27 +731,33 @@ type
       destructor Destroy; override;
 
       procedure SetCaption;
+      procedure DismissViewsExcept(Target:TControl);
+      procedure RefreshStudioLanguage;
+      procedure StudioQuickLanguageClick(Sender: TObject);
+      procedure PollQuickLanguage(Sender: TObject);
+      procedure HandleQuickLanguageKeys(Down: Boolean);
       procedure UpdateMenu;
+      procedure UpdateStudioModeButtons;
       procedure RecentFilesDialogActivate(Sender: TObject);
       procedure ShowRecentFilesDialog;
   end;
 
 var MainForm: TMainForm;
 var GShowSplash : boolean = true;
-var GCheckUpdates : boolean = true;
 
 implementation
 
 uses //FreeSplashWndw,
+  FreeShip_26Icons,
      FreeLinesplanFrm,
      FreeControlPointFrm,
      FreeKeelWizardDlg,
      FreeStringsUnit,
+     FreeUiChoices,
      FreeEmptyModelChooserDlg,
      RibbonToolBarMgr,
      TileDialog,
      FreePointGroupForm,
-     FreeUpdateDlg,
      FreeLogger;
 
 {$IFnDEF FPC}
@@ -726,6 +766,960 @@ uses //FreeSplashWndw,
   {$R *.lfm}
 {$ENDIF}
 
+
+resourcestring
+  rsStudioMoveStep = 'Movement step...';
+  rsStudioBodyView = 'Body plan';
+  rsStudioProfileView = 'Profile';
+  rsStudioPlanView = 'Plan view';
+  rsStudioPerspectiveView = 'Perspective';
+  rsStudioChecks = 'Model checks';
+  rsStudioMenu = 'Menu';
+  rsStudioMore = 'More';
+  rsStudioAbout = 'About';
+  rsStudioNew = 'New';
+  rsStudioOpen = 'Open';
+  rsStudioSave = 'Save';
+  rsStudioUndo = 'Undo';
+  rsStudioRedo = 'Redo';
+  rsStudioDeselect = 'Deselect';
+  rsStudioPoint = 'Point';
+  rsStudioEdge = 'Edge';
+  rsStudioFace = 'Face';
+  rsStudioLayers = 'Layers';
+  rsStudioControlNet = 'Control net';
+  rsStudioZoomIn = 'Zoom in';
+  rsStudioZoomOut = 'Zoom out';
+  rsStudioFit = 'Fit';
+  rsStudioBackground = 'Background';
+  rsStudioSections = 'Sections';
+  rsStudioLinesPlan = 'Lines plan';
+  rsStudioHydrostatics = 'Hydrostatics';
+  rsStudioCalculations = 'Calculations';
+
+type
+  { Keep the compact icon and text when the bound action updates itself. }
+  TStudioSpeedButton = class(TSpeedButton)
+  private
+    FStudioImages: TCustomImageList;
+    FStudioImageIndex: integer;
+    FStudioCaption: string;
+    FModeGroupIndex: integer;
+  protected
+    procedure ActionChange(Sender: TObject; CheckDefaults: Boolean); override;
+  public
+    procedure SetStudioPresentation(AImages: TCustomImageList; AIndex: integer;
+      const ACaption: string);
+    procedure SetStudioCaption(const ACaption: string);
+    procedure SetModeGroup(AGroupIndex: integer);
+  end;
+
+procedure TStudioSpeedButton.ActionChange(Sender: TObject; CheckDefaults: Boolean);
+begin
+  inherited ActionChange(Sender, CheckDefaults);
+  if FModeGroupIndex > 0 then
+  begin
+    GroupIndex := FModeGroupIndex;
+    AllowAllUp := True;
+  end;
+  if FStudioImages <> nil then
+  begin
+    Images := FStudioImages;
+    ImageIndex := FStudioImageIndex;
+    Caption := FStudioCaption;
+  end;
+end;
+
+procedure TStudioSpeedButton.SetStudioPresentation(AImages: TCustomImageList;
+  AIndex: integer; const ACaption: string);
+begin
+  FStudioImages := AImages;
+  FStudioImageIndex := AIndex;
+  FStudioCaption := ACaption;
+  Images := AImages;
+  ImageIndex := AIndex;
+  ImageWidth := 20;
+  Caption := ACaption;
+end;
+
+procedure TStudioSpeedButton.SetStudioCaption(const ACaption: string);
+begin
+  FStudioCaption := ACaption;
+  Caption := ACaption;
+  Hint := ACaption;
+end;
+
+procedure TStudioSpeedButton.SetModeGroup(AGroupIndex: integer);
+begin
+  FModeGroupIndex := AGroupIndex;
+  GroupIndex := AGroupIndex;
+  AllowAllUp := True;
+end;
+
+// The toolbar preserves existing actions while giving each one a compact icon.
+procedure TMainForm.CreateStudioBar;
+const
+  IconNames: array[0..24] of string = (
+    'Menu', 'ProjectSettings', 'Observe', 'ModelCheck', 'Transform', 'Redo', 'Deselect', 'Point', 'Edge',
+    'Face', 'Layers', 'ControlNet', 'ZoomIn', 'ZoomOut', 'Fit', 'Background',
+    'Sections', 'LinesPlan', 'Calculate', 'More', 'Info',
+    'ViewBody','ViewProfile','ViewPlan','ViewPerspective');
+  IconSizes: array[0..3] of integer = (20, 25, 30, 40);
+var GroupIndex, ButtonIndex: integer;
+    Group: TPanel;
+    Button: TStudioSpeedButton;
+    IconIndexes: array[0..24] of integer;
+    MenuItem: TMenuItem;
+    Chinese: boolean;
+
+  procedure LoadStudioImages;
+  var I, J: integer;
+      Images: array[0..3] of TCustomBitmap;
+      IconPath, BasePath: string;
+      Resolution: TCustomImageListResolution;
+  begin
+    FStudioImages := TImageList.Create(Self);
+    FStudioImages.Name := 'StudioToolbarImages';
+    FStudioImages.Width := 20;
+    FStudioImages.Height := 20;
+    FStudioImages.Scaled := True;
+    for J := Low(IconSizes) to High(IconSizes) do
+      Resolution := FStudioImages.Resolution[IconSizes[J]];
+    BasePath := IncludeTrailingPathDelimiter(FreeShip.Preferences.GlobalAppDataDirectory) +
+      'Themes' + DirectorySeparator + 'StudioLight' + DirectorySeparator + 'toolbar';
+    for I := Low(IconNames) to High(IconNames) do
+    begin
+      IconIndexes[I] := -1;
+      for J := Low(Images) to High(Images) do Images[J] := nil;
+      try
+        try
+          for J := Low(Images) to High(Images) do
+          begin
+            IconPath := BasePath + DirectorySeparator + IntToStr(IconSizes[J]) +
+              DirectorySeparator + IconNames[I] + '.png';
+            if not HasFreeShip_26Icon(IconNames[I]) and not FileExistsUTF8(IconPath) then
+              raise Exception.Create('Toolbar icon missing: ' + IconPath);
+            Images[J] := TPortableNetworkGraphic.Create;
+            if HasFreeShip_26Icon(IconNames[I]) then
+              LoadFreeShip_26Icon(Images[J],IconNames[I],IconSizes[J])
+            else Images[J].LoadFromFile(IconPath);
+          end;
+          IconIndexes[I] := FStudioImages.AddMultipleResolutions(Images);
+        except
+          on E: Exception do logger.Error(E.Message);
+        end;
+      finally
+        for J := Low(Images) to High(Images) do Images[J].Free;
+      end;
+    end;
+  end;
+
+  function LabelText(const ZH, EN: string): string;
+  begin
+    if Chinese then Result := ZH else Result := EN;
+  end;
+
+  procedure AddGroup;
+  begin
+    Group := TPanel.Create(Self);
+    FStudioGroups[GroupIndex] := Group;
+    Group.Parent := FStudioBar;
+    Group.Caption := '';
+    Group.ParentBackground := False;
+    Group.ParentColor := False;
+    case GroupIndex of
+      0: Group.Color := RGB(237, 244, 248);
+      1: Group.Color := RGB(248, 243, 232);
+      else Group.Color := RGB(229, 243, 237);
+    end;
+    Group.BevelOuter := bvNone;
+    Group.Height := Scale96ToForm(52);
+    ButtonIndex := 0;
+    Inc(GroupIndex);
+  end;
+
+  procedure AddButton(IconIndex: integer; const ZH, EN: string; Action: TAction; ViewCommand: integer = -1);
+  var ButtonWidth: integer;
+  begin
+    Button := TStudioSpeedButton.Create(Self);
+    Button.Parent := Group;
+    Button.Flat := True;
+    Button.ShowHint := True;
+    Button.ParentFont := True;
+    if Assigned(Action) then Button.Action := Action
+    else if ViewCommand >= 0 then
+    begin
+      Button.Tag := ViewCommand;
+      Button.OnClick := StudioViewClick;
+      FStudioViewButtons[ViewCommand] := Button;
+    end
+    else Button.OnClick := StudioMenuClick;
+    Button.SetStudioPresentation(FStudioImages, IconIndexes[IconIndex], LabelText(ZH, EN));
+    FStudioButtons[IconIndex] := Button;
+    Button.Layout := blGlyphTop;
+    Button.Spacing := Scale96ToForm(2);
+    Button.Margin := Scale96ToForm(2);
+    Button.Hint := Button.Caption;
+    if (Action = ShowControlNet) or (Action = AddPoint) then
+    begin
+      if Action = ShowControlNet then Button.SetModeGroup(1)
+      else Button.SetModeGroup(2);
+      Button.Down := Action.Checked;
+    end;
+    if Chinese then ButtonWidth := Scale96ToForm(60)
+    else ButtonWidth := Scale96ToForm(88);
+    Button.SetBounds(ButtonIndex * ButtonWidth, Scale96ToForm(2),
+      ButtonWidth - Scale96ToForm(2), Scale96ToForm(48));
+    Inc(ButtonIndex);
+    Group.Width := ButtonIndex * ButtonWidth;
+  end;
+
+  procedure Detach(Item:TMenuItem);
+  begin if Assigned(Item.Parent) then Item.Parent.Remove(Item) end;
+
+  procedure BindFeature(Index:Integer;Root:TMenuItem);
+  var M:TPopupMenu;Child:TMenuItem;
+  begin
+    M:=TPopupMenu.Create(Self);M.Name:='StudioFeature'+IntToStr(Index);
+    FStudioFeatureMenus[Index]:=M;
+    Detach(Root);
+    while Root.Count>0 do begin Child:=Root.Items[0];Root.Remove(Child);M.Items.Add(Child) end;
+    FStudioButtons[Index].Tag:=Index;FStudioButtons[Index].OnClick:=StudioFeatureClick;
+  end;
+
+  procedure MoveToChecks(Item:TMenuItem);
+  begin Detach(Item);FStudioFeatureMenus[3].Items.Add(Item) end;
+
+  procedure RemoveDirectEntries(Root:TMenuItem);
+  var I:Integer;Child:TMenuItem;
+  begin
+    for I:=Root.Count-1 downto 0 do begin
+      Child:=Root.Items[I];RemoveDirectEntries(Child);
+      if (Child.Action=ShowControlNet) or (Child.Action=ShowLinesplan) or
+         (Child.Action=IntersectionDialog) or (Child.Action=EditProjectSettings) then Root.Remove(Child);
+    end;
+  end;
+
+begin
+  Chinese := SameText(FreeShip.Preferences.Language, 'Chinese');
+  PanelMain.Visible := False;
+  Color := RGB(246, 249, 247);
+  MainClientPanel.ParentColor := False;
+  MainClientPanel.Color := RGB(221, 231, 226);
+  FStudioClientWidth := MainClientPanel.ClientWidth;
+  FStudioClientHeight := MainClientPanel.ClientHeight;
+  MainClientPanel.OnResize := StudioClientResize;
+  StatusBar.ParentBackground := False;
+  StatusBar.ParentColor := False;
+  StatusBar.Color := RGB(250, 252, 250);
+  StatusBar.BevelOuter := bvNone;
+  StatusPanel2.ParentColor := True;
+  StatusPanel3.ParentColor := True;
+  StatusPanel4.ParentColor := True;
+  StatusPanel5.ParentColor := True;
+  StatusPanel2.BevelOuter := bvNone;
+  StatusPanel3.BevelOuter := bvNone;
+  StatusPanel4.BevelOuter := bvNone;
+  StatusPanel5.BevelInner := bvNone;
+  StatusPanel2.Visible := False;
+  StatusPanel3.Visible := False;
+  StatusPanel4.Visible := False;
+  StatusBar.Visible := False;
+  Font.Name := 'Microsoft YaHei UI';
+  Font.Size := 9;
+  Resistance1.Visible := False;
+  PropellerTask1.Visible := False;
+  PropellerRvrs.Visible := False;
+  HydrodynTask.Visible := False;
+
+  FStudioBar := TPanel.Create(Self);
+  FStudioBar.Parent := Self;
+  FStudioBar.Align := alTop;
+  FStudioBar.BevelOuter := bvNone;
+  FStudioBar.ParentBackground := False;
+  FStudioBar.ParentColor := False;
+  FStudioBar.Color := RGB(224, 236, 232);
+  FStudioBar.Font.Name := 'Microsoft YaHei UI';
+  FStudioBar.Font.Size := 9;
+  FStudioBar.Name := 'StudioToolbar';
+  FStudioBar.Caption := '';
+  FStudioBar.Height := Scale96ToForm(58);
+  FStudioBar.OnResize := StudioBarResize;
+  LoadStudioImages;
+  FStudioMenu := TPopupMenu.Create(Self);
+  FStudioMenu.Name := 'StudioMainMenu';
+  Self.Menu := nil;
+  while MainMenu1.Items.Count > 0 do
+  begin
+    MenuItem := MainMenu1.Items[0];
+    MainMenu1.Items.Remove(MenuItem);
+    FStudioMenu.Items.Add(MenuItem);
+  end;
+  FStudioMoveStep := TMenuItem.Create(Self);
+  FStudioMoveStep.Name := 'StudioMoveStep';
+  FStudioMoveStep.OnClick := StatusPanel3Click;
+  ools1.Add(FStudioMoveStep);
+  Detach(Preferences1);
+  FStudioMenu.Items.Add(Preferences1);
+  OnShortcut := StudioMenuShortcut;
+  GroupIndex := 0;
+  AddGroup;
+  Group.Name := 'StudioPrimaryGroup';
+  Group.Caption := '';
+  AddButton(0, '菜单', 'Menu', nil);
+  AddButton(8, '边', 'Edge', nil);
+  AddButton(9, '面', 'Face', nil);
+  AddButton(7, '点', 'Point', nil);
+  AddButton(10, '图层', 'Layers', nil);
+  AddButton(2, '观察', 'Visibility', nil);
+  AddButton(3, '检查', 'Model checks', nil);
+  AddButton(4, '变换', 'Transform', nil);
+  AddButton(18, '计算', 'Calculations', nil);
+  Button.Name:='StudioCalculations'; Button.OnClick:=StudioCalculationsClick;
+  FStudioCalculationsMenu:=TPopupMenu.Create(Self);
+  FStudioCalculationsMenu.Name:='StudioCalculationsMenu';
+  if Assigned(Calculations1.Parent) then Calculations1.Parent.Remove(Calculations1);
+  while Calculations1.Count>0 do begin
+    MenuItem:=Calculations1.Items[0]; Calculations1.Remove(MenuItem);
+    FStudioCalculationsMenu.Items.Add(MenuItem);
+  end;
+  AddGroup;
+  Group.Name := 'StudioProjectGroup';
+  Group.Caption := '';
+  AddButton(1, '设计船舶', 'Project settings', EditProjectSettings);
+  AddButton(16, '剖面线', 'Sections', IntersectionDialog);
+  AddButton(17, '型线图', 'Lines plan', ShowLinesplan);
+  AddGroup;
+  Group.Name := 'StudioModeGroup';
+  Group.Caption := '';
+  AddButton(11, '控制网格', 'Control net', ShowControlNet);
+  AddGroup;
+  Group.Name:='StudioViewsGroup';Group.Caption:='';Group.Color:=RGB(231,240,246);
+  for GroupIndex:=0 to 3 do begin
+    Button:=TStudioSpeedButton.Create(Self);Button.Parent:=Group;
+    Button.Name:='StudioWindowToggle'+IntToStr(GroupIndex);Button.Tag:=GroupIndex;
+    Button.Flat:=True;Button.ShowHint:=True;Button.ParentFont:=True;Button.Layout:=blGlyphTop;
+    Button.Spacing:=Scale96ToForm(2);Button.Margin:=Scale96ToForm(2);
+    Button.SetStudioPresentation(FStudioImages,IconIndexes[21+GroupIndex],'');
+    Button.SetModeGroup(30+GroupIndex);Button.OnClick:=StudioWindowToggle;
+    FStudioWindowButtons[GroupIndex]:=Button;
+  end;
+  FStudioButtons[11].Parent:=FStudioGroups[3];
+  FStudioButtons[11].SendToBack;
+  FreeAndNil(FStudioGroups[2]);
+  BindFeature(7,Point1);BindFeature(8,Edge1);BindFeature(9,Face1);
+  // Curve creation belongs with surface construction; move the real item once.
+  Detach(Curve1);FStudioFeatureMenus[9].Items.Add(Curve1);
+  BindFeature(10,Layer1);BindFeature(2,Visibility1);BindFeature(4,ransform1);
+  FStudioFeatureMenus[3]:=TPopupMenu.Create(Self);FStudioFeatureMenus[3].Name:='StudioChecksMenu';
+  FStudioButtons[3].Tag:=3;FStudioButtons[3].OnClick:=StudioFeatureClick;
+  MoveToChecks(Analyzesurface1);MoveToChecks(SelectLeakPoints1);
+  MoveToChecks(Removeunusedpoints1);MoveToChecks(Removenegative1);
+  // Surface inspection and plate development have one route: viewport context.
+  Detach(Normals1);Detach(Curvature1);Detach(Decrcurvaturescale1);Detach(Incrcurvaturescale1);
+  Detach(Developplates1);Detach(N5);
+  RemoveDirectEntries(FStudioMenu.Items);
+  RemoveDirectEntries(FStudioCalculationsMenu.Items);
+  RemoveDirectEntries(FStudioFeatureMenus[2].Items);
+  Detach(Project1);Detach(Edit1);
+  FStudioOverflowMenu := TPopupMenu.Create(Self);
+  FStudioOverflowMenu.Name := 'StudioOverflowMenu';
+  FStudioOverflowMenu.OnPopup := StudioOverflowPopup;
+  Button := TStudioSpeedButton.Create(Self);
+  Button.Name := 'StudioOverflow';
+  Button.Parent := FStudioBar;
+  Button.Flat := True;
+  Button.ShowHint := True;
+  Button.ParentFont := True;
+  Button.Layout := blGlyphTop;
+  Button.Spacing := Scale96ToForm(2);
+  Button.Margin := Scale96ToForm(2);
+  Button.SetStudioPresentation(FStudioImages, IconIndexes[19], LabelText('更多', 'More'));
+  Button.Hint := Button.Caption;
+  Button.OnClick := StudioOverflowClick;
+  Button.SetBounds(0, 0, Scale96ToForm(60), Scale96ToForm(48));
+  FStudioOverflow := Button;
+  Button := TStudioSpeedButton.Create(Self);
+  Button.Parent := FStudioBar;
+  Button.Name := 'StudioAbout';
+  Button.Action := AboutAction;
+  Button.Flat := True; Button.ShowHint := True; Button.ParentFont := True;
+  Button.Layout := blGlyphTop; Button.Spacing := Scale96ToForm(2);
+  Button.Margin := Scale96ToForm(2);
+  Button.SetStudioPresentation(FStudioImages, IconIndexes[20], rsStudioAbout);
+  Button.Width := Scale96ToForm(70); FStudioAbout := Button;
+  FStudioBar.BringToFront;
+  RefreshStudioLanguage;
+  UpdateStudioViewButtons;
+  UpdateStudioModeButtons;
+end;
+
+procedure TMainForm.UpdateStudioModeButtons;
+begin
+  if not Assigned(FreeShip) then Exit;
+  AddPoint.Checked := FreeShip.EditMode = emAddPoint;
+  if Assigned(FStudioButtons[7]) then
+  begin
+    FStudioButtons[7].GroupIndex := 0;
+    FStudioButtons[7].AllowAllUp := True;
+    FStudioButtons[7].Down := False;
+  end;
+end;
+
+procedure TMainForm.RefreshStudioLanguage;
+var Labels: array[0..18] of string;
+    I, J, LeftPos, ButtonWidth, MinWidth: integer;
+    Group: TPanel;
+    Button: TStudioSpeedButton;
+    Measure: TBitmap;
+  function WithoutEllipsis(const Text:string):string;
+  begin
+    Result:=TrimRight(Text);
+    while (Length(Result)>=3) and (Copy(Result,Length(Result)-2,3)='...') do
+      Result:=TrimRight(Copy(Result,1,Length(Result)-3));
+    while (Length(Result)>=Length('…')) and
+      (Copy(Result,Length(Result)-Length('…')+1,Length('…'))='…') do
+      Result:=TrimRight(Copy(Result,1,Length(Result)-Length('…')));
+  end;
+  procedure CleanEntries(Owner:TComponent);
+  var K:Integer;Item:TComponent;
+  begin
+    for K:=0 to Owner.ComponentCount-1 do begin
+      Item:=Owner.Components[K];
+      if Item is TAction then TAction(Item).Caption:=WithoutEllipsis(TAction(Item).Caption);
+      if Item is TMenuItem then TMenuItem(Item).Caption:=WithoutEllipsis(TMenuItem(Item).Caption);
+      CleanEntries(Item);
+    end;
+  end;
+begin
+  if not Assigned(FStudioBar) then Exit;
+  CleanEntries(Self);
+  RefreshNativeLanguageHotkey;
+  if Assigned(FStudioAbout) then TStudioSpeedButton(FStudioAbout).SetStudioCaption(rsStudioAbout);
+  if Assigned(FStudioMoveStep) then FStudioMoveStep.Caption := WithoutEllipsis(rsStudioMoveStep);
+  SetChoiceLabels(cbPrecision, [rsChoiceLow, rsChoiceMedium, rsChoiceHigh, rsChoiceHighest]);
+  TStudioSpeedButton(FStudioWindowButtons[0]).SetStudioCaption(rsStudioBodyView);
+  TStudioSpeedButton(FStudioWindowButtons[1]).SetStudioCaption(rsStudioProfileView);
+  TStudioSpeedButton(FStudioWindowButtons[2]).SetStudioCaption(rsStudioPlanView);
+  TStudioSpeedButton(FStudioWindowButtons[3]).SetStudioCaption(rsStudioPerspectiveView);
+  Labels[0] := rsStudioMenu;
+  Labels[1] := EditProjectSettings.Caption; Labels[2] := Visibility1.Caption; Labels[3] := rsStudioChecks;
+  Labels[4] := ransform1.Caption; Labels[5] := rsStudioRedo; Labels[6] := rsStudioDeselect;
+  Labels[7] := rsStudioPoint; Labels[8] := rsStudioEdge; Labels[9] := rsStudioFace;
+  Labels[10] := rsStudioLayers; Labels[11] := rsStudioControlNet;
+  Labels[12] := rsStudioZoomIn; Labels[13] := rsStudioZoomOut; Labels[14] := rsStudioFit;
+  Labels[15] := rsStudioBackground; Labels[16] := rsStudioSections;
+  Labels[17] := rsStudioLinesPlan; Labels[18] := rsStudioCalculations;
+  for I := Low(FStudioButtons) to High(FStudioButtons) do
+    if Assigned(FStudioButtons[I]) then
+      TStudioSpeedButton(FStudioButtons[I]).SetStudioCaption(Labels[I]);
+  if Assigned(FStudioOverflow) then
+    TStudioSpeedButton(FStudioOverflow).SetStudioCaption(rsStudioMore);
+
+  Measure := TBitmap.Create;
+  try
+    Measure.SetSize(1, 1);
+    Measure.Canvas.Font.Assign(FStudioBar.Font);
+    MinWidth := Scale96ToForm(48);
+    if Assigned(FStudioAbout) then begin
+      Measure.Canvas.Font.Assign(FStudioAbout.Font);
+      FStudioAbout.Width:=Max(MinWidth,Measure.Canvas.TextWidth(FStudioAbout.Caption)+Scale96ToForm(20));
+    end;
+    Measure.Canvas.Font.Assign(FStudioBar.Font);
+    if Assigned(FreeShip.ControlpointForm) then FreeShip.ControlpointForm.RefreshPointCaption;
+    if Assigned(FStudioOverflow) then
+      FStudioOverflow.Width := Max(MinWidth,
+        Measure.Canvas.TextWidth(FStudioOverflow.Caption) + Scale96ToForm(12));
+    for I := Low(FStudioGroups) to High(FStudioGroups) do
+      if Assigned(FStudioGroups[I]) then
+      begin
+        Group := FStudioGroups[I];
+        LeftPos := 0;
+        for J := 0 to Group.ControlCount - 1 do
+          if Group.Controls[J] is TStudioSpeedButton then
+          begin
+            Button := TStudioSpeedButton(Group.Controls[J]);
+            ButtonWidth := Max(MinWidth,
+              Measure.Canvas.TextWidth(Button.Caption) + Scale96ToForm(12));
+            if Group=FStudioGroups[3] then
+              ButtonWidth:=Max(Scale96ToForm(48),
+                Measure.Canvas.TextWidth(Button.Caption)+Scale96ToForm(12));
+            Button.SetBounds(LeftPos, Scale96ToForm(2),
+              ButtonWidth - Scale96ToForm(2), Scale96ToForm(48));
+            Inc(LeftPos, ButtonWidth);
+          end;
+        Group.Width := LeftPos;
+      end;
+  finally
+    Measure.Free;
+  end;
+  UpdateStudioViewButtons;
+  StudioBarResize(FStudioBar);
+end;
+
+procedure TMainForm.StudioFeatureClick(Sender:TObject);
+var Index:Integer;P:TPoint;
+begin
+ Index:=TControl(Sender).Tag;
+ if (Index<0) or (Index>18) or not Assigned(FStudioFeatureMenus[Index]) then Exit;
+ UpdateMenu;
+ if Assigned(TControl(Sender).Parent) and (not TControl(Sender).Parent.Visible or not TControl(Sender).Visible) then
+   P:=FStudioOverflow.ClientToScreen(Point(0,FStudioOverflow.Height))
+ else P:=TControl(Sender).ClientToScreen(Point(0,TControl(Sender).Height));
+ FStudioFeatureMenus[Index].PopUp(P.X,P.Y);
+end;
+
+procedure TMainForm.StudioCalculationsClick(Sender: TObject);
+var P:TPoint;
+begin
+  if not Assigned(FStudioCalculationsMenu) then Exit;
+  if not FStudioButtons[18].Parent.Visible or not FStudioButtons[18].Visible then
+    P:=FStudioOverflow.ClientToScreen(Point(0,FStudioOverflow.Height))
+  else P:=FStudioButtons[18].ClientToScreen(Point(0,FStudioButtons[18].Height));
+  FStudioCalculationsMenu.PopUp(P.X,P.Y);
+end;
+
+procedure TMainForm.StudioMenuClick(Sender: TObject);
+var P: TPoint;
+begin
+  if not Assigned(FStudioMenu) or not Assigned(FStudioButtons[0]) then Exit;
+  P.X := 0; P.Y := FStudioButtons[0].Height;
+  P := FStudioButtons[0].ClientToScreen(P);
+  FStudioMenu.PopUp(P.X, P.Y);
+end;
+
+procedure TMainForm.StudioMenuShortcut(var Msg: TLMKey; var Handled: Boolean);
+var I:Integer;
+begin
+  if (Msg.CharCode = Ord('M')) and (KeyDataToShiftState(Msg.KeyData) = [ssAlt]) then
+  begin
+    StudioMenuClick(FStudioButtons[0]);
+    Handled := True;
+  end
+  else if Assigned(FStudioMenu) then
+  begin
+    Handled := FStudioMenu.IsShortCut(Msg);
+    if not Handled and Assigned(FStudioCalculationsMenu) then
+      Handled:=FStudioCalculationsMenu.IsShortCut(Msg);
+    for I:=Low(FStudioFeatureMenus) to High(FStudioFeatureMenus) do
+      if not Handled and Assigned(FStudioFeatureMenus[I]) then Handled:=FStudioFeatureMenus[I].IsShortCut(Msg);
+  end;
+end;
+
+procedure TMainForm.NativeLanguageActivated(Sender: TObject);
+begin RefreshNativeLanguageHotkey end;
+
+procedure TMainForm.NativeLanguageDeactivated(Sender: TObject);
+begin
+  {$IFDEF MSWINDOWS}
+  if FNativeLanguageHotkey then Windows.UnregisterHotKey(Handle,$5247);
+  {$ENDIF}
+  FNativeLanguageHotkey:=False;
+end;
+
+procedure TMainForm.RefreshNativeLanguageHotkey;
+begin
+  {$IFDEF MSWINDOWS}
+  if not Assigned(FreeShip) then Exit;
+  if not Application.Active or not FreeShip.Preferences.QuickLanguageEnabled or
+     SameText(FreeShip.Preferences.QuickLanguageFirst,FreeShip.Preferences.QuickLanguageSecond) then
+  begin NativeLanguageDeactivated(nil); Exit end;
+  if FNativeLanguageHotkey then Exit;
+  FNativeLanguageHotkey:=Windows.RegisterHotKey(Handle,$5247,$0001 or $0002 or $4000,Ord('L'));
+  if FNativeLanguageHotkey then TraceLanguageShortcut('native-hotkey-registered')
+  else TraceLanguageShortcut('native-hotkey-registration-failed error='+IntToStr(Windows.GetLastError));
+  {$ENDIF}
+end;
+
+procedure TMainForm.WMQuickLanguage(var Msg: TLMessage);
+begin
+  if (Msg.WParam=$5247) and FNativeLanguageHotkey then begin
+    TraceLanguageShortcut('native-hotkey-received');
+    if not Assigned(Screen.GetCurrentModalForm) then HandleQuickLanguageKeys(True);
+    Msg.Result:=0;
+  end;
+end;
+
+procedure TMainForm.TraceLanguageShortcut(const EventText: string);
+var Path, Line: string; Stream: TFileStream;
+begin
+  if not Assigned(FreeShip) then Exit;
+  try
+    Path:=GetTempDir(False)+'FreeShip_26-language-shortcut.log';
+    Line:=FormatDateTime('yyyy-mm-dd hh:nn:ss.zzz',Now)+' '+EventText+
+      ' enabled='+SysUtils.BoolToStr(FreeShip.Preferences.QuickLanguageEnabled,True)+
+      ' language='+FreeShip.Preferences.Language+
+      ' pair='+FreeShip.Preferences.QuickLanguageFirst+'/'+FreeShip.Preferences.QuickLanguageSecond+
+      ' modal='+SysUtils.BoolToStr(Assigned(Screen.GetCurrentModalForm),True)+LineEnding;
+    if FileExists(Path) then Stream:=TFileStream.Create(Path,fmOpenReadWrite or fmShareDenyNone)
+    else Stream:=TFileStream.Create(Path,fmCreate);
+    try Stream.Seek(0,soEnd); if Length(Line)>0 then Stream.WriteBuffer(Line[1],Length(Line));
+    finally Stream.Free end;
+  except
+    // Diagnostics must never interrupt modeling or input handling.
+  end;
+end;
+
+procedure TMainForm.StudioKeyDownBefore(Sender: TObject; var Key: Word; Shift: TShiftState);
+var C:TControl;View:TFreeHullWindow;I:Integer;
+begin
+  // Resolve viewport shortcuts before popup/menu shortcuts or dialog-key handling.
+  // Only this model's views participate; editors and other windows keep their keys.
+  if (Shift=[ssCtrl]) and (Key in [Ord('A'),Ord('I'),Ord('O')]) and
+     not Assigned(Screen.GetCurrentModalForm) and Assigned(FMDIPanelManager) then begin
+    if Sender is TCustomEdit then begin
+      if Key=Ord('A') then begin TCustomEdit(Sender).SelectAll;Key:=0 end;
+      Exit;
+    end;
+    if Sender is TCustomComboBox then Exit;
+    View:=nil;
+    if Sender is TControl then begin
+      C:=TControl(Sender);
+      while Assigned(C) and (View=nil) do begin
+        for I:=0 to MDIChildCount-1 do
+          if (C=GetMDIChildren(I)) or (C=GetMDIChildren(I).Viewport) then begin View:=GetMDIChildren(I);Break end;
+        C:=C.Parent;
+      end;
+    end;
+    if (View=nil) and (Sender=Self) and
+       not (Screen.ActiveControl is TCustomEdit) and
+       not (Screen.ActiveControl is TCustomComboBox) then View:=ActiveMDIChild;
+    if Assigned(View) then begin View.ViewportKeyDown(View.Viewport,Key,Shift);Exit end;
+  end;
+  if (Key=Ord('L')) and ((ssCtrl in Shift) or (ssAlt in Shift)) then
+    TraceLanguageShortcut('key-before ctrl='+SysUtils.BoolToStr(ssCtrl in Shift,True)+
+      ' alt='+SysUtils.BoolToStr(ssAlt in Shift,True)+' shift='+SysUtils.BoolToStr(ssShift in Shift,True));
+  if (Key <> Ord('L')) or not (ssCtrl in Shift) or not (ssAlt in Shift) or
+     (ssShift in Shift) or not Assigned(FreeShip) or
+     not FreeShip.Preferences.QuickLanguageEnabled or
+     SameText(FreeShip.Preferences.QuickLanguageFirst, FreeShip.Preferences.QuickLanguageSecond) or
+     Assigned(Screen.GetCurrentModalForm) then Exit;
+  if FNativeLanguageHotkey then Exit;
+  Key := 0;
+  HandleQuickLanguageKeys(True);
+end;
+
+procedure TMainForm.PollQuickLanguage(Sender: TObject);
+var Down: Boolean;
+begin
+  Down:=False;
+  {$IFDEF MSWINDOWS}
+  if Application.Active and not Assigned(Screen.GetCurrentModalForm) then
+    Down:=((Windows.GetAsyncKeyState(VK_CONTROL) and $8000)<>0)
+      and ((Windows.GetAsyncKeyState(VK_MENU) and $8000)<>0)
+      and ((Windows.GetAsyncKeyState(Ord('L')) and $8000)<>0)
+      and ((Windows.GetAsyncKeyState(VK_SHIFT) and $8000)=0);
+  {$ENDIF}
+  HandleQuickLanguageKeys(Down);
+end;
+
+procedure TMainForm.HandleQuickLanguageKeys(Down: Boolean);
+begin
+  if Down and not FQuickLanguageHeld then
+  begin
+    FQuickLanguageHeld:=True;
+    if Assigned(FreeShip) and FreeShip.Preferences.QuickLanguageEnabled and
+       not Assigned(Screen.GetCurrentModalForm) then
+    begin
+      TraceLanguageShortcut('physical-key-press');
+      StudioQuickLanguageClick(nil);
+    end;
+  end
+  else if not Down then FQuickLanguageHeld:=False;
+end;
+
+procedure TMainForm.StudioQuickLanguageClick(Sender: TObject);
+var Target: string; I: integer;
+begin
+  TraceLanguageShortcut('switch-request');
+  if not FreeShip.Preferences.QuickLanguageEnabled then Exit;
+  if SameText(FreeShip.Preferences.QuickLanguageFirst,
+    FreeShip.Preferences.QuickLanguageSecond) then Exit;
+  if SameText(FreeShip.Preferences.Language, FreeShip.Preferences.QuickLanguageFirst) then
+    Target := FreeShip.Preferences.QuickLanguageSecond
+  else
+    Target := FreeShip.Preferences.QuickLanguageFirst;
+  if not FreeShip.Preferences.TrySetInterfaceLanguage(Target) then
+  begin
+    MessageDlg(Format(rsQuickLanguageMissing, [LanguageDisplayName(Target)]), mtWarning, [mbOK], 0);
+    Exit;
+  end;
+  TraceLanguageShortcut('switch-applied');
+  RefreshStudioLanguage;
+  SetCaption;
+  if Assigned(FreeShip.ControlpointForm) then FreeShip.ControlpointForm.RefreshPointCaption;
+  for I := 0 to MDIChildCount - 1 do
+    if Assigned(GetMDIChildren(I)) then GetMDIChildren(I).SetCaption;
+  FreeShipChangeCursorIncrement(nil);
+  FreeShipUpdateGeometryInfo(nil);
+  FreeShip.Redraw;
+  try
+    FreeShip.Preferences.SaveCurrentLanguage;
+  except
+    on E: Exception do MessageDlg(Format(rsQuickCannotSave, [E.Message]), mtWarning, [mbOK], 0);
+  end;
+end;
+
+procedure TMainForm.StudioOverflowClick(Sender: TObject);
+var P: TPoint;
+begin
+  if not Assigned(FStudioOverflowMenu) or not Assigned(FStudioOverflow) or not Assigned(FStudioAbout) then Exit;
+  P.X := 0; P.Y := FStudioOverflow.Height;
+  P := FStudioOverflow.ClientToScreen(P);
+  FStudioOverflowMenu.PopUp(P.X, P.Y);
+end;
+
+procedure TMainForm.StudioOverflowPopup(Sender: TObject);
+var I: integer;
+    Button: TSpeedButton;
+    Item: TMenuItem;
+begin
+  FStudioOverflowMenu.Items.Clear;
+  for I:=0 to 3 do begin
+    Button:=FStudioWindowButtons[I];
+    if Assigned(Button) and not Button.Parent.Visible then begin
+      Item:=TMenuItem.Create(FStudioOverflowMenu);Item.Caption:=Button.Caption;
+      Item.Tag:=I;Item.Checked:=Button.Down;Item.Enabled:=Button.Enabled;
+      Item.OnClick:=StudioWindowToggle;FStudioOverflowMenu.Items.Add(Item);
+    end;
+  end;
+  for I := Low(FStudioButtons) to High(FStudioButtons) do
+  begin
+    Button := FStudioButtons[I];
+    if Assigned(Button) and Assigned(Button.Parent) and (not Button.Parent.Visible or not Button.Visible) then
+    begin
+      Item := TMenuItem.Create(FStudioOverflowMenu);
+      Item.Caption := Button.Caption;
+      Item.Enabled := Button.Enabled;
+      Item.Checked := Button.Down;
+      Item.Tag := I;
+      Item.OnClick := StudioOverflowExecute;
+      FStudioOverflowMenu.Items.Add(Item);
+    end;
+  end;
+end;
+
+procedure TMainForm.StudioOverflowExecute(Sender: TObject);
+var I: integer;
+begin
+  I := TMenuItem(Sender).Tag;
+  if (I >= Low(FStudioButtons)) and (I <= High(FStudioButtons)) and
+     Assigned(FStudioButtons[I]) and FStudioButtons[I].Enabled then
+    FStudioButtons[I].Click;
+end;
+
+procedure TMainForm.StudioBarResize(Sender: TObject);
+var I, J, X, Y, Gap, GroupGap, RowHeight, TotalWidth, Limit, NaturalWidth, Available, VisibleWidth, ViewGroupLeft: integer;
+    NeedsOverflow, Hiding: boolean;
+begin
+  if FStudioResizing or not Assigned(FStudioBar) or not Assigned(FStudioOverflow) or not Assigned(FStudioAbout) then Exit;
+  FStudioResizing := True;
+  try
+    Gap := Scale96ToForm(8);
+    GroupGap := Scale96ToForm(40);
+    if FStudioBar.ClientWidth<Scale96ToForm(1000) then GroupGap:=Scale96ToForm(16);
+    // Recompute natural widths so a narrow layout can expand again.
+    for I:=Low(FStudioGroups) to High(FStudioGroups) do if Assigned(FStudioGroups[I]) then begin
+      NaturalWidth:=0;
+      for J:=0 to FStudioGroups[I].ControlCount-1 do begin
+        FStudioGroups[I].Controls[J].Visible:=True;
+        NaturalWidth:=Max(NaturalWidth,FStudioGroups[I].Controls[J].Left+FStudioGroups[I].Controls[J].Width+Scale96ToForm(2));
+      end;
+      FStudioGroups[I].Width:=NaturalWidth;
+    end;
+    RowHeight := Scale96ToForm(52);
+    X := Gap; Y := Scale96ToForm(3);
+    TotalWidth := Gap;
+    for I := Low(FStudioGroups) to High(FStudioGroups) do
+      if Assigned(FStudioGroups[I]) then
+        Inc(TotalWidth, FStudioGroups[I].Width + GroupGap);
+    if TotalWidth + FStudioAbout.Width + Gap > FStudioBar.ClientWidth then
+      GroupGap:=Scale96ToForm(16);
+    NeedsOverflow := TotalWidth + FStudioAbout.Width + Gap > FStudioBar.ClientWidth;
+    ViewGroupLeft:=FStudioBar.ClientWidth-Gap-FStudioAbout.Width-GroupGap-FStudioGroups[3].Width;
+    Limit:=ViewGroupLeft;
+    NeedsOverflow:=False;
+    TotalWidth:=Gap;
+    for I:=0 to 2 do if Assigned(FStudioGroups[I]) then Inc(TotalWidth,FStudioGroups[I].Width+GroupGap);
+    NeedsOverflow:=TotalWidth>Limit;
+    if NeedsOverflow then Dec(Limit, FStudioOverflow.Width + Gap);
+    Hiding := False;
+    for I := 0 to 2 do
+      if Assigned(FStudioGroups[I]) then
+      begin
+        if (I > Low(FStudioGroups)) and (X + FStudioGroups[I].Width > Limit) then
+          Hiding := True;
+        FStudioGroups[I].Visible := not Hiding;
+        if not Hiding then
+        begin
+          FStudioGroups[I].SetBounds(X, Y, FStudioGroups[I].Width, RowHeight);
+          if (I=Low(FStudioGroups)) and (X+FStudioGroups[I].Width>Limit) then begin
+            Available:=Limit-X;VisibleWidth:=0;
+            for J:=0 to FStudioGroups[I].ControlCount-1 do begin
+              with FStudioGroups[I].Controls[J] do
+                Visible:=(J=0) or (Left+Width<=Available);
+              if FStudioGroups[I].Controls[J].Visible then
+                VisibleWidth:=Max(VisibleWidth,FStudioGroups[I].Controls[J].Left+FStudioGroups[I].Controls[J].Width+Scale96ToForm(2));
+            end;
+            FStudioGroups[I].Width:=VisibleWidth;Hiding:=True;
+          end;
+          Inc(X, FStudioGroups[I].Width + GroupGap);
+        end;
+      end;
+    FStudioGroups[3].Visible:=True;
+    if Hiding then Inc(X,FStudioOverflow.Width+Gap);
+    FStudioGroups[3].SetBounds(X,Y,FStudioGroups[3].Width,RowHeight);
+    FStudioAbout.SetBounds(FStudioBar.ClientWidth-FStudioAbout.Width-Gap, Y, FStudioAbout.Width, Scale96ToForm(48));
+    FStudioOverflow.Visible := Hiding;
+    if Hiding then
+      FStudioOverflow.SetBounds(X-FStudioOverflow.Width-Gap, Y + Scale96ToForm(2), FStudioOverflow.Width,
+        Scale96ToForm(48));
+    FStudioBar.Height := Y + RowHeight + Scale96ToForm(2);
+  finally
+    FStudioResizing := False;
+  end;
+end;
+
+// Keep the default four-up arrangement fitted, without retile of custom layouts.
+procedure TMainForm.StudioWindowMotion(Sender:TObject);
+var I:Integer; Moving:Boolean;
+begin
+  if FMDIPanelManager=nil then Exit;
+  Moving:=False;
+  for I:=0 to FMDIPanelManager.PanelCount-1 do
+    Moving:=Moving or (FMDIPanelManager.MDIPanels[I].PositionState<>wpsNone);
+  for I:=0 to FMDIPanelManager.PanelCount-1 do
+    TFreeHullWindow(FMDIPanelManager.MDIPanels[I]).Viewport.PresentationFrozen:=Moving;
+end;
+
+procedure TMainForm.StudioClientResize(Sender: TObject);
+var I, OldW, OldH, NewW, NewH: integer;
+    Window, MinimizedWindow: TFreeHullWindow;
+    Bounds: TRect;
+    Tiled: boolean;
+begin
+  NewW := MainClientPanel.ClientWidth;
+  NewH := MainClientPanel.ClientHeight;
+  OldW := FStudioClientWidth;
+  OldH := FStudioClientHeight;
+  FStudioClientWidth := NewW;
+  FStudioClientHeight := NewH;
+  if not Assigned(FMDIPanelManager) or (NewW < 4) or (NewH < 4) then Exit;
+  Tiled := (FMDIPanelManager.PanelCount = 4) and (OldW >= 4) and (OldH >= 4);
+  if Tiled then
+    for I := 0 to 3 do
+    begin
+      Window := TFreeHullWindow(FMDIPanelManager.MDIPanels[I]);
+      if Window.WindowState = wsNormal then Bounds := Window.BoundsRect
+      else Bounds := Window.NormalBounds;
+      if (Bounds.Right - Bounds.Left <> OldW div 2) or
+         (Bounds.Bottom - Bounds.Top <> OldH div 2) or
+         ((Bounds.Left <> 0) and (Bounds.Left <> OldW div 2)) or
+         ((Bounds.Top <> 0) and (Bounds.Top <> OldH div 2)) then
+      begin Tiled := False; Break; end;
+    end;
+  MinimizedWindow := nil;
+  for I := 0 to FMDIPanelManager.PanelCount-1 do
+  begin
+    Window := TFreeHullWindow(FMDIPanelManager.MDIPanels[I]);
+    if Tiled then
+    begin
+      if Window.WindowState = wsNormal then Bounds := Window.BoundsRect
+      else Bounds := Window.NormalBounds;
+      if Bounds.Left > 0 then Bounds.Left := NewW div 2;
+      if Bounds.Top > 0 then Bounds.Top := NewH div 2;
+      Bounds.Right := Bounds.Left + NewW div 2;
+      Bounds.Bottom := Bounds.Top + NewH div 2;
+      if Window.WindowState = wsNormal then Window.BoundsRect := Bounds
+      else Window.NormalBounds := Bounds;
+    end;
+    // State-specific bounds must follow the parent even for custom layouts.
+    if Window.WindowState = wsMaximized then Window.SetBounds(0, 0, NewW, NewH)
+    else if Window.WindowState = wsMinimized then MinimizedWindow := Window;
+  end;
+  if Assigned(MinimizedWindow) then MinimizedWindow.WindowState := wsMinimized;
+end;
+
+procedure TMainForm.StudioWindowToggle(Sender:TObject);
+var Index:Integer;W:TFreeHullWindow;
+begin
+ if Sender is TControl then Index:=TControl(Sender).Tag else Index:=TMenuItem(Sender).Tag;
+ if not Assigned(FMDIPanelManager) or (Index<0) or (Index>=MDIChildCount) then Exit;
+ W:=GetMDIChildren(Index);
+ if W.WindowState=wsMinimized then begin W.WindowState:=wsNormal;W.Show end
+ else W.Visible:=not W.Visible;
+ if W.Visible then W.BringToFront;
+ UpdateStudioViewButtons;
+end;
+procedure TMainForm.StudioWindowVisibility(Sender:TObject);
+var W:TFreeHullWindow;
+begin
+ if FDestroying then Exit;
+ W:=TFreeHullWindow(Sender);W.Viewport.SetPresentationFrozen(not W.Visible);
+ UpdateStudioViewButtons;
+end;
+procedure TMainForm.StudioWindowExpand(Sender:TObject);
+var C:TControl;W:TFreeHullWindow;
+begin
+ if not (Sender is TControl) then Exit;
+ C:=TControl(Sender);while Assigned(C) and not (C is TFreeHullWindow) do C:=C.Parent;
+ if C=nil then Exit;W:=TFreeHullWindow(C);
+ if W.WindowState=wsMaximized then W.WindowState:=wsNormal else W.WindowState:=wsMaximized;
+ UpdateStudioViewButtons;
+end;
+procedure TMainForm.StudioDismissViews(Sender:TObject;Msg:Cardinal);
+var C,Hit:TControl;I:Integer;W:TFreeHullWindow;
+begin
+ if FDestroying or not Assigned(FMDIPanelManager) or ((Msg<>LM_LBUTTONDOWN) and (Msg<>LM_RBUTTONDOWN) and (Msg<>LM_MBUTTONDOWN)) then Exit;
+ if not (Sender is TControl) or (GetParentForm(TControl(Sender))<>Self) then Exit;
+ Hit:=FindDragTarget(Mouse.CursorPos,True);
+ if Assigned(Hit) and (GetParentForm(Hit)<>Self) then Hit:=nil;
+ if not Assigned(Hit) then Hit:=TControl(Sender);
+ DismissViewsExcept(Hit);
+end;
+procedure TMainForm.DismissViewsExcept(Target:TControl);
+var C:TControl;I:Integer;W:TFreeHullWindow;
+begin
+ if FDestroying or not Assigned(FMDIPanelManager) then Exit;
+ C:=Target;
+ while Assigned(C) do begin
+   if C=FStudioGroups[3] then Exit; // Toggle clicks must not hide/reopen their own target.
+   C:=C.Parent;
+ end;
+ for I:=0 to MDIChildCount-1 do begin
+   W:=GetMDIChildren(I);C:=Target;
+   while Assigned(C) and (C<>W) do C:=C.Parent;
+   if (C=nil) and W.Visible then W.Hide;
+ end;
+ UpdateStudioViewButtons;
+end;
+procedure TMainForm.UpdateStudioViewButtons;
+var I: integer;
+    Window: TFreeHullWindow;
+begin
+  for I:=0 to 3 do if Assigned(FStudioWindowButtons[I]) then begin
+    FStudioWindowButtons[I].Enabled:=Assigned(FMDIPanelManager) and (I<MDIChildCount);
+    FStudioWindowButtons[I].Down:=FStudioWindowButtons[I].Enabled and GetMDIChildren(I).Visible;
+  end;
+  Window := nil;
+  if Assigned(FMDIPanelManager) then Window := ActiveMDIChild;
+  for I := Low(FStudioViewButtons) to High(FStudioViewButtons) do
+    if Assigned(FStudioViewButtons[I]) then
+      FStudioViewButtons[I].Enabled := Assigned(Window);
+end;
+
+procedure TMainForm.StudioViewClick(Sender: TObject);
+var Window: TFreeHullWindow;
+begin
+  if not Assigned(FMDIPanelManager) then Exit;
+  Window := ActiveMDIChild;
+  if Window = nil then Exit;
+  case TSpeedButton(Sender).Tag of
+    0: Window.ZoomIn.Execute;
+    1: Window.ZoomOut.Execute;
+    2: Window.ZoomExtents.Execute;
+  end;
+end;
 
 procedure SortControlsByXY(tb:TWinControl);
 var c1,c2: TControl; i,j :integer;
@@ -773,12 +1767,41 @@ begin
 end;
 
 
+{$IFDEF MSWINDOWS}
+function StudioDwmSetAttribute(Wnd:HWND;Attribute:DWORD;Value:Pointer;Size:DWORD):LongInt;stdcall;
+  external 'dwmapi.dll' name 'DwmSetWindowAttribute';
+{$ENDIF}
+procedure TMainForm.CreateWnd;
+{$IFDEF MSWINDOWS}var Tint:DWORD;{$ENDIF}
+begin
+  inherited CreateWnd;
+  {$IFDEF MSWINDOWS}
+  Tint:=RGB(224,236,232);
+  StudioDwmSetAttribute(Handle,35,@Tint,SizeOf(Tint));
+  StudioDwmSetAttribute(Handle,34,@Tint,SizeOf(Tint));
+  Tint:=RGB(32,55,50);
+  StudioDwmSetAttribute(Handle,36,@Tint,SizeOf(Tint));
+  {$ENDIF}
+end;
+
 constructor TMainForm.Create(AOwner: TComponent);
 begin
  Application.OnException := CustomExceptionHandler;
  inherited Create(AOwner);
+ {$IFDEF WINDOWS}
+ Icon.Assign(Application.Icon);
+ {$ENDIF}
+ FQuickLanguagePoll:=TTimer.Create(Self);
+ FQuickLanguagePoll.Interval:=25;
+ FQuickLanguagePoll.OnTimer:=PollQuickLanguage;
+ // Outside-click hiding is intentionally disabled; retain the implementation for reuse.
+ // Application.AddOnUserInputHandler(StudioDismissViews);
+ Application.AddOnKeyDownBeforeHandler(StudioKeyDownBefore, True);
+ Application.AddOnActivateHandler(NativeLanguageActivated);
+ Application.AddOnDeactivateHandler(NativeLanguageDeactivated);
  FMDIPanelManager := TMDIPanelManager.Create;
  FFileName:='';
+ TraceLanguageShortcut('diagnostic-start '+COMPILE_DATE+' '+COMPILE_TIME);
 
  //FreeShip.Preferences.SetDefaults;
 
@@ -805,6 +1828,13 @@ end;
 destructor TMainForm.Destroy;
 var i: Integer; thw:TFreeHullWindow;   ptr:pointer; al:TActionList;
 begin
+ if Assigned(FQuickLanguagePoll) then FQuickLanguagePoll.Enabled:=False;
+ NativeLanguageDeactivated(nil);
+ Application.RemoveOnActivateHandler(NativeLanguageActivated);
+ Application.RemoveOnDeactivateHandler(NativeLanguageDeactivated);
+ Application.RemoveOnKeyDownBeforeHandler(StudioKeyDownBefore);
+ Application.RemoveOnUserInputHandler(DismissPointEditorOnInput);
+ Application.RemoveOnUserInputHandler(StudioDismissViews);
  FDestroying := true;
  FreeShip.OnChangeActiveLayer:=nil;
  Freeship.OnChangeLayerData:=nil;
@@ -1021,9 +2051,12 @@ begin
      begin
         FOpenHullWindows;
         FreeShip.Edit.File_Load(FFileName);
-        FreeShip.Surface.Rebuild;
-        Application.ProcessMessages;
-        FreeShip.ZoomFitAllViewports;
+        if not FreeShip.IsLoadError then
+        begin
+          FreeShip.Surface.Rebuild;
+          Application.ProcessMessages;
+          FreeShip.ZoomFitAllViewports;
+        end;
         //FreeShip.Draw;
      end
    else
@@ -1063,9 +2096,8 @@ begin
 
   Freeship.Surface.OnFaceRebuilt:=Freeship.Edit.OnFaceRebuilt;
 
-  BringToFront;
-  Application.BringToFront;
-  Application.ProcessMessages;
+  // Activation is notification, not a request to change foreground order.
+  // Independent windows (including the lines plan) keep their selected focus.
 
   if GShowSplash then
   begin
@@ -1077,15 +2109,6 @@ begin
       exit;
       end;
     GShowSplash:=false; // show splash on first activate only
-  end;
-
-  if GCheckUpdates then
-  begin
-    if not assigned(FreeUpdateForm) then
-      FreeUpdateForm := TFreeUpdateForm.Create(self);
-    if FreeUpdateForm.UpdatesAvailable then
-      FreeUpdateForm.ShowModal;
-    GCheckUpdates := false; // Check updates on first activate only
   end;
 
   if not FModelInitallyLoaded then
@@ -1126,13 +2149,6 @@ procedure TMainForm.AddGridPanelExecute(Sender: TObject);
 begin
   Freeship.Edit.Geometry_AddGridPanel;
   UpdateMenu;
-end;
-
-procedure TMainForm.ActionCheckUpdatesExecute(Sender: TObject);
-begin
-  if not assigned(FreeUpdateForm) then
-     FreeUpdateForm := TFreeUpdateForm.Create(self);
-  FreeUpdateForm.ShowModal;
 end;
 
 procedure TMainForm.ColorButton1Click(Sender: TObject);
@@ -1237,6 +2253,12 @@ end;
 procedure TMainForm.HullformWindowOnActivate(Sender:TObject);
 begin
   // bring Action List here to process keys and shortcuts
+  if Sender is TFreeHullWindow then
+  begin
+    if Assigned(FStudioViewButtons[0]) then FStudioViewButtons[0].Enabled := True;
+    if Assigned(FStudioViewButtons[1]) then FStudioViewButtons[1].Enabled := True;
+    if Assigned(FStudioViewButtons[2]) then FStudioViewButtons[2].Enabled := True;
+  end;
   //FActionListHull := TFreeHullWindow(Sender).FreeHullForm.ActionListHull;
   //self.InsertComponent(FActionListHull);
 end;
@@ -1280,7 +2302,7 @@ end;
 procedure TMainForm.FOpenHullWindows;
 var HullformWindow: TFreeHullWindow;
     I             : Integer;
-    HullformActionList:TActionList;
+    HullformActionList:TActionList;CaptionIndex:Integer;
 begin
 {  StatusPanel3.Destroy;
   StatusPanel3 := TPanel.Create(Self);
@@ -1299,16 +2321,27 @@ begin
 }
    if MDIChildCount=0 then
    begin
+      MainClientPanel.DoubleBuffered:=False;
+      MainClientPanel.DisableAlign;
+      try
       for I:=0 to 3 do
       begin
          // open a new window
          HullformWindow:=TFreeHullWindow.Create(Self);
-         HullformWindow.CaptionButtons:=[cbSystemMenu,cbMaximize,cbMinimize,cbRestore];
+         HullformWindow.Visible:=False;
+         HullformWindow.CaptionButtons:=[];
+         HullformWindow.OnShow:=StudioWindowVisibility;HullformWindow.OnHide:=StudioWindowVisibility;
+         HullformWindow.OnDblClick:=StudioWindowExpand;
+         HullformWindow.CaptionPanel.OnDblClick:=StudioWindowExpand;
+         for CaptionIndex:=0 to HullformWindow.CaptionPanel.ControlCount-1 do
+           if HullformWindow.CaptionPanel.Controls[CaptionIndex] is TLabel then
+             TLabel(HullformWindow.CaptionPanel.Controls[CaptionIndex]).OnDblClick:=StudioWindowExpand;
          HullformWindow.Name:='HullformWindow'+IntToStr(I);    // helps in debugging
          HullformWindow.Viewport.Name :='Viewport'+IntToStr(I);
-         HullformWindow.FreeShip:=FreeShip;
+
          FMDIPanelManager.Add(HullformWindow);
          HullformWindow.Parent:=MainClientPanel;
+         HullformWindow.OnMoveResize:=StudioWindowMotion;
          HullformWindow.OnActivate:=HullformWindowOnActivate;
          HullformWindow.OnDeactivate:=HullformWindowOnDeactivate;
          HullformWindow.OnClose:=HullformWindowOnClose;
@@ -1318,24 +2351,32 @@ begin
          //ShowTranslatedValues(HullformWindow);
 
          HullformWindow.SetCaption;
-         HullformWindow.SetBounds(I * 40,I * 30,
-            ClientWidth * 3 div 4, ClientHeight * 3 div 4);
+         HullformWindow.SetBounds((I mod 2)*(MainClientPanel.ClientWidth div 2),
+            (I div 2)*(MainClientPanel.ClientHeight div 2),
+            MainClientPanel.ClientWidth div 2,MainClientPanel.ClientHeight div 2);
          //HullformWindow.Visible:=true;
          HullformWindow.Viewport.ViewType:=TFreeViewType(I);
+         HullformWindow.FreeShip:=FreeShip;
+         HullformWindow.Viewport.BeginProgressiveDisplay;
       end;
       {$ifndef LCL}
         TileMode := tbHorizontal;
       {$endif}
-      Tile;
+      for I:=0 to FMDIPanelManager.PanelCount-1 do
+        TFreeHullWindow(FMDIPanelManager.MDIPanels[I]).Visible:=True;
+      finally MainClientPanel.EnableAlign end;
+      FStudioClientWidth:=MainClientPanel.ClientWidth;
+      FStudioClientHeight:=MainClientPanel.ClientHeight;
    end;
    SetCaption;
+   UpdateStudioViewButtons;
 end;{TMainForm.FOpenHullWindows}
 
 procedure TMainForm.SetCaption;
 begin
    // Skip translation
-   if FreeShip.FileChanged then Caption:='Free!Ship  : '+FreeShip.Filename+' ('+rs_modified {UserString[280]}+')'
-                           else Caption:='Free!Ship  : '+FreeShip.Filename+' ('+rs_not_modified {UserString[281]}+')';
+   if FreeShip.FileChanged then Caption:='FreeShip_26  : '+FreeShip.Filename+' ('+rs_modified {UserString[280]}+')'
+                           else Caption:='FreeShip_26  : '+FreeShip.Filename+' ('+rs_not_modified {UserString[281]}+')';
    // End Skip translation
 end;{TMainForm.SetCaption}
 
@@ -1373,7 +2414,6 @@ begin
         NewModel.Enabled:=true;
         LoadFile.Enabled:=true;
         ExitProgram.Enabled:=true;
-        HelpAction.Enabled:=true;
         AboutAction.Enabled:=true;
 
         //ImportFEF.Enabled:=true;
@@ -1506,6 +2546,7 @@ begin
    CrossCurves.Enabled:=Freeship.Surface.NumberOfControlFaces>0;
    // edit commands
    AddPoint.Enabled:=(MDIChildCount>0) and (FreeShip.Visibility.ShowControlNet);
+   UpdateStudioModeButtons;
    Insertplane.Enabled:=(Freeship.Surface.NumberOfControlEdges>0) and (Freeship.Visibility.ShowControlNet);
    LayerIntersection.Enabled:=NLayers>1;
    EdgeCollapse.Enabled:=FreeShip.NumberOfSelectedControlEdges>0;
@@ -1592,9 +2633,7 @@ begin
 
    FreeShip.ControlpointForm.Reload;
    FreeShip.ControlpointForm.FormStyle:=fsSystemStayOnTop;
-   if FreeShip.ActiveControlPoint <> nil then
-      //FreeShip.ControlpointForm.Visible:=true;
-      FreeShip.ControlpointForm.Show;
+   UpdateStudioViewButtons;
 end;{TMainForm.UpdateMenu}
 
 
@@ -1672,18 +2711,24 @@ begin
 
   if (vFileName<>'') and (vFileName<>'*') then
     begin
-    FreeShip.ClearUndo;
-    FreeShip.Clear;
-    FreeShip.Surface.ClearSelection;
-    FreeShip.Surface.ClearFaces;
-    FreeShip.Surface.Clear;
+    if not FreeShip.Edit.CheckIfChangedAndAskToSave then Exit;
     FreeShip.Edit.File_Load(vFileName);
+    if FreeShip.IsLoadError then
+    begin
+      Freeship.Edit.ProgressBar := nil;
+      Exit;
+    end;
     FreeShip.Surface.Rebuild;
     FreeShip.Draw;
     end;
   if (vFileName = '*') then
     begin
     FreeShip.Edit.File_Load;
+    if FreeShip.IsLoadError then
+    begin
+      Freeship.Edit.ProgressBar := nil;
+      Exit;
+    end;
     {FreeShip.Surface.Rebuild;
     FreeShip.Draw;
     SetCaption;
@@ -1695,12 +2740,15 @@ end;
 procedure TMainForm.LoadFileExecute(Sender: TObject);
 begin
   FOpenHullWindows;
-  if self.RecentFiles.Count > 0 then
-    ShowRecentFilesDialog
-  else FreeShip.Edit.File_Load;
+  FreeShip.Edit.File_Load;
+  if FreeShip.IsLoadError then
+  begin
+    Freeship.Edit.ProgressBar := nil;
+    Exit;
+  end;
 
-  if FileExists(FreeShip.Filename) then
-     FreeShip.FileIsReadOnly := FileIsReadOnly(FreeShip.Filename);
+  if FileExistsUTF8(FreeShip.Filename) then
+     FreeShip.FileIsReadOnly := FreeShip.FileIsReadOnly or FileIsReadOnlyUTF8(FreeShip.Filename);
 
   Application.ProcessMessages;
   FreeShip.ZoomFitAllViewports;
@@ -1716,10 +2764,6 @@ begin
   if FileExists('RESISTp.dat')  then DeleteFile('RESISTp.dat');
   if FileExists('Vint1.dat')  then DeleteFile('Vint1.dat');
   if FileExists('SAC.tmp')  then DeleteFile('SAC.tmp');
-  if FileExists('SACs.txt')  then DeleteFile('SACs.txt');
-  if FileExists('Bonjean.txt')  then DeleteFile('Bonjean.txt');
-  if FileExists('Weights.txt')  then DeleteFile('Weights.txt');
-  if FileExists('Sterns.txt')  then DeleteFile('Sterns.txt');
   Close;
 end;{TMainForm.ExitProgramExecute}
 
@@ -1869,6 +2913,18 @@ begin
   ArrangeRibbonPanel(PanelMain);
 end;
 
+procedure TMainForm.DismissPointEditorOnInput(Sender: TObject; Msg: Cardinal);
+begin
+  if not Assigned(FreeShip) or not Assigned(FreeShip.ControlpointForm) or
+     not FreeShip.ControlpointForm.Visible then Exit;
+  if (Sender is TControl) and
+     (GetParentForm(TControl(Sender)) = FreeShip.ControlpointForm) then Exit;
+  case Msg of
+    LM_LBUTTONDOWN, LM_RBUTTONDOWN, LM_MBUTTONDOWN, LM_MOUSEWHEEL,
+    LM_KEYDOWN, LM_SYSKEYDOWN: FreeShip.ControlpointForm.Hide;
+  end;
+end;
+
 procedure TMainForm.ShowControlNetExecute(Sender: TObject);
 begin
    FreeShip.Visibility.ShowControlNet:=not FreeShip.Visibility.ShowControlNet;
@@ -1884,15 +2940,24 @@ end;{TMainForm.ShowInteriorEdgesExecute}
 procedure TMainForm.NewWindowExecute(Sender: TObject);
 var HullformWindow : TFreeHullWindow;
 begin
-   // open a new window
-   HullformWindow:=TFreeHullWindow.CreateNew(self);
-   //FMDIChildList.Add(HullformWindow);
+   // Create loads the viewport resource; CreateNew leaves it uninitialized.
+   HullformWindow:=TFreeHullWindow.Create(Self);
+   HullformWindow.Visible:=False;
+   HullformWindow.CaptionButtons:=[cbMaximize,cbMinimize,cbRestore];
+   HullformWindow.Parent:=MainClientPanel;
+   HullformWindow.OnMoveResize:=StudioWindowMotion;
+   HullformWindow.OnActivate:=HullformWindowOnActivate;
+   HullformWindow.OnDeactivate:=HullformWindowOnDeactivate;
+   HullformWindow.OnClose:=HullformWindowOnClose;
+   HullformWindow.OnDestroy:=HullformWindowOnDeactivate;
    FMDIPanelManager.Add(HullformWindow);
-   // Connect viewport to freeship component
+   HullformWindow.SetBounds(0,0,MainClientPanel.ClientWidth div 2,
+      MainClientPanel.ClientHeight div 2);
    HullformWindow.FreeShip:=FreeShip;
    HullformWindow.Viewport.ViewType:=fvPerspective;
-   //ShowTranslatedValues(HullformWindow);
    HullformWindow.SetCaption;
+   HullformWindow.Viewport.BeginProgressiveDisplay;
+   HullformWindow.Visible:=True;
    UpdateMenu;
 end;{TMainForm.NewWindowExecute}
 
@@ -2070,6 +3135,11 @@ begin
    if FileExists(Filename)  then
       begin
          Freeship.Edit.File_Load(Filename);
+         if FreeShip.IsLoadError then
+         begin
+           Freeship.Edit.ProgressBar := nil;
+           Exit;
+         end;
          FOpenHullWindows;
          SetCaption;
          UpdateMenu;
@@ -2109,6 +3179,11 @@ begin
     Freeship.Edit.ProgressBar := ProgressBarMain;
     Freeship.Surface.OnFaceRebuilt:=Freeship.Edit.OnFaceRebuilt;
     Freeship.Edit.File_Load(Filename);
+    if FreeShip.IsLoadError then
+    begin
+      Freeship.Edit.ProgressBar := nil;
+      Exit;
+    end;
     Freeship.RebuildModel;
     Freeship.ZoomFitAllViewports;
     SetCaption;
@@ -2127,6 +3202,11 @@ begin
     Freeship.Edit.ProgressBar := ProgressBarMain;
     Freeship.Surface.OnFaceRebuilt:=Freeship.Edit.OnFaceRebuilt;
     Freeship.Edit.File_Load(Filename);
+    if FreeShip.IsLoadError then
+    begin
+      Freeship.Edit.ProgressBar := nil;
+      Exit;
+    end;
     Freeship.RebuildModel;
     FOpenHullWindows;
     Freeship.ZoomFitAllViewports;
@@ -2323,6 +3403,7 @@ end;{TMainForm.NewModelExecute}
 
 procedure TMainForm.FormCreate(Sender: TObject);
 begin
+   WindowState:=wsMaximized;
    {$IFDEF MEMCHECK}
       // Initialize memcheck, for memory-leak tracking
       MemChk;
@@ -2334,6 +3415,7 @@ begin
 
    // Removed from LFM, moved here
    FreeShip := TFreeShip.Create(self) ;
+   Application.AddOnUserInputHandler(DismissPointEditorOnInput);
    FreeShip.MainForm := self;
    FreeShip.FileChanged := true;
    FreeShip.Filename := 'New model.fbm';
@@ -2348,6 +3430,7 @@ begin
    FAllToolbarsControlsWidth := 0;
    GlobalFreeship := Freeship;
    FModelInitallyLoaded := false;
+   CreateStudioBar;
    //dumpIcons;
    //FShowSplash := true;
 end;{TMainForm.FormCreate}
@@ -2411,74 +3494,7 @@ begin
  FreeAndNil(FreeAboutDlg);
 end;{TMainForm.About1Click}
 
-// begin correction Victor T
-procedure TMainForm.Help1Click(Sender: TObject);
-var pathFile,FileToFind : string;
-    PathFileOld        : string;
-    //FInitDirectory     : string;
-    FManDirectory     : string;
-    FLang : string;
-    man : string;
-//    FFreeship          : TFreeship;
-    command            : PAnsiChar;
-    I,II               : integer;
-    L                  : boolean;
-    //label NewCatalogSearch;
-begin
-(*
-  ii:=1;
-  if rs_Version {UserString[279]}='Версия'  then II:=10;
-  if rs_Version {UserString[279]}='Версія'  then II:=20;
-  if rs_Version {UserString[279]}='Versie'  then II:=30;
-  if rs_Version {UserString[279]}='Versjon' then II:=40;
-  if rs_Version {UserString[279]}='Versio'  then II:=50;
-  if rs_Version {UserString[279]}='Phien ban' then II:=70;
-  if rs_Version {UserString[279]}='Versiуn' then II:=62;
-  if rs_Version {UserString[279]}='Version' then begin
-    if rs_Speed {UserString[273]}='Speed'     then II:=60;
-    if rs_Speed {UserString[273]}='Vitesse'   then II:=61;
-    if rs_Speed {UserString[273]}='Velocidad' then II:=62;
-    if rs_Speed {UserString[273]}='Geschwindigkeit' then II:=63;
-  end;
-  FInitDirectory:=Freeship.Preferences.ManualsDirectory;
-  PathFile:=GetCurrentDirUTF8;
-  PathFileOld:=GetCurrentDirUTF8;
-  L:=SetCurrentDirUTF8(FInitDirectory);
-  Case II of
-    10 : command:='Manuals/ManualRU.pdf';
-    20 : command:='Manuals/ManualUA.pdf';
-    30 : command:='Manuals/ManualHO.pdf';
-    40 : command:='Manuals/ManualNO.pdf';
-    50 : command:='Manuals/ManualFI.pdf';
-    60 : command:='Manuals/Manual.pdf';
-    61 : command:='Manuals/ManualFR.pdf';
-    62 : command:='Manuals/ManualCA.pdf';
-    63 : command:='Manuals/ManualGE.pdf';
-    70 : command:='Manuals/ManualVN.pdf';
-    else command:='Manuals/Manual.pdf';
-  end;
-  FileToFind := FileSearchUTF8(command,FInitDirectory);
-*)
-  FLang := Freeship.Preferences.Language;
-  FManDirectory := Freeship.Preferences.ManualsDirectory;
-  man := FLang+'.pdf';
-  FileToFind := FileSearch(FManDirectory+DirectorySeparator+man,FManDirectory);
-  if (FileToFind='') and (FLang<>'English') then begin
-     MessageDlg('Manual file "'+man+'" not found in "'+FManDirectory+'" directory'+EOL
-               +'English manual will be opened.',mtInformation,[mbOk],0);
-     man := 'English.pdf'
-  end;
-  FileToFind := FileSearch(FManDirectory+DirectorySeparator+man,FManDirectory);
-  if FileToFind='' then begin
-     MessageDlg('Manual file "'+man+'" not found in "'+FManDirectory+'" directory',mtInformation,[mbOk],0);
-     exit;
-  end;
 
-  OpenDocument(FileToFind); { *Converted from ShellExecute* }
-
-  //L:=SetCurrentDirUTF8(PathFileOld); { *Converted from SetCurrentDir* }
-  //exit;
-end;{TMainForm.Help1Click}
 // end correction Victor T
 
 procedure TMainForm.EdgeSplitExecute(Sender: TObject);
@@ -2583,7 +3599,7 @@ procedure TMainForm.FreeShipUpdateUndoData(Sender: TObject);
 var Memory : Integer;
 begin
    Memory:=Trunc(Freeship.UndoMemory/1024);
-   if Memory<1024 then LabelUndoMemory.Caption:=rs_Undo_memory {UserString[283]}+' : '+IntToStr(Memory)+' Kb.'
+   if Memory<1024 then LabelUndoMemory.Caption:=rs_Undo_memory {UserString[283]}+' : '+IntToStr(Memory)+' Kb'
                   else LabelUndoMemory.Caption:=rs_Undo_memory {UserString[283]}+' : '+FloatToDec(Memory/1024,3)+' Mb.';
    Undo.Enabled:=FreeShip.UndoCount>0;
    SetCaption;
@@ -2611,6 +3627,7 @@ end;{TMainForm.InvertFaceExecute}
 procedure TMainForm.PreferencesExecute(Sender: TObject);
 begin
    FreeShip.Preferences.Edit;
+   RefreshStudioLanguage;
    UpdateMenu;
    LoadToolIcons;
 end;{TMainForm.PreferencesExecute}
@@ -2656,8 +3673,10 @@ end;{TMainForm.MoveModelExecute}
 
 procedure TMainForm.AddPointExecute(Sender: TObject);
 begin
-   Freeship.EditMode := emAddPoint;
-   //Freeship.Edit.Point_New;
+   if Freeship.EditMode = emAddPoint then
+     Freeship.EditMode := emSelectItems
+   else
+     Freeship.EditMode := emAddPoint;
    UpdateMenu;
 end;{TMainForm.AddPointExecute}
 
@@ -2690,10 +3709,12 @@ begin
       exit;
    end;
    AlreadyOpen:=False;
-   for I:=1 to MDIChildCount do if MDIChildren[I-1] is TFreeLinesplanForm then
+   for I:=0 to Screen.FormCount-1 do if (Screen.Forms[I] is TFreeLinesplanForm) and
+     TFreeLinesplanForm(Screen.Forms[I]).DisplaysShip(FreeShip) then
    begin
       AlreadyOpen:=True;
-      MDIChildren[I-1].BringToFront;
+      if Screen.Forms[I].WindowState=wsMinimized then Screen.Forms[I].WindowState:=wsNormal;
+      Screen.Forms[I].BringToFront;
       break;
    end;
    if not AlreadyOpen then
@@ -2701,8 +3722,7 @@ begin
       Form:=TFreeLinesplanForm.Create(self);
       //ShowTranslatedValues(Form.LinesplanFrame);
       //ShowTranslatedValues(Form);
-      Form.LinesplanFrame.FreeShip:=FreeShip;
-      Form.LinesplanFrame.Viewport.ZoomExtents;
+      Form.OpenForShip(FreeShip);
    end;
 end;{TMainForm.ShowLinesplanExecute}
 
@@ -3167,7 +4187,7 @@ end;{TMainForm.AddCylinderExecute}
 
 procedure TMainForm.SelectAllExecute(Sender: TObject);
 begin
-   Freeship.Edit.Selection_SelectAll;
+   Freeship.Edit.Selection_ToggleAll;
    UpdateMenu;
 end;{TMainForm.SelectAllExecute}
 

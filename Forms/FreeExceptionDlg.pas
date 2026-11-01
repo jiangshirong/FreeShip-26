@@ -13,9 +13,7 @@ type
   { TExceptionDlg }
 
   TExceptionDlg = class(TForm)
-    Button1: TButton;
     Message: TMemo;
-    Panel1: TPanel;
   private
 
   public

@@ -23,6 +23,7 @@ object FreeLayerVisibilityDialog: TFreeLayerVisibilityDialog
     ClientWidth = 231
     TabOrder = 0
     object bbClose: TBitBtn
+      Visible = False
       Left = 169
       Height = 36
       Top = 4

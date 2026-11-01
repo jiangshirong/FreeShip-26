@@ -206,6 +206,7 @@ type
     Wt, t, nr, Rho: single;
     PathFile, PathFileOld, FileToFind, FileName: string;
     procedure Calculate;
+    procedure CalculateInWorkspace;
     function Execute(Freeship: TFreeship;
       AutoExtract: boolean): boolean;
     property Dat2: single read FGetDat2 write FSetDat2;
@@ -239,7 +240,7 @@ var
 
 implementation
 
-uses FreeStringsUnit,
+uses FreeCalculationFiles, FreeStringsUnit,
   Printers, FreeProcess;
 
 {$IFnDEF FPC}
@@ -443,10 +444,24 @@ begin
 end;{TFreePropeller_Task3.FSetDat17}
 
 procedure TFreePropeller_Task3.Calculate;
+var Job: TFreeCalculationScope;
+begin
+  if FFreeship = nil then Exit;
+  Job := FFreeship.BeginCalculation([]);
+  try
+    CalculateInWorkspace;
+    Job.Complete;
+  finally Job.Free end;
+end;
+
+procedure TFreePropeller_Task3.CalculateInWorkspace;
 type
   TTable = array[0..16, 0..13] of single;
 
 var
+  ProcessCallerDirectory: string;
+  ProcessCallerCursor: TCursor;
+ 
   I, J, JI, IJ, Km, Kt, Kk, Nser, Nprop: integer;
   Wt, t, nr: single;
   Dat: array[1..15] of single;
@@ -486,6 +501,9 @@ var
 label
   NewSearch;
 begin
+  ProcessCallerDirectory := GetCurrentDirUTF8;
+  ProcessCallerCursor := Screen.Cursor;
+  try
   TChartSeries(Chart.Series[0]).Clear;
   TChartSeries(Chart.Series[1]).Clear;
   TChartSeries(Chart.Series[2]).Clear;
@@ -689,8 +707,8 @@ begin
   ResultsMemo.Lines.Add('');
 
   PathFileOld := GetCurrentDir;
-  ForceDirectoriesUTF8(FFreeship.Preferences.TempDirectory);
-  SetCurrentDirUTF8(FFreeship.Preferences.TempDirectory);
+  ForceDirectoriesUTF8(FFreeship.CalculationDirectory);
+  SetCurrentDirUTF8(FFreeship.CalculationDirectory);
 
   File_ExportData(dat);
 
@@ -702,7 +720,7 @@ begin
     Ntask := 3.;
     //     FSpropel(Ntask);
 
-    PathFileOld := FFreeship.Preferences.InitDirectory; // каталог Freeshipa
+    PathFileOld := IncludeTrailingPathDelimiter(FFreeship.CalculationDirectory); // каталог Freeshipa
     //  Определяем каталог с программой CalcProp.exe
     FExecDirectory := FFreeship.Preferences.ExecDirectory;
 
@@ -718,7 +736,7 @@ begin
 
     //SysUtils.ExecuteProcess(UTF8ToSys(FExecDirectory + DirectorySeparator+'CALCPROP.EXE'), '', []);
     ExecFullName := FExecDirectory + DirectorySeparator+'CALCPROP.EXE';
-    ExecuteFreePlugin(FFreeship.Preferences.TempDirectory, ExecFullName);
+    ExecuteFreeCalculation(FFreeship.CalculationDirectory, ExecFullName, fcPropeller3);
 
     FileName := 'RES3.tsk';
     //  Определяем есть ли файл с результатами расчета RES3.tsk. Если TMP3.tsk присутствует значит расчет не закончен
@@ -979,8 +997,8 @@ begin
 
   // Построение кривых R=f(Vs),Re=f(Vs)
 
-  if FileExistsUTF8('RESISTp.dat') { *Converted from FileExists* } then
-    Assignfile(FFile, 'RESISTp.dat')
+  if FileExistsUTF8(IncludeTrailingPathDelimiter(FFreeship.CalculationDirectory)+'RESISTp.dat') { *Converted from FileExists* } then
+    Assignfile(FFile, IncludeTrailingPathDelimiter(FFreeship.CalculationDirectory)+'RESISTp.dat')
   else
   begin
     MessageDlg(rs_Do_not_have_results_of_resistance_calculation_in_this_directory_ {UserString[995]}, mtInformation, [mbOK], 0);
@@ -1035,6 +1053,10 @@ begin
 
   ResultsMemo.Lines.Add(Space(16) + 'Copyright (c) 2007, Timoshenko V.F.');
 
+  finally
+    SetCurrentDirUTF8(ProcessCallerDirectory);
+    Screen.Cursor := ProcessCallerCursor;
+  end;
 end;{TFreePropeller_Task3.Calculate}
 
 function TFreePropeller_Task3.Execute(Freeship: TFreeship; AutoExtract: boolean): boolean;
@@ -1120,9 +1142,10 @@ var
   datp: array [1..20] of single;
 
 begin
-  if FileExistsUTF8('RESISTp.dat') { *Converted from FileExists* } then
+  if FFreeship = nil then Exit;
+  if FileExistsUTF8(IncludeTrailingPathDelimiter(FFreeship.CalculationDirectory)+'RESISTp.dat') { *Converted from FileExists* } then
   begin
-    Assignfile(FFile, 'RESISTp.dat');
+    Assignfile(FFile, IncludeTrailingPathDelimiter(FFreeship.CalculationDirectory)+'RESISTp.dat');
          {$I-}
     Reset(FFile);
 {$I+}
@@ -1155,9 +1178,9 @@ begin
   //#  D    P/D  Ae/Ao     Z   J     Kt  10*Kq Eta0 EtaR=i1 i2   EtaG   EtaS Ndiag  n_nom    Pe
   // 4.685 0.947 0.550     4 0.587 0.201 0.312 0.602 1.018 1.000 0.990 0.980    2.  118.0  3528.0
 
-  if FileExistsUTF8('Propres.dat') { *Converted from FileExists* } then
+  if FileExistsUTF8(IncludeTrailingPathDelimiter(FFreeship.CalculationDirectory)+'Propres.dat') { *Converted from FileExists* } then
   begin
-    Assignfile(FFile, 'Propres.dat');
+    Assignfile(FFile, IncludeTrailingPathDelimiter(FFreeship.CalculationDirectory)+'Propres.dat');
          {$I-}
     Reset(FFile);
 {$I+}

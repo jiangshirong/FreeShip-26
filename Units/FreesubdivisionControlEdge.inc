@@ -569,7 +569,6 @@ end;{TFreesubdivisionControlEdge.DistanceToCursor}
 procedure TFreesubdivisionControlEdge.Draw(DrawMirror: boolean; Viewport: TFreeViewport);
 var
   P1, P2, M: T3DCoordinate;
-  Pt1, Pt2: TPoint;
 begin
   if Visible then
   begin
@@ -599,32 +598,20 @@ begin
           if P1.X <= Surface.SplitSectionLocation then
           begin
             // P2 lies on port
-            Pt1 := Viewport.Project(P2);
-            Pt2 := Viewport.Project(M);
-            Viewport.MoveTo(Pt1.X, Pt1.Y);
-            Viewport.LineTo(Pt2.X, Pt2.Y);
+            Viewport.DrawModelLine(P2, M);
             // P1 lies on starboard
             P1.Y := -P1.Y;
             M.Y := -M.Y;
-            Pt1 := Viewport.Project(P1);
-            Pt2 := Viewport.Project(M);
-            Viewport.MoveTo(Pt1.X, Pt1.Y);
-            Viewport.LineTo(Pt2.X, Pt2.Y);
+            Viewport.DrawModelLine(P1, M);
           end
           else
           begin
             // P1 lies on port
-            Pt1 := Viewport.Project(P1);
-            Pt2 := Viewport.Project(M);
-            Viewport.MoveTo(Pt1.X, Pt1.Y);
-            Viewport.LineTo(Pt2.X, Pt2.Y);
+            Viewport.DrawModelLine(P1, M);
             // P2 lies on starboard
             P2.Y := -P2.Y;
             M.Y := -M.Y;
-            Pt1 := Viewport.Project(P2);
-            Pt2 := Viewport.Project(M);
-            Viewport.MoveTo(Pt1.X, Pt1.Y);
-            Viewport.LineTo(Pt2.X, Pt2.Y);
+            Viewport.DrawModelLine(P2, M);
           end;
         end
         else
@@ -633,18 +620,12 @@ begin
             P1.Y := -P1.Y;
           if P2.X <= Surface.SplitSectionLocation then
             P2.Y := -P2.Y;
-          Pt1 := Viewport.Project(P1);
-          Pt2 := Viewport.Project(P2);
-          Viewport.MoveTo(Pt1.X, Pt1.Y);
-          Viewport.LineTo(Pt2.X, Pt2.Y);
+          Viewport.DrawModelLine(P1, P2);
         end;
       end
       else
       begin
-        Pt1 := Viewport.Project(P1);
-        Pt2 := Viewport.Project(P2);
-        Viewport.MoveTo(Pt1.X, Pt1.Y);
-        Viewport.LineTo(Pt2.X, Pt2.Y);
+        Viewport.DrawModelLine(P1, P2);
       end;
     end;
   end;
@@ -709,29 +690,21 @@ end;{TFreeSubdivisionControlEdge.InsertControlPoint}
 
 procedure TFreesubdivisionControlEdge.LoadBinary(Source: TFreeFileBuffer);
 var
-  Index: integer;
-  Sel: boolean;
+  StartIndex, EndIndex: integer;
+  Sel, CreaseValue: boolean;
 begin
-  // Read startpoint
-  Source.LoadInteger(Index);
-  if Index = -1 then
-    Index := 0;
-  if Index <> -1 then
-  begin
-    FStartPoint := Surface.FControlPoints[Index];
-    FStartPoint.FEdges.Add(Self);
-  end;
-  // Read endpoint
-  Source.LoadInteger(Index);
-  if Index = -1 then
-    Index := 0;
-  if Index <> -1 then
-  begin
-    FEndPoint := Surface.FControlPoints[Index];
-    FEndPoint.FEdges.Add(Self);
-  end;
-  Source.LoadBoolean(FCrease);
+  Source.LoadInteger(StartIndex);
+  RequireModelIndex(StartIndex, Surface.NumberOfControlPoints, 'edge start point');
+  Source.LoadInteger(EndIndex);
+  RequireModelIndex(EndIndex, Surface.NumberOfControlPoints, 'edge end point');
+  Source.LoadBoolean(CreaseValue);
   Source.LoadBoolean(Sel);
+  // Do not attach a partially read edge to its points.
+  FStartPoint := Surface.FControlPoints[StartIndex];
+  FEndPoint := Surface.FControlPoints[EndIndex];
+  FStartPoint.FEdges.Add(Self);
+  FEndPoint.FEdges.Add(Self);
+  FCrease := CreaseValue;
   if Sel then
     selected := True;
 end;{TFreesubdivisionControlEdge.LoadBinary}

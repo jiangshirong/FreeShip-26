@@ -129,7 +129,7 @@ object FreeLinesplanFrame: TFreeLinesplanFrame
     object ZoomExtents: TAction
       Category = 'Zoom'
       Caption = 'Extents'
-      Hint = 'Zoom all.'
+      Hint = 'Zoom all'
       ImageIndex = 0
       OnExecute = ZoomExtentsExecute
       ShortCut = 16449
@@ -137,7 +137,7 @@ object FreeLinesplanFrame: TFreeLinesplanFrame
     object SaveBitmap: TAction
       Category = 'Export'
       Caption = 'Save bitmap'
-      Hint = 'Save the linesplan as a bitmap.'
+      Hint = 'Save the linesplan as a bitmap'
       ImageIndex = 4
       OnExecute = SaveBitmapExecute
     end
@@ -152,7 +152,7 @@ object FreeLinesplanFrame: TFreeLinesplanFrame
     object ZoomOut: TAction
       Category = 'Zoom'
       Caption = 'Zoom out'
-      Hint = 'Zoom out.'
+      Hint = 'Zoom out'
       ImageIndex = 2
       OnExecute = ZoomOutExecute
       ShortCut = 16463
@@ -160,7 +160,7 @@ object FreeLinesplanFrame: TFreeLinesplanFrame
     object ExportDXF: TAction
       Category = 'Export'
       Caption = 'DXF'
-      Hint = 'Export the formatted linesplan to a DXF file.'
+      Hint = 'Export the formatted linesplan to a DXF file'
       ImageIndex = 5
       OnExecute = ExportDXFExecute
     end
@@ -168,14 +168,14 @@ object FreeLinesplanFrame: TFreeLinesplanFrame
       Category = 'Visibility'
       Caption = 'Solid'
       Checked = True
-      Hint = 'Show plates with fillcolor.'
+      Hint = 'Show plates with fillcolor'
       ImageIndex = 6
       OnExecute = ShowFillColorExecute
     end
     object Print: TAction
       Category = 'Export'
       Caption = 'Print'
-      Hint = 'Send the linesplan to the printer.'
+      Hint = 'Send the linesplan to the printer'
       ImageIndex = 1
       OnExecute = PrintExecute
     end
@@ -183,21 +183,21 @@ object FreeLinesplanFrame: TFreeLinesplanFrame
       Category = 'Visibility'
       Caption = 'Use lights'
       Checked = True
-      Hint = 'Use lights in solid color drawing mode.'
+      Hint = 'Use lights in solid color drawing mode'
       ImageIndex = 7
       OnExecute = UseLightsExecute
     end
     object ShowMonochrome: TAction
       Category = 'Visibility'
       Caption = 'Monochrome'
-      Hint = 'Draw the linesplan in black and white only.'
+      Hint = 'Draw the linesplan in black and white only'
       ImageIndex = 8
       OnExecute = ShowMonochromeExecute
     end
     object MirrorPlanView: TAction
       Category = 'Visibility'
       Caption = 'MirrorPlanView'
-      Hint = 'Show both sides of the ship in plan view.'
+      Hint = 'Show both sides of the ship in plan view'
       ImageIndex = 9
       OnExecute = MirrorPlanViewExecute
     end

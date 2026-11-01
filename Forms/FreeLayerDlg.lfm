@@ -3,10 +3,11 @@ object FreeLayerDialog: TFreeLayerDialog
   Height = 727
   Top = 245
   Width = 800
-  BorderIcons = []
-  Caption = 'Layer properties.'
+  BorderIcons = [biSystemMenu]
+  Caption = 'Layer properties'
   ClientHeight = 727
   ClientWidth = 800
+  OnCloseQuery = FormCloseQuery
   Position = poOwnerFormCenter
   LCLVersion = '3.2.0.0'
   object Panel1: TPanel
@@ -415,7 +416,7 @@ object FreeLayerDialog: TFreeLayerDialog
         Top = 538
         Width = 338
         BorderSpacing.Top = 10
-        Caption = 'Surface properties. '
+        Caption = 'Surface properties '
         ChildSizing.LeftRightSpacing = 10
         ChildSizing.TopBottomSpacing = 8
         ChildSizing.HorizontalSpacing = 6
@@ -516,14 +517,14 @@ object FreeLayerDialog: TFreeLayerDialog
     TabOrder = 1
     object ToolButton20: TToolButton
       Left = 5
-      Hint = 'Create a new empty layer.'
+      Hint = 'Create a new empty layer'
       Top = 2
       ImageIndex = 1
       OnClick = ToolButton20Click
     end
     object ToolButton3: TToolButton
       Left = 28
-      Hint = 'Remove all empty layers from the model.'
+      Hint = 'Remove all empty layers from the model'
       Top = 2
       Caption = 'ToolButton3'
       ImageIndex = 2
@@ -539,7 +540,7 @@ object FreeLayerDialog: TFreeLayerDialog
     end
     object MoveUp: TToolButton
       Left = 59
-      Hint = 'Move the layer up in the list.'
+      Hint = 'Move the layer up in the list'
       Top = 2
       Caption = 'Up'
       ImageIndex = 3
@@ -547,13 +548,14 @@ object FreeLayerDialog: TFreeLayerDialog
     end
     object MoveDown: TToolButton
       Left = 82
-      Hint = 'Move the layer down in the list.'
+      Hint = 'Move the layer down in the list'
       Top = 2
       Caption = 'Down'
       ImageIndex = 4
       OnClick = MoveDownClick
     end
     object _ToolButton4: TToolButton
+      Visible = False
       Left = 105
       Height = 22
       Top = 2
@@ -562,8 +564,9 @@ object FreeLayerDialog: TFreeLayerDialog
       Style = tbsSeparator
     end
     object ToolButton1: TToolButton
+      Visible = False
       Left = 113
-      Hint = 'Close this window.'
+      Hint = 'Close this window'
       Top = 2
       Caption = 'Done'
       ImageIndex = 0

@@ -113,7 +113,7 @@ begin
       if CurrentLanguage<>nil then CurrentLanguage.Free;
       CurrentLanguage:=TLanguageIniFile.create(aName, aFilename);
    end else if uppercase(aName)<>'ENGLISH'
-      then MessageDlg('Could not load language file '+aFilename,mtError,[mbOk],0);
+      then MessageDlg(Format(rsLocCouldNotLoadLanguage, [aFilename]),mtError,[mbOk],0);
    Result:=CurrentLanguage;
 end;{LoadLanguage}
 

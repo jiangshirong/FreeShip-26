@@ -35,7 +35,8 @@ uses
 {$IFnDEF FPC}
   Windows,
 {$ELSE}
-  LCLIntf, LCLType, //
+  LCLIntf, LCLType, LMessages, //
+  {$IFDEF MSWINDOWS}Windows,{$ENDIF}
   PrintersDlgs, Printer4Lazarus, //FreePrinter,
 {$ENDIF}
   //Messages,
@@ -58,13 +59,34 @@ uses
   Math,
   ImgList,
   ActnList, StdCtrls, Spin,
-  FreeStringUtils;
+  FreeStringUtils, FreeLabelLayout, FreeSmoothLines, FreeVectorFillCache, FreeMeshFingerprint, SHA1;
 
 const
   SpacePercentage = 0.20;
   Textspace = 0.05;
 
 type
+  TLinesplanViewport=class(TFreeViewport)
+  private
+    FRendering:Boolean;
+    FComposeTarget:TBitmap;
+    FNativeResizeFrame:TBitmap;
+    FSkipPreparedPaint:Boolean;
+    FObservedWidth,FObservedHeight:Integer;
+    procedure ErasePreparedFrame(var Message:TLMEraseBkgnd);message LM_ERASEBKGND;
+  protected
+    procedure WndProc(var Message:TLMessage);override;
+    procedure Resize;override;
+    procedure Paint;override;
+  public
+    destructor Destroy;override;
+    procedure ComposeFrame;
+    procedure PrepareFrame;
+    procedure PrepareNativeResize(OuterWidth,OuterHeight:Integer);
+    function AdoptNativeResize:Boolean;
+    procedure DiscardNativeResize;
+    procedure PresentPreparedFrame(Target:TCanvas;X:Integer=0;Y:Integer=0);
+  end;
   TLinesplanView = (lvProfile, lvAftBody, lvFrontBody, lvPlan);
   TLinesplanViews = set of TLinesplanView;
 
@@ -111,6 +133,7 @@ type
     procedure PrintExecute(Sender: TObject);
     procedure ViewportMouseMove(Sender: TObject;
       Shift: TShiftState; X, Y: integer);
+    procedure ViewportMouseUp(Sender: TObject; Button: TMouseButton; Shift: TShiftState; X, Y: Integer);
     procedure ViewportMouseDown(Sender: TObject;
       Button: TMouseButton; Shift: TShiftState; X, Y: integer);
     procedure SaveBitmapExecute(Sender: TObject);
@@ -119,6 +142,26 @@ type
     procedure MirrorPlanViewExecute(Sender: TObject);
     procedure ExportDXFExecute(Sender: TObject);
   private   { Private declarations }
+    FTrace: TStringList;
+    FTracePath: string;
+    FTraceStart: QWord;
+    FTraceSnapshot:Boolean;
+    FFillVector:TVectorFillCache;
+    FDiskFillPath:string;
+    FDiskFillDirty:Boolean;
+    FFillVectorKey:string;
+    FInteractionImage: TBitmap;
+    FInteractionKey: string;
+    FInteractionOrigin: TPoint;
+    FInteractionScale: TFloatType;
+    FInteractionUntil: QWord;
+    FInteractionDragging: Boolean;
+    FPanDragStarted: Boolean;
+    FLastLabelScale: Double;
+    FLastLabelContext: string;
+    FInteractionTimer: TTimer;
+    FFillCache: TBitmap;
+    FFillCacheKey: string;
     FFreeShip: TFreeShip;
     FModelLength: TFloatType;
     FModelHeight: TFloatType;
@@ -131,16 +174,36 @@ type
     FFrontOrigin: T3DCoordinate;
     FPlanOrigin: T3DCoordinate;
     FInitialPosition: TPoint;
+    procedure TraceEvent(const Event, Detail: string);
+    procedure ViewportResizing(Sender: TObject);
+    procedure BeginInteraction;
+    procedure FinishInteraction(Sender: TObject);
+    function DrawVectorFill:Boolean;
+    function DrawInteractionPreview: Boolean;
+    procedure ViewportMouseWheel(Sender: TObject; Shift: TShiftState;
+      WheelDelta: Integer; MousePos: TPoint; var Handled: Boolean);
+    function FillCacheKey(IncludeTransform: Boolean = True): string;
     procedure FSetFreeShip(Val: TFreeShip);
     procedure CreateViewport;
+    function LabelBackgroundCost(const R: TRect): integer;
   private
+  protected
+    procedure WndProc(var Message:TLMessage);override;
+    procedure EraseBackground(DC:HDC);override;
   public    { Public declarations }
     constructor Create(TheOwner: TComponent); override;
+    destructor Destroy; override;
+    procedure TraceNativeMessage(const Layer,Phase:string;const Message:TLMessage);
+    procedure TracePresentation(const Stage:string;DC:HDC=0;const Extra:string='');
+    procedure PresentClientBackground(Target:TCanvas);
+    procedure InvalidateRenderCache;
     procedure UpdateMenu;
     property FreeShip: TFreeShip
       read FFreeShip write FSetFreeShip;
     property FontSize: integer read FFontSize write FFontSize;
   end;
+
+function LinesplanNativeLayoutReady(Control:TWinControl;DC:HDC):Boolean;
 
 var
   FreeLinesplanFrame: TFreeLinesplanFrame;
@@ -148,6 +211,265 @@ var
 implementation
 
 uses FreeStringsUnit;
+
+var LinesplanTraceSession:Boolean=False;
+
+function LinesplanNativeLayoutReady(Control:TWinControl;DC:HDC):Boolean;
+{$IFDEF MSWINDOWS}
+var R:TRect;CW,CH:Integer;
+{$ENDIF}
+begin
+  Result:=True;
+  {$IFDEF MSWINDOWS}
+  // Memory/printer canvases may prepare a future frame. A native window DC
+  // may display it only after this control AND its ancestors have committed
+  // their new HWND geometry. LCL sends size notifications before that commit.
+  if (DC=0) or (Windows.WindowFromDC(DC)=0) then Exit;
+  while Control<>nil do begin
+    if Control.HandleAllocated then begin
+      // A newly created Lazarus form can keep client-size Bounds until its
+      // first interface size notification. Native client geometry is the
+      // authority for forms; child Bounds include their own border correctly.
+      if not (Control is TCustomForm) then begin
+        if not Windows.GetWindowRect(Control.Handle,R) then Exit(False);
+        if ((R.Right-R.Left)<>Control.Width) or ((R.Bottom-R.Top)<>Control.Height) then Exit(False);
+      end;
+      if not Windows.GetClientRect(Control.Handle,R) then Exit(False);
+      CW:=Control.CachedClientWidth;CH:=Control.CachedClientHeight;
+      if ((CW>=0) and ((R.Right-R.Left)<>CW)) or
+         ((CH>=0) and ((R.Bottom-R.Top)<>CH)) then Exit(False);
+    end;
+    Control:=Control.Parent;
+  end;
+  {$ENDIF}
+end;
+
+procedure TLinesplanViewport.WndProc(var Message:TLMessage);
+var Frame:TFreeLinesplanFrame;
+begin
+  Frame:=nil;
+  if (Owner is TFreeLinesplanFrame) and not (csDestroying in ComponentState) and
+    not (csDestroying in Owner.ComponentState) then Frame:=TFreeLinesplanFrame(Owner);
+  if Frame<>nil then Frame.TraceNativeMessage('viewport','before',Message);
+  inherited WndProc(Message);
+  if Frame<>nil then Frame.TraceNativeMessage('viewport','after',Message);
+end;
+
+procedure TFreeLinesplanFrame.WndProc(var Message:TLMessage);
+begin
+  if not (csDestroying in ComponentState) then TraceNativeMessage('frame','before',Message);
+  inherited WndProc(Message);
+  if not (csDestroying in ComponentState) then TraceNativeMessage('frame','after',Message);
+end;
+
+procedure TFreeLinesplanFrame.TraceNativeMessage(const Layer,Phase:string;const Message:TLMessage);
+var Extra:string;Pos:LMessages.PWindowPos;
+begin
+  if FTrace=nil then Exit;
+  if (Message.Msg<>LM_SYSCOMMAND) and not (Message.Msg in [LM_SIZE,LM_PAINT,LM_ERASEBKGND,LM_WINDOWPOSCHANGING,LM_WINDOWPOSCHANGED,LM_SHOWWINDOW]) then Exit;
+  Extra:='msg='+IntToHex(Message.Msg,4);
+  if Message.Msg in [LM_WINDOWPOSCHANGING,LM_WINDOWPOSCHANGED] then begin
+    Pos:=TLMWindowPosMsg(Message).WindowPos;
+    if Pos<>nil then Extra:=Extra+';flags='+IntToHex(Pos^.flags,8)+';proposed='+
+      IntToStr(Pos^.x)+','+IntToStr(Pos^.y)+','+IntToStr(Pos^.cx)+','+IntToStr(Pos^.cy);
+  end;
+  TracePresentation(Layer+'.'+Phase,0,Extra);
+end;
+
+procedure TFreeLinesplanFrame.TracePresentation(const Stage:string;DC:HDC;const Extra:string);
+var Host:TCustomForm;Detail:string;R:TRect;
+  function SizeText(W,H:Integer):string;
+  begin Result:=IntToStr(W)+','+IntToStr(H) end;
+  function Snapshot(C:TWinControl):string;
+  var CR,WR:TRect;
+  begin
+    Result:='none';if C=nil then Exit;
+    Result:=SizeText(C.CachedClientWidth,C.CachedClientHeight);
+    if C.HandleAllocated then begin
+      {$IFDEF MSWINDOWS}
+      Windows.GetClientRect(C.Handle,CR);Windows.GetWindowRect(C.Handle,WR);
+      Result:=Result+'/'+SizeText(CR.Right-CR.Left,CR.Bottom-CR.Top)+'/'+
+        IntToStr(WR.Left)+','+IntToStr(WR.Top)+','+IntToStr(WR.Right)+','+IntToStr(WR.Bottom);
+      {$ENDIF}
+    end;
+  end;
+begin
+  if (FTrace=nil) or FTraceSnapshot or (Viewport=nil) then Exit;
+  FTraceSnapshot:=True;
+  try
+    Host:=GetParentForm(Self);
+    Detail:='stage='+Stage+';host='+Snapshot(Host)+';frame='+Snapshot(Self)+';viewport='+Snapshot(Viewport)+
+      ';buffer='+SizeText(Viewport.GetDrawingBuffer.Width,Viewport.GetDrawingBuffer.Height)+
+      ';scale='+FloatToStr(Viewport.Scale)+';pan='+SizeText(Viewport.Pan.X,Viewport.Pan.Y);
+    if Viewport is TLinesplanViewport then Detail:=Detail+';rendering='+IntToStr(Ord(TLinesplanViewport(Viewport).FRendering));
+    {$IFDEF MSWINDOWS}
+    if DC<>0 then begin
+      Windows.GetClipBox(DC,R);
+      Detail:=Detail+';dc_window='+IntToHex(Windows.WindowFromDC(DC),16)+';dc_clip='+
+        IntToStr(R.Left)+','+IntToStr(R.Top)+','+IntToStr(R.Right)+','+IntToStr(R.Bottom);
+    end;
+    {$ENDIF}
+    if Extra<>'' then Detail:=Detail+';'+Extra;
+    TraceEvent('native',Detail);
+  finally FTraceSnapshot:=False end;
+end;
+
+procedure TLinesplanViewport.Resize;
+var W,H:Integer;
+begin
+  W:=ClientWidth;H:=ClientHeight;
+  if (W<>FObservedWidth) or (H<>FObservedHeight) then begin
+    FObservedWidth:=W;FObservedHeight:=H;
+    if (Owner is TFreeLinesplanFrame) and
+      (TFreeLinesplanFrame(Owner).Viewport=Self) and
+      ([csLoading,csDestroying]*TFreeLinesplanFrame(Owner).ComponentState=[]) and
+      ([csLoading,csDestroying]*ComponentState=[]) then
+      TFreeLinesplanFrame(Owner).ViewportResizing(Self);
+  end;
+  inherited Resize;
+end;
+
+destructor TLinesplanViewport.Destroy;
+begin
+  FreeAndNil(FNativeResizeFrame);
+  FreeAndNil(FComposeTarget);
+  inherited Destroy;
+end;
+
+procedure TLinesplanViewport.PrepareNativeResize(OuterWidth,OuterHeight:Integer);
+var Saved:TBitmap;OldBounds:TRect;
+begin
+  if FRendering or Printing or ExportingBitmap or (OuterWidth<=8) or (OuterHeight<=8) then Exit;
+  if (OuterWidth=Width) and (OuterHeight=Height) then Exit;
+  FreeAndNil(FNativeResizeFrame);FSkipPreparedPaint:=False;
+  Saved:=TBitmap.Create;OldBounds:=BoundsRect;
+  Saved.SetSize(GetDrawingBuffer.Width,GetDrawingBuffer.Height);
+  Saved.Canvas.CopyRect(Rect(0,0,Saved.Width,Saved.Height),GetDrawingBuffer.Canvas,
+    Rect(0,0,Saved.Width,Saved.Height));
+  DisableAutoSizing;
+  try
+    // Explicit memory-only preparation BEFORE the top-level HWND starts its
+    // native size transition. The visible child HWND stays at its old size.
+    SetBounds(Left,Top,OuterWidth,OuterHeight);
+    ComposeFrame;
+    FNativeResizeFrame:=TBitmap.Create;
+    FNativeResizeFrame.SetSize(GetDrawingBuffer.Width,GetDrawingBuffer.Height);
+    FNativeResizeFrame.Canvas.CopyRect(Rect(0,0,FNativeResizeFrame.Width,FNativeResizeFrame.Height),
+      GetDrawingBuffer.Canvas,Rect(0,0,FNativeResizeFrame.Width,FNativeResizeFrame.Height));
+  finally
+    SetBounds(OldBounds.Left,OldBounds.Top,OldBounds.Right-OldBounds.Left,OldBounds.Bottom-OldBounds.Top);
+    InitializeViewport(Min3D,Max3D);
+    GetDrawingBuffer.SetSize(Saved.Width,Saved.Height);
+    GetDrawingBuffer.Canvas.CopyRect(Rect(0,0,Saved.Width,Saved.Height),Saved.Canvas,Rect(0,0,Saved.Width,Saved.Height));
+    EnableAutoSizing;Saved.Free;
+  end;
+end;
+
+function TLinesplanViewport.AdoptNativeResize:Boolean;
+begin
+  Result:=(FNativeResizeFrame<>nil) and (FNativeResizeFrame.Width=ClientWidth) and
+    (FNativeResizeFrame.Height=ClientHeight);
+  if not Result then Exit;
+  InitializeViewport(Min3D,Max3D);
+  GetDrawingBuffer.SetSize(ClientWidth,ClientHeight);
+  GetDrawingBuffer.Canvas.CopyRect(Rect(0,0,ClientWidth,ClientHeight),FNativeResizeFrame.Canvas,
+    Rect(0,0,ClientWidth,ClientHeight));
+  FreeAndNil(FNativeResizeFrame);FSkipPreparedPaint:=True;
+  if Owner is TFreeLinesplanFrame then TFreeLinesplanFrame(Owner).TracePresentation('precomposed.adopted');
+end;
+
+procedure TLinesplanViewport.DiscardNativeResize;
+begin
+  FreeAndNil(FNativeResizeFrame);FSkipPreparedPaint:=False;
+end;
+
+procedure TLinesplanViewport.ComposeFrame;
+var SavedCanvas:TCanvas;
+begin
+  if FRendering then Exit;
+  if (not Printing) and (not ExportingBitmap) and
+    ((GetDrawingBuffer.Width<>ClientWidth) or (GetDrawingBuffer.Height<>ClientHeight)) then
+    InitializeViewport(Min3D,Max3D);
+  if FComposeTarget=nil then begin
+    FComposeTarget:=TBitmap.Create;
+    FComposeTarget.SetSize(1,1);
+  end;
+  if Owner is TFreeLinesplanFrame then TFreeLinesplanFrame(Owner).TracePresentation('compose.begin');
+  SavedCanvas:=DrawingCanvas;
+  FRendering:=True;
+  try
+    // Base Paint ends by copying to DrawingCanvas. Keep that incidental copy
+    // on a clipped memory surface, never on the window outside its paint DC.
+    DrawingCanvas:=FComposeTarget.Canvas;
+    inherited Paint;
+  finally
+    DrawingCanvas:=SavedCanvas;FRendering:=False;
+    if Owner is TFreeLinesplanFrame then TFreeLinesplanFrame(Owner).TracePresentation('compose.end');
+  end;
+end;
+
+procedure TLinesplanViewport.Paint;
+begin
+  if FRendering then Exit;
+  if Printing or ExportingBitmap then begin inherited Paint;Exit end;
+  if not LinesplanNativeLayoutReady(Self,Canvas.Handle) then begin
+    PresentPreparedFrame(Canvas); // Queue paint; do not block native geometry commit.
+    Exit;
+  end;
+  AdoptNativeResize;
+  if FSkipPreparedPaint then FSkipPreparedPaint:=False else ComposeFrame;
+  PresentPreparedFrame(Canvas);
+end;
+
+procedure TLinesplanViewport.PrepareFrame;
+begin
+  if Owner is TFreeLinesplanFrame then TFreeLinesplanFrame(Owner).FinishInteraction(nil);
+  ComposeFrame;
+end;
+
+procedure TLinesplanViewport.PresentPreparedFrame(Target:TCanvas;X,Y:Integer);
+var Buffer:TBitmap;
+begin
+  if Owner is TFreeLinesplanFrame then TFreeLinesplanFrame(Owner).TracePresentation('present.begin',Target.Handle);
+  if not LinesplanNativeLayoutReady(Self,Target.Handle) then begin
+    // Do not block HWND layout with a future-size render. This method can be
+    // reached synchronously inside SetWindowPos, before child sizes commit.
+    // Retain the previous surface and compose only after the geometry barrier.
+    if Owner is TFreeLinesplanFrame then TFreeLinesplanFrame(Owner).TracePresentation('present.deferred',Target.Handle);
+    Invalidate;Exit;
+  end;
+  AdoptNativeResize;
+  Buffer:=GetDrawingBuffer;
+  if (not FRendering) and (Parent<>nil) and (ClientWidth>0) and (ClientHeight>0) and
+    not Printing and not ExportingBitmap and
+    ((Buffer.Width<>ClientWidth) or (Buffer.Height<>ClientHeight)) then begin
+    // This also covers the erase message before the first paint after a
+    // maximize/restore. Never expose a scaled composite containing text.
+    ComposeFrame;
+    Buffer:=GetDrawingBuffer;
+  end;
+  if (Buffer<>nil) and (Buffer.Width=ClientWidth) and (Buffer.Height=ClientHeight) and
+    (Buffer.Width>0) and (Buffer.Height>0) then
+    Target.Draw(X,Y,Buffer)
+  else begin
+    Target.Brush.Color:=clWhite;Target.Brush.Style:=bsSolid;
+    Target.FillRect(Rect(X,Y,X+ClientWidth,Y+ClientHeight));
+  end;
+  if Owner is TFreeLinesplanFrame then TFreeLinesplanFrame(Owner).TracePresentation('present.end',Target.Handle);
+end;
+
+procedure TLinesplanViewport.ErasePreparedFrame(var Message:TLMEraseBkgnd);
+var Target:TCanvas;
+begin
+  if (Message.DC=0) or FRendering then begin Message.Result:=1;Exit end;
+  Target:=TCanvas.Create;
+  try
+    Target.Handle:=Message.DC;
+    PresentPreparedFrame(Target);
+  finally Target.Handle:=0;Target.Free end;
+  Message.Result:=1;
+end;
+
 
 {$IFnDEF FPC}
   {$R *.dfm}
@@ -195,7 +517,7 @@ end;{Space}
 
 procedure TFreeLinesplanFrame.CreateViewport;
 begin
-  Viewport := TFreeViewport.Create(Self);
+  Viewport := TLinesplanViewport.Create(Self);
   with Viewport do
   begin
     Parent := Self;
@@ -218,12 +540,19 @@ begin
     CameraType := ftStandard;
     Color := clWhite;
     DoubleBuffer := True;
+    ParentDoubleBuffered:=False;DoubleBuffered:=True;
     Elevation := 90;
     Margin := 1;
     ViewType := fvPlan;
     ViewportMode := vmWireFrame;
     OnMouseDown := ViewportMouseDown;
     OnMouseMove := ViewportMouseMove;
+    OnMouseUp := ViewportMouseUp;
+    OnMouseWheel := ViewportMouseWheel;
+    // TLinesplanViewport.Resize starts preview at the size event itself; a
+    // delayed OnResize must not restart it after resizing has already stopped.
+    DeferredTransformRedraw := True;
+    LabelLayout.AnimationEnabled := False;
     OnRedraw := ViewportRedraw;
     OnRequestExtents := ViewportRequestExtents;
   end;
@@ -231,9 +560,248 @@ end;
 
 
 constructor TFreeLinesplanFrame.Create(TheOwner: TComponent);
+var TraceMarker:string;
 begin
   inherited Create(TheOwner);
+  Color:=clWhite;ParentBackground:=False;ParentDoubleBuffered:=False;DoubleBuffered:=True;
   CreateViewport;
+  FInteractionTimer := TTimer.Create(Self);
+  FInteractionTimer.Enabled := False;
+  FInteractionTimer.Interval := 16;
+  FInteractionTimer.OnTimer := FinishInteraction;
+  TraceMarker:=ExtractFilePath(ParamStr(0))+'.linesplan-trace-once';
+  if FindCmdLineSwitch('trace-linesplan',True) or FindCmdLineSwitch('-trace-linesplan',True) or FileExists(TraceMarker) or LinesplanTraceSession then
+  begin
+    LinesplanTraceSession:=True;
+    if FileExists(TraceMarker) then SysUtils.DeleteFile(TraceMarker);
+    FTrace := TStringList.Create;
+    FTraceStart := GetTickCount64;
+    FTracePath := IncludeTrailingPathDelimiter(GetTempDir) + 'FreeShip-linesplan-' +
+      IntToStr(GetProcessID) + '-' + IntToStr(FTraceStart) + '.tsv';
+    FTrace.Add('elapsed_ms' + #9 + 'event' + #9 + 'detail');
+    TraceEvent('created', 'pid=' + IntToStr(GetProcessID));
+  end;
+end;
+
+procedure TFreeLinesplanFrame.PresentClientBackground(Target:TCanvas);
+var Surface:TBitmap;
+begin
+  TracePresentation('host-background.begin',Target.Handle);
+  if not LinesplanNativeLayoutReady(Self,Target.Handle) then begin
+    TracePresentation('host-background.deferred',Target.Handle);Invalidate;Exit;
+  end;
+  // Growth can expose the host before the child window covers its new area.
+  // Compose the host background and current-size chart offscreen as one image.
+  Realign;
+  if Viewport<>nil then
+    Viewport.SetBounds(0,ToolBar1.Top+ToolBar1.Height,ClientWidth,
+      Max(0,ClientHeight-ToolBar1.Top-ToolBar1.Height));
+  if not LinesplanNativeLayoutReady(Viewport,Target.Handle) then begin
+    TracePresentation('host-background.deferred',Target.Handle);Invalidate;Exit;
+  end;
+  Surface:=TBitmap.Create;
+  try
+    Surface.SetSize(ClientWidth,ClientHeight);
+    Surface.Canvas.Brush.Color:=Color;
+    Surface.Canvas.FillRect(Rect(0,0,ClientWidth,ClientHeight));
+    if (Viewport is TLinesplanViewport) and (FFreeShip<>nil) then
+      TLinesplanViewport(Viewport).PresentPreparedFrame(Surface.Canvas,Viewport.Left,Viewport.Top);
+    Target.Draw(0,0,Surface);
+  finally Surface.Free end;
+  TracePresentation('host-background.end',Target.Handle);
+end;
+
+procedure TFreeLinesplanFrame.EraseBackground(DC:HDC);
+var Target:TCanvas;
+begin
+  if (DC=0) or (FFreeShip=nil) or (csDestroying in ComponentState) then begin inherited EraseBackground(DC);Exit end;
+  Target:=TCanvas.Create;
+  try Target.Handle:=DC;PresentClientBackground(Target)
+  finally Target.Handle:=0;Target.Free end;
+end;
+
+procedure TFreeLinesplanFrame.TraceEvent(const Event, Detail: string);
+begin
+  if (FTrace = nil) or (FTrace.Count >= 2000) then Exit;
+  FTrace.Add(IntToStr(GetTickCount64-FTraceStart) + #9 + Event + #9 + Detail);
+  // Diagnostic mode only: bound the trace and flush in small batches.
+  if (FTrace.Count = 2) or ((Event<>'native') and (FTrace.Count mod 16 = 0)) or
+    (Event = 'idle') or (Event = 'closed') then
+    try FTrace.SaveToFile(FTracePath) except end;
+end;
+
+procedure TFreeLinesplanFrame.BeginInteraction;
+begin
+  TraceEvent('input', 'image=' + SysUtils.BoolToStr(FInteractionImage<>nil,True) +
+    '; printing=' + SysUtils.BoolToStr(Viewport.Printing,True) +
+    '; export=' + SysUtils.BoolToStr(Viewport.ExportingBitmap,True));
+  if (FInteractionImage = nil) or Viewport.Printing or Viewport.ExportingBitmap then Exit;
+  Viewport.PauseLabelAnimation;
+  FInteractionUntil := GetTickCount64 + 500;
+  FInteractionTimer.Enabled := True;
+end;
+
+procedure TFreeLinesplanFrame.FinishInteraction(Sender: TObject);
+begin
+  if (Sender <> nil) and (FInteractionDragging or (GetTickCount64 < FInteractionUntil)) then Exit;
+  FInteractionDragging := False;
+  TraceEvent('idle','timer=' + SysUtils.BoolToStr(Sender<>nil,True));
+  if FInteractionTimer <> nil then FInteractionTimer.Enabled := False;
+  if FInteractionUntil <> 0 then
+  begin
+    FInteractionUntil := 0;
+    Viewport.Invalidate;
+  end;
+end;
+
+procedure TFreeLinesplanFrame.ViewportMouseUp(Sender: TObject; Button: TMouseButton;
+  Shift: TShiftState; X, Y: Integer);
+begin
+  FInteractionDragging := False;
+  if FInteractionUntil <> 0 then
+  begin
+    FInteractionUntil := GetTickCount64 + 500;
+    FInteractionTimer.Enabled := True;
+  end;
+end;
+
+procedure TFreeLinesplanFrame.ViewportResizing(Sender: TObject);
+begin
+  // Reuse fill-only pixels during a resize, but repaint text and strokes at
+  // their native size on every presented frame.
+  BeginInteraction;
+end;
+
+procedure TFreeLinesplanFrame.ViewportMouseWheel(Sender: TObject; Shift: TShiftState;
+  WheelDelta: Integer; MousePos: TPoint; var Handled: Boolean);
+begin
+  BeginInteraction;
+  Handled := False; // Let the viewport retain its existing cursor-centred zoom.
+end;
+
+function TFreeLinesplanFrame.DrawVectorFill:Boolean;
+var A,B:TPoint;
+begin
+ Result:=False;
+ if (FFillVector=nil) or not FFillVector.Valid then Exit;
+ A:=Viewport.Project(SetPoint(FFillVector.MinX,FFillVector.MaxY,0));
+ B:=Viewport.Project(SetPoint(FFillVector.MaxX,FFillVector.MinY,0));
+ Result:=FFillVector.Draw(Viewport.DrawingCanvas,Rect(A.X,A.Y,B.X,B.Y));
+end;
+
+function TFreeLinesplanFrame.DrawInteractionPreview: Boolean;
+var Origin: TPoint; Ratio: Double; R: TRect;
+begin
+  Result := False;
+  {$IFDEF MSWINDOWS}
+  if ((FFillVector=nil) or (FFillVectorKey<>FillCacheKey(False))) and not Viewport.Printing and not Viewport.ExportingBitmap and
+    not ShowMonochrome.Checked and ShowFillColor.Checked then begin
+    FreeAndNil(FFillVector);
+    FDiskFillPath:=IncludeTrailingPathDelimiter(GetEnvironmentVariable('LOCALAPPDATA'))+
+      'FreeShip26'+PathDelim+'LinesplanCache-v2'+PathDelim+
+      SHA1Print(SHA1String('fill-v2;'+MeshFillFingerprint(FreeShip.Surface)+';'+FillCacheKey(False)))+'.fsc';
+    FFillVector:=TVectorFillCache.Create;
+    if FFillVector.LoadDisk(FDiskFillPath) then begin
+      FFillVectorKey:=FillCacheKey(False);TraceEvent('disk-hit',FDiskFillPath);
+    end else begin FreeAndNil(FFillVector);TraceEvent('disk-miss',FDiskFillPath) end;
+  end;
+  {$ENDIF}
+  {$IFDEF MSWINDOWS}
+  if not ShowMonochrome.Checked and ShowFillColor.Checked and not Viewport.Printing and
+    not Viewport.ExportingBitmap and (FFillVectorKey=FillCacheKey(False)) then begin
+    Result:=DrawVectorFill;
+    if Result and (FTrace<>nil) then TraceEvent('fill-cache','zoom='+FloatToStr(Viewport.Zoom)+';mode='+FFillVector.LastDrawMode);
+  end;
+  Exit; // Windows never scales a lower-resolution fill bitmap as a preview.
+  {$ENDIF}
+  if ShowMonochrome.Checked or not ShowFillColor.Checked or
+    (FInteractionKey <> FillCacheKey(False)) then Exit;
+  if (FInteractionUntil = 0) or (FInteractionImage = nil) or Viewport.Printing or Viewport.ExportingBitmap or
+    (Viewport.DrawingCanvas <> Viewport.GetDrawingBuffer.Canvas) or
+    (Viewport.GetDrawingBuffer.Width <> Viewport.ClientWidth) or
+    (Viewport.GetDrawingBuffer.Height <> Viewport.ClientHeight) or
+    (FInteractionScale <= 0) then
+  begin
+    TraceEvent('preview-rejected', 'active=' + SysUtils.BoolToStr(FInteractionUntil<>0,True) +
+      '; image=' + SysUtils.BoolToStr(FInteractionImage<>nil,True) +
+      '; printing=' + SysUtils.BoolToStr(Viewport.Printing,True) +
+      '; export=' + SysUtils.BoolToStr(Viewport.ExportingBitmap,True) +
+      '; viewport=' + IntToStr(Viewport.ClientWidth) + 'x' + IntToStr(Viewport.ClientHeight) +
+      '; buffer=' + IntToStr(Viewport.GetDrawingBuffer.Width) + 'x' + IntToStr(Viewport.GetDrawingBuffer.Height));
+    Exit;
+  end;
+  if not FInteractionDragging and (GetTickCount64 >= FInteractionUntil) then
+  begin FinishInteraction(nil); Exit end;
+  Origin := Viewport.Project(ZERO);
+  Ratio := Viewport.Scale * Viewport.Zoom / FInteractionScale;
+  // Keep extreme zoom values out of GDI's signed device-coordinate range.
+  if (Ratio <= 0) or (Ratio * Max(FInteractionImage.Width,FInteractionImage.Height) > 1E7) then Exit;
+  R.Left := Round(Origin.X - Ratio * FInteractionOrigin.X);
+  R.Top := Round(Origin.Y - Ratio * FInteractionOrigin.Y);
+  R.Right := R.Left + Round(Ratio * FInteractionImage.Width);
+  R.Bottom := R.Top + Round(Ratio * FInteractionImage.Height);
+  if (R.Right-R.Left=FInteractionImage.Width) and
+     (R.Bottom-R.Top=FInteractionImage.Height) then
+    Viewport.DrawingCanvas.Draw(R.Left,R.Top,FInteractionImage)
+  else
+    Viewport.DrawingCanvas.StretchDraw(R, FInteractionImage);
+  TraceEvent('preview','zoom=' + FloatToStr(Viewport.Zoom));
+  Result := True;
+end;
+
+procedure TFreeLinesplanFrame.InvalidateRenderCache;
+begin
+  TraceEvent('invalidate','');
+  FDiskFillPath:='';FDiskFillDirty:=False;
+  if Viewport is TLinesplanViewport then TLinesplanViewport(Viewport).DiscardNativeResize;
+  FreeAndNil(FFillVector);FFillVectorKey:='';
+  FFillCacheKey := '';
+  FLastLabelContext := '';
+  FinishInteraction(nil);
+  FreeAndNil(FInteractionImage);
+  FInteractionKey := '';
+end;
+
+destructor TFreeLinesplanFrame.Destroy;
+begin
+  FSetFreeShip(nil);
+  TraceEvent('closed','');
+  FreeAndNil(FTrace);
+  FreeAndNil(FInteractionTimer);
+  FreeAndNil(FInteractionImage);
+  FreeAndNil(FFillVector);
+  if FFreeShip <> nil then FFreeShip.LinesplanFrame := nil;
+  FreeAndNil(FFillCache);
+  inherited Destroy;
+end;
+
+function TFreeLinesplanFrame.FillCacheKey(IncludeTransform: Boolean): string;
+  function F(V: TFloatType): string;
+  begin Result := FloatToStrF(V, ffGeneral, 17, 0) + ';' end;
+  function C(P: T3DCoordinate): string;
+  begin Result := F(P.X) + F(P.Y) + F(P.Z) end;
+var P: TPoint; I: Integer; Transform: string;
+begin
+  P := Viewport.Project(ZERO);
+  Transform := '';
+  if IncludeTransform then Transform := IntToStr(Viewport.ClientWidth) + ';' +
+    IntToStr(Viewport.ClientHeight) + ';' + IntToStr(P.X) + ';' + IntToStr(P.Y) + ';' +
+    IntToStr(Viewport.Pan.X) + ';' + IntToStr(Viewport.Pan.Y) + ';' + F(Viewport.Zoom) +
+    F(Viewport.Scale) + C(Viewport.CameraLocation) + C(Viewport.Min3D) + C(Viewport.Max3D);
+  // The fill atlas is model-space content. Window dimensions and fitted
+  // camera/scale belong only to the exact screen cache, not atlas identity.
+  Result := Transform + F(Viewport.Angle) + F(Viewport.Elevation) +
+    C(FMin3D) + C(FMax3D) +
+    C(FProfileOrigin) + C(FAftOrigin) + C(FFrontOrigin) + C(FPlanOrigin) +
+    F(FreeShip.ProjectSettings.ProjectDraft) +
+    IntToStr(Ord(FreeShip.ProjectSettings.ProjectShadeUnderwaterShip)) + ';' +
+    IntToStr(FreeShip.ProjectSettings.ProjectUnderWaterColor) + ';' +
+    IntToStr(Viewport.Color) + ';' + IntToStr(Ord(UseLights.Checked)) + ';' +
+    IntToStr(Ord(MirrorPlanview.Checked));
+  for I := 0 to FreeShip.NumberOfLayers - 1 do
+    Result := Result + ';' + IntToStr(FreeShip.Layer[I].Color) + ';' +
+      IntToStr(Ord(FreeShip.Layer[I].ShowInLinesplan)) + ';' +
+      IntToStr(Ord(FreeShip.Layer[I].Symmetric));
 end;
 
 procedure TFreeLinesplanFrame.UpdateMenu;
@@ -245,6 +813,18 @@ end;{TFreeLinesplanFrame.UpdateMenu}
 
 procedure TFreeLinesplanFrame.FSetFreeShip(Val: TFreeShip);
 begin
+  if Val=FFreeShip then Exit;
+  if FDiskFillDirty and (FFillVector<>nil) then FFillVector.SaveDisk(FDiskFillPath);
+  // Transfer ownership, not pixels: keep the complete model-space fill and its
+  // filtered levels across window lifetimes. Model invalidation discards it.
+  if (FFreeShip<>nil) and not (csDestroying in FFreeShip.ComponentState) and
+    (FFillVector<>nil) and FFillVector.Valid then begin
+    FreeAndNil(FFreeShip.LinesplanFillCache);
+    FFreeShip.LinesplanFillCache:=FFillVector;
+    FFreeShip.LinesplanFillCacheKey:=FFillVectorKey;
+    FFillVector:=nil;
+  end;
+  InvalidateRenderCache;
   if FFreeShip <> nil then
     FFreeShip.LinesplanFrame := nil;
   FFreeShip := Val;
@@ -256,6 +836,10 @@ begin
     Freeship.Preferences.LoadImageListByActions(MenuImages, ActionList1);
 
     FFreeShip.LinesplanFrame := self;
+    FFillVector:=TVectorFillCache(FFreeShip.LinesplanFillCache);
+    FFillVectorKey:=FFreeShip.LinesplanFillCacheKey;
+    FFreeShip.LinesplanFillCache:=nil;
+    FFreeShip.LinesplanFillCacheKey:='';
     UpdateMenu;
   end;
 end;{TFreeLinesplanFrame.FSetFreeShip}
@@ -386,8 +970,28 @@ end;{TFreeLinesplanFrame.ViewportRequestExtents}
 
 procedure TFreeLinesplanFrame.SpinEdit1Change(Sender: TObject);
 begin
+  FinishInteraction(nil);
   FFontSize := (Sender as TSpinEdit).Value;
   Viewport.invalidate;
+end;
+
+function TFreeLinesplanFrame.LabelBackgroundCost(const R: TRect): integer;
+var X, Y, I: integer; C: TColor;
+begin
+  Result := 0;
+  // Filled hull areas are already painted before the labels. Prefer local
+  // candidates on a light background so dark text remains legible.
+  for I := 0 to 4 do begin
+    case I of
+      0: begin X:=(R.Left+R.Right) div 2; Y:=(R.Top+R.Bottom) div 2 end;
+      1: begin X:=R.Left+1; Y:=R.Top+1 end;
+      2: begin X:=R.Right-2; Y:=R.Top+1 end;
+      3: begin X:=R.Left+1; Y:=R.Bottom-2 end;
+      else begin X:=R.Right-2; Y:=R.Bottom-2 end;
+    end;
+    C := ColorToRGB(Viewport.DrawingCanvas.Pixels[X,Y]);
+    if (GetRValue(C)+GetGValue(C)+GetBValue(C)<390) then Inc(Result, 2);
+  end;
 end;
 
 procedure TFreeLinesplanFrame.ViewportRedraw(Sender: TObject);
@@ -433,6 +1037,93 @@ var
   Prevcursor: TCursor;
   SubmColor: TColor;
   Pn, Pn1,Pn2: integer;
+  LabelIndex: integer;
+  PaintStarted: QWord;
+  CacheKey: string;
+  LabelContextKey: string;
+  CanCache: Boolean;
+  UsingInteractionPreview: Boolean;
+  BuildingAtlas, CaptureAtlas: Boolean;
+  VectorRecording:Boolean;VectorSavedCanvas:TCanvas;
+  AtlasZoom: TFloatType;
+  AtlasPan: TPoint;
+  KnuckleSegments: array of TSmoothSegment;
+  KnuckleCount: Integer;
+  PendingLabels:array of record X,Y,Outward,Index,FontSize:Integer;Text,FontName:string;Vertical:Boolean;Color:TColor end;
+
+
+  procedure DrawLineLabel(X, Y: integer; const Text: string; Vertical: boolean; Outward: integer);
+  var Placement: TLabelPlacement; Kind: TLabelKind;
+  begin
+    if Viewport.Printing then begin Viewport.TextOut(X, Y, Text); Exit end;
+    Inc(LabelIndex);
+    if (Text <> '') and (Text[1] in ['0'..'9', '-']) then
+    begin
+      if Vertical then Kind := lkVerticalTick else Kind := lkHorizontalTick;
+    end
+    else Kind := lkNamedLine;
+    Placement := Viewport.LabelLayout.Place('lines:' + IntToStr(LabelIndex), Text,
+      Point(X,Y), Point(X,Y), Viewport.TextWidth(Text), Viewport.TextHeight(Text), Kind, Outward);
+    if Placement.Visible then
+      Viewport.TextOutLabel(Placement,Text);
+  end;
+
+  procedure PlaceLineLabel(X,Y:Integer;const Text:string;Vertical:Boolean;Outward:Integer);
+  var N:Integer;
+  begin
+    if Viewport.Printing then begin Viewport.TextOut(X,Y,Text);Exit end;
+    N:=Length(PendingLabels);SetLength(PendingLabels,N+1);
+    PendingLabels[N].X:=X;PendingLabels[N].Y:=Y;PendingLabels[N].Text:=Text;
+    PendingLabels[N].Vertical:=Vertical;PendingLabels[N].Outward:=Outward;
+    PendingLabels[N].Index:=N+1;PendingLabels[N].FontName:=Viewport.FontName;
+    PendingLabels[N].FontSize:=Viewport.FontSize;PendingLabels[N].Color:=Viewport.FontColor;
+  end;
+
+  procedure DrawPendingLabels;
+  var Pass,N:Integer;Numeric:Boolean;
+  begin
+    for Pass:=0 to 1 do for N:=0 to High(PendingLabels) do begin
+      Numeric:=(PendingLabels[N].Text<>'') and (PendingLabels[N].Text[1] in ['0'..'9','-']);
+      if (Pass=1)<>Numeric then Continue;
+      Viewport.FontName:=PendingLabels[N].FontName;Viewport.FontSize:=PendingLabels[N].FontSize;
+      Viewport.FontColor:=PendingLabels[N].Color;LabelIndex:=PendingLabels[N].Index-1;
+      DrawLineLabel(PendingLabels[N].X,PendingLabels[N].Y,PendingLabels[N].Text,PendingLabels[N].Vertical,PendingLabels[N].Outward);
+    end;
+  end;
+
+  // Register the projected feature edges which this view draws later.  The
+  // label layout works in viewport pixels, not model or window coordinates.
+  procedure CollectFeatureEdges;
+  var I: integer; Edge: TFreeSubdivisionControlEdge; A, B, Q1, Q2: T3DCoordinate;
+    procedure AddProjected(const P1, P2: T3DCoordinate);
+    begin Viewport.LabelLayout.AddSegment(Viewport.Project(P1), Viewport.Project(P2)) end;
+  begin
+    if Viewport.Printing then Exit;
+    for I := 0 to FreeShip.Surface.NumberOfControlEdges-1 do begin
+      Edge := FreeShip.Surface.ControlEdge[I];
+      if not (Edge.Visible and Edge.Crease) then Continue;
+      A := Edge.StartPoint.Coordinate; B := Edge.EndPoint.Coordinate;
+      Q1 := Point3D(FProfileOrigin.X+A.X, FProfileOrigin.Y+A.Z, 0);
+      Q2 := Point3D(FProfileOrigin.X+B.X, FProfileOrigin.Y+B.Z, 0);
+      AddProjected(Q1,Q2);
+      Q1 := Point3D(FPlanOrigin.X+A.X, FPlanOrigin.Y+A.Y, 0);
+      Q2 := Point3D(FPlanOrigin.X+B.X, FPlanOrigin.Y+B.Y, 0);
+      AddProjected(Q1,Q2);
+      if (FreeShip.NumberofDiagonals=0) and MirrorPlanview.Checked then begin
+        Q1.Y := FPlanOrigin.Y-A.Y; Q2.Y := FPlanOrigin.Y-B.Y; AddProjected(Q1,Q2);
+      end;
+      if (A.X<=MidshipLocation) and (B.X<MidshipLocation) then begin
+        Q1 := Point3D(FAftOrigin.X-A.Y, FAftOrigin.Y+A.Z, 0);
+        Q2 := Point3D(FAftOrigin.X-B.Y, FAftOrigin.Y+B.Z, 0); AddProjected(Q1,Q2);
+        Q1.X := FAftOrigin.X+A.Y; Q2.X := FAftOrigin.X+B.Y; AddProjected(Q1,Q2);
+      end;
+      if (A.X>=MidshipLocation) and (B.X>MidshipLocation) then begin
+        Q1 := Point3D(FFrontOrigin.X-A.Y, FFrontOrigin.Y+A.Z, 0);
+        Q2 := Point3D(FFrontOrigin.X-B.Y, FFrontOrigin.Y+B.Z, 0); AddProjected(Q1,Q2);
+        Q1.X := FFrontOrigin.X+A.Y; Q2.X := FFrontOrigin.X+B.Y; AddProjected(Q1,Q2);
+      end;
+    end;
+  end;
 
   procedure DrawLineAtt(Attachpoint, P1, P2: T3DCoordinate; Text: string; CenterText: boolean);
   var
@@ -455,18 +1146,18 @@ var
       if (CenterText) and (Pts[0].X = Pts[1].X) then
       begin
         W := Viewport.TextWidth(Text) div 2;
-        Viewport.TextOut(Pts[0].X - W, Pts[0].Y, Text);
-        Viewport.TextOut(Pts[1].X - W, Pts[1].Y, Text);
+        PlaceLineLabel(Pts[0].X - W, Pts[0].Y, Text, Pts[0].X = Pts[1].X, Sign(Pts[0].Y - Pts[1].Y));
+        PlaceLineLabel(Pts[1].X - W, Pts[1].Y, Text, Pts[0].X = Pts[1].X, Sign(Pts[1].Y - Pts[0].Y));
       end
       else
       begin
         W := 0;
-        Viewport.TextOut(Pts[1].X - W, Pts[0].Y, Text);
+        PlaceLineLabel(Pts[1].X - W, Pts[0].Y, Text, Pts[0].X = Pts[1].X, Sign(Pts[1].X - Pts[0].X));
         if (Pts[0].Y = Pts[1].Y) and (Pts[1].X <> Pts[0].X) then
           W := Viewport.TextWidth(Text)
         else
           W := 0;
-        Viewport.TextOut(Pts[0].X - W, Pts[1].Y, Text);
+        PlaceLineLabel(Pts[0].X - W, Pts[1].Y, Text, Pts[0].X = Pts[1].X, Sign(Pts[0].X - Pts[1].X));
       end;
     end;
   end;{DrawLineAtt}
@@ -495,6 +1186,27 @@ var
     Viewport.LineTo(Pt.X, Pt.Y);
   end;{DrawDiagonalLine}
 
+  procedure QueueKnuckle(const A,B:TPoint);
+  begin
+    if KnuckleCount=Length(KnuckleSegments) then SetLength(KnuckleSegments,KnuckleCount+1024);
+    KnuckleSegments[KnuckleCount].A.X:=A.X;KnuckleSegments[KnuckleCount].A.Y:=A.Y;
+    KnuckleSegments[KnuckleCount].B.X:=B.X;KnuckleSegments[KnuckleCount].B.Y:=B.Y;
+    Inc(KnuckleCount);
+  end;
+  procedure FlushKnuckles;
+  var N:Integer; Points:array[0..1] of TPoint;
+  begin
+    SetLength(KnuckleSegments,KnuckleCount);
+    if KnuckleCount=0 then Exit;
+    if not Viewport.Printing then
+      if DrawSmoothSegments(Viewport.DrawingCanvas,KnuckleSegments) then Exit;
+    for N:=0 to KnuckleCount-1 do begin
+      Points[0]:=Point(Round(KnuckleSegments[N].A.X),Round(KnuckleSegments[N].A.Y));
+      Points[1]:=Point(Round(KnuckleSegments[N].B.X),Round(KnuckleSegments[N].B.Y));
+      Viewport.Polyline(Points);
+    end;
+  end;
+
   procedure DrawLine(P1, P2: T3DCoordinate);
   var
     Proj1: T3DCoordinate;
@@ -510,7 +1222,7 @@ var
     Proj2.Y := FProfileOrigin.Y + P2.Z;
     Proj2.Z := 0.0;
     Pts[1] := Viewport.Project(Proj2);
-    Viewport.Polyline(Pts);
+    QueueKnuckle(Pts[0],Pts[1]);
 
     // Draw in aft view of bodyplan
     if (P1.X <= MidshipLocation) and (P2.X < MidshipLocation) then
@@ -521,14 +1233,14 @@ var
       Proj2.X := FAftOrigin.X - P2.Y;
       Proj2.Y := FAftOrigin.Y + P2.Z;
       Pts[1] := Viewport.Project(Proj2);
-      Viewport.PolyLine(Pts);
+      QueueKnuckle(Pts[0],Pts[1]);
       Proj1.X := FAftOrigin.X + P1.Y;
       Proj1.Y := FAftOrigin.Y + P1.Z;
       Pts[0] := Viewport.Project(Proj1);
       Proj2.X := FAftOrigin.X + P2.Y;
       Proj2.Y := FAftOrigin.Y + P2.Z;
       Pts[1] := Viewport.Project(Proj2);
-      Viewport.Polyline(Pts);
+      QueueKnuckle(Pts[0],Pts[1]);
     end;
 
     // Draw in front view of bodyplan
@@ -540,14 +1252,14 @@ var
       Proj2.X := FFrontOrigin.X - P2.Y;
       Proj2.Y := FFrontOrigin.Y + P2.Z;
       Pts[1] := Viewport.Project(Proj2);
-      Viewport.Polyline(Pts);
+      QueueKnuckle(Pts[0],Pts[1]);
       Proj1.X := FFrontOrigin.X + P1.Y;
       Proj1.Y := FFrontOrigin.Y + P1.Z;
       Pts[0] := Viewport.Project(Proj1);
       Proj2.X := FFrontOrigin.X + P2.Y;
       Proj2.Y := FFrontOrigin.Y + P2.Z;
       Pts[1] := Viewport.Project(Proj2);
-      Viewport.Polyline(Pts);
+      QueueKnuckle(Pts[0],Pts[1]);
     end;
     // Draw in plan view
     Proj1.X := FPlanOrigin.X + P1.X;
@@ -556,7 +1268,7 @@ var
     Proj2.X := FPlanOrigin.X + P2.X;
     Proj2.Y := FPlanOrigin.Y + P2.Y;
     Pts[1] := Viewport.Project(Proj2);
-    Viewport.Polyline(Pts);
+    QueueKnuckle(Pts[0],Pts[1]);
     if (Freeship.NumberofDiagonals = 0) and (MirrorPlanview.Checked) then
     begin
       Proj1.X := FPlanOrigin.X + P1.X;
@@ -565,7 +1277,7 @@ var
       Proj2.X := FPlanOrigin.X + P2.X;
       Proj2.Y := FPlanOrigin.Y - P2.Y;
       Pts[1] := Viewport.Project(Proj2);
-      Viewport.Polyline(Pts);
+      QueueKnuckle(Pts[0],Pts[1]);
     end;
   end;{DrawLine}
 
@@ -782,7 +1494,7 @@ var
   begin
     if Destination.Count = Destination.Capacity then
     begin
-      Destination.Capacity := Destination.Capacity + 50;
+      Destination.Capacity := Math.Max(64, Destination.Capacity * 2);
       Setlength(Destination.Triangles, Destination.Capacity);
     end;
     C.X := (P1.X + P2.X + P3.X) / 3;
@@ -889,6 +1601,22 @@ var
     L: T3DCoordinate;
     Col: TColor;
 
+    procedure SetFillColor(Color:TColor);
+    begin
+      Col:=Color;
+      // Recording submits its own cached GDI paint objects. Updating the LCL
+      // canvas here would create redundant pen/brush state for every triangle.
+      if not VectorRecording then begin
+        Viewport.BrushColor:=Color;Viewport.PenColor:=Color;
+      end;
+    end;
+
+    function ProjectFillPoint(const P:T3DCoordinate):TPoint;
+    begin
+      if VectorRecording then Result:=FFillVector.Project(P.X,P.Y)
+      else Result:=Viewport.Project(P);
+    end;
+
     function GetColor(Lightvector: T3DCoordinate; DpScale, Contrast: TFloatType;
       Triangle: TriangleData): TColor;
     var
@@ -925,38 +1653,38 @@ var
         Triangle := Triangles.Triangles[I - 1];
         if not UseLights.Checked then
         begin
-          Viewport.BrushColor := Triangle.Color;
-          Viewport.PenColor := Triangle.Color;
+          SetFillColor(Triangle.Color);
         end
         else
         begin
           Col := GetColor(L, 1.4, 1.0, Triangle);
-          Viewport.BrushColor := Col;
-          Viewport.PenColor := Col;
+          SetFillColor(Col);
         end;
         // Draw in aft view
         P.X := FAftOrigin.X - Triangle.P1.Y;
         P.Y := FAftOrigin.Y + Triangle.P1.Z;
-        Pts[0] := Viewport.Project(P);
+        Pts[0] := ProjectFillPoint(P);
         P.X := FAftOrigin.X - Triangle.P2.Y;
         P.Y := FAftOrigin.Y + Triangle.P2.Z;
-        Pts[1] := Viewport.Project(P);
+        Pts[1] := ProjectFillPoint(P);
         P.X := FAftOrigin.X - Triangle.P3.Y;
         P.Y := FAftOrigin.Y + Triangle.P3.Z;
-        Pts[2] := Viewport.Project(P);
-        Viewport.Polygon(Pts);
+        Pts[2] := ProjectFillPoint(P);
+        if VectorRecording then FFillVector.Polygon(Pts,Col)
+        else Viewport.Polygon(Pts);
         if Triangle.Symmetric then
         begin
           P.X := FAftOrigin.X + Triangle.P1.Y;
           P.Y := FAftOrigin.Y + Triangle.P1.Z;
-          Pts[0] := Viewport.Project(P);
+          Pts[0] := ProjectFillPoint(P);
           P.X := FAftOrigin.X + Triangle.P2.Y;
           P.Y := FAftOrigin.Y + Triangle.P2.Z;
-          Pts[1] := Viewport.Project(P);
+          Pts[1] := ProjectFillPoint(P);
           P.X := FAftOrigin.X + Triangle.P3.Y;
           P.Y := FAftOrigin.Y + Triangle.P3.Z;
-          Pts[2] := Viewport.Project(P);
-          Viewport.Polygon(Pts);
+          Pts[2] := ProjectFillPoint(P);
+          if VectorRecording then FFillVector.Polygon(Pts,Col)
+        else Viewport.Polygon(Pts);
         end;
       end;
     end
@@ -972,26 +1700,25 @@ var
           L := SetPoint(0.0, -1.0, 0.0);
           if not UseLights.Checked then
           begin
-            Viewport.BrushColor := Triangle.Color;
-            Viewport.PenColor := Triangle.Color;
+            SetFillColor(Triangle.Color);
           end
           else
           begin
             Col := GetColor(L, 1.1, 1.5, Triangle);
-            Viewport.BrushColor := Col;
-            Viewport.PenColor := Col;
+            SetFillColor(Col);
           end;
           // Draw in profile view
           P.X := FProfileOrigin.X + Triangle.P1.X;
           P.Y := FProfileOrigin.Y + Triangle.P1.Z;
-          Pts[0] := Viewport.Project(P);
+          Pts[0] := ProjectFillPoint(P);
           P.X := FProfileOrigin.X + Triangle.P2.X;
           P.Y := FProfileOrigin.Y + Triangle.P2.Z;
-          Pts[1] := Viewport.Project(P);
+          Pts[1] := ProjectFillPoint(P);
           P.X := FProfileOrigin.X + Triangle.P3.X;
           P.Y := FProfileOrigin.Y + Triangle.P3.Z;
-          Pts[2] := Viewport.Project(P);
-          Viewport.Polygon(Pts);
+          Pts[2] := ProjectFillPoint(P);
+          if VectorRecording then FFillVector.Polygon(Pts,Col)
+        else Viewport.Polygon(Pts);
         end;
 
         if lvFrontBody in views then
@@ -999,38 +1726,38 @@ var
           L := SetPoint(1.0, 0.0, 0.0);
           if not UseLights.Checked then
           begin
-            Viewport.BrushColor := Triangle.Color;
-            Viewport.PenColor := Triangle.Color;
+            SetFillColor(Triangle.Color);
           end
           else
           begin
             Col := GetColor(L, 1.4, 1.0, Triangle);
-            Viewport.BrushColor := Col;
-            Viewport.PenColor := Col;
+            SetFillColor(Col);
           end;
           // Draw in Front view
           P.X := FFrontOrigin.X - Triangle.P1.Y;
           P.Y := FFrontOrigin.Y + Triangle.P1.Z;
-          Pts[0] := Viewport.Project(P);
+          Pts[0] := ProjectFillPoint(P);
           P.X := FFrontOrigin.X - Triangle.P2.Y;
           P.Y := FFrontOrigin.Y + Triangle.P2.Z;
-          Pts[1] := Viewport.Project(P);
+          Pts[1] := ProjectFillPoint(P);
           P.X := FFrontOrigin.X - Triangle.P3.Y;
           P.Y := FFrontOrigin.Y + Triangle.P3.Z;
-          Pts[2] := Viewport.Project(P);
-          Viewport.Polygon(Pts);
+          Pts[2] := ProjectFillPoint(P);
+          if VectorRecording then FFillVector.Polygon(Pts,Col)
+        else Viewport.Polygon(Pts);
           if Triangle.Symmetric then
           begin
             P.X := FFrontOrigin.X + Triangle.P1.Y;
             P.Y := FFrontOrigin.Y + Triangle.P1.Z;
-            Pts[0] := Viewport.Project(P);
+            Pts[0] := ProjectFillPoint(P);
             P.X := FFrontOrigin.X + Triangle.P2.Y;
             P.Y := FFrontOrigin.Y + Triangle.P2.Z;
-            Pts[1] := Viewport.Project(P);
+            Pts[1] := ProjectFillPoint(P);
             P.X := FFrontOrigin.X + Triangle.P3.Y;
             P.Y := FFrontOrigin.Y + Triangle.P3.Z;
-            Pts[2] := Viewport.Project(P);
-            Viewport.Polygon(Pts);
+            Pts[2] := ProjectFillPoint(P);
+            if VectorRecording then FFillVector.Polygon(Pts,Col)
+        else Viewport.Polygon(Pts);
           end;
         end;
         if lvPlan in views then
@@ -1038,44 +1765,110 @@ var
           L := SetPoint(0.0, 0.0, -1.0);
           if not UseLights.Checked then
           begin
-            Viewport.BrushColor := Triangle.Color;
-            Viewport.PenColor := Triangle.Color;
+            SetFillColor(Triangle.Color);
           end
           else
           begin
             Col := GetColor(L, 1.1, 1.5, Triangle);
-            Viewport.BrushColor := Col;
-            Viewport.PenColor := Col;
+            SetFillColor(Col);
           end;
           // Draw portside in plan view
           P.X := FPlanOrigin.X + Triangle.P1.X;
           P.Y := FPlanOrigin.Y + Triangle.P1.Y;
-          Pts[0] := Viewport.Project(P);
+          Pts[0] := ProjectFillPoint(P);
           P.X := FPlanOrigin.X + Triangle.P2.X;
           P.Y := FPlanOrigin.Y + Triangle.P2.Y;
-          Pts[1] := Viewport.Project(P);
+          Pts[1] := ProjectFillPoint(P);
           P.X := FPlanOrigin.X + Triangle.P3.X;
           P.Y := FPlanOrigin.Y + Triangle.P3.Y;
-          Pts[2] := Viewport.Project(P);
-          Viewport.Polygon(Pts);
+          Pts[2] := ProjectFillPoint(P);
+          if VectorRecording then FFillVector.Polygon(Pts,Col)
+        else Viewport.Polygon(Pts);
           if (Freeship.NumberofDiagonals = 0) and (MirrorPlanview.Checked) and
             (Triangle.Symmetric) then
           begin
             P.X := FPlanOrigin.X + Triangle.P1.X;
             P.Y := FPlanOrigin.Y - Triangle.P1.Y;
-            Pts[0] := Viewport.Project(P);
+            Pts[0] := ProjectFillPoint(P);
             P.X := FPlanOrigin.X + Triangle.P2.X;
             P.Y := FPlanOrigin.Y - Triangle.P2.Y;
-            Pts[1] := Viewport.Project(P);
+            Pts[1] := ProjectFillPoint(P);
             P.X := FPlanOrigin.X + Triangle.P3.X;
             P.Y := FPlanOrigin.Y - Triangle.P3.Y;
-            Pts[2] := Viewport.Project(P);
-            Viewport.Polygon(Pts);
+            Pts[2] := ProjectFillPoint(P);
+            if VectorRecording then FFillVector.Polygon(Pts,Col)
+        else Viewport.Polygon(Pts);
           end;
         end;
       end;
     end;
   end;{DrawTriangles}
+
+  procedure PrepareFillAtlas;
+  var Min,Max:T3DCoordinate; A,B,SavedPan:TPoint; SavedZoom:TFloatType;
+  begin
+    {$IFDEF MSWINDOWS}
+    if CanCache then begin
+      if FFillVector=nil then FFillVector:=TVectorFillCache.Create;
+      Min:=Viewport.Min3D;Max:=Viewport.Max3D;
+      VectorRecording:=FFillVector.BeginRecord(Viewport.DrawingCanvas,Min.X,Min.Y,Max.X,Max.Y,Viewport.Color);
+      if VectorRecording then begin
+        VectorSavedCanvas:=Viewport.DrawingCanvas;Viewport.DrawingCanvas:=FFillVector.Canvas;
+      end;
+    end;
+    Exit;
+    {$ENDIF}
+    BuildingAtlas := CanCache and ((FInteractionImage=nil) or
+      (FInteractionKey<>FillCacheKey(False)));
+    if not BuildingAtlas then Exit;
+    Min:=Viewport.Min3D; Max:=Viewport.Max3D;
+    A:=Viewport.Project(Min); B:=Viewport.Project(Max);
+    if (Math.Min(A.X,B.X)>=0) and (Math.Min(A.Y,B.Y)>=0) and
+       (Math.Max(A.X,B.X)<Viewport.ClientWidth) and (Math.Max(A.Y,B.Y)<Viewport.ClientHeight) then
+    begin
+      // A fitted view already contains the entire hull. Capture it once,
+      // without drawing all triangles a second time just to build the atlas.
+      CaptureAtlas:=True; BuildingAtlas:=False;
+      FInteractionOrigin:=Viewport.Project(ZERO);
+      FInteractionScale:=Viewport.Scale*Viewport.Zoom;
+      Exit;
+    end;
+    SavedZoom:=Viewport.Zoom; SavedPan:=Viewport.Pan;
+    try
+      Viewport.Zoom:=Math.Min(1.0,SavedZoom*Math.Min((Viewport.ClientWidth-8)/Math.Max(1,Abs(B.X-A.X)),
+        (Viewport.ClientHeight-8)/Math.Max(1,Abs(B.Y-A.Y))));
+      AtlasZoom:=Viewport.Zoom;
+      Viewport.Pan:=Point(0,0); A:=Viewport.Project(Min); B:=Viewport.Project(Max);
+      AtlasPan:=Point(4-Math.Min(A.X,B.X),4-Math.Min(A.Y,B.Y));
+      Viewport.Pan:=AtlasPan;
+      FInteractionOrigin:=Viewport.Project(ZERO);
+      FInteractionScale:=Viewport.Scale*AtlasZoom;
+      if FInteractionImage=nil then FInteractionImage:=TBitmap.Create;
+      FInteractionImage.SetSize(Viewport.ClientWidth,Viewport.ClientHeight);
+      FInteractionImage.Canvas.Brush.Color:=Viewport.Color;
+      FInteractionImage.Canvas.FillRect(Rect(0,0,FInteractionImage.Width,FInteractionImage.Height));
+      FInteractionImage.Canvas.Brush.Style:=bsSolid;
+      FInteractionImage.Canvas.Pen.Width:=1;
+    finally
+      Viewport.Zoom:=SavedZoom; Viewport.Pan:=SavedPan;
+    end;
+  end;
+
+  procedure DrawFillTriangles(Triangles:TriangleArray; Views:TLinesplanViews);
+  var SavedCanvas:TCanvas; SavedPan:TPoint; SavedZoom:TFloatType;
+  begin
+    DrawTriangles(Triangles,Views);
+    if not BuildingAtlas then Exit;
+    SavedCanvas:=Viewport.DrawingCanvas; SavedPan:=Viewport.Pan; SavedZoom:=Viewport.Zoom;
+    try
+      Viewport.DrawingCanvas:=FInteractionImage.Canvas;
+      Viewport.Zoom:=AtlasZoom; Viewport.Pan:=AtlasPan;
+      DrawTriangles(Triangles,Views);
+    finally
+      Viewport.DrawingCanvas:=SavedCanvas;
+      Viewport.Zoom:=SavedZoom; Viewport.Pan:=SavedPan;
+    end;
+  end;
 
   procedure SetFontHeight(DesiredHeight: TFloatType);
   var
@@ -1104,6 +1897,24 @@ var
 begin
   if Freeship = nil then
     exit;
+  PaintStarted := GetTickCount64;
+  BuildingAtlas := False;
+  CaptureAtlas := False;
+  VectorRecording:=False;
+  KnuckleCount := 0;
+  UsingInteractionPreview := DrawInteractionPreview;
+  LabelIndex := 0;
+  if Viewport.ExportingBitmap then Viewport.LabelLayout.Clear;
+  Viewport.SyncLabelHistory;
+  LabelContextKey:=FillCacheKey(False)+';font='+IntToStr(FFontSize)+
+    ';fill='+IntToStr(Ord(ShowFillColor.Checked))+';mono='+IntToStr(Ord(ShowMonochrome.Checked));
+  Viewport.LabelLayout.TranslationOnly:=FInteractionDragging and FPanDragStarted and
+    not Viewport.Printing and not Viewport.ExportingBitmap and
+    (FLastLabelContext=LabelContextKey) and
+    (FLastLabelScale=Viewport.Scale*Viewport.Zoom);
+  Viewport.LabelLayout.BeginFrame(Rect(0, 0, Viewport.ClientWidth, Viewport.ClientHeight),
+    'lines:' + Freeship.Filename);
+  if not Viewport.Printing then Viewport.LabelLayout.ExtraCost := LabelBackgroundCost;
   if Viewport.Printing then
     PenWidthfactor := Round(Viewport.PrintScaleFactor)
   else
@@ -1132,7 +1943,7 @@ begin
   Above.Count := 0;
   Above.Capacity := 0;
   Prevcursor := Screen.Cursor;
-  Screen.Cursor := crHourglass;
+  if Viewport.Printing or Viewport.ExportingBitmap then Screen.Cursor := crHourglass;
   Viewport.PenColor := clSilver;
 
   Viewport.FontName := 'Arial';
@@ -1151,6 +1962,27 @@ begin
   Viewport.DrawingCanvas.Font.Size:=FFontSize;
 
   try
+    CanCache := not Viewport.Printing and not Viewport.ExportingBitmap and (Viewport.ViewType = fvPlan) and
+      (Viewport.BackgroundImage.Bitmap = nil) and
+      (Viewport.DrawingCanvas = Viewport.GetDrawingBuffer.Canvas) and
+      (Viewport.GetDrawingBuffer.Width = Viewport.ClientWidth) and
+      (Viewport.GetDrawingBuffer.Height = Viewport.ClientHeight);
+    CacheKey := FillCacheKey;
+    if UsingInteractionPreview then
+    begin
+      Viewport.PenColor := Viewport.Color;
+      Viewport.SetPenWidth(5 * PenwidthFactor);
+      Viewport.BrushStyle := bsClear;
+    end
+    else if CanCache and (FFillCache <> nil) and (FFillCacheKey = CacheKey) and
+      not ShowMonochrome.Checked and ShowFillcolor.Checked then
+    begin
+      Viewport.DrawingCanvas.Draw(0, 0, FFillCache);
+      Viewport.PenColor := Viewport.Color;
+      Viewport.SetPenWidth(5 * PenwidthFactor);
+      Viewport.BrushStyle := bsClear;
+    end
+    else
     if (not ShowMonochrome.Checked) and (ShowFillcolor.Checked) then
     begin
       for I := 1 to Freeship.Surface.NumberOfLayers do
@@ -1194,24 +2026,63 @@ begin
           end;
         end;
 
+      PrepareFillAtlas;
       SortTriangles(Below, 2);
       SortTriangles(Above, 2);
-      DrawTriangles(Below, [lvProfile]);
-      DrawTriangles(Above, [lvProfile]);
+      DrawFillTriangles(Below, [lvProfile]);
+      DrawFillTriangles(Above, [lvProfile]);
       SortTriangles(Below, 1);
       SortTriangles(Above, 1);
       // Aft bodyplan
-      DrawTriangles(Below, [lvAftBody]);
-      DrawTriangles(Above, [lvAftBody]);
+      DrawFillTriangles(Below, [lvAftBody]);
+      DrawFillTriangles(Above, [lvAftBody]);
       // frontview on bodyplan
-      DrawTriangles(Below, [lvFrontBody]);
-      DrawTriangles(Above, [lvFrontBody]);
+      DrawFillTriangles(Below, [lvFrontBody]);
+      DrawFillTriangles(Above, [lvFrontBody]);
       // plan view
       SortTriangles(Below, 3);
       SortTriangles(Above, 3);
-      DrawTriangles(Below, [lvPlan]);
-      DrawTriangles(Above, [lvPlan]);
+      DrawFillTriangles(Below, [lvPlan]);
+      DrawFillTriangles(Above, [lvPlan]);
+      if VectorRecording then begin
+        Viewport.DrawingCanvas:=VectorSavedCanvas;VectorRecording:=False;
+        if FFillVector.EndRecord then begin
+          FFillVectorKey:=FillCacheKey(False);
+          if not DrawVectorFill then raise Exception.Create('Vector fill playback failed');
+          TraceEvent('vector-built','native-resolution');
+          FDiskFillDirty:=FDiskFillPath<>'';
+        end else raise Exception.Create('Vector fill recording failed');
+      end;
 
+      if CanCache then
+      begin
+        if FFillCache = nil then FFillCache := TBitmap.Create;
+        // Copy pixels into an independent bitmap. Assign can share a bitmap
+        // handle, allowing later grid strokes to leak into the cached base.
+        FFillCache.SetSize(Viewport.ClientWidth, Viewport.ClientHeight);
+        FFillCache.Canvas.CopyRect(Rect(0, 0, FFillCache.Width, FFillCache.Height),
+          Viewport.DrawingCanvas, Rect(0, 0, FFillCache.Width, FFillCache.Height));
+        FFillCacheKey := CacheKey;
+      end;
+    end;
+
+    if CaptureAtlas then
+    begin
+      if FInteractionImage=nil then FInteractionImage:=TBitmap.Create;
+      FInteractionImage.SetSize(Viewport.ClientWidth,Viewport.ClientHeight);
+      FInteractionImage.Canvas.CopyRect(Rect(0,0,FInteractionImage.Width,FInteractionImage.Height),
+        Viewport.DrawingCanvas,Rect(0,0,FInteractionImage.Width,FInteractionImage.Height));
+    end;
+    if BuildingAtlas or CaptureAtlas then
+    begin
+      FInteractionKey := FillCacheKey(False);
+    end;
+
+    // Keep fixed-width strokes out of the transformable fill atlas as well.
+    // The waterline band is a vector stroke, so its width stays native while
+    // the hull fill is scaled during resize/pan/zoom.
+    if (not ShowMonochrome.Checked) and ShowFillColor.Checked then
+    begin
       // Draw dwl as a white band in profile and bodyplan views
       Viewport.PenColor := Viewport.Color;
       Viewport.SetPenWidth(5 * PenwidthFactor);
@@ -1232,6 +2103,8 @@ begin
         FMax3D.Y + Space, FMin3D.Z + FFreeship.ProjectSettings.ProjectDraft, 0), '', False);
     end;
 
+    // Reserve the feature lines before placing any grid labels.
+    CollectFeatureEdges;
     // Draw grid
     if ShowMonochrome.Checked then
       Viewport.PenColor := clSilver
@@ -1417,6 +2290,7 @@ begin
       end;
     end;
 
+    FlushKnuckles;
     Viewport.SetPenWidth(PenwidthFactor);
     MidshipLocation := Freeship.ProjectSettings.ProjectSplitSectionLocation;
     // Draw stations
@@ -1549,7 +2423,21 @@ begin
         DrawDiagonalLine(FFrontOrigin, P1, P2);
       end;
     end;
+    DrawPendingLabels;
+    if not Viewport.Printing and not Viewport.ExportingBitmap then
+    begin
+      FLastLabelContext:=LabelContextKey;
+      FLastLabelScale:=Viewport.Scale*Viewport.Zoom;
+    end;
+    if UsingInteractionPreview then TraceEvent('cached-fill','ms=' + IntToStr(GetTickCount64-PaintStarted))
+    else TraceEvent('full', 'ms=' + IntToStr(GetTickCount64-PaintStarted) +
+      '; zoom=' + FloatToStr(Viewport.Zoom));
   finally
+    if VectorRecording then begin
+      Viewport.DrawingCanvas:=VectorSavedCanvas;VectorRecording:=False;FFillVector.Clear;
+    end;
+    Viewport.LabelLayout.EndFrame;
+    Viewport.LabelLayout.TranslationOnly:=False;
     Screen.Cursor := Prevcursor;
   end;
 end;{TFreeLinesplanFrame.ViewportRedraw}
@@ -1571,6 +2459,7 @@ end;{TFreeLinesplanFrame.ZoomOutExecute}
 
 procedure TFreeLinesplanFrame.ShowFillColorExecute(Sender: TObject);
 begin
+  FinishInteraction(nil);
   ShowFillcolor.Checked := not ShowFillcolor.Checked;
   UpdateMenu;
   Viewport.Refresh;
@@ -1578,6 +2467,7 @@ end;{TFreeLinesplanFrame.ShowFillColorExecute}
 
 procedure TFreeLinesplanFrame.PrintExecute(Sender: TObject);
 begin
+  FinishInteraction(nil);
   if Viewport.Width > Viewport.Height then
     Printer.Orientation := poLandscape
   else
@@ -1591,11 +2481,13 @@ procedure TFreeLinesplanFrame.ViewportMouseMove(Sender: TObject; Shift: TShiftSt
 var
   P: TPoint;
 begin
+  if (ssLeft in Shift) or (ssRight in Shift) then FInteractionDragging := True;
   if ssLeft in Shift then
   begin
     // Zoom in or zoom out
     if abs(FInitialPosition.Y - Y) > 4 then
     begin
+      BeginInteraction;
       if Y < FInitialPosition.Y then
         Viewport.ZoomIn
       else
@@ -1608,10 +2500,14 @@ begin
   else if ssRight in Shift then
   begin
     // Pan the window left, right, top or bottom
+    // Apply the drag threshold once; an active pan follows every pixel.
     if (abs(FInitialPosition.X - X) > 4) or (abs(FInitialPosition.Y - Y) > 4) then
+      FPanDragStarted := True;
+    if FPanDragStarted and ((FInitialPosition.X <> X) or (FInitialPosition.Y <> Y)) then
     begin
       P.X := Viewport.Pan.X + X - FInitialPosition.X;
       P.Y := Viewport.Pan.Y + Y - FInitialPosition.Y;
+      BeginInteraction;
       Viewport.Pan := P;
       FInitialPosition.X := X;
       FInitialPosition.Y := Y;
@@ -1622,6 +2518,8 @@ end;{TFreeLinesplanFrame.ViewportMouseMove}
 procedure TFreeLinesplanFrame.ViewportMouseDown(Sender: TObject; Button: TMouseButton;
   Shift: TShiftState; X, Y: integer);
 begin
+  FInteractionDragging := Button in [mbLeft,mbRight];
+  FPanDragStarted := False;
   FInitialPosition.X := X;
   FInitialPosition.Y := Y;
 end;{TFreeLinesplanFrame.ViewportMouseDown}
@@ -1631,6 +2529,7 @@ var
   Str: string;
 
 begin
+  FinishInteraction(nil);
   Str := FFreeShip.Preferences.ExportDirectory;
   if Str[Length(Str)] <> '\' then
     Str := Str + '\';
@@ -1640,6 +2539,7 @@ end;{TFreeLinesplanFrame.SaveBitmapExecute}
 
 procedure TFreeLinesplanFrame.UseLightsExecute(Sender: TObject);
 begin
+  FinishInteraction(nil);
   UseLights.Checked := not UseLights.Checked;
   UpdateMenu;
   Viewport.Refresh;
@@ -1647,6 +2547,7 @@ end;{TFreeLinesplanFrame.UseLightsExecute}
 
 procedure TFreeLinesplanFrame.ShowMonochromeExecute(Sender: TObject);
 begin
+  FinishInteraction(nil);
   ShowMonochrome.Checked := not ShowMonochrome.Checked;
   UpdateMenu;
   Viewport.Refresh;
@@ -1654,6 +2555,7 @@ end;{TFreeLinesplanFrame.ShowMonochromeExecute}
 
 procedure TFreeLinesplanFrame.MirrorPlanViewExecute(Sender: TObject);
 begin
+  FinishInteraction(nil);
   MirrorPlanview.Checked := not MirrorPlanview.Checked;
   UpdateMenu;
   Viewport.ZoomExtents;
@@ -1942,6 +2844,7 @@ var
   end;
   {AddIntersection}
 begin
+  FinishInteraction(nil);
   Str := IncludeTrailingPathDelimiter(FFreeShip.Preferences.ExportDirectory);
   Str := Str + ChangeFileExt(ExtractFilename(FFreeship.FileName), '') + '_Linesplan';
   SaveDialog := TSaveDialog.Create(Owner);

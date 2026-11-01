@@ -64,6 +64,12 @@ begin
   FControlPoints := TFasterListTFreeSubdivisionControlPoint.Create(true,false);
 end;{TFreeSubdivisionControlPoint.Create}
 
+destructor TFreeSubdivisionControlPointGroup.Destroy;
+begin
+  FreeAndNil(FControlPoints);
+  inherited Destroy;
+end;
+
 procedure TFreeSubdivisionControlPointGroup.AddControlPoint(cp:TFreeSubdivisionControlPoint);
 begin
  FControlPoints.Add(cp);
@@ -119,6 +125,7 @@ var
   I: integer;
   P3D: T3DCoordinate;
   MFL: TFloatType;
+  LabelPlacement: TLabelPlacement;
 begin
   if Viewport.ViewportMode = vmWireframe then
   begin
@@ -137,7 +144,18 @@ begin
       ViewPort.PenColor:=Viewport.FontColor;
       ViewPort.Ellipse(P.X - 2, P.Y - 2, P.X + 2, P.Y + 2);
       ViewPort.Ellipse(P.X - 4, P.Y - 4, P.X + 4, P.Y + 4);
-      ViewPort.TextOut(P.X + 2, P.Y + 2, FName);
+      if Viewport.Printing then
+        ViewPort.TextOut(P.X + 2, P.Y + 2, FName)
+      else
+      begin
+        LabelPlacement := Viewport.LabelLayout.Place('group:' + IntToHex(PtrUInt(Self), SizeOf(Pointer)*2),
+          FName, P, Point(P.X + 2, P.Y + 2), Viewport.TextWidth(FName),
+          Viewport.TextHeight(FName), lkPoint);
+        if LabelPlacement.Visible then begin
+          Viewport.DrawLabelLeader(P, LabelPlacement.Rect);
+          Viewport.TextOut(LabelPlacement.Position.X, LabelPlacement.Position.Y, FName);
+        end;
+      end;
 
     end;
   end;
@@ -150,13 +168,18 @@ var
 begin
   Source.LoadString(FName);
   SS:=TStringList.Create;
-  Source.LoadTStrings(SS);
-  for i:=0 to SS.Count-1 do
+  try
+    Source.LoadTStrings(SS);
+    for i:=0 to SS.Count-1 do
     begin
-    CPN:=StrToInt(SS[i]);
-    FControlPoints.Add(Surface.FControlPoints[CPN]);
+      if not TryStrToInt(SS[i], CPN) then
+        raise EReadError.CreateFmt('Invalid point group index: %s', [SS[i]]);
+      RequireModelIndex(CPN, Surface.NumberOfControlPoints, 'point group control point');
+      FControlPoints.Add(Surface.FControlPoints[CPN]);
     end;
-  SS.Free;
+  finally
+    SS.Free;
+  end;
 end;{TFreeSubdivisionControlPoint.LoadBinary}
 
 procedure TFreeSubdivisionControlPointGroup.LoadFromStream(

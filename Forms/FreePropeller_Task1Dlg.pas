@@ -189,6 +189,7 @@ type
     Wt, t, nr, Dp, Rho: single;
     PathFile, PathFileOld, FileToFind, FileName: string;
     procedure Calculate;
+    procedure CalculateInWorkspace;
     function Execute(Freeship: TFreeship;
       AutoExtract: boolean): boolean;
     property Dat2: single read FGetDat2 write FSetDat2;
@@ -224,7 +225,7 @@ var
 
 implementation
 
-uses FreeStringsUnit,
+uses FreeCalculationFiles, FreeStringsUnit,
   Printers,
   Math,
   FreeProcess;
@@ -441,10 +442,24 @@ end;{TFreePropeller_Task1.FSetDat18}
 
 
 procedure TFreePropeller_Task1.Calculate;
+var Job: TFreeCalculationScope;
+begin
+  if FFreeship = nil then Exit;
+  Job := FFreeship.BeginCalculation([]);
+  try
+    CalculateInWorkspace;
+    Job.Complete;
+  finally Job.Free end;
+end;
+
+procedure TFreePropeller_Task1.CalculateInWorkspace;
 type
   TTable = array[0..16, 0..13] of single;
 
 var
+  ProcessCallerDirectory: string;
+  ProcessCallerCursor: TCursor;
+ 
   I, J, N: integer;
   Dat: array[1..15] of single;
   Res: array[1..5, 1..9] of single;
@@ -466,6 +481,9 @@ label
   NewSearch;
 
 begin
+  ProcessCallerDirectory := GetCurrentDirUTF8;
+  ProcessCallerCursor := Screen.Cursor;
+  try
   TChartSeries(Chart.Series[0]).Clear;
   TChartSeries(Chart.Series[1]).Clear;
   TChartSeries(Chart.Series[2]).Clear;
@@ -704,8 +722,8 @@ begin
 
     //  Определяем текущий каталог с проектами и с данными для расчета IN.
     PathFileOld := GetCurrentDir;
-    ForceDirectoriesUTF8(FFreeship.Preferences.TempDirectory);
-    SetCurrentDirUTF8(FFreeship.Preferences.TempDirectory);
+    ForceDirectoriesUTF8(FFreeship.CalculationDirectory);
+    SetCurrentDirUTF8(FFreeship.CalculationDirectory);
 
     //  Определяем текущий каталог с проектами и с данными для расчета TMP1.tsk
     FileToFind := FileSearchUTF8('TMP1.tsk', GetCurrentDir);
@@ -718,7 +736,7 @@ begin
 
     //SysUtils.ExecuteProcess(UTF8ToSys(FExecDirectory + DirectorySeparator+'CALCPROP.EXE'), '', []);
     ExecFullName := FExecDirectory + DirectorySeparator+'CALCPROP.EXE';
-    ExecuteFreePlugin(FFreeship.Preferences.TempDirectory, ExecFullName);
+    ExecuteFreeCalculation(FFreeship.CalculationDirectory, ExecFullName, fcPropeller1);
 
 
     FileName := 'RES1.tsk';
@@ -761,7 +779,7 @@ begin
         Series2.AddXY(res[1, 4], res[1, 9], '', clTeeColor);
         Series4.AddXY(res[1, 4], res[1, 9] / 0.9, '', clTeeColor);
       end;
-      if (res[I, 4] > res[I - 1, 4]) and (I > 1) then
+      if (I > 1) and (res[I, 4] > res[I - 1, 4]) then
       begin
         Series3.AddXY(res[I, 4], res[I, 1], '', clTeeColor);
         Series1.AddXY(res[I, 4], res[I, 8], '', clTeeColor);
@@ -912,6 +930,10 @@ begin
   ResultsMemo.Lines.Add(Space(14) + rs_ATTENTION____ {UserString[450]} + rs_Click_button_for_start_selection_of_engine {UserString[483]});
   ResultsMemo.Lines.Add('');
   ResultsMemo.Lines.Add(Space(14) + 'Copyright (c) 2007-2013, Timoshenko V.F.');
+  finally
+    SetCurrentDirUTF8(ProcessCallerDirectory);
+    Screen.Cursor := ProcessCallerCursor;
+  end;
 end;{TFreePropeller_Task1.Calculate}
 
 function TFreePropeller_Task1.Execute(Freeship: TFreeship; AutoExtract: boolean): boolean;
@@ -952,25 +974,9 @@ begin
 end;{TFreePropeller_Task1.Execute}
 
 procedure TFreePropeller_Task1.ToolButton17Click(Sender: TObject);
-var
-  pathFile, FileToFind: string;
-  FOpenDirectory, FExecDirectory, ExecFullName: string;
-  L: boolean;
 begin
-  // Определяем каталог с программой freeship.exe
-  FExecDirectory := FFreeship.Preferences.ExecDirectory;
-  FOpenDirectory := FFreeship.Preferences.TempDirectory;
-  // ResultsMemo.Lines.Add(FOpenDirectory+'freeship.exe');
-  PathFile := GetCurrentDirUTF8; { *Converted from GetCurrentDir* }
-  // Переходим в директорию Freeshipa
-  L := SetCurrentDirUTF8(FOpenDirectory); { *Converted from SetCurrentDir* }
-  // Запускаем программу расчета
-  //SysUtils.ExecuteProcess(UTF8ToSys(FExecDirectory + DirectorySeparator+'DBFview.EXE'), '', []);
-  ExecFullName := FExecDirectory + DirectorySeparator+'DBFview.EXE';
-  ExecuteFreePlugin(FFreeship.Preferences.TempDirectory, ExecFullName);
-
-  // Переходим назад в директорию открытого проекта
-  L := SetCurrentDirUTF8(PathFile); { *Converted from SetCurrentDir* }
+  LaunchFreePluginViewer(Self, FFreeship.Preferences.TempDirectory,
+    FFreeship.Preferences.ExecDirectory + DirectorySeparator + 'DBFview.EXE');
 end;{TFreePropeller_Task1.ToolButton17Click}
 
 procedure TFreePropeller_Task1.ToolButton7Click(Sender: TObject);
@@ -1018,10 +1024,11 @@ var // HydObject  : TFreeHydrostaticCalc;
   DatVR: array[1..5, 1..5] of single;
   TMP: single;
 begin
+  if FFreeship = nil then Exit;
 
-  if FileExistsUTF8('RESISTp.dat') { *Converted from FileExists* } then
+  if FileExistsUTF8(IncludeTrailingPathDelimiter(FFreeship.CalculationDirectory)+'RESISTp.dat') { *Converted from FileExists* } then
   begin
-    Assignfile(FFile, 'RESISTp.dat');
+    Assignfile(FFile, IncludeTrailingPathDelimiter(FFreeship.CalculationDirectory)+'RESISTp.dat');
          {$I-}
     Reset(FFile);
 {$I+}
@@ -1029,7 +1036,7 @@ begin
     Readln(FFile, Nser, Nprop, Wt, t, nr, Dp);
     CloseFile(FFile);
 
-    Assignfile(FFile, 'RESIST.dat');
+    Assignfile(FFile, IncludeTrailingPathDelimiter(FFreeship.CalculationDirectory)+'RESIST.dat');
          {$I-}
     Reset(FFile);
 {$I+}

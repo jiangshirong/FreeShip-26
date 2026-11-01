@@ -313,7 +313,7 @@ uses LCLType,
   {$ifdef LCLGTK2}
   ,WSProc, Gtk2, GLib2, Pango, Gtk2WSComCtrls, Gtk2Def, Gtk2Proc
   {$endif}
-  ,FreeLogger
+  ,FreeLogger, FreePathResolution
   ;
 
 {$R *.lfm}
@@ -681,35 +681,18 @@ end;
 resourcestring rsLocation_does_not_exist = 'Location does not exist';
 
 procedure TFreeFilePreviewDialog.ComboBoxDirEditingDone(Sender: TObject);
-var loc,dir,fil:string;
+var dir, fil: string;
 begin
   if not ComboBoxDir.Focused then exit;
   if FInAutoSearchListBox then exit;
-  AutoSearchListBox.Visible:=false;
-  //ChangeDir( ComboBoxDir.Text );
-  //TODO clean and check path
-  loc := ComboBoxDir.Text;
-  dir := ExtractFilePath(loc);
-  fil := ExtractFileName(loc);
-  if (fil='') then
-    if DirectoryExistsUTF8(dir) then
-      begin
-      dir := CleanAndExpandDirectory(dir);
-      ScheduleReload(dir)
-      end
-    else ShowMessage(rsLocation_does_not_exist)
+  AutoSearchListBox.Visible := false;
+  if ResolveFileDialogLocation(ComboBoxDir.Text, dir, fil) then
+  begin
+    if fil <> '' then FFileName := fil;
+    ScheduleReload(dir);
+  end
   else
-    if FileExistsUTF8(loc) then
-      begin
-      dir := CleanAndExpandDirectory(dir);
-      FFileName := fil;
-      ScheduleReload(dir);
-      //ComboBoxDir.Text := dir;
-      //loc := CleanAndExpandFilename(loc);
-      //EditName.Text:=fil;
-      //FileName := fil;
-      end
-    else ShowMessage(rsLocation_does_not_exist);
+    ShowMessage(rsLocation_does_not_exist);
 end;
 
 procedure TFreeFilePreviewDialog.ComboBoxDirExit(Sender: TObject);
@@ -2428,7 +2411,6 @@ var idnt:string;
 procedure TFreeFilePreviewDialog.ReplaceLabels(aControl:TControl; fromText:String; toText:String);
 var WinControl: TWinControl;   i:integer; idnt0:string;
 begin
-  writeln(aControl.Name);
   if aControl.Caption = fromText then aControl.Caption := toText;
   if aControl.Hint = fromText then aControl.Hint := toText;
   if aControl is TWinControl

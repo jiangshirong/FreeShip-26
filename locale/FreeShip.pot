@@ -53,7 +53,9 @@ msgstr ""
 
 #: freefilebuffer.rsparsingerroroutoffilesize
 #, object-pascal-format
-msgid "Error parsing of file \"%s\". Reading %s of size %d at position %d that is out of file size %d."
+msgid ""
+"Error parsing of file \"%s\". Reading %s of size %d at position %d that is "
+"out of file size %d."
 msgstr ""
 
 #: freefilepreviewdialog.hintdblclicktofitsize
@@ -152,11 +154,13 @@ msgid "--log-error   : log level is Error. Only Error messages logged"
 msgstr ""
 
 #: freeship.usageline05
-msgid "--log-warning : log level is Warning. Only Error and Warning messages logged"
+msgid ""
+"--log-warning : log level is Warning. Only Error and Warning messages logged"
 msgstr ""
 
 #: freeship.usageline06
-msgid "--log-info    : log level is Info. Error, Warning and Info messages logged"
+msgid ""
+"--log-info    : log level is Info. Error, Warning and Info messages logged"
 msgstr ""
 
 #: freeship.usageline07
@@ -168,7 +172,8 @@ msgid "--log-file=<logfile> : filename of the log file"
 msgstr ""
 
 #: freeship.usageline09
-msgid "--nosplash-I-ACCEPT-GPLv3-TERMS-AND-CONDITIONS : turn off splash screen."
+msgid ""
+"--nosplash-I-ACCEPT-GPLv3-TERMS-AND-CONDITIONS : turn off splash screen."
 msgstr ""
 
 #: freeship.usageline10
@@ -321,7 +326,9 @@ msgstr ""
 
 #: freeshipunit.rssavewithhigherfileversion
 #, object-pascal-format
-msgid "The current file version is %s.%sDo you want to save the file as version %s ?"
+msgid ""
+"The current file version is %s.%sDo you want to save the file as version %s "
+"?"
 msgstr ""
 
 #: freeshipunit.rssplitsection
@@ -394,11 +401,15 @@ msgid "Version"
 msgstr ""
 
 #: freestringsunit.rs_1_1_1_r_m_isherwood___wind__resistance_of__merchant__ships___proceedings__of__royal
-msgid "1.1.1 R.M.Isherwood, \"Wind  Resistance of  Merchant  Ships\", Proceedings  of  Royal"
+msgid ""
+"1.1.1 R.M.Isherwood, \"Wind  Resistance of  Merchant  Ships\", Proceedings  "
+"of  Royal"
 msgstr ""
 
 #: freestringsunit.rs_1_1___this_wind_resistance_prediction_method_in_this_program_has_been_described_by_
-msgid "1.1   This wind resistance prediction method in this program has been described by:"
+msgid ""
+"1.1   This wind resistance prediction method in this program has been "
+"described by:"
 msgstr ""
 
 #: freestringsunit.rs_1_2___needed_input_data_parameters_
@@ -426,7 +437,9 @@ msgid "3. This is very slow computer, Fcpu < 800 MHz."
 msgstr ""
 
 #: freestringsunit.rs_4_brass_altmntfe__5_bronze_neva_60__6_bronze_neva_70__7_stainless_steel__8_duralumin_
-msgid "4-brass Al+Mn+Fe; 5-bronze Neva-60; 6-bronze Neva-70; 7-stainless steel; 8-duralumin."
+msgid ""
+"4-brass Al+Mn+Fe; 5-bronze Neva-60; 6-bronze Neva-70; 7-stainless steel; "
+"8-duralumin."
 msgstr ""
 
 #: freestringsunit.rs_4__cpu_is_loaded_more_80__another_processes_
@@ -434,7 +447,8 @@ msgid "4. CPU is loaded more 80% another processes."
 msgstr ""
 
 #: freestringsunit.rs_5_standart_deviation_of_database_for_typical_resistance_hollenbach_s_method_
-msgid "5.Standart deviation of database for typical resistance Hollenbach's method:"
+msgid ""
+"5.Standart deviation of database for typical resistance Hollenbach's method:"
 msgstr ""
 
 #: freestringsunit.rs_aae___
@@ -724,7 +738,8 @@ msgid "AS   - Lateral projected area of superstructure [m2];"
 msgstr ""
 
 #: freestringsunit.rs_attention__weight_of_a_ship_and_displacement_are_difference_more_then_10___
-msgid "Attention: Weight of a ship and displacement are difference more then 10% !"
+msgid ""
+"Attention: Weight of a ship and displacement are difference more then 10% !"
 msgstr ""
 
 #: freestringsunit.rs_attention____
@@ -732,7 +747,9 @@ msgid "ATTENTION!!!_"
 msgstr ""
 
 #: freestringsunit.rs_attention____calculated_diameter_of_propeller_is_bigger_then_limited_diameter_dp_lim_
-msgid "ATTENTION!!! Calculated diameter of propeller is bigger then limited diameter Dp_lim="
+msgid ""
+"ATTENTION!!! Calculated diameter of propeller is bigger then limited "
+"diameter Dp_lim="
 msgstr ""
 
 #: freestringsunit.rs_attention____calculation_for_sea_vessels_by_holtrop_1988_method_
@@ -760,7 +777,8 @@ msgid "ATTENTION!!! Porpoising regime !!!"
 msgstr ""
 
 #: freestringsunit.rs_attention____stopped_acceleration_calculation__because_steady_engine_rpm
-msgid "ATTENTION!!! Stopped acceleration calculation, because steady engine RPM"
+msgid ""
+"ATTENTION!!! Stopped acceleration calculation, because steady engine RPM"
 msgstr ""
 
 #: freestringsunit.rs_attention____teta0___60_
@@ -768,7 +786,9 @@ msgid "ATTENTION!!! Teta0 < 60°"
 msgstr ""
 
 #: freestringsunit.rs_attention____the_number_of_propeller_diagram_more_then_11_is_accessed_in_pro_version_only___
-msgid "ATTENTION!!! The number of propeller diagram more then 11 is accessed in Pro version only!!!"
+msgid ""
+"ATTENTION!!! The number of propeller diagram more then 11 is accessed in Pro"
+" version only!!!"
 msgstr ""
 
 #: freestringsunit.rs_attention____the_power_of_engine_is_very_high_
@@ -780,11 +800,14 @@ msgid "ATTENTION!!! The power of engine is very low!"
 msgstr ""
 
 #: freestringsunit.rs_attention____the_waiting_speed_is_outside_valid_domain_of_calculated_speed___
-msgid "ATTENTION!!! The waiting speed is outside valid domain of calculated speed!!!"
+msgid ""
+"ATTENTION!!! The waiting speed is outside valid domain of calculated "
+"speed!!!"
 msgstr ""
 
 #: freestringsunit.rs_attention____this_is_diagram_of_propeller_accessed_in_pro_version_only___
-msgid "ATTENTION!!! This is diagram of propeller accessed in Pro version only!!!"
+msgid ""
+"ATTENTION!!! This is diagram of propeller accessed in Pro version only!!!"
 msgstr ""
 
 #: freestringsunit.rs_attention____this_is_propeller_with_cavitation_
@@ -796,7 +819,9 @@ msgid "ATTENTION!!! This is series NOT correct for this project!"
 msgstr ""
 
 #: freestringsunit.rs_attention_____power_is_out_valid_domain_30_____400_bhp_per_unit_for_used_diagram_
-msgid "ATTENTION !!! Power is out valid domain 30 ... 400 BHP per unit for used diagram."
+msgid ""
+"ATTENTION !!! Power is out valid domain 30 ... 400 BHP per unit for used "
+"diagram."
 msgstr ""
 
 #: freestringsunit.rs_attention_____vs_is_out_valid_domain_0_____40_knots_for_used_diagram_
@@ -1104,11 +1129,14 @@ msgid "Calculations of resistance and power by D.Savitsky method"
 msgstr ""
 
 #: freestringsunit.rs_calculations_of_resistance_and_power_for_planing_ships_by_lyubomirov_i_p__formulaes
-msgid "Calculations of resistance and power for planing ships by Lyubomirov I.P. formulaes"
+msgid ""
+"Calculations of resistance and power for planing ships by Lyubomirov I.P. "
+"formulaes"
 msgstr ""
 
 #: freestringsunit.rs_calculations_of_resistance_and_power_for_planing_ships_by_sedov_l_i__method
-msgid "Calculations of resistance and power for planing ships by Sedov L.I. method"
+msgid ""
+"Calculations of resistance and power for planing ships by Sedov L.I. method"
 msgstr ""
 
 #: freestringsunit.rs_calculation_aborted
@@ -1136,7 +1164,9 @@ msgid "Calculation of propeller for selected engine"
 msgstr ""
 
 #: freestringsunit.rs_calculation_of_propeller_is_stop__because_np_set_zero_in_resistance_calculation_
-msgid "Calculation of propeller is stop, because Np set zero in resistance calculation!"
+msgid ""
+"Calculation of propeller is stop, because Np set zero in resistance "
+"calculation!"
 msgstr ""
 
 #: freestringsunit.rs_calculation_of_propeller_on_cavitation_by_a_method_of_papmehl_
@@ -1152,7 +1182,9 @@ msgid "Calculation of propeller on general strength for r/D=0.3:"
 msgstr ""
 
 #: freestringsunit.rs_calculation_of_resistance_for_keeled_yacht_by_holtrop_s_method_is_impossible___
-msgid "Calculation of resistance for keeled yacht by Holtrop's method is impossible!!!"
+msgid ""
+"Calculation of resistance for keeled yacht by Holtrop's method is "
+"impossible!!!"
 msgstr ""
 
 #: freestringsunit.rs_calculation_of_the_propeller_elements_for_main_engine_selection
@@ -1168,7 +1200,8 @@ msgid "Calculation optimal elements of propeller for engine selection"
 msgstr ""
 
 #: freestringsunit.rs_calculation_ssd__dsd_and_weather_criteria_is_available_in_metric_system_
-msgid "Calculation SSD, DSD and weather criteria is available in metric system!"
+msgid ""
+"Calculation SSD, DSD and weather criteria is available in metric system!"
 msgstr ""
 
 #: freestringsunit.rs_cavitation_number_sigma__________________
@@ -1342,7 +1375,7 @@ msgid "Deck House/Cargo Frontal Area (m^2)    ="
 msgstr ""
 
 #: freestringsunit.rs_degr
-msgid "degr"
+msgid "°"
 msgstr ""
 
 #: freestringsunit.rs_delete
@@ -1711,7 +1744,8 @@ msgid "Final calculations of resistance and power by Compton's method"
 msgstr ""
 
 #: freestringsunit.rs_final_calculations_of_resistance_and_power_by_mercier_and_savitsky_s_method
-msgid "Final calculations of resistance and power by Mercier and Savitsky's method"
+msgid ""
+"Final calculations of resistance and power by Mercier and Savitsky's method"
 msgstr ""
 
 #: freestringsunit.rs_final_calculations_of_resistance_and_power_by_method_fung_leibman_1995
@@ -1723,7 +1757,8 @@ msgid "Final calculations of resistance and power by method Hollenbach-1998"
 msgstr ""
 
 #: freestringsunit.rs_final_calculations_of_resistance_and_power_by_method_van_oortmerssen_1971
-msgid "Final calculations of resistance and power by method van Oortmerssen-1971"
+msgid ""
+"Final calculations of resistance and power by method van Oortmerssen-1971"
 msgstr ""
 
 #: freestringsunit.rs_final_calculations_of_resistance_and_power_by_m_bunkov_method
@@ -1735,7 +1770,8 @@ msgid "Final calculations of resistance and power by Radojcic's method"
 msgstr ""
 
 #: freestringsunit.rs_final_calculations_of_resistance_and_power_by_ridgeley_nevitt_1967_method
-msgid "Final calculations of resistance and power by Ridgeley-Nevitt-1967 method"
+msgid ""
+"Final calculations of resistance and power by Ridgeley-Nevitt-1967 method"
 msgstr ""
 
 #: freestringsunit.rs_final_calculations_of_resistance_and_power_by_robinson_s_method
@@ -2254,7 +2290,9 @@ msgid ""
 msgstr ""
 
 #: freestringsunit.rs_hydrostatics_calculation_is_not_possible__because_there_is_leak_point_under_dwl___
-msgid "Hydrostatics calculation is not possible, because there is leak point under DWL!!!"
+msgid ""
+"Hydrostatics calculation is not possible, because there is leak point under "
+"DWL!!!"
 msgstr ""
 
 #: freestringsunit.rs_if_sigmab_4___1____
@@ -2654,7 +2692,9 @@ msgid "Limit diameter of propeller [m]"
 msgstr ""
 
 #: freestringsunit.rs_limit_of_power_in_freeware_free_shipt_is_reached_or_increase_diameter_of_propeller___
-msgid "Limit of power in freeware Free!ship+ is reached or increase diameter of propeller!!!"
+msgid ""
+"Limit of power in freeware Free!ship+ is reached or increase diameter of "
+"propeller!!!"
 msgstr ""
 
 #: freestringsunit.rs_limit_of_speed_in_freeware_free_shipt_is_reached___
@@ -2662,7 +2702,9 @@ msgid "Limit of speed in freeware Free!ship+ is reached!!!"
 msgstr ""
 
 #: freestringsunit.rs_lnumlcharact_lmeas_l________________________m_e_a_n_i_n_g_s________________________l
-msgid "|Num|Charact.|Meas.|                        M E A N I N G S                        |"
+msgid ""
+"|Num|Charact.|Meas.|                        M E A N I N G S"
+"                        |"
 msgstr ""
 
 #: freestringsunit.rs_location
@@ -2702,7 +2744,9 @@ msgid "Longitudinal transverse metacenter"
 msgstr ""
 
 #: freestringsunit.rs_lpropeller_s_metal_l___1___l___2___l___3___l___4___l___5___l___6___l___7___l___8___l
-msgid "|Propeller's metal:|   1   |   2   |   3   |   4   |   5   |   6   |   7   |   8   |"
+msgid ""
+"|Propeller's metal:|   1   |   2   |   3   |   4   |   5   |   6   |   7   |"
+"   8   |"
 msgstr ""
 
 #: freestringsunit.rs_lwl_bwl_is_outside_valid_domain
@@ -2750,7 +2794,8 @@ msgid "| 9 | F      |[m2] |"
 msgstr ""
 
 #: freestringsunit.rs_l_character___l___________________t____________________t__twin_screw_ship__l
-msgid "| Character.  |-------------------+--------------------+  Twin-screw ship  |"
+msgid ""
+"| Character.  |-------------------+--------------------+  Twin-screw ship  |"
 msgstr ""
 
 #: freestringsunit.rs_l_d________l___m____l
@@ -2786,7 +2831,8 @@ msgid "| Kt       |  [-]   |"
 msgstr ""
 
 #: freestringsunit.rs_l_l_voo0_3333_l__4_490_____6_008__l__5_450_____7_047___l__4_405_____7_265__l
-msgid "| L/V**0.3333 |  4.490 ... 6.008  |  5.450 ... 7.047   |  4.405 ... 7.265  |"
+msgid ""
+"| L/V**0.3333 |  4.490 ... 6.008  |  5.450 ... 7.047   |  4.405 ... 7.265  |"
 msgstr ""
 
 #: freestringsunit.rs_l_n________l_1_min__l
@@ -2818,23 +2864,33 @@ msgid "| R        |  [kN]  |"
 msgstr ""
 
 #: freestringsunit.rs_l_speed_l_speed_l_fr_v__l___r_f__l___r_r__l___r_t__l__power__l__r_t_e_l_power_e_l
-msgid "| Speed | Speed | Fr_V  |   R_f  |   R_r  |   R_T  |  Power  |  R_T_e | Power_e |"
+msgid ""
+"| Speed | Speed | Fr_V  |   R_f  |   R_r  |   R_T  |  Power  |  R_T_e | "
+"Power_e |"
 msgstr ""
 
 #: freestringsunit.rs_l_speed_l_speed_l__fr___l___r_f__l___r_r__l___r_t__l__power__l__r_t_e_l_power_e_l
-msgid "| Speed | Speed |  Fr   |   R_f  |   R_r  |   R_T  |  Power  |  R_T_e | Power_e |"
+msgid ""
+"| Speed | Speed |  Fr   |   R_f  |   R_r  |   R_T  |  Power  |  R_T_e | "
+"Power_e |"
 msgstr ""
 
 #: freestringsunit.rs_l_speed_l_speed_l__fr___l___r_f__l___r_r__l___r_t__l__power__l___wt__l___t___l
-msgid "| Speed | Speed |  Fr   |   R_f  |   R_r  |   R_T  |  Power  |   Wt  |   t   |"
+msgid ""
+"| Speed | Speed |  Fr   |   R_f  |   R_r  |   R_T  |  Power  |   Wt  |   t"
+"   |"
 msgstr ""
 
 #: freestringsunit.rs_l_speed_l_speed_l__fr___l___r_f___l___r_r___l____r_t____l__power__l_cp_opt__l_lcb_opt_l
-msgid "| Speed | Speed |  Fr   |   R_f   |   R_r   |    R_T    |  Power  | Cp opt. | LCB opt |"
+msgid ""
+"| Speed | Speed |  Fr   |   R_f   |   R_r   |    R_T    |  Power  | Cp opt. "
+"| LCB opt |"
 msgstr ""
 
 #: freestringsunit.rs_l_speed_l_speed_l__fr___l___r_v__l___r_r__l___r_t__l__power__l__r_t_e_l_power_e_l
-msgid "| Speed | Speed |  Fr   |   R_v  |   R_r  |   R_T  |  Power  |  R_T_e | Power_e |"
+msgid ""
+"| Speed | Speed |  Fr   |   R_v  |   R_r  |   R_T  |  Power  |  R_T_e | "
+"Power_e |"
 msgstr ""
 
 #: freestringsunit.rs_l_speed_l_speed_l__s_l__l_r_frict_l_r_resid_l_r_total_l_spilman_l
@@ -2874,27 +2930,39 @@ msgid "|  [kn] | [m/s] | ratio |   [N]   |   [N]   |   [N]   |   [N]   |"
 msgstr ""
 
 #: freestringsunit.rs_l___kn__l__m_s__l_______l___kn___l___kn___l____kn__l____kw___l____kn__l____kw___l
-msgid "|  [kn] | [m/s] |  [-]  |  [kN]  |  [kN]  |   [kN] |   [kW]  |   [kN] |   [kW]  |"
+msgid ""
+"|  [kn] | [m/s] |  [-]  |  [kN]  |  [kN]  |   [kN] |   [kW]  |   [kN] |   "
+"[kW]  |"
 msgstr ""
 
 #: freestringsunit.rs_l___kn__l__m_s__l_______l___kn___l___kn___l____kn__l____kw___l_______l_______l
-msgid "|  [kn] | [m/s] |  [-]  |  [kN]  |  [kN]  |   [kN] |   [kW]  |  [-]  |  [-]  |"
+msgid ""
+"|  [kn] | [m/s] |  [-]  |  [kN]  |  [kN]  |   [kN] |   [kW]  |  [-]  |  [-]"
+"  |"
 msgstr ""
 
 #: freestringsunit.rs_l___kn__l__m_s__l_______l___kn____l___kn____l____kn_____l____kw___l_________l_________l
-msgid "|  [kn] | [m/s] |  [-]  |  [kN]   |  [kN]   |   [kN]    |   [kW]  |   [-]   |   [%]   |"
+msgid ""
+"|  [kn] | [m/s] |  [-]  |  [kN]   |  [kN]   |   [kN]    |   [kW]  |   [-]   "
+"|   [%]   |"
 msgstr ""
 
 #: freestringsunit.rs_l___kn__l__m_s__l_______l____n___l____n___l____n___l____w____l____n___l____w____l
-msgid "|  [kn] | [m/s] |  [-]  |   [N]  |   [N]  |   [N]  |   [W]   |   [N]  |   [W]   |"
+msgid ""
+"|  [kn] | [m/s] |  [-]  |   [N]  |   [N]  |   [N]  |   [W]   |   [N]  |   "
+"[W]   |"
 msgstr ""
 
 #: freestringsunit.rs_l___kn__l__m_s__l_______l____n___l____n___l____n___l____w____l_______l_______l
-msgid "|  [kn] | [m/s] |  [-]  |   [N]  |   [N]  |   [N]  |   [W]   |  [-]  |  [-]  |"
+msgid ""
+"|  [kn] | [m/s] |  [-]  |   [N]  |   [N]  |   [N]  |   [W]   |  [-]  |  [-]"
+"  |"
 msgstr ""
 
 #: freestringsunit.rs_l___kn__l__m_s__l_______l____n____l____n____l_____n_____l____w____l_________l_________l
-msgid "|  [kn] | [m/s] |  [-]  |   [N]   |   [N]   |    [N]    |   [W]   |   [-]   |   [%]   |"
+msgid ""
+"|  [kn] | [m/s] |  [-]  |   [N]   |   [N]   |    [N]    |   [W]   |   [-]   "
+"|   [%]   |"
 msgstr ""
 
 #: freestringsunit.rs_l___kn__l_______l__degr_l___kn____l___kn____l___kn____l___kw____l
@@ -2918,19 +2986,25 @@ msgid "|  [kn] |   -   |   -   |  [lbf]  |  [lbf]  |  [lbf]  |  [ehp]  |"
 msgstr ""
 
 #: freestringsunit.rs_l___kn___l___m_s__l________l___kn___l___kn___l___kn___l___kw___l___kn___l___kw___l
-msgid "|   kn   |   m/s  |    -   |   kN   |   kN   |   kN   |   kW   |   kN   |   kW   |"
+msgid ""
+"|   kn   |   m/s  |    -   |   kN   |   kN   |   kN   |   kW   |   kN   |   "
+"kW   |"
 msgstr ""
 
 #: freestringsunit.rs_l___kn___l___m_s__l________l____n___l____n___l____n___l___w____l____n___l___w____l
-msgid "|   kn   |   m/s  |    -   |    N   |    N   |    N   |   W    |    N   |   W    |"
+msgid ""
+"|   kn   |   m/s  |    -   |    N   |    N   |    N   |   W    |    N   |   "
+"W    |"
 msgstr ""
 
 #: freestringsunit.rs_l___los_lwl___l__1_000_____1_050__l__1_000_____1_050___l__1_000_____1_050__l
-msgid "|   Los/Lwl   |  1.000 ... 1.050  |  1.000 ... 1.050   |  1.000 ... 1.050  |"
+msgid ""
+"|   Los/Lwl   |  1.000 ... 1.050  |  1.000 ... 1.050   |  1.000 ... 1.050  |"
 msgstr ""
 
 #: freestringsunit.rs_l___lwl_l_____l__1_000_____1_055__l__0_945_____1_000___l__1_000_____1_070__l
-msgid "|   Lwl/L     |  1.000 ... 1.055  |  0.945 ... 1.000   |  1.000 ... 1.070  |"
+msgid ""
+"|   Lwl/L     |  1.000 ... 1.055  |  0.945 ... 1.000   |  1.000 ... 1.070  |"
 msgstr ""
 
 #: freestringsunit.rs_l___value__l______________m_e_a_n_i_n_g_s_______________l
@@ -2958,11 +3032,14 @@ msgid "|   Vs  |  FrV  |  Tau  |   R_f   |   R_p   |   R_t   |   Pe    |"
 msgstr ""
 
 #: freestringsunit.rs_l___vs___l___vms__l___fr___l___r_f__l___r_r__l___r_t__l___pe___l__r_t_e_l__pe_e__l
-msgid "|   Vs   |   Vms  |   Fr   |   R_f  |   R_r  |   R_T  |   Pe   |  R_T_e |  Pe_e  |"
+msgid ""
+"|   Vs   |   Vms  |   Fr   |   R_f  |   R_r  |   R_T  |   Pe   |  R_T_e |  "
+"Pe_e  |"
 msgstr ""
 
 #: freestringsunit.rs_l____dp_ta____l__0_430_____0_840__l__0_655_____1_050___l__0_495_____0_860__l
-msgid "|    Dp/Ta    |  0.430 ... 0.840  |  0.655 ... 1.050   |  0.495 ... 0.860  |"
+msgid ""
+"|    Dp/Ta    |  0.430 ... 0.840  |  0.655 ... 1.050   |  0.495 ... 0.860  |"
 msgstr ""
 
 #: freestringsunit.rs_l____jb____l________l
@@ -3026,23 +3103,28 @@ msgid "|    vs    |   [kn] |"
 msgstr ""
 
 #: freestringsunit.rs_l_____b_t_____l__1_989_____4_002__l__2_967_____6_120___l__2_308_____6_110__l
-msgid "|     B/T     |  1.989 ... 4.002  |  2.967 ... 6.120   |  2.308 ... 6.110  |"
+msgid ""
+"|     B/T     |  1.989 ... 4.002  |  2.967 ... 6.120   |  2.308 ... 6.110  |"
 msgstr ""
 
 #: freestringsunit.rs_l_____cb______l__0_601_____0_830__l__0_559_____0_790___l__0_512_____0_775__l
-msgid "|     Cb      |  0.601 ... 0.830  |  0.559 ... 0.790   |  0.512 ... 0.775  |"
+msgid ""
+"|     Cb      |  0.601 ... 0.830  |  0.559 ... 0.790   |  0.512 ... 0.775  |"
 msgstr ""
 
 #: freestringsunit.rs_l_____l_b_____l__4_710_____7_106__l__4_949_____6_623___l__3_960_____7_130__l
-msgid "|     L/B     |  4.710 ... 7.106  |  4.949 ... 6.623   |  3.960 ... 7.130  |"
+msgid ""
+"|     L/B     |  4.710 ... 7.106  |  4.949 ... 6.623   |  3.960 ... 7.130  |"
 msgstr ""
 
 #: freestringsunit.rs_l_____________l____design_draft___l___ballast_draft____l___________________l
-msgid "|             |    Design draft   |   Ballast draft    |                   |"
+msgid ""
+"|             |    Design draft   |   Ballast draft    |                   |"
 msgstr ""
 
 #: freestringsunit.rs_l_____________l____________single_screw_ship___________l___________________l
-msgid "|             |            Single-screw ship           |                   |"
+msgid ""
+"|             |            Single-screw ship           |                   |"
 msgstr ""
 
 #: freestringsunit.rs_m
@@ -3231,7 +3313,9 @@ msgid "Need enable automoving model to baseline or set new project draft."
 msgstr ""
 
 #: freestringsunit.rs_need_restart_calculation__design_hydrostatics__for_model_displacement_balance___
-msgid "Need restart calculation \"Design hydrostatics\" for model displacement balance..."
+msgid ""
+"Need restart calculation \"Design hydrostatics\" for model displacement "
+"balance..."
 msgstr ""
 
 #: freestringsunit.rs_new_controlcurve
@@ -3279,7 +3363,9 @@ msgid "Note 1: Calculated number of hull surface areas  :"
 msgstr ""
 
 #: freestringsunit.rs_note_1__draft__and_all_other_vertical_heights__is_measured_from_point_of_the_hull_z_0_
-msgid "NOTE 1: Draft (and all other vertical heights) is measured from point of the hull Z=0."
+msgid ""
+"NOTE 1: Draft (and all other vertical heights) is measured from point of the"
+" hull Z=0."
 msgstr ""
 
 #: freestringsunit.rs_note_2__added_masses_are_be_devided_on____________
@@ -3287,15 +3373,21 @@ msgid "Note 2: Added masses are be devided on           :"
 msgstr ""
 
 #: freestringsunit.rs_note_2__all_calculated_coefficients_based_on_actual_dimensions_of_submerged_body_
-msgid "NOTE 2: All calculated coefficients based on actual dimensions of submerged body."
+msgid ""
+"NOTE 2: All calculated coefficients based on actual dimensions of submerged "
+"body."
 msgstr ""
 
 #: freestringsunit.rs_note_2__all_calculated_coefficients_based_on_project_length___draft_and_beam_
-msgid "NOTE 2: All calculated coefficients based on project length), draft and beam."
+msgid ""
+"NOTE 2: All calculated coefficients based on project length), draft and "
+"beam."
 msgstr ""
 
 #: freestringsunit.rs_note_3__the_bulb_characteristics_was_calculated_right__if_f_p__is_through_point_of_intersection
-msgid "Note 3: The bulb characteristics was calculated right, if F.P. is through point of intersection"
+msgid ""
+"Note 3: The bulb characteristics was calculated right, if F.P. is through "
+"point of intersection"
 msgstr ""
 
 #: freestringsunit.rs_note__appendage_resistance_is_calculated_for_stationary_engine
@@ -3303,19 +3395,25 @@ msgid "NOTE: Appendage resistance is calculated for stationary engine"
 msgstr ""
 
 #: freestringsunit.rs_note__coefficients_wt__t_and_etar_were_calculated_by_formulaes_of_method_holtrop_
-msgid "NOTE: Coefficients Wt, t and EtaR were calculated by formulaes of method Holtrop-"
+msgid ""
+"NOTE: Coefficients Wt, t and EtaR were calculated by formulaes of method "
+"Holtrop-"
 msgstr ""
 
 #: freestringsunit.rs_note__coefficients__wt_t_nr_cp_opt_lcb_opt__are_calculated_for_speed_vs__
-msgid "Note: Coefficients (Wt,t,nr,Cp_opt,Lcb_opt) are calculated for speed Vs ="
+msgid ""
+"Note: Coefficients (Wt,t,nr,Cp_opt,Lcb_opt) are calculated for speed Vs ="
 msgstr ""
 
 #: freestringsunit.rs_note__in_parentheses_the_minimum_values_of_demanded_parameters_are_specified
-msgid "Note: In parentheses the minimum values of demanded parameters are specified"
+msgid ""
+"Note: In parentheses the minimum values of demanded parameters are specified"
 msgstr ""
 
 #: freestringsunit.rs_note__propeller_s_metal___1_brass_mntfe__2_bronze_altfe_h9_4_4__3_carbon_steel_
-msgid "Note: Propeller's metal:  1-brass Mn+Fe; 2-bronze Al+Fe H9-4-4; 3-carbon steel;"
+msgid ""
+"Note: Propeller's metal:  1-brass Mn+Fe; 2-bronze Al+Fe H9-4-4; 3-carbon "
+"steel;"
 msgstr ""
 
 #: freestringsunit.rs_not_all_points_could_be_added_while_collapsing_edge
@@ -3414,7 +3512,8 @@ msgid "number of station for SAC calculation must be < 100!"
 msgstr ""
 
 #: freestringsunit.rs_off__bow________________error________________error________________error
-msgid "OFF  BOW                ERROR                ERROR                ERROR"
+msgid ""
+"OFF  BOW                ERROR                ERROR                ERROR"
 msgstr ""
 
 #: freestringsunit.rs_ok__propeller_is_not_cavitate_
@@ -3504,7 +3603,8 @@ msgid "point move"
 msgstr ""
 
 #: freestringsunit.rs_possible_inaccurate_ssd_calculation__increase_the_maximum_angle_of_heel_
-msgid "Possible inaccurate SSD calculation: Increase the maximum angle of heel!"
+msgid ""
+"Possible inaccurate SSD calculation: Increase the maximum angle of heel!"
 msgstr ""
 
 #: freestringsunit.rs_power
@@ -3542,23 +3642,32 @@ msgid "Profile view"
 msgstr ""
 
 #: freestringsunit.rs_program_of_aerodynamics_characteristics_calculation_for_merchant_ships_
-msgid "Program of aerodynamics characteristics calculation for merchant ships."
+msgid ""
+"Program of aerodynamics characteristics calculation for merchant ships."
 msgstr ""
 
 #: freestringsunit.rs_program_of_resistance_and_power_prediction_for_naval_ships__nuos_ukraine_2010_
-msgid "Program of resistance and power prediction for naval ships (NUoS,Ukraine,2010)"
+msgid ""
+"Program of resistance and power prediction for naval ships "
+"(NUoS,Ukraine,2010)"
 msgstr ""
 
 #: freestringsunit.rs_program_of_resistance_and_power_prediction_for_tugs_and_trawlers__nuos__ukraine_2009_
-msgid "Program of resistance and power prediction for tugs and trawlers (NUoS, Ukraine,2009)"
+msgid ""
+"Program of resistance and power prediction for tugs and trawlers (NUoS, "
+"Ukraine,2009)"
 msgstr ""
 
 #: freestringsunit.rs_program_of_resistance_prediction_for_cargo_ships_by_hollenbach_1998_method__nuos__ukraine_
-msgid "Program of resistance prediction for cargo ships by Hollenbach-1998 method (NUoS, Ukraine)"
+msgid ""
+"Program of resistance prediction for cargo ships by Hollenbach-1998 method "
+"(NUoS, Ukraine)"
 msgstr ""
 
 #: freestringsunit.rs_program_of_resistance_prediction_for_displacement_ships_hydronship_v1_08__nuos__ukraine_
-msgid "Program of resistance prediction for displacement ships HydroNShIp v1.08 (NUoS, Ukraine)"
+msgid ""
+"Program of resistance prediction for displacement ships HydroNShIp v1.08 "
+"(NUoS, Ukraine)"
 msgstr ""
 
 #: freestringsunit.rs_program_of_resistance_prediction_planing_and_pre_planing_ships
@@ -3877,7 +3986,8 @@ msgid "Redo"
 msgstr ""
 
 #: freestringsunit.rs_rel_wind_______coeff____stand_______coeff____stand_______coeff____stand
-msgid "REL WIND       COEFF    STAND       COEFF    STAND       COEFF    STAND"
+msgid ""
+"REL WIND       COEFF    STAND       COEFF    STAND       COEFF    STAND"
 msgstr ""
 
 #: freestringsunit.rs_remaining_resistance_components__n__
@@ -3934,7 +4044,8 @@ msgid "Resistance and power for small displacement ships by UBC-1993 method"
 msgstr ""
 
 #: freestringsunit.rs_resistance_and_power_of_tugs_and_trawlers_by_ridgeley_nevitt_1967_method
-msgid "Resistance and power of tugs and trawlers by Ridgeley-Nevitt-1967 method"
+msgid ""
+"Resistance and power of tugs and trawlers by Ridgeley-Nevitt-1967 method"
 msgstr ""
 
 #: freestringsunit.rs_resistance_and_power_planing_ships_by_clement_blount_method
@@ -4032,7 +4143,9 @@ msgstr ""
 
 #: freestringsunit.rs_resistance_holtrop_note_p4
 msgctxt "freestringsunit.rs_resistance_holtrop_note_p4"
-msgid "4.If wetted surface area S is set as 0, then S to calculate by formulae from method of Holtrop."
+msgid ""
+"4.If wetted surface area S is set as 0, then S to calculate by formulae from"
+" method of Holtrop."
 msgstr ""
 
 #: freestringsunit.rs_resistance_holtrop_note_p5
@@ -4330,7 +4443,9 @@ msgid ""
 msgstr ""
 
 #: freestringsunit.rs_resistance_prediction_for_sea_vessels__according_to_associate_prof__timoshenko
-msgid "Resistance prediction for sea vessels, according to Associate Prof. Timoshenko"
+msgid ""
+"Resistance prediction for sea vessels, according to Associate Prof. "
+"Timoshenko"
 msgstr ""
 
 #: freestringsunit.rs_resistance__effective_power__propulsion_factors_and_required_thrust
@@ -4379,11 +4494,15 @@ msgid "Righting lever transverse static stability  GZ_teta"
 msgstr ""
 
 #: freestringsunit.rs_robinson_john___performance_prediction_of_chine_and_round_bilge_hull_forms___international
-msgid "Robinson John, \"Performance Prediction of Chine and Round Bilge Hull Forms\", International"
+msgid ""
+"Robinson John, \"Performance Prediction of Chine and Round Bilge Hull "
+"Forms\", International"
 msgstr ""
 
 #: freestringsunit.rs_roger_h_compton___resistance_of_a_systemic_series_of_semiplaning_transom_stern_hulls__
-msgid "Roger H.Compton, \"Resistance of a Systemic Series of Semiplaning Transom-Stern Hulls\","
+msgid ""
+"Roger H.Compton, \"Resistance of a Systemic Series of Semiplaning Transom-"
+"Stern Hulls\","
 msgstr ""
 
 #: freestringsunit.rs_rotate
@@ -4555,7 +4674,9 @@ msgid "Stabiliser fins area"
 msgstr ""
 
 #: freestringsunit.rs_stability_calculation_according_to_the_rules_of_the_river_register_of_shipping_of_ukraine_
-msgid "Stability calculation according to the rules of the River Register of Shipping of Ukraine:"
+msgid ""
+"Stability calculation according to the rules of the River Register of "
+"Shipping of Ukraine:"
 msgstr ""
 
 #: freestringsunit.rs_stability_calculation_results
@@ -4661,7 +4782,8 @@ msgid "The following items were corrected"
 msgstr ""
 
 #: freestringsunit.rs_the_following_layer_properties_are_calculated_for_both_sides_of_the_ship
-msgid "The following layer properties are calculated for both sides of the ship"
+msgid ""
+"The following layer properties are calculated for both sides of the ship"
 msgstr ""
 
 #: freestringsunit.rs_the_model_already_contains_markers__do_you_want_to_delete_those_
@@ -4673,7 +4795,9 @@ msgid "The model contains a total of"
 msgstr ""
 
 #: freestringsunit.rs_the_selection_contains_locked_points_that_will_not_be_affected_by_this_operation
-msgid "The selection contains locked points that will not be affected by this operation"
+msgid ""
+"The selection contains locked points that will not be affected by this "
+"operation"
 msgstr ""
 
 #: freestringsunit.rs_the_vessel_does_not_correspond_to_any_category_of_navigation____
@@ -4686,7 +4810,9 @@ msgid "Thickness"
 msgstr ""
 
 #: freestringsunit.rs_this_calculation_method_is_here___series_by_oct_5_0181_75_and_other_methods____
-msgid "This calculation method is here: \"Series by OCT 5.0181-75 and other methods...\""
+msgid ""
+"This calculation method is here: \"Series by OCT 5.0181-75 and other "
+"methods...\""
 msgstr ""
 
 #: freestringsunit.rs_this_file_was_created_with_a_later_version_of_free_ship_
@@ -4734,7 +4860,8 @@ msgid "This is version of program work with metric system units only"
 msgstr ""
 
 #: freestringsunit.rs_this_model_contains_locked_points_that_will_be_modified_by_this_operation
-msgid "This model contains locked points that will be modified by this operation"
+msgid ""
+"This model contains locked points that will be modified by this operation"
 msgstr ""
 
 #: freestringsunit.rs_thrust_coefficient_and_torque__kt__10okq
@@ -4897,11 +5024,13 @@ msgid "t/m^3"
 msgstr ""
 
 #: freestringsunit.rs_t___t________t_____t_______t_______t_______t_______t_______t_______t_______t_______t
-msgid "+---+--------+-----+-------+-------+-------+-------+-------+-------+-------+-------+"
+msgid ""
+"+---+--------+-----+-------+-------+-------+-------+-------+-------+-------+-------+"
 msgstr ""
 
 #: freestringsunit.rs_t___t________t_____t_______________________________________________________________t
-msgid "+---+--------+-----+---------------------------------------------------------------+"
+msgid ""
+"+---+--------+-----+---------------------------------------------------------------+"
 msgstr ""
 
 #: freestringsunit.rs_t_______t_______t_______t_________t_________t_________t_________t
@@ -4909,7 +5038,8 @@ msgid "+-------+-------+-------+---------+---------+---------+---------+"
 msgstr ""
 
 #: freestringsunit.rs_t________t________t________t________t________t________t________t________t________t
-msgid "+--------+--------+--------+--------+--------+--------+--------+--------+--------+"
+msgid ""
+"+--------+--------+--------+--------+--------+--------+--------+--------+--------+"
 msgstr ""
 
 #: freestringsunit.rs_t__________t________t________t________t________t________t
@@ -4929,11 +5059,13 @@ msgid "+----------+--------------------------------------------+"
 msgstr ""
 
 #: freestringsunit.rs_t_____________t___________________t____________________t___________________t
-msgid "+-------------+-------------------+--------------------+-------------------+"
+msgid ""
+"+-------------+-------------------+--------------------+-------------------+"
 msgstr ""
 
 #: freestringsunit.rs_t_____________t________________________________________t___________________t
-msgid "+-------------+----------------------------------------+-------------------+"
+msgid ""
+"+-------------+----------------------------------------+-------------------+"
 msgstr ""
 
 #: freestringsunit.rs_t_________________t______________t_____________t
@@ -5043,15 +5175,18 @@ msgid "Vp   ="
 msgstr ""
 
 #: freestringsunit.rs_v_kts____rfok1______rapp______rw_________rb_______rtr_______ra_______rair
-msgid "V(kts)   RF*K1      RAPP      RW         RB       RTR       RA       RAIR"
+msgid ""
+"V(kts)   RF*K1      RAPP      RW         RB       RTR       RA       RAIR"
 msgstr ""
 
 #: freestringsunit.rs_v_kts____rt_n______pe_kw_______w________t_____req_thr_n_____etah______etar
-msgid "V(kts)   RT(N)     PE(kW)      w        t     REQ.THR(N)    EtaH      EtaR"
+msgid ""
+"V(kts)   RT(N)     PE(kW)      w        t     REQ.THR(N)    EtaH      EtaR"
 msgstr ""
 
 #: freestringsunit.rs_v_kts_____v_m_s_______fn_____slratio_____cf________cr________ca_______rf
-msgid "V(kts)    V(m/s)      FN     SLRATIO     CF        CR        CA       RF"
+msgid ""
+"V(kts)    V(m/s)      FN     SLRATIO     CF        CR        CA       RF"
 msgstr ""
 
 #: freestringsunit.rs_w
@@ -5189,7 +5324,9 @@ msgid "X of CoG"
 msgstr ""
 
 #: freestringsunit.rs_yachtres__resistance_prediction_for_sailing_yachts__according_to_prof__gerritsma
-msgid "YachtRes, resistance prediction for sailing yachts, according to Prof. Gerritsma"
+msgid ""
+"YachtRes, resistance prediction for sailing yachts, according to Prof. "
+"Gerritsma"
 msgstr ""
 
 #: freestringsunit.rs_you_have_to_set_the_mainparticulars_first_
@@ -5197,7 +5334,9 @@ msgid "You have to set the mainparticulars first!"
 msgstr ""
 
 #: freestringsunit.rs_you_must_to_increase_ae_ao__may_be_cavitation_and_or_destruction_of_propeller_
-msgid "You must to increase Ae/Ao! May be cavitation and/or destruction of propeller."
+msgid ""
+"You must to increase Ae/Ao! May be cavitation and/or destruction of "
+"propeller."
 msgstr ""
 
 #: freestringsunit.rs_you_must_to_increase_number_of_blades_until
@@ -5205,7 +5344,8 @@ msgid "You must to increase number of blades until"
 msgstr ""
 
 #: freestringsunit.rs_you_need_to_select_at_least_3_controlpoints_to_create_a_new_controlface
-msgid "You need to select at least 3 controlpoints to create a new controlface"
+msgid ""
+"You need to select at least 3 controlpoints to create a new controlface"
 msgstr ""
 
 #: freestringsunit.rs_y_coordinate
@@ -5269,15 +5409,18 @@ msgid "- with shipwaves and depth water for"
 msgstr ""
 
 #: freestringsunit.rs__________form____appendage___wave_______bulb____transom_correlation_air_drag
-msgid "         Form    Appendage   Wave       Bulb    Transom Correlation Air Drag"
+msgid ""
+"         Form    Appendage   Wave       Bulb    Transom Correlation Air Drag"
 msgstr ""
 
 #: freestringsunit.rs__________________long_force____________lat_force__________yaw_moment____
-msgid ".................LONG FORCE............LAT FORCE..........YAW MOMENT...."
+msgid ""
+".................LONG FORCE............LAT FORCE..........YAW MOMENT...."
 msgstr ""
 
 #: freestringsunit.rs_______________________________________________________________________________________________
-msgid "----------------------------------------------------------------------------------------------"
+msgid ""
+"----------------------------------------------------------------------------------------------"
 msgstr ""
 
 #: freestringutils.rsallfiles
@@ -10250,7 +10393,10 @@ msgid "Build"
 msgstr ""
 
 #: tfreesplashwindow.labelcondition.caption
-msgid "This is free software, and you are welcome to redistribute it under the conditions of the GNU General Public License (GPL) Version 3,  29 June 2007 or later"
+msgid ""
+"This is free software, and you are welcome to redistribute it under the "
+"conditions of the GNU General Public License (GPL) Version 3,  29 June 2007 "
+"or later"
 msgstr ""
 
 #: tfreesplashwindow.labelrelease.caption
@@ -10263,7 +10409,14 @@ msgid "Version 0.00"
 msgstr ""
 
 #: tfreesplashwindow.labelwarranty.caption
-msgid "THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE."
+msgid ""
+"THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR"
+" IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, "
+"FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE "
+"AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER "
+"LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING "
+"FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS"
+" IN THE SOFTWARE."
 msgstr ""
 
 #: tfreesplashwindow._label2.caption
@@ -10961,7 +11114,9 @@ msgid "Align"
 msgstr ""
 
 #: tmainform.pointalign.hint
-msgid "Project selected points on a straight line through the first and last selected point."
+msgid ""
+"Project selected points on a straight line through the first and last "
+"selected point."
 msgstr ""
 
 #: tmainform.pointanchor.caption
@@ -11170,10 +11325,6 @@ msgstr ""
 
 #: tmainform.selection1.caption
 msgid "Selection"
-msgstr ""
-
-#: tmainform.selectiondialog.caption
-msgid "Selection Dialog"
 msgstr ""
 
 #: tmainform.selectleakpoints.caption
@@ -11501,3 +11652,12 @@ msgstr ""
 msgid "Recent projects"
 msgstr ""
 
+#: tmainform.selectiondialog.caption
+msgctxt "tmainform.selectiondialog.caption"
+msgid "Selected Object Details"
+msgstr ""
+
+#: tformselected.caption
+msgctxt "tformselected.caption"
+msgid "Selected Object Details"
+msgstr ""

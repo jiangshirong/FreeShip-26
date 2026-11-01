@@ -1,4 +1,5 @@
 object FreeIntersectionDialog: TFreeIntersectionDialog
+  PopupMode = pmAuto
   Left = 652
   Height = 400
   Top = 180
@@ -266,6 +267,7 @@ object FreeIntersectionDialog: TFreeIntersectionDialog
       Action = DeleteSelected
     end
     object tbCloseDialog: TToolButton
+      Visible = False
       Left = 174
       Top = 2
       Action = CloseDialog
@@ -332,49 +334,50 @@ object FreeIntersectionDialog: TFreeIntersectionDialog
     object ShowStations: TAction
       Caption = 'Stations'
       Checked = True
-      Hint = 'Switch to view or add stations.'
+      Hint = 'Switch to view or add stations'
       ImageIndex = 2
       OnExecute = ShowStationsExecute
     end
     object ShowButtocks: TAction
       Caption = 'Buttocks'
-      Hint = 'Switch to view or add buttocks.'
+      Hint = 'Switch to view or add buttocks'
       ImageIndex = 0
       OnExecute = ShowButtocksExecute
     end
     object ShowWaterlines: TAction
       Caption = 'Waterlines'
-      Hint = 'Switch to view or add waterlines.'
+      Hint = 'Switch to view or add waterlines'
       ImageIndex = 1
       OnExecute = ShowWaterlinesExecute
     end
     object ShowDiagonals: TAction
       Caption = 'Diagonals'
-      Hint = 'Switch to view or add diagonals.'
+      Hint = 'Switch to view or add diagonals'
       ImageIndex = 3
       OnExecute = ShowDiagonalsExecute
     end
     object CloseDialog: TAction
+      Visible = False
       Caption = 'CloseDialog'
-      Hint = 'Close this dialog.'
+      Hint = 'Close this dialog'
       ImageIndex = 4
       OnExecute = CloseDialogExecute
     end
     object AddOne: TAction
       Caption = 'Add...'
-      Hint = 'Add one station.'
+      Hint = 'Add one station'
       ImageIndex = 7
       OnExecute = AddOneExecute
     end
     object AddRange: TAction
       Caption = 'Range'
-      Hint = 'Add a whole range of intersection curves.'
+      Hint = 'Add a whole range of intersection curves'
       ImageIndex = 6
       OnExecute = AddRangeExecute
     end
     object DeleteAll: TAction
       Caption = 'Delete all'
-      Hint = 'Delete all stations.'
+      Hint = 'Delete all stations'
       ImageIndex = 5
       OnExecute = DeleteAllExecute
     end

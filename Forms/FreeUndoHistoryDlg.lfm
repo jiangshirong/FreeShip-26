@@ -3,7 +3,7 @@ object FreeUndoHistoryDialog: TFreeUndoHistoryDialog
   Height = 434
   Top = 177
   Width = 684
-  Caption = 'Undo history.'
+  Caption = 'Undo history'
   ClientHeight = 434
   ClientWidth = 684
   OnResize = FormResize

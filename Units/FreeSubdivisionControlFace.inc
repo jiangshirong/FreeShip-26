@@ -1236,41 +1236,37 @@ var
   P1, P2: TFreeSubdivisionControlPoint;
   Edge: TFreeSubdivisionControlEdge;
   Sel: boolean;
+  PointIndices: array of Integer;
+  LayerIndex: Integer;
 begin
   // Read controlpoint data
-  Source.LoadInteger(N);
-  FPoints.Clear;
-  FPoints.Capacity := N;
+  N := LoadModelCount(Source, 'face point', SizeOf(Integer));
+  if (N < 3) or (N > Surface.NumberOfControlPoints) then
+    raise EReadError.CreateFmt('Invalid face point count: %d (control points %d)',
+      [N, Surface.NumberOfControlPoints]);
+  SetLength(PointIndices, N);
   for I := 1 to N do
   begin
     Source.LoadInteger(Index);
-    if Index = -1 then
-      Index := 0;
-    if Index <> -1 then
-    begin
-      P1 := Surface.FControlPoints[Index];
-      FPoints.Add(P1);
-      P1.FFaces.Add(Self);
-    end;
+    RequireModelIndex(Index, Surface.NumberOfControlPoints, 'face control point');
+    PointIndices[I - 1] := Index;
   end;
-  // Read layer-index
-  Source.LoadInteger(Index);
-  if (Index >= 0) and (Index < Surface.FLayers.Count) then
-  begin
-    FLayer := Surface.Layer[Index];
-  end
-  else
-  begin
-    FLayer := Surface.Layer[0];
-    // Reference to an invalid layer. Assign to owners default layer
-  end;
-  if FLayer <> nil then
-    FLayer.AddControlFace(self)
-  else
-    raise Exception.Create(
-      'Invalid layer reference in procedure TFreeSubdivisionControlFace.LoadBinary!');
-
+  Source.LoadInteger(LayerIndex);
+  // SaveBinary explicitly writes -1 for an unassigned layer.
+  if LayerIndex = -1 then LayerIndex := 0;
+  RequireModelIndex(LayerIndex, Surface.NumberOfLayers, 'face layer');
   Source.LoadBoolean(Sel);
+
+  FPoints.Clear;
+  FPoints.Capacity := N;
+  for I := 0 to N - 1 do
+  begin
+    P1 := Surface.FControlPoints[PointIndices[I]];
+    FPoints.Add(P1);
+    P1.FFaces.Add(Self);
+  end;
+  FLayer := Surface.Layer[LayerIndex];
+  FLayer.AddControlFace(self);
   if sel then
     Selected := True;
   P1 := FPoints[NumberOfPoints - 1] as TFreeSubdivisionControlPoint;
@@ -1288,7 +1284,7 @@ begin
       Edge := Surface.AddControlEdge(P1, P2);
       Edge.FFaces.Add(Self);
       Edge.Crease := True;
-      MessageDlg('Could not find edge!', mtError, [mbOK], 0);
+      MessageDlg(rsLocEdgeMissing, mtError, [mbOK], 0);
     end;
     P1 := P2;
   end;

@@ -250,6 +250,7 @@ type
     _Label30: TLabel;
     _Label34: TLabel;
     _Label37: TLabel;
+    procedure FormCreate(Sender: TObject);
     procedure ComboBoxClick(Sender: TObject);
     //                                    procedure ComboBox1Click(Sender: TObject);
     procedure File_ExportData(dat, dan: array of single);
@@ -376,6 +377,7 @@ type
     function CorrectInputdata: boolean;
     procedure Calculate;
     procedure doCalculate;
+    procedure CalculateInWorkspace;
     function Execute(Freeship: TFreeship;
       AutoExtract: boolean): boolean;
     property Bwl: single
@@ -475,7 +477,7 @@ var
 
 implementation
 
-uses FreeLogger, FreeStringsUnit, FreeProcess;
+uses FreeCalculationFiles, FreeUiChoices, FreeLogger, FreeStringsUnit, FreeProcess;
 
 {$IFnDEF FPC}
   {$R *.dfm}
@@ -483,6 +485,13 @@ uses FreeLogger, FreeStringsUnit, FreeProcess;
 {$ELSE}
   {$R *.lfm}
 {$ENDIF}
+
+procedure TFreeResistance_Oortmer.FormCreate(Sender: TObject);
+begin
+  SetResistanceShipTypeChoices(A11Box);
+  SetChoiceLabels(ComboBox, [rsChoiceVanOortmerssen, rsChoiceRidgeleyNewitt, rsChoiceUBC,
+    rsChoiceNeyman, rsChoiceEroshin, rsChoiceReservedTitle]);
+end;
 
 function TFreeResistance_Oortmer.CorrectInputdata: boolean;
 begin
@@ -567,7 +576,7 @@ begin
   try
     CurDir:=GetCurrentDir;
     try
-      SetCurrentDir(FFreeShip.Preferences.TempDirectory);
+      SetCurrentDir(FFreeship.CalculationDirectory);
       doCalculate;
     except
       on E:EInOutError do
@@ -590,7 +599,21 @@ begin
 end;
 
 procedure TFreeResistance_Oortmer.doCalculate;
+var Job: TFreeCalculationScope;
+begin
+  if FFreeship = nil then Exit;
+  Job := FFreeship.BeginCalculation(['RESIST.dat','RESISTp.dat','Propres.dat']);
+  try
+    CalculateInWorkspace;
+    Job.Complete;
+  finally Job.Free end;
+end;
+
+procedure TFreeResistance_Oortmer.CalculateInWorkspace;
 var
+  ProcessCallerDirectory: string;
+  ProcessCallerCursor: TCursor;
+ 
   ConvertedSpeed: single;
   FroudeNumber: single;
   Rf, Rr, Rt, flag: single;
@@ -624,6 +647,9 @@ label
 label
   NewSearch1;
 begin
+  ProcessCallerDirectory := GetCurrentDirUTF8;
+  ProcessCallerCursor := Screen.Cursor;
+  try
   Vs[1] := StartSpeed;
   Vs[4] := EndSpeed;
   Vs[5] := StepSpeed;
@@ -930,14 +956,14 @@ begin
 
     if (Lwl > 0) and (Bwl > 0) and (Dp > 0) and (Np > 0) and (Ta > 0) then
     begin
-      PathFileOld := FFreeship.Preferences.InitDirectory; // каталог Freeshipa
+      PathFileOld := IncludeTrailingPathDelimiter(FFreeship.CalculationDirectory); // каталог Freeshipa
       //  Определяем каталог с программой Oortmers.exe
       FExecDirectory := FFreeship.Preferences.ExecDirectory;
 
       //  Определяем текущий каталог с проектами и с данными для расчета TMP6.tsk
       PathFileOld := GetCurrentDir;
-      ForceDirectoriesUTF8(FFreeship.Preferences.TempDirectory);
-      SetCurrentDirUTF8(FFreeship.Preferences.TempDirectory);
+      ForceDirectoriesUTF8(FFreeship.CalculationDirectory);
+      SetCurrentDirUTF8(FFreeship.CalculationDirectory);
 
       FileToFind := FileSearchUTF8('TMP6.tsk', GetCurrentDir);
       { *Converted from FileSearch* }
@@ -951,7 +977,7 @@ begin
         Chart.Title.Text.Text := rs_Resistance_and_power_are_calculated {UserString[265]} + ' ' + rs_by_van_Oortmerssen_1971_method {UserString[1650]};
         //SysUtils.ExecuteProcess(UTF8ToSys(FExecDirectory + DirectorySeparator+'OORTMERS.EXE'),'', []);
         ExecFullName := FExecDirectory + DirectorySeparator+'OORTMERS.EXE';
-        ExecuteFreePlugin(FFreeship.Preferences.TempDirectory, ExecFullName);
+        ExecuteFreeCalculation(FFreeship.CalculationDirectory, ExecFullName, fcOortmer);
         Nser := 1;
       end;
       if Combobox.ItemIndex = 1 then
@@ -959,7 +985,7 @@ begin
         Chart.Title.Text.Text := rs_Resistance_and_power_are_calculated {UserString[265]} + ' ' + rs_by_Ridgeley_Nevitt_1967_method {UserString[1651]};
         //SysUtils.ExecuteProcess(UTF8ToSys(FExecDirectory + DirectorySeparator+'RNTSP.EXE'), '', []);
         ExecFullName := FExecDirectory + DirectorySeparator+'RNTSP.EXE';
-        ExecuteFreePlugin(FFreeship.Preferences.TempDirectory, ExecFullName);
+        ExecuteFreeCalculation(FFreeship.CalculationDirectory, ExecFullName, fcOortmer);
         Nser := 2;
       end;
       if Combobox.ItemIndex = 2 then
@@ -967,7 +993,7 @@ begin
         Chart.Title.Text.Text := rs_Resistance_and_power_are_calculated {UserString[265]} + ' ' + rs_by_UBC_1993_method {UserString[1652]};
         //SysUtils.ExecuteProcess(UTF8ToSys(FExecDirectory + DirectorySeparator+'UBCRT.EXE'), '', []);
         ExecFullName := FExecDirectory + DirectorySeparator+'UBCRT.EXE';
-        ExecuteFreePlugin(FFreeship.Preferences.TempDirectory, ExecFullName);
+        ExecuteFreeCalculation(FFreeship.CalculationDirectory, ExecFullName, fcOortmer);
         Nser := 3;
       end;
       if Combobox.ItemIndex = 5 then
@@ -1066,8 +1092,8 @@ begin
 
         //  Определяем текущий каталог с проектами и с данными для расчета IN.
         PathFileOld := GetCurrentDir;
-        ForceDirectoriesUTF8(FFreeship.Preferences.TempDirectory);
-        SetCurrentDirUTF8(FFreeship.Preferences.TempDirectory);
+        ForceDirectoriesUTF8(FFreeship.CalculationDirectory);
+        SetCurrentDirUTF8(FFreeship.CalculationDirectory);
 
         //  Определяем текущий каталог с проектами и с данными для расчета IN.
         FileToFind := FileSearchUTF8('TMPke.txt', GetCurrentDir);
@@ -1081,7 +1107,7 @@ begin
         // Запускаем программу расчета
         //SysUtils.ExecuteProcess(UTF8ToSys(FExecDirectory + DirectorySeparator+'SeaMargn.EXE'), '', []);
         ExecFullName := FExecDirectory + DirectorySeparator+'SeaMargn.EXE';
-        ExecuteFreePlugin(FFreeship.Preferences.TempDirectory, ExecFullName);
+        ExecuteFreeCalculation(FFreeship.CalculationDirectory, ExecFullName, fcSeaMargin);
 
         FileName := 'OUT.TXT';
         //  Определяем есть ли файл с результатами расчета OUT. Если TMPke.txt присутствует значит расчет не закончен
@@ -1143,7 +1169,7 @@ begin
     end;
     // Записываем результаты расчета в Resistp.dat для 10 скоростей
     FTmpFileName := 'RESISTp.dat';
-    Assignfile(FFile, 'RESISTp.dat');
+    Assignfile(FFile, IncludeTrailingPathDelimiter(FFreeship.CalculationDirectory)+'RESISTp.dat');
     Rewrite(FFile);
     try
       Writeln(FFile, '#     Nser      Np       Wt        t       Eta_R     Dp');
@@ -1167,7 +1193,7 @@ begin
     end;
     // Записываем результаты расчета в Resist.dat для 5 скоростей
     FTmpFileName := 'RESIST.dat';
-    Assignfile(FFile, 'RESIST.dat');
+    Assignfile(FFile, IncludeTrailingPathDelimiter(FFreeship.CalculationDirectory)+'RESIST.dat');
     Rewrite(FFile);
     try
       for I := 1 to 5 do
@@ -1396,6 +1422,10 @@ begin
 
     ResultsMemo.Visible := True;
     PrintButton.Enabled := True;
+  end;
+  finally
+    SetCurrentDirUTF8(ProcessCallerDirectory);
+    Screen.Cursor := ProcessCallerCursor;
   end;
 end;{TFreeResistance_Delft.Calculate}
 
@@ -2207,7 +2237,7 @@ begin
   begin
     if (A_9 <= 0) or (A_8 <= 0) or (A_6 <= 0) or (A_7 <= 0) or (A_11 <= 0) then
     begin
-      MessageDlg('Data for Ke calcs are need!!!', mtInformation, [mbOK], 0);
+      MessageDlg(rsLocKeDataRequired, mtInformation, [mbOK], 0);
       exit;
     end;
     dat[1] := Lwl;        // Lpp
