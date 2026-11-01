@@ -1,0 +1,894 @@
+object FreeAddMassOutputDialog: TFreeAddMassOutputDialog
+  Left = 540
+  Height = 539
+  Top = 90
+  Width = 694
+  Caption = 'Add_Mass file generator.'
+  ClientHeight = 539
+  ClientWidth = 694
+  Color = clBtnFace
+  Font.Color = clWindowText
+  Font.Height = -11
+  Font.Name = 'MS Sans Serif'
+  OnResize = FormResize
+  Position = poMainFormCenter
+  LCLVersion = '1.4.2.0'
+  object Panel1: TPanel
+    Left = 0
+    Height = 26
+    Top = 0
+    Width = 694
+    Align = alTop
+    AutoSize = True
+    BevelOuter = bvNone
+    ClientHeight = 26
+    ClientWidth = 694
+    TabOrder = 0
+    object OKbutton: TSpeedButton
+      Left = 530
+      Height = 22
+      Top = 2
+      Width = 80
+      Align = alRight
+      BorderSpacing.Around = 2
+      Constraints.MinWidth = 80
+      Caption = 'OK'
+      Flat = True
+      Glyph.Data = {
+        36040000424D3604000000000000360000002800000010000000100000000100
+        2000000000000004000064000000640000000000000000000000000000000000
+        00000000000000000000000000000EA628FF0EA628FF00000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        00000000000000000000000000000EA628FF0EA628FF00000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        00000000000000000000000000000EA628FF0EA628FF0EA628FF000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        000000000000000000000EA628FF0EA628FF0EA628FF0EA628FF000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        000000000000000000000EA628FF0EA628FF0EA628FF0EA628FF000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000EA628FF0EA628FF0EA628FF0EA628FF0EA628FF0EA628FF0000
+        0000000000000000000000000000000000000000000000000000000000000000
+        00000EA628FF0EA628FF0EA628FF0EA628FF0EA628FF0EA628FF0EA628FF0000
+        0000000000000000000000000000000000000000000000000000000000000000
+        00000EA628FF0EA628FF0EA628FF0EA628FF0EA628FF0EA628FF0EA628FF0EA6
+        28FF000000000000000000000000000000000000000000000000000000000000
+        00000EA628FF0EA628FF0EA628FF00000000000000000EA628FF0EA628FF0EA6
+        28FF000000000000000000000000000000000000000000000000000000000000
+        000000000000000000000000000000000000000000000EA628FF0EA628FF0EA6
+        28FF0EA628FF0000000000000000000000000000000000000000000000000000
+        00000000000000000000000000000000000000000000000000000EA628FF0EA6
+        28FF0EA628FF0EA628FF00000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000EA6
+        28FF0EA628FF0EA628FF00000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000EA6
+        28FF0EA628FF0EA628FF0EA628FF000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        00000EA628FF0EA628FF0EA628FF0EA628FF0000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000EA628FF0EA628FF0EA628FF0000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000EA628FF0EA628FF0EA628FF0000000000000000
+      }
+      OnClick = OKbuttonClick
+    end
+    object CancelButton: TSpeedButton
+      Left = 612
+      Height = 22
+      Top = 2
+      Width = 80
+      Align = alRight
+      BorderSpacing.Around = 2
+      Constraints.MinWidth = 80
+      Caption = 'Cancel'
+      Flat = True
+      Glyph.Data = {
+        36040000424D3604000000000000360000002800000010000000100000000100
+        2000000000000004000064000000640000000000000000000000000000000000
+        000000000000000000002110C0FF2110C0FF2110C0FF2110C0FF2110C0FF2110
+        C0FF2110C0FF2110C0FF00000000000000000000000000000000000000000000
+        00002110C0FF2110C0FF2110C0FF2110C0FF2110C0FF2110C0FF2110C0FF2110
+        C0FF2110C0FF2110C0FF2110C0FF2110C0FF0000000000000000000000002110
+        C0FF2110C0FF2110C0FF2110C0FF2110C0FF2110C0FF2110C0FF2110C0FF2110
+        C0FF2110C0FF2110C0FF2110C0FF2110C0FF2110C0FF00000000000000002110
+        C0FF2110C0FF2110C0FF2110C0FF000000000000000000000000000000000000
+        00002110C0FF2110C0FF2110C0FF2110C0FF2110C0FF000000002110C0FF2110
+        C0FF2110C0FF2110C0FF00000000000000000000000000000000000000002110
+        C0FF2110C0FF2110C0FF2110C0FF2110C0FF2110C0FF2110C0FF2110C0FF2110
+        C0FF2110C0FF00000000000000000000000000000000000000002110C0FF2110
+        C0FF2110C0FF2110C0FF2110C0FF2110C0FF2110C0FF2110C0FF2110C0FF2110
+        C0FF2110C0FF000000000000000000000000000000002110C0FF2110C0FF2110
+        C0FF2110C0FF2110C0FF000000002110C0FF2110C0FF2110C0FF2110C0FF2110
+        C0FF2110C0FF0000000000000000000000002110C0FF2110C0FF2110C0FF2110
+        C0FF2110C0FF00000000000000002110C0FF2110C0FF2110C0FF2110C0FF2110
+        C0FF2110C0FF00000000000000002110C0FF2110C0FF2110C0FF2110C0FF2110
+        C0FF0000000000000000000000002110C0FF2110C0FF2110C0FF2110C0FF2110
+        C0FF2110C0FF000000002110C0FF2110C0FF2110C0FF2110C0FF2110C0FF0000
+        00000000000000000000000000002110C0FF2110C0FF2110C0FF2110C0FF2110
+        C0FF2110C0FF2110C0FF2110C0FF2110C0FF2110C0FF2110C0FF000000000000
+        00000000000000000000000000002110C0FF2110C0FF2110C0FF2110C0FF2110
+        C0FF2110C0FF2110C0FF2110C0FF2110C0FF2110C0FF00000000000000000000
+        000000000000000000002110C0FF2110C0FF2110C0FF2110C0FF000000002110
+        C0FF2110C0FF2110C0FF2110C0FF2110C0FF0000000000000000000000000000
+        0000000000002110C0FF2110C0FF2110C0FF2110C0FF00000000000000002110
+        C0FF2110C0FF2110C0FF2110C0FF2110C0FF2110C0FF2110C0FF2110C0FF2110
+        C0FF2110C0FF2110C0FF2110C0FF2110C0FF2110C0FF00000000000000000000
+        00002110C0FF2110C0FF2110C0FF2110C0FF2110C0FF2110C0FF2110C0FF2110
+        C0FF2110C0FF2110C0FF2110C0FF2110C0FF0000000000000000000000000000
+        000000000000000000002110C0FF2110C0FF2110C0FF2110C0FF2110C0FF2110
+        C0FF2110C0FF2110C0FF00000000000000000000000000000000
+      }
+      OnClick = CancelButtonClick
+    end
+  end
+  object Panel2: TPanel
+    Left = 0
+    Height = 500
+    Top = 26
+    Width = 694
+    Align = alClient
+    BevelOuter = bvLowered
+    ClientHeight = 500
+    ClientWidth = 694
+    TabOrder = 1
+    object PageControl1: TPageControl
+      Left = 1
+      Height = 498
+      Top = 1
+      Width = 692
+      ActivePage = TabSheet1
+      Align = alClient
+      TabIndex = 0
+      TabOrder = 0
+      object TabSheet1: TTabSheet
+        Caption = 'Hull geometry'
+        ClientHeight = 468
+        ClientWidth = 688
+        object Panel4: TPanel
+          Left = 0
+          Height = 135
+          Top = 0
+          Width = 688
+          Align = alTop
+          BevelOuter = bvLowered
+          ClientHeight = 135
+          ClientWidth = 688
+          TabOrder = 0
+          object Label1: TLabel
+            Left = 12
+            Height = 14
+            Top = 16
+            Width = 143
+            Caption = 'Number of stations (5-45)'
+            ParentColor = False
+          end
+          object Label2: TLabel
+            Left = 12
+            Height = 14
+            Top = 40
+            Width = 156
+            Caption = 'Number of waterlines (5-25)'
+            ParentColor = False
+          end
+          object Label3: TLabel
+            Left = 12
+            Height = 14
+            Top = 64
+            Width = 29
+            Caption = 'Draft'
+            ParentColor = False
+          end
+          object Label4: TLabel
+            Left = 12
+            Height = 14
+            Top = 88
+            Width = 39
+            Caption = 'Length'
+            ParentColor = False
+          end
+          object Label5: TLabel
+            Left = 12
+            Height = 14
+            Top = 112
+            Width = 41
+            Caption = 'Volume'
+            ParentColor = False
+          end
+          object _Label18: TLabel
+            Left = 249
+            Height = 14
+            Top = 64
+            Width = 20
+            Caption = '[m]'
+            ParentColor = False
+          end
+          object _Label19: TLabel
+            Left = 249
+            Height = 14
+            Top = 88
+            Width = 20
+            Caption = '[m]'
+            ParentColor = False
+          end
+          object _Label20: TLabel
+            Left = 249
+            Height = 14
+            Top = 112
+            Width = 36
+            Caption = '[m^3]'
+            ParentColor = False
+          end
+          object Edit1: TFreeNumInput
+            Left = 184
+            Height = 24
+            Top = 8
+            Width = 61
+            Alignment = taRightJustify
+            Decimals = 0
+            Digits = 12
+            Max = 45
+            Min = 5
+            OutOfRangeMessage = False
+            TabOnEnterKey = False
+            Value = 5
+            Validate = True
+            OnAfterSetValue = Edit1AfterSetValue
+            BorderColor = clBtnShadow
+            TabOrder = 0
+          end
+          object Edit2: TFreeNumInput
+            Left = 184
+            Height = 24
+            Top = 32
+            Width = 61
+            Alignment = taRightJustify
+            Decimals = 0
+            Digits = 12
+            Max = 25
+            Min = 5
+            OutOfRangeMessage = False
+            TabOnEnterKey = False
+            Value = 5
+            Validate = True
+            OnAfterSetValue = Edit2AfterSetValue
+            BorderColor = clBtnShadow
+            TabOrder = 1
+          end
+          object Edit3: TFreeNumInput
+            Left = 184
+            Height = 24
+            Top = 56
+            Width = 61
+            Alignment = taRightJustify
+            Decimals = 3
+            Digits = 12
+            Max = 10000000000
+            Min = 0
+            OutOfRangeMessage = False
+            TabOnEnterKey = False
+            Value = 0
+            Validate = True
+            OnAfterSetValue = Edit3AfterSetValue
+            BorderColor = clBtnShadow
+            TabOrder = 2
+          end
+          object Edit4: TFreeNumInput
+            Left = 184
+            Height = 24
+            Top = 80
+            Width = 61
+            Alignment = taRightJustify
+            Decimals = 3
+            Digits = 12
+            Max = 0
+            Min = 0
+            OutOfRangeMessage = False
+            TabOnEnterKey = False
+            Value = 0
+            Validate = False
+            OnAfterSetValue = Edit4AfterSetValue
+            BorderColor = clBtnShadow
+            Color = clBtnFace
+            Font.Color = clWindowText
+            Font.Height = -11
+            Font.Name = 'MS Sans Serif'
+            ParentFont = False
+            ReadOnly = True
+            TabOrder = 3
+          end
+          object Edit5: TFreeNumInput
+            Left = 184
+            Height = 24
+            Top = 104
+            Width = 61
+            Alignment = taRightJustify
+            Decimals = 3
+            Digits = 12
+            Max = 0
+            Min = 0
+            OutOfRangeMessage = False
+            TabOnEnterKey = False
+            Value = 0
+            Validate = False
+            OnAfterSetValue = Edit5AfterSetValue
+            BorderColor = clBtnShadow
+            Color = clBtnFace
+            Font.Color = clWindowText
+            Font.Height = -11
+            Font.Name = 'MS Sans Serif'
+            ParentFont = False
+            ReadOnly = True
+            TabOrder = 4
+          end
+          object GroupBox3: TGroupBox
+            Left = 306
+            Height = 121
+            Top = 8
+            Width = 231
+            Caption = 'Hullform configuration:  '
+            ClientHeight = 103
+            ClientWidth = 223
+            TabOrder = 5
+            object Label14: TLabel
+              Left = 5
+              Height = 14
+              Top = 62
+              Width = 185
+              Caption = 'Distance between center of hulls:'
+              ParentColor = False
+            end
+            object _Label15: TLabel
+              Left = 95
+              Height = 14
+              Top = 100
+              Width = 20
+              Caption = '[m]'
+              ParentColor = False
+            end
+            object RadioButton1: TRadioButton
+              Left = 4
+              Height = 20
+              Top = 1
+              Width = 79
+              Caption = 'Monohull'
+              Checked = True
+              OnClick = RadioButton1Click
+              TabOrder = 0
+              TabStop = True
+            end
+            object RadioButton2: TRadioButton
+              Left = 4
+              Height = 20
+              Top = 21
+              Width = 192
+              Caption = 'Monohull, send as catamaran'
+              OnClick = RadioButton1Click
+              TabOrder = 1
+            end
+            object RadioButton3: TRadioButton
+              Left = 4
+              Height = 20
+              Top = 41
+              Width = 91
+              Caption = 'Catamaran'
+              OnClick = RadioButton1Click
+              TabOrder = 2
+            end
+            object Distance: TFreeNumInput
+              Left = 8
+              Height = 24
+              Top = 78
+              Width = 85
+              Alignment = taRightJustify
+              Decimals = 3
+              Digits = 12
+              Max = 0
+              Min = 0
+              OutOfRangeMessage = False
+              TabOnEnterKey = False
+              Value = 0
+              Validate = False
+              OnAfterSetValue = DistanceAfterSetValue
+              BorderColor = clBtnShadow
+              Enabled = False
+              TabOrder = 3
+            end
+          end
+        end
+        object Panel6: TPanel
+          Left = 0
+          Height = 333
+          Top = 135
+          Width = 688
+          Align = alClient
+          BevelOuter = bvLowered
+          ClientHeight = 333
+          ClientWidth = 688
+          TabOrder = 1
+          object ScrollBar1: TScrollBar
+            Left = 1
+            Height = 15
+            Top = 317
+            Width = 686
+            Align = alBottom
+            Max = 180
+            Min = -180
+            PageSize = 0
+            Position = 20
+            TabOrder = 0
+          end
+          object ScrollBar2: TScrollBar
+            Left = 672
+            Height = 316
+            Top = 1
+            Width = 15
+            Align = alRight
+            Kind = sbVertical
+            Max = 180
+            Min = -180
+            PageSize = 0
+            Position = 20
+            TabOrder = 1
+          end
+          object Viewport: TFreeViewport
+            Left = 1
+            Height = 316
+            Top = 1
+            Width = 671
+            Angle = 20
+            Align = alClient
+            BackgroundImage.Alpha = 255
+            BackgroundImage.Owner = Viewport
+            BackgroundImage.Quality = 100
+            BackgroundImage.Scale = 1
+            BackgroundImage.ShowInView = fvBodyplan
+            BackgroundImage.Tolerance = 5
+            BackgroundImage.Transparent = False
+            BackgroundImage.TransparentColor = clBlack
+            BackgroundImage.Visible = True
+            CameraType = ftStandard
+            Color = clBlack
+            DoubleBuffer = True
+            Elevation = 20
+            HorScrollbar = ScrollBar1
+            Margin = 0
+            VertScrollbar = ScrollBar2
+            ViewType = fvPerspective
+            ViewportMode = vmWireFrame
+            OnRedraw = ViewportRedraw
+            OnRequestExtents = ViewportRequestExtents
+          end
+        end
+      end
+      object TabSheet3: TTabSheet
+        Caption = 'Environment'
+        ClientHeight = 470
+        ClientWidth = 686
+        ImageIndex = 2
+        object Panel7: TPanel
+          Left = 0
+          Height = 470
+          Top = 0
+          Width = 686
+          Align = alClient
+          BevelOuter = bvLowered
+          ClientHeight = 470
+          ClientWidth = 686
+          TabOrder = 0
+          object Label6: TLabel
+            Left = 12
+            Height = 14
+            Top = 16
+            Width = 78
+            Caption = 'Water density'
+            ParentColor = False
+          end
+          object Label7: TLabel
+            Left = 12
+            Height = 14
+            Top = 40
+            Width = 144
+            Caption = 'Water kinematic viscosity'
+            ParentColor = False
+          end
+          object _Label8: TLabel
+            Left = 370
+            Height = 14
+            Top = 40
+            Width = 75
+            Caption = '*10-6  [m2/s]'
+            ParentColor = False
+          end
+          object _Label9: TLabel
+            Left = 370
+            Height = 14
+            Top = 16
+            Width = 34
+            Caption = '[t/m3]'
+            ParentColor = False
+          end
+          object Label10: TLabel
+            Left = 12
+            Height = 14
+            Top = 64
+            Width = 69
+            Caption = 'Water depth'
+            ParentColor = False
+          end
+          object _Label11: TLabel
+            Left = 370
+            Height = 14
+            Top = 64
+            Width = 19
+            Caption = '[m]'
+            ParentColor = False
+          end
+          object Label12: TLabel
+            Left = 12
+            Height = 14
+            Top = 88
+            Width = 59
+            Caption = 'Trim angle'
+            ParentColor = False
+          end
+          object _Label13: TLabel
+            Left = 370
+            Height = 14
+            Top = 88
+            Width = 34
+            Caption = '[degr]'
+            ParentColor = False
+          end
+          object Label20: TLabel
+            Left = 12
+            Height = 14
+            Top = 112
+            Width = 96
+            Caption = 'Number of areas'
+            ParentColor = False
+          end
+          object Label21: TLabel
+            Left = 12
+            Height = 14
+            Top = 136
+            Width = 122
+            Caption = 'Percent of areas sum'
+            ParentColor = False
+          end
+          object _Label21: TLabel
+            Left = 370
+            Height = 14
+            Top = 136
+            Width = 18
+            Caption = '[%]'
+            ParentColor = False
+          end
+          object Label22: TLabel
+            Left = 12
+            Height = 14
+            Top = 160
+            Width = 117
+            Caption = 'Calculation accuracy'
+            ParentColor = False
+          end
+          object Label23: TLabel
+            Left = 12
+            Height = 14
+            Top = 184
+            Width = 215
+            Caption = 'Type of areas (1-triangle;2-trapezium)'
+            ParentColor = False
+          end
+          object Label24: TLabel
+            Left = 12
+            Height = 14
+            Top = 232
+            Width = 131
+            Caption = 'Drift angle BetaD, degr'
+            ParentColor = False
+          end
+          object Label25: TLabel
+            Left = 12
+            Height = 14
+            Top = 256
+            Width = 160
+            Caption = 'Estimated velocity Vs, knots'
+            ParentColor = False
+          end
+          object Label26: TLabel
+            Left = 12
+            Height = 14
+            Top = 280
+            Width = 178
+            Caption = 'Rotative velocity Omega, 1/sec'
+            ParentColor = False
+          end
+          object Label27: TLabel
+            Left = 12
+            Height = 14
+            Top = 208
+            Width = 126
+            Caption = 'Type of object or ship:'
+            ParentColor = False
+          end
+          object ComboBox: TComboBox
+            Left = 168
+            Height = 25
+            Top = 200
+            Width = 200
+            ItemHeight = 16
+            ItemIndex = 0
+            Items.Strings = (
+              'Any Objects or Ships'
+              'Underwater Vechicle'
+              'Displacement Sea Ships'
+              'Displacement River Ships'
+            )
+            OnClick = ComboBoxClick
+            TabOrder = 4
+            Text = 'Any Objects or Ships'
+          end
+          object Edit6: TFreeNumInput
+            Left = 290
+            Height = 24
+            Top = 8
+            Width = 78
+            Alignment = taRightJustify
+            Decimals = 3
+            Digits = 12
+            Max = 1.03
+            Min = 0.995
+            OutOfRangeMessage = False
+            TabOnEnterKey = False
+            Value = 1
+            Validate = False
+            OnAfterSetValue = Edit6AfterSetValue
+            BorderColor = clBtnShadow
+            TabOrder = 1
+          end
+          object Edit7: TFreeNumInput
+            Left = 290
+            Height = 24
+            Top = 32
+            Width = 78
+            Alignment = taRightJustify
+            Decimals = 4
+            Digits = 12
+            Max = 1.61
+            Min = 0.8
+            OutOfRangeMessage = False
+            TabOnEnterKey = False
+            Value = 0.8
+            Validate = True
+            OnAfterSetValue = Edit7AfterSetValue
+            BorderColor = clBtnShadow
+            Color = clBtnFace
+            Font.Color = clWindowText
+            Font.Height = -11
+            Font.Name = 'MS Sans Serif'
+            ParentFont = False
+            TabOrder = 2
+          end
+          object Edit8: TFreeNumInput
+            Left = 290
+            Height = 24
+            Top = 56
+            Width = 78
+            Alignment = taRightJustify
+            Decimals = 2
+            Digits = 12
+            Max = 10000
+            Min = 0
+            OutOfRangeMessage = False
+            TabOnEnterKey = False
+            Value = 0
+            Validate = True
+            OnAfterSetValue = Edit8AfterSetValue
+            BorderColor = clBtnShadow
+            TabOrder = 3
+          end
+          object Edit9: TFreeNumInput
+            Left = 290
+            Height = 24
+            Top = 80
+            Width = 78
+            Alignment = taRightJustify
+            Decimals = 3
+            Digits = 12
+            Max = 90
+            Min = -90
+            OutOfRangeMessage = False
+            TabOnEnterKey = False
+            Value = 0
+            Validate = True
+            OnAfterSetValue = Edit9AfterSetValue
+            BorderColor = clBtnShadow
+            TabOrder = 5
+          end
+          object Edit20: TFreeNumInput
+            Left = 290
+            Height = 24
+            Top = 104
+            Width = 78
+            Alignment = taRightJustify
+            Decimals = 0
+            Digits = 12
+            Max = 4000
+            Min = 400
+            OutOfRangeMessage = False
+            TabOnEnterKey = False
+            Value = 1000
+            Validate = True
+            OnAfterSetValue = Edit20AfterSetValue
+            BorderColor = clBtnShadow
+            TabOrder = 6
+          end
+          object Edit21: TFreeNumInput
+            Left = 290
+            Height = 24
+            Top = 128
+            Width = 78
+            Alignment = taRightJustify
+            Decimals = 0
+            Digits = 12
+            Max = 100
+            Min = 10
+            OutOfRangeMessage = False
+            TabOnEnterKey = False
+            Value = 100
+            Validate = True
+            OnAfterSetValue = Edit21AfterSetValue
+            BorderColor = clBtnShadow
+            TabOrder = 7
+          end
+          object Edit22: TFreeNumInput
+            Left = 290
+            Height = 24
+            Top = 152
+            Width = 78
+            Alignment = taRightJustify
+            Decimals = 2
+            Digits = 12
+            Max = 1
+            Min = 0
+            OutOfRangeMessage = False
+            TabOnEnterKey = False
+            Value = 0.2
+            Validate = True
+            OnAfterSetValue = Edit22AfterSetValue
+            BorderColor = clBtnShadow
+            TabOrder = 8
+          end
+          object Edit23: TFreeNumInput
+            Left = 290
+            Height = 24
+            Top = 176
+            Width = 78
+            Alignment = taRightJustify
+            Decimals = 0
+            Digits = 12
+            Max = 2
+            Min = 1
+            OutOfRangeMessage = False
+            TabOnEnterKey = False
+            Value = 1
+            Validate = True
+            OnAfterSetValue = Edit23AfterSetValue
+            BorderColor = clBtnShadow
+            TabOrder = 9
+          end
+          object Edit24: TFreeNumInput
+            Left = 290
+            Height = 24
+            Top = 224
+            Width = 78
+            Alignment = taRightJustify
+            Decimals = 2
+            Digits = 12
+            Max = 90
+            Min = 0
+            OutOfRangeMessage = False
+            TabOnEnterKey = False
+            Value = 0
+            Validate = True
+            OnAfterSetValue = Edit24AfterSetValue
+            BorderColor = clBtnShadow
+            TabOrder = 10
+          end
+          object Edit25: TFreeNumInput
+            Left = 290
+            Height = 24
+            Top = 248
+            Width = 78
+            Alignment = taRightJustify
+            Decimals = 2
+            Digits = 12
+            Max = 30
+            Min = 0
+            OutOfRangeMessage = False
+            TabOnEnterKey = False
+            Value = 10
+            Validate = True
+            OnAfterSetValue = Edit25AfterSetValue
+            BorderColor = clBtnShadow
+            TabOrder = 11
+          end
+          object Edit26: TFreeNumInput
+            Left = 290
+            Height = 24
+            Top = 272
+            Width = 78
+            Alignment = taRightJustify
+            Decimals = 3
+            Digits = 12
+            Max = 30
+            Min = 0
+            OutOfRangeMessage = False
+            TabOnEnterKey = False
+            Value = 0
+            Validate = True
+            OnAfterSetValue = Edit26AfterSetValue
+            BorderColor = clBtnShadow
+            TabOrder = 0
+          end
+        end
+      end
+      object TabSheet2: TTabSheet
+        Caption = 'Results'
+        ClientHeight = 470
+        ClientWidth = 686
+        ImageIndex = 1
+        object Resultsmemo: TMemo
+          Left = 0
+          Height = 470
+          Top = 0
+          Width = 686
+          Align = alClient
+          Font.Color = clBlack
+          Font.Height = -13
+          Font.Name = 'Courier New'
+          ParentFont = False
+          ScrollBars = ssBoth
+          TabOrder = 0
+          Visible = False
+        end
+      end
+      object TabSheet4: TTabSheet
+        Caption = 'Help'
+        ClientHeight = 470
+        ClientWidth = 686
+        ImageIndex = 1
+        object Resultsmemo2: TMemo
+          Left = 0
+          Height = 470
+          Top = 0
+          Width = 686
+          Align = alClient
+          Font.Color = clBlack
+          Font.Height = -13
+          Font.Name = 'Courier New'
+          ParentFont = False
+          ScrollBars = ssBoth
+          TabOrder = 0
+          Visible = False
+        end
+      end
+    end
+  end
+  object Panel3: TPanel
+    Left = 0
+    Height = 13
+    Top = 526
+    Width = 694
+    Align = alBottom
+    BevelOuter = bvNone
+    TabOrder = 2
+  end
+  object ActionList1: TActionList
+    left = 557
+    top = 55
+    object SaveFile: TAction
+      Caption = 'Save'
+    end
+  end
+end

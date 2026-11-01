@@ -1,0 +1,297 @@
+object FreeRotateMDialog: TFreeRotateMDialog
+  Left = 487
+  Height = 159
+  Top = 141
+  Width = 425
+  BorderStyle = bsDialog
+  Caption = 'Rotation'
+  ClientHeight = 159
+  ClientWidth = 425
+  Color = clBtnFace
+  Font.Color = clWindowText
+  Font.Height = -11
+  Font.Name = 'MS Sans Serif'
+  Position = poMainFormCenter
+  LCLVersion = '1.4.2.0'
+  object Panel2: TPanel
+    Left = 0
+    Height = 122
+    Top = 24
+    Width = 425
+    Align = alClient
+    BevelOuter = bvLowered
+    ClientHeight = 122
+    ClientWidth = 425
+    TabOrder = 0
+    object GroupBox1: TGroupBox
+      Left = 1
+      Height = 120
+      Top = 1
+      Width = 247
+      Align = alLeft
+      Caption = 'Axis:'
+      ClientHeight = 102
+      ClientWidth = 239
+      TabOrder = 1
+      object Label3: TLabel
+        Left = 194
+        Height = 14
+        Top = 18
+        Width = 37
+        Caption = '[degr.]'
+        ParentColor = False
+      end
+      object Label6: TLabel
+        Left = 194
+        Height = 14
+        Top = 48
+        Width = 37
+        Caption = '[degr.]'
+        ParentColor = False
+      end
+      object Label9: TLabel
+        Left = 194
+        Height = 14
+        Top = 78
+        Width = 37
+        Caption = '[degr.]'
+        ParentColor = False
+      end
+      object Label1: TLabel
+        Left = 5
+        Height = 14
+        Top = 18
+        Width = 94
+        Caption = 'Longitudinal axis'
+        ParentColor = False
+      end
+      object Label2: TLabel
+        Left = 5
+        Height = 14
+        Top = 48
+        Width = 85
+        Caption = 'Transverse axis'
+        ParentColor = False
+      end
+      object Label4: TLabel
+        Left = 5
+        Height = 14
+        Top = 78
+        Width = 67
+        Caption = 'Vertical axis'
+        ParentColor = False
+      end
+      object Edit1: TEdit
+        Left = 123
+        Height = 24
+        Top = 10
+        Width = 65
+        OnExit = Edit1Exit
+        OnKeyPress = Edit1KeyPress
+        TabOrder = 0
+      end
+      object Edit2: TEdit
+        Left = 123
+        Height = 24
+        Top = 40
+        Width = 65
+        OnExit = Edit2Exit
+        OnKeyPress = Edit1KeyPress
+        TabOrder = 1
+      end
+      object Edit3: TEdit
+        Left = 123
+        Height = 24
+        Top = 70
+        Width = 65
+        OnExit = Edit3Exit
+        OnKeyPress = Edit1KeyPress
+        TabOrder = 2
+      end
+    end
+    object GroupBox2: TGroupBox
+      Left = 248
+      Height = 120
+      Top = 1
+      Width = 204
+      Align = alLeft
+      Caption = 'Current angles:'
+      ClientHeight = 102
+      ClientWidth = 196
+      TabOrder = 0
+      object Label11: TLabel
+        Left = 8
+        Height = 14
+        Top = 18
+        Width = 63
+        Caption = 'of the heel:'
+        ParentColor = False
+      end
+      object Label12: TLabel
+        Left = 8
+        Height = 14
+        Top = 48
+        Width = 62
+        Caption = 'of the trim:'
+        ParentColor = False
+      end
+      object Label13: TLabel
+        Left = 8
+        Height = 14
+        Top = 78
+        Width = 61
+        Caption = 'of the yaw:'
+        ParentColor = False
+      end
+      object Label14: TLabel
+        Left = 91
+        Height = 14
+        Top = 18
+        Width = 54
+        Caption = '0.00 degr'
+        ParentColor = False
+      end
+      object Label15: TLabel
+        Left = 91
+        Height = 14
+        Top = 48
+        Width = 54
+        Caption = '0.00 degr'
+        ParentColor = False
+      end
+      object Label16: TLabel
+        Left = 91
+        Height = 14
+        Top = 78
+        Width = 54
+        Caption = '0.00 degr'
+        ParentColor = False
+      end
+    end
+  end
+  object Panel3: TPanel
+    Left = 0
+    Height = 13
+    Top = 146
+    Width = 425
+    Align = alBottom
+    BevelOuter = bvNone
+    TabOrder = 1
+  end
+  object Panel1: TPanel
+    Left = 0
+    Height = 24
+    Top = 0
+    Width = 425
+    Align = alTop
+    AutoSize = True
+    BevelOuter = bvNone
+    ClientHeight = 24
+    ClientWidth = 425
+    TabOrder = 2
+    object OKButton: TSpeedButton
+      Left = 261
+      Height = 20
+      Hint = 'Close dialog.'
+      Top = 2
+      Width = 80
+      Align = alRight
+      AutoSize = True
+      BorderSpacing.Around = 2
+      Constraints.MinWidth = 80
+      Caption = '&Ok'
+      Flat = True
+      Glyph.Data = {
+        36040000424D3604000000000000360000002800000010000000100000000100
+        2000000000000004000064000000640000000000000000000000000000000000
+        00000000000000000000000000000EA628FF0EA628FF00000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        00000000000000000000000000000EA628FF0EA628FF00000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        00000000000000000000000000000EA628FF0EA628FF0EA628FF000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        000000000000000000000EA628FF0EA628FF0EA628FF0EA628FF000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        000000000000000000000EA628FF0EA628FF0EA628FF0EA628FF000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000EA628FF0EA628FF0EA628FF0EA628FF0EA628FF0EA628FF0000
+        0000000000000000000000000000000000000000000000000000000000000000
+        00000EA628FF0EA628FF0EA628FF0EA628FF0EA628FF0EA628FF0EA628FF0000
+        0000000000000000000000000000000000000000000000000000000000000000
+        00000EA628FF0EA628FF0EA628FF0EA628FF0EA628FF0EA628FF0EA628FF0EA6
+        28FF000000000000000000000000000000000000000000000000000000000000
+        00000EA628FF0EA628FF0EA628FF00000000000000000EA628FF0EA628FF0EA6
+        28FF000000000000000000000000000000000000000000000000000000000000
+        000000000000000000000000000000000000000000000EA628FF0EA628FF0EA6
+        28FF0EA628FF0000000000000000000000000000000000000000000000000000
+        00000000000000000000000000000000000000000000000000000EA628FF0EA6
+        28FF0EA628FF0EA628FF00000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000EA6
+        28FF0EA628FF0EA628FF00000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000EA6
+        28FF0EA628FF0EA628FF0EA628FF000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        00000EA628FF0EA628FF0EA628FF0EA628FF0000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000EA628FF0EA628FF0EA628FF0000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000EA628FF0EA628FF0EA628FF0000000000000000
+      }
+      OnClick = OKButtonClick
+      ShowHint = True
+      ParentShowHint = False
+    end
+    object CancelButton: TSpeedButton
+      Left = 343
+      Height = 20
+      Hint = 'Cancel operation.'
+      Top = 2
+      Width = 80
+      Align = alRight
+      AutoSize = True
+      BorderSpacing.Around = 2
+      Constraints.MinWidth = 80
+      Caption = '&Cancel'
+      Flat = True
+      Glyph.Data = {
+        36040000424D3604000000000000360000002800000010000000100000000100
+        2000000000000004000064000000640000000000000000000000000000000000
+        000000000000000000002110C0FF2110C0FF2110C0FF2110C0FF2110C0FF2110
+        C0FF2110C0FF2110C0FF00000000000000000000000000000000000000000000
+        00002110C0FF2110C0FF2110C0FF2110C0FF2110C0FF2110C0FF2110C0FF2110
+        C0FF2110C0FF2110C0FF2110C0FF2110C0FF0000000000000000000000002110
+        C0FF2110C0FF2110C0FF2110C0FF2110C0FF2110C0FF2110C0FF2110C0FF2110
+        C0FF2110C0FF2110C0FF2110C0FF2110C0FF2110C0FF00000000000000002110
+        C0FF2110C0FF2110C0FF2110C0FF000000000000000000000000000000000000
+        00002110C0FF2110C0FF2110C0FF2110C0FF2110C0FF000000002110C0FF2110
+        C0FF2110C0FF2110C0FF00000000000000000000000000000000000000002110
+        C0FF2110C0FF2110C0FF2110C0FF2110C0FF2110C0FF2110C0FF2110C0FF2110
+        C0FF2110C0FF00000000000000000000000000000000000000002110C0FF2110
+        C0FF2110C0FF2110C0FF2110C0FF2110C0FF2110C0FF2110C0FF2110C0FF2110
+        C0FF2110C0FF000000000000000000000000000000002110C0FF2110C0FF2110
+        C0FF2110C0FF2110C0FF000000002110C0FF2110C0FF2110C0FF2110C0FF2110
+        C0FF2110C0FF0000000000000000000000002110C0FF2110C0FF2110C0FF2110
+        C0FF2110C0FF00000000000000002110C0FF2110C0FF2110C0FF2110C0FF2110
+        C0FF2110C0FF00000000000000002110C0FF2110C0FF2110C0FF2110C0FF2110
+        C0FF0000000000000000000000002110C0FF2110C0FF2110C0FF2110C0FF2110
+        C0FF2110C0FF000000002110C0FF2110C0FF2110C0FF2110C0FF2110C0FF0000
+        00000000000000000000000000002110C0FF2110C0FF2110C0FF2110C0FF2110
+        C0FF2110C0FF2110C0FF2110C0FF2110C0FF2110C0FF2110C0FF000000000000
+        00000000000000000000000000002110C0FF2110C0FF2110C0FF2110C0FF2110
+        C0FF2110C0FF2110C0FF2110C0FF2110C0FF2110C0FF00000000000000000000
+        000000000000000000002110C0FF2110C0FF2110C0FF2110C0FF000000002110
+        C0FF2110C0FF2110C0FF2110C0FF2110C0FF0000000000000000000000000000
+        0000000000002110C0FF2110C0FF2110C0FF2110C0FF00000000000000002110
+        C0FF2110C0FF2110C0FF2110C0FF2110C0FF2110C0FF2110C0FF2110C0FF2110
+        C0FF2110C0FF2110C0FF2110C0FF2110C0FF2110C0FF00000000000000000000
+        00002110C0FF2110C0FF2110C0FF2110C0FF2110C0FF2110C0FF2110C0FF2110
+        C0FF2110C0FF2110C0FF2110C0FF2110C0FF0000000000000000000000000000
+        000000000000000000002110C0FF2110C0FF2110C0FF2110C0FF2110C0FF2110
+        C0FF2110C0FF2110C0FF00000000000000000000000000000000
+      }
+      OnClick = CancelButtonClick
+      ShowHint = True
+      ParentShowHint = False
+    end
+  end
+end

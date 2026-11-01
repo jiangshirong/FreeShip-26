@@ -1,0 +1,681 @@
+object FreeLackenbyDialog: TFreeLackenbyDialog
+  Left = 189
+  Height = 511
+  Top = 71
+  Width = 746
+  BorderStyle = bsSingle
+  Caption = 'Lackenby hullform transformation.'
+  ClientHeight = 511
+  ClientWidth = 746
+  Color = clBtnFace
+  Font.Color = clWindowText
+  Font.Height = -11
+  Font.Name = 'MS Sans Serif'
+  Position = poOwnerFormCenter
+  LCLVersion = '1.4.2.0'
+  object Splitter2: TSplitter
+    Cursor = crVSplit
+    Left = 0
+    Height = 3
+    Top = 304
+    Width = 746
+    Align = alTop
+    Color = clRed
+    ParentColor = False
+    ResizeAnchor = akTop
+  end
+  object Panel2: TPanel
+    Left = 0
+    Height = 280
+    Top = 24
+    Width = 746
+    Align = alTop
+    BevelOuter = bvLowered
+    ClientHeight = 280
+    ClientWidth = 746
+    TabOrder = 0
+    object Splitter3: TSplitter
+      Left = 409
+      Height = 278
+      Top = 1
+      Width = 5
+      Color = clRed
+      ParentColor = False
+    end
+    object Viewport: TFreeViewport
+      Left = 414
+      Height = 278
+      Top = 1
+      Width = 331
+      Angle = 0
+      Align = alClient
+      BackgroundImage.Alpha = 255
+      BackgroundImage.Owner = Viewport
+      BackgroundImage.Quality = 100
+      BackgroundImage.Scale = 1
+      BackgroundImage.ShowInView = fvBodyplan
+      BackgroundImage.Tolerance = 5
+      BackgroundImage.Transparent = False
+      BackgroundImage.TransparentColor = clBlack
+      BackgroundImage.Visible = True
+      BorderStyle = bsSingle
+      CameraType = ftStandard
+      DoubleBuffer = True
+      Elevation = 0
+      Margin = 0
+      ViewType = fvBodyplan
+      ViewportMode = vmWireFrame
+      OnRedraw = ViewportRedraw
+      OnRequestExtents = ViewportRequestExtents
+    end
+    object Panel5: TPanel
+      Left = 1
+      Height = 278
+      Top = 1
+      Width = 408
+      Align = alLeft
+      BevelOuter = bvNone
+      ClientHeight = 278
+      ClientWidth = 408
+      TabOrder = 1
+      object Label1: TLabel
+        Left = 4
+        Height = 14
+        Top = 32
+        Width = 77
+        Caption = 'Displacement'
+        ParentColor = False
+      end
+      object Label2: TLabel
+        Left = 183
+        Height = 15
+        Top = 2
+        Width = 52
+        Caption = 'Current'
+        Font.Color = clWindowText
+        Font.Height = -12
+        Font.Name = 'MS Sans Serif'
+        Font.Style = [fsBold]
+        ParentColor = False
+        ParentFont = False
+      end
+      object Label3: TLabel
+        Left = 242
+        Height = 15
+        Top = 2
+        Width = 52
+        Caption = 'Desired'
+        Font.Color = clWindowText
+        Font.Height = -12
+        Font.Name = 'MS Sans Serif'
+        Font.Style = [fsBold]
+        ParentColor = False
+        ParentFont = False
+      end
+      object Label4: TLabel
+        Left = 359
+        Height = 14
+        Top = 30
+        Width = 37
+        Caption = 'Label4'
+        ParentColor = False
+      end
+      object Label5: TLabel
+        Left = 4
+        Height = 14
+        Top = 60
+        Width = 92
+        Caption = 'Block coefficient'
+        ParentColor = False
+      end
+      object Label7: TLabel
+        Left = 4
+        Height = 14
+        Top = 88
+        Width = 113
+        Caption = 'Prismatic coefficient'
+        ParentColor = False
+      end
+      object Label6: TLabel
+        Left = 4
+        Height = 14
+        Top = 116
+        Width = 141
+        Caption = 'Long. center of buoyancy'
+        ParentColor = False
+      end
+      object Label8: TLabel
+        Left = 301
+        Height = 15
+        Top = 2
+        Width = 70
+        Caption = 'Difference'
+        Font.Color = clWindowText
+        Font.Height = -12
+        Font.Name = 'MS Sans Serif'
+        Font.Style = [fsBold]
+        ParentColor = False
+        ParentFont = False
+      end
+      object Label9: TLabel
+        Left = 359
+        Height = 14
+        Top = 114
+        Width = 37
+        Caption = 'Label9'
+        ParentColor = False
+      end
+      object Label10: TLabel
+        Left = 4
+        Height = 14
+        Top = 144
+        Width = 145
+        Caption = 'Maximum no. of iterations'
+        ParentColor = False
+      end
+      object Label11: TLabel
+        Left = 4
+        Height = 14
+        Top = 200
+        Width = 126
+        Caption = 'Prismatic coeff. aftship'
+        ParentColor = False
+      end
+      object _Label12: TLabel
+        Left = 183
+        Height = 14
+        Top = 198
+        Width = 50
+        Caption = '_Label12'
+        ParentColor = False
+      end
+      object Label13: TLabel
+        Left = 4
+        Height = 14
+        Top = 228
+        Width = 133
+        Caption = 'Prismatic coeff. foreship'
+        ParentColor = False
+      end
+      object _Label14: TLabel
+        Left = 183
+        Height = 14
+        Top = 226
+        Width = 44
+        Caption = 'Label12'
+        ParentColor = False
+      end
+      object Label15: TLabel
+        Left = 4
+        Height = 14
+        Top = 256
+        Width = 133
+        Caption = 'Maximum displacement'
+        ParentColor = False
+      end
+      object _Label16: TLabel
+        Left = 183
+        Height = 14
+        Top = 254
+        Width = 44
+        Caption = 'Label12'
+        ParentColor = False
+      end
+      object Edit1: TFreeNumInput
+        Left = 183
+        Height = 24
+        Top = 22
+        Width = 55
+        Alignment = taRightJustify
+        Decimals = 3
+        Digits = 12
+        Max = 0
+        Min = 0
+        OutOfRangeMessage = False
+        TabOnEnterKey = False
+        Value = 0
+        Validate = False
+        BorderColor = clBtnShadow
+        Enabled = False
+        ReadOnly = True
+        TabOrder = 0
+      end
+      object Input1: TFreeNumInput
+        Left = 242
+        Height = 24
+        Top = 22
+        Width = 55
+        Alignment = taRightJustify
+        Decimals = 3
+        Digits = 12
+        Max = 0
+        Min = 0
+        OutOfRangeMessage = False
+        TabOnEnterKey = False
+        Value = 0
+        Validate = False
+        OnAfterSetValue = Input1AfterSetValue
+        BorderColor = clBtnShadow
+        TabOrder = 1
+      end
+      object Edit2: TFreeNumInput
+        Left = 183
+        Height = 24
+        Top = 50
+        Width = 55
+        Alignment = taRightJustify
+        Decimals = 4
+        Digits = 12
+        Max = 0
+        Min = 0
+        OutOfRangeMessage = False
+        TabOnEnterKey = False
+        Value = 0
+        Validate = False
+        BorderColor = clBtnShadow
+        Enabled = False
+        ReadOnly = True
+        TabOrder = 2
+      end
+      object Input2: TFreeNumInput
+        Left = 242
+        Height = 24
+        Top = 50
+        Width = 55
+        Alignment = taRightJustify
+        Decimals = 4
+        Digits = 12
+        Max = 0
+        Min = 0
+        OutOfRangeMessage = False
+        TabOnEnterKey = False
+        Value = 0
+        Validate = False
+        OnAfterSetValue = Input2AfterSetValue
+        BorderColor = clBtnShadow
+        TabOrder = 3
+      end
+      object Edit3: TFreeNumInput
+        Left = 183
+        Height = 24
+        Top = 78
+        Width = 55
+        Alignment = taRightJustify
+        Decimals = 4
+        Digits = 12
+        Max = 0
+        Min = 0
+        OutOfRangeMessage = False
+        TabOnEnterKey = False
+        Value = 0
+        Validate = False
+        BorderColor = clBtnShadow
+        Enabled = False
+        ReadOnly = True
+        TabOrder = 4
+      end
+      object Input3: TFreeNumInput
+        Left = 242
+        Height = 24
+        Top = 78
+        Width = 55
+        Alignment = taRightJustify
+        Decimals = 4
+        Digits = 12
+        Max = 0
+        Min = 0
+        OutOfRangeMessage = False
+        TabOnEnterKey = False
+        Value = 0
+        Validate = False
+        OnAfterSetValue = Input3AfterSetValue
+        BorderColor = clBtnShadow
+        TabOrder = 5
+      end
+      object Diff1: TFreeNumInput
+        Left = 301
+        Height = 24
+        Top = 22
+        Width = 55
+        Alignment = taRightJustify
+        Decimals = 3
+        Digits = 12
+        Max = 0
+        Min = 0
+        OutOfRangeMessage = False
+        TabOnEnterKey = False
+        Value = 0
+        Validate = False
+        BorderColor = clBtnShadow
+        Enabled = False
+        ReadOnly = True
+        TabOrder = 6
+      end
+      object Diff2: TFreeNumInput
+        Left = 301
+        Height = 24
+        Top = 50
+        Width = 55
+        Alignment = taRightJustify
+        Decimals = 4
+        Digits = 12
+        Max = 0
+        Min = 0
+        OutOfRangeMessage = False
+        TabOnEnterKey = False
+        Value = 0
+        Validate = False
+        BorderColor = clBtnShadow
+        Enabled = False
+        ReadOnly = True
+        TabOrder = 7
+      end
+      object Diff3: TFreeNumInput
+        Left = 301
+        Height = 24
+        Top = 78
+        Width = 55
+        Alignment = taRightJustify
+        Decimals = 4
+        Digits = 12
+        Max = 0
+        Min = 0
+        OutOfRangeMessage = False
+        TabOnEnterKey = False
+        Value = 0
+        Validate = False
+        BorderColor = clBtnShadow
+        Enabled = False
+        ReadOnly = True
+        TabOrder = 8
+      end
+      object Edit4: TFreeNumInput
+        Left = 183
+        Height = 24
+        Top = 106
+        Width = 55
+        Alignment = taRightJustify
+        Decimals = 3
+        Digits = 12
+        Max = 0
+        Min = 0
+        OutOfRangeMessage = False
+        TabOnEnterKey = False
+        Value = 0
+        Validate = False
+        BorderColor = clBtnShadow
+        Enabled = False
+        ReadOnly = True
+        TabOrder = 9
+      end
+      object Input4: TFreeNumInput
+        Left = 242
+        Height = 24
+        Top = 106
+        Width = 55
+        Alignment = taRightJustify
+        Decimals = 3
+        Digits = 12
+        Max = 0
+        Min = 0
+        OutOfRangeMessage = False
+        TabOnEnterKey = False
+        Value = 0
+        Validate = False
+        BorderColor = clBtnShadow
+        TabOrder = 10
+      end
+      object Diff4: TFreeNumInput
+        Left = 301
+        Height = 24
+        Top = 106
+        Width = 55
+        Alignment = taRightJustify
+        Decimals = 3
+        Digits = 12
+        Max = 0
+        Min = 0
+        OutOfRangeMessage = False
+        TabOnEnterKey = False
+        Value = 0
+        Validate = False
+        BorderColor = clBtnShadow
+        Enabled = False
+        ReadOnly = True
+        TabOrder = 11
+      end
+      object IterationBox: TFreeNumInput
+        Left = 183
+        Height = 24
+        Top = 134
+        Width = 55
+        Alignment = taRightJustify
+        Decimals = 0
+        Digits = 12
+        Max = 50
+        Min = 0
+        DataType = dtInteger
+        OutOfRangeMessage = False
+        TabOnEnterKey = False
+        Value = 15
+        Validate = True
+        BorderColor = clBtnShadow
+        TabOrder = 12
+      end
+      object CheckBox1: TCheckBox
+        Left = 3
+        Height = 20
+        Top = 172
+        Width = 181
+        Alignment = taLeftJustify
+        Caption = 'Redraw after each iteration'
+        Checked = True
+        State = cbChecked
+        TabOrder = 13
+      end
+    end
+  end
+  object Panel1: TPanel
+    Left = 0
+    Height = 24
+    Top = 0
+    Width = 746
+    Align = alTop
+    AutoSize = True
+    BevelOuter = bvNone
+    ClientHeight = 24
+    ClientWidth = 746
+    Constraints.MinWidth = 60
+    ParentShowHint = False
+    ShowHint = True
+    TabOrder = 1
+    object Button1: TSpeedButton
+      Left = 4
+      Height = 20
+      Hint = 'Start the hullform transformation.'
+      Top = 2
+      Width = 79
+      Align = alLeft
+      AutoSize = True
+      BorderSpacing.Left = 4
+      BorderSpacing.Top = 2
+      BorderSpacing.Right = 4
+      BorderSpacing.Bottom = 2
+      Constraints.MinWidth = 60
+      Caption = 'Transform'
+      Flat = True
+      Glyph.Data = {
+        F6000000424DF600000000000000760000002800000010000000100000000100
+        04000000000080000000130B0000130B00001000000000000000000000000000
+        800000800000008080008000000080008000808000007F7F7F00BFBFBF000000
+        FF0000FF000000FFFF00FF000000FF00FF00FFFF0000FFFFFF00337000000000
+        7333330888888888033333080808999803333308888888880333330808080808
+        0333330888888888033333080808080803333308888888880333330808080808
+        0333330888888888033333080000000803333308000E0E080333330800000008
+        0333330888888888033333088888888803333370000000007333
+      }
+      OnClick = Button1Click
+      ShowHint = True
+      ParentShowHint = False
+    end
+    object SpeedButton1: TSpeedButton
+      Left = 578
+      Height = 20
+      Top = 2
+      Width = 80
+      Align = alRight
+      AutoSize = True
+      BorderSpacing.Left = 4
+      BorderSpacing.Top = 2
+      BorderSpacing.Right = 4
+      BorderSpacing.Bottom = 2
+      Constraints.MinWidth = 80
+      Caption = 'OK'
+      Flat = True
+      Glyph.Data = {
+        36040000424D3604000000000000360000002800000010000000100000000100
+        2000000000000004000064000000640000000000000000000000000000000000
+        00000000000000000000000000000EA628FF0EA628FF00000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        00000000000000000000000000000EA628FF0EA628FF00000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        00000000000000000000000000000EA628FF0EA628FF0EA628FF000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        000000000000000000000EA628FF0EA628FF0EA628FF0EA628FF000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        000000000000000000000EA628FF0EA628FF0EA628FF0EA628FF000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000EA628FF0EA628FF0EA628FF0EA628FF0EA628FF0EA628FF0000
+        0000000000000000000000000000000000000000000000000000000000000000
+        00000EA628FF0EA628FF0EA628FF0EA628FF0EA628FF0EA628FF0EA628FF0000
+        0000000000000000000000000000000000000000000000000000000000000000
+        00000EA628FF0EA628FF0EA628FF0EA628FF0EA628FF0EA628FF0EA628FF0EA6
+        28FF000000000000000000000000000000000000000000000000000000000000
+        00000EA628FF0EA628FF0EA628FF00000000000000000EA628FF0EA628FF0EA6
+        28FF000000000000000000000000000000000000000000000000000000000000
+        000000000000000000000000000000000000000000000EA628FF0EA628FF0EA6
+        28FF0EA628FF0000000000000000000000000000000000000000000000000000
+        00000000000000000000000000000000000000000000000000000EA628FF0EA6
+        28FF0EA628FF0EA628FF00000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000EA6
+        28FF0EA628FF0EA628FF00000000000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000EA6
+        28FF0EA628FF0EA628FF0EA628FF000000000000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        00000EA628FF0EA628FF0EA628FF0EA628FF0000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000EA628FF0EA628FF0EA628FF0000000000000000000000000000
+        0000000000000000000000000000000000000000000000000000000000000000
+        0000000000000EA628FF0EA628FF0EA628FF0000000000000000
+      }
+      OnClick = BitBtn1Click
+    end
+    object BitBtn2: TSpeedButton
+      Left = 662
+      Height = 20
+      Top = 2
+      Width = 80
+      Align = alRight
+      AutoSize = True
+      BorderSpacing.Left = 4
+      BorderSpacing.Top = 2
+      BorderSpacing.Right = 4
+      BorderSpacing.Bottom = 2
+      Constraints.MinWidth = 80
+      Caption = 'Cancel'
+      Flat = True
+      Glyph.Data = {
+        36040000424D3604000000000000360000002800000010000000100000000100
+        2000000000000004000064000000640000000000000000000000000000000000
+        000000000000000000002110C0FF2110C0FF2110C0FF2110C0FF2110C0FF2110
+        C0FF2110C0FF2110C0FF00000000000000000000000000000000000000000000
+        00002110C0FF2110C0FF2110C0FF2110C0FF2110C0FF2110C0FF2110C0FF2110
+        C0FF2110C0FF2110C0FF2110C0FF2110C0FF0000000000000000000000002110
+        C0FF2110C0FF2110C0FF2110C0FF2110C0FF2110C0FF2110C0FF2110C0FF2110
+        C0FF2110C0FF2110C0FF2110C0FF2110C0FF2110C0FF00000000000000002110
+        C0FF2110C0FF2110C0FF2110C0FF000000000000000000000000000000000000
+        00002110C0FF2110C0FF2110C0FF2110C0FF2110C0FF000000002110C0FF2110
+        C0FF2110C0FF2110C0FF00000000000000000000000000000000000000002110
+        C0FF2110C0FF2110C0FF2110C0FF2110C0FF2110C0FF2110C0FF2110C0FF2110
+        C0FF2110C0FF00000000000000000000000000000000000000002110C0FF2110
+        C0FF2110C0FF2110C0FF2110C0FF2110C0FF2110C0FF2110C0FF2110C0FF2110
+        C0FF2110C0FF000000000000000000000000000000002110C0FF2110C0FF2110
+        C0FF2110C0FF2110C0FF000000002110C0FF2110C0FF2110C0FF2110C0FF2110
+        C0FF2110C0FF0000000000000000000000002110C0FF2110C0FF2110C0FF2110
+        C0FF2110C0FF00000000000000002110C0FF2110C0FF2110C0FF2110C0FF2110
+        C0FF2110C0FF00000000000000002110C0FF2110C0FF2110C0FF2110C0FF2110
+        C0FF0000000000000000000000002110C0FF2110C0FF2110C0FF2110C0FF2110
+        C0FF2110C0FF000000002110C0FF2110C0FF2110C0FF2110C0FF2110C0FF0000
+        00000000000000000000000000002110C0FF2110C0FF2110C0FF2110C0FF2110
+        C0FF2110C0FF2110C0FF2110C0FF2110C0FF2110C0FF2110C0FF000000000000
+        00000000000000000000000000002110C0FF2110C0FF2110C0FF2110C0FF2110
+        C0FF2110C0FF2110C0FF2110C0FF2110C0FF2110C0FF00000000000000000000
+        000000000000000000002110C0FF2110C0FF2110C0FF2110C0FF000000002110
+        C0FF2110C0FF2110C0FF2110C0FF2110C0FF0000000000000000000000000000
+        0000000000002110C0FF2110C0FF2110C0FF2110C0FF00000000000000002110
+        C0FF2110C0FF2110C0FF2110C0FF2110C0FF2110C0FF2110C0FF2110C0FF2110
+        C0FF2110C0FF2110C0FF2110C0FF2110C0FF2110C0FF00000000000000000000
+        00002110C0FF2110C0FF2110C0FF2110C0FF2110C0FF2110C0FF2110C0FF2110
+        C0FF2110C0FF2110C0FF2110C0FF2110C0FF0000000000000000000000000000
+        000000000000000000002110C0FF2110C0FF2110C0FF2110C0FF2110C0FF2110
+        C0FF2110C0FF2110C0FF00000000000000000000000000000000
+      }
+      OnClick = BitBtn2Click
+    end
+  end
+  object Panel4: TPanel
+    Left = 0
+    Height = 204
+    Top = 307
+    Width = 746
+    Align = alClient
+    BevelOuter = bvNone
+    Caption = 'Panel4'
+    ClientHeight = 204
+    ClientWidth = 746
+    TabOrder = 2
+    object Splitter1: TSplitter
+      Left = 163
+      Height = 204
+      Top = 0
+      Width = 5
+      Color = clRed
+      ParentColor = False
+    end
+    object LayerBox: TCheckListBox
+      Left = 0
+      Height = 204
+      Top = 0
+      Width = 163
+      Align = alLeft
+      ItemHeight = 0
+      TabOrder = 0
+    end
+    object TopView: TFreeViewport
+      Left = 168
+      Height = 204
+      Top = 0
+      Width = 578
+      Angle = 90
+      Align = alClient
+      BackgroundImage.Alpha = 255
+      BackgroundImage.Owner = TopView
+      BackgroundImage.Quality = 100
+      BackgroundImage.Scale = 1
+      BackgroundImage.ShowInView = fvBodyplan
+      BackgroundImage.Tolerance = 5
+      BackgroundImage.Transparent = False
+      BackgroundImage.TransparentColor = clBlack
+      BackgroundImage.Visible = True
+      BorderStyle = bsSingle
+      CameraType = ftStandard
+      DoubleBuffer = True
+      Elevation = 90
+      Margin = 0
+      ViewType = fvPlan
+      ViewportMode = vmWireFrame
+      OnRedraw = TopViewRedraw
+      OnRequestExtents = TopViewRequestExtents
+    end
+  end
+end
