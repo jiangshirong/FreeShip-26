@@ -1,0 +1,32 @@
+{
+  "FreeHydrostaticsDlg": [
+    "ButtonClose"
+  ],
+  "FreeHydrostaticsFrm": [
+    "Button1"
+  ],
+  "FreeHydrostaticsResultsDlg": [
+    "ButtonClose"
+  ],
+  "FreeLayerVisibilityDlg": [
+    "bbClose"
+  ],
+  "FreeSplitSectionDlg": [
+    "BitBtn1"
+  ],
+  "FreeSelectedDlg": [
+    "bbClose",
+    "aClose"
+  ],
+  "FreeIntersectionDlg": [
+    "tbCloseDialog",
+    "CloseDialog"
+  ],
+  "FreeExpanedPlatesDlg": [
+    "ToolButton22",
+    "CloseDialog"
+  ],
+  "tiledialog": [
+    "bbClose"
+  ]
+}

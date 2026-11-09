@@ -1,0 +1,215 @@
+{
+  "date": "2026-11-02",
+  "installed": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\dist",
+  "previous_installation": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\dist-before-ship-formats-20261102",
+  "scope": "Native C++ Archimedes HLL/APP and legacy Windows PAM geometry template, Qt export/cancel/reference editing.",
+  "manifest_sha256": "8daa92f90276d3ab1716033421e89210f769ab0c700ea77a2c9252d13710dc90",
+  "verified_package_files": 2503,
+  "binaries_sha256": {
+    "FreeShipQt.exe": "76dd67eeaf4da0b65c1991882e30da4ab634170b5b169e7a3e5b30b4f3279023",
+    "FreeShipGeometryExport.exe": "42887adaaa756c9eda87f5030945763e161ce483cc3c076ca5044f006b3db201",
+    "bridge/FreeShipGeometryBridge.exe": "782b536b888daa06dc031b79133c93b349d4a0af6d37bdf48421d85e73f44934"
+  },
+  "legacy_source_sha256": "277a3c69392c86fe14c375e7dfc9c3197b4162e982673cbbcf4b4a2dfff0ab6b",
+  "bridge_build": "C:/FreeShip26Tests/build/cad-service-02",
+  "reports": {
+    "qt-ship-formats-unified/qt-ship-formats": {
+      "path": "C:\\FreeShip26Tests\\reports\\qt-ship-formats-unified\\qt-ship-formats\\report.json",
+      "sha256": "8eddf7b62e7a59a2fe7202f58181aeae7100a9091ac051b4f14c7abe660a8aec",
+      "counts": {
+        "pass": 215,
+        "fail": 0,
+        "review": 1,
+        "not_run": 2,
+        "error": 0
+      },
+      "status": "partial"
+    },
+    "qt-ship-formats-delivery": {
+      "path": "C:\\FreeShip26Tests\\reports\\qt-ship-formats-delivery\\report.json",
+      "sha256": "bd5b76fcbb89bf0effdf8108e5bfddd518d7d48410f4c360d661375eb3dc4594",
+      "counts": {
+        "pass": 215,
+        "fail": 0,
+        "review": 1,
+        "not_run": 2,
+        "error": 0
+      },
+      "status": "partial"
+    },
+    "qt-ghs-ship-delivery": {
+      "path": "C:\\FreeShip26Tests\\reports\\qt-ghs-ship-delivery\\report.json",
+      "sha256": "e4909343ae365d8e33c243d017ba103ddc103e631996266bf40b3d8f4bf0c0bf",
+      "counts": {
+        "pass": 90,
+        "fail": 0,
+        "review": 1,
+        "not_run": 1,
+        "error": 0
+      },
+      "status": "partial"
+    },
+    "qt-cad-ship-delivery": {
+      "path": "C:\\FreeShip26Tests\\reports\\qt-cad-ship-delivery\\report.json",
+      "sha256": "ca5a42ec995e27f2a49baf14f88d562871cdccb8c9b9a9e89e4753574a5203c4",
+      "counts": {
+        "pass": 461,
+        "fail": 0,
+        "review": 1,
+        "not_run": 1,
+        "error": 0
+      },
+      "status": "partial"
+    },
+    "qt-migration-ship-delivery": {
+      "path": "C:\\FreeShip26Tests\\reports\\qt-migration-ship-delivery\\report.json",
+      "sha256": "eb1a4bfebc902edc3e3a6c640a078c157ffa9d8516bbf650d27ff311a481dc2e",
+      "counts": {
+        "pass": 85,
+        "fail": 0,
+        "review": 0,
+        "not_run": 4,
+        "error": 0
+      },
+      "status": "partial"
+    }
+  },
+  "real_9a_exports": {
+    "arch_hll": {
+      "centerline_lobes": [
+        {
+          "contours": 2,
+          "x": 189.1300048828125
+        }
+      ],
+      "chord_tolerance_m": 0.0001,
+      "closed_decks": [
+        0,
+        18.913000106811523,
+        37.82600021362305,
+        56.73899841308594,
+        75.6520004272461,
+        94.56500244140625,
+        113.47799682617188,
+        132.39100646972656,
+        151.3040008544922,
+        170.2169952392578,
+        189.1300048828125
+      ],
+      "document_id": "36351599-337c-4fdf-94aa-ebb3f64a06f5",
+      "empty_stations": [],
+      "format": "arch_hll",
+      "half_section_points": 2171,
+      "points": 4331,
+      "references_m": {
+        "aft_mark": 0,
+        "ap": 0,
+        "fp": 189.1300048828125,
+        "fwd_mark": 189.1300048828125,
+        "mid_mark": 94.56500244140625
+      },
+      "revision": 1,
+      "sha256": "7ee61b22983b999223bd7eed727fcb9d8c0aa2b1907d59356e81403032475679",
+      "source_side": "starboard",
+      "stations": 11,
+      "status": "pass",
+      "total_ms": 310.6588,
+      "units": "m"
+    },
+    "arch_app": {
+      "centerline_lobes": [
+        {
+          "contours": 2,
+          "x": 189.1300048828125
+        }
+      ],
+      "chord_tolerance_m": 0.0001,
+      "closed_decks": [
+        0,
+        18.913000106811523,
+        37.82600021362305,
+        56.73899841308594,
+        75.6520004272461,
+        94.56500244140625,
+        113.47799682617188,
+        132.39100646972656,
+        151.3040008544922,
+        170.2169952392578,
+        189.1300048828125
+      ],
+      "document_id": "36351599-337c-4fdf-94aa-ebb3f64a06f5",
+      "empty_stations": [],
+      "format": "arch_app",
+      "half_section_points": 2171,
+      "points": 4331,
+      "references_m": {
+        "ap": 0,
+        "fp": 189.1300048828125
+      },
+      "revision": 1,
+      "sha256": "acbd6e47e7459f66f723acc09860fc24f5b0133e7fbedea8eb80973e351a5545",
+      "source_side": "starboard",
+      "stations": 11,
+      "status": "pass",
+      "total_ms": 262.8644,
+      "units": "m"
+    },
+    "pam": {
+      "centerline_lobes": [
+        {
+          "contours": 2,
+          "x": 189.1300048828125
+        }
+      ],
+      "chord_tolerance_m": 0.0001,
+      "closed_decks": [
+        0,
+        18.913000106811523,
+        37.82600021362305,
+        56.73899841308594,
+        75.6520004272461,
+        94.56500244140625,
+        113.47799682617188,
+        132.39100646972656,
+        151.3040008544922,
+        170.2169952392578,
+        189.1300048828125
+      ],
+      "document_id": "36351599-337c-4fdf-94aa-ebb3f64a06f5",
+      "empty_stations": [],
+      "format": "pam",
+      "half_section_points": 2171,
+      "points": 2171,
+      "references_m": {
+        "midship": 94.56500244140625,
+        "waterline": 10.850000381469727
+      },
+      "revision": 1,
+      "sha256": "820ddf829855aed74a8d8a45c96127ed5308ca962726726bc96f3327e1ff4d6a",
+      "source_side": "starboard",
+      "stations": 11,
+      "status": "pass",
+      "total_ms": 288.3886,
+      "units": "m"
+    }
+  },
+  "ghs_9a_byte_comparison": {
+    "previous": "C:\\FreeShip26Tests\\reports\\qt-ghs-delivery\\model-3\\export\\船体 with spaces.gf",
+    "current": "C:\\FreeShip26Tests\\reports\\qt-ghs-ship-delivery\\model-3\\export\\船体 with spaces.gf",
+    "sha256": "9c532b2fa2ba2c4648d2736bbf3951361ad49d5a68670821bac87ace957060d7",
+    "equal": true
+  },
+  "notes": [
+    "HLL has escaped UTF-8 names and longitudinal draught-mark positions. APP/PAM description fields retain ASCII. File paths preserve Unicode and spaces.",
+    "Geometry uses all hydrostatics layers and existing stations, preserving origin and precision. The 0.1 mm chord bound is a curve tessellation bound, not total hull accuracy.",
+    "PAM uses metres and kg/m3 and an explicit midship / waterline reference. Opaque original calculation parameters remain unchanged. This is not Add_Mass.EXE INA. input or solver integration.",
+    "The first diagnostic report had a null half_section_points field due to an invalidated QJsonObject value reference. It was fixed and tested; this new migration defect is not an upstream issue.",
+    "Installed-directory tests exercise hidden production Windows Qt callbacks. Physical desktop and external Archimedes/PAM/GHS receiver acceptance remain unverified, including centerline-connected multiple lobes.",
+    "The old source, QtPilot, user models and fs launcher remain unchanged. New test outputs and disposable builds are on C; reusable tests and one-time maintenance sources remain in FreeShip-Tests.",
+    "Michlet/AddMass, parts and remaining imports, Pascal model ownership and professional computations still require migration."
+  ],
+  "free_bytes_after": {
+    "C": 40491937792,
+    "D": 31397122048
+  }
+}

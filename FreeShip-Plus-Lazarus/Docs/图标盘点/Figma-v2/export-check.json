@@ -1,0 +1,5563 @@
+{
+  "status": "pass",
+  "svg_count": 72,
+  "png_count": 504,
+  "sizes": [
+    16,
+    20,
+    24,
+    25,
+    30,
+    32,
+    40
+  ],
+  "renderer": "resvg-py direct SVG rasterization",
+  "records": [
+    {
+      "key": "ProjectSettings",
+      "size": 16,
+      "sha256": "2320a5aff56b1bbde58d02dc34a56465e75cdbb96ae28531d051be333e2cde5f",
+      "alpha_bounds": [
+        1,
+        2,
+        15,
+        14
+      ]
+    },
+    {
+      "key": "ProjectSettings",
+      "size": 20,
+      "sha256": "7e766b9325bf243368a853020b7dd08cb4b723cea0c68a0aac338597e04c0726",
+      "alpha_bounds": [
+        2,
+        3,
+        18,
+        17
+      ]
+    },
+    {
+      "key": "ProjectSettings",
+      "size": 24,
+      "sha256": "88a006d8bb1551dbdb9ba3e3a189cca7ad0bb624f1e5823671649eb411dd3279",
+      "alpha_bounds": [
+        2,
+        3,
+        22,
+        21
+      ]
+    },
+    {
+      "key": "ProjectSettings",
+      "size": 25,
+      "sha256": "91812ae3b26e4778143e89890726dd12dfd52960af8e5e6e922107d55b97f6a9",
+      "alpha_bounds": [
+        2,
+        4,
+        23,
+        21
+      ]
+    },
+    {
+      "key": "ProjectSettings",
+      "size": 30,
+      "sha256": "140e81001de226fb3c9488b14d469a154fe8a30473ed055a5ec671eee3466f9a",
+      "alpha_bounds": [
+        3,
+        4,
+        27,
+        26
+      ]
+    },
+    {
+      "key": "ProjectSettings",
+      "size": 32,
+      "sha256": "a1f698c9be555c97b9d6d9d6e8e3ec10971177e1c2011fba9948dcc9e97177b7",
+      "alpha_bounds": [
+        3,
+        5,
+        29,
+        27
+      ]
+    },
+    {
+      "key": "ProjectSettings",
+      "size": 40,
+      "sha256": "529da865c44cab536d7832d61a8d3da5afce9295cfb88b2febe25df0d5306e01",
+      "alpha_bounds": [
+        4,
+        6,
+        36,
+        34
+      ]
+    },
+    {
+      "key": "Observe",
+      "size": 16,
+      "sha256": "acbf76e49b0cfce0a792885895d3c049df61dc7e03e7b190ae8ae78b68c58740",
+      "alpha_bounds": [
+        1,
+        3,
+        15,
+        13
+      ]
+    },
+    {
+      "key": "Observe",
+      "size": 20,
+      "sha256": "106434d5ecbdf80b415cd3bac76dc7aa2e86c5dae7042cdea397831547727871",
+      "alpha_bounds": [
+        1,
+        4,
+        19,
+        16
+      ]
+    },
+    {
+      "key": "Observe",
+      "size": 24,
+      "sha256": "a3938fbd6ef0c393e09226fb2017abb4e5471611a0055589ee4e8783f12687d5",
+      "alpha_bounds": [
+        1,
+        5,
+        23,
+        19
+      ]
+    },
+    {
+      "key": "Observe",
+      "size": 25,
+      "sha256": "9b357bbcc45f564c1b51cb80824af0e7d1eed21ba6e9340e4863838d57757679",
+      "alpha_bounds": [
+        1,
+        5,
+        24,
+        20
+      ]
+    },
+    {
+      "key": "Observe",
+      "size": 30,
+      "sha256": "6b8de3eb47c72b1fbbd32d25566c3c738ccb56b447ad922a6b2ec39938291be6",
+      "alpha_bounds": [
+        1,
+        6,
+        29,
+        24
+      ]
+    },
+    {
+      "key": "Observe",
+      "size": 32,
+      "sha256": "45a54b67646d46d9ef99bfe9547ed47c1f78f891b4ea7b16530ef401891c76d5",
+      "alpha_bounds": [
+        2,
+        6,
+        30,
+        26
+      ]
+    },
+    {
+      "key": "Observe",
+      "size": 40,
+      "sha256": "5146b7d23ee7d4e39c9ad42cfdfe1fc6818e664a02e407f83f4440c21da8512b",
+      "alpha_bounds": [
+        2,
+        8,
+        38,
+        32
+      ]
+    },
+    {
+      "key": "ModelCheck",
+      "size": 16,
+      "sha256": "549ce5cafa012183752539095242f436e7cc9a079bd5f580f2422abbd2dabe11",
+      "alpha_bounds": [
+        1,
+        1,
+        15,
+        15
+      ]
+    },
+    {
+      "key": "ModelCheck",
+      "size": 20,
+      "sha256": "f0505171f8b29edc906b7b9120e8b869e0e0e25fb6ec7430900bd567a4c35c7c",
+      "alpha_bounds": [
+        1,
+        1,
+        19,
+        19
+      ]
+    },
+    {
+      "key": "ModelCheck",
+      "size": 24,
+      "sha256": "67d207b707187cbf54d72a4fd8e87b2c18f111af6afc9d21a22d2def8031f3cd",
+      "alpha_bounds": [
+        2,
+        2,
+        22,
+        22
+      ]
+    },
+    {
+      "key": "ModelCheck",
+      "size": 25,
+      "sha256": "93fea4c94d448c344204345fe80bbcf93738277352afd4eef72dde407ae7a089",
+      "alpha_bounds": [
+        2,
+        2,
+        23,
+        23
+      ]
+    },
+    {
+      "key": "ModelCheck",
+      "size": 30,
+      "sha256": "530cc514582256e4a3f048224da54949dec46aae7f489738ea739225a64f3755",
+      "alpha_bounds": [
+        2,
+        2,
+        28,
+        28
+      ]
+    },
+    {
+      "key": "ModelCheck",
+      "size": 32,
+      "sha256": "5985f8d336d45b9476640f2a54bacfd0947ed36575777f8eb44d63753cbd6cb3",
+      "alpha_bounds": [
+        2,
+        2,
+        30,
+        30
+      ]
+    },
+    {
+      "key": "ModelCheck",
+      "size": 40,
+      "sha256": "d8fd7ecf7a65cb3f33eccfee9f375ec2ad07e02fd4fc82a188c896fa5a1c6a14",
+      "alpha_bounds": [
+        3,
+        3,
+        37,
+        37
+      ]
+    },
+    {
+      "key": "Transform",
+      "size": 16,
+      "sha256": "3d69e024c6c1168eb421893dcaba55c9e1dc8622da952d3148a3f69f8ba29c37",
+      "alpha_bounds": [
+        1,
+        1,
+        15,
+        15
+      ]
+    },
+    {
+      "key": "Transform",
+      "size": 20,
+      "sha256": "b48e7d7d2025ea7114afffee46934e0d24a8e828cacf05888c0d12cb0aadd300",
+      "alpha_bounds": [
+        1,
+        1,
+        19,
+        19
+      ]
+    },
+    {
+      "key": "Transform",
+      "size": 24,
+      "sha256": "57be1e41eeb689e1daccd602ff862fe0061c6e6790cda6f02585df512292c716",
+      "alpha_bounds": [
+        1,
+        1,
+        23,
+        23
+      ]
+    },
+    {
+      "key": "Transform",
+      "size": 25,
+      "sha256": "e1296dd2b93cdf78c042d4212071fe6715d10ed852decbfc47bdbeaf197978bc",
+      "alpha_bounds": [
+        1,
+        1,
+        24,
+        24
+      ]
+    },
+    {
+      "key": "Transform",
+      "size": 30,
+      "sha256": "0424ad4541a2f2758468acd9fa1e1d589336bb7e692eb69a9112fe1c9afbed01",
+      "alpha_bounds": [
+        1,
+        1,
+        29,
+        29
+      ]
+    },
+    {
+      "key": "Transform",
+      "size": 32,
+      "sha256": "adc6ab7faa9b238b363770420a9621872b9a55611ebc0ca4620645a26d248198",
+      "alpha_bounds": [
+        2,
+        2,
+        30,
+        30
+      ]
+    },
+    {
+      "key": "Transform",
+      "size": 40,
+      "sha256": "8997bf9a7eba1e3056527365beeb09c340361ac8fe10d3310c88973c3b7c9962",
+      "alpha_bounds": [
+        2,
+        2,
+        38,
+        38
+      ]
+    },
+    {
+      "key": "ViewBody",
+      "size": 16,
+      "sha256": "f7e4b459f627c5b3b25462429b275fa25ba8acbfe763ae5cca2f2d2b1d51bf25",
+      "alpha_bounds": [
+        1,
+        1,
+        15,
+        15
+      ]
+    },
+    {
+      "key": "ViewBody",
+      "size": 20,
+      "sha256": "50b493fe9f4d19a3ed84a56c8fd18681fc27298236c903a2866b9af802574557",
+      "alpha_bounds": [
+        2,
+        2,
+        18,
+        18
+      ]
+    },
+    {
+      "key": "ViewBody",
+      "size": 24,
+      "sha256": "134337f97227deb504866d2dcc5f105f87952cbf90ecc05b65068e2dee5a688b",
+      "alpha_bounds": [
+        2,
+        2,
+        22,
+        22
+      ]
+    },
+    {
+      "key": "ViewBody",
+      "size": 25,
+      "sha256": "c216542de7ea8cd8879da7ceb240f748e19a08cd3a9c6dc18c61c4655d78bbd0",
+      "alpha_bounds": [
+        2,
+        2,
+        23,
+        23
+      ]
+    },
+    {
+      "key": "ViewBody",
+      "size": 30,
+      "sha256": "739731b43b19fa2f210205d1752462c61605c7ae50efbe0056888b9dc2bd8aff",
+      "alpha_bounds": [
+        3,
+        3,
+        27,
+        27
+      ]
+    },
+    {
+      "key": "ViewBody",
+      "size": 32,
+      "sha256": "b5935b30f9fd123d20090dc7502124ee9db5351616f976941b7e8350f07a43cc",
+      "alpha_bounds": [
+        3,
+        3,
+        29,
+        29
+      ]
+    },
+    {
+      "key": "ViewBody",
+      "size": 40,
+      "sha256": "f7c2df5f0464dc6207e19969ad2803376c55ecc4f84022f9bddb945b1b236246",
+      "alpha_bounds": [
+        4,
+        4,
+        36,
+        36
+      ]
+    },
+    {
+      "key": "ViewProfile",
+      "size": 16,
+      "sha256": "97fedc9d5f0a097f397d054b585d0b7d84ac0973179f1a71014e0f03e0812105",
+      "alpha_bounds": [
+        1,
+        4,
+        15,
+        15
+      ]
+    },
+    {
+      "key": "ViewProfile",
+      "size": 20,
+      "sha256": "625139d6aa6b28f5672732828537fed4e5070bd724cd4ae7c39e05466ea2fa47",
+      "alpha_bounds": [
+        1,
+        5,
+        19,
+        18
+      ]
+    },
+    {
+      "key": "ViewProfile",
+      "size": 24,
+      "sha256": "03b797e3116523e74e37b641beba87a20c4200af511f19115e0c12746ee1c8cd",
+      "alpha_bounds": [
+        2,
+        6,
+        22,
+        22
+      ]
+    },
+    {
+      "key": "ViewProfile",
+      "size": 25,
+      "sha256": "06de7228929508447b21da4d332e3b31dab05fd0be1391f2e93dbfc3c954526c",
+      "alpha_bounds": [
+        2,
+        6,
+        23,
+        23
+      ]
+    },
+    {
+      "key": "ViewProfile",
+      "size": 30,
+      "sha256": "76133e3fc8b3b76a15964d2a61317b6ffbd92bfeb6bf304969d8955978f0471d",
+      "alpha_bounds": [
+        2,
+        7,
+        28,
+        27
+      ]
+    },
+    {
+      "key": "ViewProfile",
+      "size": 32,
+      "sha256": "ec452fe6619c10d8aa19add3ebd73f22d61db90f4fce4aaf89ee9c7fe87227d5",
+      "alpha_bounds": [
+        2,
+        8,
+        30,
+        29
+      ]
+    },
+    {
+      "key": "ViewProfile",
+      "size": 40,
+      "sha256": "abe9db664d9b1d27f07e6373d90068e40102a19358c62a861b5f0b08104c1899",
+      "alpha_bounds": [
+        3,
+        10,
+        37,
+        36
+      ]
+    },
+    {
+      "key": "ViewPlan",
+      "size": 16,
+      "sha256": "1fd052463b97177e830bb68a65562afdd444fbe097d41b01b09418dc8f29554a",
+      "alpha_bounds": [
+        3,
+        1,
+        13,
+        15
+      ]
+    },
+    {
+      "key": "ViewPlan",
+      "size": 20,
+      "sha256": "c07e7e33baf73e8fa3890e646cee2ac04dbac2b86debfc47ba3cd8b7cf5567a6",
+      "alpha_bounds": [
+        4,
+        1,
+        16,
+        18
+      ]
+    },
+    {
+      "key": "ViewPlan",
+      "size": 24,
+      "sha256": "9e1e2012fe8a6d8fc76ae81effb10639e469754cf987a2dea21eb55ce116e286",
+      "alpha_bounds": [
+        4,
+        1,
+        20,
+        22
+      ]
+    },
+    {
+      "key": "ViewPlan",
+      "size": 25,
+      "sha256": "5794e2d80b102d13c24ab6004543bab8559c23aac64816c58e5d3bd3a5b5c94b",
+      "alpha_bounds": [
+        5,
+        1,
+        20,
+        23
+      ]
+    },
+    {
+      "key": "ViewPlan",
+      "size": 30,
+      "sha256": "a246d18bcb935162e0c4819eef10b4a986f1708e909333f2f3407e9e7cc0e590",
+      "alpha_bounds": [
+        6,
+        1,
+        24,
+        27
+      ]
+    },
+    {
+      "key": "ViewPlan",
+      "size": 32,
+      "sha256": "1fe3fed56c87602d2d8d5613897117bf864a289b6a7e7807070d23c68d1757c6",
+      "alpha_bounds": [
+        6,
+        2,
+        26,
+        29
+      ]
+    },
+    {
+      "key": "ViewPlan",
+      "size": 40,
+      "sha256": "d2bbdb343bbdb596e192484c3ea451855c6b59282f9ae00e18fe725ef10ccf7a",
+      "alpha_bounds": [
+        7,
+        2,
+        33,
+        36
+      ]
+    },
+    {
+      "key": "ViewPerspective",
+      "size": 16,
+      "sha256": "c44169c26dbb1981f70203cfe91ce9212a7f5e0633991b7e4cb060025245db1f",
+      "alpha_bounds": [
+        1,
+        1,
+        15,
+        15
+      ]
+    },
+    {
+      "key": "ViewPerspective",
+      "size": 20,
+      "sha256": "aabdfc1bad263691e803591116b2acdccb4a893826f9a9dde33939c89fe29e50",
+      "alpha_bounds": [
+        2,
+        1,
+        18,
+        19
+      ]
+    },
+    {
+      "key": "ViewPerspective",
+      "size": 24,
+      "sha256": "0641f52c331ca1d51b2b2578f3052a71e44bb86a7f592958ebd4bdb0c9e88cdf",
+      "alpha_bounds": [
+        2,
+        1,
+        22,
+        23
+      ]
+    },
+    {
+      "key": "ViewPerspective",
+      "size": 25,
+      "sha256": "23a3c3e0194107ebbbda7fff0848977ce65941d4ec6a667ead26b878d8f4faa6",
+      "alpha_bounds": [
+        2,
+        1,
+        23,
+        24
+      ]
+    },
+    {
+      "key": "ViewPerspective",
+      "size": 30,
+      "sha256": "80ffd75b4888e38ff1f93658e65cde5f45573f02f22b2864c51374ec553fac92",
+      "alpha_bounds": [
+        3,
+        1,
+        27,
+        29
+      ]
+    },
+    {
+      "key": "ViewPerspective",
+      "size": 32,
+      "sha256": "b67e891fc8a838c6e0f2a4c00f93b5c59c971ab32b70fba19c8defd5da61e278",
+      "alpha_bounds": [
+        3,
+        2,
+        29,
+        30
+      ]
+    },
+    {
+      "key": "ViewPerspective",
+      "size": 40,
+      "sha256": "839dd96cd2d578942f5b33c6223957582c64e77998a70c6c0929208e28819aa3",
+      "alpha_bounds": [
+        4,
+        2,
+        36,
+        38
+      ]
+    },
+    {
+      "key": "NewFile",
+      "size": 16,
+      "sha256": "503a47d01b8498b6925ab720c04ac18daf47bc6662b51fd488780e1b94541274",
+      "alpha_bounds": [
+        3,
+        1,
+        14,
+        15
+      ]
+    },
+    {
+      "key": "NewFile",
+      "size": 20,
+      "sha256": "a4448cddb67e74b73eabad2531b4f40838300a408a7cf444203c4c0f7ac6c6c3",
+      "alpha_bounds": [
+        4,
+        1,
+        17,
+        19
+      ]
+    },
+    {
+      "key": "NewFile",
+      "size": 24,
+      "sha256": "9fbb138f9486e48d835cb9b4fc00a53395938478e3a9340f0f6eaf5d8498a027",
+      "alpha_bounds": [
+        5,
+        2,
+        21,
+        22
+      ]
+    },
+    {
+      "key": "NewFile",
+      "size": 25,
+      "sha256": "59526846dfdad5bf1cc32ad18d7cbcc8f42ac336082a2fc0ed4f6ea4a4b3e7ca",
+      "alpha_bounds": [
+        5,
+        2,
+        21,
+        23
+      ]
+    },
+    {
+      "key": "NewFile",
+      "size": 30,
+      "sha256": "d650dda4311130a20f5b25623883118817f9f268bfce031b77325bf98dfec1a7",
+      "alpha_bounds": [
+        6,
+        2,
+        26,
+        28
+      ]
+    },
+    {
+      "key": "NewFile",
+      "size": 32,
+      "sha256": "abfe98aa9df22787b998e1d5354071745d6a93844a9a008abfa8bdd3ffbe6411",
+      "alpha_bounds": [
+        6,
+        2,
+        27,
+        30
+      ]
+    },
+    {
+      "key": "NewFile",
+      "size": 40,
+      "sha256": "071669a025ebca0cc507b0744cfd89f3961d8c10b090bf639f88f5070e5d5d48",
+      "alpha_bounds": [
+        8,
+        3,
+        34,
+        37
+      ]
+    },
+    {
+      "key": "OpenFile",
+      "size": 16,
+      "sha256": "b1d797ab50a8a680759c1224245a9babf9caf0a59e8d52bb0ce3c9e8de4011bf",
+      "alpha_bounds": [
+        1,
+        3,
+        15,
+        14
+      ]
+    },
+    {
+      "key": "OpenFile",
+      "size": 20,
+      "sha256": "c0d5e4f9e0d7baaed141933d90a1987f699b9d61947aa9ae3f981ce52e833df9",
+      "alpha_bounds": [
+        1,
+        4,
+        19,
+        17
+      ]
+    },
+    {
+      "key": "OpenFile",
+      "size": 24,
+      "sha256": "be29a899cd91c364867632e31bbf524ba8a08e0dbebb4861298d2892c1fe1c6e",
+      "alpha_bounds": [
+        2,
+        5,
+        22,
+        21
+      ]
+    },
+    {
+      "key": "OpenFile",
+      "size": 25,
+      "sha256": "efebb58dfe71d9033911c8f381c2bcdd08cb4ccf5e7c5d1eef06e60b82fbb873",
+      "alpha_bounds": [
+        2,
+        5,
+        23,
+        21
+      ]
+    },
+    {
+      "key": "OpenFile",
+      "size": 30,
+      "sha256": "528a6c2a707288944afe63679b87e0e6096e3a38eff34a46a46045ad93be193f",
+      "alpha_bounds": [
+        2,
+        6,
+        28,
+        26
+      ]
+    },
+    {
+      "key": "OpenFile",
+      "size": 32,
+      "sha256": "f3a422982e7e5c05e960ba632d2ba0d3e6c0be896d7291699767d430fb2a8d49",
+      "alpha_bounds": [
+        2,
+        6,
+        30,
+        27
+      ]
+    },
+    {
+      "key": "OpenFile",
+      "size": 40,
+      "sha256": "419ea7ff0dfdb9bcf04bf3451967a2b41dc65fd33cfbd0e7f8abdd53d8208046",
+      "alpha_bounds": [
+        3,
+        8,
+        37,
+        34
+      ]
+    },
+    {
+      "key": "SaveFile",
+      "size": 16,
+      "sha256": "10be30c5d8f327b554f5c3316690acdceeac98f692c965bd4c02c929d7623346",
+      "alpha_bounds": [
+        1,
+        1,
+        15,
+        15
+      ]
+    },
+    {
+      "key": "SaveFile",
+      "size": 20,
+      "sha256": "5a5ff0aca85d2c19c054a63431d6f1b54fcb89113cfd35360cb0f3a59c3b4c04",
+      "alpha_bounds": [
+        2,
+        2,
+        18,
+        18
+      ]
+    },
+    {
+      "key": "SaveFile",
+      "size": 24,
+      "sha256": "0473ce6f873c4e2876480846ecccfd8bfc09d45fff151c9719f1ac3c5e998938",
+      "alpha_bounds": [
+        2,
+        2,
+        22,
+        22
+      ]
+    },
+    {
+      "key": "SaveFile",
+      "size": 25,
+      "sha256": "773c8a02505a6e5219f46357dd3db0884e84c9f6ef1584f18409f35f427e7078",
+      "alpha_bounds": [
+        2,
+        2,
+        23,
+        23
+      ]
+    },
+    {
+      "key": "SaveFile",
+      "size": 30,
+      "sha256": "9ea18f50a9e6e7f676fe6dd10abd63cc2aed72f1591474e93d5812ba42245bc3",
+      "alpha_bounds": [
+        3,
+        3,
+        27,
+        27
+      ]
+    },
+    {
+      "key": "SaveFile",
+      "size": 32,
+      "sha256": "7c7ee19c04983768dd48c85de56edb7f3235f1879f14a6b254d6c4a6af46d535",
+      "alpha_bounds": [
+        3,
+        3,
+        29,
+        29
+      ]
+    },
+    {
+      "key": "SaveFile",
+      "size": 40,
+      "sha256": "1488bd752e283c28f09fb1898851ad544c959d558654181285a252cb319f684c",
+      "alpha_bounds": [
+        4,
+        4,
+        36,
+        36
+      ]
+    },
+    {
+      "key": "SaveAs",
+      "size": 16,
+      "sha256": "07fa1ec4a85dfb50d80cac80fbdcca9f14bc8c127217c8111e3ce2e0f36161d4",
+      "alpha_bounds": [
+        1,
+        1,
+        15,
+        15
+      ]
+    },
+    {
+      "key": "SaveAs",
+      "size": 20,
+      "sha256": "3aaf656bf19a637573b244f5b43c8a30186b2a1d5272b59948d7147fbf8cf8b2",
+      "alpha_bounds": [
+        2,
+        2,
+        18,
+        19
+      ]
+    },
+    {
+      "key": "SaveAs",
+      "size": 24,
+      "sha256": "22d5b6108b744103d6528e3c1eff404c844013a15a70b8d4d7742d54b679e2f7",
+      "alpha_bounds": [
+        2,
+        2,
+        22,
+        23
+      ]
+    },
+    {
+      "key": "SaveAs",
+      "size": 25,
+      "sha256": "756e3425a454156f17bdde30844524d6b9729c9b5e38b4dbc5aaadf0e465614e",
+      "alpha_bounds": [
+        2,
+        2,
+        23,
+        24
+      ]
+    },
+    {
+      "key": "SaveAs",
+      "size": 30,
+      "sha256": "c10531fe06cbc03a154bae35c436a9d0d56114a176d3f9db5551cb1f9410b100",
+      "alpha_bounds": [
+        3,
+        3,
+        27,
+        29
+      ]
+    },
+    {
+      "key": "SaveAs",
+      "size": 32,
+      "sha256": "d5952f2db2d9bb4331ad44556cf0b301a7b0e925807ae4d2045e687f8b0edf88",
+      "alpha_bounds": [
+        3,
+        3,
+        29,
+        30
+      ]
+    },
+    {
+      "key": "SaveAs",
+      "size": 40,
+      "sha256": "70ddb6bdc52487985338c3549d87818edf29cb9325ab7ca4838d19cc12579c0d",
+      "alpha_bounds": [
+        4,
+        4,
+        36,
+        38
+      ]
+    },
+    {
+      "key": "ExportFile",
+      "size": 16,
+      "sha256": "2b049769562c84c6e2e19476306388dbd177f971f7d980cf51ba7fef05e5d2a3",
+      "alpha_bounds": [
+        2,
+        1,
+        15,
+        15
+      ]
+    },
+    {
+      "key": "ExportFile",
+      "size": 20,
+      "sha256": "c5dfb23725f330fbf704c25467ae5f3a889a66787a929f083286571dcd226717",
+      "alpha_bounds": [
+        3,
+        2,
+        18,
+        18
+      ]
+    },
+    {
+      "key": "ExportFile",
+      "size": 24,
+      "sha256": "4fc4d8f918ece9b0f5ff709a55f879d8e2a9725805571fb7e8a49afd915afe67",
+      "alpha_bounds": [
+        3,
+        2,
+        22,
+        22
+      ]
+    },
+    {
+      "key": "ExportFile",
+      "size": 25,
+      "sha256": "9bb36c4e2a88293e55f54e7bab33ebbaef9526c5a34597c6753d9f102a4e74ec",
+      "alpha_bounds": [
+        4,
+        2,
+        23,
+        23
+      ]
+    },
+    {
+      "key": "ExportFile",
+      "size": 30,
+      "sha256": "90d1a59826b162b64a5535ba4dc69570d9680a52e2dd835adfcad82bfb70c107",
+      "alpha_bounds": [
+        4,
+        3,
+        27,
+        27
+      ]
+    },
+    {
+      "key": "ExportFile",
+      "size": 32,
+      "sha256": "79c0e0be0d13504cbf5a70f4a300d25ba5e4215af2c9ff0b84c49acb4525e093",
+      "alpha_bounds": [
+        5,
+        3,
+        29,
+        29
+      ]
+    },
+    {
+      "key": "ExportFile",
+      "size": 40,
+      "sha256": "b38716ce33e2f1f31f8d4bc7ef8c63f5708069ae87ee0f78c7b9c21a64b1e147",
+      "alpha_bounds": [
+        6,
+        4,
+        36,
+        36
+      ]
+    },
+    {
+      "key": "ExportImage",
+      "size": 16,
+      "sha256": "056f129a438ef06b1712c56d80e5f75c9e2b1f7a2c29514e7a8b71b0d70da2e9",
+      "alpha_bounds": [
+        1,
+        1,
+        15,
+        15
+      ]
+    },
+    {
+      "key": "ExportImage",
+      "size": 20,
+      "sha256": "cdd2ee582df36d65d2d8af5d1943d3b47de31ab3113f81a2423da9702c59fc03",
+      "alpha_bounds": [
+        1,
+        2,
+        18,
+        18
+      ]
+    },
+    {
+      "key": "ExportImage",
+      "size": 24,
+      "sha256": "aeae211348ff226bf7d603232f08ca38f90e06a497958c54076b2cd5022f25f2",
+      "alpha_bounds": [
+        2,
+        2,
+        22,
+        22
+      ]
+    },
+    {
+      "key": "ExportImage",
+      "size": 25,
+      "sha256": "563e67de469a4ffb90b79f1124c18bf6a27110a3c9361d6b7127daffd6006cd9",
+      "alpha_bounds": [
+        2,
+        2,
+        23,
+        23
+      ]
+    },
+    {
+      "key": "ExportImage",
+      "size": 30,
+      "sha256": "78aa81e3c78449d5f3ffc210816e48c67fcf2f7e002ccda162e46f8ac7f36643",
+      "alpha_bounds": [
+        2,
+        3,
+        27,
+        27
+      ]
+    },
+    {
+      "key": "ExportImage",
+      "size": 32,
+      "sha256": "f6c9d5a626b0bab03f445157f4c1f3af61f1ed46c1df18c26ab9e4df4d0e0574",
+      "alpha_bounds": [
+        2,
+        3,
+        29,
+        29
+      ]
+    },
+    {
+      "key": "ExportImage",
+      "size": 40,
+      "sha256": "8d47a0155299facd455901f3a3ec9bdb9de1393d74c2aa83ae2e4850858185ad",
+      "alpha_bounds": [
+        3,
+        4,
+        36,
+        36
+      ]
+    },
+    {
+      "key": "Print",
+      "size": 16,
+      "sha256": "08f6e06cd2b1177b47af9b025ad1c6a46a14a2eb56fcf88dc59e787f919004e9",
+      "alpha_bounds": [
+        1,
+        1,
+        15,
+        15
+      ]
+    },
+    {
+      "key": "Print",
+      "size": 20,
+      "sha256": "27eb59165f221ef928c1816186045fc8a08a7c87fadd56eae85d6502f5590099",
+      "alpha_bounds": [
+        2,
+        2,
+        18,
+        18
+      ]
+    },
+    {
+      "key": "Print",
+      "size": 24,
+      "sha256": "b8fbabdfc65b48de30038e9beb70674324e87e60076c3593f1c348665dbb9330",
+      "alpha_bounds": [
+        2,
+        2,
+        22,
+        22
+      ]
+    },
+    {
+      "key": "Print",
+      "size": 25,
+      "sha256": "9689f31ff46525414c3449c79cbda3dadd3d2d5c53545b9a4a09049ab7fa9e08",
+      "alpha_bounds": [
+        2,
+        2,
+        23,
+        23
+      ]
+    },
+    {
+      "key": "Print",
+      "size": 30,
+      "sha256": "c0ffe981c620a0dc36b5a696b3d35a14d5e262d63233775f514c61d548b9042b",
+      "alpha_bounds": [
+        3,
+        3,
+        27,
+        27
+      ]
+    },
+    {
+      "key": "Print",
+      "size": 32,
+      "sha256": "333d81489097da86b21ad4f5408f93eb7862522df3c67f5c5186d1c7bcb9fc2b",
+      "alpha_bounds": [
+        3,
+        3,
+        29,
+        29
+      ]
+    },
+    {
+      "key": "Print",
+      "size": 40,
+      "sha256": "bd7ea3044348b7b42a9b739c06fd0884e6cff8b375e4d562f88ddd37923aba82",
+      "alpha_bounds": [
+        4,
+        4,
+        36,
+        36
+      ]
+    },
+    {
+      "key": "Confirm",
+      "size": 16,
+      "sha256": "d1cfdb34b5092af5eecc5deb1f5eb96c023471b98bbd52c93deb3424c609574a",
+      "alpha_bounds": [
+        2,
+        3,
+        14,
+        12
+      ]
+    },
+    {
+      "key": "Confirm",
+      "size": 20,
+      "sha256": "bd08329a2c54c9e7f26d745100e56b113a65a82fac9dd1a07e98c8d8dedcdbe2",
+      "alpha_bounds": [
+        3,
+        4,
+        17,
+        15
+      ]
+    },
+    {
+      "key": "Confirm",
+      "size": 24,
+      "sha256": "fa480bf5a5c21f4db083cb9d615f969c8af91572ef0fbf604a31dcbcb00a2695",
+      "alpha_bounds": [
+        3,
+        5,
+        21,
+        18
+      ]
+    },
+    {
+      "key": "Confirm",
+      "size": 25,
+      "sha256": "72be68c96429d10e396e647353f52d8f18a426d7b8049a899a3f8fe552a24abc",
+      "alpha_bounds": [
+        4,
+        5,
+        21,
+        19
+      ]
+    },
+    {
+      "key": "Confirm",
+      "size": 30,
+      "sha256": "0bab95cb6f05799be1724c68adaf8f2e12f494de2aa8806e2e1c3f9ff606708e",
+      "alpha_bounds": [
+        4,
+        6,
+        26,
+        23
+      ]
+    },
+    {
+      "key": "Confirm",
+      "size": 32,
+      "sha256": "e69a55aae5a9f7ddc895e6031587331910b80d270b21ecc77cfcf8df83dd83ba",
+      "alpha_bounds": [
+        5,
+        6,
+        27,
+        24
+      ]
+    },
+    {
+      "key": "Confirm",
+      "size": 40,
+      "sha256": "83eec8ac1f2aabc425539b3a87dfa7733b44ada92aa7308ae010ea7f85f88a34",
+      "alpha_bounds": [
+        6,
+        8,
+        34,
+        30
+      ]
+    },
+    {
+      "key": "Cancel",
+      "size": 16,
+      "sha256": "7162b6969b416cb313d1ab182a07de1845b8b90a4aacf4a4e9b1f1c1870ff645",
+      "alpha_bounds": [
+        3,
+        3,
+        13,
+        13
+      ]
+    },
+    {
+      "key": "Cancel",
+      "size": 20,
+      "sha256": "d647bdf36eb1f9341c70e8c3d9d7e392a9c25bc740dd147a4f1a4559580359bb",
+      "alpha_bounds": [
+        4,
+        4,
+        16,
+        16
+      ]
+    },
+    {
+      "key": "Cancel",
+      "size": 24,
+      "sha256": "fc9bd33bed3b5d464f0cb67dbc3357ef187c0d074779b848bf6f3064981c7743",
+      "alpha_bounds": [
+        5,
+        5,
+        19,
+        19
+      ]
+    },
+    {
+      "key": "Cancel",
+      "size": 25,
+      "sha256": "5533d00f1ada81f90b7c80686a734241fd7c54963609bef6512d23eefa9d36c1",
+      "alpha_bounds": [
+        5,
+        5,
+        20,
+        20
+      ]
+    },
+    {
+      "key": "Cancel",
+      "size": 30,
+      "sha256": "628df7ded55cf462e43ba0ad2c0f2c775d292b77a8bb5efd4ae59910bf649ebb",
+      "alpha_bounds": [
+        6,
+        6,
+        24,
+        24
+      ]
+    },
+    {
+      "key": "Cancel",
+      "size": 32,
+      "sha256": "ec51a2edbcd9b145694356e0c762efdae0b6e75ab529f7f7e87bcb5e2f08c39e",
+      "alpha_bounds": [
+        6,
+        6,
+        26,
+        26
+      ]
+    },
+    {
+      "key": "Cancel",
+      "size": 40,
+      "sha256": "5aa53326ca32320226e687731b7537ddd9cefb2d9993fbf90ac8305f209d8ba4",
+      "alpha_bounds": [
+        8,
+        8,
+        32,
+        32
+      ]
+    },
+    {
+      "key": "ZoomIn",
+      "size": 16,
+      "sha256": "e14f7c4aa8d9f13c403db530ad39ff0bcac5fcf306b44827671586a3452fb4ee",
+      "alpha_bounds": [
+        1,
+        1,
+        15,
+        15
+      ]
+    },
+    {
+      "key": "ZoomIn",
+      "size": 20,
+      "sha256": "b3437941bc02b70b702816114fa59d3fc9f87c0d0dce8444a46dc2c66730f3e6",
+      "alpha_bounds": [
+        2,
+        2,
+        18,
+        18
+      ]
+    },
+    {
+      "key": "ZoomIn",
+      "size": 24,
+      "sha256": "52d536f903b13b6b4cd0b7620c584212ddc0e4bc62286baad36c3a6eec3b3293",
+      "alpha_bounds": [
+        2,
+        2,
+        22,
+        22
+      ]
+    },
+    {
+      "key": "ZoomIn",
+      "size": 25,
+      "sha256": "c9aeec5595c3d64ebf44451a249c797026fc501ee3ec032c4203f36da5941997",
+      "alpha_bounds": [
+        2,
+        2,
+        23,
+        23
+      ]
+    },
+    {
+      "key": "ZoomIn",
+      "size": 30,
+      "sha256": "58f6afe010995feb762f923831f42724879bb7f7e77ba203ba7a66129d28d185",
+      "alpha_bounds": [
+        3,
+        3,
+        27,
+        27
+      ]
+    },
+    {
+      "key": "ZoomIn",
+      "size": 32,
+      "sha256": "6e455ce3dd42ecd87080b4c55dca837cedee53823c8b7fd730e7d4e0da948008",
+      "alpha_bounds": [
+        3,
+        3,
+        29,
+        29
+      ]
+    },
+    {
+      "key": "ZoomIn",
+      "size": 40,
+      "sha256": "21567ca26b63a4b5c0fb849b5a418ef666a580d3a53745daed6731ec2694b882",
+      "alpha_bounds": [
+        4,
+        4,
+        36,
+        36
+      ]
+    },
+    {
+      "key": "ZoomOut",
+      "size": 16,
+      "sha256": "6267e2ca2e6758c4fa8ce4e2eb28daba0916f64f475dc4b137e4f0e726ccd6e3",
+      "alpha_bounds": [
+        1,
+        1,
+        15,
+        15
+      ]
+    },
+    {
+      "key": "ZoomOut",
+      "size": 20,
+      "sha256": "09a3559be29d4ba023da2a836d20f74363371bec1ec8c40e3c2ace00a6be73b3",
+      "alpha_bounds": [
+        2,
+        2,
+        18,
+        18
+      ]
+    },
+    {
+      "key": "ZoomOut",
+      "size": 24,
+      "sha256": "4dda7dfef5db160496e64a567d59119e5a3690429232bac1f3f83eb77a331e20",
+      "alpha_bounds": [
+        2,
+        2,
+        22,
+        22
+      ]
+    },
+    {
+      "key": "ZoomOut",
+      "size": 25,
+      "sha256": "99f3f80b223e0f5daad861f2b4545853c014fdc071c378a5d20f1c2ab83f92cf",
+      "alpha_bounds": [
+        2,
+        2,
+        23,
+        23
+      ]
+    },
+    {
+      "key": "ZoomOut",
+      "size": 30,
+      "sha256": "d35b748f87fdb79de5f77a2e985344cd78b1c8bab154e571eaef9a92c25d35f1",
+      "alpha_bounds": [
+        3,
+        3,
+        27,
+        27
+      ]
+    },
+    {
+      "key": "ZoomOut",
+      "size": 32,
+      "sha256": "cdc2d0cb02937012cc02d53e5607c84cdcad0309ca3445f256bdfec44f561e0b",
+      "alpha_bounds": [
+        3,
+        3,
+        29,
+        29
+      ]
+    },
+    {
+      "key": "ZoomOut",
+      "size": 40,
+      "sha256": "6dbf1857e3c0b29606d3ff774849c602b97cbb45bde9c48de31f3cbe543bdffc",
+      "alpha_bounds": [
+        4,
+        4,
+        36,
+        36
+      ]
+    },
+    {
+      "key": "FitView",
+      "size": 16,
+      "sha256": "b3d91358903b8a34dbc61ebeb33024213b6bd46c526e8d55dbc218df731b1178",
+      "alpha_bounds": [
+        1,
+        1,
+        15,
+        15
+      ]
+    },
+    {
+      "key": "FitView",
+      "size": 20,
+      "sha256": "863f3d8f719b8556a0b92ed96d71f7770e2dce99a9aaea502162710c8a038d4a",
+      "alpha_bounds": [
+        2,
+        2,
+        18,
+        18
+      ]
+    },
+    {
+      "key": "FitView",
+      "size": 24,
+      "sha256": "ebea3ef9f223661ca7158966e067c41a10572ac6a1f1196858bea235c5767349",
+      "alpha_bounds": [
+        2,
+        2,
+        22,
+        22
+      ]
+    },
+    {
+      "key": "FitView",
+      "size": 25,
+      "sha256": "66d679b9991c19a8bbc6f6b5daf531ea58d390da5b4a91ed35c2831b1a09c659",
+      "alpha_bounds": [
+        2,
+        2,
+        23,
+        23
+      ]
+    },
+    {
+      "key": "FitView",
+      "size": 30,
+      "sha256": "60b1b6b8347d3c987926d3cfaea22eb0f8d58f95b90aed0e6582a5da237c1f7f",
+      "alpha_bounds": [
+        3,
+        3,
+        27,
+        27
+      ]
+    },
+    {
+      "key": "FitView",
+      "size": 32,
+      "sha256": "de0883113aa713e3002f75339deee7374a600a1b84185aff6bfe77cc5f14b42d",
+      "alpha_bounds": [
+        3,
+        3,
+        29,
+        29
+      ]
+    },
+    {
+      "key": "FitView",
+      "size": 40,
+      "sha256": "c4cd1ab0043ab05ca2a8fb404e89f7a0f9149963a1708c26d1f8639b9cac17a2",
+      "alpha_bounds": [
+        4,
+        4,
+        36,
+        36
+      ]
+    },
+    {
+      "key": "FillColor",
+      "size": 16,
+      "sha256": "b9a8dd314d664067b73105e8f7bddb1967d1fb376f1af8a6393f91556793be65",
+      "alpha_bounds": [
+        1,
+        1,
+        15,
+        14
+      ]
+    },
+    {
+      "key": "FillColor",
+      "size": 20,
+      "sha256": "c66f1e1cb93d7a842004638ff71a5e9239a565014c3fd4faf84c627d91e6eba6",
+      "alpha_bounds": [
+        1,
+        1,
+        19,
+        17
+      ]
+    },
+    {
+      "key": "FillColor",
+      "size": 24,
+      "sha256": "fe31ce77638e60a8dd7ef4a75a805973d920b1076eef9d44089e78db50adfc30",
+      "alpha_bounds": [
+        1,
+        1,
+        22,
+        21
+      ]
+    },
+    {
+      "key": "FillColor",
+      "size": 25,
+      "sha256": "db62d8612e24b87b004579b466cb94de38b3fe9bbda08bb4966b9d1bab9f34e6",
+      "alpha_bounds": [
+        1,
+        1,
+        23,
+        21
+      ]
+    },
+    {
+      "key": "FillColor",
+      "size": 30,
+      "sha256": "39d7c4b9fea4cfab5ea707c6491ca5728bcbe1085ac91f513363b30bff50cffd",
+      "alpha_bounds": [
+        1,
+        1,
+        28,
+        26
+      ]
+    },
+    {
+      "key": "FillColor",
+      "size": 32,
+      "sha256": "9493b2a3e525060f0985be065790e89121fdc77e593d7fc0c391590d74ddc664",
+      "alpha_bounds": [
+        2,
+        2,
+        30,
+        27
+      ]
+    },
+    {
+      "key": "FillColor",
+      "size": 40,
+      "sha256": "d70f03b55977c2210e347defc12de88118777f96dca9377da424b49e54c2c004",
+      "alpha_bounds": [
+        2,
+        2,
+        37,
+        34
+      ]
+    },
+    {
+      "key": "Lighting",
+      "size": 16,
+      "sha256": "f464cb57923d12f57fd6ce0bb545a9255dea61e1042b7d21877a0a56bb7bbec6",
+      "alpha_bounds": [
+        3,
+        1,
+        13,
+        15
+      ]
+    },
+    {
+      "key": "Lighting",
+      "size": 20,
+      "sha256": "e71565208b178ea6483c4ddf3534989994b3e1100da44935b5d208ddcb21da68",
+      "alpha_bounds": [
+        4,
+        2,
+        16,
+        18
+      ]
+    },
+    {
+      "key": "Lighting",
+      "size": 24,
+      "sha256": "651263e07d605f4d5e879095273a7b38a64cafb8906c4be8536b23cdd41862bc",
+      "alpha_bounds": [
+        5,
+        2,
+        19,
+        22
+      ]
+    },
+    {
+      "key": "Lighting",
+      "size": 25,
+      "sha256": "6c7fe1c4a495807efbff5471d440619347a4d19f99202a1e01e10288f5dd1d3f",
+      "alpha_bounds": [
+        5,
+        2,
+        20,
+        23
+      ]
+    },
+    {
+      "key": "Lighting",
+      "size": 30,
+      "sha256": "a942304dd6333c16c4696ccbcf4a5baa69cfbfc7da0aaebc58ed0f6e42788dfc",
+      "alpha_bounds": [
+        6,
+        3,
+        24,
+        27
+      ]
+    },
+    {
+      "key": "Lighting",
+      "size": 32,
+      "sha256": "8ad239c7579e0c9414e125d083564f514efcb9a27b30608d69117c15d56cbce8",
+      "alpha_bounds": [
+        6,
+        3,
+        26,
+        29
+      ]
+    },
+    {
+      "key": "Lighting",
+      "size": 40,
+      "sha256": "bf518a4c490df721f816decf0ef1dfcb33dab649db4a7b6c28e4c9893908e6c6",
+      "alpha_bounds": [
+        8,
+        4,
+        32,
+        36
+      ]
+    },
+    {
+      "key": "Monochrome",
+      "size": 16,
+      "sha256": "1de29a6d2a18a6254c1985adfae5a444169ce66c7c73ee70150d5fa9de6c07fd",
+      "alpha_bounds": [
+        1,
+        1,
+        15,
+        15
+      ]
+    },
+    {
+      "key": "Monochrome",
+      "size": 20,
+      "sha256": "44d421dea224fbf12b37ce14ad887eb6e68c83c07cdd0a62d224f099b37ba45e",
+      "alpha_bounds": [
+        2,
+        2,
+        18,
+        18
+      ]
+    },
+    {
+      "key": "Monochrome",
+      "size": 24,
+      "sha256": "34bcf5cbe962f9c39a7fa2d945e8c4853f7c9ddf52fc6d6ee852e6fff9874fa4",
+      "alpha_bounds": [
+        2,
+        2,
+        22,
+        22
+      ]
+    },
+    {
+      "key": "Monochrome",
+      "size": 25,
+      "sha256": "38233075664e864bec071281ce37c440bcfef1bf3981ab832ca00e9d24b72fff",
+      "alpha_bounds": [
+        2,
+        2,
+        23,
+        23
+      ]
+    },
+    {
+      "key": "Monochrome",
+      "size": 30,
+      "sha256": "24850042c9e985e4d21924882c0e5e5b83a6d2b55568aae65dda86525d12f688",
+      "alpha_bounds": [
+        3,
+        3,
+        27,
+        27
+      ]
+    },
+    {
+      "key": "Monochrome",
+      "size": 32,
+      "sha256": "cd0eddab5e24e25183a3acddf7844f6fbdc9742cc289ed3b37cb97f69a0dad91",
+      "alpha_bounds": [
+        3,
+        3,
+        29,
+        29
+      ]
+    },
+    {
+      "key": "Monochrome",
+      "size": 40,
+      "sha256": "8ae59691c500c0c4e6ab3e2ea54c01bc3b89fd0c2881aae2c3e6d3a829b3ff36",
+      "alpha_bounds": [
+        4,
+        4,
+        36,
+        36
+      ]
+    },
+    {
+      "key": "MirrorPlanView",
+      "size": 16,
+      "sha256": "ec05660b01700e316e57be3c45b1f7c88ba2b270f2f27cdcff6f50690dd3466c",
+      "alpha_bounds": [
+        1,
+        1,
+        15,
+        15
+      ]
+    },
+    {
+      "key": "MirrorPlanView",
+      "size": 20,
+      "sha256": "8f6a1219db41acebdd1bed80706819a78d107fc4635364c98af0d908bd8f7dcf",
+      "alpha_bounds": [
+        2,
+        1,
+        18,
+        19
+      ]
+    },
+    {
+      "key": "MirrorPlanView",
+      "size": 24,
+      "sha256": "918c5f2468fd0fcc3de6d4308d59dbbb11848d90437ac838fa2c644d936f7d23",
+      "alpha_bounds": [
+        2,
+        1,
+        22,
+        23
+      ]
+    },
+    {
+      "key": "MirrorPlanView",
+      "size": 25,
+      "sha256": "cf2ce086fb39a020c56e8b4c088ca5dfa5acab00ef9b3db52e0e240b0b3b7b0b",
+      "alpha_bounds": [
+        2,
+        1,
+        23,
+        24
+      ]
+    },
+    {
+      "key": "MirrorPlanView",
+      "size": 30,
+      "sha256": "0771bd830a6e52303fb69b64e5b87b54bd5a4509cdf4c89609794ef11ecb54d2",
+      "alpha_bounds": [
+        3,
+        1,
+        27,
+        29
+      ]
+    },
+    {
+      "key": "MirrorPlanView",
+      "size": 32,
+      "sha256": "04bdb85d4ce6dde214a6b91ff00dfc109e7c83bb7038153f60a64b7f6a719eb8",
+      "alpha_bounds": [
+        3,
+        2,
+        29,
+        30
+      ]
+    },
+    {
+      "key": "MirrorPlanView",
+      "size": 40,
+      "sha256": "b57644ee9deaa6a981461ab328576c2e7425902a0192a4979c39156a9509b8c2",
+      "alpha_bounds": [
+        4,
+        2,
+        36,
+        38
+      ]
+    },
+    {
+      "key": "BothSides",
+      "size": 16,
+      "sha256": "9c330d1b443759505ed9a483a4387cc413b018108859fe2b2b3423bb5159f2c8",
+      "alpha_bounds": [
+        3,
+        1,
+        13,
+        15
+      ]
+    },
+    {
+      "key": "BothSides",
+      "size": 20,
+      "sha256": "452d2d9a8f3fa7ccf1c07553ba46ddac51a57822e0ec389583f2210f6b6f84e1",
+      "alpha_bounds": [
+        3,
+        1,
+        17,
+        19
+      ]
+    },
+    {
+      "key": "BothSides",
+      "size": 24,
+      "sha256": "ff88e5702ed1040acbd9f03361150c160bc5d572592076014875707c13e20bb5",
+      "alpha_bounds": [
+        4,
+        1,
+        20,
+        23
+      ]
+    },
+    {
+      "key": "BothSides",
+      "size": 25,
+      "sha256": "541c5e30022ca932dd3c22caa0d39d801cc0812ecb73e4cee13fddc1591750ca",
+      "alpha_bounds": [
+        4,
+        1,
+        21,
+        24
+      ]
+    },
+    {
+      "key": "BothSides",
+      "size": 30,
+      "sha256": "2a64c55b2d30341cbb6c52d75fd5cd002c497f5cb0850685c30679cd6292df6d",
+      "alpha_bounds": [
+        5,
+        1,
+        25,
+        29
+      ]
+    },
+    {
+      "key": "BothSides",
+      "size": 32,
+      "sha256": "505bf05eb354e2eb903f996914bd7f607603ae7643be247f3695b70d344631bb",
+      "alpha_bounds": [
+        6,
+        2,
+        26,
+        30
+      ]
+    },
+    {
+      "key": "BothSides",
+      "size": 40,
+      "sha256": "25932f718cb4b3708222dda798a10e60afb08a5004e8d2c776fbf7fd43eb6d8a",
+      "alpha_bounds": [
+        7,
+        2,
+        33,
+        38
+      ]
+    },
+    {
+      "key": "Grid",
+      "size": 16,
+      "sha256": "b329bf6d502d796c6909dc19c828fa04e6980126fe58e84c6667a022e0e37193",
+      "alpha_bounds": [
+        1,
+        1,
+        15,
+        15
+      ]
+    },
+    {
+      "key": "Grid",
+      "size": 20,
+      "sha256": "75455018e49d27b7624b5a2df6f602724fb0f494f917f42d9fdb9db767433c7f",
+      "alpha_bounds": [
+        2,
+        2,
+        18,
+        18
+      ]
+    },
+    {
+      "key": "Grid",
+      "size": 24,
+      "sha256": "7bcaed1c063d258b31839558f8b89bcce0f33c800f9541d2f0836afdab05e838",
+      "alpha_bounds": [
+        2,
+        2,
+        22,
+        22
+      ]
+    },
+    {
+      "key": "Grid",
+      "size": 25,
+      "sha256": "ac93eb764771f08b655c55a6b7ea33e1c9f8f41f7d8ccd31a7fafe7a0c8d0b17",
+      "alpha_bounds": [
+        2,
+        2,
+        23,
+        23
+      ]
+    },
+    {
+      "key": "Grid",
+      "size": 30,
+      "sha256": "ce2abb1cef83f5e6ba3adab35d452becc2237aeff008071a5f5be962e169302f",
+      "alpha_bounds": [
+        3,
+        3,
+        27,
+        27
+      ]
+    },
+    {
+      "key": "Grid",
+      "size": 32,
+      "sha256": "dfdf542f72ad3aa6f53d1f17cba433be0fc1d8701c0d5a8362cc5f55d82ffc4d",
+      "alpha_bounds": [
+        3,
+        3,
+        29,
+        29
+      ]
+    },
+    {
+      "key": "Grid",
+      "size": 40,
+      "sha256": "ff462175995c24d7da1bc3a0a24c31a534e661829543441f970036f6f07bd955",
+      "alpha_bounds": [
+        4,
+        4,
+        36,
+        36
+      ]
+    },
+    {
+      "key": "Normals",
+      "size": 16,
+      "sha256": "5dc7f0979133023b3686c7ead15ccf2433fd23cfa81b5f6d7adda04d4336b16a",
+      "alpha_bounds": [
+        1,
+        1,
+        14,
+        15
+      ]
+    },
+    {
+      "key": "Normals",
+      "size": 20,
+      "sha256": "d819c2a81ce683a8fda5d88b1ccebf7004ff23006f040761c94760dd3b85bb1f",
+      "alpha_bounds": [
+        2,
+        2,
+        17,
+        18
+      ]
+    },
+    {
+      "key": "Normals",
+      "size": 24,
+      "sha256": "dbd1b67144304440500b3e8c8aab53f83cfeae653f5d78641f4603dd7e6e7f5b",
+      "alpha_bounds": [
+        2,
+        2,
+        21,
+        22
+      ]
+    },
+    {
+      "key": "Normals",
+      "size": 25,
+      "sha256": "bf86ebe965a6009ce85c3deaebdc510360b0ea3dc5dc52c19c0a2ce40458dbfc",
+      "alpha_bounds": [
+        2,
+        2,
+        21,
+        23
+      ]
+    },
+    {
+      "key": "Normals",
+      "size": 30,
+      "sha256": "d5e2005c819dc39875c7540173ee6088536536391631512cff39907b4b3f38e6",
+      "alpha_bounds": [
+        3,
+        3,
+        26,
+        27
+      ]
+    },
+    {
+      "key": "Normals",
+      "size": 32,
+      "sha256": "506f5aff0e8f0bcfc4945e39d3384ecb2fc1af8b419802e6bcc5af2dd4caf32d",
+      "alpha_bounds": [
+        3,
+        3,
+        27,
+        29
+      ]
+    },
+    {
+      "key": "Normals",
+      "size": 40,
+      "sha256": "1a4f7108b604258377565fed2ea2623f87a21165845f6f46e252e48125c04409",
+      "alpha_bounds": [
+        4,
+        4,
+        34,
+        36
+      ]
+    },
+    {
+      "key": "Curvature",
+      "size": 16,
+      "sha256": "2d27e13959e61bae43c2f62b92643720b57e0a52f6105d9913682d191013dcb3",
+      "alpha_bounds": [
+        1,
+        2,
+        15,
+        13
+      ]
+    },
+    {
+      "key": "Curvature",
+      "size": 20,
+      "sha256": "9b3513bf774cecfb73d6980b3bbea68a4f349dbbe5671ca55051ab396a223a29",
+      "alpha_bounds": [
+        2,
+        3,
+        18,
+        16
+      ]
+    },
+    {
+      "key": "Curvature",
+      "size": 24,
+      "sha256": "3c07d94790c1606e411df017e666f3d00ac1c92574830683cdbaf6bd9b006ba4",
+      "alpha_bounds": [
+        2,
+        3,
+        22,
+        19
+      ]
+    },
+    {
+      "key": "Curvature",
+      "size": 25,
+      "sha256": "c919659bf87ada490a375726798a8e9cb14980b8b0f3f08bad37bffcd8548403",
+      "alpha_bounds": [
+        2,
+        4,
+        23,
+        20
+      ]
+    },
+    {
+      "key": "Curvature",
+      "size": 30,
+      "sha256": "17b8486a6de54fccf86d3fdce03588fc4082275526581f6a7bccaa9ecab817c9",
+      "alpha_bounds": [
+        3,
+        4,
+        27,
+        24
+      ]
+    },
+    {
+      "key": "Curvature",
+      "size": 32,
+      "sha256": "4c6b8e85f7c1a8e3293de1e8babecb659c8e5154a0435c76217e9e51a3d2a52d",
+      "alpha_bounds": [
+        3,
+        5,
+        29,
+        26
+      ]
+    },
+    {
+      "key": "Curvature",
+      "size": 40,
+      "sha256": "07418e5d693ebde0f509dd13062da493caff78177d3faab3b04b11d60dfea19f",
+      "alpha_bounds": [
+        4,
+        6,
+        36,
+        32
+      ]
+    },
+    {
+      "key": "Hydrostatics",
+      "size": 16,
+      "sha256": "b9df129f4f4dab77943c8eea8807ba9304da8c4f042f2d74f52244e11c43118e",
+      "alpha_bounds": [
+        1,
+        1,
+        15,
+        13
+      ]
+    },
+    {
+      "key": "Hydrostatics",
+      "size": 20,
+      "sha256": "21f5e5ada4a40ae8548882c4b776a328f72dc22baa32f1263f26410769f0f0e7",
+      "alpha_bounds": [
+        1,
+        1,
+        19,
+        17
+      ]
+    },
+    {
+      "key": "Hydrostatics",
+      "size": 24,
+      "sha256": "936e0b95bc880aae9be562b53476db78ea64c97d6150ba51840a3b622224b7ff",
+      "alpha_bounds": [
+        1,
+        1,
+        23,
+        20
+      ]
+    },
+    {
+      "key": "Hydrostatics",
+      "size": 25,
+      "sha256": "445331d7b93f739d40df2376f3c06e0ed2692af1c59c4a92e91558717560c35e",
+      "alpha_bounds": [
+        1,
+        1,
+        24,
+        21
+      ]
+    },
+    {
+      "key": "Hydrostatics",
+      "size": 30,
+      "sha256": "b139dcb250a58742f164dfc826951ca80d870be4196904cebd4c2ec0df323103",
+      "alpha_bounds": [
+        1,
+        1,
+        29,
+        25
+      ]
+    },
+    {
+      "key": "Hydrostatics",
+      "size": 32,
+      "sha256": "fd7bbac57a7c88957b535c2461eb77adb524202f49f5ff560de728ead97e71a2",
+      "alpha_bounds": [
+        2,
+        2,
+        30,
+        26
+      ]
+    },
+    {
+      "key": "Hydrostatics",
+      "size": 40,
+      "sha256": "d5c0d5b62adba2d2044a78ed646838c1c6ae7ad9a4267b1fb8ed41d56bdc5bac",
+      "alpha_bounds": [
+        2,
+        2,
+        38,
+        33
+      ]
+    },
+    {
+      "key": "Camera",
+      "size": 16,
+      "sha256": "bc8c95e045565cf23100ec4ff5e1bce3e00129e89dc3949cf800267be639f33d",
+      "alpha_bounds": [
+        1,
+        1,
+        15,
+        14
+      ]
+    },
+    {
+      "key": "Camera",
+      "size": 20,
+      "sha256": "e88a5ef05328821d6d7f706e5dd9db084d18c4ca31975c686ca5895b68d8b324",
+      "alpha_bounds": [
+        1,
+        2,
+        19,
+        17
+      ]
+    },
+    {
+      "key": "Camera",
+      "size": 24,
+      "sha256": "1cac075518d3fe1a31b9aedcddda14de3348575f81e897645a29a470c89c2f73",
+      "alpha_bounds": [
+        2,
+        2,
+        22,
+        21
+      ]
+    },
+    {
+      "key": "Camera",
+      "size": 25,
+      "sha256": "5448de5afe6327608cce439182c87ef6c72d801ded40047393f83302b048e353",
+      "alpha_bounds": [
+        2,
+        2,
+        23,
+        21
+      ]
+    },
+    {
+      "key": "Camera",
+      "size": 30,
+      "sha256": "589049dd1a41d3d39a5054c53c074ca961933fe1c606f4c36ff5f6af5885fbbd",
+      "alpha_bounds": [
+        2,
+        3,
+        28,
+        26
+      ]
+    },
+    {
+      "key": "Camera",
+      "size": 32,
+      "sha256": "17ac5778288ab39ef51a8db6bf7255b1d2ac1fc15acd90d4cc841afa3d5a62cb",
+      "alpha_bounds": [
+        2,
+        3,
+        30,
+        27
+      ]
+    },
+    {
+      "key": "Camera",
+      "size": 40,
+      "sha256": "a16ec744269abf1c5a3cb84053a42cd76724624d63b6934e67fd09ab8778beb9",
+      "alpha_bounds": [
+        3,
+        4,
+        37,
+        34
+      ]
+    },
+    {
+      "key": "InteriorEdges",
+      "size": 16,
+      "sha256": "6006cbe04cea4af947e47c30167089074b9b7d169dd198061b87e01842d3eff6",
+      "alpha_bounds": [
+        1,
+        1,
+        15,
+        15
+      ]
+    },
+    {
+      "key": "InteriorEdges",
+      "size": 20,
+      "sha256": "35b0d85e40cf65b1f0757d7e7900e07e08fb0139b505862948a5aae49470cba4",
+      "alpha_bounds": [
+        2,
+        2,
+        18,
+        18
+      ]
+    },
+    {
+      "key": "InteriorEdges",
+      "size": 24,
+      "sha256": "a4cbd60bc0bf5af27d98067086a7590c4c2b76df2c4e56db5cedb989e4a1fb82",
+      "alpha_bounds": [
+        2,
+        2,
+        22,
+        22
+      ]
+    },
+    {
+      "key": "InteriorEdges",
+      "size": 25,
+      "sha256": "c04f30ca4e0a00a0bd3b9295603b69d9d1d7cd023a72c4f35dc84f733467b39e",
+      "alpha_bounds": [
+        2,
+        2,
+        23,
+        23
+      ]
+    },
+    {
+      "key": "InteriorEdges",
+      "size": 30,
+      "sha256": "60b539b80562b57b6c53305935407976a164e6ef1bc7db3c72e851deae3fc334",
+      "alpha_bounds": [
+        3,
+        3,
+        27,
+        27
+      ]
+    },
+    {
+      "key": "InteriorEdges",
+      "size": 32,
+      "sha256": "59439c309a82a42864225dd1399c2fe2c9e082adbe7f7e28aefe2d44e8a29e37",
+      "alpha_bounds": [
+        3,
+        3,
+        29,
+        29
+      ]
+    },
+    {
+      "key": "InteriorEdges",
+      "size": 40,
+      "sha256": "f3a224983e61347ae2f9d0351f8acd35c52f48fb2c6bc5b34875877b39705ade",
+      "alpha_bounds": [
+        4,
+        4,
+        36,
+        36
+      ]
+    },
+    {
+      "key": "Stations",
+      "size": 16,
+      "sha256": "3ad6fd48855187b302b63efd9c0e5fef9608a0ccc4fecad93249ee843f1f4c12",
+      "alpha_bounds": [
+        1,
+        1,
+        15,
+        15
+      ]
+    },
+    {
+      "key": "Stations",
+      "size": 20,
+      "sha256": "88e3d95d60bf1d134e6d7d01748b94d6cbfb10bb89caad089f55336b988e2df7",
+      "alpha_bounds": [
+        2,
+        2,
+        18,
+        18
+      ]
+    },
+    {
+      "key": "Stations",
+      "size": 24,
+      "sha256": "08ba52bc92dd369a62b88463fb7717957a1b432eafb89e669226dc8eef212d68",
+      "alpha_bounds": [
+        2,
+        2,
+        22,
+        22
+      ]
+    },
+    {
+      "key": "Stations",
+      "size": 25,
+      "sha256": "e7f5775f51dc8c6582a9ec18c1ee8fa2874fa0013a8982cb40d26f3c7d6d1844",
+      "alpha_bounds": [
+        2,
+        2,
+        23,
+        23
+      ]
+    },
+    {
+      "key": "Stations",
+      "size": 30,
+      "sha256": "e0b3113759ffdb8ac7f193c0d43391f95371ee5c36f2a405c815031247aa0efa",
+      "alpha_bounds": [
+        3,
+        3,
+        27,
+        27
+      ]
+    },
+    {
+      "key": "Stations",
+      "size": 32,
+      "sha256": "181020467bdbffca767649fb9b2497a428082ea2e06f2792526ed5a447e553da",
+      "alpha_bounds": [
+        3,
+        3,
+        29,
+        29
+      ]
+    },
+    {
+      "key": "Stations",
+      "size": 40,
+      "sha256": "f6a35a86ea726fa9a3572a510191d49158db053d9aba4b3831c73d026335b506",
+      "alpha_bounds": [
+        4,
+        4,
+        36,
+        36
+      ]
+    },
+    {
+      "key": "Waterlines",
+      "size": 16,
+      "sha256": "e13659aec1236ad92b54d43cff82466adfb9f8746289dba7525e4e937e8e1a48",
+      "alpha_bounds": [
+        1,
+        1,
+        15,
+        15
+      ]
+    },
+    {
+      "key": "Waterlines",
+      "size": 20,
+      "sha256": "b4d40e68875f1dc6ea94654cc36b54054b14b014f83b044e2812b3f48b48db8e",
+      "alpha_bounds": [
+        2,
+        2,
+        18,
+        18
+      ]
+    },
+    {
+      "key": "Waterlines",
+      "size": 24,
+      "sha256": "68829f79b67e9770154f01e75a4fe09f1c37666906928f590352844f09029cca",
+      "alpha_bounds": [
+        2,
+        2,
+        22,
+        22
+      ]
+    },
+    {
+      "key": "Waterlines",
+      "size": 25,
+      "sha256": "b6a5ccb0dc745454584c777712a3be35f74812fc9f5bc0d98c4c1e4465fe7cd8",
+      "alpha_bounds": [
+        2,
+        2,
+        23,
+        23
+      ]
+    },
+    {
+      "key": "Waterlines",
+      "size": 30,
+      "sha256": "783bc4ee21113f9b9de1430ad1ec1538b107d62a54f8316ab6ea19f1ba9b0216",
+      "alpha_bounds": [
+        3,
+        3,
+        27,
+        27
+      ]
+    },
+    {
+      "key": "Waterlines",
+      "size": 32,
+      "sha256": "c0baf698df0bbb391d5c5e6ebdc3147d20f19179512ad5a05845b741252ef49b",
+      "alpha_bounds": [
+        3,
+        3,
+        29,
+        29
+      ]
+    },
+    {
+      "key": "Waterlines",
+      "size": 40,
+      "sha256": "b9769a36f46c3eb0afcf9117a97db2942afbd529ceffdd35acc545e68850008b",
+      "alpha_bounds": [
+        4,
+        4,
+        36,
+        36
+      ]
+    },
+    {
+      "key": "Buttocks",
+      "size": 16,
+      "sha256": "072064f2bd9af37a000d9479767172168bb68c6f2c59b03d3abc6b1541af99e9",
+      "alpha_bounds": [
+        1,
+        3,
+        15,
+        13
+      ]
+    },
+    {
+      "key": "Buttocks",
+      "size": 20,
+      "sha256": "6720de1b82dd4a8cd2b47f376d742363e0f96219771e3b53cda7eb19890bf77e",
+      "alpha_bounds": [
+        1,
+        4,
+        19,
+        16
+      ]
+    },
+    {
+      "key": "Buttocks",
+      "size": 24,
+      "sha256": "f733e1902ad3cb36e82195a17de62bd95b81e8762260298275fc6b304679019a",
+      "alpha_bounds": [
+        1,
+        5,
+        23,
+        19
+      ]
+    },
+    {
+      "key": "Buttocks",
+      "size": 25,
+      "sha256": "f750ee4e72ae5478520c829fdc95e8e8f21d6574600da84ef351a37212900d98",
+      "alpha_bounds": [
+        1,
+        5,
+        24,
+        20
+      ]
+    },
+    {
+      "key": "Buttocks",
+      "size": 30,
+      "sha256": "27157033e21f7a673eb0a24d4df93d2687c29b6fb85d872d228a29d7269b176e",
+      "alpha_bounds": [
+        1,
+        6,
+        29,
+        24
+      ]
+    },
+    {
+      "key": "Buttocks",
+      "size": 32,
+      "sha256": "e6cc7de49678608ebd46a8463d445bcd8f45ef4b92e21da4f5b81bf25439ed8e",
+      "alpha_bounds": [
+        2,
+        6,
+        30,
+        26
+      ]
+    },
+    {
+      "key": "Buttocks",
+      "size": 40,
+      "sha256": "2e6f6828baf05f1c0660fe7f13587cda2bedbc4794c62ca2675a26bd09d1818c",
+      "alpha_bounds": [
+        2,
+        8,
+        38,
+        32
+      ]
+    },
+    {
+      "key": "Diagonals",
+      "size": 16,
+      "sha256": "3eec32ef2d27d97965009c056eab1a340abc385a52c63a549e5fe429f6da3aee",
+      "alpha_bounds": [
+        1,
+        1,
+        15,
+        15
+      ]
+    },
+    {
+      "key": "Diagonals",
+      "size": 20,
+      "sha256": "c7822340345217094192828731867e3596145a930864f17614b8e3d75ae5ae85",
+      "alpha_bounds": [
+        2,
+        2,
+        18,
+        18
+      ]
+    },
+    {
+      "key": "Diagonals",
+      "size": 24,
+      "sha256": "d4a021f0def811093b67e6801b52e6ca0a0cd41ca4513661e2a7927b0dcbdccb",
+      "alpha_bounds": [
+        2,
+        2,
+        22,
+        22
+      ]
+    },
+    {
+      "key": "Diagonals",
+      "size": 25,
+      "sha256": "8179d5d595482274e4a8bcdd1b8b177b429743cdda029ded065b075d2cc340ed",
+      "alpha_bounds": [
+        2,
+        2,
+        23,
+        23
+      ]
+    },
+    {
+      "key": "Diagonals",
+      "size": 30,
+      "sha256": "43730b5aa4059f81f32872c0f218b8b8e902d674314e5862914066cf82eeb96a",
+      "alpha_bounds": [
+        3,
+        3,
+        27,
+        27
+      ]
+    },
+    {
+      "key": "Diagonals",
+      "size": 32,
+      "sha256": "06a7bd18b30262647122dbff5117d14c39583964057901c180597fefad840158",
+      "alpha_bounds": [
+        3,
+        3,
+        29,
+        29
+      ]
+    },
+    {
+      "key": "Diagonals",
+      "size": 40,
+      "sha256": "41a1d5dc91555735d6ef76d105c1dc7c7918702b90cb0e3a5b88a606764d5e6a",
+      "alpha_bounds": [
+        4,
+        4,
+        36,
+        36
+      ]
+    },
+    {
+      "key": "AddOne",
+      "size": 16,
+      "sha256": "ef945a3193ae10eaf9b3110045600e64625b2b3bc423cd3c92a581113dbd654b",
+      "alpha_bounds": [
+        1,
+        3,
+        15,
+        13
+      ]
+    },
+    {
+      "key": "AddOne",
+      "size": 20,
+      "sha256": "ebdccba22b6235be57508d616a1dd516260f317576de3c434033f4b6cbbd3953",
+      "alpha_bounds": [
+        2,
+        4,
+        19,
+        16
+      ]
+    },
+    {
+      "key": "AddOne",
+      "size": 24,
+      "sha256": "ba198eb6a61656fcb09e4d239b71f28be55a9917ac4c916084088d2076093ccd",
+      "alpha_bounds": [
+        2,
+        5,
+        22,
+        19
+      ]
+    },
+    {
+      "key": "AddOne",
+      "size": 25,
+      "sha256": "4a45ab8990d81a0640bd93f470f50c74776decc9c656e10f398e4f7568f26d0f",
+      "alpha_bounds": [
+        2,
+        5,
+        23,
+        20
+      ]
+    },
+    {
+      "key": "AddOne",
+      "size": 30,
+      "sha256": "9804b2c2b917de7b4d39cd983948da7a560067a17e8f39716c0d7fd3a83a01c6",
+      "alpha_bounds": [
+        3,
+        6,
+        28,
+        24
+      ]
+    },
+    {
+      "key": "AddOne",
+      "size": 32,
+      "sha256": "9ab770460e7070584ea2b3970b78811d307067112cd14e0750a3d12c2959456c",
+      "alpha_bounds": [
+        3,
+        6,
+        30,
+        26
+      ]
+    },
+    {
+      "key": "AddOne",
+      "size": 40,
+      "sha256": "d8c80d30688c8c0fe147a4f800e4609c6650b6dc29c5a4948d950b8772e7bec9",
+      "alpha_bounds": [
+        4,
+        8,
+        37,
+        32
+      ]
+    },
+    {
+      "key": "AddRange",
+      "size": 16,
+      "sha256": "efb39f2de6392a22a87597f8a001631a7709e4be1c415ac43e50cd4935b88f76",
+      "alpha_bounds": [
+        1,
+        1,
+        15,
+        15
+      ]
+    },
+    {
+      "key": "AddRange",
+      "size": 20,
+      "sha256": "f512615343cb6c10a56324794508e6d27d520f65f5bfebd3f623ac89bdb11f55",
+      "alpha_bounds": [
+        2,
+        2,
+        18,
+        19
+      ]
+    },
+    {
+      "key": "AddRange",
+      "size": 24,
+      "sha256": "048ea7f7a60a3d0b1ba5bb94b83acb6fc92f1e57d33bbeacb0323bc7ee49f771",
+      "alpha_bounds": [
+        2,
+        2,
+        22,
+        22
+      ]
+    },
+    {
+      "key": "AddRange",
+      "size": 25,
+      "sha256": "1be08f6af9205bb61d4067eccbfa645b18980159271940c42ecd9376383f0f36",
+      "alpha_bounds": [
+        2,
+        2,
+        23,
+        23
+      ]
+    },
+    {
+      "key": "AddRange",
+      "size": 30,
+      "sha256": "f4864756377338c5655d9c88271ccc60c52586d3e27f129f34e622003341b25a",
+      "alpha_bounds": [
+        3,
+        3,
+        27,
+        28
+      ]
+    },
+    {
+      "key": "AddRange",
+      "size": 32,
+      "sha256": "8fbe725ef871a181faee59f57786203919ab0ff9de0c7d753e34a025c049da79",
+      "alpha_bounds": [
+        3,
+        3,
+        29,
+        30
+      ]
+    },
+    {
+      "key": "AddRange",
+      "size": 40,
+      "sha256": "f6e1213dccc3efe3190081596d7b806055ec9c4021b90d4fe1dfd26ad4140900",
+      "alpha_bounds": [
+        4,
+        4,
+        36,
+        37
+      ]
+    },
+    {
+      "key": "Delete",
+      "size": 16,
+      "sha256": "1414204885b3496a6190957be57dde1970f3ae7a90521d2a570f8e191193fbf3",
+      "alpha_bounds": [
+        1,
+        1,
+        15,
+        15
+      ]
+    },
+    {
+      "key": "Delete",
+      "size": 20,
+      "sha256": "6e68e8aba1d46cbace8fd566915c0a297cd49a22e5bfd0d36826bc905eef6c04",
+      "alpha_bounds": [
+        2,
+        2,
+        18,
+        18
+      ]
+    },
+    {
+      "key": "Delete",
+      "size": 24,
+      "sha256": "3ab42e02a72d13f76b3230ff01686af807452d6c92de643079ded004931e967e",
+      "alpha_bounds": [
+        2,
+        2,
+        22,
+        22
+      ]
+    },
+    {
+      "key": "Delete",
+      "size": 25,
+      "sha256": "773169f3422e82ced36ad42e8ed6ccbfefbe959cbcb033a2abc24afccfb00378",
+      "alpha_bounds": [
+        2,
+        2,
+        23,
+        23
+      ]
+    },
+    {
+      "key": "Delete",
+      "size": 30,
+      "sha256": "10e0e332b093080464647c99e727574c76b8eb5d8190033b4e20256b15316a9b",
+      "alpha_bounds": [
+        3,
+        3,
+        27,
+        27
+      ]
+    },
+    {
+      "key": "Delete",
+      "size": 32,
+      "sha256": "89c5ff9f054a169a9174580db4e7040e8ce48b928b9d7b5dfe3dc08118a91ae5",
+      "alpha_bounds": [
+        3,
+        3,
+        29,
+        29
+      ]
+    },
+    {
+      "key": "Delete",
+      "size": 40,
+      "sha256": "0a06969cbef248ae0571d8fe6a14d47ba062c5bb089a1f84bc98fd5d3c5fa127",
+      "alpha_bounds": [
+        4,
+        4,
+        36,
+        36
+      ]
+    },
+    {
+      "key": "DeleteSelected",
+      "size": 16,
+      "sha256": "e17c6b3e3969439bcc3a911351c179762793c3db0ab213329f5496fbdc43a148",
+      "alpha_bounds": [
+        1,
+        1,
+        15,
+        15
+      ]
+    },
+    {
+      "key": "DeleteSelected",
+      "size": 20,
+      "sha256": "4806e89913ef92a5c85e17793dbcfa1f568f0c6a3f2d0f89fbf7aed4b5136a36",
+      "alpha_bounds": [
+        1,
+        1,
+        19,
+        18
+      ]
+    },
+    {
+      "key": "DeleteSelected",
+      "size": 24,
+      "sha256": "d96f9ceca85e97426dd5ba31588224eb02b0ee8401cf2945564fa42d965ca5c5",
+      "alpha_bounds": [
+        1,
+        1,
+        23,
+        22
+      ]
+    },
+    {
+      "key": "DeleteSelected",
+      "size": 25,
+      "sha256": "fb9f86de94df62efbc7ad6b4f88b2ae4e876f48141b0080878a993cb5c81168f",
+      "alpha_bounds": [
+        1,
+        1,
+        24,
+        23
+      ]
+    },
+    {
+      "key": "DeleteSelected",
+      "size": 30,
+      "sha256": "1040744d0f853dc51d43ea4de8cb9e449c6aa64ce03e8b55ea08735585eab6f5",
+      "alpha_bounds": [
+        1,
+        1,
+        29,
+        27
+      ]
+    },
+    {
+      "key": "DeleteSelected",
+      "size": 32,
+      "sha256": "b2e3875d7f411556959fec1802741d0d6004f8fa7f6c521aa32bbb25950d0c17",
+      "alpha_bounds": [
+        2,
+        2,
+        30,
+        29
+      ]
+    },
+    {
+      "key": "DeleteSelected",
+      "size": 40,
+      "sha256": "270502718d6fde167a829d958c05f3ae19ed1d8c4a731f16069d0836d52304c0",
+      "alpha_bounds": [
+        2,
+        2,
+        38,
+        36
+      ]
+    },
+    {
+      "key": "DeleteAll",
+      "size": 16,
+      "sha256": "2ec4c628bd79d23ae5d899648eff7d4b50387425580fe4466b908dd614a7c24d",
+      "alpha_bounds": [
+        1,
+        1,
+        15,
+        15
+      ]
+    },
+    {
+      "key": "DeleteAll",
+      "size": 20,
+      "sha256": "cd81c34223dd4dbedff1cb2748906caea9cb27ee247a53b1b13050148446674d",
+      "alpha_bounds": [
+        2,
+        2,
+        18,
+        18
+      ]
+    },
+    {
+      "key": "DeleteAll",
+      "size": 24,
+      "sha256": "32962167cb07bcddb68cb536cad35eacf9225690e5813d6d507074d1f550d2b2",
+      "alpha_bounds": [
+        2,
+        2,
+        22,
+        22
+      ]
+    },
+    {
+      "key": "DeleteAll",
+      "size": 25,
+      "sha256": "9480e9a7f47ccd9aefe8306fa126ae4009b25e19ee7c138e8c05eb76664e8433",
+      "alpha_bounds": [
+        2,
+        2,
+        23,
+        23
+      ]
+    },
+    {
+      "key": "DeleteAll",
+      "size": 30,
+      "sha256": "cc7bc4223c0d476ac46c2aa0cc28f532181c85597755bfc6c2aedbfd35a7482b",
+      "alpha_bounds": [
+        3,
+        3,
+        27,
+        27
+      ]
+    },
+    {
+      "key": "DeleteAll",
+      "size": 32,
+      "sha256": "3a8374fea3e15c199bf0d6a9778c03bcd56d50210dfa8f2c4f3942c0ba1ba504",
+      "alpha_bounds": [
+        3,
+        3,
+        29,
+        29
+      ]
+    },
+    {
+      "key": "DeleteAll",
+      "size": 40,
+      "sha256": "e1a99338a38a48fb9af569e8814c1c890361e26fd2efb0cc98535bad0eaaa167",
+      "alpha_bounds": [
+        4,
+        4,
+        36,
+        36
+      ]
+    },
+    {
+      "key": "SplitSection",
+      "size": 16,
+      "sha256": "a4878f87849c5e7a83b5ee7c3f653ef11db9ee44d44eacb2baa3328ff960f3a2",
+      "alpha_bounds": [
+        1,
+        1,
+        15,
+        15
+      ]
+    },
+    {
+      "key": "SplitSection",
+      "size": 20,
+      "sha256": "0d264ad2451ea1e0958ac076fee5ac932d84d742c82225db0c1300c994088aae",
+      "alpha_bounds": [
+        1,
+        1,
+        19,
+        19
+      ]
+    },
+    {
+      "key": "SplitSection",
+      "size": 24,
+      "sha256": "487d9d2b9c64e6556aae1f944c7af0518efb48efa39e9778230eb3c82ce34bb5",
+      "alpha_bounds": [
+        1,
+        1,
+        23,
+        23
+      ]
+    },
+    {
+      "key": "SplitSection",
+      "size": 25,
+      "sha256": "4abfe3e708376f7c7bc189cb8156a115287e43fe49a68113465ce66e4d65fb35",
+      "alpha_bounds": [
+        1,
+        1,
+        24,
+        24
+      ]
+    },
+    {
+      "key": "SplitSection",
+      "size": 30,
+      "sha256": "8a8fd023b0db1eb46437a9b5226c6561d141c6c0419a437201bab6863dc9a2ea",
+      "alpha_bounds": [
+        1,
+        1,
+        29,
+        29
+      ]
+    },
+    {
+      "key": "SplitSection",
+      "size": 32,
+      "sha256": "d0d5b178362db79162c2190f5958a765438dacfdf8198661a12a1e1f792d17e5",
+      "alpha_bounds": [
+        2,
+        2,
+        30,
+        30
+      ]
+    },
+    {
+      "key": "SplitSection",
+      "size": 40,
+      "sha256": "258fb7ff781a8a8e4f6d540e2470e31371e74d46c219a881825a7843b5653b8a",
+      "alpha_bounds": [
+        2,
+        2,
+        38,
+        38
+      ]
+    },
+    {
+      "key": "NewLayer",
+      "size": 16,
+      "sha256": "c9a26d7e3e3d6bd8efd28af4ebfb1d97323d935d203a0aa9ff003face7a2a7e2",
+      "alpha_bounds": [
+        1,
+        1,
+        15,
+        15
+      ]
+    },
+    {
+      "key": "NewLayer",
+      "size": 20,
+      "sha256": "e030cd66a7428b6e05de23d9133778b2bbbea409a99e142fbc7725fea276fc21",
+      "alpha_bounds": [
+        2,
+        2,
+        19,
+        19
+      ]
+    },
+    {
+      "key": "NewLayer",
+      "size": 24,
+      "sha256": "bbfe6edd7b8c149b6f8c2bace9160eb0114a4b4d837b650c374a46f713a2edd2",
+      "alpha_bounds": [
+        2,
+        2,
+        22,
+        23
+      ]
+    },
+    {
+      "key": "NewLayer",
+      "size": 25,
+      "sha256": "9ce448cf25073bc07ae7d18586f9719fe45e6b5770e9773a0539bf7bbf5106e7",
+      "alpha_bounds": [
+        2,
+        2,
+        23,
+        24
+      ]
+    },
+    {
+      "key": "NewLayer",
+      "size": 30,
+      "sha256": "a5a98cec37be26400def695197f1766a70b3a589814a8dfb3376d74801009bf5",
+      "alpha_bounds": [
+        3,
+        3,
+        28,
+        29
+      ]
+    },
+    {
+      "key": "NewLayer",
+      "size": 32,
+      "sha256": "02485e5e3d07302c03d41e908d87fa5834405080845ec1ed8a02c03e488234e0",
+      "alpha_bounds": [
+        3,
+        3,
+        30,
+        30
+      ]
+    },
+    {
+      "key": "NewLayer",
+      "size": 40,
+      "sha256": "78597dc1aa6905c956a0080ef478a5ce7dabf1acf4fd37c86cc44e8b7e5646de",
+      "alpha_bounds": [
+        4,
+        4,
+        37,
+        38
+      ]
+    },
+    {
+      "key": "DeleteEmptyLayers",
+      "size": 16,
+      "sha256": "faf665774d7baf286b59fd9301477f301dad37f47e1e72049b195cd65af94023",
+      "alpha_bounds": [
+        1,
+        1,
+        15,
+        15
+      ]
+    },
+    {
+      "key": "DeleteEmptyLayers",
+      "size": 20,
+      "sha256": "12523bf60a8d6fa0d0106d0244ad25dec7c8449c9aca4bceb24cc17eb86c3cb8",
+      "alpha_bounds": [
+        2,
+        1,
+        18,
+        18
+      ]
+    },
+    {
+      "key": "DeleteEmptyLayers",
+      "size": 24,
+      "sha256": "8ae6c3f5414a85d127846b6c7c84d7ca05acece2372c3fbd2258001c63f0cc00",
+      "alpha_bounds": [
+        2,
+        1,
+        22,
+        22
+      ]
+    },
+    {
+      "key": "DeleteEmptyLayers",
+      "size": 25,
+      "sha256": "aadd6a575f37c07e8cc851b44ed68a7d0c38eb2a4fb779a2a218a5b81687adf6",
+      "alpha_bounds": [
+        2,
+        1,
+        23,
+        23
+      ]
+    },
+    {
+      "key": "DeleteEmptyLayers",
+      "size": 30,
+      "sha256": "7cf55dbf4c69c46b877b7d7a896141fb5f332568bd045ac3aebaa29f6a5ee928",
+      "alpha_bounds": [
+        3,
+        1,
+        27,
+        27
+      ]
+    },
+    {
+      "key": "DeleteEmptyLayers",
+      "size": 32,
+      "sha256": "0331cc9ce3b2fe6f3d096d3188fe4fb6c627c3f99e8f8651efcdf92280e010d7",
+      "alpha_bounds": [
+        3,
+        2,
+        29,
+        29
+      ]
+    },
+    {
+      "key": "DeleteEmptyLayers",
+      "size": 40,
+      "sha256": "e4ea57fa26ab9da933f1814792282a605bd84601a0883b5c349eb5c6c8cce61b",
+      "alpha_bounds": [
+        4,
+        2,
+        36,
+        36
+      ]
+    },
+    {
+      "key": "MoveUp",
+      "size": 16,
+      "sha256": "884373fcd6cb50b0cccea42303e59eb21c2c8cf3ae9423c49d4e48ede010f6d5",
+      "alpha_bounds": [
+        3,
+        1,
+        13,
+        15
+      ]
+    },
+    {
+      "key": "MoveUp",
+      "size": 20,
+      "sha256": "8b5d39514bb6687cde56ad55a331c58248696cf32d0941898bd918e19103a670",
+      "alpha_bounds": [
+        4,
+        2,
+        16,
+        18
+      ]
+    },
+    {
+      "key": "MoveUp",
+      "size": 24,
+      "sha256": "13ab3a7e27cac842bd2a41a586345ad9b6f88271f1b75ad77846c7ac7d977f77",
+      "alpha_bounds": [
+        5,
+        2,
+        19,
+        22
+      ]
+    },
+    {
+      "key": "MoveUp",
+      "size": 25,
+      "sha256": "419a1d3df74abe2a72bb861f78c9449ba610d847258e5a148d817d0253ef1a67",
+      "alpha_bounds": [
+        5,
+        2,
+        20,
+        23
+      ]
+    },
+    {
+      "key": "MoveUp",
+      "size": 30,
+      "sha256": "a523b39c3a2e2ac6904881a26cf304b2a02b6c4ec5da3685ce909b5500a9999e",
+      "alpha_bounds": [
+        6,
+        3,
+        24,
+        27
+      ]
+    },
+    {
+      "key": "MoveUp",
+      "size": 32,
+      "sha256": "1f8ed9014e007699f7d1189bbcb9155b69a52fea67dc039d75de2e84e806fe79",
+      "alpha_bounds": [
+        6,
+        3,
+        26,
+        29
+      ]
+    },
+    {
+      "key": "MoveUp",
+      "size": 40,
+      "sha256": "a4dc7b8bfa85fae43d6fdbcb511b376a12415afe7fa3691884d0f5c6ad9d1703",
+      "alpha_bounds": [
+        8,
+        4,
+        32,
+        36
+      ]
+    },
+    {
+      "key": "MoveDown",
+      "size": 16,
+      "sha256": "b02b03800e5a8b9e7a6b06553662988e2a07539da4f92692fe001fce973ec085",
+      "alpha_bounds": [
+        3,
+        1,
+        13,
+        15
+      ]
+    },
+    {
+      "key": "MoveDown",
+      "size": 20,
+      "sha256": "6c91b196995f7811fd346bfb4a825c55e39134b11f4ec892ce81b6a300e7d784",
+      "alpha_bounds": [
+        4,
+        2,
+        16,
+        18
+      ]
+    },
+    {
+      "key": "MoveDown",
+      "size": 24,
+      "sha256": "80aee1410cb8dbd0faae5d536136c7be736b76446915ed6b1a9728d2e74a8b2e",
+      "alpha_bounds": [
+        5,
+        2,
+        19,
+        22
+      ]
+    },
+    {
+      "key": "MoveDown",
+      "size": 25,
+      "sha256": "90dcfdbce1b70ded7bf51680ff93043790411d5f7a5b4883acd05c639091173b",
+      "alpha_bounds": [
+        5,
+        2,
+        20,
+        23
+      ]
+    },
+    {
+      "key": "MoveDown",
+      "size": 30,
+      "sha256": "cd7dd83a54d4799e4caba889d47adba5251bc180eab2e112e03faa2f5b17e1a6",
+      "alpha_bounds": [
+        6,
+        3,
+        24,
+        27
+      ]
+    },
+    {
+      "key": "MoveDown",
+      "size": 32,
+      "sha256": "b91e39762c8aabbffdf737cd839cf9a8fc02a139df5b3dc9a321b5f614176728",
+      "alpha_bounds": [
+        6,
+        3,
+        26,
+        29
+      ]
+    },
+    {
+      "key": "MoveDown",
+      "size": 40,
+      "sha256": "b67f96e2ea408380805e6aef2b5647ed788622f8c39ef72042f104fef8a8a5a0",
+      "alpha_bounds": [
+        8,
+        4,
+        32,
+        36
+      ]
+    },
+    {
+      "key": "LayerVisibility",
+      "size": 16,
+      "sha256": "5dc2ebe78ecccbba2342323fb8eb580eda2d77db90e41b47ad6f220899bd60ba",
+      "alpha_bounds": [
+        1,
+        2,
+        15,
+        15
+      ]
+    },
+    {
+      "key": "LayerVisibility",
+      "size": 20,
+      "sha256": "ff23fcbfaaec41749e694fbb7d34e3ed5ef4fcfad21883a3f319f5922df99abe",
+      "alpha_bounds": [
+        1,
+        2,
+        19,
+        18
+      ]
+    },
+    {
+      "key": "LayerVisibility",
+      "size": 24,
+      "sha256": "fc86d59c0bf2440afb6139c61162cb402dedb30cb1b918dd3202b237d207e796",
+      "alpha_bounds": [
+        1,
+        3,
+        23,
+        22
+      ]
+    },
+    {
+      "key": "LayerVisibility",
+      "size": 25,
+      "sha256": "052cdc340a3c5bc268fe125f2f81900066906406eeb291efa3f60621ea9f40a2",
+      "alpha_bounds": [
+        1,
+        3,
+        24,
+        23
+      ]
+    },
+    {
+      "key": "LayerVisibility",
+      "size": 30,
+      "sha256": "bbf7f39667d6a9674bbac83d5721be57852b35599eb22bbec2a7049e76d85e77",
+      "alpha_bounds": [
+        1,
+        4,
+        29,
+        27
+      ]
+    },
+    {
+      "key": "LayerVisibility",
+      "size": 32,
+      "sha256": "a2b93cf4dbd84d8d636f43d73f80a1ff1cebe9efbc450fca936cd933ca194b29",
+      "alpha_bounds": [
+        2,
+        4,
+        30,
+        29
+      ]
+    },
+    {
+      "key": "LayerVisibility",
+      "size": 40,
+      "sha256": "679cbdb98abb73bf3f2b372eac0d34ec0f6be413a88b72ae522cbe23a10407f8",
+      "alpha_bounds": [
+        2,
+        5,
+        38,
+        36
+      ]
+    },
+    {
+      "key": "LayerAutoGroup",
+      "size": 16,
+      "sha256": "ec199bd8e42175bb3b858896a7efcaf5b7a8eb208c3548c690c9d759ee92c23a",
+      "alpha_bounds": [
+        1,
+        1,
+        15,
+        15
+      ]
+    },
+    {
+      "key": "LayerAutoGroup",
+      "size": 20,
+      "sha256": "07ac82855384f59983c76771aa7fe15d65cced3b5203f4e39f7f2de6af499421",
+      "alpha_bounds": [
+        1,
+        2,
+        19,
+        18
+      ]
+    },
+    {
+      "key": "LayerAutoGroup",
+      "size": 24,
+      "sha256": "cc0a7f4c9f1c17d8af22451ad9de7a41b2b60806d9c52f818c44e0ab5fe8bb58",
+      "alpha_bounds": [
+        2,
+        2,
+        22,
+        22
+      ]
+    },
+    {
+      "key": "LayerAutoGroup",
+      "size": 25,
+      "sha256": "3f2bb27a4f872378656e4554c565092c4cd14e132f6b9651e5c2583dc9973864",
+      "alpha_bounds": [
+        2,
+        2,
+        23,
+        23
+      ]
+    },
+    {
+      "key": "LayerAutoGroup",
+      "size": 30,
+      "sha256": "a1006bb34077fe2302703bd37412d16e4b101be39f17744d24c05007515db7da",
+      "alpha_bounds": [
+        2,
+        3,
+        28,
+        27
+      ]
+    },
+    {
+      "key": "LayerAutoGroup",
+      "size": 32,
+      "sha256": "cdcc419bc15cb622cae24ef8dfddf17e5c7af565dc6c60b3591639c4c6f92894",
+      "alpha_bounds": [
+        2,
+        3,
+        30,
+        29
+      ]
+    },
+    {
+      "key": "LayerAutoGroup",
+      "size": 40,
+      "sha256": "666e4849c80b11bb8e9ad3b5165a68a16dc3883d1a0aee0672d84b344ad52a87",
+      "alpha_bounds": [
+        3,
+        4,
+        37,
+        36
+      ]
+    },
+    {
+      "key": "Move",
+      "size": 16,
+      "sha256": "3d69e024c6c1168eb421893dcaba55c9e1dc8622da952d3148a3f69f8ba29c37",
+      "alpha_bounds": [
+        1,
+        1,
+        15,
+        15
+      ]
+    },
+    {
+      "key": "Move",
+      "size": 20,
+      "sha256": "b48e7d7d2025ea7114afffee46934e0d24a8e828cacf05888c0d12cb0aadd300",
+      "alpha_bounds": [
+        1,
+        1,
+        19,
+        19
+      ]
+    },
+    {
+      "key": "Move",
+      "size": 24,
+      "sha256": "57be1e41eeb689e1daccd602ff862fe0061c6e6790cda6f02585df512292c716",
+      "alpha_bounds": [
+        1,
+        1,
+        23,
+        23
+      ]
+    },
+    {
+      "key": "Move",
+      "size": 25,
+      "sha256": "e1296dd2b93cdf78c042d4212071fe6715d10ed852decbfc47bdbeaf197978bc",
+      "alpha_bounds": [
+        1,
+        1,
+        24,
+        24
+      ]
+    },
+    {
+      "key": "Move",
+      "size": 30,
+      "sha256": "0424ad4541a2f2758468acd9fa1e1d589336bb7e692eb69a9112fe1c9afbed01",
+      "alpha_bounds": [
+        1,
+        1,
+        29,
+        29
+      ]
+    },
+    {
+      "key": "Move",
+      "size": 32,
+      "sha256": "adc6ab7faa9b238b363770420a9621872b9a55611ebc0ca4620645a26d248198",
+      "alpha_bounds": [
+        2,
+        2,
+        30,
+        30
+      ]
+    },
+    {
+      "key": "Move",
+      "size": 40,
+      "sha256": "8997bf9a7eba1e3056527365beeb09c340361ac8fe10d3310c88973c3b7c9962",
+      "alpha_bounds": [
+        2,
+        2,
+        38,
+        38
+      ]
+    },
+    {
+      "key": "Scale",
+      "size": 16,
+      "sha256": "9896bcc674b9832aff5d2f62cf268054e37d83e7b4915a9b9b7ae1d8dc5a2ab4",
+      "alpha_bounds": [
+        1,
+        1,
+        15,
+        15
+      ]
+    },
+    {
+      "key": "Scale",
+      "size": 20,
+      "sha256": "647199190d17186d2b4f4bb8680f6aadc944276a35da79e703825a7392db6092",
+      "alpha_bounds": [
+        2,
+        2,
+        18,
+        18
+      ]
+    },
+    {
+      "key": "Scale",
+      "size": 24,
+      "sha256": "1843cf41d529f8ae533aa1df36bfa3b4d282569c1bdd48bf9ce544e24b162086",
+      "alpha_bounds": [
+        2,
+        2,
+        22,
+        22
+      ]
+    },
+    {
+      "key": "Scale",
+      "size": 25,
+      "sha256": "23bc722584f5f1018255a7b7bc88a5ae84744cec5a7ebab7437866a88144d0ac",
+      "alpha_bounds": [
+        2,
+        2,
+        23,
+        23
+      ]
+    },
+    {
+      "key": "Scale",
+      "size": 30,
+      "sha256": "5fcd427bc92d1b10552c7cc46a57a2b5f3336b462385ef4e23423160bdd857a7",
+      "alpha_bounds": [
+        3,
+        3,
+        27,
+        27
+      ]
+    },
+    {
+      "key": "Scale",
+      "size": 32,
+      "sha256": "0d92ed8ce5a176efc371fa6aba4ea5b59deb85f7ba686c3cae9e2dab8fdc69d9",
+      "alpha_bounds": [
+        3,
+        3,
+        29,
+        29
+      ]
+    },
+    {
+      "key": "Scale",
+      "size": 40,
+      "sha256": "d0dfaac37f94b0b56844143d1e386912fb01e947dd5ed0caf49233112c4a3b42",
+      "alpha_bounds": [
+        4,
+        4,
+        36,
+        36
+      ]
+    },
+    {
+      "key": "RotateCW",
+      "size": 16,
+      "sha256": "1ba242dad9a42f11b798f2323e8e5dde40e126107a21b4f10260a1a79557e6fe",
+      "alpha_bounds": [
+        3,
+        1,
+        14,
+        14
+      ]
+    },
+    {
+      "key": "RotateCW",
+      "size": 20,
+      "sha256": "7156dc57cd8d59f152fe9348133dfb2dc324d98dcc850b6aff330f36b9c9d5d3",
+      "alpha_bounds": [
+        3,
+        2,
+        17,
+        18
+      ]
+    },
+    {
+      "key": "RotateCW",
+      "size": 24,
+      "sha256": "c7039ec9c92498307c7d7a54802006183b3047fc5f002d87eb2ef1b6dc279f79",
+      "alpha_bounds": [
+        4,
+        2,
+        21,
+        21
+      ]
+    },
+    {
+      "key": "RotateCW",
+      "size": 25,
+      "sha256": "5c4f73bce5a279953371b37f5fb37b695aca82d96b0d8ed1183f8ed387b703fa",
+      "alpha_bounds": [
+        4,
+        2,
+        21,
+        22
+      ]
+    },
+    {
+      "key": "RotateCW",
+      "size": 30,
+      "sha256": "f74b8a913156c95f9b5245481758c6bf2f4252321ed84f4f034a59b65862fc72",
+      "alpha_bounds": [
+        5,
+        3,
+        26,
+        26
+      ]
+    },
+    {
+      "key": "RotateCW",
+      "size": 32,
+      "sha256": "eaa526e28007bade619f068411e0ed3a2b3d10d2664b78b4978d19555017fbcf",
+      "alpha_bounds": [
+        6,
+        3,
+        27,
+        28
+      ]
+    },
+    {
+      "key": "RotateCW",
+      "size": 40,
+      "sha256": "7f37b8e554109164aefe7956fdbd3acf8459c0d4b1a26df97617c97b9ad9863a",
+      "alpha_bounds": [
+        7,
+        4,
+        34,
+        35
+      ]
+    },
+    {
+      "key": "RotateCCW",
+      "size": 16,
+      "sha256": "b37c1b55e67caa041afc67c74627508c6056f6321501c32909b8fee3a665911f",
+      "alpha_bounds": [
+        2,
+        1,
+        13,
+        14
+      ]
+    },
+    {
+      "key": "RotateCCW",
+      "size": 20,
+      "sha256": "3af46d2847b391d23e58d114f31560320110ee023656414ffd879c9bef5f6072",
+      "alpha_bounds": [
+        3,
+        2,
+        17,
+        18
+      ]
+    },
+    {
+      "key": "RotateCCW",
+      "size": 24,
+      "sha256": "3359f1517cb787f5472153325edfb86d2b97793874a66e688f7c2d04d1b0d114",
+      "alpha_bounds": [
+        3,
+        2,
+        20,
+        21
+      ]
+    },
+    {
+      "key": "RotateCCW",
+      "size": 25,
+      "sha256": "a9789dd54c69063cf127a9f0055d59edec1ebdc424a8d5ecc45cc93fbc0b8b46",
+      "alpha_bounds": [
+        4,
+        2,
+        21,
+        22
+      ]
+    },
+    {
+      "key": "RotateCCW",
+      "size": 30,
+      "sha256": "f9927725c79dfe70a59791ded1c34b7f8f0ac4124c2d9180d7bb631175dcc111",
+      "alpha_bounds": [
+        4,
+        3,
+        25,
+        26
+      ]
+    },
+    {
+      "key": "RotateCCW",
+      "size": 32,
+      "sha256": "034300471a5231d23aeda269adeed77fe02663152342aeaaad76e3c96eee35ea",
+      "alpha_bounds": [
+        5,
+        3,
+        26,
+        28
+      ]
+    },
+    {
+      "key": "RotateCCW",
+      "size": 40,
+      "sha256": "5981c708b0190a09b12e1522eeae052b9535c0cd2298e0dc61315484aa8f9f4e",
+      "alpha_bounds": [
+        6,
+        4,
+        33,
+        35
+      ]
+    },
+    {
+      "key": "Mirror",
+      "size": 16,
+      "sha256": "f2b038e9b777067b6e734418526cd70c64a586d503b5fb963c4295a094744542",
+      "alpha_bounds": [
+        1,
+        1,
+        15,
+        15
+      ]
+    },
+    {
+      "key": "Mirror",
+      "size": 20,
+      "sha256": "150281fac5bf180d9c8f9a62014d537e37a7e26a4d45b3f0cad730c25a1d6f78",
+      "alpha_bounds": [
+        1,
+        1,
+        19,
+        19
+      ]
+    },
+    {
+      "key": "Mirror",
+      "size": 24,
+      "sha256": "58b27580badb3298c77a31164ff728acb7bded83d01888b6904d7a7d85586c39",
+      "alpha_bounds": [
+        1,
+        1,
+        23,
+        23
+      ]
+    },
+    {
+      "key": "Mirror",
+      "size": 25,
+      "sha256": "f18f4f298f0313d2a8c835b319b5089a9ba8f76dd695e61faa8902f4feac182b",
+      "alpha_bounds": [
+        1,
+        1,
+        24,
+        24
+      ]
+    },
+    {
+      "key": "Mirror",
+      "size": 30,
+      "sha256": "eff8ad90bc087ab6ab7025a2555a2f194be77cc30624d9331a9d4696aeaaf08d",
+      "alpha_bounds": [
+        1,
+        1,
+        29,
+        29
+      ]
+    },
+    {
+      "key": "Mirror",
+      "size": 32,
+      "sha256": "e96fce3605e9e61fa418654eec6c4b672f51ad54a80556d18fb4e3be40567a31",
+      "alpha_bounds": [
+        2,
+        2,
+        30,
+        30
+      ]
+    },
+    {
+      "key": "Mirror",
+      "size": 40,
+      "sha256": "29b509806f50f0c30ab7941fb8e23eeb28587d21ff235761d4f9ff72b1378661",
+      "alpha_bounds": [
+        2,
+        2,
+        38,
+        38
+      ]
+    },
+    {
+      "key": "Undo",
+      "size": 16,
+      "sha256": "6a585694496712f84a955a7e4b7452f7ec194583c69df6b3ea90189762543bcc",
+      "alpha_bounds": [
+        1,
+        1,
+        14,
+        15
+      ]
+    },
+    {
+      "key": "Undo",
+      "size": 20,
+      "sha256": "6a80ad0c4c5f002d8c4f550167225a204d7e57c11262c63ce11f0a64cce66640",
+      "alpha_bounds": [
+        2,
+        2,
+        17,
+        18
+      ]
+    },
+    {
+      "key": "Undo",
+      "size": 24,
+      "sha256": "ede1e512ed73e6a2586f350b92aa0c9cb75a32eba3bb3f918cc890dc04dde5c2",
+      "alpha_bounds": [
+        2,
+        2,
+        21,
+        22
+      ]
+    },
+    {
+      "key": "Undo",
+      "size": 25,
+      "sha256": "bef20f035f6b19ce86c47c59551d38e23c13d808e3e0d522612a797521bd70a6",
+      "alpha_bounds": [
+        2,
+        2,
+        21,
+        23
+      ]
+    },
+    {
+      "key": "Undo",
+      "size": 30,
+      "sha256": "b3beaf07fd059de4d72ac87f3f2ed61b2849438db1735eb978c8504155064387",
+      "alpha_bounds": [
+        3,
+        3,
+        26,
+        27
+      ]
+    },
+    {
+      "key": "Undo",
+      "size": 32,
+      "sha256": "28b6b92d3052c5781b807b8d2e4734e2e8a716f3c76ab9de05a1ce1bb18dadd7",
+      "alpha_bounds": [
+        3,
+        3,
+        27,
+        29
+      ]
+    },
+    {
+      "key": "Undo",
+      "size": 40,
+      "sha256": "8dc8144b7cd98ca10da2b5e047ce562a5a9339d763d8ee3cd75d89d589b411b5",
+      "alpha_bounds": [
+        4,
+        4,
+        34,
+        36
+      ]
+    },
+    {
+      "key": "Redo",
+      "size": 16,
+      "sha256": "80191d54eff8a2c8b59728b5fbbbc99e0a5ff021547d01edd2fa8b89695c2317",
+      "alpha_bounds": [
+        2,
+        1,
+        15,
+        15
+      ]
+    },
+    {
+      "key": "Redo",
+      "size": 20,
+      "sha256": "67ff8b57a8c67e6ba3a2d1274290ddc531eb4d976296df394ae6cc4e5c62ee2e",
+      "alpha_bounds": [
+        3,
+        2,
+        18,
+        18
+      ]
+    },
+    {
+      "key": "Redo",
+      "size": 24,
+      "sha256": "0f09f081e7e42e7dfc3ca51374cf65f667a3a14969306d8f60afed055a07072e",
+      "alpha_bounds": [
+        3,
+        2,
+        22,
+        22
+      ]
+    },
+    {
+      "key": "Redo",
+      "size": 25,
+      "sha256": "ed2f46b8a5d381680451d547bc14a66deda618168beb6a6985a93a3672fdd6ba",
+      "alpha_bounds": [
+        4,
+        2,
+        23,
+        23
+      ]
+    },
+    {
+      "key": "Redo",
+      "size": 30,
+      "sha256": "a80c7b19add65d948208c881b0c0e4e4f74a277f53de88cd3174bba66ab26ce2",
+      "alpha_bounds": [
+        4,
+        3,
+        27,
+        27
+      ]
+    },
+    {
+      "key": "Redo",
+      "size": 32,
+      "sha256": "3f7f4bb8b93a94c621c75b0d2557a9572d377fcf56162eb1ed46fd08df5ba095",
+      "alpha_bounds": [
+        5,
+        3,
+        29,
+        29
+      ]
+    },
+    {
+      "key": "Redo",
+      "size": 40,
+      "sha256": "b97b9ca66a697665eef8642469201688391ca8bafe5b9a6f1889c232c7fa5caa",
+      "alpha_bounds": [
+        6,
+        4,
+        36,
+        36
+      ]
+    },
+    {
+      "key": "SelectAll",
+      "size": 16,
+      "sha256": "b3d91358903b8a34dbc61ebeb33024213b6bd46c526e8d55dbc218df731b1178",
+      "alpha_bounds": [
+        1,
+        1,
+        15,
+        15
+      ]
+    },
+    {
+      "key": "SelectAll",
+      "size": 20,
+      "sha256": "863f3d8f719b8556a0b92ed96d71f7770e2dce99a9aaea502162710c8a038d4a",
+      "alpha_bounds": [
+        2,
+        2,
+        18,
+        18
+      ]
+    },
+    {
+      "key": "SelectAll",
+      "size": 24,
+      "sha256": "ebea3ef9f223661ca7158966e067c41a10572ac6a1f1196858bea235c5767349",
+      "alpha_bounds": [
+        2,
+        2,
+        22,
+        22
+      ]
+    },
+    {
+      "key": "SelectAll",
+      "size": 25,
+      "sha256": "66d679b9991c19a8bbc6f6b5daf531ea58d390da5b4a91ed35c2831b1a09c659",
+      "alpha_bounds": [
+        2,
+        2,
+        23,
+        23
+      ]
+    },
+    {
+      "key": "SelectAll",
+      "size": 30,
+      "sha256": "60b1b6b8347d3c987926d3cfaea22eb0f8d58f95b90aed0e6582a5da237c1f7f",
+      "alpha_bounds": [
+        3,
+        3,
+        27,
+        27
+      ]
+    },
+    {
+      "key": "SelectAll",
+      "size": 32,
+      "sha256": "de0883113aa713e3002f75339deee7374a600a1b84185aff6bfe77cc5f14b42d",
+      "alpha_bounds": [
+        3,
+        3,
+        29,
+        29
+      ]
+    },
+    {
+      "key": "SelectAll",
+      "size": 40,
+      "sha256": "c4cd1ab0043ab05ca2a8fb404e89f7a0f9149963a1708c26d1f8639b9cac17a2",
+      "alpha_bounds": [
+        4,
+        4,
+        36,
+        36
+      ]
+    },
+    {
+      "key": "DeselectAll",
+      "size": 16,
+      "sha256": "268be4cba9de8b62c8a640514de7136e7e5b0c74ba40647d0b074e3e4e9a7ebd",
+      "alpha_bounds": [
+        1,
+        1,
+        15,
+        15
+      ]
+    },
+    {
+      "key": "DeselectAll",
+      "size": 20,
+      "sha256": "0e885bbc4aa903ea31a947bf4e35f60af40887cebd001dc35e81a67a70b67502",
+      "alpha_bounds": [
+        2,
+        2,
+        18,
+        18
+      ]
+    },
+    {
+      "key": "DeselectAll",
+      "size": 24,
+      "sha256": "950e5de156cadc5ecdabdcec26efba489819f48d76a936584b70b440fbd4a313",
+      "alpha_bounds": [
+        2,
+        2,
+        22,
+        22
+      ]
+    },
+    {
+      "key": "DeselectAll",
+      "size": 25,
+      "sha256": "d2b36fa11c0803049c5b05ac46760049bf288eaa70a2aa7a5951edb5d6807aad",
+      "alpha_bounds": [
+        2,
+        2,
+        23,
+        23
+      ]
+    },
+    {
+      "key": "DeselectAll",
+      "size": 30,
+      "sha256": "33eac077d1e2c30727b4810990fb995d38278f5ce826c6f7777637b9e90b2139",
+      "alpha_bounds": [
+        3,
+        3,
+        27,
+        27
+      ]
+    },
+    {
+      "key": "DeselectAll",
+      "size": 32,
+      "sha256": "30613dafd78508844b7e8a39fdfffab7281356e275fc5e69c169e5aa91d19f6e",
+      "alpha_bounds": [
+        3,
+        3,
+        29,
+        29
+      ]
+    },
+    {
+      "key": "DeselectAll",
+      "size": 40,
+      "sha256": "f48152b4f0f4fcfcc924cc579a931d8bc30ce6795b2db2ceffb6a9c8846e00d5",
+      "alpha_bounds": [
+        4,
+        4,
+        36,
+        36
+      ]
+    },
+    {
+      "key": "Lock",
+      "size": 16,
+      "sha256": "8a7e3c1e7bed2b98d718362eb6453ae2ca1566c7c4efa54b5ffbea2791dc1bcd",
+      "alpha_bounds": [
+        2,
+        1,
+        14,
+        15
+      ]
+    },
+    {
+      "key": "Lock",
+      "size": 20,
+      "sha256": "cdb18930898c54b232fd5531195bfccd952eaf3fd8683490e88358cef7e7472d",
+      "alpha_bounds": [
+        3,
+        1,
+        17,
+        18
+      ]
+    },
+    {
+      "key": "Lock",
+      "size": 24,
+      "sha256": "67df083244f030e1ff6c3ad2550066eaca3f08c441e4ea2dcb55eb77d9590bc3",
+      "alpha_bounds": [
+        3,
+        1,
+        21,
+        22
+      ]
+    },
+    {
+      "key": "Lock",
+      "size": 25,
+      "sha256": "e40ce82d7e1df8239bfaf55f676fef86aa04e3ecfe65ad26bec3c5b8140fee9d",
+      "alpha_bounds": [
+        4,
+        1,
+        21,
+        23
+      ]
+    },
+    {
+      "key": "Lock",
+      "size": 30,
+      "sha256": "ad9c6f1ff0ddf1e712e7523bdff1f074b71edccc528764b6e1dea7360161812a",
+      "alpha_bounds": [
+        4,
+        1,
+        26,
+        27
+      ]
+    },
+    {
+      "key": "Lock",
+      "size": 32,
+      "sha256": "7c58082b00365fb252ef7b2c5c317831b19668f791545334df2c9d06e48f54cc",
+      "alpha_bounds": [
+        5,
+        2,
+        27,
+        29
+      ]
+    },
+    {
+      "key": "Lock",
+      "size": 40,
+      "sha256": "6af808f655432b6787d91db9ccd24686276826ac4484f2ec700139fb063fb12f",
+      "alpha_bounds": [
+        6,
+        2,
+        34,
+        36
+      ]
+    },
+    {
+      "key": "Unlock",
+      "size": 16,
+      "sha256": "2e58cf7ca9fffe848d1fdfcf4f8c84d5a2d9d114ec6ae7b7d5ca3134a27662df",
+      "alpha_bounds": [
+        2,
+        1,
+        14,
+        15
+      ]
+    },
+    {
+      "key": "Unlock",
+      "size": 20,
+      "sha256": "6bd2f7cc6d879ed587a84b23f42843ea728e99f3188575fb62fa66841b7da745",
+      "alpha_bounds": [
+        3,
+        1,
+        17,
+        18
+      ]
+    },
+    {
+      "key": "Unlock",
+      "size": 24,
+      "sha256": "181785a8eed3e06344738c00f50c6fa8bf82b184026e5844839706d2037122bc",
+      "alpha_bounds": [
+        3,
+        2,
+        21,
+        22
+      ]
+    },
+    {
+      "key": "Unlock",
+      "size": 25,
+      "sha256": "e6c2140d1d15a0706040a4a9a0e6255718c452c3c78f9d916a7f520b002583cb",
+      "alpha_bounds": [
+        4,
+        2,
+        21,
+        23
+      ]
+    },
+    {
+      "key": "Unlock",
+      "size": 30,
+      "sha256": "3a069f46ce04b1ee9ad3faa85697839922ed298b5033ba7fc398820c13143b41",
+      "alpha_bounds": [
+        4,
+        2,
+        26,
+        27
+      ]
+    },
+    {
+      "key": "Unlock",
+      "size": 32,
+      "sha256": "daa8a812e288d085f6c758716d78fe5802176354a454f54d3164e2b8931455e4",
+      "alpha_bounds": [
+        5,
+        2,
+        27,
+        29
+      ]
+    },
+    {
+      "key": "Unlock",
+      "size": 40,
+      "sha256": "83e01c3779385b05ae03999e7af6a1e1b29a2f1d206a0e72a1ddb097fccd9630",
+      "alpha_bounds": [
+        6,
+        3,
+        34,
+        36
+      ]
+    },
+    {
+      "key": "AlignPoints",
+      "size": 16,
+      "sha256": "770cb0b7fde69cb295aecbb5869ea4f650ca49d9c16891abdde0361497ee0f11",
+      "alpha_bounds": [
+        1,
+        1,
+        15,
+        14
+      ]
+    },
+    {
+      "key": "AlignPoints",
+      "size": 20,
+      "sha256": "fc6ec3cf5ad62fb91a4c4f9fba2c90c1de0424ac3e843c45581740813c33c670",
+      "alpha_bounds": [
+        2,
+        2,
+        18,
+        17
+      ]
+    },
+    {
+      "key": "AlignPoints",
+      "size": 24,
+      "sha256": "fd57d88de88ca03d4074bca0b60d0f87c9793e55d3d84ac32a871eab488c984f",
+      "alpha_bounds": [
+        2,
+        2,
+        22,
+        21
+      ]
+    },
+    {
+      "key": "AlignPoints",
+      "size": 25,
+      "sha256": "099b0a5a79aa6646ba12bfdaefd2bb74b39161f9c8fe77f897dfdfd95d21f032",
+      "alpha_bounds": [
+        2,
+        2,
+        23,
+        21
+      ]
+    },
+    {
+      "key": "AlignPoints",
+      "size": 30,
+      "sha256": "7175cfdff9a586a26959f3df11062c5c3392d3ef68f05675574a9674424d89aa",
+      "alpha_bounds": [
+        3,
+        3,
+        27,
+        26
+      ]
+    },
+    {
+      "key": "AlignPoints",
+      "size": 32,
+      "sha256": "db3a6f58eccd4786477113417b6e66965c5b686dc2ed1bea100e2b2ef7a242ac",
+      "alpha_bounds": [
+        3,
+        3,
+        29,
+        27
+      ]
+    },
+    {
+      "key": "AlignPoints",
+      "size": 40,
+      "sha256": "743308a4a69882e373ce0df434c20689b7f82c39d2b0f6ab940a7c2633c55230",
+      "alpha_bounds": [
+        4,
+        4,
+        36,
+        34
+      ]
+    },
+    {
+      "key": "Collapse",
+      "size": 16,
+      "sha256": "91156f5bafce22a8dc1a686f93fa4887f6d7943b84f9483dcd76995a88e32427",
+      "alpha_bounds": [
+        0,
+        2,
+        16,
+        14
+      ]
+    },
+    {
+      "key": "Collapse",
+      "size": 20,
+      "sha256": "4d09cf3e722131146f8618317e42318aeadf229d2d29b8c79152ad13db6b3032",
+      "alpha_bounds": [
+        0,
+        2,
+        20,
+        18
+      ]
+    },
+    {
+      "key": "Collapse",
+      "size": 24,
+      "sha256": "50716856ae37dab4130f0ed1a374914e9b2c42989ee600a1357a98e603cd823a",
+      "alpha_bounds": [
+        0,
+        3,
+        24,
+        21
+      ]
+    },
+    {
+      "key": "Collapse",
+      "size": 25,
+      "sha256": "bb652453bcb276f9fa787ee7e8c069fd4eee11d61de691da51c13160b401d073",
+      "alpha_bounds": [
+        0,
+        3,
+        24,
+        22
+      ]
+    },
+    {
+      "key": "Collapse",
+      "size": 30,
+      "sha256": "1b93cd0918b2ad0f7a407c008a69d848b0f9da617f1088425b9346687a795ed3",
+      "alpha_bounds": [
+        1,
+        4,
+        29,
+        26
+      ]
+    },
+    {
+      "key": "Collapse",
+      "size": 32,
+      "sha256": "ed10c98b903a8a7aefe44b41d143b83dd5f917fe282ef07b4b3a4827889110aa",
+      "alpha_bounds": [
+        1,
+        4,
+        31,
+        28
+      ]
+    },
+    {
+      "key": "Collapse",
+      "size": 40,
+      "sha256": "b040c5fff4a093e363773962425176aad76a6b9ffa6ed6b57e76455768fd6880",
+      "alpha_bounds": [
+        1,
+        5,
+        39,
+        35
+      ]
+    },
+    {
+      "key": "SplitEdge",
+      "size": 16,
+      "sha256": "d3ca70a63d8f971cb3bb476e0b942a37002636a2d8b631b53f210b0ce0a8cd86",
+      "alpha_bounds": [
+        0,
+        1,
+        16,
+        10
+      ]
+    },
+    {
+      "key": "SplitEdge",
+      "size": 20,
+      "sha256": "805a10421f4906abe12596fed1c2caf729c82806107aeb2b48ec766a6aa7e8e4",
+      "alpha_bounds": [
+        0,
+        1,
+        20,
+        13
+      ]
+    },
+    {
+      "key": "SplitEdge",
+      "size": 24,
+      "sha256": "712b107170c0b1c953d3fb09b2153e25f5f7eb87e589116d832158abe0f4a21f",
+      "alpha_bounds": [
+        0,
+        1,
+        24,
+        15
+      ]
+    },
+    {
+      "key": "SplitEdge",
+      "size": 25,
+      "sha256": "5fce58272ac195e68e5384ecec02d92bb533d269f2693bb500dc56d28b55c1e6",
+      "alpha_bounds": [
+        1,
+        1,
+        24,
+        16
+      ]
+    },
+    {
+      "key": "SplitEdge",
+      "size": 30,
+      "sha256": "eaa2238ea33b06e0d3ec553ad40459f82c74df4cd15e4ff62efa76a40fd4bce1",
+      "alpha_bounds": [
+        1,
+        1,
+        29,
+        19
+      ]
+    },
+    {
+      "key": "SplitEdge",
+      "size": 32,
+      "sha256": "8f2202b97df4531d8e774ee8296a6a436a287f3cac171f4b22adfd2f40be860d",
+      "alpha_bounds": [
+        1,
+        2,
+        31,
+        20
+      ]
+    },
+    {
+      "key": "SplitEdge",
+      "size": 40,
+      "sha256": "8b2c98eebc5ad78af915edd9f4af496c498aefc10368adfb3fb19f91cddd0f0a",
+      "alpha_bounds": [
+        1,
+        2,
+        39,
+        25
+      ]
+    },
+    {
+      "key": "ExtrudeEdge",
+      "size": 16,
+      "sha256": "a450ccea5d41a58e24e425039470ac3a3ce5c8b8a4bbbb2ef0f89ca93b2d9631",
+      "alpha_bounds": [
+        1,
+        1,
+        15,
+        15
+      ]
+    },
+    {
+      "key": "ExtrudeEdge",
+      "size": 20,
+      "sha256": "33af1bc38978bbe96758c4f8139a1bb55dc32b2769b4d85150bac76385a945da",
+      "alpha_bounds": [
+        2,
+        2,
+        18,
+        18
+      ]
+    },
+    {
+      "key": "ExtrudeEdge",
+      "size": 24,
+      "sha256": "1b7f2f15aae44ab95afeabc0ecf599751caeb904bdf54a60677650fc9440dfb9",
+      "alpha_bounds": [
+        2,
+        2,
+        22,
+        22
+      ]
+    },
+    {
+      "key": "ExtrudeEdge",
+      "size": 25,
+      "sha256": "baff986236ba6016fcd21e4cd19d7a520ffa184755b893b01def7e5b46d5a0b4",
+      "alpha_bounds": [
+        2,
+        2,
+        23,
+        23
+      ]
+    },
+    {
+      "key": "ExtrudeEdge",
+      "size": 30,
+      "sha256": "34545ec4e25e7fc4cb6f4ea08788ee8809c286062cbf17e308bca5d0745312d0",
+      "alpha_bounds": [
+        3,
+        3,
+        27,
+        27
+      ]
+    },
+    {
+      "key": "ExtrudeEdge",
+      "size": 32,
+      "sha256": "26cd8041a0e9cf062840a2ceb97d5a307c0a84ba6c2443d7899e59a643deb4bc",
+      "alpha_bounds": [
+        3,
+        3,
+        29,
+        29
+      ]
+    },
+    {
+      "key": "ExtrudeEdge",
+      "size": 40,
+      "sha256": "50c0dc74383daf74d2fa7756f8e81dc72eef96ae77a56da9a4c15c15d5074276",
+      "alpha_bounds": [
+        4,
+        4,
+        36,
+        36
+      ]
+    },
+    {
+      "key": "CreaseEdge",
+      "size": 16,
+      "sha256": "4495c3be3ec4537cf0ca2aa94953ca8c76562c56b47f0569e27b683efb507c7d",
+      "alpha_bounds": [
+        1,
+        3,
+        15,
+        15
+      ]
+    },
+    {
+      "key": "CreaseEdge",
+      "size": 20,
+      "sha256": "284d6d35c48743228a80dadbe844992ebf69636370cb7617e5aaac6d74e90296",
+      "alpha_bounds": [
+        2,
+        4,
+        18,
+        18
+      ]
+    },
+    {
+      "key": "CreaseEdge",
+      "size": 24,
+      "sha256": "11f422c41abda822f23689f92b7a4cf619e638ed0e3f4196ca192533d0c85f74",
+      "alpha_bounds": [
+        2,
+        5,
+        22,
+        22
+      ]
+    },
+    {
+      "key": "CreaseEdge",
+      "size": 25,
+      "sha256": "f8846071607576d5edd975fe86ec0ba4f2e04606261dc7df1401969da25c876f",
+      "alpha_bounds": [
+        2,
+        5,
+        23,
+        23
+      ]
+    },
+    {
+      "key": "CreaseEdge",
+      "size": 30,
+      "sha256": "6dba2a8f746754ea60d6efef448f524daa8c0dfe95111dbb1cfca17ca7742811",
+      "alpha_bounds": [
+        3,
+        6,
+        27,
+        27
+      ]
+    },
+    {
+      "key": "CreaseEdge",
+      "size": 32,
+      "sha256": "6cb13e52fc527bf4d8471d24d8358816ed867998e7aa0316be6892ce4b111ae9",
+      "alpha_bounds": [
+        3,
+        6,
+        29,
+        29
+      ]
+    },
+    {
+      "key": "CreaseEdge",
+      "size": 40,
+      "sha256": "87c8bd1a3f858b6f763df9e78fb6c1a9f7c53ef7838a8d362da1ea7ea9966c3f",
+      "alpha_bounds": [
+        4,
+        8,
+        36,
+        36
+      ]
+    },
+    {
+      "key": "NewCurve",
+      "size": 16,
+      "sha256": "e1b03ad7d7a03721f4abd0b4dc77832b8ee241960fa9a426946cf5181d9894d3",
+      "alpha_bounds": [
+        0,
+        1,
+        15,
+        14
+      ]
+    },
+    {
+      "key": "NewCurve",
+      "size": 20,
+      "sha256": "197fbde7c118aaec1a60e47e8cc99f020cb5f2d498e86aeab5a4411ee6a7b747",
+      "alpha_bounds": [
+        0,
+        1,
+        19,
+        18
+      ]
+    },
+    {
+      "key": "NewCurve",
+      "size": 24,
+      "sha256": "526048d30506cd68c7f0c62a917b330d788afe7a83bcd95012671100e6c552a5",
+      "alpha_bounds": [
+        0,
+        1,
+        23,
+        21
+      ]
+    },
+    {
+      "key": "NewCurve",
+      "size": 25,
+      "sha256": "b99113670f91155ea93c3429335ccad5995ddf0e55ad7f7dfa250bf1f74b861c",
+      "alpha_bounds": [
+        1,
+        1,
+        24,
+        22
+      ]
+    },
+    {
+      "key": "NewCurve",
+      "size": 30,
+      "sha256": "2512c9979655902b8264d134aa7f3446fa52f7cca2b150e1c2557e7ee712ba3e",
+      "alpha_bounds": [
+        1,
+        1,
+        29,
+        26
+      ]
+    },
+    {
+      "key": "NewCurve",
+      "size": 32,
+      "sha256": "dca3c258c359942c36ce214ba9e1b2734ba085d063e09e0f52259f88cf026d6e",
+      "alpha_bounds": [
+        1,
+        2,
+        30,
+        28
+      ]
+    },
+    {
+      "key": "NewCurve",
+      "size": 40,
+      "sha256": "23a408506c3eedd85d9b4bc74afe48aaf425dbad8ca92d7d3b925b0dd5679543",
+      "alpha_bounds": [
+        1,
+        2,
+        38,
+        35
+      ]
+    },
+    {
+      "key": "InvertFace",
+      "size": 16,
+      "sha256": "d750f893a6fe66bd1571a14df836f691b49c6e3843bad5d2a4fc1998de9e2c07",
+      "alpha_bounds": [
+        1,
+        1,
+        15,
+        15
+      ]
+    },
+    {
+      "key": "InvertFace",
+      "size": 20,
+      "sha256": "65c4d0697127b44fe2ca09f39f2b84a7b9ecd4ea241f3f297b8a23347b2e6380",
+      "alpha_bounds": [
+        2,
+        1,
+        18,
+        19
+      ]
+    },
+    {
+      "key": "InvertFace",
+      "size": 24,
+      "sha256": "798a6fb72d05cea6be8490d1430997f7e7d310b88bb05fb4120afdcb6dc05df0",
+      "alpha_bounds": [
+        2,
+        1,
+        22,
+        23
+      ]
+    },
+    {
+      "key": "InvertFace",
+      "size": 25,
+      "sha256": "832345df48dc425259af6fbef27c5f8ac0a0483d110d60f24be2e1163da1afd7",
+      "alpha_bounds": [
+        2,
+        1,
+        23,
+        24
+      ]
+    },
+    {
+      "key": "InvertFace",
+      "size": 30,
+      "sha256": "daf5e7198cb7193c56a2f24d8632ef132d59c57a87c189c0c25116cd625d170a",
+      "alpha_bounds": [
+        3,
+        1,
+        27,
+        29
+      ]
+    },
+    {
+      "key": "InvertFace",
+      "size": 32,
+      "sha256": "fa6340d6cc5330267adb44dfacf1c4f4018d919eb61db741187a94d6ef0a7016",
+      "alpha_bounds": [
+        3,
+        2,
+        29,
+        30
+      ]
+    },
+    {
+      "key": "InvertFace",
+      "size": 40,
+      "sha256": "6150167b08de44023b369d3089ae2c2db4bd3c1efecdc209a4b40e5bd08acbc7",
+      "alpha_bounds": [
+        4,
+        2,
+        36,
+        38
+      ]
+    },
+    {
+      "key": "Markers",
+      "size": 16,
+      "sha256": "da13b75e8facf6767324a3ee8864eb2a89d906e1eb730b46bf00c0cb3f6994e9",
+      "alpha_bounds": [
+        4,
+        2,
+        14,
+        15
+      ]
+    },
+    {
+      "key": "Markers",
+      "size": 20,
+      "sha256": "b6286cd9f7675480f98660460248e61671238b3a1220e0194599f274f688013f",
+      "alpha_bounds": [
+        5,
+        3,
+        17,
+        19
+      ]
+    },
+    {
+      "key": "Markers",
+      "size": 24,
+      "sha256": "11a2fe415c5e6c33301c118b8a80d7d08cd5d0d670f5aeeb2b254c0b2d99fad0",
+      "alpha_bounds": [
+        6,
+        3,
+        21,
+        23
+      ]
+    },
+    {
+      "key": "Markers",
+      "size": 25,
+      "sha256": "6e2b82e2e1f93fbae51505263c5840d2a2f028e1af618a79e195d0af47273cbd",
+      "alpha_bounds": [
+        6,
+        4,
+        21,
+        24
+      ]
+    },
+    {
+      "key": "Markers",
+      "size": 30,
+      "sha256": "e497c008dae3a7ba4ec4ab0b7289cfc6be23e93d3b5b4a37119982e9ebd6d022",
+      "alpha_bounds": [
+        7,
+        4,
+        26,
+        29
+      ]
+    },
+    {
+      "key": "Markers",
+      "size": 32,
+      "sha256": "ba3582ed883ab50bc63d10470299161b5cc1df77d749b6e9e352b3344c8d5d0a",
+      "alpha_bounds": [
+        8,
+        5,
+        27,
+        30
+      ]
+    },
+    {
+      "key": "Markers",
+      "size": 40,
+      "sha256": "abcd76a88970e0bcaa30bc42ab78be542abc45559b6db88b637599f91ac005f4",
+      "alpha_bounds": [
+        10,
+        6,
+        34,
+        38
+      ]
+    },
+    {
+      "key": "Flowlines",
+      "size": 16,
+      "sha256": "fadef402552627bf79d5b006e5f98165cef7b6a2c3674e47903dea5e14942f33",
+      "alpha_bounds": [
+        1,
+        1,
+        15,
+        14
+      ]
+    },
+    {
+      "key": "Flowlines",
+      "size": 20,
+      "sha256": "4ce5161e1b7df8417e88619e45512e14611bd07bf7b81042dfa18c80501fed87",
+      "alpha_bounds": [
+        1,
+        2,
+        19,
+        17
+      ]
+    },
+    {
+      "key": "Flowlines",
+      "size": 24,
+      "sha256": "4a8f3655d30fa529292b6850d8ca731bc54e96a126a07c434f2742bc889875cb",
+      "alpha_bounds": [
+        1,
+        2,
+        23,
+        21
+      ]
+    },
+    {
+      "key": "Flowlines",
+      "size": 25,
+      "sha256": "ef71c8425f59e2f18e34f41ffa6e64c61ca3785f041ac82bd03b0fa6252d54fb",
+      "alpha_bounds": [
+        1,
+        2,
+        24,
+        21
+      ]
+    },
+    {
+      "key": "Flowlines",
+      "size": 30,
+      "sha256": "7f8f19b2ddc253e7e719cc09b557129b95268533c0c96fb7bdbf71393490ac70",
+      "alpha_bounds": [
+        1,
+        3,
+        29,
+        26
+      ]
+    },
+    {
+      "key": "Flowlines",
+      "size": 32,
+      "sha256": "80a3bebee1444581eb0f1ecafe4984b3e3e4e7f42661b7e515325dafa83c8135",
+      "alpha_bounds": [
+        2,
+        3,
+        30,
+        27
+      ]
+    },
+    {
+      "key": "Flowlines",
+      "size": 40,
+      "sha256": "ee1179beef947d76b995bfdde6dd5645f623f2efc00c0a0842bb21b595034b30",
+      "alpha_bounds": [
+        2,
+        4,
+        38,
+        34
+      ]
+    },
+    {
+      "key": "FreeObjects",
+      "size": 16,
+      "sha256": "8a568a3e865da8d2892905742bd1dba96599ab41737afdd2c4e56c9832325a90",
+      "alpha_bounds": [
+        1,
+        1,
+        15,
+        15
+      ]
+    },
+    {
+      "key": "FreeObjects",
+      "size": 20,
+      "sha256": "59bd1cbf6b584f7ecb544e2c08e13d467bcc2edba2ca5d67cbeff76d32280bd3",
+      "alpha_bounds": [
+        1,
+        2,
+        18,
+        18
+      ]
+    },
+    {
+      "key": "FreeObjects",
+      "size": 24,
+      "sha256": "8c595a9d2cd2eea726b3aaba1f0f87dc3758b806887a357ec6995c7d7313dc48",
+      "alpha_bounds": [
+        1,
+        2,
+        22,
+        22
+      ]
+    },
+    {
+      "key": "FreeObjects",
+      "size": 25,
+      "sha256": "351bdf77997a8edce190d67fe76e0a68ddb1a7fd560e1e851ec3510e907047fd",
+      "alpha_bounds": [
+        1,
+        2,
+        23,
+        23
+      ]
+    },
+    {
+      "key": "FreeObjects",
+      "size": 30,
+      "sha256": "4f3be85acdefccff43f6bf63a9813780e0858cef11a4591d12b156b5bef29740",
+      "alpha_bounds": [
+        1,
+        3,
+        27,
+        27
+      ]
+    },
+    {
+      "key": "FreeObjects",
+      "size": 32,
+      "sha256": "be18fd5f468189c590c0dff69d13fe27873b30af069569791464eac0c1b0528e",
+      "alpha_bounds": [
+        2,
+        3,
+        29,
+        29
+      ]
+    },
+    {
+      "key": "FreeObjects",
+      "size": 40,
+      "sha256": "7c38c7ed961f660dd834289fdd0ba02116e4eea5f94aec5d182e972c2135dffa",
+      "alpha_bounds": [
+        2,
+        4,
+        36,
+        36
+      ]
+    },
+    {
+      "key": "Dimensions",
+      "size": 16,
+      "sha256": "d68931221a85f36fb43e4f38fe6461d301d14911c1810ac6516ef69c252a9656",
+      "alpha_bounds": [
+        1,
+        1,
+        15,
+        15
+      ]
+    },
+    {
+      "key": "Dimensions",
+      "size": 20,
+      "sha256": "b51525dcefe66a502ad709aaf23a87b3a94b99565ab05b6b8c3f1000289e22a3",
+      "alpha_bounds": [
+        2,
+        2,
+        18,
+        18
+      ]
+    },
+    {
+      "key": "Dimensions",
+      "size": 24,
+      "sha256": "9729b96e902fbe55312e41596a0b579c5abb2608286fc7397ccf02b677b19c4e",
+      "alpha_bounds": [
+        2,
+        2,
+        22,
+        22
+      ]
+    },
+    {
+      "key": "Dimensions",
+      "size": 25,
+      "sha256": "1c65f2b9ede69650c3b41fde3d43b13f5bd6e82f9a87b70ce8f62bddb00fdf46",
+      "alpha_bounds": [
+        2,
+        2,
+        23,
+        23
+      ]
+    },
+    {
+      "key": "Dimensions",
+      "size": 30,
+      "sha256": "4a5f68f227241ca02754b7479007ac47ea0ed726bbd468c5532ba26f6b76f348",
+      "alpha_bounds": [
+        3,
+        3,
+        27,
+        27
+      ]
+    },
+    {
+      "key": "Dimensions",
+      "size": 32,
+      "sha256": "20c6e76492bc2684315076110920000924f0957896211399dd7042b998bfe47a",
+      "alpha_bounds": [
+        3,
+        3,
+        29,
+        29
+      ]
+    },
+    {
+      "key": "Dimensions",
+      "size": 40,
+      "sha256": "5c04fb69b34861521f3f6d193acabbdad5904dbe6e3262078105338a670ff260",
+      "alpha_bounds": [
+        4,
+        4,
+        36,
+        36
+      ]
+    },
+    {
+      "key": "CheckEdges",
+      "size": 16,
+      "sha256": "fd375e1e74c3e97e0750c9d706973e6a8d56281c72df7b26addc0ff1de55ff82",
+      "alpha_bounds": [
+        2,
+        2,
+        14,
+        13
+      ]
+    },
+    {
+      "key": "CheckEdges",
+      "size": 20,
+      "sha256": "bdc6836a675a55f59bf50cef6f0f6a7cdeb0ccebb8dc8ac37bb76e4e033f6d0c",
+      "alpha_bounds": [
+        3,
+        3,
+        17,
+        16
+      ]
+    },
+    {
+      "key": "CheckEdges",
+      "size": 24,
+      "sha256": "952be7cf308365e642ed2dea5dbb03eae4befebcf769a025eac809f8aa59a011",
+      "alpha_bounds": [
+        3,
+        3,
+        21,
+        19
+      ]
+    },
+    {
+      "key": "CheckEdges",
+      "size": 25,
+      "sha256": "ce9b881d5cdf0f6c28f9c00a69f12a6d25053b362d60aee3a64ac7cf3186617c",
+      "alpha_bounds": [
+        4,
+        4,
+        21,
+        20
+      ]
+    },
+    {
+      "key": "CheckEdges",
+      "size": 30,
+      "sha256": "022135991f95aa365e00f906a394882b113120883a62bb92a0bd7fd2c83a6544",
+      "alpha_bounds": [
+        4,
+        4,
+        26,
+        24
+      ]
+    },
+    {
+      "key": "CheckEdges",
+      "size": 32,
+      "sha256": "dbce8b8c1c53ae24fa8beaf8da7618f5de7860ff4f6cfdb3cd6dcbfb7acf79ee",
+      "alpha_bounds": [
+        5,
+        5,
+        27,
+        26
+      ]
+    },
+    {
+      "key": "CheckEdges",
+      "size": 40,
+      "sha256": "9607c10617a783fd19191ad5f4e012bcd6a48441a71b6c82a9b7b517ee9dd870",
+      "alpha_bounds": [
+        6,
+        6,
+        34,
+        32
+      ]
+    },
+    {
+      "key": "PartName",
+      "size": 16,
+      "sha256": "c4df1614d4ac9a46c5689edd3c45abb7cb502427fff59d6369af90a46c05527f",
+      "alpha_bounds": [
+        1,
+        2,
+        15,
+        15
+      ]
+    },
+    {
+      "key": "PartName",
+      "size": 20,
+      "sha256": "89fd839dbb19b287fe94bb7f8400a8138bcb68bb4509bf17a9a4769c7a10d647",
+      "alpha_bounds": [
+        2,
+        3,
+        18,
+        18
+      ]
+    },
+    {
+      "key": "PartName",
+      "size": 24,
+      "sha256": "82c530ad60b3b5900df6da0e99fe6e5b513488c32ebc6ec93aa1b5adfa9e4a9d",
+      "alpha_bounds": [
+        2,
+        3,
+        22,
+        22
+      ]
+    },
+    {
+      "key": "PartName",
+      "size": 25,
+      "sha256": "aa84937a33448feb776b1f8508fa9e932d47e793f1a7764cea7191bf70a6c7f0",
+      "alpha_bounds": [
+        2,
+        4,
+        23,
+        23
+      ]
+    },
+    {
+      "key": "PartName",
+      "size": 30,
+      "sha256": "6f9e8d2878536374648ffd887df2b45469677b4c6e97147a9986c8e195e454fd",
+      "alpha_bounds": [
+        3,
+        4,
+        27,
+        27
+      ]
+    },
+    {
+      "key": "PartName",
+      "size": 32,
+      "sha256": "cfea1b7cc7d0c1e9fa0c11aa5a9e92b2d8c53c8f530a09aab38614b0dfed0649",
+      "alpha_bounds": [
+        3,
+        5,
+        29,
+        29
+      ]
+    },
+    {
+      "key": "PartName",
+      "size": 40,
+      "sha256": "590d2996e6a6df06906b2840c12a6110650c524b66f5da8e342e06282554f942",
+      "alpha_bounds": [
+        4,
+        6,
+        36,
+        36
+      ]
+    },
+    {
+      "key": "ObjectDetails",
+      "size": 16,
+      "sha256": "0c641a3c6425a5515660c108031e51175f0c74fcc161a96f410d4d352747c082",
+      "alpha_bounds": [
+        1,
+        1,
+        15,
+        15
+      ]
+    },
+    {
+      "key": "ObjectDetails",
+      "size": 20,
+      "sha256": "95db1637e37083d74d1795262fc207caa6161ed27c73db8c64f03f40e6a38ed8",
+      "alpha_bounds": [
+        1,
+        2,
+        19,
+        18
+      ]
+    },
+    {
+      "key": "ObjectDetails",
+      "size": 24,
+      "sha256": "8baca4dbf6ad3113e8a9ca30e3da3f73af78236ee97650bbc6acb525f9bff374",
+      "alpha_bounds": [
+        2,
+        2,
+        22,
+        22
+      ]
+    },
+    {
+      "key": "ObjectDetails",
+      "size": 25,
+      "sha256": "2363fbd9aee812a1a2cc3782c827c676e64ac0153f36d6bdc8dbb83d7dd09801",
+      "alpha_bounds": [
+        2,
+        2,
+        23,
+        23
+      ]
+    },
+    {
+      "key": "ObjectDetails",
+      "size": 30,
+      "sha256": "26b5e936fb948f5fe1e4c86baaebe64edc87a5da3eb1e372c5424fd51fd760fa",
+      "alpha_bounds": [
+        2,
+        3,
+        28,
+        27
+      ]
+    },
+    {
+      "key": "ObjectDetails",
+      "size": 32,
+      "sha256": "e22e1aac84c416c92b29778d6f66e047a0a351f684b263c6668876ce93ce297b",
+      "alpha_bounds": [
+        2,
+        3,
+        30,
+        29
+      ]
+    },
+    {
+      "key": "ObjectDetails",
+      "size": 40,
+      "sha256": "7ad0b4bea5ea6696dfbd84babbf7c06fa75b4130b0a63aaa45ea27627e285343",
+      "alpha_bounds": [
+        3,
+        4,
+        37,
+        36
+      ]
+    }
+  ],
+  "local_visual_review": "inspected full gallery plus native-size excerpts; not a Figma screenshot",
+  "figma_visual_review": "not_run: MCP Starter call quota"
+}

@@ -1,0 +1,553 @@
+{
+  "entries": [
+    {
+      "source": "historical/product-tests/FreeBackgroundFrameRegression.pas",
+      "sha256": "13cad28c5149292748f44510c82b6b3b21dfc5052510ad309998fb7197cd1279",
+      "disposition": "integrated",
+      "probe": "FreeBackgroundFrameRegression",
+      "path": "probes/history/FreeBackgroundFrameRegression.pas",
+      "mode": "assertion",
+      "reason": "隔离编译运行；检查确定性的缓存、像素或数据状态行为。"
+    },
+    {
+      "source": "historical/product-tests/FreeLabelAnimationTests.pas",
+      "sha256": "857f7342ab563f8ce20cbf0686e9eb5a6c77ea60f4617818d76e3d697bef91ec",
+      "disposition": "integrated",
+      "probe": "FreeLabelAnimationTests",
+      "path": "probes/history/FreeLabelAnimationTests.pas",
+      "mode": "assertion",
+      "reason": "隔离编译运行；检查确定性的缓存、像素或数据状态行为。"
+    },
+    {
+      "source": "historical/product-tests/FreeLabelLayoutTests.pas",
+      "sha256": "837edf09301486e843e11de0c8a19d0e5f41135b36d464fbb9feb1ecea087151",
+      "disposition": "integrated",
+      "probe": "FreeLabelLayoutTests",
+      "path": "probes/history/FreeLabelLayoutTests.pas",
+      "mode": "assertion",
+      "reason": "隔离编译运行；检查确定性的缓存、像素或数据状态行为。"
+    },
+    {
+      "source": "historical/product-tests/FreeMarkerOverlayOrderTests.pas",
+      "sha256": "486663b326dbd4964426bfd2408410c20cbc550ded5f8e8976e229064f2f9b5f",
+      "disposition": "integrated",
+      "probe": "FreeMarkerOverlayOrderTests",
+      "path": "probes/history/FreeMarkerOverlayOrderTests.pas",
+      "mode": "assertion",
+      "reason": "隔离编译运行；检查确定性的缓存、像素或数据状态行为。"
+    },
+    {
+      "source": "historical/product-tests/FreePointPulseCompletionTests.pas",
+      "sha256": "35c630b75d7ab9ae25d95d67f65d8167b9cfc5126e36f1a2c15cf6e93fc1ac49",
+      "disposition": "integrated",
+      "probe": "FreePointPulseCompletionTests",
+      "path": "probes/history/FreePointPulseCompletionTests.pas",
+      "mode": "assertion",
+      "reason": "隔离编译运行；检查确定性的缓存、像素或数据状态行为。"
+    },
+    {
+      "source": "historical/product-tests/FreeShipLabelDrawProbe.pas",
+      "sha256": "d7d27bb41f0fddf09a22333761bcdbc573e9bfe4e4499ed6ab20fdfb940e8a3e",
+      "disposition": "replaced",
+      "entry": "freeship_ui_test.py --case all",
+      "reason": "逐点身份、绘制及矩形证据已有探针；不沿用把所有矩形相交直接当失败的规则。"
+    },
+    {
+      "source": "historical/product-tests/FreeToolbarRoutesTests.pas",
+      "sha256": "7b98040344711af7b3651a24e0e28f1199d202e6ec37fbd6ee76508d171d49d4",
+      "disposition": "retired",
+      "reason": "禁止撤销/重做出现在菜单等旧布局断言，与现行按动作发现入口的测试原则冲突。",
+      "entry": "freeship_ui_test.py --case inventory"
+    },
+    {
+      "source": "historical/product-tests/FreeZoomBoundsTests.pas",
+      "sha256": "fc2a6cd5a63ea4f80e64aa9ca3e2bdeb4a926cd708e704a5a7659282bd9bdf9e",
+      "disposition": "integrated",
+      "probe": "FreeZoomBoundsTests",
+      "path": "probes/history/FreeZoomBoundsTests.pas",
+      "mode": "assertion",
+      "reason": "隔离编译运行；检查确定性的缓存、像素或数据状态行为。"
+    },
+    {
+      "source": "historical/product-tests/run-background-frame-regression.py",
+      "sha256": "d16427b230d323979d4d45f73370500666e2239b3fe014f94cd499d3042dd935",
+      "disposition": "non_test_tool",
+      "reason": "旧包装器在产品目录生成工程、EXE和日志；已用隔离构建器运行同一背景边框探针，不再就地编译。"
+    },
+    {
+      "source": "historical/temporary/about_language_test.pas",
+      "sha256": "3e6c8e583408067b9ac666351674f147f835df6fad90623b19cf47ae99750027",
+      "disposition": "retired",
+      "reason": "按行列写死署名、七种语言数及控件删除，混合了当次内容验收；语言数据改由通用关于页采集。",
+      "entry": "historical_regression.py --run-reviewed --probe historical-ui"
+    },
+    {
+      "source": "historical/temporary/about_layout_test.pas",
+      "sha256": "cfc002cce2fd8ec91aebe5b2a36b38d0257870608c826ae80c4b52822c0af7a9",
+      "disposition": "retired",
+      "reason": "关于页旧内嵌折叠面板已改为独立信息窗；旧控件类型、固定尺寸和互斥规则已失效。",
+      "entry": "historical_regression.py --run-reviewed --probe historical-ui"
+    },
+    {
+      "source": "historical/temporary/about_popup_test.pas",
+      "sha256": "73e0aee9c4e74f178acb8910940a04b597b208e96f5b34d447074e177aa81b70",
+      "disposition": "retired",
+      "reason": "固定行数、无滚动条和指定布局不是通用正确性；信息窗内容与Esc回调由新探针采集。",
+      "entry": "historical_regression.py --run-reviewed --probe historical-ui"
+    },
+    {
+      "source": "historical/temporary/about_test.pas",
+      "sha256": "351185e5bbffc6ccad1bdfd1c72b7c6b2513c87cef5335d63fd1352ddcaf032b",
+      "disposition": "retired",
+      "reason": "断言删除帮助菜单、关于按钮最右、固定字号及旧TButton折叠面板，属于已变更界面设计。",
+      "entry": "historical_regression.py --run-reviewed --probe historical-ui"
+    },
+    {
+      "source": "historical/temporary/animation_test.pas",
+      "sha256": "857f7342ab563f8ce20cbf0686e9eb5a6c77ea60f4617818d76e3d697bef91ec",
+      "disposition": "replaced",
+      "reason": "与维护版原始来源SHA-256完全相同，直接复用已接入动画回归，避免重复执行和两种结果口径。",
+      "entry": "historical_regression.py --run-reviewed --probe FreeLabelAnimationTests"
+    },
+    {
+      "source": "historical/temporary/apply-pending.ps1",
+      "sha256": "e86a9bb763c6538a19674cb03d5ec51439cf7341147cd8d18d2b701bcfe1d4f3",
+      "disposition": "non_test_tool",
+      "reason": "安装器会等待并替换用户EXE，不是测试；正式程序绝不能作为回归写入目标。"
+    },
+    {
+      "source": "historical/temporary/bfs_overlay_test.pas",
+      "sha256": "51aef40836c5f71520de1de64e56df3ecc1007cc22c243a256e78cb66d7b82f5",
+      "disposition": "integrated",
+      "probe": "bfs_overlay_test",
+      "path": "probes/history/bfs_overlay_test.pas",
+      "mode": "observation",
+      "reason": "隔离编译并保留原场景；历史运动阈值/布局偏好仅作为观察，不冒充当前设计要求。"
+    },
+    {
+      "source": "historical/temporary/boundary_continuity_test.pas",
+      "sha256": "e2afa33f41a074c00e9888d4e9194911bebe2fd73d7c6e150ad0740c2bdf6f28",
+      "disposition": "integrated",
+      "probe": "boundary_continuity_test",
+      "path": "probes/history/boundary_continuity_test.pas",
+      "mode": "observation",
+      "reason": "隔离编译并保留原场景；历史运动阈值/布局偏好仅作为观察，不冒充当前设计要求。"
+    },
+    {
+      "source": "historical/temporary/brand_credit_test.pas",
+      "sha256": "60cd4232f74ae94376430e3a6456b5d073ae9fa7535c379e9035b7428eb046a9",
+      "disposition": "retired",
+      "reason": "品牌与贡献描述的指定字符串属于当次文案，不应永久锁定；新探针保留实际内容。",
+      "entry": "historical_regression.py --run-reviewed --probe historical-ui"
+    },
+    {
+      "source": "historical/temporary/build-native-composition.py",
+      "sha256": "6dea1ebaff5cd73c99a9e8824ae357542f9ce47ff709d73f24c40c04816ccb5e",
+      "disposition": "non_test_tool",
+      "reason": "一次性就地构建脚本，会改工程文件和版本文件；隔离构建器已提供同类编译能力。"
+    },
+    {
+      "source": "historical/temporary/build-post-commit-render.py",
+      "sha256": "e6f2a667f554fe2dc0d2ed2fcb6332d530fc8668d410bc15b87f623d4f566f8e",
+      "disposition": "non_test_tool",
+      "reason": "一次性就地构建脚本，会改工程文件和版本文件；隔离构建器已提供同类编译能力。"
+    },
+    {
+      "source": "historical/temporary/build-stable-fill.py",
+      "sha256": "8e3d80f718493c92335b98f5955db1c1bbe0719a28b1269cd63af8db31365af0",
+      "disposition": "non_test_tool",
+      "reason": "一次性就地构建脚本，会改工程文件和版本文件；隔离构建器已提供同类编译能力。"
+    },
+    {
+      "source": "historical/temporary/cached_drag_test.pas",
+      "sha256": "2909b7d7b995f89268f7d0f85dd2913de2f85d4575992da7963368a01295fa4d",
+      "disposition": "integrated",
+      "probe": "cached_drag_test",
+      "path": "probes/history/cached_drag_test.pas",
+      "mode": "assertion",
+      "reason": "隔离编译运行；检查确定性的缓存、像素或数据状态行为。"
+    },
+    {
+      "source": "historical/temporary/close_button_audit_test.pas",
+      "sha256": "78f235e6363ec39218015afb37457446ad9af7b0073c38d9a0ce977df8777a01",
+      "disposition": "retired",
+      "reason": "固定九窗体隐藏按钮清单不是通用UI规则；有价值的关闭接受语义由新隐藏探针保留。",
+      "entry": "historical_regression.py --run-reviewed --probe historical-ui"
+    },
+    {
+      "source": "historical/temporary/compile-local.ps1",
+      "sha256": "ec5e106b94b65ed196bfe2e25d984e1057ce3dc0262ac97f9bfd4d760c289751",
+      "disposition": "non_test_tool",
+      "reason": "固定K/L盘编译运行包装器，已由隔离构建器替代。"
+    },
+    {
+      "source": "historical/temporary/continuity_test.pas",
+      "sha256": "8ca27eebe46534ca6445273b1507ad06e9e87443062160b13e8b3d1a5dafffbc",
+      "disposition": "integrated",
+      "probe": "continuity_test",
+      "path": "probes/history/continuity_test.pas",
+      "mode": "observation",
+      "reason": "隔离编译并保留原场景；历史运动阈值/布局偏好仅作为观察，不冒充当前设计要求。"
+    },
+    {
+      "source": "historical/temporary/coordinate_bug_probe.pas",
+      "sha256": "5299625611d5fac41e3cd0d6768cd12931fd015f79e2834ab8731b95c608c446",
+      "disposition": "replaced",
+      "entry": "freeship_ui_test.py --case coordinates",
+      "reason": "已有坐标菜单回调、轴值及可见点状态检查，原脚本依赖固定个人模型。"
+    },
+    {
+      "source": "historical/temporary/copyright_language_test.pas",
+      "sha256": "e4ee50bd6f9e67dcf32506697e643e4a17ee5d7dc8affc993136a20f0120a77d",
+      "disposition": "retired",
+      "reason": "按固定行号比较版权译文，当前采用全表采集供内容复核。",
+      "entry": "historical_regression.py --run-reviewed --probe historical-ui"
+    },
+    {
+      "source": "historical/temporary/credit_group_test.pas",
+      "sha256": "9c87b3e59ced2e3cb4859aa20ffdf457ab27158da8bde70a861ae7e298700a81",
+      "disposition": "retired",
+      "reason": "固定11行、三个空白分组及年份所在行属于旧版排版约束。",
+      "entry": "historical_regression.py --run-reviewed --probe historical-ui"
+    },
+    {
+      "source": "historical/temporary/credits_test.pas",
+      "sha256": "81b8dfbbff2dfd72017b79c208530719505a5d20edbc2e9489929b49a35e8c22",
+      "disposition": "retired",
+      "reason": "两列六行旧署名表已变更；不沿用旧列号和文案。",
+      "entry": "historical_regression.py --run-reviewed --probe historical-ui"
+    },
+    {
+      "source": "historical/temporary/edge_clip_test.pas",
+      "sha256": "97a0ddb3c0bdeed5d718b2412c2528bd896e94f23f8b18ee3ec98d9d42f5fc51",
+      "disposition": "integrated",
+      "probe": "edge_clip_test",
+      "path": "probes/history/edge_clip_test.pas",
+      "mode": "observation",
+      "reason": "隔离编译并保留原场景；历史运动阈值/布局偏好仅作为观察，不冒充当前设计要求。"
+    },
+    {
+      "source": "historical/temporary/emf_device_probe.pas",
+      "sha256": "55ef0c356f954ac48169044cec3813efeddb0ad114da5905b103cb40b24b8155",
+      "disposition": "integrated",
+      "probe": "emf_device_probe",
+      "path": "probes/history/emf_device_probe.pas",
+      "mode": "observation",
+      "reason": "隔离编译并保留原场景；历史运动阈值/布局偏好仅作为观察，不冒充当前设计要求。"
+    },
+    {
+      "source": "historical/temporary/exception_close_test.pas",
+      "sha256": "8fe8b3a641f2bf1784f9af88dc11bbd22bc4c24a247511ebd036a5abf9756ad4",
+      "disposition": "retired",
+      "reason": "调用Show操作真实窗口且断言没有任何按钮；改用隐藏关闭行为探针，不执行原Show。",
+      "entry": "historical_regression.py --run-reviewed --probe historical-ui"
+    },
+    {
+      "source": "historical/temporary/full_animation_bench.pas",
+      "sha256": "96496b719737da17de10a33a65ebc899292219df2e2913a23a9f60523df556d2",
+      "disposition": "integrated",
+      "reason": "原四视图/模型性能或投影采集保留；模型改为私有副本，计时和图片仅供复核，不设性能及美观通过线。",
+      "probe": "full_animation_bench",
+      "path": "probes/history/full_animation_bench.pas",
+      "mode": "observation"
+    },
+    {
+      "source": "historical/temporary/gravity_test.pas",
+      "sha256": "23cbe2e24b3eead2c8fcb8afd0349f3cf4564b841b6e43ea2da08e70a813d6dc",
+      "disposition": "integrated",
+      "probe": "gravity_test",
+      "path": "probes/history/gravity_test.pas",
+      "mode": "observation",
+      "reason": "隔离编译并保留原场景；历史运动阈值/布局偏好仅作为观察，不冒充当前设计要求。"
+    },
+    {
+      "source": "historical/temporary/icon_integration_test.pas",
+      "sha256": "a85fdb46f46bc7c3a401591cbf910655453ddb24a5897667a4e288cc6c5efbfb",
+      "disposition": "retired",
+      "reason": "旧RongShip图标API、11图标和恰好两个按钮不再作为设计断言；资源尺寸由新图标探针按文件枚举。",
+      "entry": "historical_regression.py --run-reviewed --probe historical-icons；historical_assets.py"
+    },
+    {
+      "source": "historical/temporary/icon_report.py",
+      "sha256": "5cde70efe522520366ed8fe69caccf68ed0faf122d3c9ed1f3b69b5c286a3adc",
+      "disposition": "non_test_tool",
+      "reason": "生成旧图标文档和图集，不包含产品行为断言。"
+    },
+    {
+      "source": "historical/temporary/inventory_icons.py",
+      "sha256": "a7290b1ca1aa689cc4c39d5e6c0afb8adea1c0db81a62d108a0c149c48cf6d85",
+      "disposition": "non_test_tool",
+      "reason": "静态图标盘点与CSV导出工具，不是运行时测试。"
+    },
+    {
+      "source": "historical/temporary/label_fade_test.pas",
+      "sha256": "1cc6a2aa3a9a9edcbef25110dbbba4759ed73508edfe14650a6f21a8083dd678",
+      "disposition": "integrated",
+      "probe": "label_fade_test",
+      "path": "probes/history/label_fade_test.pas",
+      "mode": "observation",
+      "reason": "隔离编译并保留原场景；历史运动阈值/布局偏好仅作为观察，不冒充当前设计要求。"
+    },
+    {
+      "source": "historical/temporary/label_pan_bench.pas",
+      "sha256": "ce56aa92456453b4f5d966c6ca642d94c0e82d3bafecc9c2e1a1376e27ffbf8f",
+      "disposition": "integrated",
+      "reason": "原四视图/模型性能或投影采集保留；模型改为私有副本，计时和图片仅供复核，不设性能及美观通过线。",
+      "probe": "label_pan_bench",
+      "path": "probes/history/label_pan_bench.pas",
+      "mode": "observation"
+    },
+    {
+      "source": "historical/temporary/label_space_no_edge_test.pas",
+      "sha256": "ad34957bb613743b0458884d1fcd8c2df729855e1f262559ff6c1ae0e1698844",
+      "disposition": "integrated",
+      "probe": "label_space_no_edge_test",
+      "path": "probes/history/label_space_no_edge_test.pas",
+      "mode": "observation",
+      "reason": "隔离编译并保留原场景；历史运动阈值/布局偏好仅作为观察，不冒充当前设计要求。"
+    },
+    {
+      "source": "historical/temporary/label_space_test.pas",
+      "sha256": "0423a7700229f9ca55c93078ee19bf4540f78fe44c4316c6d825de8d73544e82",
+      "disposition": "integrated",
+      "probe": "label_space_test",
+      "path": "probes/history/label_space_test.pas",
+      "mode": "observation",
+      "reason": "隔离编译并保留原场景；历史运动阈值/布局偏好仅作为观察，不冒充当前设计要求。"
+    },
+    {
+      "source": "historical/temporary/make_figma_icons.py",
+      "sha256": "531a6247e70e90ee36bad4de7673c45dfe2850e354c592900b8c472815f7ae63",
+      "disposition": "non_test_tool",
+      "reason": "图标设计产物生成器，会写资源文件，不属于回归测试。"
+    },
+    {
+      "source": "historical/temporary/marker_order_test.pas",
+      "sha256": "486663b326dbd4964426bfd2408410c20cbc550ded5f8e8976e229064f2f9b5f",
+      "disposition": "replaced",
+      "entry": "historical_regression.py --run-reviewed --probe FreeMarkerOverlayOrderTests",
+      "reason": "维护版像素覆盖顺序回归。"
+    },
+    {
+      "source": "historical/temporary/marker_pixel_test.pas",
+      "sha256": "533c15a9700dd0e9308969034d44d20d0d0564ed8325f31182a99c76d270f380",
+      "disposition": "integrated",
+      "probe": "marker_pixel_test",
+      "path": "probes/history/marker_pixel_test.pas",
+      "mode": "assertion",
+      "reason": "隔离编译运行；检查确定性的缓存、像素或数据状态行为。"
+    },
+    {
+      "source": "historical/temporary/menu_visibility_test.pas",
+      "sha256": "0ea8450aa5f4110d594444585f1cf05334332f38692cef427db7e565c9704b1b",
+      "disposition": "replaced",
+      "entry": "freeship_ui_test.py --case display",
+      "reason": "已有四视图显示模式与菜单状态检查，旧模式索引断言不作为通用规则。"
+    },
+    {
+      "source": "historical/temporary/native_geometry_probe.pas",
+      "sha256": "9a5225500c4705c02108adb1c24805ca23a58131fd8a793c0fbc81a5b5a54bdb",
+      "disposition": "integrated",
+      "probe": "native_geometry_probe",
+      "path": "probes/history/native_geometry_probe.pas",
+      "mode": "observation",
+      "reason": "隔离编译并保留原场景；历史运动阈值/布局偏好仅作为观察，不冒充当前设计要求。"
+    },
+    {
+      "source": "historical/temporary/numeric_label_test.pas",
+      "sha256": "51a4d9add57abb0c97a4db2f788538b9eb4dbc38119e151ce248c08df44262e2",
+      "disposition": "integrated",
+      "probe": "numeric_label_test",
+      "path": "probes/history/numeric_label_test.pas",
+      "mode": "observation",
+      "reason": "隔离编译并保留原场景；历史运动阈值/布局偏好仅作为观察，不冒充当前设计要求。"
+    },
+    {
+      "source": "historical/temporary/overlay_model_probe.pas",
+      "sha256": "c07cddf0e35ee1bddad48dca76394134fe39ccca8cab5fb39841ffb062e86406",
+      "disposition": "integrated",
+      "reason": "原四视图/模型性能或投影采集保留；模型改为私有副本，计时和图片仅供复核，不设性能及美观通过线。",
+      "probe": "overlay_model_probe",
+      "path": "probes/history/overlay_model_probe.pas",
+      "mode": "observation"
+    },
+    {
+      "source": "historical/temporary/overlay_perf_bench.pas",
+      "sha256": "d2b35f7d2dd3fecba70c3fe6182191fadf726566777d14708b1153438be63bf2",
+      "disposition": "integrated",
+      "probe": "overlay_perf_bench",
+      "path": "probes/history/overlay_perf_bench.pas",
+      "mode": "assertion",
+      "reason": "隔离编译运行；检查确定性的缓存、像素或数据状态行为。"
+    },
+    {
+      "source": "historical/temporary/overlay_reveal_test.pas",
+      "sha256": "571215263767770996c2f6f32b838ea381c610b486c3a129f2a33d2affc302c4",
+      "disposition": "integrated",
+      "probe": "overlay_reveal_test",
+      "path": "probes/history/overlay_reveal_test.pas",
+      "mode": "observation",
+      "reason": "隔离编译并保留原场景；历史运动阈值/布局偏好仅作为观察，不冒充当前设计要求。"
+    },
+    {
+      "source": "historical/temporary/pan_label_test.pas",
+      "sha256": "c4f44a8b2b97b79974b2f746d745bdf25c341951f8dc615e87edb55bb5afd677",
+      "disposition": "integrated",
+      "probe": "pan_label_test",
+      "path": "probes/history/pan_label_test.pas",
+      "mode": "observation",
+      "reason": "隔离编译并保留原场景；历史运动阈值/布局偏好仅作为观察，不冒充当前设计要求。"
+    },
+    {
+      "source": "historical/temporary/perf_probe.pas",
+      "sha256": "284ff13945c04a3e249bd9b4abdc6054d9a6f759391fa2a551cd2c6f2d006132",
+      "disposition": "integrated",
+      "reason": "原四视图/模型性能或投影采集保留；模型改为私有副本，计时和图片仅供复核，不设性能及美观通过线。",
+      "probe": "perf_probe",
+      "path": "probes/history/perf_probe.pas",
+      "mode": "observation"
+    },
+    {
+      "source": "historical/temporary/point_motion_test.pas",
+      "sha256": "c5e95ebb3edc00078714e4d631723447ce4f292fd582703fe520576b3fbcf44f",
+      "disposition": "retired",
+      "reason": "旧右到左扫描、固定时间和坐标已改为逐点动画；由逐点脉冲和最终帧回归取代，不沿用扫描方向。",
+      "entry": "historical_regression.py --run-reviewed --probe pulse_regression_test --probe FreePointPulseCompletionTests"
+    },
+    {
+      "source": "historical/temporary/point_reveal_test.pas",
+      "sha256": "6e9d1baa75ea8b2151c2a7eba5d56b1ad07879b0166a62dfa221ed1cc073452f",
+      "disposition": "retired",
+      "reason": "旧全局颜色淡入API方案；现有逐点脉冲测试检查帧时钟、终态及跳过行为。",
+      "entry": "historical_regression.py --run-reviewed --probe pulse_regression_test --probe FreePointPulseCompletionTests"
+    },
+    {
+      "source": "historical/temporary/progressive_test.pas",
+      "sha256": "dac27d7ebc50b4e900bb6392af56f5b23e40ca479b28be427ae84c95bc3d6fae",
+      "disposition": "retired",
+      "reason": "复用隐藏进度回调不改变客户区的检查；旧预览必须在1000ms推进的时序约束退役，不作为当前设计条件。",
+      "entry": "historical_regression.py --run-reviewed --probe historical-progress"
+    },
+    {
+      "source": "historical/temporary/projection_probe.pas",
+      "sha256": "7d7055d14221297ef73cc6590d4219b514964386421b373eb0086fb2b7727edf",
+      "disposition": "integrated",
+      "reason": "原四视图/模型性能或投影采集保留；模型改为私有副本，计时和图片仅供复核，不设性能及美观通过线。",
+      "probe": "projection_probe",
+      "path": "probes/history/projection_probe.pas",
+      "mode": "observation"
+    },
+    {
+      "source": "historical/temporary/pulse_completion_test.pas",
+      "sha256": "35c630b75d7ab9ae25d95d67f65d8167b9cfc5126e36f1a2c15cf6e93fc1ac49",
+      "disposition": "replaced",
+      "entry": "historical_regression.py --run-reviewed --probe FreePointPulseCompletionTests",
+      "reason": "维护版最终帧颜色连续性回归。"
+    },
+    {
+      "source": "historical/temporary/pulse_regression_test.pas",
+      "sha256": "af84f017859ce11036a0449e652b45f32998b6a66cf6406489ba6396a908752d",
+      "disposition": "integrated",
+      "probe": "pulse_regression_test",
+      "path": "probes/history/pulse_regression_test.pas",
+      "mode": "assertion",
+      "reason": "隔离编译运行；检查确定性的缓存、像素或数据状态行为。"
+    },
+    {
+      "source": "historical/temporary/reference_identity_test.pas",
+      "sha256": "e4080b7ee76c9a699df402c38bde2d323a47c79aaafca798b48e62118fcb5902",
+      "disposition": "integrated",
+      "probe": "reference_identity_test",
+      "path": "probes/history/reference_identity_test.pas",
+      "mode": "observation",
+      "reason": "隔离编译并保留原场景；历史运动阈值/布局偏好仅作为观察，不冒充当前设计要求。"
+    },
+    {
+      "source": "historical/temporary/render_icon_delivery.py",
+      "sha256": "7d63bbd43cb0ce285f04ac508a6a37d5f7f7cbf5fe2815d8193f3e39fe2d3031",
+      "disposition": "non_test_tool",
+      "reason": "渲染、打包设计交付文件，不属于产品行为检查。"
+    },
+    {
+      "source": "historical/temporary/shared_resize_test.pas",
+      "sha256": "b0fc1034ca71ad4d0d338eb37a28f1c3ddad4b20b592beaee5e384c1d0a6399a",
+      "disposition": "replaced",
+      "entry": "freeship_window_test.py",
+      "reason": "已有共享边界、最小尺寸与隐藏邻居行为检查，取消对个人模型和窗口序号的依赖。"
+    },
+    {
+      "source": "historical/temporary/smooth_batch_test.pas",
+      "sha256": "a044023d5890e0af50cacd20aafea3b2b325e09b446565d502b1513b744a2270",
+      "disposition": "integrated",
+      "probe": "smooth_batch_test",
+      "path": "probes/history/smooth_batch_test.pas",
+      "mode": "assertion",
+      "reason": "隔离编译运行；检查确定性的缓存、像素或数据状态行为。"
+    },
+    {
+      "source": "historical/temporary/spring_motion_test.pas",
+      "sha256": "e0b0070edb5f1065d154382cdbe7a6053b90346104d6a24439af54f4d8e7bd2f",
+      "disposition": "integrated",
+      "probe": "spring_motion_test",
+      "path": "probes/history/spring_motion_test.pas",
+      "mode": "observation",
+      "reason": "隔离编译并保留原场景；历史运动阈值/布局偏好仅作为观察，不冒充当前设计要求。"
+    },
+    {
+      "source": "historical/temporary/test_all_labels.pas",
+      "sha256": "eed4a478a8a32305cd5dd588931bb9d9bdf27bed46578b3f254d86e4ff56c9c6",
+      "disposition": "replaced",
+      "entry": "freeship_ui_test.py --case labels",
+      "reason": "现有逐项绘制、裁切和候选重叠证据替代全部矩形不得相交的旧断言。"
+    },
+    {
+      "source": "historical/temporary/test_layout.pas",
+      "sha256": "89bb05aaba6e8a02de9f3215650dad4dbb7a67a7a00f5090ed9a476f8193ead7",
+      "disposition": "replaced",
+      "entry": "historical_regression.py --run-reviewed --probe FreeLabelLayoutTests",
+      "reason": "已有维护版几何布局探针；旧边缘吸附的坐标断言不再追加为产品规范。"
+    },
+    {
+      "source": "historical/temporary/test_linesplan.pas",
+      "sha256": "bea612b63f9fa5bba2543ec45b34ae992602610d3f527b300bd8b8184237fd73",
+      "disposition": "replaced",
+      "entry": "linesplan_performance.py",
+      "reason": "现有多语言绘制与导出比较替代旧框架和固定路径，重叠仍需复核。"
+    },
+    {
+      "source": "historical/temporary/test_rongship.pas",
+      "sha256": "f8c47ccc808582d683c50c0d241ae12e704ed5090cdfe7ccc36fddf311b05827",
+      "disposition": "retired",
+      "reason": "硬编码RongShip旧品牌、12个按钮和索引；现行库存检查记录实际入口而不锁定布局。",
+      "entry": "freeship_ui_test.py --case inventory"
+    },
+    {
+      "source": "historical/temporary/test_shortcuts.pas",
+      "sha256": "40ab3d0da9c710b02822fe54c41fdf920d10c6fdda710dda659974ffc61a05f3",
+      "disposition": "replaced",
+      "entry": "freeship_ui_test.py --case shortcuts",
+      "reason": "现有按绑定发现快捷键并检查语言切换，移除固定Ctrl组合及个人文件路径。"
+    },
+    {
+      "source": "historical/temporary/toolbar_routes_test.pas",
+      "sha256": "7b98040344711af7b3651a24e0e28f1199d202e6ec37fbd6ee76508d171d49d4",
+      "disposition": "retired",
+      "reason": "同产品目录旧顶栏路由脚本；不以菜单位置及命令唯一出现作为默认正确性。",
+      "entry": "freeship_ui_test.py --case inventory"
+    },
+    {
+      "source": "historical/temporary/view_state_test.pas",
+      "sha256": "fbb0ebb921a7d2747c7ffbe3852e08825b94eea63d39eda64eca99002ac2fed2",
+      "disposition": "replaced",
+      "entry": "freeship_window_test.py",
+      "reason": "已有窗口最小化、恢复、平铺与吸附检查；内部标志不是屏幕验收。"
+    },
+    {
+      "source": "historical/temporary/zoom_bounds_test.pas",
+      "sha256": "fc2a6cd5a63ea4f80e64aa9ca3e2bdeb4a926cd708e704a5a7659282bd9bdf9e",
+      "disposition": "replaced",
+      "entry": "historical_regression.py --run-reviewed --probe FreeZoomBoundsTests",
+      "reason": "维护版缩放边界探针取代临时同类测试。"
+    }
+  ]
+}

@@ -1,0 +1,93 @@
+{
+  "date": "2026-11-02",
+  "scope": "Qt developed-plate window, original unfolding integration, local plate layout, error display, section curves, complete boundary exports and scaled print output.",
+  "installed": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\dist",
+  "previous_installation": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\dist-before-plates-20261102",
+  "binaries_sha256": {
+    "FreeShipQt.exe": "fe2c1ae9cfd0e43b7723fae2338c1818f39addc10f4777b63ee8db09203fec02",
+    "bridge/FreeShipGeometryBridge.exe": "1ca2261eb60fd2091b3fed29fe36ea91a17b5d32d78fe02a24ac0e2e52fbc08e"
+  },
+  "package_manifest_sha256": "8db9883dc982574463017887a0a0a805ffaafb930dd35960a2d3a1b6bdad6ab1",
+  "legacy_source_sha256": "277a3c69392c86fe14c375e7dfc9c3197b4162e982673cbbcf4b4a2dfff0ab6b",
+  "bridge_build": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\plates-service-05",
+  "reports": {
+    "qt-plates-final-c": {
+      "status": "partial",
+      "counts": {
+        "pass": 423,
+        "fail": 0,
+        "review": 1,
+        "not_run": 1,
+        "error": 0
+      },
+      "report_sha256": "2af383fbee55b59d5faaecc69aa7fdd09ab8ffa6e9788ebb2ddf3dd7cbd40ea9"
+    },
+    "qt-migration-plates-a": {
+      "status": "partial",
+      "counts": {
+        "pass": 751,
+        "fail": 0,
+        "review": 9,
+        "not_run": 7,
+        "error": 0
+      },
+      "report_sha256": "f88cae59578ec20b9a13da83c7cbe71e8788729f4858ce2e1ef29b80d93d6f71"
+    },
+    "qt-plates-package-b": {
+      "status": "partial",
+      "counts": {
+        "pass": 34,
+        "fail": 0,
+        "review": 0,
+        "not_run": 1,
+        "error": 0
+      },
+      "report_sha256": "a4f1bf82b5feb7041b9fab4540483b5005417341a07d159d41d31b46cc5f23fe"
+    },
+    "qt-performance-plates-package-b": {
+      "status": "partial",
+      "counts": {
+        "pass": 29,
+        "fail": 0,
+        "review": 0,
+        "not_run": 1,
+        "error": 0
+      },
+      "report_sha256": "1a22d6f214ea8fafbd8cf19f87b0fdedc9fc1f0b253d50e035029e9cd2c4e6a4"
+    },
+    "qt-plates-delivery-b": {
+      "status": "partial",
+      "counts": {
+        "pass": 34,
+        "fail": 0,
+        "review": 0,
+        "not_run": 1,
+        "error": 0
+      },
+      "report_sha256": "14b051411f723c68e3ee984928e943439b9735fe79252120c8834c53bdc132bd"
+    },
+    "qt-migration-plates-delivery-b": {
+      "status": "partial",
+      "counts": {
+        "pass": 33,
+        "fail": 0,
+        "review": 0,
+        "not_run": 2,
+        "error": 0
+      },
+      "report_sha256": "6704b6367e66ef2aa70cfb1973d6da7093f862faa071e6ea4e3fa754320c59e3"
+    }
+  },
+  "notes": [
+    "The complete plate suite is current with the installed source; it contains independent original-core fixtures and mathematical checks, an independent DXF reader, and physical PDF scale measurements.",
+    "The basic migration regression preceded only plate-specific project color and label contrast changes. The actual installed basic editing workflow was then rechecked directly.",
+    "Geometry still uses Pascal unfolding. This does not complete the remaining native core migration.",
+    "Hidden Windows Qt widgets and image/PDF inspection do not replace desktop mouse, focus, multi-monitor or physical printer acceptance.",
+    "Connected symmetric plate halves retain separate closed DXF outlines and their common centreline. Exports are not deduplicated CAM cutting paths.",
+    "Automatic nesting, material forming allowances and manufacturing certification remain outside this delivery.",
+    "All test and diagnostic sources are retained under FreeShip-Tests and integrated in the qt-plates suite.",
+    "Legacy fs, QtPilot, user models and existing preferences were not replaced.",
+    "Final image inspection found and corrected white names inside plate holes. The complete plate suite was rerun with 423 pass, 0 fail, 1 review and 1 not_run, followed by actual-directory validation."
+  ],
+  "supersedes_receipt": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\maintenance\\plates-installed-20261102-initial.json"
+}

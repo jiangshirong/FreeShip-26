@@ -1,0 +1,72 @@
+{
+  "reason": "Unmodified Plus InsertPlane sorts newly allocated points by heap address; these two independently executed original-service cuts have exact identical attributed control nets but differ in child-face traversal and one Single rounding result. Deterministic native coordinate order matches variant 0 exactly. Neither coordinates nor output tolerances are modified. A third exact variant was reproduced four times using the previously installed pre-auxiliary service; it reverses the curve and rounds two child coordinates differently. Native expected variant 0 is unchanged.",
+  "model": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-MCP\\examples\\box.fbm",
+  "model_sha256": "dde4bc78eb4eb1393783b50498d09a532ee223d6bfb04338d4875e9ddd2aac48",
+  "request": {
+    "method": "modeling",
+    "operation": "insert_plane",
+    "axis": 0,
+    "position": [
+      5,
+      0,
+      0
+    ],
+    "create_curve": true
+  },
+  "variants": [
+    {
+      "original_output": "C:\\FreeShip26Tests\\reports\\construction-native-focused-01\\020-insert_plane\\oracle",
+      "sha256": {
+        "model.json": "959c3ea1a8ad24be589b5503b70b91b72b141e1f46a32b8363e136970168f407",
+        "scene.fslp": "99175e0a23dbcb1b26aa62fadc1cb91bd5c66e11a8294d79c417fcf0d5c63308",
+        "reference.dxf": "7cd73d03bec0bec9410e12becca1f3207028d01d5a33064d5da7a315309877a9",
+        "sections.json": "329b915db1bf5f52d1f7cac05380d21d55307babe0c2c8b29d807479fb745fe5"
+      }
+    },
+    {
+      "original_output": "C:\\FreeShip26Tests\\reports\\construction-native-focused-03\\023-insert_plane\\oracle",
+      "sha256": {
+        "model.json": "b8e25402864ac7aee07873117d125e5cd28d8fee01761d73c2c5ce1a85de774f",
+        "scene.fslp": "7bfe7aa88fd41e47da309e6bc56a6d922cc83afc6b89b47658cf0e3a02b2f835",
+        "reference.dxf": "7cd73d03bec0bec9410e12becca1f3207028d01d5a33064d5da7a315309877a9",
+        "sections.json": "329b915db1bf5f52d1f7cac05380d21d55307babe0c2c8b29d807479fb745fe5"
+      }
+    },
+    {
+      "original_output": "C:\\FreeShip26Tests\\reports\\auxiliary-plane-old-replay-01\\attempt-1\\023",
+      "sha256": {
+        "model.json": "1ba01575216ce3c57255472094086a7efab93fb620df755836f947c7cf5439b9",
+        "reference.dxf": "3b8bfa2d83f17eb6f1eb2af1c4b5f60341cec8f6991bc37db0c132fa95a972bc",
+        "scene.fslp": "93b95ca7580b39fe5448e775cbf47d8d433d8ac777e173d7abd3a3d27ab6b913",
+        "sections.json": "329b915db1bf5f52d1f7cac05380d21d55307babe0c2c8b29d807479fb745fe5"
+      },
+      "independent_replay": {
+        "report": "C:\\FreeShip26Tests\\reports\\auxiliary-plane-old-replay-01\\report.json",
+        "sha256": "6026c7fc35b1b0923d6c4f4b8109c35b37e01228143289a0310d5169e1875213",
+        "service": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\dist\\bridge\\FreeShipGeometryBridge.exe",
+        "service_sha256": "f8523fcfce09776a33ea9c8d0c93fe8ddef5456182d169957fac6aa00753f8ae",
+        "matching_attempts": 4
+      }
+    },
+    {
+      "original_output": "C:\\Users\\12968\\FreeShip26-TestResults\\document-regressions-20261109\\full\\qt-document\\native-construction\\023-insert_plane\\oracle",
+      "sha256": {
+        "model.json": "7c96987f5da8aea6526b6bff2bf838c0ca516eb0b927b66293412b7611d9bde8",
+        "scene.fslp": "8670ccff49691aa181957cdc1f9244bc6821e4a3004979108733b8b5b5d98591",
+        "reference.dxf": "3b8bfa2d83f17eb6f1eb2af1c4b5f60341cec8f6991bc37db0c132fa95a972bc",
+        "sections.json": "329b915db1bf5f52d1f7cac05380d21d55307babe0c2c8b29d807479fb745fe5"
+      },
+      "independent_replay": {
+        "report": "C:\\Users\\12968\\FreeShip26-TestResults\\document-regressions-20261109\\replay-layout\\report.json",
+        "sha256": "f582f9d9ae776c1f2d08a7108d7fc9679140d0a894f92dfe8b59c4ca88ce5c04",
+        "service": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\dist\\bridge\\FreeShipGeometryBridge.exe",
+        "service_sha256": "93fb9bf98ec69ae3ef61199ed59275187795f631553166423f04d5a99b8c94fa",
+        "matching_attempts": 4
+      },
+      "reason": "2026-11-09: four independent original-service replays preserve path layout and allocation sizes. Native geometry and variant 0 remain unchanged; this legacy variant is review evidence only."
+    }
+  ],
+  "legacy_source_sha256": "277a3c69392c86fe14c375e7dfc9c3197b4162e982673cbbcf4b4a2dfff0ab6b",
+  "oracle_bridge_sha256": "00f1b745d345cbc3a7ee58103925088ffbb46caab4efa936da40c4b92d37b4f3",
+  "native_linesplan_sha256": "a68e340a43e207773afa2cc0c74c3ed58d074514165e3dd5541bffcb6943fded"
+}

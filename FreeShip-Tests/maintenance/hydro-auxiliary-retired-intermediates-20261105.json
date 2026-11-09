@@ -1,0 +1,2079 @@
+{
+  "bytes": 13767234.0,
+  "retired": [
+    {
+      "bytes": 3244,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\fixture\\box.fbm"
+    },
+    {
+      "bytes": 3140,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\fixture\\seed.fbm"
+    },
+    {
+      "bytes": 22390,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\fixture\\add-1\\model.json"
+    },
+    {
+      "bytes": 2783,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\fixture\\add-1\\native-input.json"
+    },
+    {
+      "bytes": 60438,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\fixture\\add-1\\reference.dxf"
+    },
+    {
+      "bytes": 90232,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\fixture\\add-1\\scene.fslp"
+    },
+    {
+      "bytes": 89973,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\fixture\\add-1\\sections.json"
+    },
+    {
+      "bytes": 20043,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\fixture\\add-1\\surface.json"
+    },
+    {
+      "bytes": 22575,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\fixture\\add-3\\model.json"
+    },
+    {
+      "bytes": 2863,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\fixture\\add-3\\native-input.json"
+    },
+    {
+      "bytes": 70794,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\fixture\\add-3\\reference.dxf"
+    },
+    {
+      "bytes": 91448,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\fixture\\add-3\\scene.fslp"
+    },
+    {
+      "bytes": 111259,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\fixture\\add-3\\sections.json"
+    },
+    {
+      "bytes": 20043,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\fixture\\add-3\\surface.json"
+    },
+    {
+      "bytes": 22106,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\fixture\\clear-1\\model.json"
+    },
+    {
+      "bytes": 2659,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\fixture\\clear-1\\native-input.json"
+    },
+    {
+      "bytes": 30799,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\fixture\\clear-1\\reference.dxf"
+    },
+    {
+      "bytes": 88072,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\fixture\\clear-1\\scene.fslp"
+    },
+    {
+      "bytes": 49633,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\fixture\\clear-1\\sections.json"
+    },
+    {
+      "bytes": 20043,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\fixture\\clear-1\\surface.json"
+    },
+    {
+      "bytes": 22295,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\fixture\\clear-3\\model.json"
+    },
+    {
+      "bytes": 2741,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\fixture\\clear-3\\native-input.json"
+    },
+    {
+      "bytes": 55258,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\fixture\\clear-3\\reference.dxf"
+    },
+    {
+      "bytes": 89624,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\fixture\\clear-3\\scene.fslp"
+    },
+    {
+      "bytes": 77881,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\fixture\\clear-3\\sections.json"
+    },
+    {
+      "bytes": 20043,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\fixture\\clear-3\\surface.json"
+    },
+    {
+      "bytes": 22233,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\fixture\\load\\model.json"
+    },
+    {
+      "bytes": 2735,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\fixture\\load\\native-input.json"
+    },
+    {
+      "bytes": 40676,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\fixture\\load\\reference.dxf"
+    },
+    {
+      "bytes": 88792,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\fixture\\load\\scene.fslp"
+    },
+    {
+      "bytes": 60995,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\fixture\\load\\sections.json"
+    },
+    {
+      "bytes": 20043,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\fixture\\load\\surface.json"
+    },
+    {
+      "bytes": 22215,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\fixture\\material-1\\model.json"
+    },
+    {
+      "bytes": 2717,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\fixture\\material-1\\native-input.json"
+    },
+    {
+      "bytes": 40676,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\fixture\\material-1\\reference.dxf"
+    },
+    {
+      "bytes": 88792,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\fixture\\material-1\\scene.fslp"
+    },
+    {
+      "bytes": 60995,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\fixture\\material-1\\sections.json"
+    },
+    {
+      "bytes": 20043,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\fixture\\material-1\\surface.json"
+    },
+    {
+      "bytes": 22197,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\fixture\\material-2\\model.json"
+    },
+    {
+      "bytes": 2699,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\fixture\\material-2\\native-input.json"
+    },
+    {
+      "bytes": 40676,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\fixture\\material-2\\reference.dxf"
+    },
+    {
+      "bytes": 88792,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\fixture\\material-2\\scene.fslp"
+    },
+    {
+      "bytes": 60995,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\fixture\\material-2\\sections.json"
+    },
+    {
+      "bytes": 20043,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\fixture\\material-2\\surface.json"
+    },
+    {
+      "bytes": 1820,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\fixture\\native-lines-cache\\137a7a5d30396720c24756caa74f8d4be131f82f554ebf7e09c98cff30e7b0e5\\entry.json"
+    },
+    {
+      "bytes": 30799,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\fixture\\native-lines-cache\\137a7a5d30396720c24756caa74f8d4be131f82f554ebf7e09c98cff30e7b0e5\\reference.dxf"
+    },
+    {
+      "bytes": 88072,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\fixture\\native-lines-cache\\137a7a5d30396720c24756caa74f8d4be131f82f554ebf7e09c98cff30e7b0e5\\scene.fslp"
+    },
+    {
+      "bytes": 49633,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\fixture\\native-lines-cache\\137a7a5d30396720c24756caa74f8d4be131f82f554ebf7e09c98cff30e7b0e5\\sections.json"
+    },
+    {
+      "bytes": 20043,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\fixture\\native-lines-cache\\137a7a5d30396720c24756caa74f8d4be131f82f554ebf7e09c98cff30e7b0e5\\surface.json"
+    },
+    {
+      "bytes": 1841,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\fixture\\native-lines-cache\\18ecad0a7b1d5cba445988c944e9145e24e9f953ed64ec67a6d02291940d1f53\\entry.json"
+    },
+    {
+      "bytes": 40676,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\fixture\\native-lines-cache\\18ecad0a7b1d5cba445988c944e9145e24e9f953ed64ec67a6d02291940d1f53\\reference.dxf"
+    },
+    {
+      "bytes": 88792,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\fixture\\native-lines-cache\\18ecad0a7b1d5cba445988c944e9145e24e9f953ed64ec67a6d02291940d1f53\\scene.fslp"
+    },
+    {
+      "bytes": 60995,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\fixture\\native-lines-cache\\18ecad0a7b1d5cba445988c944e9145e24e9f953ed64ec67a6d02291940d1f53\\sections.json"
+    },
+    {
+      "bytes": 20043,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\fixture\\native-lines-cache\\18ecad0a7b1d5cba445988c944e9145e24e9f953ed64ec67a6d02291940d1f53\\surface.json"
+    },
+    {
+      "bytes": 1881,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\fixture\\native-lines-cache\\2fb1c7008eb8f718a4c69921c56e47179084d057d4149a4465d79e3b00ef0a4a\\entry.json"
+    },
+    {
+      "bytes": 70794,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\fixture\\native-lines-cache\\2fb1c7008eb8f718a4c69921c56e47179084d057d4149a4465d79e3b00ef0a4a\\reference.dxf"
+    },
+    {
+      "bytes": 91448,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\fixture\\native-lines-cache\\2fb1c7008eb8f718a4c69921c56e47179084d057d4149a4465d79e3b00ef0a4a\\scene.fslp"
+    },
+    {
+      "bytes": 111259,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\fixture\\native-lines-cache\\2fb1c7008eb8f718a4c69921c56e47179084d057d4149a4465d79e3b00ef0a4a\\sections.json"
+    },
+    {
+      "bytes": 20043,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\fixture\\native-lines-cache\\2fb1c7008eb8f718a4c69921c56e47179084d057d4149a4465d79e3b00ef0a4a\\surface.json"
+    },
+    {
+      "bytes": 1854,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\fixture\\native-lines-cache\\3a9bf5610e0306ad960ca88788e0743e4f498d5177a29270ce1b1a829c24e58d\\entry.json"
+    },
+    {
+      "bytes": 40676,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\fixture\\native-lines-cache\\3a9bf5610e0306ad960ca88788e0743e4f498d5177a29270ce1b1a829c24e58d\\reference.dxf"
+    },
+    {
+      "bytes": 88792,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\fixture\\native-lines-cache\\3a9bf5610e0306ad960ca88788e0743e4f498d5177a29270ce1b1a829c24e58d\\scene.fslp"
+    },
+    {
+      "bytes": 60995,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\fixture\\native-lines-cache\\3a9bf5610e0306ad960ca88788e0743e4f498d5177a29270ce1b1a829c24e58d\\sections.json"
+    },
+    {
+      "bytes": 20043,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\fixture\\native-lines-cache\\3a9bf5610e0306ad960ca88788e0743e4f498d5177a29270ce1b1a829c24e58d\\surface.json"
+    },
+    {
+      "bytes": 1860,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\fixture\\native-lines-cache\\3c3fdb977dd44e72c605aa534f21413d6f9a7c5a5c34736e7bbfdfaae74ee492\\entry.json"
+    },
+    {
+      "bytes": 55258,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\fixture\\native-lines-cache\\3c3fdb977dd44e72c605aa534f21413d6f9a7c5a5c34736e7bbfdfaae74ee492\\reference.dxf"
+    },
+    {
+      "bytes": 89624,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\fixture\\native-lines-cache\\3c3fdb977dd44e72c605aa534f21413d6f9a7c5a5c34736e7bbfdfaae74ee492\\scene.fslp"
+    },
+    {
+      "bytes": 77881,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\fixture\\native-lines-cache\\3c3fdb977dd44e72c605aa534f21413d6f9a7c5a5c34736e7bbfdfaae74ee492\\sections.json"
+    },
+    {
+      "bytes": 20043,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\fixture\\native-lines-cache\\3c3fdb977dd44e72c605aa534f21413d6f9a7c5a5c34736e7bbfdfaae74ee492\\surface.json"
+    },
+    {
+      "bytes": 1893,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\fixture\\native-lines-cache\\8af634d474b0c6eabe2256c9065f1585220da8c01a206bd1ede20b3d31e70aeb\\entry.json"
+    },
+    {
+      "bytes": 60438,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\fixture\\native-lines-cache\\8af634d474b0c6eabe2256c9065f1585220da8c01a206bd1ede20b3d31e70aeb\\reference.dxf"
+    },
+    {
+      "bytes": 90232,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\fixture\\native-lines-cache\\8af634d474b0c6eabe2256c9065f1585220da8c01a206bd1ede20b3d31e70aeb\\scene.fslp"
+    },
+    {
+      "bytes": 89973,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\fixture\\native-lines-cache\\8af634d474b0c6eabe2256c9065f1585220da8c01a206bd1ede20b3d31e70aeb\\sections.json"
+    },
+    {
+      "bytes": 20043,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\fixture\\native-lines-cache\\8af634d474b0c6eabe2256c9065f1585220da8c01a206bd1ede20b3d31e70aeb\\surface.json"
+    },
+    {
+      "bytes": 1877,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\fixture\\native-lines-cache\\90806adbb28ca494303df8fbd1da2a1f8aeaab120d8bf5d52636851370c91b2f\\entry.json"
+    },
+    {
+      "bytes": 64363,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\fixture\\native-lines-cache\\90806adbb28ca494303df8fbd1da2a1f8aeaab120d8bf5d52636851370c91b2f\\reference.dxf"
+    },
+    {
+      "bytes": 35080,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\fixture\\native-lines-cache\\90806adbb28ca494303df8fbd1da2a1f8aeaab120d8bf5d52636851370c91b2f\\scene.fslp"
+    },
+    {
+      "bytes": 54436,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\fixture\\native-lines-cache\\90806adbb28ca494303df8fbd1da2a1f8aeaab120d8bf5d52636851370c91b2f\\sections.json"
+    },
+    {
+      "bytes": 5681,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\fixture\\native-lines-cache\\90806adbb28ca494303df8fbd1da2a1f8aeaab120d8bf5d52636851370c91b2f\\surface.json"
+    },
+    {
+      "bytes": 1840,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\fixture\\native-lines-cache\\f0cc8cba48ad63c5e181b4ca115dc4ff2a20586864e427c68cef3c2ee106fb63\\entry.json"
+    },
+    {
+      "bytes": 40676,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\fixture\\native-lines-cache\\f0cc8cba48ad63c5e181b4ca115dc4ff2a20586864e427c68cef3c2ee106fb63\\reference.dxf"
+    },
+    {
+      "bytes": 88792,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\fixture\\native-lines-cache\\f0cc8cba48ad63c5e181b4ca115dc4ff2a20586864e427c68cef3c2ee106fb63\\scene.fslp"
+    },
+    {
+      "bytes": 60995,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\fixture\\native-lines-cache\\f0cc8cba48ad63c5e181b4ca115dc4ff2a20586864e427c68cef3c2ee106fb63\\sections.json"
+    },
+    {
+      "bytes": 20043,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\fixture\\native-lines-cache\\f0cc8cba48ad63c5e181b4ca115dc4ff2a20586864e427c68cef3c2ee106fb63\\surface.json"
+    },
+    {
+      "bytes": 7993,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\fixture\\native-lines-cache\\sections\\cuts.fscache"
+    },
+    {
+      "bytes": 16190,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\fixture\\process\\protocol.jsonl"
+    },
+    {
+      "bytes": 3244,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\fixture\\save\\saved.fbm"
+    },
+    {
+      "bytes": 10170,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\fixture\\settings\\model.json"
+    },
+    {
+      "bytes": 2863,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\fixture\\settings\\native-input.json"
+    },
+    {
+      "bytes": 64363,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\fixture\\settings\\reference.dxf"
+    },
+    {
+      "bytes": 35080,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\fixture\\settings\\scene.fslp"
+    },
+    {
+      "bytes": 54436,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\fixture\\settings\\sections.json"
+    },
+    {
+      "bytes": 5681,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\fixture\\settings\\surface.json"
+    },
+    {
+      "bytes": 575,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v0-noop.fbm"
+    },
+    {
+      "bytes": 191,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v0-noop.json"
+    },
+    {
+      "bytes": 189,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v0-toggle.json"
+    },
+    {
+      "bytes": 575,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v0.fbm"
+    },
+    {
+      "bytes": 575,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v1-noop.fbm"
+    },
+    {
+      "bytes": 191,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v1-noop.json"
+    },
+    {
+      "bytes": 189,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v1-toggle.json"
+    },
+    {
+      "bytes": 575,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v1.fbm"
+    },
+    {
+      "bytes": 779,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v10-noop.fbm"
+    },
+    {
+      "bytes": 191,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v10-noop.json"
+    },
+    {
+      "bytes": 189,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v10-toggle.json"
+    },
+    {
+      "bytes": 779,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v10.fbm"
+    },
+    {
+      "bytes": 839,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v11-noop.fbm"
+    },
+    {
+      "bytes": 191,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v11-noop.json"
+    },
+    {
+      "bytes": 189,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v11-toggle.json"
+    },
+    {
+      "bytes": 839,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v11.fbm"
+    },
+    {
+      "bytes": 861,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v12-noop.fbm"
+    },
+    {
+      "bytes": 191,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v12-noop.json"
+    },
+    {
+      "bytes": 189,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v12-toggle.json"
+    },
+    {
+      "bytes": 861,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v12.fbm"
+    },
+    {
+      "bytes": 869,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v13-noop.fbm"
+    },
+    {
+      "bytes": 191,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v13-noop.json"
+    },
+    {
+      "bytes": 189,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v13-toggle.json"
+    },
+    {
+      "bytes": 869,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v13.fbm"
+    },
+    {
+      "bytes": 869,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v14-noop.fbm"
+    },
+    {
+      "bytes": 191,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v14-noop.json"
+    },
+    {
+      "bytes": 189,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v14-toggle.json"
+    },
+    {
+      "bytes": 869,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v14.fbm"
+    },
+    {
+      "bytes": 871,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v15-noop.fbm"
+    },
+    {
+      "bytes": 191,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v15-noop.json"
+    },
+    {
+      "bytes": 189,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v15-toggle.json"
+    },
+    {
+      "bytes": 871,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v15.fbm"
+    },
+    {
+      "bytes": 992,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v16-noop.fbm"
+    },
+    {
+      "bytes": 191,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v16-noop.json"
+    },
+    {
+      "bytes": 189,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v16-toggle.json"
+    },
+    {
+      "bytes": 992,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v16.fbm"
+    },
+    {
+      "bytes": 998,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v17-noop.fbm"
+    },
+    {
+      "bytes": 191,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v17-noop.json"
+    },
+    {
+      "bytes": 189,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v17-toggle.json"
+    },
+    {
+      "bytes": 998,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v17.fbm"
+    },
+    {
+      "bytes": 999,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v18-noop.fbm"
+    },
+    {
+      "bytes": 191,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v18-noop.json"
+    },
+    {
+      "bytes": 189,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v18-toggle.json"
+    },
+    {
+      "bytes": 999,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v18.fbm"
+    },
+    {
+      "bytes": 999,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v19-noop.fbm"
+    },
+    {
+      "bytes": 191,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v19-noop.json"
+    },
+    {
+      "bytes": 189,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v19-toggle.json"
+    },
+    {
+      "bytes": 999,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v19.fbm"
+    },
+    {
+      "bytes": 740,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v2-noop.fbm"
+    },
+    {
+      "bytes": 191,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v2-noop.json"
+    },
+    {
+      "bytes": 189,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v2-toggle.json"
+    },
+    {
+      "bytes": 740,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v2.fbm"
+    },
+    {
+      "bytes": 2422,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v20-noop.fbm"
+    },
+    {
+      "bytes": 191,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v20-noop.json"
+    },
+    {
+      "bytes": 189,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v20-toggle.json"
+    },
+    {
+      "bytes": 2422,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v20.fbm"
+    },
+    {
+      "bytes": 2431,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v21-noop.fbm"
+    },
+    {
+      "bytes": 191,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v21-noop.json"
+    },
+    {
+      "bytes": 189,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v21-toggle.json"
+    },
+    {
+      "bytes": 2431,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v21.fbm"
+    },
+    {
+      "bytes": 3055,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v22-noop.fbm"
+    },
+    {
+      "bytes": 191,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v22-noop.json"
+    },
+    {
+      "bytes": 189,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v22-toggle.json"
+    },
+    {
+      "bytes": 3055,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v22.fbm"
+    },
+    {
+      "bytes": 3111,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v23-noop.fbm"
+    },
+    {
+      "bytes": 191,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v23-noop.json"
+    },
+    {
+      "bytes": 189,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v23-toggle.json"
+    },
+    {
+      "bytes": 3111,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v23.fbm"
+    },
+    {
+      "bytes": 3179,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v24-noop.fbm"
+    },
+    {
+      "bytes": 191,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v24-noop.json"
+    },
+    {
+      "bytes": 189,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v24-toggle.json"
+    },
+    {
+      "bytes": 3179,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v24.fbm"
+    },
+    {
+      "bytes": 3355,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v25-noop.fbm"
+    },
+    {
+      "bytes": 191,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v25-noop.json"
+    },
+    {
+      "bytes": 189,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v25-toggle.json"
+    },
+    {
+      "bytes": 3355,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v25.fbm"
+    },
+    {
+      "bytes": 3419,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v26-noop.fbm"
+    },
+    {
+      "bytes": 191,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v26-noop.json"
+    },
+    {
+      "bytes": 189,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v26-toggle.json"
+    },
+    {
+      "bytes": 3419,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v26.fbm"
+    },
+    {
+      "bytes": 3419,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v27-noop.fbm"
+    },
+    {
+      "bytes": 191,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v27-noop.json"
+    },
+    {
+      "bytes": 189,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v27-toggle.json"
+    },
+    {
+      "bytes": 3419,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v27.fbm"
+    },
+    {
+      "bytes": 3419,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v28-noop.fbm"
+    },
+    {
+      "bytes": 191,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v28-noop.json"
+    },
+    {
+      "bytes": 189,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v28-toggle.json"
+    },
+    {
+      "bytes": 3419,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v28.fbm"
+    },
+    {
+      "bytes": 3419,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v29-noop.fbm"
+    },
+    {
+      "bytes": 191,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v29-noop.json"
+    },
+    {
+      "bytes": 189,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v29-toggle.json"
+    },
+    {
+      "bytes": 3419,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v29.fbm"
+    },
+    {
+      "bytes": 740,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v3-noop.fbm"
+    },
+    {
+      "bytes": 191,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v3-noop.json"
+    },
+    {
+      "bytes": 189,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v3-toggle.json"
+    },
+    {
+      "bytes": 740,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v3.fbm"
+    },
+    {
+      "bytes": 3443,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v30-noop.fbm"
+    },
+    {
+      "bytes": 191,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v30-noop.json"
+    },
+    {
+      "bytes": 189,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v30-toggle.json"
+    },
+    {
+      "bytes": 3443,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v30.fbm"
+    },
+    {
+      "bytes": 3443,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v31-noop.fbm"
+    },
+    {
+      "bytes": 191,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v31-noop.json"
+    },
+    {
+      "bytes": 189,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v31-toggle.json"
+    },
+    {
+      "bytes": 3443,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v31.fbm"
+    },
+    {
+      "bytes": 3443,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v32-noop.fbm"
+    },
+    {
+      "bytes": 191,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v32-noop.json"
+    },
+    {
+      "bytes": 189,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v32-toggle.json"
+    },
+    {
+      "bytes": 3443,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v32.fbm"
+    },
+    {
+      "bytes": 3619,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v33-noop.fbm"
+    },
+    {
+      "bytes": 191,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v33-noop.json"
+    },
+    {
+      "bytes": 189,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v33-toggle.json"
+    },
+    {
+      "bytes": 3619,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v33.fbm"
+    },
+    {
+      "bytes": 3619,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v34-noop.fbm"
+    },
+    {
+      "bytes": 191,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v34-noop.json"
+    },
+    {
+      "bytes": 189,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v34-toggle.json"
+    },
+    {
+      "bytes": 3619,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v34.fbm"
+    },
+    {
+      "bytes": 3795,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v35-noop.fbm"
+    },
+    {
+      "bytes": 191,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v35-noop.json"
+    },
+    {
+      "bytes": 189,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v35-toggle.json"
+    },
+    {
+      "bytes": 3795,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v35.fbm"
+    },
+    {
+      "bytes": 3795,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v36-noop.fbm"
+    },
+    {
+      "bytes": 191,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v36-noop.json"
+    },
+    {
+      "bytes": 189,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v36-toggle.json"
+    },
+    {
+      "bytes": 3795,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v36.fbm"
+    },
+    {
+      "bytes": 3796,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v37-noop.fbm"
+    },
+    {
+      "bytes": 191,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v37-noop.json"
+    },
+    {
+      "bytes": 189,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v37-toggle.json"
+    },
+    {
+      "bytes": 3796,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v37.fbm"
+    },
+    {
+      "bytes": 3924,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v38-noop.fbm"
+    },
+    {
+      "bytes": 191,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v38-noop.json"
+    },
+    {
+      "bytes": 189,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v38-toggle.json"
+    },
+    {
+      "bytes": 3924,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v38.fbm"
+    },
+    {
+      "bytes": 3925,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v39-noop.fbm"
+    },
+    {
+      "bytes": 190,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v39-noop.json"
+    },
+    {
+      "bytes": 3925,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v39-toggle.fbm"
+    },
+    {
+      "bytes": 191,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v39-toggle.json"
+    },
+    {
+      "bytes": 3925,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v39.fbm"
+    },
+    {
+      "bytes": 740,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v4-noop.fbm"
+    },
+    {
+      "bytes": 191,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v4-noop.json"
+    },
+    {
+      "bytes": 189,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v4-toggle.json"
+    },
+    {
+      "bytes": 740,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v4.fbm"
+    },
+    {
+      "bytes": 4349,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v40-noop.fbm"
+    },
+    {
+      "bytes": 190,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v40-noop.json"
+    },
+    {
+      "bytes": 4349,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v40-toggle.fbm"
+    },
+    {
+      "bytes": 191,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v40-toggle.json"
+    },
+    {
+      "bytes": 4349,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v40.fbm"
+    },
+    {
+      "bytes": 4443,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v41-noop.fbm"
+    },
+    {
+      "bytes": 190,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v41-noop.json"
+    },
+    {
+      "bytes": 4443,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v41-toggle.fbm"
+    },
+    {
+      "bytes": 191,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v41-toggle.json"
+    },
+    {
+      "bytes": 4443,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v41.fbm"
+    },
+    {
+      "bytes": 4476,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v42-noop.fbm"
+    },
+    {
+      "bytes": 190,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v42-noop.json"
+    },
+    {
+      "bytes": 4476,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v42-toggle.fbm"
+    },
+    {
+      "bytes": 191,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v42-toggle.json"
+    },
+    {
+      "bytes": 4476,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v42.fbm"
+    },
+    {
+      "bytes": 4480,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v43-noop.fbm"
+    },
+    {
+      "bytes": 190,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v43-noop.json"
+    },
+    {
+      "bytes": 4480,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v43-toggle.fbm"
+    },
+    {
+      "bytes": 191,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v43-toggle.json"
+    },
+    {
+      "bytes": 4480,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v43.fbm"
+    },
+    {
+      "bytes": 4484,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v44-noop.fbm"
+    },
+    {
+      "bytes": 190,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v44-noop.json"
+    },
+    {
+      "bytes": 4484,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v44-toggle.fbm"
+    },
+    {
+      "bytes": 191,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v44-toggle.json"
+    },
+    {
+      "bytes": 4484,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v44.fbm"
+    },
+    {
+      "bytes": 740,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v5-noop.fbm"
+    },
+    {
+      "bytes": 191,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v5-noop.json"
+    },
+    {
+      "bytes": 189,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v5-toggle.json"
+    },
+    {
+      "bytes": 740,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v5.fbm"
+    },
+    {
+      "bytes": 745,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v6-noop.fbm"
+    },
+    {
+      "bytes": 191,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v6-noop.json"
+    },
+    {
+      "bytes": 189,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v6-toggle.json"
+    },
+    {
+      "bytes": 745,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v6.fbm"
+    },
+    {
+      "bytes": 746,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v7-noop.fbm"
+    },
+    {
+      "bytes": 191,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v7-noop.json"
+    },
+    {
+      "bytes": 189,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v7-toggle.json"
+    },
+    {
+      "bytes": 746,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v7.fbm"
+    },
+    {
+      "bytes": 746,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v8-noop.fbm"
+    },
+    {
+      "bytes": 191,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v8-noop.json"
+    },
+    {
+      "bytes": 189,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v8-toggle.json"
+    },
+    {
+      "bytes": 746,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v8.fbm"
+    },
+    {
+      "bytes": 779,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v9-noop.fbm"
+    },
+    {
+      "bytes": 191,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v9-noop.json"
+    },
+    {
+      "bytes": 189,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v9-toggle.json"
+    },
+    {
+      "bytes": 779,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\formats\\v9.fbm"
+    },
+    {
+      "bytes": 232,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\production\\history.json"
+    },
+    {
+      "bytes": 3244,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\production\\input.Bak"
+    },
+    {
+      "bytes": 3244,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\production\\input.fbm"
+    },
+    {
+      "bytes": 521,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\production\\settings.json"
+    },
+    {
+      "bytes": 852,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\production\\hydro\\hydro-report.csv"
+    },
+    {
+      "bytes": 29616,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\production\\hydro\\hydro-report.pdf"
+    },
+    {
+      "bytes": 10170,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\production\\hydro\\after\\model.json"
+    },
+    {
+      "bytes": 64363,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\production\\hydro\\after\\reference.dxf"
+    },
+    {
+      "bytes": 35080,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\production\\hydro\\after\\scene.fslp"
+    },
+    {
+      "bytes": 54436,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\production\\hydro\\after\\sections.json"
+    },
+    {
+      "bytes": 10170,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\production\\hydro\\original\\model.json"
+    },
+    {
+      "bytes": 64363,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\production\\hydro\\original\\reference.dxf"
+    },
+    {
+      "bytes": 35080,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\production\\hydro\\original\\scene.fslp"
+    },
+    {
+      "bytes": 54436,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\production\\hydro\\original\\sections.json"
+    },
+    {
+      "bytes": 3244,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\production\\project\\backup-6.fbm"
+    },
+    {
+      "bytes": 64363,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\production\\project\\dxf-1.dxf"
+    },
+    {
+      "bytes": 64363,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\production\\project\\dxf-2.dxf"
+    },
+    {
+      "bytes": 64363,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\production\\project\\dxf-3.dxf"
+    },
+    {
+      "bytes": 64363,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\production\\project\\dxf-4.dxf"
+    },
+    {
+      "bytes": 64363,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\production\\project\\dxf-5.dxf"
+    },
+    {
+      "bytes": 64363,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\production\\project\\dxf-6.dxf"
+    },
+    {
+      "bytes": 10170,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\production\\project\\model-1.json"
+    },
+    {
+      "bytes": 10170,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\production\\project\\model-2.json"
+    },
+    {
+      "bytes": 10171,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\production\\project\\model-3.json"
+    },
+    {
+      "bytes": 10170,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\production\\project\\model-4.json"
+    },
+    {
+      "bytes": 10171,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\production\\project\\model-5.json"
+    },
+    {
+      "bytes": 10171,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\production\\project\\model-6.json"
+    },
+    {
+      "bytes": 35080,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\production\\project\\scene-1.scene"
+    },
+    {
+      "bytes": 35080,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\production\\project\\scene-2.scene"
+    },
+    {
+      "bytes": 35080,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\production\\project\\scene-3.scene"
+    },
+    {
+      "bytes": 35080,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\production\\project\\scene-4.scene"
+    },
+    {
+      "bytes": 35080,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\production\\project\\scene-5.scene"
+    },
+    {
+      "bytes": 35080,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\production\\project\\scene-6.scene"
+    },
+    {
+      "bytes": 54436,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\production\\project\\sections-1.sections"
+    },
+    {
+      "bytes": 54436,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\production\\project\\sections-2.sections"
+    },
+    {
+      "bytes": 54436,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\production\\project\\sections-3.sections"
+    },
+    {
+      "bytes": 54436,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\production\\project\\sections-4.sections"
+    },
+    {
+      "bytes": 54436,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\production\\project\\sections-5.sections"
+    },
+    {
+      "bytes": 54436,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\production\\project\\sections-6.sections"
+    },
+    {
+      "bytes": 5681,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\production\\project\\surface-1.surface"
+    },
+    {
+      "bytes": 5681,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\production\\project\\surface-2.surface"
+    },
+    {
+      "bytes": 5681,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\production\\project\\surface-3.surface"
+    },
+    {
+      "bytes": 5681,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\production\\project\\surface-4.surface"
+    },
+    {
+      "bytes": 5681,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\production\\project\\surface-5.surface"
+    },
+    {
+      "bytes": 5681,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\production\\project\\surface-6.surface"
+    },
+    {
+      "bytes": 10170,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\add-raised\\model.json"
+    },
+    {
+      "bytes": 2863,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\add-raised\\native-input.json"
+    },
+    {
+      "bytes": 59213,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\add-raised\\reference.dxf"
+    },
+    {
+      "bytes": 31678,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\add-raised\\scene.fslp"
+    },
+    {
+      "bytes": 44267,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\add-raised\\sections.json"
+    },
+    {
+      "bytes": 5681,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\add-raised\\surface.json"
+    },
+    {
+      "bytes": 10170,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\after\\model.json"
+    },
+    {
+      "bytes": 2863,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\after\\native-input.json"
+    },
+    {
+      "bytes": 64363,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\after\\reference.dxf"
+    },
+    {
+      "bytes": 35080,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\after\\scene.fslp"
+    },
+    {
+      "bytes": 54436,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\after\\sections.json"
+    },
+    {
+      "bytes": 5681,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\after\\surface.json"
+    },
+    {
+      "bytes": 1557,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\bounded\\hydro.json"
+    },
+    {
+      "bytes": 9890,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\clear-raised\\model.json"
+    },
+    {
+      "bytes": 2741,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\clear-raised\\native-input.json"
+    },
+    {
+      "bytes": 43677,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\clear-raised\\reference.dxf"
+    },
+    {
+      "bytes": 30142,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\clear-raised\\scene.fslp"
+    },
+    {
+      "bytes": 23418,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\clear-raised\\sections.json"
+    },
+    {
+      "bytes": 5681,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\clear-raised\\surface.json"
+    },
+    {
+      "bytes": 16316,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\imperial\\model.json"
+    },
+    {
+      "bytes": 3237,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\imperial\\native-input.json"
+    },
+    {
+      "bytes": 69030,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\imperial\\reference.dxf"
+    },
+    {
+      "bytes": 35314,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\imperial\\scene.fslp"
+    },
+    {
+      "bytes": 110506,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\imperial\\sections.json"
+    },
+    {
+      "bytes": 11931,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\imperial\\surface.json"
+    },
+    {
+      "bytes": 8934,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\imperial-calc\\hydro.json"
+    },
+    {
+      "bytes": 6315,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\invalid-hull\\hydro.json"
+    },
+    {
+      "bytes": 2814,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\legacy\\protocol.jsonl"
+    },
+    {
+      "bytes": 3891,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\legacy-calc\\hydro.json"
+    },
+    {
+      "bytes": 27012,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\legacy-load\\model.json"
+    },
+    {
+      "bytes": 4708,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\legacy-load\\native-input.json"
+    },
+    {
+      "bytes": 64363,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\legacy-load\\reference.dxf"
+    },
+    {
+      "bytes": 35080,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\legacy-load\\scene.fslp"
+    },
+    {
+      "bytes": 54436,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\legacy-load\\sections.json"
+    },
+    {
+      "bytes": 10170,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\load\\model.json"
+    },
+    {
+      "bytes": 2863,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\load\\native-input.json"
+    },
+    {
+      "bytes": 64363,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\load\\reference.dxf"
+    },
+    {
+      "bytes": 35080,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\load\\scene.fslp"
+    },
+    {
+      "bytes": 54436,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\load\\sections.json"
+    },
+    {
+      "bytes": 5681,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\load\\surface.json"
+    },
+    {
+      "bytes": 22240,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\many-waterlines\\model.json"
+    },
+    {
+      "bytes": 8379,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\many-waterlines\\native-input.json"
+    },
+    {
+      "bytes": 537722,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\many-waterlines\\reference.dxf"
+    },
+    {
+      "bytes": 82512,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\many-waterlines\\scene.fslp"
+    },
+    {
+      "bytes": 1048595,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\many-waterlines\\sections.json"
+    },
+    {
+      "bytes": 5681,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\many-waterlines\\surface.json"
+    },
+    {
+      "bytes": 1882,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\native-lines-cache\\09d3ec93d2eaae6202addb6d1ff0dc3f00faf447bfe6a44c98f5647d60a9c7eb\\entry.json"
+    },
+    {
+      "bytes": 44378,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\native-lines-cache\\09d3ec93d2eaae6202addb6d1ff0dc3f00faf447bfe6a44c98f5647d60a9c7eb\\reference.dxf"
+    },
+    {
+      "bytes": 31258,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\native-lines-cache\\09d3ec93d2eaae6202addb6d1ff0dc3f00faf447bfe6a44c98f5647d60a9c7eb\\scene.fslp"
+    },
+    {
+      "bytes": 23612,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\native-lines-cache\\09d3ec93d2eaae6202addb6d1ff0dc3f00faf447bfe6a44c98f5647d60a9c7eb\\sections.json"
+    },
+    {
+      "bytes": 5681,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\native-lines-cache\\09d3ec93d2eaae6202addb6d1ff0dc3f00faf447bfe6a44c98f5647d60a9c7eb\\surface.json"
+    },
+    {
+      "bytes": 1861,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\native-lines-cache\\32188bddce46d1d90a4744dbf894842ad0f25573ec1bda754bcdb32af575b21e\\entry.json"
+    },
+    {
+      "bytes": 43677,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\native-lines-cache\\32188bddce46d1d90a4744dbf894842ad0f25573ec1bda754bcdb32af575b21e\\reference.dxf"
+    },
+    {
+      "bytes": 30142,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\native-lines-cache\\32188bddce46d1d90a4744dbf894842ad0f25573ec1bda754bcdb32af575b21e\\scene.fslp"
+    },
+    {
+      "bytes": 23418,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\native-lines-cache\\32188bddce46d1d90a4744dbf894842ad0f25573ec1bda754bcdb32af575b21e\\sections.json"
+    },
+    {
+      "bytes": 5681,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\native-lines-cache\\32188bddce46d1d90a4744dbf894842ad0f25573ec1bda754bcdb32af575b21e\\surface.json"
+    },
+    {
+      "bytes": 1880,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\native-lines-cache\\44d6d09fb54b84a265261a57f51d490d645a9a044dd9fd5022b25c8e88663e88\\entry.json"
+    },
+    {
+      "bytes": 64363,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\native-lines-cache\\44d6d09fb54b84a265261a57f51d490d645a9a044dd9fd5022b25c8e88663e88\\reference.dxf"
+    },
+    {
+      "bytes": 35080,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\native-lines-cache\\44d6d09fb54b84a265261a57f51d490d645a9a044dd9fd5022b25c8e88663e88\\scene.fslp"
+    },
+    {
+      "bytes": 54436,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\native-lines-cache\\44d6d09fb54b84a265261a57f51d490d645a9a044dd9fd5022b25c8e88663e88\\sections.json"
+    },
+    {
+      "bytes": 1898,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\native-lines-cache\\4a5e8e326cd3c98c32cb6af144eaf5eb724bd55eebebead57c81e69fcd53f830\\entry.json"
+    },
+    {
+      "bytes": 59213,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\native-lines-cache\\4a5e8e326cd3c98c32cb6af144eaf5eb724bd55eebebead57c81e69fcd53f830\\reference.dxf"
+    },
+    {
+      "bytes": 31678,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\native-lines-cache\\4a5e8e326cd3c98c32cb6af144eaf5eb724bd55eebebead57c81e69fcd53f830\\scene.fslp"
+    },
+    {
+      "bytes": 44267,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\native-lines-cache\\4a5e8e326cd3c98c32cb6af144eaf5eb724bd55eebebead57c81e69fcd53f830\\sections.json"
+    },
+    {
+      "bytes": 5681,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\native-lines-cache\\4a5e8e326cd3c98c32cb6af144eaf5eb724bd55eebebead57c81e69fcd53f830\\surface.json"
+    },
+    {
+      "bytes": 3676,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\native-lines-cache\\581eae69ad2670b102f4fe995dcd30853ec4bc30b5ff279f62d8a5669a6e4929\\entry.json"
+    },
+    {
+      "bytes": 537722,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\native-lines-cache\\581eae69ad2670b102f4fe995dcd30853ec4bc30b5ff279f62d8a5669a6e4929\\reference.dxf"
+    },
+    {
+      "bytes": 82512,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\native-lines-cache\\581eae69ad2670b102f4fe995dcd30853ec4bc30b5ff279f62d8a5669a6e4929\\scene.fslp"
+    },
+    {
+      "bytes": 1048595,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\native-lines-cache\\581eae69ad2670b102f4fe995dcd30853ec4bc30b5ff279f62d8a5669a6e4929\\sections.json"
+    },
+    {
+      "bytes": 5681,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\native-lines-cache\\581eae69ad2670b102f4fe995dcd30853ec4bc30b5ff279f62d8a5669a6e4929\\surface.json"
+    },
+    {
+      "bytes": 1841,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\native-lines-cache\\7498f9b34a23c6fdeab6131f8d6eac581276f83022a4342fd9b8e1d99e30829d\\entry.json"
+    },
+    {
+      "bytes": 40676,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\native-lines-cache\\7498f9b34a23c6fdeab6131f8d6eac581276f83022a4342fd9b8e1d99e30829d\\reference.dxf"
+    },
+    {
+      "bytes": 88792,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\native-lines-cache\\7498f9b34a23c6fdeab6131f8d6eac581276f83022a4342fd9b8e1d99e30829d\\scene.fslp"
+    },
+    {
+      "bytes": 60995,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\native-lines-cache\\7498f9b34a23c6fdeab6131f8d6eac581276f83022a4342fd9b8e1d99e30829d\\sections.json"
+    },
+    {
+      "bytes": 20088,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\native-lines-cache\\7498f9b34a23c6fdeab6131f8d6eac581276f83022a4342fd9b8e1d99e30829d\\surface.json"
+    },
+    {
+      "bytes": 1837,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\native-lines-cache\\75fbb2d28b4c1fab83d9cde499fec4ecbce2b69d79a866d67006f1dc0b23546d\\entry.json"
+    },
+    {
+      "bytes": 34724,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\native-lines-cache\\75fbb2d28b4c1fab83d9cde499fec4ecbce2b69d79a866d67006f1dc0b23546d\\reference.dxf"
+    },
+    {
+      "bytes": 33496,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\native-lines-cache\\75fbb2d28b4c1fab83d9cde499fec4ecbce2b69d79a866d67006f1dc0b23546d\\scene.fslp"
+    },
+    {
+      "bytes": 35809,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\native-lines-cache\\75fbb2d28b4c1fab83d9cde499fec4ecbce2b69d79a866d67006f1dc0b23546d\\sections.json"
+    },
+    {
+      "bytes": 5681,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\native-lines-cache\\75fbb2d28b4c1fab83d9cde499fec4ecbce2b69d79a866d67006f1dc0b23546d\\surface.json"
+    },
+    {
+      "bytes": 1880,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\native-lines-cache\\90806adbb28ca494303df8fbd1da2a1f8aeaab120d8bf5d52636851370c91b2f\\entry.json"
+    },
+    {
+      "bytes": 64363,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\native-lines-cache\\90806adbb28ca494303df8fbd1da2a1f8aeaab120d8bf5d52636851370c91b2f\\reference.dxf"
+    },
+    {
+      "bytes": 35080,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\native-lines-cache\\90806adbb28ca494303df8fbd1da2a1f8aeaab120d8bf5d52636851370c91b2f\\scene.fslp"
+    },
+    {
+      "bytes": 54436,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\native-lines-cache\\90806adbb28ca494303df8fbd1da2a1f8aeaab120d8bf5d52636851370c91b2f\\sections.json"
+    },
+    {
+      "bytes": 5681,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\native-lines-cache\\90806adbb28ca494303df8fbd1da2a1f8aeaab120d8bf5d52636851370c91b2f\\surface.json"
+    },
+    {
+      "bytes": 1798,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\native-lines-cache\\b04315e7c3d0fb47caab37730612fa9ae67f1b92a826a5af1321a28ad954dfd0\\entry.json"
+    },
+    {
+      "bytes": 19188,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\native-lines-cache\\b04315e7c3d0fb47caab37730612fa9ae67f1b92a826a5af1321a28ad954dfd0\\reference.dxf"
+    },
+    {
+      "bytes": 31960,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\native-lines-cache\\b04315e7c3d0fb47caab37730612fa9ae67f1b92a826a5af1321a28ad954dfd0\\scene.fslp"
+    },
+    {
+      "bytes": 15980,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\native-lines-cache\\b04315e7c3d0fb47caab37730612fa9ae67f1b92a826a5af1321a28ad954dfd0\\sections.json"
+    },
+    {
+      "bytes": 5681,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\native-lines-cache\\b04315e7c3d0fb47caab37730612fa9ae67f1b92a826a5af1321a28ad954dfd0\\surface.json"
+    },
+    {
+      "bytes": 1963,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\native-lines-cache\\c3d7e59ebcdaf1f4609a0e8308a8e146be5c0ff55870ef39bac4230823e4ba5b\\entry.json"
+    },
+    {
+      "bytes": 69030,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\native-lines-cache\\c3d7e59ebcdaf1f4609a0e8308a8e146be5c0ff55870ef39bac4230823e4ba5b\\reference.dxf"
+    },
+    {
+      "bytes": 35314,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\native-lines-cache\\c3d7e59ebcdaf1f4609a0e8308a8e146be5c0ff55870ef39bac4230823e4ba5b\\scene.fslp"
+    },
+    {
+      "bytes": 110506,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\native-lines-cache\\c3d7e59ebcdaf1f4609a0e8308a8e146be5c0ff55870ef39bac4230823e4ba5b\\sections.json"
+    },
+    {
+      "bytes": 11931,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\native-lines-cache\\c3d7e59ebcdaf1f4609a0e8308a8e146be5c0ff55870ef39bac4230823e4ba5b\\surface.json"
+    },
+    {
+      "bytes": 51935,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\native-lines-cache\\sections\\cuts.fscache"
+    },
+    {
+      "bytes": 9886,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\no-stations\\model.json"
+    },
+    {
+      "bytes": 2739,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\no-stations\\native-input.json"
+    },
+    {
+      "bytes": 34724,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\no-stations\\reference.dxf"
+    },
+    {
+      "bytes": 33496,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\no-stations\\scene.fslp"
+    },
+    {
+      "bytes": 35809,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\no-stations\\sections.json"
+    },
+    {
+      "bytes": 5681,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\no-stations\\surface.json"
+    },
+    {
+      "bytes": 5533,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\no-stations-calc\\hydro.json"
+    },
+    {
+      "bytes": 9606,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\no-waterlines\\model.json"
+    },
+    {
+      "bytes": 2617,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\no-waterlines\\native-input.json"
+    },
+    {
+      "bytes": 19188,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\no-waterlines\\reference.dxf"
+    },
+    {
+      "bytes": 31960,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\no-waterlines\\scene.fslp"
+    },
+    {
+      "bytes": 15980,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\no-waterlines\\sections.json"
+    },
+    {
+      "bytes": 5681,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\no-waterlines\\surface.json"
+    },
+    {
+      "bytes": 1556,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\no-waterlines-calc\\hydro.json"
+    },
+    {
+      "bytes": 10171,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\off\\model.json"
+    },
+    {
+      "bytes": 2863,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\off\\native-input.json"
+    },
+    {
+      "bytes": 64363,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\off\\reference.dxf"
+    },
+    {
+      "bytes": 35080,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\off\\scene.fslp"
+    },
+    {
+      "bytes": 54436,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\off\\sections.json"
+    },
+    {
+      "bytes": 5681,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\off\\surface.json"
+    },
+    {
+      "bytes": 1484,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\off-calc\\hydro.json"
+    },
+    {
+      "bytes": 3244,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\off-save\\saved.fbm"
+    },
+    {
+      "bytes": 23250,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\old-enable\\model.json"
+    },
+    {
+      "bytes": 2772,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\old-enable\\native-input.json"
+    },
+    {
+      "bytes": 40676,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\old-enable\\reference.dxf"
+    },
+    {
+      "bytes": 88792,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\old-enable\\scene.fslp"
+    },
+    {
+      "bytes": 60995,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\old-enable\\sections.json"
+    },
+    {
+      "bytes": 20088,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\old-enable\\surface.json"
+    },
+    {
+      "bytes": 3925,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\old-enabled\\saved.fbm"
+    },
+    {
+      "bytes": 23251,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\old-load\\model.json"
+    },
+    {
+      "bytes": 2772,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\old-load\\native-input.json"
+    },
+    {
+      "bytes": 40676,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\old-load\\reference.dxf"
+    },
+    {
+      "bytes": 88792,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\old-load\\scene.fslp"
+    },
+    {
+      "bytes": 60995,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\old-load\\sections.json"
+    },
+    {
+      "bytes": 20088,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\old-load\\surface.json"
+    },
+    {
+      "bytes": 3924,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\old-original\\saved.fbm"
+    },
+    {
+      "bytes": 3924,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\old-restored\\saved.fbm"
+    },
+    {
+      "bytes": 23251,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\old-undo\\model.json"
+    },
+    {
+      "bytes": 2772,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\old-undo\\native-input.json"
+    },
+    {
+      "bytes": 40676,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\old-undo\\reference.dxf"
+    },
+    {
+      "bytes": 88792,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\old-undo\\scene.fslp"
+    },
+    {
+      "bytes": 60995,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\old-undo\\sections.json"
+    },
+    {
+      "bytes": 20088,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\old-undo\\surface.json"
+    },
+    {
+      "bytes": 10170,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\points\\model.json"
+    },
+    {
+      "bytes": 2863,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\points\\native-input.json"
+    },
+    {
+      "bytes": 64363,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\points\\reference.dxf"
+    },
+    {
+      "bytes": 35080,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\points\\scene.fslp"
+    },
+    {
+      "bytes": 54436,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\points\\sections.json"
+    },
+    {
+      "bytes": 5681,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\points\\surface.json"
+    },
+    {
+      "bytes": 60437,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\process\\protocol.jsonl"
+    },
+    {
+      "bytes": 10170,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\raise\\model.json"
+    },
+    {
+      "bytes": 2863,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\raise\\native-input.json"
+    },
+    {
+      "bytes": 44378,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\raise\\reference.dxf"
+    },
+    {
+      "bytes": 31258,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\raise\\scene.fslp"
+    },
+    {
+      "bytes": 23612,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\raise\\sections.json"
+    },
+    {
+      "bytes": 5681,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\raise\\surface.json"
+    },
+    {
+      "bytes": 6424,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\raised\\hydro.json"
+    },
+    {
+      "bytes": 10171,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\redo\\model.json"
+    },
+    {
+      "bytes": 2863,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\redo\\native-input.json"
+    },
+    {
+      "bytes": 64363,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\redo\\reference.dxf"
+    },
+    {
+      "bytes": 35080,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\redo\\scene.fslp"
+    },
+    {
+      "bytes": 54436,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\redo\\sections.json"
+    },
+    {
+      "bytes": 5681,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\redo\\surface.json"
+    },
+    {
+      "bytes": 3244,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\redo-save\\saved.fbm"
+    },
+    {
+      "bytes": 10170,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\reload\\model.json"
+    },
+    {
+      "bytes": 2863,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\reload\\native-input.json"
+    },
+    {
+      "bytes": 64363,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\reload\\reference.dxf"
+    },
+    {
+      "bytes": 35080,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\reload\\scene.fslp"
+    },
+    {
+      "bytes": 54436,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\reload\\sections.json"
+    },
+    {
+      "bytes": 5681,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\reload\\surface.json"
+    },
+    {
+      "bytes": 10170,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\reload-bad\\model.json"
+    },
+    {
+      "bytes": 2863,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\reload-bad\\native-input.json"
+    },
+    {
+      "bytes": 64363,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\reload-bad\\reference.dxf"
+    },
+    {
+      "bytes": 35080,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\reload-bad\\scene.fslp"
+    },
+    {
+      "bytes": 54436,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\reload-bad\\sections.json"
+    },
+    {
+      "bytes": 5681,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\reload-bad\\surface.json"
+    },
+    {
+      "bytes": 10170,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\reload-limits\\model.json"
+    },
+    {
+      "bytes": 2863,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\reload-limits\\native-input.json"
+    },
+    {
+      "bytes": 64363,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\reload-limits\\reference.dxf"
+    },
+    {
+      "bytes": 35080,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\reload-limits\\scene.fslp"
+    },
+    {
+      "bytes": 54436,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\reload-limits\\sections.json"
+    },
+    {
+      "bytes": 5681,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\reload-limits\\surface.json"
+    },
+    {
+      "bytes": 10170,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\reload-units\\model.json"
+    },
+    {
+      "bytes": 2863,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\reload-units\\native-input.json"
+    },
+    {
+      "bytes": 64363,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\reload-units\\reference.dxf"
+    },
+    {
+      "bytes": 35080,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\reload-units\\scene.fslp"
+    },
+    {
+      "bytes": 54436,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\reload-units\\sections.json"
+    },
+    {
+      "bytes": 5681,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\reload-units\\surface.json"
+    },
+    {
+      "bytes": 6843,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\tilted\\hydro.json"
+    },
+    {
+      "bytes": 3244,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\unchanged\\saved.fbm"
+    },
+    {
+      "bytes": 10170,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\undo\\model.json"
+    },
+    {
+      "bytes": 2863,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\undo\\native-input.json"
+    },
+    {
+      "bytes": 64363,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\undo\\reference.dxf"
+    },
+    {
+      "bytes": 35080,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\undo\\scene.fslp"
+    },
+    {
+      "bytes": 54436,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\undo\\sections.json"
+    },
+    {
+      "bytes": 5681,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\undo\\surface.json"
+    },
+    {
+      "bytes": 3244,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\undo-save\\saved.fbm"
+    },
+    {
+      "bytes": 6428,
+      "path": "C:\\FreeShip26-HydroAuxiliaryTests\\focused\\service\\upright\\hydro.json"
+    }
+  ],
+  "kept": "Test source, reports, images, logs, final runs, bridge build and previous package",
+  "created_utc": "2026-11-05T03:59:16.2387425Z"
+}

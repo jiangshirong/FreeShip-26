@@ -1,0 +1,62 @@
+{
+  "installed": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\dist",
+  "binaries_sha256": {
+    "FreeShipQt.exe": "0822e27555bc89ab631a534c3de1c54a9709f2efdd8caf321f89434e476bc3f3",
+    "bridge\\FreeShipGeometryBridge.exe": "1b2daf2560e79392fa3d71050accecb8de116dad8f225d4d548de22f5300eb9c"
+  },
+  "reports": {
+    "qt-advanced-20261101-d": {
+      "pass": 1436,
+      "fail": 0,
+      "review": 15,
+      "not_run": 5,
+      "error": 0
+    },
+    "qt-auxiliary-advanced-20261101-b": {
+      "pass": 813,
+      "fail": 0,
+      "review": 15,
+      "not_run": 5,
+      "error": 0
+    },
+    "qt-advanced-package-20261101-b": {
+      "pass": 151,
+      "fail": 0,
+      "review": 3,
+      "not_run": 1,
+      "error": 0
+    },
+    "qt-advanced-delivery-20261101-b": {
+      "pass": 151,
+      "fail": 0,
+      "review": 3,
+      "not_run": 1,
+      "error": 0
+    },
+    "qt-startup-advanced-delivery-20261101-b": {
+      "pass": 54,
+      "fail": 0,
+      "review": 0,
+      "not_run": 17,
+      "error": 0
+    }
+  },
+  "retention": {
+    "Plan": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\maintenance\\retention-advanced-iterations-20261101.json",
+    "Removed": [
+      "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\reports\\qt-auxiliary-advanced-20261101",
+      "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\reports\\qt-advanced-20261101-b",
+      "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\reports\\qt-advanced-20261101-a",
+      "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\reports\\qt-advanced-delivery-20261101",
+      "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\reports\\qt-advanced-core-probe-20261101-e",
+      "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\reports\\qt-advanced-core-probe-20261101-d",
+      "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\reports\\qt-advanced-core-probe-20261101-c",
+      "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\reports\\qt-advanced-core-probe-20261101-b",
+      "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\reports\\qt-advanced-core-probe-20261101"
+    ],
+    "RemovedCount": 9,
+    "FreeBefore": 7762006016,
+    "FreeAfter": 9885310976,
+    "FreedGiB": 1.98
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "Plan": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\maintenance\\retention-advanced-iterations-20261101.json",
+  "Removed": [
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\reports\\qt-auxiliary-advanced-20261101",
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\reports\\qt-advanced-20261101-b",
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\reports\\qt-advanced-20261101-a",
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\reports\\qt-advanced-delivery-20261101",
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\reports\\qt-advanced-core-probe-20261101-e",
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\reports\\qt-advanced-core-probe-20261101-d",
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\reports\\qt-advanced-core-probe-20261101-c",
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\reports\\qt-advanced-core-probe-20261101-b",
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\reports\\qt-advanced-core-probe-20261101"
+  ],
+  "RemovedCount": 9,
+  "FreeBefore": 7762006016,
+  "FreeAfter": 9885310976,
+  "FreedGiB": 1.98
+}

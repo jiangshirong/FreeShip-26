@@ -1,0 +1,106 @@
+{
+  "recorded_utc": "2026-11-03T06:03:20.419136+00:00",
+  "scope": "Native four-view triangles, point normals and control-curve display splines share the lines-plan subdivision.",
+  "installed": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\dist",
+  "previous_installation": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\dist-before-surface-20261103",
+  "manifest_sha256": "1a4d9a62b888f4ca5528df4185fce164c895166ec1f2b87d935b1e6206814dc1",
+  "verified_package_files": 2525,
+  "binaries_sha256": {
+    "FreeShipQt.exe": "8c5c334964f71631d96db8e9d2c21d91472b8f95bc1a9b7a2a060965ea0b758f",
+    "FreeShipDocumentService.exe": "57ba7457a7f8b44260e975531e89a9e87cf5048ffb23e435026409bdef814c52",
+    "FreeShipNativeLinesplan.exe": "2eced26821d9e1fb9b4f0db9e619335728008934de108ae1a8b2254adb8288fc",
+    "qt_document_codec_tests.exe": "6bea534e1060f50264796a13ebfbe782909dd15950ca0037fb9d6daef6e76f11",
+    "qt_auxiliary_tests.exe": "f7c3dbae03da2e7a35e5bcaefd84d65b78bcb9309adbfbe3321ee7ee4fb38e3a",
+    "bridge/FreeShipGeometryBridge.exe": "91d674108d53137a733753984968a198b2c77fbc516d63b65c932045bf5c65f5"
+  },
+  "legacy_source_sha256": "277a3c69392c86fe14c375e7dfc9c3197b4162e982673cbbcf4b4a2dfff0ab6b",
+  "reports": {
+    "qt-document": {
+      "path": "C:\\FreeShip26Tests\\reports\\surface-final-01\\qt-document\\report.json",
+      "sha256": "1bfddcd97ae6710b7ae4c79d56e2fb81f3b6d2ab19b8fbcd5011105b8a4d0833",
+      "counts": {
+        "pass": 10527,
+        "fail": 0,
+        "review": 25,
+        "not_run": 3,
+        "error": 0
+      },
+      "phase_seconds": {
+        "runtime_ready_s": 5.783880100003444,
+        "codec_s": 0.8957828999991762,
+        "protocol_s": 107.39504820000002,
+        "native_point_edit_s": 5.312490899996192,
+        "native_topology_s": 14.209017499997572,
+        "native_modeling_s": 11.951073299998825,
+        "native_transforms_s": 18.787312699998438,
+        "native_construction_s": 9.217474400000356,
+        "native_lackenby_s": 41.14424380000128,
+        "native_attributes_s": 5.806110499994247,
+        "native_face_tools_s": 21.35523970000213,
+        "native_project_s": 30.911680099998193,
+        "native_definitions_s": 23.238231299998006,
+        "native_auxiliary_s": 18.499781200000143,
+        "native_background_s": 10.833172999999078,
+        "native_surface_s": 61.08912340000097,
+        "modeling_service_s": 18.992789700001595,
+        "production_ui_s": 15.875266300005023
+      },
+      "elapsed_seconds": 421.99138250000397,
+      "scope": "Complete isolated document run; tested binaries match installation."
+    },
+    "surface-installed-display": {
+      "path": "C:\\FreeShip26Tests\\reports\\surface-installed-display\\report.json",
+      "sha256": "bf83b38bf220efb855b66dd50c119fde219164ab3644c9123cb83f45f6364db9",
+      "counts": {
+        "pass": 130,
+        "fail": 0,
+        "review": 3,
+        "not_run": 1,
+        "error": 0
+      },
+      "scope": "Actual installed Qt callbacks in hidden windows with private settings."
+    },
+    "surface-installed-auxiliary": {
+      "path": "C:\\FreeShip26Tests\\reports\\surface-installed-auxiliary\\report.json",
+      "sha256": "ad57206bb46bdcc33062037e9675fe77910baffa19f09a8633b49d55c73bdc22",
+      "counts": {
+        "pass": 151,
+        "fail": 0,
+        "review": 3,
+        "not_run": 1,
+        "error": 0
+      },
+      "scope": "Actual installed Qt callbacks in hidden windows with private settings."
+    }
+  },
+  "combined_counts": {
+    "pass": 10808,
+    "fail": 0,
+    "review": 31,
+    "not_run": 5,
+    "error": 0
+  },
+  "surface_generation_ms": {
+    "samples": 36,
+    "minimum": 0.1847,
+    "median": 9.76155,
+    "maximum": 586.2936
+  },
+  "notes": [
+    "Exact coordinates, normal values and spline order; only pointer-dependent normal-list ordering is ignored.",
+    "Inherited AddPoint negative-Y clamp explicitly preserved; this migration does not silently correct normal mathematics.",
+    "Pascal still rebuilds its surface for analysis and flow tracing. No whole-operation speedup claim.",
+    "Loader/new/import/version conversion, analysis settings, hydrostatics/stability, resistance/propulsion, plates and IGES preparation remain.",
+    "Hidden callbacks are not physical desktop acceptance. Test source retained, builds and outputs on C."
+  ],
+  "maintenance_sources_sha256": {
+    "record_surface_delivery.py": "2e0d9ff8f076b33887b67b1ceafb9f0aa8e9bb013fb91948c9b33844c9c650b2",
+    "record_topology_delivery.py": "dcb355a690a034c8b84582d824685a9e1992d1de59576de712a5f2d1b96e4f6c",
+    "inspect_surface_normals.py": "de1f4d4de05b4bad8041cc727b3fe24b3c4f377102d935c7468bf7335dab48fc",
+    "promote_runtime.ps1": "d0427a3964c2263a93768185d29f9f9cfba8600d48965c1b29518c443e4bb728"
+  },
+  "free_bytes_after": {
+    "C": 11454238720,
+    "D": 30188298240
+  }
+}

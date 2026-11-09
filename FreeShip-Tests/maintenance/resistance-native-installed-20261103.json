@@ -1,0 +1,92 @@
+{
+  "recorded_utc": "2026-11-03T12:40:09.634203+00:00",
+  "scope": "Ten native C++ resistance workflows, existing Qt dialogs and original external solvers.",
+  "installed": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\dist",
+  "previous_installation": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\dist-before-resistance-native-20261103",
+  "manifest_sha256": "71061288c2b0d527d0e9fe3309e0355d07fabb782e412d4241ebee0439eb4d76",
+  "verified_package_files": 2534,
+  "legacy_source_sha256": "277a3c69392c86fe14c375e7dfc9c3197b4162e982673cbbcf4b4a2dfff0ab6b",
+  "binaries_sha256": {
+    "FreeShipQt.exe": "c02b93cb3a82f3703b0dba53b9eb0db5fe122c6dec69246d0807a7b8fd2709b6",
+    "FreeShipDocumentService.exe": "e5875637594162523f404675fc55a12040fd4870b723eeb25b5f3ec354baf849",
+    "FreeShipNativeLinesplan.exe": "32be8b2bb691413a263c5cccbce755f981658167e266a7250319c2189a51900f",
+    "FreeShipGeometryExport.exe": "be13f3ca9fe6bfdc2406fd5a0aa4e2de858137be5962da5b6e7216660ee1200d",
+    "bridge/FreeShipGeometryBridge.exe": "772dddb8df850de02def13867fe3727d4b5ca19fa0ecbd8ad5cfdb3669d1f0ef"
+  },
+  "reports": {
+    "core": {
+      "path": "D:\\FreeShip26Tests\\reports\\resistance-native-final-04\\qt-performance\\report.json",
+      "sha256": "2d5ab4ca4bb7c0019259a316d6b60165ab78c3a52db57f55697ffaa0d3e79632",
+      "counts": {
+        "pass": 4520,
+        "fail": 0,
+        "review": 5,
+        "not_run": 15,
+        "error": 0
+      }
+    },
+    "hydro": {
+      "path": "D:\\FreeShip26Tests\\reports\\resistance-native-hydro-01\\report.json",
+      "sha256": "9ce06b2bc35ad1eb019ee5155920da7d708263dee1bb4f796c87d6b2403b290d",
+      "counts": {
+        "pass": 1102,
+        "fail": 0,
+        "review": 1,
+        "not_run": 0,
+        "error": 0
+      }
+    },
+    "installed_workflow": {
+      "path": "D:\\FreeShip26Tests\\reports\\resistance-native-installed-01\\qt-performance\\report.json",
+      "sha256": "e4984023e0174cedf7edabb807f48cb32d266588ac56e0ac70756ff0607130da",
+      "counts": {
+        "pass": 29,
+        "fail": 0,
+        "review": 0,
+        "not_run": 1,
+        "error": 0
+      }
+    },
+    "startup": {
+      "path": "D:\\FreeShip26Tests\\reports\\resistance-native-startup-01\\report.json",
+      "sha256": "546f9f32758a55e01a5dafda7d33d7e52d0830bae211446349dbf4d9a555916f",
+      "counts": {
+        "pass": 54,
+        "fail": 0,
+        "review": 0,
+        "not_run": 17,
+        "error": 0
+      }
+    }
+  },
+  "combined_counts": {
+    "pass": 5705,
+    "fail": 0,
+    "review": 6,
+    "not_run": 33,
+    "error": 0
+  },
+  "core_elapsed_seconds": 183.05218929999683,
+  "notes": [
+    "Ten primary resistance curves and available series branches match the isolated original exactly; no tolerance was widened.",
+    "Parameter extraction, saved values, imperial inputs, protocol failures, cancellation and revision-scoped cache invalidation are covered.",
+    "Delft power and estimated wetted area have independent formula checks; PowerPrd output also matches a direct process invocation.",
+    "Eight resistance branch samples have no original numerical result: three Oortmerssen-family cases and five unavailable MH series. These remain not_run.",
+    "The original uninitialized draft and PowerPrd EOF-wait paths remain review, with separately verified native repairs.",
+    "CLEMBLOU emits NaN in long working directories: four short and four long independent runs reproduced the difference with identical inputs. Native uses a short private workspace; the original curve comparison is staged in a short path too, without retries or skipped coordinates.",
+    "Hydrostatics was rerun after adding entrance angle, bulb-section and waterline-bound fields. Its diagnostic report is retained separately.",
+    "The full performance suite also covers all five previous propulsion workflows; its external CALCPROP limitations remain explicit.",
+    "The installed Holtrop Qt callback, report/CSV and geometry are compared with the tested package; startup uses private models and preferences.",
+    "Hidden production callbacks are not actual desktop acceptance. Remaining Pascal modules and full visual parity are outside this delivery.",
+    "Generators and test sources are retained in FreeShip-Tests. Current outputs are on D following the user correction; historical C evidence paths are junctions. External solver binaries are not redistributed."
+  ],
+  "maintenance_sources_sha256": {
+    "record_resistance_native_delivery.py": "89370d5fe3a22352f0859fc3941f60ea1c38a509414217890e4b59b62bd798f4",
+    "record_topology_delivery.py": "dcb355a690a034c8b84582d824685a9e1992d1de59576de712a5f2d1b96e4f6c",
+    "promote_runtime.ps1": "d0427a3964c2263a93768185d29f9f9cfba8600d48965c1b29518c443e4bb728"
+  },
+  "free_bytes_after": {
+    "C": 8790605824,
+    "D": 22837694464
+  }
+}

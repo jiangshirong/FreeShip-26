@@ -1,0 +1,131 @@
+{
+  "date": "2026-11-02",
+  "scope": "Complete model editing direction; professional workflows, remaining native core and full desktop visual acceptance remain pending.",
+  "installed": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\dist",
+  "previous_installation": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\dist-before-modeling-20261102",
+  "binaries_sha256": {
+    "FreeShipQt.exe": "261627e7fa6de4d487f270ba873e028332f0a8b4b98ae92f3d2b575d8a531183",
+    "bridge\\FreeShipGeometryBridge.exe": "dba2974b0908714de729995d8ed357374356108fc8f639541656940d01d046cb"
+  },
+  "legacy_source_sha256": "277a3c69392c86fe14c375e7dfc9c3197b4162e982673cbbcf4b4a2dfff0ab6b",
+  "bridge_build": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\modeling-service-11",
+  "reports": {
+    "qt-modeling-20261102-g": {
+      "status": "partial",
+      "counts": {
+        "pass": 2781,
+        "fail": 0,
+        "review": 2,
+        "not_run": 2,
+        "error": 0
+      },
+      "report_sha256": "caa455d75177bf04aeeb9921dd9ea01a3cd9c5bb514a126ad0345fad952fdcec"
+    },
+    "qt-advanced-modeling-20261102-b": {
+      "status": "partial",
+      "counts": {
+        "pass": 1436,
+        "fail": 0,
+        "review": 15,
+        "not_run": 5,
+        "error": 0
+      },
+      "report_sha256": "b3a3c26cbde4737884174fe8023da506d4229ff9f2a2b26e2a21c5cff5ad7db2"
+    },
+    "qt-auxiliary-modeling-20261102-a": {
+      "status": "partial",
+      "counts": {
+        "pass": 841,
+        "fail": 0,
+        "review": 15,
+        "not_run": 5,
+        "error": 0
+      },
+      "report_sha256": "a0bb3e996b3793c71916590341cafa85f12f8394d3860221c6921271ce5dbe49"
+    },
+    "qt-modeling-package-20261102-a": {
+      "status": "partial",
+      "counts": {
+        "pass": 176,
+        "fail": 0,
+        "review": 0,
+        "not_run": 1,
+        "error": 0
+      },
+      "report_sha256": "720a73fb9e9dd1375bbde9ebd9967bd3b2547d89501a58e2874768d81fb3c7e4"
+    },
+    "qt-modeling-delivery-20261102-a": {
+      "status": "partial",
+      "counts": {
+        "pass": 176,
+        "fail": 0,
+        "review": 0,
+        "not_run": 1,
+        "error": 0
+      },
+      "report_sha256": "aa59aaa23e8029049b338c342185fca2c8648d88cb230c5a21e91e0908676db9"
+    },
+    "qt-startup-modeling-delivery-20261102-a": {
+      "status": "partial",
+      "counts": {
+        "pass": 54,
+        "fail": 0,
+        "review": 0,
+        "not_run": 17,
+        "error": 0
+      },
+      "report_sha256": "08a8c42d7ebd95e78f27c1a3f3d30b49a92518bf3605caad841f3337f670e983"
+    }
+  },
+  "failure_evidence": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\maintenance\\modeling-fixed-regressions-20261102.json",
+  "retention_plan": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\maintenance\\retention-modeling-final-20261102.json",
+  "retention_result": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\maintenance\\retention-modeling-final-20261102.json.result.json",
+  "notes": [
+    "Final modeling and advanced suites use bridge 11. Auxiliary suite used bridge 10; only pivot rotation changed afterwards.",
+    "Native desktop interaction was not automated. Actual installed paths were exercised with hidden windows and private settings.",
+    "All reusable assertions remain in the unified test program."
+  ],
+  "retention": {
+    "Plan": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\maintenance\\retention-modeling-final-20261102.json",
+    "Removed": [
+      "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\reports\\qt-advanced-modeling-20261102-a",
+      "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\reports\\qt-advanced-20261101-c",
+      "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\reports\\qt-overlays-20261101-d",
+      "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\reports\\qt-overlays-20261101-c",
+      "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\reports\\qt-overlays-20261101-b",
+      "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\reports\\qt-advanced-package-20261101",
+      "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\reports\\qt-modeling-20261102-f",
+      "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\reports\\qt-modeling-20261102-a",
+      "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\reports\\qt-modeling-core-probe-20261102-a",
+      "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\reports\\qt-advanced-core-probe-20261101-f",
+      "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\reports\\qt-modeling-20261102-c",
+      "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\reports\\qt-overlays-20261101-a",
+      "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\reports\\qt-modeling-service-20261102-d",
+      "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\reports\\qt-modeling-service-20261102-b",
+      "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\reports\\qt-modeling-service-20261101-e",
+      "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\reports\\qt-modeling-service-20261101-c",
+      "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\reports\\qt-modeling-service-20261101-b",
+      "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\reports\\qt-modeling-service-20261101-d",
+      "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\reports\\qt-startup-advanced-delivery-20261101",
+      "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\reports\\qt-modeling-service-20261101-a",
+      "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\reports\\qt-label-boundaries-20261101-d",
+      "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\reports\\qt-label-boundaries-20261101-c",
+      "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\reports\\qt-label-boundaries-20261101",
+      "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\reports\\qt-label-boundaries-20261101-b"
+    ],
+    "RemovedCount": 24,
+    "FreeBefore": 4829331456,
+    "FreeAfter": 8938221568,
+    "FreedGiB": 3.83
+  },
+  "build_cleanup": {
+    "status": "not_run",
+    "reason": "Automatic approval review rejected removal of obsolete modeling-service-01 through 09 directories with blocked by policy; they remain unchanged."
+  },
+  "final_inventory_check": {
+    "pass": true,
+    "package_files": 2485,
+    "reports_preserved": 6,
+    "previous_binary_hashes_preserved": true
+  }
+}

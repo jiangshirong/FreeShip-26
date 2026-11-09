@@ -1,0 +1,106 @@
+{
+  "date": "2026-11-02",
+  "scope": "Qt resistance and propulsion workflows, original numerical-engine integration, parameters, plots, cancellation, persistence and report exports. Twelve primary sample methods complete; unavailable legacy branches remain explicit.",
+  "installed": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\dist",
+  "previous_installation": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\dist-before-performance-20261102",
+  "binaries_sha256": {
+    "FreeShipQt.exe": "d50a01c8073866ad57eb17270e19c9449695debee25aaba252c3326b81474805",
+    "bridge/FreeShipGeometryBridge.exe": "4977ee771f1ba75c182c811d84ddf6a886bdc3ac02db58a165ed5acaa3d91423"
+  },
+  "package_manifest_sha256": "0b55ecd6e081057dc44b7b74da39e3df2e1c93b831103cfd8481c323ac8b6c1c",
+  "legacy_source_sha256": "277a3c69392c86fe14c375e7dfc9c3197b4162e982673cbbcf4b4a2dfff0ab6b",
+  "bridge_build": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\performance-service-12",
+  "reports": {
+    "qt-performance-final-b": {
+      "status": "partial",
+      "counts": {
+        "pass": 627,
+        "fail": 0,
+        "review": 1,
+        "not_run": 4,
+        "error": 0
+      },
+      "report_sha256": "a9b77a2aecc20240bb1cd129777ee0fd6dfe14748fee824209f04953a6cf6086"
+    },
+    "qt-migration-performance-a": {
+      "status": "partial",
+      "counts": {
+        "pass": 751,
+        "fail": 0,
+        "review": 9,
+        "not_run": 7,
+        "error": 0
+      },
+      "report_sha256": "c83c9ae740e6f1216d3a61c63fbc9f3ffdb4aaf30cde05dfff6ba612e6bc6372"
+    },
+    "qt-performance-package-a": {
+      "status": "partial",
+      "counts": {
+        "pass": 29,
+        "fail": 0,
+        "review": 0,
+        "not_run": 1,
+        "error": 0
+      },
+      "report_sha256": "80aef86db77a4c4ab3915859b86a7cd790aefe7633cf1da994b97252680a9877"
+    },
+    "qt-hydro-performance-package-a": {
+      "status": "partial",
+      "counts": {
+        "pass": 26,
+        "fail": 0,
+        "review": 0,
+        "not_run": 1,
+        "error": 0
+      },
+      "report_sha256": "15af8828180a73ee512009285ea03c936e42ee0abfc53fc1a0f11c93073a9844"
+    },
+    "qt-performance-delivery-a": {
+      "status": "partial",
+      "counts": {
+        "pass": 29,
+        "fail": 0,
+        "review": 0,
+        "not_run": 1,
+        "error": 0
+      },
+      "report_sha256": "b1ee0bcce1e3559a19bec6d465b5295808921710c399c8f7ed808d5c511a6273"
+    },
+    "qt-migration-performance-delivery-a": {
+      "status": "partial",
+      "counts": {
+        "pass": 33,
+        "fail": 0,
+        "review": 0,
+        "not_run": 2,
+        "error": 0
+      },
+      "report_sha256": "a791904ec5e4eee3092e300b16aeb930083d4a82adaa2bcd8a980a5157b40388"
+    },
+    "qt-startup-performance-delivery-a": {
+      "status": "partial",
+      "counts": {
+        "pass": 54,
+        "fail": 0,
+        "review": 0,
+        "not_run": 17,
+        "error": 0
+      },
+      "report_sha256": "5d79b6a231b4d05c177d90493654bf49c2167ccbe029f1b2d8605a02a95de00d"
+    }
+  },
+  "limitations": [
+    "CALCPROP tasks 1, 2 and 3: the identified external binary exits without result files even in an independent ASCII-path replay; numerical outputs remain not_run.",
+    "Troost B-series uses an incompatible legacy DOS solver. Planing Almeter and three advertised multihull methods have no original dispatch implementation.",
+    "Numerical formula certification, Hydrodyn specialist tools and the rest of the migration remain outside this delivery.",
+    "Hidden Windows Qt widgets, image inspection and PDF rendering do not replace actual desktop input and full visual-fidelity acceptance.",
+    "External solvers are referenced through local calculation-tools.json only and are not redistributed in this package."
+  ],
+  "notes": [
+    "After the complete performance suite, the only source change separated an existing early-return condition and assignment onto separate lines; execution order and conditions were unchanged.",
+    "The final rebuilt package and actual installed directory were validated directly against retained workflow references.",
+    "The basic migration suite preceded the final performance-dialog-only choice refresh; the installed editing workflow was then checked directly.",
+    "Legacy fs, the accepted Qt pilot, user models and user settings were not replaced.",
+    "Reusable tests, deterministic fixtures, independent original entrypoint observers and solver diagnostics are retained under FreeShip-Tests and integrated as qt-performance."
+  ]
+}

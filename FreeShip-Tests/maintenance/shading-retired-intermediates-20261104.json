@@ -1,0 +1,583 @@
+{
+  "kept": "All source, reports, screenshots, logs, manifests, final runs, package-02, package-04, package-final and installed backup",
+  "created_utc": "2026-11-04T02:39:28.2978603Z",
+  "packages": [
+    {
+      "bytes": 121911736.0,
+      "name": "package-01",
+      "path": "C:\\FreeShip26-ShadingTests\\package-01"
+    },
+    {
+      "bytes": 121922311.0,
+      "name": "package-03",
+      "path": "C:\\FreeShip26-ShadingTests\\package-03"
+    }
+  ],
+  "files": [
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-01\\qt-shading\\private-model.fbm",
+      "bytes": 5652
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-01\\qt-shading\\load\\model.json",
+      "bytes": 4748007
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-01\\qt-shading\\load\\native-input.json",
+      "bytes": 10286
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-01\\qt-shading\\load\\reference.dxf",
+      "bytes": 195032
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-01\\qt-shading\\load\\scene.fslp",
+      "bytes": 8373308
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-01\\qt-shading\\load\\sections.json",
+      "bytes": 61
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-01\\qt-shading\\load\\surface.json",
+      "bytes": 5469371
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-01\\qt-shading\\native-lines-cache\\f4d4b9c5170b2c9746b9ff06840cf4cc0bed36af63c0c0cebf64577bab4c10a3\\entry.json",
+      "bytes": 1384
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-01\\qt-shading\\native-lines-cache\\f4d4b9c5170b2c9746b9ff06840cf4cc0bed36af63c0c0cebf64577bab4c10a3\\reference.dxf",
+      "bytes": 195032
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-01\\qt-shading\\native-lines-cache\\f4d4b9c5170b2c9746b9ff06840cf4cc0bed36af63c0c0cebf64577bab4c10a3\\scene.fslp",
+      "bytes": 8373308
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-01\\qt-shading\\native-lines-cache\\f4d4b9c5170b2c9746b9ff06840cf4cc0bed36af63c0c0cebf64577bab4c10a3\\sections.json",
+      "bytes": 61
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-01\\qt-shading\\native-lines-cache\\f4d4b9c5170b2c9746b9ff06840cf4cc0bed36af63c0c0cebf64577bab4c10a3\\surface.json",
+      "bytes": 5469371
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-01\\qt-shading\\production-offscreen\\unchanged.fbm",
+      "bytes": 5652
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-01\\qt-shading\\production-offscreen\\after\\model.json",
+      "bytes": 4748007
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-01\\qt-shading\\production-offscreen\\after\\reference.dxf",
+      "bytes": 195032
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-01\\qt-shading\\production-offscreen\\after\\scene.fslp",
+      "bytes": 8373308
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-01\\qt-shading\\production-offscreen\\after\\sections.json",
+      "bytes": 61
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-01\\qt-shading\\production-offscreen\\before\\model.json",
+      "bytes": 4748007
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-01\\qt-shading\\production-offscreen\\before\\reference.dxf",
+      "bytes": 195032
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-01\\qt-shading\\production-offscreen\\before\\scene.fslp",
+      "bytes": 8373308
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-01\\qt-shading\\production-offscreen\\before\\sections.json",
+      "bytes": 61
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-01\\qt-shading\\production-offscreen\\edited\\model.json",
+      "bytes": 4769312
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-01\\qt-shading\\production-offscreen\\edited\\reference.dxf",
+      "bytes": 195343
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-01\\qt-shading\\production-offscreen\\edited\\scene.fslp",
+      "bytes": 8373308
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-01\\qt-shading\\production-offscreen\\edited\\sections.json",
+      "bytes": 61
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-01\\qt-shading\\production-offscreen\\restored\\model.json",
+      "bytes": 4748007
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-01\\qt-shading\\production-offscreen\\restored\\reference.dxf",
+      "bytes": 195032
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-01\\qt-shading\\production-offscreen\\restored\\scene.fslp",
+      "bytes": 8373308
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-01\\qt-shading\\production-offscreen\\restored\\sections.json",
+      "bytes": 61
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-01\\qt-shading\\production-windows\\unchanged.fbm",
+      "bytes": 5652
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-01\\qt-shading\\production-windows\\after\\model.json",
+      "bytes": 4748007
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-01\\qt-shading\\production-windows\\after\\reference.dxf",
+      "bytes": 195032
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-01\\qt-shading\\production-windows\\after\\scene.fslp",
+      "bytes": 8373308
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-01\\qt-shading\\production-windows\\after\\sections.json",
+      "bytes": 61
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-01\\qt-shading\\production-windows\\before\\model.json",
+      "bytes": 4748007
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-01\\qt-shading\\production-windows\\before\\reference.dxf",
+      "bytes": 195032
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-01\\qt-shading\\production-windows\\before\\scene.fslp",
+      "bytes": 8373308
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-01\\qt-shading\\production-windows\\before\\sections.json",
+      "bytes": 61
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-01\\qt-shading\\production-windows\\edited\\model.json",
+      "bytes": 4769312
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-01\\qt-shading\\production-windows\\edited\\reference.dxf",
+      "bytes": 195343
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-01\\qt-shading\\production-windows\\edited\\scene.fslp",
+      "bytes": 8373308
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-01\\qt-shading\\production-windows\\edited\\sections.json",
+      "bytes": 61
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-01\\qt-shading\\production-windows\\restored\\model.json",
+      "bytes": 4748007
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-01\\qt-shading\\production-windows\\restored\\reference.dxf",
+      "bytes": 195032
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-01\\qt-shading\\production-windows\\restored\\scene.fslp",
+      "bytes": 8373308
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-01\\qt-shading\\production-windows\\restored\\sections.json",
+      "bytes": 61
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-01\\qt-shading\\service\\protocol.jsonl",
+      "bytes": 2253
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-02\\qt-shading\\private-model.fbm",
+      "bytes": 5652
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-02\\qt-shading\\load\\model.json",
+      "bytes": 4748007
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-02\\qt-shading\\load\\native-input.json",
+      "bytes": 10286
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-02\\qt-shading\\load\\reference.dxf",
+      "bytes": 195032
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-02\\qt-shading\\load\\scene.fslp",
+      "bytes": 8373308
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-02\\qt-shading\\load\\sections.json",
+      "bytes": 61
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-02\\qt-shading\\load\\surface.json",
+      "bytes": 5469371
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-02\\qt-shading\\native-lines-cache\\f4d4b9c5170b2c9746b9ff06840cf4cc0bed36af63c0c0cebf64577bab4c10a3\\entry.json",
+      "bytes": 1384
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-02\\qt-shading\\native-lines-cache\\f4d4b9c5170b2c9746b9ff06840cf4cc0bed36af63c0c0cebf64577bab4c10a3\\reference.dxf",
+      "bytes": 195032
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-02\\qt-shading\\native-lines-cache\\f4d4b9c5170b2c9746b9ff06840cf4cc0bed36af63c0c0cebf64577bab4c10a3\\scene.fslp",
+      "bytes": 8373308
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-02\\qt-shading\\native-lines-cache\\f4d4b9c5170b2c9746b9ff06840cf4cc0bed36af63c0c0cebf64577bab4c10a3\\sections.json",
+      "bytes": 61
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-02\\qt-shading\\native-lines-cache\\f4d4b9c5170b2c9746b9ff06840cf4cc0bed36af63c0c0cebf64577bab4c10a3\\surface.json",
+      "bytes": 5469371
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-02\\qt-shading\\production-offscreen\\unchanged.fbm",
+      "bytes": 5652
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-02\\qt-shading\\production-offscreen\\after\\model.json",
+      "bytes": 4748007
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-02\\qt-shading\\production-offscreen\\after\\reference.dxf",
+      "bytes": 195032
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-02\\qt-shading\\production-offscreen\\after\\scene.fslp",
+      "bytes": 8373308
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-02\\qt-shading\\production-offscreen\\after\\sections.json",
+      "bytes": 61
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-02\\qt-shading\\production-offscreen\\before\\model.json",
+      "bytes": 4748007
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-02\\qt-shading\\production-offscreen\\before\\reference.dxf",
+      "bytes": 195032
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-02\\qt-shading\\production-offscreen\\before\\scene.fslp",
+      "bytes": 8373308
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-02\\qt-shading\\production-offscreen\\before\\sections.json",
+      "bytes": 61
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-02\\qt-shading\\production-offscreen\\edited\\model.json",
+      "bytes": 4769312
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-02\\qt-shading\\production-offscreen\\edited\\reference.dxf",
+      "bytes": 195343
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-02\\qt-shading\\production-offscreen\\edited\\scene.fslp",
+      "bytes": 8373308
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-02\\qt-shading\\production-offscreen\\edited\\sections.json",
+      "bytes": 61
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-02\\qt-shading\\production-offscreen\\restored\\model.json",
+      "bytes": 4748007
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-02\\qt-shading\\production-offscreen\\restored\\reference.dxf",
+      "bytes": 195032
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-02\\qt-shading\\production-offscreen\\restored\\scene.fslp",
+      "bytes": 8373308
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-02\\qt-shading\\production-offscreen\\restored\\sections.json",
+      "bytes": 61
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-02\\qt-shading\\production-windows\\unchanged.fbm",
+      "bytes": 5652
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-02\\qt-shading\\production-windows\\after\\model.json",
+      "bytes": 4748007
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-02\\qt-shading\\production-windows\\after\\reference.dxf",
+      "bytes": 195032
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-02\\qt-shading\\production-windows\\after\\scene.fslp",
+      "bytes": 8373308
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-02\\qt-shading\\production-windows\\after\\sections.json",
+      "bytes": 61
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-02\\qt-shading\\production-windows\\before\\model.json",
+      "bytes": 4748007
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-02\\qt-shading\\production-windows\\before\\reference.dxf",
+      "bytes": 195032
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-02\\qt-shading\\production-windows\\before\\scene.fslp",
+      "bytes": 8373308
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-02\\qt-shading\\production-windows\\before\\sections.json",
+      "bytes": 61
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-02\\qt-shading\\production-windows\\edited\\model.json",
+      "bytes": 4769312
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-02\\qt-shading\\production-windows\\edited\\reference.dxf",
+      "bytes": 195343
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-02\\qt-shading\\production-windows\\edited\\scene.fslp",
+      "bytes": 8373308
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-02\\qt-shading\\production-windows\\edited\\sections.json",
+      "bytes": 61
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-02\\qt-shading\\production-windows\\restored\\model.json",
+      "bytes": 4748007
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-02\\qt-shading\\production-windows\\restored\\reference.dxf",
+      "bytes": 195032
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-02\\qt-shading\\production-windows\\restored\\scene.fslp",
+      "bytes": 8373308
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-02\\qt-shading\\production-windows\\restored\\sections.json",
+      "bytes": 61
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-02\\qt-shading\\service\\protocol.jsonl",
+      "bytes": 2253
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-03\\qt-shading\\private-model.fbm",
+      "bytes": 5652
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-03\\qt-shading\\load\\model.json",
+      "bytes": 4748007
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-03\\qt-shading\\load\\native-input.json",
+      "bytes": 10286
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-03\\qt-shading\\load\\reference.dxf",
+      "bytes": 195032
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-03\\qt-shading\\load\\scene.fslp",
+      "bytes": 8373308
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-03\\qt-shading\\load\\sections.json",
+      "bytes": 61
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-03\\qt-shading\\load\\surface.json",
+      "bytes": 5469371
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-03\\qt-shading\\native-lines-cache\\f4d4b9c5170b2c9746b9ff06840cf4cc0bed36af63c0c0cebf64577bab4c10a3\\entry.json",
+      "bytes": 1384
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-03\\qt-shading\\native-lines-cache\\f4d4b9c5170b2c9746b9ff06840cf4cc0bed36af63c0c0cebf64577bab4c10a3\\reference.dxf",
+      "bytes": 195032
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-03\\qt-shading\\native-lines-cache\\f4d4b9c5170b2c9746b9ff06840cf4cc0bed36af63c0c0cebf64577bab4c10a3\\scene.fslp",
+      "bytes": 8373308
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-03\\qt-shading\\native-lines-cache\\f4d4b9c5170b2c9746b9ff06840cf4cc0bed36af63c0c0cebf64577bab4c10a3\\sections.json",
+      "bytes": 61
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-03\\qt-shading\\native-lines-cache\\f4d4b9c5170b2c9746b9ff06840cf4cc0bed36af63c0c0cebf64577bab4c10a3\\surface.json",
+      "bytes": 5469371
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-03\\qt-shading\\production-offscreen\\unchanged.fbm",
+      "bytes": 5652
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-03\\qt-shading\\production-offscreen\\after\\model.json",
+      "bytes": 4748007
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-03\\qt-shading\\production-offscreen\\after\\reference.dxf",
+      "bytes": 195032
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-03\\qt-shading\\production-offscreen\\after\\scene.fslp",
+      "bytes": 8373308
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-03\\qt-shading\\production-offscreen\\after\\sections.json",
+      "bytes": 61
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-03\\qt-shading\\production-offscreen\\before\\model.json",
+      "bytes": 4748007
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-03\\qt-shading\\production-offscreen\\before\\reference.dxf",
+      "bytes": 195032
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-03\\qt-shading\\production-offscreen\\before\\scene.fslp",
+      "bytes": 8373308
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-03\\qt-shading\\production-offscreen\\before\\sections.json",
+      "bytes": 61
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-03\\qt-shading\\production-offscreen\\edited\\model.json",
+      "bytes": 4769312
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-03\\qt-shading\\production-offscreen\\edited\\reference.dxf",
+      "bytes": 195343
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-03\\qt-shading\\production-offscreen\\edited\\scene.fslp",
+      "bytes": 8373308
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-03\\qt-shading\\production-offscreen\\edited\\sections.json",
+      "bytes": 61
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-03\\qt-shading\\production-offscreen\\restored\\model.json",
+      "bytes": 4748007
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-03\\qt-shading\\production-offscreen\\restored\\reference.dxf",
+      "bytes": 195032
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-03\\qt-shading\\production-offscreen\\restored\\scene.fslp",
+      "bytes": 8373308
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-03\\qt-shading\\production-offscreen\\restored\\sections.json",
+      "bytes": 61
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-03\\qt-shading\\production-windows\\unchanged.fbm",
+      "bytes": 5652
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-03\\qt-shading\\production-windows\\after\\model.json",
+      "bytes": 4748007
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-03\\qt-shading\\production-windows\\after\\reference.dxf",
+      "bytes": 195032
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-03\\qt-shading\\production-windows\\after\\scene.fslp",
+      "bytes": 8373308
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-03\\qt-shading\\production-windows\\after\\sections.json",
+      "bytes": 61
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-03\\qt-shading\\production-windows\\before\\model.json",
+      "bytes": 4748007
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-03\\qt-shading\\production-windows\\before\\reference.dxf",
+      "bytes": 195032
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-03\\qt-shading\\production-windows\\before\\scene.fslp",
+      "bytes": 8373308
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-03\\qt-shading\\production-windows\\before\\sections.json",
+      "bytes": 61
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-03\\qt-shading\\production-windows\\edited\\model.json",
+      "bytes": 4769312
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-03\\qt-shading\\production-windows\\edited\\reference.dxf",
+      "bytes": 195343
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-03\\qt-shading\\production-windows\\edited\\scene.fslp",
+      "bytes": 8373308
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-03\\qt-shading\\production-windows\\edited\\sections.json",
+      "bytes": 61
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-03\\qt-shading\\production-windows\\restored\\model.json",
+      "bytes": 4748007
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-03\\qt-shading\\production-windows\\restored\\reference.dxf",
+      "bytes": 195032
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-03\\qt-shading\\production-windows\\restored\\scene.fslp",
+      "bytes": 8373308
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-03\\qt-shading\\production-windows\\restored\\sections.json",
+      "bytes": 61
+    },
+    {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-03\\qt-shading\\service\\protocol.jsonl",
+      "bytes": 2253
+    }
+  ],
+  "bytes": 662120825.0
+}

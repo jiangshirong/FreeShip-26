@@ -1,0 +1,1778 @@
+{
+  "files": [
+    {
+      "bytes": 2787,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-02\\qt-project-completion\\service\\align\\native-input.json"
+    },
+    {
+      "bytes": 30530,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-02\\qt-project-completion\\service\\align\\reference.dxf"
+    },
+    {
+      "bytes": 85142,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-02\\qt-project-completion\\service\\align\\scene.fslp"
+    },
+    {
+      "bytes": 20088,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-02\\qt-project-completion\\service\\align\\surface.json"
+    },
+    {
+      "bytes": 2772,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-02\\qt-project-completion\\service\\load\\native-input.json"
+    },
+    {
+      "bytes": 30574,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-02\\qt-project-completion\\service\\load\\reference.dxf"
+    },
+    {
+      "bytes": 85154,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-02\\qt-project-completion\\service\\load\\scene.fslp"
+    },
+    {
+      "bytes": 21960,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-02\\qt-project-completion\\service\\load\\surface.json"
+    },
+    {
+      "bytes": 2772,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-02\\qt-project-completion\\service\\load-locked\\native-input.json"
+    },
+    {
+      "bytes": 30574,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-02\\qt-project-completion\\service\\load-locked\\reference.dxf"
+    },
+    {
+      "bytes": 85154,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-02\\qt-project-completion\\service\\load-locked\\scene.fslp"
+    },
+    {
+      "bytes": 21960,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-02\\qt-project-completion\\service\\load-locked\\surface.json"
+    },
+    {
+      "bytes": 2787,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-02\\qt-project-completion\\service\\noop\\native-input.json"
+    },
+    {
+      "bytes": 30530,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-02\\qt-project-completion\\service\\noop\\reference.dxf"
+    },
+    {
+      "bytes": 85142,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-02\\qt-project-completion\\service\\noop\\scene.fslp"
+    },
+    {
+      "bytes": 20088,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-02\\qt-project-completion\\service\\noop\\surface.json"
+    },
+    {
+      "bytes": 2787,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-02\\qt-project-completion\\service\\redo\\native-input.json"
+    },
+    {
+      "bytes": 30530,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-02\\qt-project-completion\\service\\redo\\reference.dxf"
+    },
+    {
+      "bytes": 85142,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-02\\qt-project-completion\\service\\redo\\scene.fslp"
+    },
+    {
+      "bytes": 20088,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-02\\qt-project-completion\\service\\redo\\surface.json"
+    },
+    {
+      "bytes": 2787,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-02\\qt-project-completion\\service\\reopen\\native-input.json"
+    },
+    {
+      "bytes": 30530,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-02\\qt-project-completion\\service\\reopen\\reference.dxf"
+    },
+    {
+      "bytes": 85142,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-02\\qt-project-completion\\service\\reopen\\scene.fslp"
+    },
+    {
+      "bytes": 20088,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-02\\qt-project-completion\\service\\reopen\\surface.json"
+    },
+    {
+      "bytes": 2772,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-02\\qt-project-completion\\service\\reset\\native-input.json"
+    },
+    {
+      "bytes": 30574,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-02\\qt-project-completion\\service\\reset\\reference.dxf"
+    },
+    {
+      "bytes": 85154,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-02\\qt-project-completion\\service\\reset\\scene.fslp"
+    },
+    {
+      "bytes": 21960,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-02\\qt-project-completion\\service\\reset\\surface.json"
+    },
+    {
+      "bytes": 2772,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-02\\qt-project-completion\\service\\undo\\native-input.json"
+    },
+    {
+      "bytes": 30574,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-02\\qt-project-completion\\service\\undo\\reference.dxf"
+    },
+    {
+      "bytes": 85154,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-02\\qt-project-completion\\service\\undo\\scene.fslp"
+    },
+    {
+      "bytes": 21960,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-02\\qt-project-completion\\service\\undo\\surface.json"
+    },
+    {
+      "bytes": 2772,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-02\\qt-project-completion\\service\\unit-undo\\native-input.json"
+    },
+    {
+      "bytes": 30574,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-02\\qt-project-completion\\service\\unit-undo\\reference.dxf"
+    },
+    {
+      "bytes": 85154,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-02\\qt-project-completion\\service\\unit-undo\\scene.fslp"
+    },
+    {
+      "bytes": 21960,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-02\\qt-project-completion\\service\\unit-undo\\surface.json"
+    },
+    {
+      "bytes": 3083,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-02\\qt-project-completion\\service\\units-align\\native-input.json"
+    },
+    {
+      "bytes": 32916,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-02\\qt-project-completion\\service\\units-align\\reference.dxf"
+    },
+    {
+      "bytes": 85298,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-02\\qt-project-completion\\service\\units-align\\scene.fslp"
+    },
+    {
+      "bytes": 42298,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-02\\qt-project-completion\\service\\units-align\\surface.json"
+    },
+    {
+      "bytes": 2077,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-02\\qt-project-completion\\water\\load\\native-input.json"
+    },
+    {
+      "bytes": 8908,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-02\\qt-project-completion\\water\\load\\reference.dxf"
+    },
+    {
+      "bytes": 15948,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-02\\qt-project-completion\\water\\load\\scene.fslp"
+    },
+    {
+      "bytes": 4352,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-02\\qt-project-completion\\water\\load\\surface.json"
+    },
+    {
+      "bytes": 2077,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-02\\qt-project-completion\\water\\maneuver-save\\native-input.json"
+    },
+    {
+      "bytes": 8908,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-02\\qt-project-completion\\water\\maneuver-save\\reference.dxf"
+    },
+    {
+      "bytes": 15948,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-02\\qt-project-completion\\water\\maneuver-save\\scene.fslp"
+    },
+    {
+      "bytes": 4352,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-02\\qt-project-completion\\water\\maneuver-save\\surface.json"
+    },
+    {
+      "bytes": 2077,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-02\\qt-project-completion\\water\\prop-save\\native-input.json"
+    },
+    {
+      "bytes": 8908,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-02\\qt-project-completion\\water\\prop-save\\reference.dxf"
+    },
+    {
+      "bytes": 15948,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-02\\qt-project-completion\\water\\prop-save\\scene.fslp"
+    },
+    {
+      "bytes": 4352,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-02\\qt-project-completion\\water\\prop-save\\surface.json"
+    },
+    {
+      "bytes": 30530,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-02\\qt-project-completion\\service\\native-lines-cache\\353845f2a9a2c14ccb141ccffebc1bc6cd9052c3a2e26194d056e5df23abd62e\\reference.dxf"
+    },
+    {
+      "bytes": 85142,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-02\\qt-project-completion\\service\\native-lines-cache\\353845f2a9a2c14ccb141ccffebc1bc6cd9052c3a2e26194d056e5df23abd62e\\scene.fslp"
+    },
+    {
+      "bytes": 20088,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-02\\qt-project-completion\\service\\native-lines-cache\\353845f2a9a2c14ccb141ccffebc1bc6cd9052c3a2e26194d056e5df23abd62e\\surface.json"
+    },
+    {
+      "bytes": 30574,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-02\\qt-project-completion\\service\\native-lines-cache\\c39e53550750203b151481689e7de3d65dc77ee5dd33e8935c61fd86f0d7d8b5\\reference.dxf"
+    },
+    {
+      "bytes": 85154,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-02\\qt-project-completion\\service\\native-lines-cache\\c39e53550750203b151481689e7de3d65dc77ee5dd33e8935c61fd86f0d7d8b5\\scene.fslp"
+    },
+    {
+      "bytes": 21960,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-02\\qt-project-completion\\service\\native-lines-cache\\c39e53550750203b151481689e7de3d65dc77ee5dd33e8935c61fd86f0d7d8b5\\surface.json"
+    },
+    {
+      "bytes": 32916,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-02\\qt-project-completion\\service\\native-lines-cache\\d1aa66ad24fd8fa4398098e2a36bdf525fec650da86a1dde402890525047aa36\\reference.dxf"
+    },
+    {
+      "bytes": 85298,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-02\\qt-project-completion\\service\\native-lines-cache\\d1aa66ad24fd8fa4398098e2a36bdf525fec650da86a1dde402890525047aa36\\scene.fslp"
+    },
+    {
+      "bytes": 42298,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-02\\qt-project-completion\\service\\native-lines-cache\\d1aa66ad24fd8fa4398098e2a36bdf525fec650da86a1dde402890525047aa36\\surface.json"
+    },
+    {
+      "bytes": 8908,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-02\\qt-project-completion\\water\\native-lines-cache\\d82e31540c012625f1687c68611f6bb8bc6741787bc9540516ad4599bef60e83\\reference.dxf"
+    },
+    {
+      "bytes": 15948,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-02\\qt-project-completion\\water\\native-lines-cache\\d82e31540c012625f1687c68611f6bb8bc6741787bc9540516ad4599bef60e83\\scene.fslp"
+    },
+    {
+      "bytes": 4352,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-02\\qt-project-completion\\water\\native-lines-cache\\d82e31540c012625f1687c68611f6bb8bc6741787bc9540516ad4599bef60e83\\surface.json"
+    },
+    {
+      "bytes": 30574,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-03\\qt-project-completion\\production\\project\\dxf-1.dxf"
+    },
+    {
+      "bytes": 30574,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-03\\qt-project-completion\\production\\project\\dxf-2.dxf"
+    },
+    {
+      "bytes": 30530,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-03\\qt-project-completion\\production\\project\\dxf-3.dxf"
+    },
+    {
+      "bytes": 30574,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-03\\qt-project-completion\\production\\project\\dxf-4.dxf"
+    },
+    {
+      "bytes": 30530,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-03\\qt-project-completion\\production\\project\\dxf-5.dxf"
+    },
+    {
+      "bytes": 30530,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-03\\qt-project-completion\\production\\project\\dxf-6.dxf"
+    },
+    {
+      "bytes": 2787,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-03\\qt-project-completion\\service\\align\\native-input.json"
+    },
+    {
+      "bytes": 30530,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-03\\qt-project-completion\\service\\align\\reference.dxf"
+    },
+    {
+      "bytes": 85142,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-03\\qt-project-completion\\service\\align\\scene.fslp"
+    },
+    {
+      "bytes": 20088,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-03\\qt-project-completion\\service\\align\\surface.json"
+    },
+    {
+      "bytes": 2772,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-03\\qt-project-completion\\service\\load\\native-input.json"
+    },
+    {
+      "bytes": 30574,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-03\\qt-project-completion\\service\\load\\reference.dxf"
+    },
+    {
+      "bytes": 85154,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-03\\qt-project-completion\\service\\load\\scene.fslp"
+    },
+    {
+      "bytes": 21960,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-03\\qt-project-completion\\service\\load\\surface.json"
+    },
+    {
+      "bytes": 2772,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-03\\qt-project-completion\\service\\load-locked\\native-input.json"
+    },
+    {
+      "bytes": 30574,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-03\\qt-project-completion\\service\\load-locked\\reference.dxf"
+    },
+    {
+      "bytes": 85154,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-03\\qt-project-completion\\service\\load-locked\\scene.fslp"
+    },
+    {
+      "bytes": 21960,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-03\\qt-project-completion\\service\\load-locked\\surface.json"
+    },
+    {
+      "bytes": 2787,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-03\\qt-project-completion\\service\\noop\\native-input.json"
+    },
+    {
+      "bytes": 30530,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-03\\qt-project-completion\\service\\noop\\reference.dxf"
+    },
+    {
+      "bytes": 85142,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-03\\qt-project-completion\\service\\noop\\scene.fslp"
+    },
+    {
+      "bytes": 20088,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-03\\qt-project-completion\\service\\noop\\surface.json"
+    },
+    {
+      "bytes": 2787,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-03\\qt-project-completion\\service\\redo\\native-input.json"
+    },
+    {
+      "bytes": 30530,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-03\\qt-project-completion\\service\\redo\\reference.dxf"
+    },
+    {
+      "bytes": 85142,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-03\\qt-project-completion\\service\\redo\\scene.fslp"
+    },
+    {
+      "bytes": 20088,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-03\\qt-project-completion\\service\\redo\\surface.json"
+    },
+    {
+      "bytes": 2787,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-03\\qt-project-completion\\service\\reopen\\native-input.json"
+    },
+    {
+      "bytes": 30530,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-03\\qt-project-completion\\service\\reopen\\reference.dxf"
+    },
+    {
+      "bytes": 85142,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-03\\qt-project-completion\\service\\reopen\\scene.fslp"
+    },
+    {
+      "bytes": 20088,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-03\\qt-project-completion\\service\\reopen\\surface.json"
+    },
+    {
+      "bytes": 2772,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-03\\qt-project-completion\\service\\reset\\native-input.json"
+    },
+    {
+      "bytes": 30574,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-03\\qt-project-completion\\service\\reset\\reference.dxf"
+    },
+    {
+      "bytes": 85154,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-03\\qt-project-completion\\service\\reset\\scene.fslp"
+    },
+    {
+      "bytes": 21960,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-03\\qt-project-completion\\service\\reset\\surface.json"
+    },
+    {
+      "bytes": 2772,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-03\\qt-project-completion\\service\\undo\\native-input.json"
+    },
+    {
+      "bytes": 30574,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-03\\qt-project-completion\\service\\undo\\reference.dxf"
+    },
+    {
+      "bytes": 85154,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-03\\qt-project-completion\\service\\undo\\scene.fslp"
+    },
+    {
+      "bytes": 21960,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-03\\qt-project-completion\\service\\undo\\surface.json"
+    },
+    {
+      "bytes": 2772,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-03\\qt-project-completion\\service\\unit-undo\\native-input.json"
+    },
+    {
+      "bytes": 30574,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-03\\qt-project-completion\\service\\unit-undo\\reference.dxf"
+    },
+    {
+      "bytes": 85154,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-03\\qt-project-completion\\service\\unit-undo\\scene.fslp"
+    },
+    {
+      "bytes": 21960,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-03\\qt-project-completion\\service\\unit-undo\\surface.json"
+    },
+    {
+      "bytes": 3083,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-03\\qt-project-completion\\service\\units-align\\native-input.json"
+    },
+    {
+      "bytes": 32916,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-03\\qt-project-completion\\service\\units-align\\reference.dxf"
+    },
+    {
+      "bytes": 85298,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-03\\qt-project-completion\\service\\units-align\\scene.fslp"
+    },
+    {
+      "bytes": 42298,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-03\\qt-project-completion\\service\\units-align\\surface.json"
+    },
+    {
+      "bytes": 2077,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-03\\qt-project-completion\\water\\load\\native-input.json"
+    },
+    {
+      "bytes": 8908,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-03\\qt-project-completion\\water\\load\\reference.dxf"
+    },
+    {
+      "bytes": 15948,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-03\\qt-project-completion\\water\\load\\scene.fslp"
+    },
+    {
+      "bytes": 4352,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-03\\qt-project-completion\\water\\load\\surface.json"
+    },
+    {
+      "bytes": 2077,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-03\\qt-project-completion\\water\\maneuver-save\\native-input.json"
+    },
+    {
+      "bytes": 8908,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-03\\qt-project-completion\\water\\maneuver-save\\reference.dxf"
+    },
+    {
+      "bytes": 15948,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-03\\qt-project-completion\\water\\maneuver-save\\scene.fslp"
+    },
+    {
+      "bytes": 4352,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-03\\qt-project-completion\\water\\maneuver-save\\surface.json"
+    },
+    {
+      "bytes": 2077,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-03\\qt-project-completion\\water\\prop-save\\native-input.json"
+    },
+    {
+      "bytes": 8908,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-03\\qt-project-completion\\water\\prop-save\\reference.dxf"
+    },
+    {
+      "bytes": 15948,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-03\\qt-project-completion\\water\\prop-save\\scene.fslp"
+    },
+    {
+      "bytes": 4352,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-03\\qt-project-completion\\water\\prop-save\\surface.json"
+    },
+    {
+      "bytes": 2077,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-03\\qt-project-completion\\water\\reopen\\native-input.json"
+    },
+    {
+      "bytes": 8908,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-03\\qt-project-completion\\water\\reopen\\reference.dxf"
+    },
+    {
+      "bytes": 15948,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-03\\qt-project-completion\\water\\reopen\\scene.fslp"
+    },
+    {
+      "bytes": 4352,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-03\\qt-project-completion\\water\\reopen\\surface.json"
+    },
+    {
+      "bytes": 30530,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-03\\qt-project-completion\\service\\native-lines-cache\\353845f2a9a2c14ccb141ccffebc1bc6cd9052c3a2e26194d056e5df23abd62e\\reference.dxf"
+    },
+    {
+      "bytes": 85142,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-03\\qt-project-completion\\service\\native-lines-cache\\353845f2a9a2c14ccb141ccffebc1bc6cd9052c3a2e26194d056e5df23abd62e\\scene.fslp"
+    },
+    {
+      "bytes": 20088,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-03\\qt-project-completion\\service\\native-lines-cache\\353845f2a9a2c14ccb141ccffebc1bc6cd9052c3a2e26194d056e5df23abd62e\\surface.json"
+    },
+    {
+      "bytes": 30574,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-03\\qt-project-completion\\service\\native-lines-cache\\c39e53550750203b151481689e7de3d65dc77ee5dd33e8935c61fd86f0d7d8b5\\reference.dxf"
+    },
+    {
+      "bytes": 85154,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-03\\qt-project-completion\\service\\native-lines-cache\\c39e53550750203b151481689e7de3d65dc77ee5dd33e8935c61fd86f0d7d8b5\\scene.fslp"
+    },
+    {
+      "bytes": 21960,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-03\\qt-project-completion\\service\\native-lines-cache\\c39e53550750203b151481689e7de3d65dc77ee5dd33e8935c61fd86f0d7d8b5\\surface.json"
+    },
+    {
+      "bytes": 32916,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-03\\qt-project-completion\\service\\native-lines-cache\\d1aa66ad24fd8fa4398098e2a36bdf525fec650da86a1dde402890525047aa36\\reference.dxf"
+    },
+    {
+      "bytes": 85298,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-03\\qt-project-completion\\service\\native-lines-cache\\d1aa66ad24fd8fa4398098e2a36bdf525fec650da86a1dde402890525047aa36\\scene.fslp"
+    },
+    {
+      "bytes": 42298,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-03\\qt-project-completion\\service\\native-lines-cache\\d1aa66ad24fd8fa4398098e2a36bdf525fec650da86a1dde402890525047aa36\\surface.json"
+    },
+    {
+      "bytes": 8908,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-03\\qt-project-completion\\water\\native-lines-cache\\d82e31540c012625f1687c68611f6bb8bc6741787bc9540516ad4599bef60e83\\reference.dxf"
+    },
+    {
+      "bytes": 15948,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-03\\qt-project-completion\\water\\native-lines-cache\\d82e31540c012625f1687c68611f6bb8bc6741787bc9540516ad4599bef60e83\\scene.fslp"
+    },
+    {
+      "bytes": 4352,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-03\\qt-project-completion\\water\\native-lines-cache\\d82e31540c012625f1687c68611f6bb8bc6741787bc9540516ad4599bef60e83\\surface.json"
+    },
+    {
+      "bytes": 8908,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-03\\qt-project-completion\\production\\maneuver-16.1\\qt\\after\\reference.dxf"
+    },
+    {
+      "bytes": 15948,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-03\\qt-project-completion\\production\\maneuver-16.1\\qt\\after\\scene.fslp"
+    },
+    {
+      "bytes": 8908,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-03\\qt-project-completion\\production\\maneuver-16.1\\qt\\original\\reference.dxf"
+    },
+    {
+      "bytes": 15948,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-03\\qt-project-completion\\production\\maneuver-16.1\\qt\\original\\scene.fslp"
+    },
+    {
+      "bytes": 205550,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-03\\qt-project-completion\\production\\maneuver-16.1\\qt\\views\\parameters.png"
+    },
+    {
+      "bytes": 92456,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-03\\qt-project-completion\\production\\maneuver-16.1\\qt\\views\\results-0.png"
+    },
+    {
+      "bytes": 93809,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-03\\qt-project-completion\\production\\maneuver-16.1\\qt\\views\\results-1.png"
+    },
+    {
+      "bytes": 163319,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-03\\qt-project-completion\\production\\maneuver-16.1\\qt\\views\\results-2.png"
+    },
+    {
+      "bytes": 8908,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-03\\qt-project-completion\\production\\propeller4-0\\qt\\after\\reference.dxf"
+    },
+    {
+      "bytes": 15948,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-03\\qt-project-completion\\production\\propeller4-0\\qt\\after\\scene.fslp"
+    },
+    {
+      "bytes": 8908,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-03\\qt-project-completion\\production\\propeller4-0\\qt\\original\\reference.dxf"
+    },
+    {
+      "bytes": 15948,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-03\\qt-project-completion\\production\\propeller4-0\\qt\\original\\scene.fslp"
+    },
+    {
+      "bytes": 82012,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-03\\qt-project-completion\\production\\propeller4-0\\qt\\views\\parameters.png"
+    },
+    {
+      "bytes": 134382,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-03\\qt-project-completion\\production\\propeller4-0\\qt\\views\\results-0.png"
+    },
+    {
+      "bytes": 112412,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-03\\qt-project-completion\\production\\propeller4-0\\qt\\views\\results-1.png"
+    },
+    {
+      "bytes": 132551,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-03\\qt-project-completion\\production\\propeller4-0\\qt\\views\\results-2.png"
+    },
+    {
+      "bytes": 8908,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-03\\qt-project-completion\\production\\propeller4-20\\qt\\after\\reference.dxf"
+    },
+    {
+      "bytes": 15948,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-03\\qt-project-completion\\production\\propeller4-20\\qt\\after\\scene.fslp"
+    },
+    {
+      "bytes": 8908,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-03\\qt-project-completion\\production\\propeller4-20\\qt\\original\\reference.dxf"
+    },
+    {
+      "bytes": 15948,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-03\\qt-project-completion\\production\\propeller4-20\\qt\\original\\scene.fslp"
+    },
+    {
+      "bytes": 82012,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-03\\qt-project-completion\\production\\propeller4-20\\qt\\views\\parameters.png"
+    },
+    {
+      "bytes": 133908,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-03\\qt-project-completion\\production\\propeller4-20\\qt\\views\\results-0.png"
+    },
+    {
+      "bytes": 110969,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-03\\qt-project-completion\\production\\propeller4-20\\qt\\views\\results-1.png"
+    },
+    {
+      "bytes": 132568,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-03\\qt-project-completion\\production\\propeller4-20\\qt\\views\\results-2.png"
+    },
+    {
+      "bytes": 8908,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-03\\qt-project-completion\\production\\propeller4-30\\qt\\after\\reference.dxf"
+    },
+    {
+      "bytes": 15948,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-03\\qt-project-completion\\production\\propeller4-30\\qt\\after\\scene.fslp"
+    },
+    {
+      "bytes": 8908,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-03\\qt-project-completion\\production\\propeller4-30\\qt\\original\\reference.dxf"
+    },
+    {
+      "bytes": 15948,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-03\\qt-project-completion\\production\\propeller4-30\\qt\\original\\scene.fslp"
+    },
+    {
+      "bytes": 82012,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-03\\qt-project-completion\\production\\propeller4-30\\qt\\views\\parameters.png"
+    },
+    {
+      "bytes": 134459,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-03\\qt-project-completion\\production\\propeller4-30\\qt\\views\\results-0.png"
+    },
+    {
+      "bytes": 112131,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-03\\qt-project-completion\\production\\propeller4-30\\qt\\views\\results-1.png"
+    },
+    {
+      "bytes": 132705,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\focused-03\\qt-project-completion\\production\\propeller4-30\\qt\\views\\results-2.png"
+    },
+    {
+      "bytes": 7058,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\editing-widgets\\body-editing.png"
+    },
+    {
+      "bytes": 7364,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\editing-widgets\\plan-editing.png"
+    },
+    {
+      "bytes": 6721,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\editing-widgets\\profile-editing.png"
+    },
+    {
+      "bytes": 35384,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\scale-1\\preferences.14.compact.page0.png"
+    },
+    {
+      "bytes": 74225,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\scale-1\\preferences.14.compact.page1.png"
+    },
+    {
+      "bytes": 50492,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\scale-1\\preferences.14.compact.page2.png"
+    },
+    {
+      "bytes": 37429,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\scale-1\\preferences.14.normal.page0.png"
+    },
+    {
+      "bytes": 76549,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\scale-1\\preferences.14.normal.page1.png"
+    },
+    {
+      "bytes": 83281,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\scale-1\\preferences.14.normal.page2.png"
+    },
+    {
+      "bytes": 39831,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\scale-1\\preferences.18.compact.page0.png"
+    },
+    {
+      "bytes": 70946,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\scale-1\\preferences.18.compact.page1.png"
+    },
+    {
+      "bytes": 53100,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\scale-1\\preferences.18.compact.page2.png"
+    },
+    {
+      "bytes": 41435,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\scale-1\\preferences.18.normal.page0.png"
+    },
+    {
+      "bytes": 92690,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\scale-1\\preferences.18.normal.page1.png"
+    },
+    {
+      "bytes": 87959,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\scale-1\\preferences.18.normal.page2.png"
+    },
+    {
+      "bytes": 14670,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\scale-1\\preferences.9.compact.page0.png"
+    },
+    {
+      "bytes": 30017,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\scale-1\\preferences.9.compact.page1.png"
+    },
+    {
+      "bytes": 26410,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\scale-1\\preferences.9.compact.page2.png"
+    },
+    {
+      "bytes": 16470,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\scale-1\\preferences.9.normal.page0.png"
+    },
+    {
+      "bytes": 32164,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\scale-1\\preferences.9.normal.page1.png"
+    },
+    {
+      "bytes": 43085,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\scale-1\\preferences.9.normal.page2.png"
+    },
+    {
+      "bytes": 49785,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\scale-1\\project.14.compact.page0.png"
+    },
+    {
+      "bytes": 71353,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\scale-1\\project.14.compact.page1.png"
+    },
+    {
+      "bytes": 54356,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\scale-1\\project.14.compact.page2.png"
+    },
+    {
+      "bytes": 70383,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\scale-1\\project.14.normal.page0.png"
+    },
+    {
+      "bytes": 73814,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\scale-1\\project.14.normal.page1.png"
+    },
+    {
+      "bytes": 71987,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\scale-1\\project.14.normal.page2.png"
+    },
+    {
+      "bytes": 57592,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\scale-1\\project.18.compact.page0.png"
+    },
+    {
+      "bytes": 64177,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\scale-1\\project.18.compact.page1.png"
+    },
+    {
+      "bytes": 59762,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\scale-1\\project.18.compact.page2.png"
+    },
+    {
+      "bytes": 75720,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\scale-1\\project.18.normal.page0.png"
+    },
+    {
+      "bytes": 89845,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\scale-1\\project.18.normal.page1.png"
+    },
+    {
+      "bytes": 85583,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\scale-1\\project.18.normal.page2.png"
+    },
+    {
+      "bytes": 22692,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\scale-1\\project.9.compact.page0.png"
+    },
+    {
+      "bytes": 26457,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\scale-1\\project.9.compact.page1.png"
+    },
+    {
+      "bytes": 28483,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\scale-1\\project.9.compact.page2.png"
+    },
+    {
+      "bytes": 35291,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\scale-1\\project.9.normal.page0.png"
+    },
+    {
+      "bytes": 28736,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\scale-1\\project.9.normal.page1.png"
+    },
+    {
+      "bytes": 30881,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\scale-1\\project.9.normal.page2.png"
+    },
+    {
+      "bytes": 21470,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\scale-1\\sections.14.png"
+    },
+    {
+      "bytes": 23111,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\scale-1\\sections.18.png"
+    },
+    {
+      "bytes": 11094,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\scale-1\\sections.9.png"
+    },
+    {
+      "bytes": 53213,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\scale-1.5\\preferences.14.compact.page0.png"
+    },
+    {
+      "bytes": 113851,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\scale-1.5\\preferences.14.compact.page1.png"
+    },
+    {
+      "bytes": 78209,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\scale-1.5\\preferences.14.compact.page2.png"
+    },
+    {
+      "bytes": 56545,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\scale-1.5\\preferences.14.normal.page0.png"
+    },
+    {
+      "bytes": 117821,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\scale-1.5\\preferences.14.normal.page1.png"
+    },
+    {
+      "bytes": 126592,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\scale-1.5\\preferences.14.normal.page2.png"
+    },
+    {
+      "bytes": 59984,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\scale-1.5\\preferences.18.compact.page0.png"
+    },
+    {
+      "bytes": 106157,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\scale-1.5\\preferences.18.compact.page1.png"
+    },
+    {
+      "bytes": 78757,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\scale-1.5\\preferences.18.compact.page2.png"
+    },
+    {
+      "bytes": 63259,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\scale-1.5\\preferences.18.normal.page0.png"
+    },
+    {
+      "bytes": 138864,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\scale-1.5\\preferences.18.normal.page1.png"
+    },
+    {
+      "bytes": 130911,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\scale-1.5\\preferences.18.normal.page2.png"
+    },
+    {
+      "bytes": 22561,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\scale-1.5\\preferences.9.compact.page0.png"
+    },
+    {
+      "bytes": 48080,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\scale-1.5\\preferences.9.compact.page1.png"
+    },
+    {
+      "bytes": 41105,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\scale-1.5\\preferences.9.compact.page2.png"
+    },
+    {
+      "bytes": 25743,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\scale-1.5\\preferences.9.normal.page0.png"
+    },
+    {
+      "bytes": 51392,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\scale-1.5\\preferences.9.normal.page1.png"
+    },
+    {
+      "bytes": 68120,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\scale-1.5\\preferences.9.normal.page2.png"
+    },
+    {
+      "bytes": 75705,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\scale-1.5\\project.14.compact.page0.png"
+    },
+    {
+      "bytes": 109841,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\scale-1.5\\project.14.compact.page1.png"
+    },
+    {
+      "bytes": 82854,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\scale-1.5\\project.14.compact.page2.png"
+    },
+    {
+      "bytes": 108342,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\scale-1.5\\project.14.normal.page0.png"
+    },
+    {
+      "bytes": 114269,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\scale-1.5\\project.14.normal.page1.png"
+    },
+    {
+      "bytes": 110806,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\scale-1.5\\project.14.normal.page2.png"
+    },
+    {
+      "bytes": 84208,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\scale-1.5\\project.18.compact.page0.png"
+    },
+    {
+      "bytes": 95812,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\scale-1.5\\project.18.compact.page1.png"
+    },
+    {
+      "bytes": 88784,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\scale-1.5\\project.18.compact.page2.png"
+    },
+    {
+      "bytes": 112518,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\scale-1.5\\project.18.normal.page0.png"
+    },
+    {
+      "bytes": 135238,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\scale-1.5\\project.18.normal.page1.png"
+    },
+    {
+      "bytes": 129391,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\scale-1.5\\project.18.normal.page2.png"
+    },
+    {
+      "bytes": 34728,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\scale-1.5\\project.9.compact.page0.png"
+    },
+    {
+      "bytes": 40880,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\scale-1.5\\project.9.compact.page1.png"
+    },
+    {
+      "bytes": 44324,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\scale-1.5\\project.9.compact.page2.png"
+    },
+    {
+      "bytes": 55617,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\scale-1.5\\project.9.normal.page0.png"
+    },
+    {
+      "bytes": 45459,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\scale-1.5\\project.9.normal.page1.png"
+    },
+    {
+      "bytes": 48811,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\scale-1.5\\project.9.normal.page2.png"
+    },
+    {
+      "bytes": 33480,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\scale-1.5\\sections.14.png"
+    },
+    {
+      "bytes": 37736,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\scale-1.5\\sections.18.png"
+    },
+    {
+      "bytes": 20027,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\scale-1.5\\sections.9.png"
+    },
+    {
+      "bytes": 70827,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\scale-2\\preferences.14.compact.page0.png"
+    },
+    {
+      "bytes": 150873,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\scale-2\\preferences.14.compact.page1.png"
+    },
+    {
+      "bytes": 102788,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\scale-2\\preferences.14.compact.page2.png"
+    },
+    {
+      "bytes": 76595,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\scale-2\\preferences.14.normal.page0.png"
+    },
+    {
+      "bytes": 157206,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\scale-2\\preferences.14.normal.page1.png"
+    },
+    {
+      "bytes": 168853,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\scale-2\\preferences.14.normal.page2.png"
+    },
+    {
+      "bytes": 80174,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\scale-2\\preferences.18.compact.page0.png"
+    },
+    {
+      "bytes": 141011,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\scale-2\\preferences.18.compact.page1.png"
+    },
+    {
+      "bytes": 106566,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\scale-2\\preferences.18.compact.page2.png"
+    },
+    {
+      "bytes": 85622,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\scale-2\\preferences.18.normal.page0.png"
+    },
+    {
+      "bytes": 185175,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\scale-2\\preferences.18.normal.page1.png"
+    },
+    {
+      "bytes": 176442,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\scale-2\\preferences.18.normal.page2.png"
+    },
+    {
+      "bytes": 30433,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\scale-2\\preferences.9.compact.page0.png"
+    },
+    {
+      "bytes": 64270,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\scale-2\\preferences.9.compact.page1.png"
+    },
+    {
+      "bytes": 54939,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\scale-2\\preferences.9.compact.page2.png"
+    },
+    {
+      "bytes": 35677,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\scale-2\\preferences.9.normal.page0.png"
+    },
+    {
+      "bytes": 69951,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\scale-2\\preferences.9.normal.page1.png"
+    },
+    {
+      "bytes": 92327,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\scale-2\\preferences.9.normal.page2.png"
+    },
+    {
+      "bytes": 99539,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\scale-2\\project.14.compact.page0.png"
+    },
+    {
+      "bytes": 143456,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\scale-2\\project.14.compact.page1.png"
+    },
+    {
+      "bytes": 110712,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\scale-2\\project.14.compact.page2.png"
+    },
+    {
+      "bytes": 143638,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\scale-2\\project.14.normal.page0.png"
+    },
+    {
+      "bytes": 149612,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\scale-2\\project.14.normal.page1.png"
+    },
+    {
+      "bytes": 148553,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\scale-2\\project.14.normal.page2.png"
+    },
+    {
+      "bytes": 113080,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\scale-2\\project.18.compact.page0.png"
+    },
+    {
+      "bytes": 128285,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\scale-2\\project.18.compact.page1.png"
+    },
+    {
+      "bytes": 118434,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\scale-2\\project.18.compact.page2.png"
+    },
+    {
+      "bytes": 151120,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\scale-2\\project.18.normal.page0.png"
+    },
+    {
+      "bytes": 180505,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\scale-2\\project.18.normal.page1.png"
+    },
+    {
+      "bytes": 171959,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\scale-2\\project.18.normal.page2.png"
+    },
+    {
+      "bytes": 45728,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\scale-2\\project.9.compact.page0.png"
+    },
+    {
+      "bytes": 54338,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\scale-2\\project.9.compact.page1.png"
+    },
+    {
+      "bytes": 58443,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\scale-2\\project.9.compact.page2.png"
+    },
+    {
+      "bytes": 73969,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\scale-2\\project.9.normal.page0.png"
+    },
+    {
+      "bytes": 60744,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\scale-2\\project.9.normal.page1.png"
+    },
+    {
+      "bytes": 65283,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\scale-2\\project.9.normal.page2.png"
+    },
+    {
+      "bytes": 45712,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\scale-2\\sections.14.png"
+    },
+    {
+      "bytes": 48847,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\scale-2\\sections.18.png"
+    },
+    {
+      "bytes": 24778,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\scale-2\\sections.9.png"
+    },
+    {
+      "bytes": 23925,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\sections\\section-dialog-edited.png"
+    },
+    {
+      "bytes": 21358,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\sections\\section-dialog.png"
+    },
+    {
+      "bytes": 12355,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\sections\\sections-body-view.png"
+    },
+    {
+      "bytes": 2077,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\snapshot\\native-input.json"
+    },
+    {
+      "bytes": 8908,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\snapshot\\reference.dxf"
+    },
+    {
+      "bytes": 15948,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\snapshot\\scene.fslp"
+    },
+    {
+      "bytes": 4352,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\snapshot\\surface.json"
+    },
+    {
+      "bytes": 8965,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\editing\\batch\\reference.dxf"
+    },
+    {
+      "bytes": 24588,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\editing\\batch\\scene.fslp"
+    },
+    {
+      "bytes": 8965,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\editing\\batch_redo\\reference.dxf"
+    },
+    {
+      "bytes": 24588,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\editing\\batch_redo\\scene.fslp"
+    },
+    {
+      "bytes": 8918,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\editing\\batch_undo\\reference.dxf"
+    },
+    {
+      "bytes": 24588,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\editing\\batch_undo\\scene.fslp"
+    },
+    {
+      "bytes": 8918,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\editing\\layer\\reference.dxf"
+    },
+    {
+      "bytes": 24588,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\editing\\layer\\scene.fslp"
+    },
+    {
+      "bytes": 8908,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\editing\\original\\reference.dxf"
+    },
+    {
+      "bytes": 15948,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\editing\\original\\scene.fslp"
+    },
+    {
+      "bytes": 8918,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\editing\\project\\reference.dxf"
+    },
+    {
+      "bytes": 24588,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\editing\\project\\scene.fslp"
+    },
+    {
+      "bytes": 8965,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\editing\\reopened\\reference.dxf"
+    },
+    {
+      "bytes": 24588,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\editing\\reopened\\scene.fslp"
+    },
+    {
+      "bytes": 9668,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\editing\\units\\reference.dxf"
+    },
+    {
+      "bytes": 24660,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\editing\\units\\scene.fslp"
+    },
+    {
+      "bytes": 8918,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\editing\\units_undo\\reference.dxf"
+    },
+    {
+      "bytes": 24588,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\editing\\units_undo\\scene.fslp"
+    },
+    {
+      "bytes": 75963,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\editing\\views\\layers.png"
+    },
+    {
+      "bytes": 8908,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\native-lines-cache\\d82e31540c012625f1687c68611f6bb8bc6741787bc9540516ad4599bef60e83\\reference.dxf"
+    },
+    {
+      "bytes": 15948,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\native-lines-cache\\d82e31540c012625f1687c68611f6bb8bc6741787bc9540516ad4599bef60e83\\scene.fslp"
+    },
+    {
+      "bytes": 4352,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\native-lines-cache\\d82e31540c012625f1687c68611f6bb8bc6741787bc9540516ad4599bef60e83\\surface.json"
+    },
+    {
+      "bytes": 9379,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\sections\\added\\reference.dxf"
+    },
+    {
+      "bytes": 16704,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\sections\\added\\scene.fslp"
+    },
+    {
+      "bytes": 14769,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\sections\\complete\\reference.dxf"
+    },
+    {
+      "bytes": 19872,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\sections\\complete\\scene.fslp"
+    },
+    {
+      "bytes": 9222,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\sections\\deleted\\reference.dxf"
+    },
+    {
+      "bytes": 16452,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\sections\\deleted\\scene.fslp"
+    },
+    {
+      "bytes": 9387,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\sections\\edited\\reference.dxf"
+    },
+    {
+      "bytes": 16704,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\sections\\edited\\scene.fslp"
+    },
+    {
+      "bytes": 14769,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\sections\\layer\\reference.dxf"
+    },
+    {
+      "bytes": 19872,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\sections\\layer\\scene.fslp"
+    },
+    {
+      "bytes": 8908,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\sections\\original\\reference.dxf"
+    },
+    {
+      "bytes": 15948,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\sections\\original\\scene.fslp"
+    },
+    {
+      "bytes": 9222,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\sections\\redo\\reference.dxf"
+    },
+    {
+      "bytes": 16452,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\sections\\redo\\scene.fslp"
+    },
+    {
+      "bytes": 14769,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\sections\\reopened\\reference.dxf"
+    },
+    {
+      "bytes": 19872,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\sections\\reopened\\scene.fslp"
+    },
+    {
+      "bytes": 9387,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\sections\\undo\\reference.dxf"
+    },
+    {
+      "bytes": 16704,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-dialog-layout\\sections\\undo\\scene.fslp"
+    },
+    {
+      "bytes": 30574,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-project-completion\\production\\project\\dxf-1.dxf"
+    },
+    {
+      "bytes": 30574,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-project-completion\\production\\project\\dxf-2.dxf"
+    },
+    {
+      "bytes": 30530,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-project-completion\\production\\project\\dxf-3.dxf"
+    },
+    {
+      "bytes": 30574,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-project-completion\\production\\project\\dxf-4.dxf"
+    },
+    {
+      "bytes": 30530,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-project-completion\\production\\project\\dxf-5.dxf"
+    },
+    {
+      "bytes": 30530,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-project-completion\\production\\project\\dxf-6.dxf"
+    },
+    {
+      "bytes": 2787,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-project-completion\\service\\align\\native-input.json"
+    },
+    {
+      "bytes": 30530,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-project-completion\\service\\align\\reference.dxf"
+    },
+    {
+      "bytes": 85142,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-project-completion\\service\\align\\scene.fslp"
+    },
+    {
+      "bytes": 20088,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-project-completion\\service\\align\\surface.json"
+    },
+    {
+      "bytes": 2772,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-project-completion\\service\\load\\native-input.json"
+    },
+    {
+      "bytes": 30574,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-project-completion\\service\\load\\reference.dxf"
+    },
+    {
+      "bytes": 85154,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-project-completion\\service\\load\\scene.fslp"
+    },
+    {
+      "bytes": 21960,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-project-completion\\service\\load\\surface.json"
+    },
+    {
+      "bytes": 2772,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-project-completion\\service\\load-locked\\native-input.json"
+    },
+    {
+      "bytes": 30574,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-project-completion\\service\\load-locked\\reference.dxf"
+    },
+    {
+      "bytes": 85154,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-project-completion\\service\\load-locked\\scene.fslp"
+    },
+    {
+      "bytes": 21960,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-project-completion\\service\\load-locked\\surface.json"
+    },
+    {
+      "bytes": 2787,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-project-completion\\service\\noop\\native-input.json"
+    },
+    {
+      "bytes": 30530,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-project-completion\\service\\noop\\reference.dxf"
+    },
+    {
+      "bytes": 85142,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-project-completion\\service\\noop\\scene.fslp"
+    },
+    {
+      "bytes": 20088,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-project-completion\\service\\noop\\surface.json"
+    },
+    {
+      "bytes": 2787,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-project-completion\\service\\redo\\native-input.json"
+    },
+    {
+      "bytes": 30530,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-project-completion\\service\\redo\\reference.dxf"
+    },
+    {
+      "bytes": 85142,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-project-completion\\service\\redo\\scene.fslp"
+    },
+    {
+      "bytes": 20088,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-project-completion\\service\\redo\\surface.json"
+    },
+    {
+      "bytes": 2787,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-project-completion\\service\\reopen\\native-input.json"
+    },
+    {
+      "bytes": 30530,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-project-completion\\service\\reopen\\reference.dxf"
+    },
+    {
+      "bytes": 85142,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-project-completion\\service\\reopen\\scene.fslp"
+    },
+    {
+      "bytes": 20088,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-project-completion\\service\\reopen\\surface.json"
+    },
+    {
+      "bytes": 2772,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-project-completion\\service\\reset\\native-input.json"
+    },
+    {
+      "bytes": 30574,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-project-completion\\service\\reset\\reference.dxf"
+    },
+    {
+      "bytes": 85154,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-project-completion\\service\\reset\\scene.fslp"
+    },
+    {
+      "bytes": 21960,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-project-completion\\service\\reset\\surface.json"
+    },
+    {
+      "bytes": 2772,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-project-completion\\service\\undo\\native-input.json"
+    },
+    {
+      "bytes": 30574,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-project-completion\\service\\undo\\reference.dxf"
+    },
+    {
+      "bytes": 85154,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-project-completion\\service\\undo\\scene.fslp"
+    },
+    {
+      "bytes": 21960,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-project-completion\\service\\undo\\surface.json"
+    },
+    {
+      "bytes": 2772,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-project-completion\\service\\unit-undo\\native-input.json"
+    },
+    {
+      "bytes": 30574,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-project-completion\\service\\unit-undo\\reference.dxf"
+    },
+    {
+      "bytes": 85154,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-project-completion\\service\\unit-undo\\scene.fslp"
+    },
+    {
+      "bytes": 21960,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-project-completion\\service\\unit-undo\\surface.json"
+    },
+    {
+      "bytes": 3083,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-project-completion\\service\\units-align\\native-input.json"
+    },
+    {
+      "bytes": 32916,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-project-completion\\service\\units-align\\reference.dxf"
+    },
+    {
+      "bytes": 85298,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-project-completion\\service\\units-align\\scene.fslp"
+    },
+    {
+      "bytes": 42298,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-project-completion\\service\\units-align\\surface.json"
+    },
+    {
+      "bytes": 2077,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-project-completion\\water\\load\\native-input.json"
+    },
+    {
+      "bytes": 8908,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-project-completion\\water\\load\\reference.dxf"
+    },
+    {
+      "bytes": 15948,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-project-completion\\water\\load\\scene.fslp"
+    },
+    {
+      "bytes": 4352,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-project-completion\\water\\load\\surface.json"
+    },
+    {
+      "bytes": 2077,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-project-completion\\water\\maneuver-save\\native-input.json"
+    },
+    {
+      "bytes": 8908,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-project-completion\\water\\maneuver-save\\reference.dxf"
+    },
+    {
+      "bytes": 15948,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-project-completion\\water\\maneuver-save\\scene.fslp"
+    },
+    {
+      "bytes": 4352,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-project-completion\\water\\maneuver-save\\surface.json"
+    },
+    {
+      "bytes": 2077,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-project-completion\\water\\prop-save\\native-input.json"
+    },
+    {
+      "bytes": 8908,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-project-completion\\water\\prop-save\\reference.dxf"
+    },
+    {
+      "bytes": 15948,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-project-completion\\water\\prop-save\\scene.fslp"
+    },
+    {
+      "bytes": 4352,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-project-completion\\water\\prop-save\\surface.json"
+    },
+    {
+      "bytes": 2077,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-project-completion\\water\\reopen\\native-input.json"
+    },
+    {
+      "bytes": 8908,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-project-completion\\water\\reopen\\reference.dxf"
+    },
+    {
+      "bytes": 15948,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-project-completion\\water\\reopen\\scene.fslp"
+    },
+    {
+      "bytes": 4352,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-project-completion\\water\\reopen\\surface.json"
+    },
+    {
+      "bytes": 30530,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-project-completion\\service\\native-lines-cache\\353845f2a9a2c14ccb141ccffebc1bc6cd9052c3a2e26194d056e5df23abd62e\\reference.dxf"
+    },
+    {
+      "bytes": 85142,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-project-completion\\service\\native-lines-cache\\353845f2a9a2c14ccb141ccffebc1bc6cd9052c3a2e26194d056e5df23abd62e\\scene.fslp"
+    },
+    {
+      "bytes": 20088,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-project-completion\\service\\native-lines-cache\\353845f2a9a2c14ccb141ccffebc1bc6cd9052c3a2e26194d056e5df23abd62e\\surface.json"
+    },
+    {
+      "bytes": 30574,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-project-completion\\service\\native-lines-cache\\c39e53550750203b151481689e7de3d65dc77ee5dd33e8935c61fd86f0d7d8b5\\reference.dxf"
+    },
+    {
+      "bytes": 85154,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-project-completion\\service\\native-lines-cache\\c39e53550750203b151481689e7de3d65dc77ee5dd33e8935c61fd86f0d7d8b5\\scene.fslp"
+    },
+    {
+      "bytes": 21960,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-project-completion\\service\\native-lines-cache\\c39e53550750203b151481689e7de3d65dc77ee5dd33e8935c61fd86f0d7d8b5\\surface.json"
+    },
+    {
+      "bytes": 32916,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-project-completion\\service\\native-lines-cache\\d1aa66ad24fd8fa4398098e2a36bdf525fec650da86a1dde402890525047aa36\\reference.dxf"
+    },
+    {
+      "bytes": 85298,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-project-completion\\service\\native-lines-cache\\d1aa66ad24fd8fa4398098e2a36bdf525fec650da86a1dde402890525047aa36\\scene.fslp"
+    },
+    {
+      "bytes": 42298,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-project-completion\\service\\native-lines-cache\\d1aa66ad24fd8fa4398098e2a36bdf525fec650da86a1dde402890525047aa36\\surface.json"
+    },
+    {
+      "bytes": 8908,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-project-completion\\water\\native-lines-cache\\d82e31540c012625f1687c68611f6bb8bc6741787bc9540516ad4599bef60e83\\reference.dxf"
+    },
+    {
+      "bytes": 15948,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-project-completion\\water\\native-lines-cache\\d82e31540c012625f1687c68611f6bb8bc6741787bc9540516ad4599bef60e83\\scene.fslp"
+    },
+    {
+      "bytes": 4352,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-project-completion\\water\\native-lines-cache\\d82e31540c012625f1687c68611f6bb8bc6741787bc9540516ad4599bef60e83\\surface.json"
+    },
+    {
+      "bytes": 8908,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-project-completion\\production\\maneuver-16.1\\qt\\after\\reference.dxf"
+    },
+    {
+      "bytes": 15948,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-project-completion\\production\\maneuver-16.1\\qt\\after\\scene.fslp"
+    },
+    {
+      "bytes": 8908,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-project-completion\\production\\maneuver-16.1\\qt\\original\\reference.dxf"
+    },
+    {
+      "bytes": 15948,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-project-completion\\production\\maneuver-16.1\\qt\\original\\scene.fslp"
+    },
+    {
+      "bytes": 205550,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-project-completion\\production\\maneuver-16.1\\qt\\views\\parameters.png"
+    },
+    {
+      "bytes": 92475,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-project-completion\\production\\maneuver-16.1\\qt\\views\\results-0.png"
+    },
+    {
+      "bytes": 93825,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-project-completion\\production\\maneuver-16.1\\qt\\views\\results-1.png"
+    },
+    {
+      "bytes": 163339,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-project-completion\\production\\maneuver-16.1\\qt\\views\\results-2.png"
+    },
+    {
+      "bytes": 8908,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-project-completion\\production\\propeller4-0\\qt\\after\\reference.dxf"
+    },
+    {
+      "bytes": 15948,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-project-completion\\production\\propeller4-0\\qt\\after\\scene.fslp"
+    },
+    {
+      "bytes": 8908,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-project-completion\\production\\propeller4-0\\qt\\original\\reference.dxf"
+    },
+    {
+      "bytes": 15948,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-project-completion\\production\\propeller4-0\\qt\\original\\scene.fslp"
+    },
+    {
+      "bytes": 81875,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-project-completion\\production\\propeller4-0\\qt\\views\\parameters.png"
+    },
+    {
+      "bytes": 134335,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-project-completion\\production\\propeller4-0\\qt\\views\\results-0.png"
+    },
+    {
+      "bytes": 112271,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-project-completion\\production\\propeller4-0\\qt\\views\\results-1.png"
+    },
+    {
+      "bytes": 132110,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-project-completion\\production\\propeller4-0\\qt\\views\\results-2.png"
+    },
+    {
+      "bytes": 8908,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-project-completion\\production\\propeller4-20\\qt\\after\\reference.dxf"
+    },
+    {
+      "bytes": 15948,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-project-completion\\production\\propeller4-20\\qt\\after\\scene.fslp"
+    },
+    {
+      "bytes": 8908,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-project-completion\\production\\propeller4-20\\qt\\original\\reference.dxf"
+    },
+    {
+      "bytes": 15948,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-project-completion\\production\\propeller4-20\\qt\\original\\scene.fslp"
+    },
+    {
+      "bytes": 81875,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-project-completion\\production\\propeller4-20\\qt\\views\\parameters.png"
+    },
+    {
+      "bytes": 133773,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-project-completion\\production\\propeller4-20\\qt\\views\\results-0.png"
+    },
+    {
+      "bytes": 110794,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-project-completion\\production\\propeller4-20\\qt\\views\\results-1.png"
+    },
+    {
+      "bytes": 132083,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-project-completion\\production\\propeller4-20\\qt\\views\\results-2.png"
+    },
+    {
+      "bytes": 8908,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-project-completion\\production\\propeller4-30\\qt\\after\\reference.dxf"
+    },
+    {
+      "bytes": 15948,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-project-completion\\production\\propeller4-30\\qt\\after\\scene.fslp"
+    },
+    {
+      "bytes": 8908,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-project-completion\\production\\propeller4-30\\qt\\original\\reference.dxf"
+    },
+    {
+      "bytes": 15948,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-project-completion\\production\\propeller4-30\\qt\\original\\scene.fslp"
+    },
+    {
+      "bytes": 81875,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-project-completion\\production\\propeller4-30\\qt\\views\\parameters.png"
+    },
+    {
+      "bytes": 134380,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-project-completion\\production\\propeller4-30\\qt\\views\\results-0.png"
+    },
+    {
+      "bytes": 112002,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-project-completion\\production\\propeller4-30\\qt\\views\\results-1.png"
+    },
+    {
+      "bytes": 132266,
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\project-completion-20261109\\final\\qt-project-completion\\production\\propeller4-30\\qt\\views\\results-2.png"
+    }
+  ],
+  "reason": "Superseded local reproduction runs; retained reports/logs/inputs and complete final-02, regression, installed evidence",
+  "logical_bytes_removed": 20332954
+}

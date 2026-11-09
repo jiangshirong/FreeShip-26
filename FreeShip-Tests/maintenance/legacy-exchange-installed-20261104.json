@@ -1,0 +1,111 @@
+{
+  "created_utc": "2026-11-04T11:44:42.517529+00:00",
+  "status": "partial",
+  "scope": "Part and wave append, static VRML import, part export, Michlet/AddMass single-hull input, rectangular offsets and crease DXF.",
+  "installed": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\dist",
+  "previous_installation": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\dist-before-legacy-exchange-20261104",
+  "package_manifest_sha256": "b5024ddac63a2a2420ad1f2bb1476cd3d71e858f7169022d05f6728620adadaf",
+  "verified_files": 2549,
+  "executable_sha256": {
+    "FreeShipDocumentService.exe": "f44eb3624d256e4dcfb8121fac84378e8f964d092d02b4e3c35c8e3a86ddf497",
+    "FreeShipGeometryExport.exe": "6ead71aeed6e3b752888fdf323fb07173f58ffd37887dd1f18345effadb8e74f",
+    "FreeShipNativeLinesplan.exe": "160a90d275994470e6ef309f86a28d015c0e4708342b4e920eca23b36d004598",
+    "FreeShipQt.exe": "b2897d857029e8eaa432ee48d942fd93686927e317b7b6150707c0dd87c6abd3",
+    "native_analysis_edit_probe.exe": "a20732783e3e34a1a1f5d1c1eac05ab69e50ee6ae024a64b47a4c5549efe3b64",
+    "native_auxiliary_edit_probe.exe": "30fc5f8b629439b7a7e4342aab48d6d333b721d4de76d9b18e1065168835f75f",
+    "native_background_edit_probe.exe": "e2af495ae0a7668ed0075dac57052c1de0f9efcfa3122d2dea1bcd64004eedfe",
+    "native_definition_edit_probe.exe": "678c6ce800d9c46d25cf957843c52f83deb1289aeb050edb854b07fd191af881",
+    "native_document_create_probe.exe": "ea9967a38408a05808eb337ba4216938dd53de8e70a1e3b80f16108dc26931ce",
+    "native_face_tools_probe.exe": "77737f27002a7119dee2d869989fea6bfaaf7d7fba2b2d90bec757a5fc873367",
+    "native_flowline_probe.exe": "f7f1320c1adb6cf0fac11d46adaa4c57ed71f7b0c58f2629a5ab4e1d1766ce70",
+    "native_project_edit_probe.exe": "5b917782b54d3b60999a2a0cb3f09060c1547a19a1b65871b354850a124daf9c",
+    "qt_auxiliary_tests.exe": "6e0d4c952cc9eca713a78beb416297a7b389c2f8fde2adb7527787b8e284bb71",
+    "qt_background_tests.exe": "b4bb564c1cf30edc965a3b8ab1b16511157f5e69356ff959c75ec8b0d9a21415",
+    "qt_camera_lighting_tests.exe": "cb57d8d56a6901e12182a4cda81f8ad979640191d89ebaebfda0b87bfab6c796",
+    "qt_display_tests.exe": "594c8c2539718f58f6f4a0f3f05606da4af904bfd97aa2bdb204004b753ef2db",
+    "qt_document_codec_tests.exe": "486f300339bb765d66792e86c766bdbd37636405e5eb9fd54114b3722c444084",
+    "qt_editing_tests.exe": "2a976ed25993d23639d1666b5037e571ae686e733b1b8361136fbd8be4112a40",
+    "qt_exchange_tests.exe": "881ea61cd842047f9124d53e8eb7d8393da498ab39ad6195613ab1a543ef766e",
+    "qt_lines_tests.exe": "2da67d5d4fc3316c976aaa6c8de70e6ad69fae3a2ff89228dc9d92bb1f8c9671",
+    "qt_migration_tests.exe": "8239a5fec7b3fd1a9d5c829a14fd1ac9150bd1a83c847a34610ba893506b99dd",
+    "qt_model_ui_tests.exe": "ff2589ecca8bd1f1f36d13a0037af698d74b9e78bf91c619a7b6b82ac59c2427",
+    "qt_overlay_tests.exe": "5f790d213960cd61a221098011181d936aefd938a6ca82d676df6995be325ba9",
+    "qt_session_tests.exe": "5b0ffcf7f609b6fb7ae62eabaa60cdc5f5e8d457613806355408d08a0ce5989c",
+    "qt_shading_tests.exe": "fdcbbac2d39dc78041b4a954ff20c4a466cca256cdb00b4a7c05fce9987c4657",
+    "bridge/FreeShipGeometryBridge.exe": "13c57ac758abf206d35ba5acc58df7cddab0484300533570442630103d068058"
+  },
+  "legacy_source_sha256": "277a3c69392c86fe14c375e7dfc9c3197b4162e982673cbbcf4b4a2dfff0ab6b",
+  "reports": {
+    "qt-legacy-exchange": {
+      "path": "C:\\FreeShip26-LegacyExchangeTests\\installed\\qt-legacy-exchange\\report.json",
+      "sha256": "be1a19328f018d81c20d31d1ef0a62cdf47436c9d48f3d812b2d55c6c2c7b775",
+      "counts": {
+        "pass": 226,
+        "fail": 0,
+        "review": 6,
+        "not_run": 2,
+        "error": 0
+      },
+      "tested_runtime": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\dist"
+    },
+    "qt-curve-import": {
+      "path": "C:\\FreeShip26-LegacyExchangeTests\\delivery-regression\\qt-curve-import\\report.json",
+      "sha256": "8ac8787034a15a6522afe086e984831cf26321af29b8f60a08e9fcec7cb1b8eb",
+      "counts": {
+        "pass": 265,
+        "fail": 0,
+        "review": 1,
+        "not_run": 2,
+        "error": 0
+      },
+      "tested_runtime": "D:\\FreeShip26Tests\\exchange-package"
+    },
+    "qt-exchange": {
+      "path": "C:\\FreeShip26-LegacyExchangeTests\\delivery-regression\\qt-exchange\\report.json",
+      "sha256": "c60bca48f13bd7b8cbca508193b409abed59d59b49112e7832a8b29d8abb47a5",
+      "counts": {
+        "pass": 280,
+        "fail": 0,
+        "review": 1,
+        "not_run": 1,
+        "error": 0
+      },
+      "tested_runtime": "D:\\FreeShip26Tests\\exchange-package"
+    },
+    "qt-publication": {
+      "path": "D:\\FreeShip26Tests\\reports\\legacy-exchange-delivery-publication\\qt-publication\\report.json",
+      "sha256": "75802d7363ec049797818727dda35e31f30052e196473f829e25230295169c0a",
+      "counts": {
+        "pass": 163,
+        "fail": 0,
+        "review": 0,
+        "not_run": 1,
+        "error": 0
+      },
+      "tested_runtime": "D:\\FreeShip26Tests\\exchange-package"
+    }
+  },
+  "counts": {
+    "pass": 934,
+    "fail": 0,
+    "review": 8,
+    "not_run": 6,
+    "error": 0
+  },
+  "limits": [
+    "Six bundled VRML files are rejected for degenerate faces at the existing Single precision; no faces were silently dropped.",
+    "Michlet/AddMass are symmetric single-hull input writers. Multihull placement and actual receiving solvers remain pending.",
+    "Hidden Qt callbacks/screenshots do not establish physical desktop, native file-picker, printer or complete old-UI acceptance."
+  ],
+  "retained_sources": [
+    "qt_legacy_exchange.py",
+    "qt/exchange_tests.cpp",
+    "run_tests.py",
+    "maintenance/finalize_legacy_exchange_package.py",
+    "maintenance/record_legacy_exchange_delivery.py"
+  ],
+  "free_bytes_after": {
+    "C": 19707514880,
+    "D": 17978429440
+  }
+}

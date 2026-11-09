@@ -1,0 +1,126 @@
+{
+  "recorded_utc": "2026-11-03T03:16:41.063299+00:00",
+  "scope": "Nine remaining native modeling edits: point properties; create/update/delete group; add/delete markers; auto group layers; assemble faces; repair normals. All topology/advanced/modeling edit dispatch is native.",
+  "installed": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\dist",
+  "previous_installation": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\dist-before-modeling-complete-20261103",
+  "manifest_sha256": "f6cc0d7eb26adbcc80f7f84ec37cee0f3e4935d1f6809740e1c98c966278804d",
+  "verified_package_files": 2519,
+  "binaries_sha256": {
+    "FreeShipQt.exe": "1e0a8f8b3cdaa669e3736eb927945039b79bba7137b36e0c6cbcc13dff94be35",
+    "FreeShipDocumentService.exe": "f39c4210ef82fd55157550af7cd350233453b4cb3a1a7a1c0bb8fb0d5ee65a56",
+    "FreeShipNativeLinesplan.exe": "a68e340a43e207773afa2cc0c74c3ed58d074514165e3dd5541bffcb6943fded",
+    "qt_document_codec_tests.exe": "4312b55d6fdd62293cb062d034d8ecdcf6028801925ac00f27d07da28c1ecaaf",
+    "native_face_tools_probe.exe": "df52a7b38667b499b091483e69fcecb7cb78b2c7902cb04aea1c5e9e173babf2",
+    "bridge/FreeShipGeometryBridge.exe": "af7a7883441face18af42e9f6ffb33921fa660eb82421093ef32c68e9fc11a30"
+  },
+  "legacy_source_sha256": "277a3c69392c86fe14c375e7dfc9c3197b4162e982673cbbcf4b4a2dfff0ab6b",
+  "reports": {
+    "qt-document": {
+      "path": "C:\\FreeShip26Tests\\reports\\modeling-complete-final-02\\qt-document\\report.json",
+      "sha256": "9601561a9acbffd2f975db24c6a2e2b96861099a752070c311683f31231868c1",
+      "counts": {
+        "pass": 7077,
+        "fail": 0,
+        "review": 10,
+        "not_run": 3,
+        "error": 0
+      },
+      "phase_seconds": {
+        "runtime_ready_s": 4.291759400002775,
+        "codec_s": 0.9592606000005617,
+        "protocol_s": 89.14838659999805,
+        "native_point_edit_s": 5.126661700000113,
+        "native_topology_s": 17.227336499992816,
+        "native_modeling_s": 12.745020100002876,
+        "native_transforms_s": 20.074257000000216,
+        "native_construction_s": 8.727120299998205,
+        "native_lackenby_s": 32.788935800002946,
+        "native_attributes_s": 4.980198199998995,
+        "native_face_tools_s": 18.228594899999734,
+        "modeling_service_s": 16.93984000000637,
+        "production_ui_s": 13.582340200002363
+      },
+      "elapsed_seconds": 245.51894310000353,
+      "scope": "Complete isolated suite; these binaries match the installed package."
+    },
+    "modeling-complete-installed-modeling": {
+      "path": "C:\\FreeShip26Tests\\reports\\modeling-complete-installed-modeling\\report.json",
+      "sha256": "11f74a6c32b1f4cde947c57bd951a9e03cbdd471ac67c9e1d063c7039d6bd652",
+      "counts": {
+        "pass": 256,
+        "fail": 0,
+        "review": 0,
+        "not_run": 1,
+        "error": 0
+      },
+      "scope": "Actual installed Qt production callbacks in hidden private windows."
+    },
+    "modeling-complete-installed-topology": {
+      "path": "C:\\FreeShip26Tests\\reports\\modeling-complete-installed-topology\\report.json",
+      "sha256": "408aadff7c1d1aae2d49560d5958723a17f0847ad74c251614308891cf20972c",
+      "counts": {
+        "pass": 178,
+        "fail": 0,
+        "review": 0,
+        "not_run": 1,
+        "error": 0
+      },
+      "scope": "Actual installed Qt production callbacks in hidden private windows."
+    },
+    "modeling-complete-installed-auxiliary": {
+      "path": "C:\\FreeShip26Tests\\reports\\modeling-complete-installed-auxiliary\\report.json",
+      "sha256": "30b2649535528bc1751a24718163e59153348ffa38a2ebe39c5d1461ce26e8f2",
+      "counts": {
+        "pass": 151,
+        "fail": 0,
+        "review": 3,
+        "not_run": 1,
+        "error": 0
+      },
+      "scope": "Actual installed Qt production callbacks in hidden private windows."
+    }
+  },
+  "combined_counts": {
+    "pass": 7662,
+    "fail": 0,
+    "review": 13,
+    "not_run": 6,
+    "error": 0
+  },
+  "codec": {
+    "cases": 296,
+    "supplied_files": 80
+  },
+  "candidate_kernel_ms": {
+    "native_attribute_timings": {
+      "samples": 15,
+      "minimum": 0.0887,
+      "median": 0.2625,
+      "maximum": 0.4389
+    },
+    "native_face_tools_timings": {
+      "samples": 21,
+      "minimum": 0.1554,
+      "median": 0.301,
+      "maximum": 0.4498
+    }
+  },
+  "notes": [
+    "No numerical tolerance added to coordinates, winding, exact triangles or per-face material/visibility properties.",
+    "Old pointer sorting can produce another valid rectangular patch partition. Different partitions and their exports remain explicit review, not claims of identical exports.",
+    "Native text editing rejects escaped NUL that the FPC JSON scanner drops; the exact old difference is retained as evidence.",
+    "Private layer bindings compare stored layer IDs, not temporary IDs allocated during adapter loading.",
+    "Remaining field writers, format conversion/new/import, four-view mesh and full professional analysis still have Pascal dependencies.",
+    "Hidden callbacks do not establish physical desktop acceptance. Test source retained; reports and builds are on C."
+  ],
+  "maintenance_sources_sha256": {
+    "record_modeling_completion_delivery.py": "a7b7e2c41cb8bd3ec6c5cc3779211519ca7a2a20884950f86c7d28ba1ca0e4ce",
+    "record_topology_delivery.py": "dcb355a690a034c8b84582d824685a9e1992d1de59576de712a5f2d1b96e4f6c",
+    "promote_runtime.ps1": "d0427a3964c2263a93768185d29f9f9cfba8600d48965c1b29518c443e4bb728",
+    "generate_fbm_codepages.py": "25540a08b8714412543932e71b465c1234c61406cf3d0c70f95252e1fc8dd8c7"
+  },
+  "free_bytes_after": {
+    "C": 24351113216,
+    "D": 30556712960
+  }
+}

@@ -1,0 +1,229 @@
+{
+  "date": "2026-11-02",
+  "recorded_utc": "2026-11-02T14:52:35.727082+00:00",
+  "installed": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\dist",
+  "previous_installation": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\dist-before-document-20261102",
+  "scope": "C++ document authority, native FBM structural reader and byte-preserving save, guarded transactions, undo/redo, save points, stable IDs and adapter crash recovery.",
+  "manifest_sha256": "4f7143fd610ff2c62c3cd9501c1507fb011506c4e412dec4dd9dbdbc8b41efd8",
+  "verified_package_files": 2507,
+  "binaries_sha256": {
+    "FreeShipQt.exe": "33a8277d283802504cc91afdf9c3d1498da13d2faa2baa19ea1fd405ee2dc07b",
+    "FreeShipDocumentService.exe": "7420676e6b39bff5fe3aa0d5ddc14ccc7c77211904a488745e2b45bd7c6e8a53",
+    "qt_document_codec_tests.exe": "5d03194140e7d95369b6a90b2cbe47f0842ae1d63a12650e06398fbf3836b507",
+    "FreeShipNativeLinesplan.exe": "a68e340a43e207773afa2cc0c74c3ed58d074514165e3dd5541bffcb6943fded",
+    "bridge/FreeShipGeometryBridge.exe": "256d7dfc0f1af92ed06bfae5db6613470cf34d55a7e31290acc68ea0eb0b3691"
+  },
+  "legacy_source_sha256": "277a3c69392c86fe14c375e7dfc9c3197b4162e982673cbbcf4b4a2dfff0ab6b",
+  "bridge_build": "C:/FreeShip26Tests/build/document-service-01",
+  "reports": {
+    "qt-document-installed/qt-document": {
+      "path": "C:\\FreeShip26Tests\\reports\\qt-document-installed\\qt-document\\report.json",
+      "sha256": "a70ed1e8f70f3e1eb32048b3a8e5dfafbddd8180d9f4f4266611a67b8e24df40",
+      "status": "partial",
+      "counts": {
+        "pass": 1943,
+        "fail": 0,
+        "review": 2,
+        "not_run": 2,
+        "error": 0
+      },
+      "elapsed_seconds": 130.55712179999955,
+      "phase_seconds": {
+        "runtime_ready_s": 1.270061899999746,
+        "codec_s": 0.5321080000003349,
+        "protocol_s": 110.29293359999974,
+        "modeling_service_s": 10.131655799999862,
+        "production_ui_s": 7.993348099999821
+      },
+      "production_child_seconds_sum": 7.071488900000077
+    },
+    "qt-editing-document": {
+      "path": "C:\\FreeShip26Tests\\reports\\qt-editing-document\\report.json",
+      "sha256": "e592f92870e488592c39a6202aaf7e5e5ac7f28483008f15820d2f135b20d15a",
+      "status": "partial",
+      "counts": {
+        "pass": 142,
+        "fail": 0,
+        "review": 0,
+        "not_run": 4,
+        "error": 0
+      },
+      "production_child_seconds_sum": 56.66812589999972
+    },
+    "qt-sections-document-final": {
+      "path": "C:\\FreeShip26Tests\\reports\\qt-sections-document-final\\report.json",
+      "sha256": "3b19aefc4e1af1df7ebe5b032c615b42a87fdef1f495cd768320688fb1d9e099",
+      "status": "partial",
+      "counts": {
+        "pass": 214,
+        "fail": 0,
+        "review": 0,
+        "not_run": 1,
+        "error": 0
+      },
+      "production_child_seconds_sum": 49.142568199999914
+    },
+    "qt-backgrounds-document": {
+      "path": "C:\\FreeShip26Tests\\reports\\qt-backgrounds-document\\report.json",
+      "sha256": "7d207621db372970c1a0228425fd567d0573bd8bb4c995014eec1fda69c8e32a",
+      "status": "partial",
+      "counts": {
+        "pass": 214,
+        "fail": 0,
+        "review": 3,
+        "not_run": 4,
+        "error": 0
+      },
+      "production_child_seconds_sum": 63.97531049999998
+    },
+    "qt-advanced-document": {
+      "path": "C:\\FreeShip26Tests\\reports\\qt-advanced-document\\report.json",
+      "sha256": "e9d3afb6406b29d8b2fb914a3c953c1bb5d6cab614f88f1f15ddea6a8823c2ad",
+      "status": "partial",
+      "counts": {
+        "pass": 151,
+        "fail": 0,
+        "review": 3,
+        "not_run": 1,
+        "error": 0
+      },
+      "production_child_seconds_sum": 67.46201210000072
+    },
+    "qt-auxiliary-document": {
+      "path": "C:\\FreeShip26Tests\\reports\\qt-auxiliary-document\\report.json",
+      "sha256": "ab7301f700a84448d2efc10cc2eeff97475d127318bb0846527d574257d76ce1",
+      "status": "partial",
+      "counts": {
+        "pass": 151,
+        "fail": 0,
+        "review": 3,
+        "not_run": 1,
+        "error": 0
+      },
+      "production_child_seconds_sum": 66.3662013000012
+    },
+    "qt-display-document": {
+      "path": "C:\\FreeShip26Tests\\reports\\qt-display-document\\report.json",
+      "sha256": "accd8ca6492f3f8588006f5096ad638e82ad7229f4903395bc1adc3af50a3fb0",
+      "status": "partial",
+      "counts": {
+        "pass": 130,
+        "fail": 0,
+        "review": 3,
+        "not_run": 1,
+        "error": 0
+      },
+      "production_child_seconds_sum": 53.40968580000117
+    },
+    "qt-startup-document": {
+      "path": "C:\\FreeShip26Tests\\reports\\qt-startup-document\\report.json",
+      "sha256": "54916206d6be1614fcac9dad2f43aeab7327226239d22022272e96fe53751765",
+      "status": "partial",
+      "counts": {
+        "pass": 54,
+        "fail": 0,
+        "review": 0,
+        "not_run": 17,
+        "error": 0
+      }
+    }
+  },
+  "installed_counts": {
+    "pass": 2999,
+    "fail": 0,
+    "review": 14,
+    "not_run": 31,
+    "error": 0
+  },
+  "codec": {
+    "path": "C:\\FreeShip26Tests\\reports\\qt-document-installed\\qt-document\\codec\\report.json",
+    "sha256": "f6f266242622822279521371e7ca7026d1885f5ba2526575edb0d4c7ff0de072",
+    "supplied_files": 80,
+    "pass": 146,
+    "note": "Synthetic ordinals 0-44 are separate from the 18 versions represented by actual supplied files."
+  },
+  "section_reference": {
+    "path": "C:\\FreeShip26Tests\\reports\\qt-sections-pre-document-reference\\report.json",
+    "sha256": "db034f206d2e00b19a0adc06a79601affff9b357b7864f58274d37c437e2da36",
+    "counts": {
+      "pass": 232,
+      "fail": 0,
+      "review": 0,
+      "not_run": 1,
+      "error": 0
+    },
+    "elapsed_seconds": 44.619487500000105
+  },
+  "retained_diagnostics": {
+    "qt-document-a": {
+      "path": "C:\\FreeShip26Tests\\reports\\qt-document-a\\report.json",
+      "sha256": "d1aba34b49c7718ece24cd37042da402d9ee8b3a5733b5a5104b8975833b6b9f",
+      "counts": {
+        "pass": 1886,
+        "fail": 0,
+        "review": 2,
+        "not_run": 2,
+        "error": 3
+      },
+      "elapsed_seconds": 79.66854469999998,
+      "explanation": "Three idle-adapter recovery errors. Fixed by refreshing QProcess termination state before reuse; assertions unchanged."
+    },
+    "qt-document-b": {
+      "path": "C:\\FreeShip26Tests\\reports\\qt-document-b\\report.json",
+      "sha256": "27502ed8d7d1ebbf1170b5a71211e5b45054c6243486ee580650dae80571369a",
+      "counts": {
+        "pass": 1943,
+        "fail": 0,
+        "review": 2,
+        "not_run": 2,
+        "error": 0
+      },
+      "elapsed_seconds": 103.38313500000004,
+      "explanation": "Full core rerun after the recovery fix, before installation."
+    },
+    "qt-sections-document": {
+      "path": "C:\\FreeShip26Tests\\reports\\qt-sections-document\\report.json",
+      "sha256": "4b6203c7a50a9f9c623ec48c230d757bbf915fcd708db2fd7bdb9d86fcecff0d",
+      "counts": {
+        "pass": 189,
+        "fail": 25,
+        "review": 0,
+        "not_run": 1,
+        "error": 0
+      },
+      "elapsed_seconds": null,
+      "explanation": "25 old-reference mismatches: preexisting added splines fields only. Original geometry exact. The final suite compares all bytes against the intact pre-document package, including splines."
+    }
+  },
+  "time_accounting": {
+    "first_observed_utc": "2026-11-02T13:32:27+00:00",
+    "receipt_utc": "2026-11-02T14:52:35.727082+00:00",
+    "elapsed_wall_seconds": 4808.727082,
+    "basis": "Clock observations bracket this work, not an IDE activity trace. Core suite phases are measured. Independent installed suites ran concurrently; child duration sums are not total waiting time.",
+    "reported_tool_wall_seconds": {
+      "first_cpp_build": 6.43,
+      "recovery_fix_cpp_build": 5.14,
+      "package": 5.48
+    },
+    "unallocated": "Reading, design, implementation, integration, diagnosis and tool interaction were not separately timed. Do not attribute the remaining elapsed time to test execution."
+  },
+  "notes": [
+    "Full FBM re-encoding after edits, geometry-edit algorithms, four-view mesh construction and professional computations still depend on Pascal. Native structural traversal and unchanged byte writing are not a complete native semantic encoder.",
+    "Unknown trailing bytes are saved unchanged and editing is blocked to prevent adapter data loss. Some historical calculator layouts reuse version numbers and cannot be distinguished perfectly from truncation.",
+    "The initial core recovery bug was introduced by this migration, not by the upstream project. Its failed report remains available.",
+    "No test expectations were weakened for the section sidecar extension. A preserved pre-document executable supplied a fresh complete reference; all scene, DXF and section outputs then matched.",
+    "Generic legacy limitation strings in older shared report templates predate native document ownership. Scope is defined by this receipt and NATIVE-DOCUMENT.md; Pascal remains the calculation/edit adapter.",
+    "Hidden production Qt actions and screenshots are not physical desktop acceptance. Fourteen review and thirty-one not_run results remain explicit, including recent-action discovery and visual fidelity.",
+    "Only adapter-process recovery is implemented here; whole-application crash recovery, persistent undo and restart caches remain separate work.",
+    "The old source, QtPilot, user models and fs launcher are unchanged. Reports/builds are on C; reusable tests and one-time maintenance sources remain in FreeShip-Tests."
+  ],
+  "maintenance_sources_sha256": {
+    "promote_document.ps1": "caabe8c0def88b22a725917b8a9c3cbe8ce317e8a02ff6b7f93b85cfd01c0906",
+    "document_sections_reference.py": "5e5c95855c75c77bd08a6a91573b95f09535ac12f85eccaab0a2bb339a606c69",
+    "record_document_delivery.py": "9417315914deea3792845f3dbc7d6af9ceaa9a757bc14af4febf9031287ffd89"
+  },
+  "free_bytes_after": {
+    "C": 38022438912,
+    "D": 31273152512
+  }
+}

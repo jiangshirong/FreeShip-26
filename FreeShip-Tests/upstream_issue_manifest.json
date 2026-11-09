@@ -1,0 +1,123 @@
+{
+  "cases": [
+    {
+      "id": "01",
+      "title": "保存失败后没有恢复正式文件",
+      "record": "01-保存失败后没有恢复正式文件.md",
+      "status": "not_run",
+      "reason": "No behavioral probe implemented; source document is an investigation record, not a test result."
+    },
+    {
+      "id": "02",
+      "title": "加载失败会清空当前模型",
+      "record": "02-加载失败会清空当前模型.md",
+      "status": "not_run",
+      "reason": "No behavioral probe implemented; source document is an investigation record, not a test result."
+    },
+    {
+      "id": "03",
+      "title": "文件读写缺少零进度退出条件",
+      "record": "03-文件读写缺少零进度退出条件.md",
+      "status": "not_run",
+      "reason": "No behavioral probe implemented; source document is an investigation record, not a test result."
+    },
+    {
+      "id": "04",
+      "title": "损坏模型缺少边界检查",
+      "record": "04-损坏模型缺少边界检查.md",
+      "status": "not_run",
+      "reason": "No behavioral probe implemented; source document is an investigation record, not a test result."
+    },
+    {
+      "id": "05",
+      "title": "英制密度换算存在偏差",
+      "record": "05-英制密度换算存在偏差.md",
+      "status": "not_run",
+      "reason": "No behavioral probe implemented; source document is an investigation record, not a test result."
+    },
+    {
+      "id": "06",
+      "title": "切换单位后交线位置未换算",
+      "record": "06-切换单位后交线位置未换算.md",
+      "status": "not_run",
+      "reason": "No behavioral probe implemented; source document is an investigation record, not a test result."
+    },
+    {
+      "id": "07",
+      "title": "剖面定位依赖坐标原点",
+      "record": "07-剖面定位依赖坐标原点.md",
+      "status": "not_run",
+      "reason": "No behavioral probe implemented; source document is an investigation record, not a test result."
+    },
+    {
+      "id": "08",
+      "title": "重建异常后状态不复位",
+      "record": "08-重建异常后状态不复位.md",
+      "status": "not_run",
+      "reason": "No behavioral probe implemented; source document is an investigation record, not a test result."
+    },
+    {
+      "id": "09",
+      "title": "加载状态被同名局部变量遮蔽",
+      "record": "09-加载状态被同名局部变量遮蔽.md",
+      "status": "not_run",
+      "reason": "No behavioral probe implemented; source document is an investigation record, not a test result."
+    },
+    {
+      "id": "10",
+      "title": "取消操作会截断重做历史",
+      "record": "10-取消操作会截断重做历史.md",
+      "status": "not_run",
+      "reason": "No behavioral probe implemented; source document is an investigation record, not a test result."
+    },
+    {
+      "id": "11",
+      "title": "外部计算缺少超时和退出码处理",
+      "record": "11-外部计算缺少超时和退出码处理.md",
+      "status": "not_run",
+      "reason": "No behavioral probe implemented; source document is an investigation record, not a test result."
+    },
+    {
+      "id": "12",
+      "title": "静水力表重复计算结束吃水",
+      "record": "12-静水力表重复计算结束吃水.md",
+      "status": "not_run",
+      "reason": "No behavioral probe implemented; source document is an investigation record, not a test result."
+    },
+    {
+      "id": "13",
+      "title": "STL 导出忽略图层对称设置",
+      "record": "13-STL导出忽略图层对称设置.md",
+      "status": "not_run",
+      "reason": "No behavioral probe implemented; source document is an investigation record, not a test result."
+    },
+    {
+      "id": "14",
+      "title": "JPG 背景图释放后仍读取属性",
+      "record": "14-JPG背景图释放后仍读取属性.md",
+      "status": "not_run",
+      "reason": "No behavioral probe implemented; source document is an investigation record, not a test result."
+    },
+    {
+      "id": "15",
+      "title": "静水力计算隐式写入工作目录",
+      "record": "15-静水力计算隐式写入工作目录.md",
+      "status": "not_run",
+      "reason": "No behavioral probe implemented; source document is an investigation record, not a test result."
+    },
+    {
+      "id": "16",
+      "title": "板材展开误差量纲与说明",
+      "record": "16-板材展开误差量纲与说明.md",
+      "status": "not_run",
+      "reason": "No behavioral probe implemented; source document is an investigation record, not a test result."
+    },
+    {
+      "id": "17",
+      "title": "旧文件兼容性仍需定位",
+      "record": "17-旧文件兼容性仍需定位.md",
+      "status": "not_run",
+      "reason": "No behavioral probe implemented; source document is an investigation record, not a test result."
+    }
+  ]
+}

@@ -1,0 +1,71 @@
+{
+  "created_utc": "2026-11-04T02:39:25.818832+00:00",
+  "status": "partial",
+  "scope": "Gaussian angle-deficit display, developability and zebra shading, indexed topology, lazy shared analysis and actual exports",
+  "installed": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\dist",
+  "previous": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\dist-before-shading-20261104",
+  "source_sha256": "277a3c69392c86fe14c375e7dfc9c3197b4162e982673cbbcf4b4a2dfff0ab6b",
+  "package_manifest_sha256": "eea4881ba252ec927a1a61b985b7e2b624611afcd6b78839e268a2d76266d26f",
+  "unchanged_numerical_sources": 124,
+  "reports": {
+    "core": {
+      "path": "C:\\FreeShip26-ShadingTests\\reports-04\\qt-shading\\report.json",
+      "sha256": "d1813df426ed9f825bfae03b53e23d64185c1407fd320717c70520af00a22a22",
+      "counts": {
+        "pass": 161,
+        "fail": 0,
+        "review": 2,
+        "not_run": 5,
+        "error": 0
+      }
+    },
+    "viewport": {
+      "path": "C:\\FreeShip26-ShadingTests\\viewport-02\\qt-viewport\\report.json",
+      "sha256": "e7f6c281375863ed3a61471c28ae1d8032ad0486def27ab63ab9b9c3577551ae",
+      "counts": {
+        "pass": 239,
+        "fail": 0,
+        "review": 2,
+        "not_run": 7,
+        "error": 0
+      }
+    },
+    "publication": {
+      "path": "C:\\FreeShip26-ShadingTests\\publication-02\\report.json",
+      "sha256": "367579760b479ec9b7ff50acb2eb194fef74b0b1b3432c7a3f0beb0de4478e0b",
+      "counts": {
+        "pass": 193,
+        "fail": 0,
+        "review": 0,
+        "not_run": 1,
+        "error": 0
+      }
+    },
+    "installed": {
+      "path": "C:\\FreeShip26-ShadingTests\\installed-01\\qt-shading\\report.json",
+      "sha256": "3ccf1c637274522d325fcc02561cebdcc3d98c339e2f5e1341dc59df15df184c",
+      "counts": {
+        "pass": 161,
+        "fail": 0,
+        "review": 2,
+        "not_run": 5,
+        "error": 0
+      }
+    }
+  },
+  "counts": {
+    "pass": 754,
+    "fail": 0,
+    "review": 6,
+    "not_run": 18,
+    "error": 0
+  },
+  "audit_script_sha256": "9435a283650b6df04e2fcde8581d59d41434b5c667f1ac4254759ac553dd4239",
+  "limitations": [
+    "Counts include repeated installed checks and reused tests, not unique scenarios.",
+    "Shared raster edge color differences remain review; full locations and device subpixel precision are retained.",
+    "Hidden events and screenshots do not certify desktop mouse, native dialogs, multi-monitor DPI or physical printing.",
+    "Angle deficit is not area-normalized curvature; unknown regions are not certified developable.",
+    "Dedicated tool windows and other migration/visual work remain. Language work belongs to the separate translation model."
+  ]
+}

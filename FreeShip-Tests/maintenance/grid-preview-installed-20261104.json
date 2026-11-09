@@ -1,0 +1,91 @@
+{
+  "created_utc": "2026-11-04T13:16:45.788027+00:00",
+  "status": "partial",
+  "scope": "Exact sampled-grid preview in Michlet/AddMass export and AddMass calculation dialogs; camera, invalidation, cancellation and unchanged exports.",
+  "installed": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\dist",
+  "previous_installation": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\dist-before-grid-preview-20261104",
+  "verified_files": 2554,
+  "package_manifest_sha256": "216655584b3625d7648858ddd3f6a073d828201ed21568fad6f19e944233428e",
+  "legacy_source_sha256": "277a3c69392c86fe14c375e7dfc9c3197b4162e982673cbbcf4b4a2dfff0ab6b",
+  "executable_sha256": {
+    "FreeShipDocumentService.exe": "09565a5ce2c30a802a0715cc34be931bd7b6b7063a676f56eaf242ba01906430",
+    "FreeShipGeometryExport.exe": "d736d186f64141c11542f3806f64e8e5adbf698314ae0987c13eb3c9bd103de9",
+    "FreeShipNativeLinesplan.exe": "160a90d275994470e6ef309f86a28d015c0e4708342b4e920eca23b36d004598",
+    "FreeShipQt.exe": "9fbd48728cd9bd6ae0e429fa62ff2aac865fbb19824c8f267796ed6cc76831ad",
+    "native_analysis_edit_probe.exe": "c355544d2e60c0074a2fe0c90a3b70ff957cdce5da593deb20d1f8809ab787c9",
+    "native_auxiliary_edit_probe.exe": "a661b436e761634a44a1bfd391053f4c867d77c20e79f1e824b0a4fc12a78aea",
+    "native_background_edit_probe.exe": "0235a5818661a9aa1293f79951421a4079397a128b7237c0d6dacca5162d2619",
+    "native_definition_edit_probe.exe": "359fffa1da6096d2eddd59cd5efc6360d5bf3076a9e50edc7b346ce40a7dd636",
+    "native_document_create_probe.exe": "e290ed64c855636a11b36b6a03e3e106ffbc62c8174fbe10e78c743e925b1340",
+    "native_face_tools_probe.exe": "6bc5e75eab308a2232016afc644421673630f74423f4bdb04cf8dd3819024df1",
+    "native_flowline_probe.exe": "f7f1320c1adb6cf0fac11d46adaa4c57ed71f7b0c58f2629a5ab4e1d1766ce70",
+    "native_project_edit_probe.exe": "8bbf876e69d138debb64b0f44bdad14fe1d8597906143f2cbe328d9ecf95eb91",
+    "qt_added_mass_probe.exe": "f05821c41c507c255af47ac5174602e408fca290e264b564cd83b97c769b4b4c",
+    "qt_auxiliary_tests.exe": "f98866d43ee1d6691f6765a2098faa30d9ea0ac89a6b54ddd8dace4d3c7523da",
+    "qt_background_tests.exe": "d88a8ca3729a32b516339a4f203613acea1ee64c8024725b206dcf316cb08cd2",
+    "qt_camera_lighting_tests.exe": "ea8f9314cc473d838c17bc0df5b6e587fc308ae4e9a1579644edb992b5de031d",
+    "qt_display_tests.exe": "0b59088dbfe12f376feaffb7bb485539902b50b011835a317523ff15fc634e24",
+    "qt_document_codec_tests.exe": "79e4f3f70ba062737842949eedc73d8c9d8435b200f1f8ca392a0035d7411eb7",
+    "qt_editing_tests.exe": "d2b3f7278de003952e0cd91c05ca526156b60285514d373434263e5d13aae07e",
+    "qt_exchange_tests.exe": "8a1e69902c01f24321b1384e0226fb349defbfca8d15d97bb10a32cb99912ab2",
+    "qt_grid_preview_tests.exe": "4679a5deec524d0e436cd18c93b3ecabe51d2711fa500a6c69094fa4a974b47d",
+    "qt_lines_tests.exe": "2da67d5d4fc3316c976aaa6c8de70e6ad69fae3a2ff89228dc9d92bb1f8c9671",
+    "qt_migration_tests.exe": "5b3443d339e2b32b372c9ae20821177758ed99f508affa8eed886868174c335f",
+    "qt_model_ui_tests.exe": "e0dea0e3cc2f1355b1b48e46736a2ce446b7dfdd504fb6239440636df6c2c53f",
+    "qt_overlay_tests.exe": "3ac8c8dec8231e313c2ff875ebf8a5468b14c874b676a8ae3693a4c66ec389a3",
+    "qt_session_tests.exe": "590a3556e070615470465559bedefd032310e0805effe642b08f64875a1ddeb1",
+    "qt_shading_tests.exe": "c82a722f47dc2512c4910632b77b118aeb59583f6c22484f68108954a7209ed3",
+    "bridge/FreeShipGeometryBridge.exe": "13c57ac758abf206d35ba5acc58df7cddab0484300533570442630103d068058"
+  },
+  "reports": {
+    "qt-grid-preview": {
+      "path": "C:\\FreeShip26-GridPreviewTests\\installed\\qt-grid-preview\\report.json",
+      "sha256": "b5c8c44db2746277b94a26c1079e838587dd564f60bc67b1f56400041c0860d5",
+      "counts": {
+        "pass": 150,
+        "fail": 0,
+        "review": 1,
+        "not_run": 1,
+        "error": 0
+      }
+    },
+    "qt-added-mass": {
+      "path": "C:\\FreeShip26-GridPreviewTests\\regression-addmass\\qt-added-mass\\report.json",
+      "sha256": "580c5de57372405dc808589784d9aacc0cc5fed467c2bb3940218940541a2152",
+      "counts": {
+        "pass": 121,
+        "fail": 0,
+        "review": 1,
+        "not_run": 1,
+        "error": 0
+      }
+    },
+    "qt-legacy-exchange": {
+      "path": "C:\\FreeShip26-GridPreviewTests\\regression-exchange\\qt-legacy-exchange\\report.json",
+      "sha256": "aacad9d7b97d6d61eca1ffa2e49a20a4f19d0c1a579e552789bb9f0c07adf5a7",
+      "counts": {
+        "pass": 315,
+        "fail": 0,
+        "review": 6,
+        "not_run": 2,
+        "error": 0
+      }
+    }
+  },
+  "counts": {
+    "pass": 586,
+    "fail": 0,
+    "review": 8,
+    "not_run": 4,
+    "error": 0
+  },
+  "limits": [
+    "ADD_MASS.EXE remains an external original solver, not a native C++ numerical rewrite.",
+    "Unsupported high-Cb river correction is omitted because upstream uses uninitialized variables.",
+    "Engineering certification, full old dialog fidelity and desktop acceptance remain separate."
+  ],
+  "free_bytes_after": {
+    "C": 18841649152,
+    "D": 16577703936
+  }
+}

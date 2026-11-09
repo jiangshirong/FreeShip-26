@@ -1,0 +1,488 @@
+{
+  "status": "complete",
+  "target": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\qt",
+  "logical_bytes": 20953402.0,
+  "files": [
+    {
+      "path": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\qt\\.ninja_deps",
+      "bytes": 264976,
+      "sha256": "2b9a57d28915a60e414cdf22a9485299ac41a5e8d3fd9d69078df9325685501c"
+    },
+    {
+      "path": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\qt\\.ninja_log",
+      "bytes": 7957,
+      "sha256": "7cdc3cf04d4a220b0b5fc7d30b3b6494b1c3784c63f7cac490c6e2761071d734"
+    },
+    {
+      "path": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\qt\\build.ninja",
+      "bytes": 372613,
+      "sha256": "11a1b1b0a1ac3b73ead64ae13e2fec00e88d0a4219b307a9c921ed07ee75b906"
+    },
+    {
+      "path": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\qt\\cmake_install.cmake",
+      "bytes": 2209,
+      "sha256": "bc65b8b2ecae4e4cd0826d9719be393f4329b593aa3c64bac5501458c5f2494b"
+    },
+    {
+      "path": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\qt\\CMakeCache.txt",
+      "bytes": 61723,
+      "sha256": "134b3735fa8fe401c4a6f49f36c18109d32a56f517dafcfbb8199972ba69a17d"
+    },
+    {
+      "path": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\qt\\libfbm_document.a",
+      "bytes": 6289774,
+      "sha256": "a360139ba2cb90c49384865a113610057ec83c65d942a5101eac69e4b09e084c"
+    },
+    {
+      "path": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\qt\\libhull_views.a",
+      "bytes": 830522,
+      "sha256": "ba615c6ee59e1f7c72eee1c2b07934b94f4c7d74a208bb0f6391cf9bae648a00"
+    },
+    {
+      "path": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\qt\\liblinesplan.a",
+      "bytes": 100156,
+      "sha256": "6563dd40964858271afe3592696666083993ca82c01f271e1f4c63a30f21b8e0"
+    },
+    {
+      "path": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\qt\\libmodel_core.a",
+      "bytes": 1226188,
+      "sha256": "7f65abe618e2030111c6ff0191dc8ed276c9b4f442eb5c21c19e32e58c96dec1"
+    },
+    {
+      "path": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\qt\\libnative_geometry.a",
+      "bytes": 54432,
+      "sha256": "ade88c379bbfd0a223810919ab29f2cba214411117061c27797d0247f54e5609"
+    },
+    {
+      "path": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\qt\\libnative_linesplan_engine.a",
+      "bytes": 302288,
+      "sha256": "3fa4b1c045fb7513bb96677b108f83ca8b4b04cb48a5e42d0085e1ade62f0f21"
+    },
+    {
+      "path": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\qt\\libnative_sections.a",
+      "bytes": 105352,
+      "sha256": "1737bff25e0e6756ebbf31c7f91e16c536c1af9504e2d2b14ff0349ac69d1a59"
+    },
+    {
+      "path": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\qt\\libnative_subdivision.a",
+      "bytes": 112030,
+      "sha256": "119292d3e9fc6b217141b79e32221ef06d88bb622b4e589a79f5615cdf1fef4c"
+    },
+    {
+      "path": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\qt\\libproperty_ui.a",
+      "bytes": 535542,
+      "sha256": "d78e4cc45cd9c0d063ca9708973c83984d04235db5bfd26c65a199010a9ab962"
+    },
+    {
+      "path": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\qt\\.qt\\QtDeploySupport.cmake",
+      "bytes": 2867,
+      "sha256": "8835587c3cb66b0f1c7c932ab168592db39594db0ae50760f624330857556c64"
+    },
+    {
+      "path": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\qt\\.qt\\QtDeployTargets.cmake",
+      "bytes": 18670,
+      "sha256": "96f28e23e65423ddefea7ddf2d8e35b648fd02c48cca8faf1d5e8cfdd177ab63"
+    },
+    {
+      "path": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\qt\\CMakeFiles\\cmake.check_cache",
+      "bytes": 86,
+      "sha256": "95079b44bcef481d601432c2fd3c654d7fe85b9c8386c355f2874502b47441d7"
+    },
+    {
+      "path": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\qt\\CMakeFiles\\CMakeConfigureLog.yaml",
+      "bytes": 516310,
+      "sha256": "4f6147e8b0cccd72400d93ba4c4096428796b07d842132da347df4d40a1f765c"
+    },
+    {
+      "path": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\qt\\CMakeFiles\\InstallScripts.json",
+      "bytes": 149,
+      "sha256": "58e63f58cb5cba4cf960aedf7d7856a7e10e8c52e27efa3cfca7b8f3c8266c19"
+    },
+    {
+      "path": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\qt\\CMakeFiles\\rules.ninja",
+      "bytes": 38571,
+      "sha256": "c74692c95079de7c1e90648b7f7d12c2add091115735d998b69bc0714ea3114c"
+    },
+    {
+      "path": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\qt\\CMakeFiles\\TargetDirectories.txt",
+      "bytes": 4161,
+      "sha256": "9bf2d8ce0d72041af683e38b5b55db9e245e51a4a93156d718bd9ce4e0eb25d7"
+    },
+    {
+      "path": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\qt\\CMakeFiles\\4.4.4\\CMakeCXXCompiler.cmake",
+      "bytes": 10258,
+      "sha256": "3a77d669b0b053da1083890499c0c2a11507157486c747eea8e7c1c842bb536c"
+    },
+    {
+      "path": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\qt\\CMakeFiles\\4.4.4\\CMakeDetermineCompilerABI_CXX.bin",
+      "bytes": 44810,
+      "sha256": "b0057d4262979c31f0a205270bf6fcf382b4934851e47abf4c5eaaf41cee9015"
+    },
+    {
+      "path": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\qt\\CMakeFiles\\4.4.4\\CMakeRCCompiler.cmake",
+      "bytes": 285,
+      "sha256": "910c8c5db2f6c4b3f9da7943e08049ca697b8481aebe1ffe5b59faf0743e86fb"
+    },
+    {
+      "path": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\qt\\CMakeFiles\\4.4.4\\CMakeSystem.cmake",
+      "bytes": 395,
+      "sha256": "cb655f074177502b26612fa979ee72c606731a0b59f300e936ebba161d8cce09"
+    },
+    {
+      "path": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\qt\\CMakeFiles\\4.4.4\\CompilerIdCXX\\a.exe",
+      "bytes": 44862,
+      "sha256": "72f0ee9e1d3891490db26514438aa8b186416b7c82a8d77c323fd67e7b38d797"
+    },
+    {
+      "path": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\qt\\CMakeFiles\\4.4.4\\CompilerIdCXX\\CMakeCXXCompilerId.cpp",
+      "bytes": 30605,
+      "sha256": "c260f5f6368fe636da54c24d6abd310ac6fcc3acdc4bdc674d9b7223569a85eb"
+    },
+    {
+      "path": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\qt\\CMakeFiles\\fbm_document.dir\\src\\document\\analysis_edit.cpp.obj",
+      "bytes": 111595,
+      "sha256": "95b25a943b90fb068d0ee698db24fee475caa03dc90dff94f840084753518f3a"
+    },
+    {
+      "path": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\qt\\CMakeFiles\\fbm_document.dir\\src\\document\\attribute_edit.cpp.obj",
+      "bytes": 74139,
+      "sha256": "f290540ff9c9859b3f8b267e2a354ce301b0f10f1f9d25fd9e7439efa22ec8c6"
+    },
+    {
+      "path": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\qt\\CMakeFiles\\fbm_document.dir\\src\\document\\auxiliary_edit.cpp.obj",
+      "bytes": 105167,
+      "sha256": "b2e4030ffb3b45eb892f0ac20c58e49cee20b73935a8345f6dcc735a3c21236a"
+    },
+    {
+      "path": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\qt\\CMakeFiles\\fbm_document.dir\\src\\document\\background_edit.cpp.obj",
+      "bytes": 38873,
+      "sha256": "7db9913cc3a573aa8c3168920964e47ca030acb66e8d0f0d97c595b8ad00067f"
+    },
+    {
+      "path": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\qt\\CMakeFiles\\fbm_document.dir\\src\\document\\cad_patches.cpp.obj",
+      "bytes": 79008,
+      "sha256": "595cb7b2c9f6c6f98517210c08f6712031cd3fca8b1f714bfe56d54ed3f7f30b"
+    },
+    {
+      "path": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\qt\\CMakeFiles\\fbm_document.dir\\src\\document\\construction.cpp.obj",
+      "bytes": 37028,
+      "sha256": "196e6838e743ac535ae4668bf667dfbbf1a87f444e46b28ce99e312f66251bea"
+    },
+    {
+      "path": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\qt\\CMakeFiles\\fbm_document.dir\\src\\document\\definition_edit.cpp.obj",
+      "bytes": 74747,
+      "sha256": "98491fb4f66156c69c236bf1430fa52c13ed4819e90a4f59f582bdb6ace2cde2"
+    },
+    {
+      "path": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\qt\\CMakeFiles\\fbm_document.dir\\src\\document\\document_create.cpp.obj",
+      "bytes": 114572,
+      "sha256": "ffc290456542cb3faf8051872de01a6b6c197f464ecb8957e9af26d4ba12c123"
+    },
+    {
+      "path": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\qt\\CMakeFiles\\fbm_document.dir\\src\\document\\document_format.cpp.obj",
+      "bytes": 88578,
+      "sha256": "b6adcc330a875cbd08bb87ffb8b920dd8c102b9241a69292afb63d9f66c8d156"
+    },
+    {
+      "path": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\qt\\CMakeFiles\\fbm_document.dir\\src\\document\\face_tools.cpp.obj",
+      "bytes": 104932,
+      "sha256": "061677009ece98420161fb8cd98d384ac778977763d0f4038ea84c07b278aee4"
+    },
+    {
+      "path": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\qt\\CMakeFiles\\fbm_document.dir\\src\\document\\fbm_codec.cpp.obj",
+      "bytes": 144549,
+      "sha256": "f4632bdba2620019a0983d4fa4046829c7be906e9f8e314a9b77fe1b50934a08"
+    },
+    {
+      "path": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\qt\\CMakeFiles\\fbm_document.dir\\src\\document\\fbm_text.cpp.obj",
+      "bytes": 48042,
+      "sha256": "348557f4c6a600b867a3daf2fa4e6200e9c1cded0bdbb88b998c64747c1d1403"
+    },
+    {
+      "path": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\qt\\CMakeFiles\\fbm_document.dir\\src\\document\\geometry_input.cpp.obj",
+      "bytes": 37995,
+      "sha256": "cccfb28337a20aeca8ba98326d23230d5ca9f6443a5738629059e2d77a7d58e8"
+    },
+    {
+      "path": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\qt\\CMakeFiles\\fbm_document.dir\\src\\document\\hydrodynamics.cpp.obj",
+      "bytes": 159205,
+      "sha256": "71871896aa0258d537c8157d1b5e43e0ad099894a371a97ae56f2455b129cb7b"
+    },
+    {
+      "path": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\qt\\CMakeFiles\\fbm_document.dir\\src\\document\\hydrostatics.cpp.obj",
+      "bytes": 170850,
+      "sha256": "32910718d0758bd4e65fe3ad9b58e383b427b3b4b44a18254be182b28c84a2fb"
+    },
+    {
+      "path": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\qt\\CMakeFiles\\fbm_document.dir\\src\\document\\lackenby_edit.cpp.obj",
+      "bytes": 111493,
+      "sha256": "145e5f87732ff9f7025d4c8634e561e295e227ba120cbb67e569447ffeb9c3ba"
+    },
+    {
+      "path": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\qt\\CMakeFiles\\fbm_document.dir\\src\\document\\plates.cpp.obj",
+      "bytes": 122901,
+      "sha256": "035d0c7929c78fa1b8f1026b750305f2403dca18abc286375e60dc09d269903d"
+    },
+    {
+      "path": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\qt\\CMakeFiles\\fbm_document.dir\\src\\document\\point_edit.cpp.obj",
+      "bytes": 56787,
+      "sha256": "3e243095133e524ef42798b0b1428e5818821dd58ef6a83895d77cadbf758e57"
+    },
+    {
+      "path": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\qt\\CMakeFiles\\fbm_document.dir\\src\\document\\preferences.cpp.obj",
+      "bytes": 121250,
+      "sha256": "db5a3244e458de48997faa8c61fa290ded883f842401ec35fd8ee6c5308fd750"
+    },
+    {
+      "path": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\qt\\CMakeFiles\\fbm_document.dir\\src\\document\\project_edit.cpp.obj",
+      "bytes": 102441,
+      "sha256": "102ea6c43d5d6d368ddc9246dabdb98106b8f33430dcbd4a516ccd91bcad2a33"
+    },
+    {
+      "path": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\qt\\CMakeFiles\\fbm_document.dir\\src\\document\\propulsion.cpp.obj",
+      "bytes": 408344,
+      "sha256": "c2cae0f25e0c1a7b3080ce01daf5e5457646e20113f5d296a5098284f03928cc"
+    },
+    {
+      "path": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\qt\\CMakeFiles\\fbm_document.dir\\src\\document\\publication.cpp.obj",
+      "bytes": 120044,
+      "sha256": "225ae203a0bea9b432cf396932fa20f1ea4e8a7521d634d587cf0a0c1d54e07c"
+    },
+    {
+      "path": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\qt\\CMakeFiles\\fbm_document.dir\\src\\document\\resistance.cpp.obj",
+      "bytes": 3511997,
+      "sha256": "279235a2fae66fb20bd93470eb86efabb7f2f82094002b4d5bcb14743d7f5f2d"
+    },
+    {
+      "path": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\qt\\CMakeFiles\\fbm_document.dir\\src\\document\\topology_edit.cpp.obj",
+      "bytes": 234360,
+      "sha256": "d513beb8a4494c5c8f9a45c47d9d85689e214a94ca023f9917e8c129dcab5ea4"
+    },
+    {
+      "path": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\qt\\CMakeFiles\\fbm_document.dir\\src\\document\\transform_edit.cpp.obj",
+      "bytes": 62634,
+      "sha256": "d1618dce73c8910afd43abbc2503e3278c17d79f1cdf0480ad85ae9118e8a55b"
+    },
+    {
+      "path": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\qt\\CMakeFiles\\FreeShipQt.dir\\src\\main.cpp.obj",
+      "bytes": 13991,
+      "sha256": "f9605af445d1c79677805b5c50633353cdc9458a460254ea65187c2c6965ad98"
+    },
+    {
+      "path": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\qt\\CMakeFiles\\FreeShipQt.dir\\src\\app\\file_history.cpp.obj",
+      "bytes": 18431,
+      "sha256": "936a7a410913da8a6d92fa5dab25f4a13c5710af220b25f32feb287a390e7b26"
+    },
+    {
+      "path": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\qt\\CMakeFiles\\FreeShipQt.dir\\src\\app\\main_window.cpp.obj",
+      "bytes": 219027,
+      "sha256": "b761ad3397a7e9e6fd4d44de9f88bc1005a7c0a26abc4b55483394e14a7b2ef9"
+    },
+    {
+      "path": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\qt\\CMakeFiles\\FreeShipQt.dir\\src\\app\\startup.cpp.obj",
+      "bytes": 7573,
+      "sha256": "ea19285a3f4c1ea1b3f9bd48382e36c4c70d0e2c3680bd3954a3396f52433e7d"
+    },
+    {
+      "path": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\qt\\CMakeFiles\\hull_views.dir\\src\\render\\auxiliary_geometry.cpp.obj",
+      "bytes": 34673,
+      "sha256": "bfe138ead4a4ab4f32dab9bd994eef65c394eb164d92d5ff2100f9d7d1402dc3"
+    },
+    {
+      "path": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\qt\\CMakeFiles\\hull_views.dir\\src\\render\\background_geometry.cpp.obj",
+      "bytes": 4301,
+      "sha256": "09777ff39a6493fdf0bfb9a5f5d232550b2395f906a9d3c119ea70438b506aa7"
+    },
+    {
+      "path": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\qt\\CMakeFiles\\hull_views.dir\\src\\render\\curvature_comb.cpp.obj",
+      "bytes": 17719,
+      "sha256": "66ef9a87d9d898f72dfefd312634273dc17565ccdb420ef6df650d99e720c549"
+    },
+    {
+      "path": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\qt\\CMakeFiles\\hull_views.dir\\src\\render\\hull_gpu.cpp.obj",
+      "bytes": 31770,
+      "sha256": "0629c46932997e50f93fe5a36c2f8352c0e0ff5d86bf7392be4bafd3428ce07f"
+    },
+    {
+      "path": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\qt\\CMakeFiles\\hull_views.dir\\src\\render\\hull_view.cpp.obj",
+      "bytes": 459432,
+      "sha256": "f4198ccdc68e5361ef1ff443ddbf37af091066070010478e5a61d98d7c84f394"
+    },
+    {
+      "path": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\qt\\CMakeFiles\\hull_views.dir\\src\\render\\label_layout.cpp.obj",
+      "bytes": 75465,
+      "sha256": "9f7e7cc75ba7cd23df37bca09c943850786fb0131576caef62d41eebf04e54d4"
+    },
+    {
+      "path": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\qt\\CMakeFiles\\hull_views.dir\\src\\render\\overlay_animation.cpp.obj",
+      "bytes": 72271,
+      "sha256": "781653dffddc651285d4a082f8699de42b67131cc91cf07ffcbfee7b81c46ec5"
+    },
+    {
+      "path": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\qt\\CMakeFiles\\hull_views.dir\\src\\render\\surface_analysis.cpp.obj",
+      "bytes": 69895,
+      "sha256": "879f3ef8ec39b647a0e9af97d788be6d5f1e000a455eefa4ef9c15cfdaece08e"
+    },
+    {
+      "path": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\qt\\CMakeFiles\\hull_views.dir\\src\\render\\view_overlay.cpp.obj",
+      "bytes": 35744,
+      "sha256": "e72b246e2a75256e34447e5ec9ff7fa03c756b3e8fc73ce77bca91038554a1cc"
+    },
+    {
+      "path": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\qt\\CMakeFiles\\linesplan.dir\\src\\gpu_fill.cpp.obj",
+      "bytes": 18236,
+      "sha256": "6eb97c1e9646780bdae0beefb3445a24eeef920941e3229637d0c5f3b508619d"
+    },
+    {
+      "path": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\qt\\CMakeFiles\\linesplan.dir\\src\\scene.cpp.obj",
+      "bytes": 38381,
+      "sha256": "fa6f2820c8b5c95580de2d1fa4fc844616308d5728ca46fc3aa24ffb313eb5dc"
+    },
+    {
+      "path": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\qt\\CMakeFiles\\linesplan.dir\\src\\view.cpp.obj",
+      "bytes": 39944,
+      "sha256": "b63c1278376a613c150414355f854d12ef254ad2c5402772f1fa15b5ac669e28"
+    },
+    {
+      "path": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\qt\\CMakeFiles\\model_core.dir\\src\\core\\background_image.cpp.obj",
+      "bytes": 35110,
+      "sha256": "6a05bd07d670bdee786391c2c13e70798f6df4c0972774e6e2f81e16d26173b3"
+    },
+    {
+      "path": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\qt\\CMakeFiles\\model_core.dir\\src\\core\\cad_export.cpp.obj",
+      "bytes": 103508,
+      "sha256": "f6c3c2d725281008490478551b9b77c601daa843c3bb6520dcc8c333d0375441"
+    },
+    {
+      "path": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\qt\\CMakeFiles\\model_core.dir\\src\\core\\curve_import.cpp.obj",
+      "bytes": 158748,
+      "sha256": "b48a0fb0202c4353d803fd349e9b5a4da3ece1671917bc8d35bd1003014c37e3"
+    },
+    {
+      "path": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\qt\\CMakeFiles\\model_core.dir\\src\\core\\developed_plates.cpp.obj",
+      "bytes": 107084,
+      "sha256": "c29c4bf2676384b14b3816372a2cbc46c876f7d056f35fe846d0fda0535f9f0c"
+    },
+    {
+      "path": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\qt\\CMakeFiles\\model_core.dir\\src\\core\\model_checks.cpp.obj",
+      "bytes": 78771,
+      "sha256": "ecb5e5a652be465fa8dac5b486b2c887c46f99e06985ca2b9ecef74f95359f15"
+    },
+    {
+      "path": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\qt\\CMakeFiles\\model_core.dir\\src\\core\\model_exchange.cpp.obj",
+      "bytes": 409449,
+      "sha256": "2d4dd2316f7b946d84d8691f697207d0dfac237a99dda2c9491c840966371f5c"
+    },
+    {
+      "path": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\qt\\CMakeFiles\\model_core.dir\\src\\core\\model_snapshot.cpp.obj",
+      "bytes": 306349,
+      "sha256": "013b9b6e1719a94d9725e4a0022946b9318bbf7714ca684ead3ef55b87bee3fb"
+    },
+    {
+      "path": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\qt\\CMakeFiles\\native_geometry.dir\\src\\native\\plane.cpp.obj",
+      "bytes": 16452,
+      "sha256": "352b395ef5b1d76b59dabb015bcdec5e5eb2cf6d0534445acebe3e7ee0722c87"
+    },
+    {
+      "path": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\qt\\CMakeFiles\\native_geometry.dir\\src\\native\\spline.cpp.obj",
+      "bytes": 34911,
+      "sha256": "19eba782df1ea4b472a5483f574a40596ba1d5b1ba3bc5754812b579cee9cdd4"
+    },
+    {
+      "path": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\qt\\CMakeFiles\\native_linesplan_engine.dir\\src\\native\\document.cpp.obj",
+      "bytes": 79631,
+      "sha256": "beb0b7d962ec578c8c6105e3e77a58babb974b00cb0c231930e833fcb40582d5"
+    },
+    {
+      "path": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\qt\\CMakeFiles\\native_linesplan_engine.dir\\src\\native\\flowlines.cpp.obj",
+      "bytes": 33235,
+      "sha256": "58b690927ab80389a9a4a0e3998784b7b488288a646f100cc85084d7ded2ca8f"
+    },
+    {
+      "path": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\qt\\CMakeFiles\\native_linesplan_engine.dir\\src\\native\\scene_builder.cpp.obj",
+      "bytes": 157999,
+      "sha256": "3ab18d8875a3ef766f5d4e2264563817257933eb4eb32f20f18c08444a548820"
+    },
+    {
+      "path": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\qt\\CMakeFiles\\native_linesplan_engine.dir\\src\\native\\surface_display.cpp.obj",
+      "bytes": 24137,
+      "sha256": "9854d7e5e42f315ef5f7d6f3cc278d80914e342c951333aa7ee58c3a0d5a14c3"
+    },
+    {
+      "path": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\qt\\CMakeFiles\\native_sections.dir\\src\\native\\linesplan.cpp.obj",
+      "bytes": 17467,
+      "sha256": "8ce6307a37e29a5a335e39e4d6c86189724ad98c46361089c76f0caa2b2dc459"
+    },
+    {
+      "path": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\qt\\CMakeFiles\\native_sections.dir\\src\\native\\sections.cpp.obj",
+      "bytes": 83583,
+      "sha256": "425a86adae99f57354790000071059df553e73364a1ac23e5d5b6a6e2cdff386"
+    },
+    {
+      "path": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\qt\\CMakeFiles\\native_subdivision.dir\\src\\native\\subdivision.cpp.obj",
+      "bytes": 108264,
+      "sha256": "71dbae184ae43bb5e42558d11a8408e981255a73c930f559aec7fd3dab853445"
+    },
+    {
+      "path": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\qt\\CMakeFiles\\property_ui.dir\\src\\app\\layer_panel.cpp.obj",
+      "bytes": 149372,
+      "sha256": "9e040f4008f0eec7cb96df4a8b737a6e6d9d681687b4446461877eace8b99702"
+    },
+    {
+      "path": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\qt\\CMakeFiles\\property_ui.dir\\src\\app\\light_dialog.cpp.obj",
+      "bytes": 40817,
+      "sha256": "5dcfcdcdfa28188214ec7853692be2f0100dd30dc005dc2a375a256e05ff32c4"
+    },
+    {
+      "path": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\qt\\CMakeFiles\\property_ui.dir\\src\\app\\preferences_dialog.cpp.obj",
+      "bytes": 73139,
+      "sha256": "c4544b25c89b37890a59aaddb8ffb2b6b40f3f2818324a3b5afbb300ac8b4d9f"
+    },
+    {
+      "path": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\qt\\CMakeFiles\\property_ui.dir\\src\\app\\preferences_store.cpp.obj",
+      "bytes": 30733,
+      "sha256": "27a3ea6db2a934b31bb449ea720cb8c7f9cf1d705ae43c121b0135d5ddd0868c"
+    },
+    {
+      "path": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\qt\\CMakeFiles\\property_ui.dir\\src\\app\\project_dialog.cpp.obj",
+      "bytes": 107238,
+      "sha256": "3aca3e9d02601072df3bf741bdc43102718967923adb80e4bd72bd37013179d7"
+    },
+    {
+      "path": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\qt\\CMakeFiles\\property_ui.dir\\src\\app\\section_dialog.cpp.obj",
+      "bytes": 81581,
+      "sha256": "7ca16ba4696df6bca88997baca2b3bc4c4fbef273906649c7c2c9ced32cd77f2"
+    },
+    {
+      "path": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\qt\\CMakeFiles\\property_ui.dir\\src\\app\\studio_ui.cpp.obj",
+      "bytes": 37470,
+      "sha256": "4ee31b73dd280090b20946e0a9734fc433f808fbeca6689080ce5182a9312a4f"
+    },
+    {
+      "path": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\qt\\CMakeFiles\\qt_exchange_tests.dir\\C_\\Users\\12968\\AppData\\Local\\Temp\\FreeShip26Qt-tests-054A23C67E2C\\qt\\exchange_tests.cpp.obj",
+      "bytes": 39050,
+      "sha256": "7efffab0601ab67c41355678721d551dd4e2f5893e43e5724937fb908c50e3d7"
+    },
+    {
+      "path": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\qt\\CMakeFiles\\qt_shading_tests.dir\\C_\\Users\\12968\\AppData\\Local\\Temp\\FreeShip26Qt-tests-054A23C67E2C\\qt\\shading_tests.cpp.obj",
+      "bytes": 134320,
+      "sha256": "b2bcf7f72162931816b8f2d9466f48da0d729c879ee80391541e050df07a2e8f"
+    },
+    {
+      "path": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\qt\\CMakeFiles\\ship_export.dir\\src\\core\\ghs_export.cpp.obj",
+      "bytes": 10639,
+      "sha256": "0bcd313d1cc0389eae8b8eb2e7de2e43d74e3f2f001df4345d9b226a0529f775"
+    },
+    {
+      "path": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\qt\\CMakeFiles\\ship_export.dir\\src\\core\\hull_sections.cpp.obj",
+      "bytes": 82229,
+      "sha256": "3d06311fd2bf537a33d52a5a8f2ab546788f3cf81b29f4b70c01c69e6ac226f2"
+    },
+    {
+      "path": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\qt\\CMakeFiles\\ship_export.dir\\src\\core\\ship_formats.cpp.obj",
+      "bytes": 35941,
+      "sha256": "0a11b96bed7a529878a003a4c9d8879f38a271b26a8c7cc7f06268df878bd3e3"
+    }
+  ],
+  "retained": "Active build, source, reports, installed runtime, tested candidate and rollback"
+}

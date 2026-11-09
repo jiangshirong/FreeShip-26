@@ -1,0 +1,19 @@
+{
+  "schema": 1,
+  "description": "Only explicitly reviewed, hash-matched event adapters may run; all other callbacks remain not_run.",
+  "menu_adapters": {
+    "main_overflow": {
+      "source": "Forms/Main.pas",
+      "sha256": "7b639608e72b9ed39b568017a8c68a15de2b4e59bc12d0de86b67d2c0ff4a044"
+    },
+    "hull_popup": {
+      "source": "Forms/freehullformwindow_panel.pas",
+      "sha256": "a478e9ff80174f19e9c5cc915f0d2d97cf0b3a2a93bc40bca5337c4335d30e8b"
+    },
+    "layer_dialog": {
+      "source": "Forms/FreeLayerVisibilityDlg.pas",
+      "sha256": "09bf9bc1fb9b9feb173a1b6fb6f6b9d55d4a890ded3bfffff694318fd8a9d7ab"
+    }
+  },
+  "dropdown_adapters": []
+}

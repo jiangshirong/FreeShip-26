@@ -1,0 +1,33 @@
+{
+  "Plan": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\maintenance\\retention-modeling-final-20261102.json",
+  "Removed": [
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\reports\\qt-advanced-modeling-20261102-a",
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\reports\\qt-advanced-20261101-c",
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\reports\\qt-overlays-20261101-d",
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\reports\\qt-overlays-20261101-c",
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\reports\\qt-overlays-20261101-b",
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\reports\\qt-advanced-package-20261101",
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\reports\\qt-modeling-20261102-f",
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\reports\\qt-modeling-20261102-a",
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\reports\\qt-modeling-core-probe-20261102-a",
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\reports\\qt-advanced-core-probe-20261101-f",
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\reports\\qt-modeling-20261102-c",
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\reports\\qt-overlays-20261101-a",
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\reports\\qt-modeling-service-20261102-d",
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\reports\\qt-modeling-service-20261102-b",
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\reports\\qt-modeling-service-20261101-e",
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\reports\\qt-modeling-service-20261101-c",
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\reports\\qt-modeling-service-20261101-b",
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\reports\\qt-modeling-service-20261101-d",
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\reports\\qt-startup-advanced-delivery-20261101",
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\reports\\qt-modeling-service-20261101-a",
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\reports\\qt-label-boundaries-20261101-d",
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\reports\\qt-label-boundaries-20261101-c",
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\reports\\qt-label-boundaries-20261101",
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\reports\\qt-label-boundaries-20261101-b"
+  ],
+  "RemovedCount": 24,
+  "FreeBefore": 4829331456,
+  "FreeAfter": 8938221568,
+  "FreedGiB": 3.83
+}

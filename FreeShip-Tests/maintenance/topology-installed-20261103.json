@@ -1,0 +1,128 @@
+{
+  "recorded_utc": "2026-11-02T16:41:58.865772+00:00",
+  "scope": "13 basic control-net commands, FBM topology encoding, live incident-edge order, immutable undo/redo and saved-file roundtrip.",
+  "installed": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\dist",
+  "previous_installation": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\dist-before-topology-20261103",
+  "manifest_sha256": "8686cf9fab7053b44a3e1c450dee4506295aa0bef151035aba7dd411757dc953",
+  "verified_package_files": 2509,
+  "binaries_sha256": {
+    "FreeShipQt.exe": "33a8277d283802504cc91afdf9c3d1498da13d2faa2baa19ea1fd405ee2dc07b",
+    "FreeShipDocumentService.exe": "ca472edd5c3afe79232441a68022f1d80e63f1d147d6f60ca9403fed6c798084",
+    "FreeShipNativeLinesplan.exe": "a68e340a43e207773afa2cc0c74c3ed58d074514165e3dd5541bffcb6943fded",
+    "qt_document_codec_tests.exe": "fe5f743dab1316e09f25da5e34a4f05d18898694784baa923e2977657837161d",
+    "bridge/FreeShipGeometryBridge.exe": "a3e61614a2410abd428c97c9b5282cb0e438ab6f7452f983f9d4f0947ac63cd0"
+  },
+  "legacy_source_sha256": "277a3c69392c86fe14c375e7dfc9c3197b4162e982673cbbcf4b4a2dfff0ab6b",
+  "reports": {
+    "qt-document": {
+      "path": "C:\\FreeShip26Tests\\reports\\qt-native-topology-final\\qt-document\\report.json",
+      "sha256": "ecf5d56eb3c1ad2282d718dae4d81cceb2af6309f2196bd8b8a4ae0252a61a6f",
+      "counts": {
+        "pass": 2766,
+        "fail": 0,
+        "review": 2,
+        "not_run": 2,
+        "error": 0
+      },
+      "phase_seconds": {
+        "runtime_ready_s": 3.3225784999995085,
+        "codec_s": 0.8039948999994522,
+        "protocol_s": 80.01226660000066,
+        "native_point_edit_s": 4.816597600000023,
+        "native_topology_s": 13.166634900000645,
+        "modeling_service_s": 9.73667530000057,
+        "production_ui_s": 7.912775800001327
+      },
+      "elapsed_seconds": 120.13772289999906,
+      "scope": "Complete isolated suite, exact same relevant binaries as installed."
+    },
+    "qt-topology-topology-installed": {
+      "path": "C:\\FreeShip26Tests\\reports\\qt-topology-topology-installed\\report.json",
+      "sha256": "f6bf3336d267ce9c4768f6d1fb2d0f5432543c51f4e798eeed28d8782975a2a5",
+      "counts": {
+        "pass": 64,
+        "fail": 0,
+        "review": 0,
+        "not_run": 1,
+        "error": 0
+      },
+      "scope": "Actual installed production Qt callbacks, hidden windows."
+    },
+    "qt-modeling-topology-installed": {
+      "path": "C:\\FreeShip26Tests\\reports\\qt-modeling-topology-installed\\report.json",
+      "sha256": "07199e735d0f1055e5392ec62325c6b4b576edd5568147dfb555a65fd214c620",
+      "counts": {
+        "pass": 176,
+        "fail": 0,
+        "review": 0,
+        "not_run": 1,
+        "error": 0
+      },
+      "scope": "Actual installed production Qt callbacks, hidden windows."
+    },
+    "qt-auxiliary-topology-installed": {
+      "path": "C:\\FreeShip26Tests\\reports\\qt-auxiliary-topology-installed\\report.json",
+      "sha256": "b1b459b267f68ead6924162d99462a81cb8101c235f1076f2194d6082b625ed6",
+      "counts": {
+        "pass": 55,
+        "fail": 0,
+        "review": 1,
+        "not_run": 1,
+        "error": 0
+      },
+      "scope": "Actual installed production Qt callbacks, hidden windows."
+    },
+    "qt-sections-topology-installed-b": {
+      "path": "C:\\FreeShip26Tests\\reports\\qt-sections-topology-installed-b\\report.json",
+      "sha256": "616018ced76f1ec11dfe8762384d5e464ade577e46b1646fb0d076b0664376e0",
+      "counts": {
+        "pass": 214,
+        "fail": 0,
+        "review": 0,
+        "not_run": 1,
+        "error": 0
+      },
+      "scope": "Actual installed production Qt callbacks, hidden windows."
+    }
+  },
+  "combined_counts": {
+    "pass": 3275,
+    "fail": 0,
+    "review": 3,
+    "not_run": 6,
+    "error": 0
+  },
+  "codec": {
+    "cases": 243,
+    "real_files_read": 80,
+    "note": "77 nonempty recognized control nets reindexed; 2 empty nets unchanged; 1 opaque-tail file rejected for rewriting. Synthetic format branches also validate references and byte-preserved unrelated blocks."
+  },
+  "topology_kernel_ms": {
+    "minimum": 0.0704,
+    "median": 0.20365,
+    "maximum": 0.3861,
+    "samples": 40,
+    "note": "Candidate computation and encoding only. Not complete GUI latency or an old/new speedup claim."
+  },
+  "time_accounting": {
+    "first_observed_utc": "2026-11-02T16:00:06+00:00",
+    "elapsed_wall_seconds": 2512.865772,
+    "core_final_seconds": 120.13772289999906,
+    "note": "Several focused diagnostic regressions also ran. Coding, investigation, packaging and review were not separately timed; remaining wall time is not test waiting."
+  },
+  "notes": [
+    "Native geometry, IDs, history, scenes, DXF and sections are compared without new floating tolerances.",
+    "Face deletion intentionally retains legacy wire-edge semantics. Free-curve endpoint normalization is included before native persistence.",
+    "Live point-edge order is session data, not an FBM extension. Direct split-then-collapse and undo/redo are separately covered.",
+    "Advanced modeling, constraint definitions, other FBM fields, old-version conversion, four-view mesh and professional calculations still have Pascal dependencies.",
+    "Hidden Qt callback tests are not physical desktop or complete visual acceptance. Reusable sources are retained; outputs/builds are on C."
+  ],
+  "maintenance_sources_sha256": {
+    "record_topology_delivery.py": "dcb355a690a034c8b84582d824685a9e1992d1de59576de712a5f2d1b96e4f6c",
+    "promote_runtime.ps1": "d0427a3964c2263a93768185d29f9f9cfba8600d48965c1b29518c443e4bb728"
+  },
+  "free_bytes_after": {
+    "C": 31125995520,
+    "D": 31032967168
+  }
+}

@@ -1,0 +1,109 @@
+{
+  "created_utc": "2026-11-03T13:46:42.299918+00:00",
+  "status": "partial",
+  "scope": "Native C++ IGES surface preparation and existing Qt export workflow; not full application migration",
+  "installed": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\dist",
+  "previous": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\dist-before-cad-native-20261103",
+  "package_manifest_sha256": "62e4e163f86bf1aa9c013b04094c6b545c612dedfc48b3dbb37ae702f8b93736",
+  "source_sha256": "277a3c69392c86fe14c375e7dfc9c3197b4162e982673cbbcf4b4a2dfff0ab6b",
+  "reports": {
+    "core": {
+      "path": "D:\\FreeShip26Tests\\reports\\cad-native-core-01\\qt-cad\\report.json",
+      "sha256": "078c2a02bb3a82876027422940483f5580dca64bb046df88d3da6798d63da7e9",
+      "counts": {
+        "pass": 562,
+        "fail": 0,
+        "review": 1,
+        "not_run": 1,
+        "error": 0
+      }
+    },
+    "migration": {
+      "path": "D:\\FreeShip26Tests\\reports\\cad-native-migration-01\\report.json",
+      "sha256": "c1f8890a751888825f1dd684c7ec7053b273e3245debce3e76ca4ddfc5e74e9b",
+      "counts": {
+        "pass": 751,
+        "fail": 0,
+        "review": 9,
+        "not_run": 7,
+        "error": 0
+      }
+    },
+    "installed_workflow": {
+      "path": "D:\\FreeShip26Tests\\reports\\cad-native-installed-01\\report.json",
+      "sha256": "0a47fdd4a13106e0587658752029928b4e16353128f1e7645910f9eb91ca0efa",
+      "counts": {
+        "pass": 284,
+        "fail": 0,
+        "review": 1,
+        "not_run": 1,
+        "error": 0
+      }
+    },
+    "startup": {
+      "path": "D:\\FreeShip26Tests\\reports\\cad-native-startup-01\\report.json",
+      "sha256": "909a468310dd2a827c7315c61a0cb923bae5c94bde51fda32bd53fbbd6d732bb",
+      "counts": {
+        "pass": 54,
+        "fail": 0,
+        "review": 0,
+        "not_run": 17,
+        "error": 0
+      }
+    }
+  },
+  "counts": {
+    "pass": 1651,
+    "fail": 0,
+    "review": 11,
+    "not_run": 26,
+    "error": 0
+  },
+  "timings": [
+    {
+      "model": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-MCP\\examples\\box.fbm",
+      "native_ms": 2.9525999998440966,
+      "legacy_ms": 3.408399992622435
+    },
+    {
+      "model": "D:\\FreeShip26Tests\\reports\\cad-native-core-01\\qt-cad\\native\\fixtures\\plane\\save\\saved.fbm",
+      "native_ms": 1.942799994139932,
+      "legacy_ms": 2.5677999947220087
+    },
+    {
+      "model": "D:\\FreeShip26Tests\\reports\\cad-native-core-01\\qt-cad\\native\\fixtures\\saddle\\save\\saved.fbm",
+      "native_ms": 1.9595999910961837,
+      "legacy_ms": 2.4234000011347234
+    },
+    {
+      "model": "D:\\FreeShip26Tests\\reports\\cad-native-core-01\\qt-cad\\native\\fixtures\\hole\\save\\saved.fbm",
+      "native_ms": 2.497099994798191,
+      "legacy_ms": 4.153400004724972
+    },
+    {
+      "model": "D:\\FreeShip26Tests\\reports\\cad-native-core-01\\qt-cad\\native\\fixtures\\polygon-3\\save\\saved.fbm",
+      "native_ms": 2.2144999966258183,
+      "legacy_ms": 2.0671000092988834
+    },
+    {
+      "model": "D:\\FreeShip26Tests\\reports\\cad-native-core-01\\qt-cad\\native\\fixtures\\polygon-5\\save\\saved.fbm",
+      "native_ms": 1.653899991651997,
+      "legacy_ms": 2.536500003770925
+    },
+    {
+      "model": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-MCP\\examples\\synthetic-hull.fbm",
+      "native_ms": 3.5226000036345795,
+      "legacy_ms": 36.44019999774173
+    },
+    {
+      "model": "D:\\桌面文件夹\\学习\\大学课程\\过考试\\船舶设计原理\\9a\\9a-Женя.fbm",
+      "native_ms": 11.7061999917496,
+      "legacy_ms": 53.19489999965299
+    }
+  ],
+  "limitations": [
+    "Hidden Qt callbacks and OpenCascade readers do not cover physical desktop or commercial CAD/manufacturing acceptance.",
+    "Other formats, legacy analysis loading and remaining tools/UI are still in the migration backlog."
+  ],
+  "audit_script_sha256": "f696bc3444a87465034e99b5d16963c6142ab363492727f1f582c590eda9dccd"
+}

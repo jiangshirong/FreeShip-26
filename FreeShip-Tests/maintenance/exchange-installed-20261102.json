@@ -1,0 +1,122 @@
+{
+  "date": "2026-11-02",
+  "scope": "OBJ/STL/FEF model import and export, native format validation, Qt dialogs and transactional candidate import.",
+  "installed": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\dist",
+  "previous_installation": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\dist-before-exchange-20261102",
+  "binaries_sha256": {
+    "FreeShipQt.exe": "e613269a1aaad372b23f4861314ea7bb28081721a34187291c63e362da52acb6",
+    "bridge/FreeShipGeometryBridge.exe": "c3bd14f4ddb26cea9e5c75274db02f7c4b5a44b923eec7ed3cfc73eba48ce641"
+  },
+  "package_manifest_sha256": "68e0e425c4b6156cb4631f826e9f32759b5c47b242ada1e5ca97e0388040d578",
+  "package_files_verified": 2496,
+  "legacy_source_sha256": "277a3c69392c86fe14c375e7dfc9c3197b4162e982673cbbcf4b4a2dfff0ab6b",
+  "bridge_build": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\exchange-service-04",
+  "reports": {
+    "qt-exchange-unified/qt-exchange": {
+      "path": "C:\\FreeShip26Tests\\reports\\qt-exchange-unified\\qt-exchange\\report.json",
+      "status": "partial",
+      "counts": {
+        "pass": 271,
+        "fail": 0,
+        "review": 1,
+        "not_run": 1,
+        "error": 0
+      },
+      "report_sha256": "a24d19cd0940e4902385142a59567bd17e67c72319e8867c5d1c33ca37a87d33"
+    },
+    "qt-exchange-final": {
+      "path": "C:\\FreeShip26Tests\\reports\\qt-exchange-final\\report.json",
+      "status": "partial",
+      "counts": {
+        "pass": 277,
+        "fail": 0,
+        "review": 1,
+        "not_run": 1,
+        "error": 0
+      },
+      "report_sha256": "8f6bc794fc87ba1cae84ffa2e9f7a279b9d067832da05a4dcbb95e09e47d76ed"
+    },
+    "qt-migration-exchange-a": {
+      "path": "C:\\FreeShip26Tests\\reports\\qt-migration-exchange-a\\report.json",
+      "status": "partial",
+      "counts": {
+        "pass": 2154,
+        "fail": 0,
+        "review": 27,
+        "not_run": 18,
+        "error": 0
+      },
+      "report_sha256": "c0f6f03c0e3b6fdf11886ec26a0317df3fa78ff6e2c8f02ec1e344312f4d184b"
+    },
+    "qt-exchange-package-final": {
+      "path": "C:\\FreeShip26Tests\\reports\\qt-exchange-package-final\\report.json",
+      "status": "partial",
+      "counts": {
+        "pass": 280,
+        "fail": 0,
+        "review": 1,
+        "not_run": 1,
+        "error": 0
+      },
+      "report_sha256": "13533289fa9c512b1a3ba84e030872257561cfd5b8250d3beda47945eb9d7ac5"
+    },
+    "qt-plates-exchange-package": {
+      "path": "C:\\FreeShip26Tests\\reports\\qt-plates-exchange-package\\report.json",
+      "status": "partial",
+      "counts": {
+        "pass": 34,
+        "fail": 0,
+        "review": 0,
+        "not_run": 1,
+        "error": 0
+      },
+      "report_sha256": "b1e0ad78c24952505e5b9ba2df0dc77dad0aead4e170883d65a434db6a2b3479"
+    },
+    "qt-performance-exchange-package": {
+      "path": "C:\\FreeShip26Tests\\reports\\qt-performance-exchange-package\\report.json",
+      "status": "partial",
+      "counts": {
+        "pass": 29,
+        "fail": 0,
+        "review": 0,
+        "not_run": 1,
+        "error": 0
+      },
+      "report_sha256": "81ab6bc72a7a9b8d774a409c5cfbdb141ccbeee3c8e1add7b926115a324fd26c"
+    },
+    "qt-exchange-delivery": {
+      "path": "C:\\FreeShip26Tests\\reports\\qt-exchange-delivery\\report.json",
+      "status": "partial",
+      "counts": {
+        "pass": 280,
+        "fail": 0,
+        "review": 1,
+        "not_run": 1,
+        "error": 0
+      },
+      "report_sha256": "74fce28ab47b819b5651be8254fd279dc322d34fc440aa05f2868f7acf45fa5f"
+    },
+    "qt-migration-exchange-delivery": {
+      "path": "C:\\FreeShip26Tests\\reports\\qt-migration-exchange-delivery\\report.json",
+      "status": "partial",
+      "counts": {
+        "pass": 85,
+        "fail": 0,
+        "review": 0,
+        "not_run": 4,
+        "error": 0
+      },
+      "report_sha256": "8fe96b0e10c9940312313aba8972ac17ec55ce683b2fdd3dcb8f6e925d20dece"
+    }
+  },
+  "notes": [
+    "Final candidate and installed-directory exchange checks each contain 280 pass, 0 fail, 1 review and 1 not_run.",
+    "The full 2154-pass migration run preceded only the new imperial-import default density fix and FEF unit-display fix; actual-directory edit/save/reopen checks passed afterward.",
+    "FEF roundtrip on real 9a compares point/edge/layer attributes and the full derived triangle geometry. OBJ/STL checks use independent readers and mathematical fixtures.",
+    "Current model ownership, candidate construction, FBM and professional calculation still use the Pascal bridge. The whole native core migration is not complete.",
+    "Hidden Qt callbacks do not cover the native chooser, real mouse/focus, external CAD interoperability or full original UI acceptance.",
+    "FEF is control-model exchange, not full FBM project persistence. Material libraries, STL colors and unsupported OBJ geometry are not silently imported.",
+    "All reusable tests remain under FreeShip-Tests and qt-exchange is integrated in run_tests.py.",
+    "Legacy fs, QtPilot, user models and preferences were not replaced."
+  ]
+}

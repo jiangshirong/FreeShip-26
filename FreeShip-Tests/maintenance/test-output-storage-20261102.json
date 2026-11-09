@@ -1,0 +1,23 @@
+{
+  "date": "2026-11-02",
+  "status": "complete",
+  "report_root": "C:\\FreeShip26Tests\\reports",
+  "source_remains": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests",
+  "d_bytes_relocated": 20655096162.0,
+  "d_directories_relocated": 17,
+  "relocation_receipt": "C:\\FreeShip26Tests\\maintenance\\relocation-20261102\\final-paths.json",
+  "relocation_receipt_sha256": "c762373dc37d4c9355ee79b87eb9c92432ec61499e89ed9838dc937c155e3ed4",
+  "default_runner_report": "C:\\FreeShip26Tests\\reports\\combined-20261102-184439\\report.json",
+  "default_runner_report_sha256": "a0e1288620d107b23cf835c8817a5ff300ed2dcc898e0c8ffbf39395575a6361",
+  "default_runner_status": "pass",
+  "free_bytes_after": {
+    "C": 49517920256,
+    "D": 30429274112
+  },
+  "notes": [
+    "Every file was SHA256-verified against its D copy before that duplicate was removed; original manifests are retained beside the relocation receipt.",
+    "Final C-to-C move preserved counts and report hashes. Both historical D paths and the initial Codex-local C path remain accessible through junctions.",
+    "The default unified runner was exercised without --output. Explicit output paths still override the local configuration.",
+    "These one-time storage/delivery scripts are retained for audit and are not application regression tests or automatic cleanup tasks."
+  ]
+}

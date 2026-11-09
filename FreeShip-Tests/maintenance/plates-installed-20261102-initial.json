@@ -1,0 +1,91 @@
+{
+  "date": "2026-11-02",
+  "scope": "Qt developed-plate window, original unfolding integration, local plate layout, error display, section curves, complete boundary exports and scaled print output.",
+  "installed": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\dist",
+  "previous_installation": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\dist-before-plates-20261102",
+  "binaries_sha256": {
+    "FreeShipQt.exe": "58535c71c3215667db25e8f3313f5d9476f0ca42dfd231472726099ef400870e",
+    "bridge/FreeShipGeometryBridge.exe": "1ca2261eb60fd2091b3fed29fe36ea91a17b5d32d78fe02a24ac0e2e52fbc08e"
+  },
+  "package_manifest_sha256": "c1a716cf7e69b8f2e73df3582f421a12992ef28e16de71ed12ee3d47e457eb70",
+  "legacy_source_sha256": "277a3c69392c86fe14c375e7dfc9c3197b4162e982673cbbcf4b4a2dfff0ab6b",
+  "bridge_build": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\plates-service-05",
+  "reports": {
+    "qt-plates-final-b": {
+      "status": "partial",
+      "counts": {
+        "pass": 416,
+        "fail": 0,
+        "review": 1,
+        "not_run": 1,
+        "error": 0
+      },
+      "report_sha256": "c02a261ecd8e0fcfcdad54e8c8921ba26b4d90e1a2e4649b0d2069c6b2ebdb4d"
+    },
+    "qt-migration-plates-a": {
+      "status": "partial",
+      "counts": {
+        "pass": 751,
+        "fail": 0,
+        "review": 9,
+        "not_run": 7,
+        "error": 0
+      },
+      "report_sha256": "f88cae59578ec20b9a13da83c7cbe71e8788729f4858ce2e1ef29b80d93d6f71"
+    },
+    "qt-plates-package-a": {
+      "status": "partial",
+      "counts": {
+        "pass": 33,
+        "fail": 0,
+        "review": 0,
+        "not_run": 1,
+        "error": 0
+      },
+      "report_sha256": "706a03a901aa3b57c6c9e9ecf843b952a6aebfa1add6c540719738aa0f9abfc3"
+    },
+    "qt-performance-plates-package-a": {
+      "status": "partial",
+      "counts": {
+        "pass": 29,
+        "fail": 0,
+        "review": 0,
+        "not_run": 1,
+        "error": 0
+      },
+      "report_sha256": "ce4dde9c85f5f9777697efc8285865229e241f1e7640bc2aac910985ed0d01ed"
+    },
+    "qt-plates-delivery-a": {
+      "status": "partial",
+      "counts": {
+        "pass": 33,
+        "fail": 0,
+        "review": 0,
+        "not_run": 1,
+        "error": 0
+      },
+      "report_sha256": "3268fce73205f821ead81cfee01cafd907d7ee76dd8693819834981c36c937b1"
+    },
+    "qt-migration-plates-delivery-a": {
+      "status": "partial",
+      "counts": {
+        "pass": 33,
+        "fail": 0,
+        "review": 0,
+        "not_run": 2,
+        "error": 0
+      },
+      "report_sha256": "3151d522a48609207ee975eb79d6f0b58db7337260edd608900f343a87756d63"
+    }
+  },
+  "notes": [
+    "The complete plate suite is current with the installed source; it contains independent original-core fixtures and mathematical checks, an independent DXF reader, and physical PDF scale measurements.",
+    "The basic migration regression preceded only plate-specific project color and label contrast changes. The actual installed basic editing workflow was then rechecked directly.",
+    "Geometry still uses Pascal unfolding. This does not complete the remaining native core migration.",
+    "Hidden Windows Qt widgets and image/PDF inspection do not replace desktop mouse, focus, multi-monitor or physical printer acceptance.",
+    "Connected symmetric plate halves retain separate closed DXF outlines and their common centreline. Exports are not deduplicated CAM cutting paths.",
+    "Automatic nesting, material forming allowances and manufacturing certification remain outside this delivery.",
+    "All test and diagnostic sources are retained under FreeShip-Tests and integrated in the qt-plates suite.",
+    "Legacy fs, QtPilot, user models and existing preferences were not replaced."
+  ]
+}

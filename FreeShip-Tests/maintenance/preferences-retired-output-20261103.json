@@ -1,0 +1,105 @@
+{
+  "status": "complete",
+  "started": "2026-11-03T23:12:42.0469149+08:00",
+  "validated_report": "D:\\FreeShip26Tests\\reports\\preferences-document-02\\report.json",
+  "validated_report_sha256": "1961756BBB52EB35DABFD48D399A36BDCB448C422C4F52C62A38337C4E5AF3D5",
+  "final_runtime": "D:\\FreeShip26Tests\\build\\preferences-native-package-05",
+  "retained_final_reports": [
+    "preferences-core-04",
+    "preferences-document-02",
+    "preferences-publication-02"
+  ],
+  "free_bytes_before": 3612733440,
+  "unlinked_toolchain_aliases": [
+    {
+      "path": "D:\\FreeShip26Tests\\reports\\preferences-document-01\\native-lackenby\\rtl-convergence\\fs-ui-tools-2a0f9e90c007",
+      "target": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-MCP\\.toolchain\\lazarus"
+    },
+    {
+      "path": "D:\\FreeShip26Tests\\reports\\preferences-document-01\\native-project\\math\\fs-ui-tools-2a0f9e90c007",
+      "target": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-MCP\\.toolchain\\lazarus"
+    }
+  ],
+  "items": [
+    {
+      "path": "D:\\FreeShip26Tests\\reports\\preferences-core-01",
+      "retained": [
+        {
+          "name": "report.json",
+          "sha256": "D425D14AEBF93A67BB8BC693A9A2DCC2741BFC4A7FDAA6E9D3E1547F57D6DA50"
+        }
+      ],
+      "logical_bytes_removed": 92799858.0,
+      "status": "retired"
+    },
+    {
+      "path": "D:\\FreeShip26Tests\\reports\\preferences-core-02",
+      "retained": [
+        {
+          "name": "report.json",
+          "sha256": "42D9196A112CCA8E43B78B5EBD580AA7416EA644DFA4B739DE3743B255FB999C"
+        }
+      ],
+      "logical_bytes_removed": 92822975.0,
+      "status": "retired"
+    },
+    {
+      "path": "D:\\FreeShip26Tests\\reports\\preferences-core-03",
+      "retained": [
+        {
+          "name": "report.json",
+          "sha256": "599EE648F096FC7DFBBFE2E1A72445F2472DEDD034102A634FA58DF4D1D6D6A7"
+        }
+      ],
+      "logical_bytes_removed": 97256366.0,
+      "status": "retired"
+    },
+    {
+      "path": "D:\\FreeShip26Tests\\reports\\preferences-document-01",
+      "retained": [
+        {
+          "name": "report.json",
+          "sha256": "D2E6778E95947BF624D6704B1D60454F616EA7D938C2F37C5D0425662A02A7AB"
+        }
+      ],
+      "logical_bytes_removed": 1679482609.0,
+      "status": "retired"
+    },
+    {
+      "path": "D:\\FreeShip26Tests\\reports\\preferences-publication-01",
+      "retained": [
+        {
+          "name": "report.json",
+          "sha256": "1CFC8B3B6430B6713D7CFFFEBD4D6A7D5EBAD4B211E8ED25B86A64C31CA018AC"
+        }
+      ],
+      "logical_bytes_removed": 273009242.0,
+      "status": "retired"
+    },
+    {
+      "path": "D:\\FreeShip26Tests\\build\\preferences-native-package-02",
+      "retained": [
+        {
+          "name": "build-manifest.json",
+          "sha256": "B2DA896113D8FFA706F01764BD3E2347D2C20F8963462BC08C2CE673127CA7F2"
+        }
+      ],
+      "logical_bytes_removed": 116638457.0,
+      "status": "retired"
+    },
+    {
+      "path": "D:\\FreeShip26Tests\\build\\preferences-native-package-04",
+      "retained": [
+        {
+          "name": "build-manifest.json",
+          "sha256": "40BA8D3A93AA93CDCF45A992A5B734617B1B47AB4653FF0B3E3FD9E722D0B615"
+        }
+      ],
+      "logical_bytes_removed": 116640824.0,
+      "status": "retired"
+    }
+  ],
+  "script_sha256": "15D91D09DBF11D36DAD8F18DF6AACC1B0859F5B5467F8CC4A23B110DF294640A",
+  "completed": "2026-11-03T23:12:55.2646711+08:00",
+  "free_bytes_after": 5979848704
+}

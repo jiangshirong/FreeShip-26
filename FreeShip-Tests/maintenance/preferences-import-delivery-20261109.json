@@ -1,0 +1,59 @@
+{
+  "created_utc": "2026-11-09T06:54:45.143918+00:00",
+  "status": "partial",
+  "scope": "Explicit read-only INI/DTA import into the Qt preferences draft",
+  "installed": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\dist",
+  "previous": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\dist-before-preferences-import-20261109",
+  "package_manifest_sha256": "f33123b90b5a5da7ac698ecbc5f0e5ef0db2b2d8bc03de2bc1f9feb9faa85307",
+  "reports": {
+    "core": {
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\preferences-import-20261109\\ui-final\\qt-preferences-ui\\report.json",
+      "sha256": "b7510c5cd42b02fd0cc7b3590f1d594ecd9a32858b0bb66204b50118f0ced560",
+      "counts": {
+        "pass": 133,
+        "fail": 0,
+        "review": 0,
+        "not_run": 21,
+        "error": 0
+      }
+    },
+    "bootstrap": {
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\preferences-import-20261109\\bootstrap-final\\qt-preferences\\report.json",
+      "sha256": "97208f958012b28d5fd8ee46d6a6792ec89fc6d981453c64d07627239a8250da",
+      "counts": {
+        "pass": 94,
+        "fail": 0,
+        "review": 0,
+        "not_run": 3,
+        "error": 0
+      }
+    },
+    "installed": {
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\preferences-import-20261109\\installed\\qt-preferences-import\\report.json",
+      "sha256": "dbcc5a63b82928a51b57d7e2c9c3f32a2fc7801b5d118c1a15b2f6f7d46373ac",
+      "counts": {
+        "pass": 68,
+        "fail": 0,
+        "review": 0,
+        "not_run": 10,
+        "error": 0
+      }
+    }
+  },
+  "counts": {
+    "pass": 295,
+    "fail": 0,
+    "review": 0,
+    "not_run": 34,
+    "error": 0
+  },
+  "audit_script_sha256": "3bf92dbff0c771d421cdc16abfc1d0deb00fc3e0782d6cff47b813660a83fa7d",
+  "limitations": [
+    "Counts include installed repetition, not distinct user scenarios.",
+    "Hidden production callbacks and reviewed screenshots are not desktop input/focus/DPI acceptance.",
+    "No language migration, recent-file or window-layout import.",
+    "Unsupported theme options and invalid directories are reported and skipped.",
+    "Text files must be valid UTF-8; legacy ANSI code pages are not guessed.",
+    "Selected display alpha and DXF colors may change; model geometry and FBM bytes remain exact."
+  ]
+}

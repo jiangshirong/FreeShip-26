@@ -1,0 +1,16 @@
+program close_button_audit_test;
+{$mode objfpc}{$H+}
+uses Interfaces,Forms,SysUtils,Controls,Main,FreeShipUnit,FreeHydrostaticsDlg,FreeHydrostaticsFrm,FreeHydrostaticsResultsDlg,FreeLayerVisibilityDlg,FreeSplitSectionDlg,FreeSelectedDlg,FreeIntersectionDlg,FreeExpanedPlatesDlg,TileDialog;
+procedure Check(Ok:Boolean;const Msg:String);begin if not Ok then begin WriteLn('FAIL ',Msg);Halt(1) end;WriteLn('PASS ',Msg) end;
+procedure Test1;var d:TFreeHydrostaticsDialog;begin d:=TFreeHydrostaticsDialog.Create(nil);try Check(biSystemMenu in d.BorderIcons,'FreeHydrostaticsDlg has X');Check(not d.ButtonClose.Visible,'FreeHydrostaticsDlg.ButtonClose hidden');finally d.Free end end;
+procedure Test2;var d:TFreeHydrostaticsForm;closeAction:TCloseAction;begin d:=TFreeHydrostaticsForm.Create(nil);try Check(biSystemMenu in d.BorderIcons,'FreeHydrostaticsFrm has X');Check(not d.Button1.Visible,'FreeHydrostaticsFrm.Button1 hidden');d.Button1Click(d);Check(d.ModalResult=mrOk,'original close accepted settings');d.ModalResult:=mrCancel;d.CloseFromTitleBar(d,closeAction);Check(d.ModalResult=mrOk,'title-bar close retains settings acceptance');finally d.Free end end;
+procedure Test3;var d:TFreeHydrostaticsResultsDialog;begin d:=TFreeHydrostaticsResultsDialog.Create(nil);try Check(biSystemMenu in d.BorderIcons,'FreeHydrostaticsResultsDlg has X');Check(not d.ButtonClose.Visible,'FreeHydrostaticsResultsDlg.ButtonClose hidden');finally d.Free end end;
+procedure Test4;var d:TFreeLayerVisibilityDialog;begin d:=TFreeLayerVisibilityDialog.Create(nil);try Check(biSystemMenu in d.BorderIcons,'FreeLayerVisibilityDlg has X');Check(not d.bbClose.Visible,'FreeLayerVisibilityDlg.bbClose hidden');finally d.Free end end;
+procedure Test5;var d:TFreeSplitSectionDialog;begin d:=TFreeSplitSectionDialog.Create(nil);try Check(biSystemMenu in d.BorderIcons,'FreeSplitSectionDlg has X');Check(not d.BitBtn1.Visible,'FreeSplitSectionDlg.BitBtn1 hidden');finally d.Free end end;
+procedure Test6;var d:TFormSelected;begin d:=TFormSelected.Create(nil);try Check(biSystemMenu in d.BorderIcons,'FreeSelectedDlg has X');Check(not d.bbClose.Visible,'FreeSelectedDlg.bbClose hidden');Check(not d.aClose.Visible,'FreeSelectedDlg.aClose hidden');finally d.Free end end;
+procedure Test7;var d:TFreeIntersectionDialog;begin d:=TFreeIntersectionDialog.Create(nil);try Check(biSystemMenu in d.BorderIcons,'FreeIntersectionDlg has X');Check(not d.tbCloseDialog.Visible,'FreeIntersectionDlg.tbCloseDialog hidden');Check(not d.CloseDialog.Visible,'FreeIntersectionDlg.CloseDialog hidden');finally d.Free end end;
+procedure Test8;var d:TFreeExpanedplatesDialog;begin d:=TFreeExpanedplatesDialog.Create(nil);try Check(biSystemMenu in d.BorderIcons,'FreeExpanedPlatesDlg has X');Check(not d.ToolButton22.Visible,'FreeExpanedPlatesDlg.ToolButton22 hidden');Check(not d.CloseDialog.Visible,'FreeExpanedPlatesDlg.CloseDialog hidden');finally d.Free end end;
+procedure Test9;var d:TTileDialog;begin d:=TTileDialog.Create(nil);try Check(biSystemMenu in d.BorderIcons,'tiledialog has X');Check(not d.bbClose.Visible,'tiledialog.bbClose hidden');finally d.Free end end;
+begin Application.Initialize;Application.CreateForm(TMainForm,MainForm);
+Test1;Test2;Test3;Test4;Test5;Test6;Test7;Test8;Test9;
+MainForm.Free;end.

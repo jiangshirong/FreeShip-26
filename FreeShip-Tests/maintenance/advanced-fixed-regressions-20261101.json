@@ -1,0 +1,184 @@
+{
+  "purpose": "Compact before-fix evidence; reusable cases live in qt_advanced.py, including independent point-type assertions and repeated production processes. Superseded runtimes and build copies are not needed to reproduce the retained test recipe.",
+  "resolved_test_assumptions": [
+    "waterline_z is derived from hull minimum plus draft, not a stored main dimension",
+    "FBM record ordinals change after save and rollback; exact attributed geometry is compared through coordinate-based relation mapping"
+  ],
+  "product_defect": "SaveProject sorts ControlPoints by address. ExtrudeEdges assumed new points were appended, so Initialize could miss new corners or affect old points. AdvancedEdits now explicitly restores append semantics before extrusion.",
+  "extruded_point_differences": [
+    {
+      "reference": {
+        "id": 66,
+        "p": [
+          2.033175468444824,
+          0.01482685748487711,
+          0.09622325003147125
+        ],
+        "locked": false,
+        "batch_movable": true,
+        "name": "",
+        "vertex_type": 1,
+        "leak": true
+      },
+      "observed": {
+        "id": 66,
+        "p": [
+          2.033175468444824,
+          0.01482685748487711,
+          0.09622325003147125
+        ],
+        "locked": false,
+        "batch_movable": true,
+        "name": "",
+        "vertex_type": 3,
+        "leak": true
+      }
+    }
+  ],
+  "runs": [
+    {
+      "retired_run": "qt-advanced-20261101-a",
+      "report_sha256": "9e6fb759c517c9477e2caa7d55c157d26e5823e91cb3d53224be899a8de5feed",
+      "counts": {
+        "pass": 1282,
+        "fail": 3,
+        "review": 9,
+        "not_run": 3,
+        "error": 1
+      },
+      "failures": [
+        {
+          "id": "1.translate.partial-selection-keeps-settings",
+          "status": "fail"
+        },
+        {
+          "id": "1.scale.partial-selection-keeps-settings",
+          "status": "fail"
+        },
+        {
+          "id": "1.rotate.partial-selection-keeps-settings",
+          "status": "fail"
+        },
+        {
+          "id": "suite.execution",
+          "status": "error",
+          "reason": "RuntimeError: Service rejected a required operation: Invalid floating point operation"
+        }
+      ]
+    },
+    {
+      "retired_run": "qt-advanced-20261101-b",
+      "report_sha256": "5e9179ccfb05e6decca421a438a92126d9e96f10f8445d7480e5ba1bb88913b7",
+      "counts": {
+        "pass": 1329,
+        "fail": 1,
+        "review": 12,
+        "not_run": 5,
+        "error": 0
+      },
+      "failures": [
+        {
+          "id": "whole.scale-exact-old-control_points",
+          "status": "fail"
+        }
+      ]
+    },
+    {
+      "retired_run": "qt-advanced-delivery-20261101",
+      "report_sha256": "75eb9383afb4843dfb5b991856f74dc1bb77bd65dcd37da788b1efe1b4365d98",
+      "counts": {
+        "pass": 141,
+        "fail": 10,
+        "review": 3,
+        "not_run": 1,
+        "error": 0
+      },
+      "failures": [
+        {
+          "id": "model-2.deployment.extruded_scene-equals-tested-runtime",
+          "status": "fail",
+          "actual": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\reports\\qt-advanced-delivery-20261101\\model-2\\production\\extruded\\scene.fslp",
+          "expected": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\reports\\qt-advanced-20261101-c\\model-2\\production\\extruded\\scene.fslp",
+          "byte_equal": false
+        },
+        {
+          "id": "model-2.deployment.extruded_dxf-equals-tested-runtime",
+          "status": "fail",
+          "actual": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\reports\\qt-advanced-delivery-20261101\\model-2\\production\\extruded\\reference.dxf",
+          "expected": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\reports\\qt-advanced-20261101-c\\model-2\\production\\extruded\\reference.dxf",
+          "byte_equal": false
+        },
+        {
+          "id": "model-2.deployment.mirrored_scene-equals-tested-runtime",
+          "status": "fail",
+          "actual": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\reports\\qt-advanced-delivery-20261101\\model-2\\production\\mirrored\\scene.fslp",
+          "expected": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\reports\\qt-advanced-20261101-c\\model-2\\production\\mirrored\\scene.fslp",
+          "byte_equal": false
+        },
+        {
+          "id": "model-2.deployment.mirrored_dxf-equals-tested-runtime",
+          "status": "fail",
+          "actual": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\reports\\qt-advanced-delivery-20261101\\model-2\\production\\mirrored\\reference.dxf",
+          "expected": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\reports\\qt-advanced-20261101-c\\model-2\\production\\mirrored\\reference.dxf",
+          "byte_equal": false
+        },
+        {
+          "id": "model-2.deployment.undo_mirror_scene-equals-tested-runtime",
+          "status": "fail",
+          "actual": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\reports\\qt-advanced-delivery-20261101\\model-2\\production\\undo_mirror\\scene.fslp",
+          "expected": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\reports\\qt-advanced-20261101-c\\model-2\\production\\undo_mirror\\scene.fslp",
+          "byte_equal": false
+        },
+        {
+          "id": "model-2.deployment.undo_mirror_dxf-equals-tested-runtime",
+          "status": "fail",
+          "actual": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\reports\\qt-advanced-delivery-20261101\\model-2\\production\\undo_mirror\\reference.dxf",
+          "expected": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\reports\\qt-advanced-20261101-c\\model-2\\production\\undo_mirror\\reference.dxf",
+          "byte_equal": false
+        },
+        {
+          "id": "model-2.deployment.redo_mirror_scene-equals-tested-runtime",
+          "status": "fail",
+          "actual": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\reports\\qt-advanced-delivery-20261101\\model-2\\production\\redo_mirror\\scene.fslp",
+          "expected": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\reports\\qt-advanced-20261101-c\\model-2\\production\\redo_mirror\\scene.fslp",
+          "byte_equal": false
+        },
+        {
+          "id": "model-2.deployment.redo_mirror_dxf-equals-tested-runtime",
+          "status": "fail",
+          "actual": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\reports\\qt-advanced-delivery-20261101\\model-2\\production\\redo_mirror\\reference.dxf",
+          "expected": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\reports\\qt-advanced-20261101-c\\model-2\\production\\redo_mirror\\reference.dxf",
+          "byte_equal": false
+        },
+        {
+          "id": "model-2.deployment.reopened_scene-equals-tested-runtime",
+          "status": "fail",
+          "actual": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\reports\\qt-advanced-delivery-20261101\\model-2\\production\\reopened\\scene.fslp",
+          "expected": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\reports\\qt-advanced-20261101-c\\model-2\\production\\reopened\\scene.fslp",
+          "byte_equal": false
+        },
+        {
+          "id": "model-2.deployment.reopened_dxf-equals-tested-runtime",
+          "status": "fail",
+          "actual": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\reports\\qt-advanced-delivery-20261101\\model-2\\production\\reopened\\reference.dxf",
+          "expected": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\reports\\qt-advanced-20261101-c\\model-2\\production\\reopened\\reference.dxf",
+          "byte_equal": false
+        }
+      ]
+    }
+  ],
+  "legacy_drawing_diagnostic": {
+    "short_sampling": [
+      {
+        "kind": 3,
+        "index": 0,
+        "curve": 2,
+        "fragments": 1,
+        "points": 2
+      }
+    ],
+    "scene_error": "EInvalidOp: Invalid floating point operation",
+    "dxf": "pass"
+  },
+  "legacy_drawing_stack": "GETVALUES\nC:/Users/12968/AppData/Local/Temp/fs-qt-editing-fixture-wtr9q_to//Units/FreeSpline.inc:722\nDRAWSPLINE\nC:/Users/12968/AppData/Local/Temp/fs-qt-editing-fixture-wtr9q_to//Units/FreeLinesplanScene.pas:634\nDRAWINTERSECTION\nC:/Users/12968/AppData/Local/Temp/fs-qt-editing-fixture-wtr9q_to//Units/FreeLinesplanScene.pas:712\nEMITSCENE\nC:/Users/12968/AppData/Local/Temp/fs-qt-editing-fixture-wtr9q_to//Units/FreeLinesplanScene.pas:1327\nGENERATE\nC:/Users/12968/AppData/Local/Temp/fs-qt-editing-fixture-wtr9q_to//Units/FreeLinesplanScene.pas:101\nLEGACYEXPORTS\nC:/Users/12968/AppData/Local/Temp/fs-qt-editing-fixture-wtr9q_to//Tests/NativeLinesplanProbe.pas:323\nmain\nC:/Users/12968/AppData/Local/Temp/fs-qt-editing-fixture-wtr9q_to//Tests/NativeLinesplanProbe.pas:397\n??\n??:?\n??\n??:?\n??\n??:?\n??\n??:0\n??\n??:0\n"
+}

@@ -1,0 +1,13 @@
+{
+  "files": 7760,
+  "logical_bytes": 35092273956,
+  "free_before": {
+    "C": 11495616512,
+    "D": 4388327424
+  },
+  "free_after": {
+    "C": 23637733376,
+    "D": 27330805760
+  },
+  "policy": "Same-volume SHA256-verified hardlinks; historical paths preserved; no reparse traversal"
+}

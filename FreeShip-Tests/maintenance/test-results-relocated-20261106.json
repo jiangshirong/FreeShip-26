@@ -1,0 +1,37 @@
+[
+  {
+    "destination": "C:\\Users\\12968\\FreeShip26-TestResults\\relocated-20261106\\plates-native-migration-01",
+    "bytes": 1794617667,
+    "files": 8240,
+    "source": "D:\\FreeShip26Tests\\reports\\plates-native-migration-01",
+    "sha256_verified": true
+  },
+  {
+    "destination": "C:\\Users\\12968\\FreeShip26-TestResults\\relocated-20261106\\publication-migration-01",
+    "bytes": 1756266991,
+    "files": 8239,
+    "source": "D:\\FreeShip26Tests\\reports\\publication-migration-01",
+    "sha256_verified": true
+  },
+  {
+    "destination": "C:\\Users\\12968\\FreeShip26-TestResults\\relocated-20261106\\resistance-native-final-03",
+    "bytes": 1178552154,
+    "files": 8258,
+    "source": "D:\\FreeShip26Tests\\reports\\resistance-native-final-03",
+    "sha256_verified": true
+  },
+  {
+    "destination": "C:\\Users\\12968\\FreeShip26-TestResults\\relocated-20261106\\resistance-native-final-01",
+    "bytes": 1178532396,
+    "files": 8252,
+    "source": "D:\\FreeShip26Tests\\reports\\resistance-native-final-01",
+    "sha256_verified": true
+  },
+  {
+    "destination": "C:\\Users\\12968\\FreeShip26-TestResults\\relocated-20261106\\resistance-native-final-04",
+    "bytes": 1178446997,
+    "files": 8265,
+    "source": "D:\\FreeShip26Tests\\reports\\resistance-native-final-04",
+    "sha256_verified": true
+  }
+]

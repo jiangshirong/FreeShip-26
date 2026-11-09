@@ -1,0 +1,111 @@
+{
+  "created_utc": "2026-11-04T12:15:54.809470+00:00",
+  "status": "partial",
+  "scope": "Michlet single/duplicated/modelled twin hulls, complete wave-domain parameters, explicit wave import origin and input-contract corrections.",
+  "installed": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\dist",
+  "previous_installation": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\dist-before-multihull-20261104",
+  "package_manifest_sha256": "65ad30f61ec8c3eb79c48d460ba75d3b3dc7041ac8bc85c9c93606d1c0aab5ea",
+  "verified_files": 2550,
+  "executable_sha256": {
+    "FreeShipDocumentService.exe": "47c2d34df147fb5ae25c82e9eab6cd0336ad0ed7226450a80d07f1ca8638e6ae",
+    "FreeShipGeometryExport.exe": "2035910e7b60c6e3ab758dea3630d20be4b5c7ae01c7d3158bac05f020199513",
+    "FreeShipNativeLinesplan.exe": "160a90d275994470e6ef309f86a28d015c0e4708342b4e920eca23b36d004598",
+    "FreeShipQt.exe": "7a4c17ba478c67d286fdd707782b68075ddc295be85b2e22c0da4db2bd9830e0",
+    "native_analysis_edit_probe.exe": "c355544d2e60c0074a2fe0c90a3b70ff957cdce5da593deb20d1f8809ab787c9",
+    "native_auxiliary_edit_probe.exe": "a661b436e761634a44a1bfd391053f4c867d77c20e79f1e824b0a4fc12a78aea",
+    "native_background_edit_probe.exe": "0235a5818661a9aa1293f79951421a4079397a128b7237c0d6dacca5162d2619",
+    "native_definition_edit_probe.exe": "359fffa1da6096d2eddd59cd5efc6360d5bf3076a9e50edc7b346ce40a7dd636",
+    "native_document_create_probe.exe": "e290ed64c855636a11b36b6a03e3e106ffbc62c8174fbe10e78c743e925b1340",
+    "native_face_tools_probe.exe": "6bc5e75eab308a2232016afc644421673630f74423f4bdb04cf8dd3819024df1",
+    "native_flowline_probe.exe": "f7f1320c1adb6cf0fac11d46adaa4c57ed71f7b0c58f2629a5ab4e1d1766ce70",
+    "native_project_edit_probe.exe": "8bbf876e69d138debb64b0f44bdad14fe1d8597906143f2cbe328d9ecf95eb91",
+    "qt_auxiliary_tests.exe": "2b329f4bd4658af8c3c96d1133f0131f8d75a3d183008c7fdf357c603d04ea3c",
+    "qt_background_tests.exe": "09c96d054736f886ebd28649c0454369c9abfd457474bef1ad5020c02e29035d",
+    "qt_camera_lighting_tests.exe": "6ca9b7416ccd8299b5a0646a63064b6d011692dc2320bdd508b87d29c9dfb162",
+    "qt_display_tests.exe": "17e8173f5e8690c2816dc7e247d66353217c84b1da59d96a0168ae1993ff969e",
+    "qt_document_codec_tests.exe": "79e4f3f70ba062737842949eedc73d8c9d8435b200f1f8ca392a0035d7411eb7",
+    "qt_editing_tests.exe": "173eeda20c4450e0b45d9c7b9664b1e1d405ddacac4b7d8362bcd438acf4a873",
+    "qt_exchange_tests.exe": "535b1276e553cf090df7a49e680bd1dc049a7b77d1d15fd36168af788e246ed8",
+    "qt_lines_tests.exe": "2da67d5d4fc3316c976aaa6c8de70e6ad69fae3a2ff89228dc9d92bb1f8c9671",
+    "qt_migration_tests.exe": "22614a56d7dae9c1b60dc4ab2a2b6900725908c86b6079b64478b7196c4f1cc2",
+    "qt_model_ui_tests.exe": "555390ecd3b7421f16f0178492cfc7cbf8e8ec1d9504e084347cf5934af32df8",
+    "qt_overlay_tests.exe": "22a9d6eea2daabe7afdb2e236950662ccdce8f6c1de35c377ffaec70a71f3ea3",
+    "qt_session_tests.exe": "590a3556e070615470465559bedefd032310e0805effe642b08f64875a1ddeb1",
+    "qt_shading_tests.exe": "21c3141384c720a316cda3d01b23ebbdc22735faa8db0fcd5cec4761201e50f7",
+    "bridge/FreeShipGeometryBridge.exe": "13c57ac758abf206d35ba5acc58df7cddab0484300533570442630103d068058"
+  },
+  "legacy_source_sha256": "277a3c69392c86fe14c375e7dfc9c3197b4162e982673cbbcf4b4a2dfff0ab6b",
+  "reports": {
+    "qt-legacy-exchange": {
+      "path": "C:\\FreeShip26-MultihullTests\\installed\\qt-legacy-exchange\\report.json",
+      "sha256": "a3f124b35c9385f034082bd405228c3906bab893ff978f1a0102c3e836fb36ff",
+      "counts": {
+        "pass": 315,
+        "fail": 0,
+        "review": 6,
+        "not_run": 2,
+        "error": 0
+      },
+      "tested_runtime": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\dist"
+    },
+    "qt-curve-import": {
+      "path": "C:\\FreeShip26-MultihullTests\\regression\\qt-curve-import\\report.json",
+      "sha256": "f24c5eace65db88b8989e1091d1fa9d649e5ee29a94b04730989185a54bf0f34",
+      "counts": {
+        "pass": 265,
+        "fail": 0,
+        "review": 1,
+        "not_run": 2,
+        "error": 0
+      },
+      "tested_runtime": "C:\\FreeShip26-MultihullTests\\runtime"
+    },
+    "qt-exchange": {
+      "path": "C:\\FreeShip26-MultihullTests\\regression\\qt-exchange\\report.json",
+      "sha256": "d8f634cf70802b903447baf88d13993f55ab33454bf043511375a997239b4b5c",
+      "counts": {
+        "pass": 280,
+        "fail": 0,
+        "review": 1,
+        "not_run": 1,
+        "error": 0
+      },
+      "tested_runtime": "C:\\FreeShip26-MultihullTests\\runtime"
+    },
+    "qt-publication": {
+      "path": "C:\\FreeShip26-MultihullTests\\publication\\qt-publication\\report.json",
+      "sha256": "39ea236f6d274836d1c374d4ab68fbaa8dfcbd3543bf49a5218d3788a23dce46",
+      "counts": {
+        "pass": 163,
+        "fail": 0,
+        "review": 0,
+        "not_run": 1,
+        "error": 0
+      },
+      "tested_runtime": "C:\\FreeShip26-MultihullTests\\runtime"
+    }
+  },
+  "counts": {
+    "pass": 1023,
+    "fail": 0,
+    "review": 8,
+    "not_run": 6,
+    "error": 0
+  },
+  "limits": [
+    "Six bundled VRML files are rejected for degenerate faces at the existing Single precision; no faces were silently dropped.",
+    "Michlet covers the three legacy hull modes; arbitrary different demihulls and receiving-solver execution are not covered. AddMass calculation/results workflow remains pending.",
+    "Hidden Qt callbacks/screenshots do not establish physical desktop, native file-picker, printer or complete old-UI acceptance."
+  ],
+  "retained_sources": [
+    "qt_legacy_exchange.py",
+    "qt/exchange_tests.cpp",
+    "run_tests.py",
+    "maintenance/finalize_legacy_exchange_package.py",
+    "maintenance/record_legacy_exchange_delivery.py"
+  ],
+  "free_bytes_after": {
+    "C": 19147059200,
+    "D": 17076273152
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "free_after": {
+    "D": 18905321472,
+    "C": 20921540608
+  },
+  "free_before": {
+    "D": 8051306496,
+    "C": 9552949248
+  },
+  "plan": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\maintenance\\storage-cleanup-20261104.json",
+  "status": "complete",
+  "logical_bytes": 37276885827,
+  "actual_free_delta": {
+    "D": 10854014976,
+    "C": 11368591360
+  },
+  "deleted_files": 128554,
+  "plan_sha256": "42E70DA6F88CF1D30348340C3432D4389D1674D20F17983CD41243AA635B98FC",
+  "kept": "All source, reports, screenshots, models, published scenes/exports, manifests, current runtime, protected baselines, current build and private tools. Historical compiled runtimes require rebuild; their manifests remain.",
+  "created_utc": "2026-11-04T10:03:36.4253327Z"
+}

@@ -1,0 +1,60 @@
+{
+  "created_utc": "2026-11-04T01:26:44.800620+00:00",
+  "status": "partial",
+  "scope": "Five perspective lenses and per-view light controls, GPU/software rendering and current-view export",
+  "installed": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\dist",
+  "previous": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\dist-before-viewport-20261104",
+  "package_manifest_sha256": "67969e89621081a18d70740effeeae724fac89fc983be273e1d7ad8c6baf9f5b",
+  "source_sha256": "277a3c69392c86fe14c375e7dfc9c3197b4162e982673cbbcf4b4a2dfff0ab6b",
+  "unchanged_computation_source_count": 140,
+  "reports": {
+    "core": {
+      "path": "C:\\FreeShip26-ViewportTests\\reports-03\\qt-viewport\\report.json",
+      "sha256": "9189046206c1c55e58707e81e9d5191d945e768072bf8f145e2aaf3c4dbc479c",
+      "counts": {
+        "pass": 239,
+        "fail": 0,
+        "review": 2,
+        "not_run": 7,
+        "error": 0
+      }
+    },
+    "model_ui": {
+      "path": "C:\\FreeShip26-ViewportTests\\model-ui-03\\qt-model-ui\\report.json",
+      "sha256": "04c42988625500b2d78c44b3fcfbfc496dd78dd058e3c40a72011fedb234c182",
+      "counts": {
+        "pass": 289,
+        "fail": 0,
+        "review": 4,
+        "not_run": 3,
+        "error": 0
+      }
+    },
+    "installed": {
+      "path": "C:\\FreeShip26-ViewportTests\\installed-01\\qt-viewport\\report.json",
+      "sha256": "febec5c8ceb88d14a815d09fe385958c0361a2d9482418e02f72dbb9d59e70de",
+      "counts": {
+        "pass": 239,
+        "fail": 0,
+        "review": 2,
+        "not_run": 7,
+        "error": 0
+      }
+    }
+  },
+  "counts": {
+    "pass": 767,
+    "fail": 0,
+    "review": 8,
+    "not_run": 17,
+    "error": 0
+  },
+  "audit_script_sha256": "22d831b2ff2c8db101d7d88233ee0c8c0e177d061b27a56749d215e242d9955d",
+  "limitations": [
+    "Counts include repeated installed checks and shared regressions, not unique scenarios.",
+    "Hidden Qt events and images do not certify desktop mouse, focus, native dialogs, printing or multi-monitor DPI.",
+    "View settings are not stored in FBM or across restart.",
+    "Gaussian curvature, zebra and developability shading remain pending.",
+    "Language support belongs to the separate translation workstream."
+  ]
+}

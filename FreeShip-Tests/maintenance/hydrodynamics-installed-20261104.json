@@ -1,0 +1,81 @@
+{
+  "created_utc": "2026-11-04T03:26:07.390797+00:00",
+  "status": "partial",
+  "scope": "Three Hydrodyn workflows and Qt dialogs, full result table, FBM settings, database viewer launcher",
+  "installed": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\dist",
+  "previous": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\dist-before-hydrodynamics-20261104",
+  "source_sha256": "277a3c69392c86fe14c375e7dfc9c3197b4162e982673cbbcf4b4a2dfff0ab6b",
+  "package_manifest_sha256": "87b2ae839e2a670167c61ed5fd6fb1febfd53c711c26b53b3c12ee1d448ae6dc",
+  "unchanged_geometry_sources": 95,
+  "changed_sources": [
+    "CMakeLists.txt",
+    "src/app/model_session.cpp",
+    "src/app/performance_dialog.cpp",
+    "src/app/performance_dialog.h",
+    "src/app/performance_workflow.cpp",
+    "src/app/studio_actions.cpp",
+    "src/document/analysis_edit.cpp",
+    "src/document/document_service.cpp",
+    "src/document/hydrodynamics-origin.json",
+    "src/document/hydrodynamics.cpp",
+    "src/document/hydrodynamics.h",
+    "src/document/hydrodynamics_tables.h"
+  ],
+  "external_solvers": {
+    "Ishercof.exe": "44968e316ed4cc4d9696ada6b8991bc0eefc21faaf32936d7f0620d5f4eb5214",
+    "ManeuvPP.EXE": "3a58718215b5b0cbbdbd60767da4ae3d7d784537bf54c3cc7b53c87834e7bed1",
+    "RVRSSHIP.EXE": "50b9b1c79d27fb05a12902181b0c23d5b98050c764bcfcdfb3351d16336ec2e6",
+    "PropPred.EXE": "4916b84dc3fa18c4583be28624f2ce409aa659b0c8fbdd779d64212e8e155336"
+  },
+  "reports": {
+    "core": {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-final\\qt-hydrodynamics\\report.json",
+      "sha256": "18c5e6f8adc2320dd44e4625248b6ac3b79de6970213c6385f3bcfa78ed440e3",
+      "counts": {
+        "pass": 279,
+        "fail": 0,
+        "review": 3,
+        "not_run": 2,
+        "error": 0
+      }
+    },
+    "publication": {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\publication-01\\report.json",
+      "sha256": "8b466216d8ffa259c379acc93fc786382197f6f5cd92a49a69951a60fd7c89c7",
+      "counts": {
+        "pass": 193,
+        "fail": 0,
+        "review": 0,
+        "not_run": 1,
+        "error": 0
+      }
+    },
+    "installed": {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\installed-01\\qt-hydrodynamics\\report.json",
+      "sha256": "053e1f50e9cb97fa0102135f9135530e9d678709ba432793ab44462ad4a24cb4",
+      "counts": {
+        "pass": 279,
+        "fail": 0,
+        "review": 3,
+        "not_run": 2,
+        "error": 0
+      }
+    }
+  },
+  "counts": {
+    "pass": 751,
+    "fail": 0,
+    "review": 6,
+    "not_run": 5,
+    "error": 0
+  },
+  "audit_script_sha256": "55b5f7d3c1169721a8e5a681e7c2e324b0159e05b750bdac2b09107f97b204c1",
+  "limitations": [
+    "Counts include repeated installed checks, not unique scenarios.",
+    "Type 13 wind coefficient and engine inertia units retain unresolved legacy-source conflicts.",
+    "Original external solvers remain dependencies; protocol checks are not engineering certification.",
+    "Real DBFview.EXE is unavailable; the isolated process fixture is not database acceptance.",
+    "Full dialog visual fidelity and real desktop input/printing are not certified.",
+    "Other migration directions remain. Language support belongs to the separate translation model."
+  ]
+}

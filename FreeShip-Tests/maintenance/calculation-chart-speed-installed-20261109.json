@@ -1,0 +1,1239 @@
+{
+  "created_utc": "2026-11-09T02:45:52.303086+00:00",
+  "installed": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\dist",
+  "previous_package": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\dist-before-calculation-chart-speed-20261109",
+  "files": 2568,
+  "changed_source_files": [
+    "CMakeLists.txt",
+    "src/app/calculation_plot.cpp",
+    "src/app/calculation_plot.h",
+    "src/app/performance_dialog.cpp"
+  ],
+  "manifest_sha256": "e38f39799871f7b15b1d49af3b9950ab15b31657e7690267a9c25be9d496c9a4",
+  "reports": [
+    {
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\calculation-chart-speed-20261109\\final\\qt-calculation-charts\\report.json",
+      "sha256": "20a8a50752e48e937db942c36669c65a203119f6564f6e480ad6e28faa19e784",
+      "counts": {
+        "pass": 1313,
+        "fail": 0,
+        "review": 1,
+        "not_run": 2,
+        "error": 0
+      },
+      "timings": [
+        {
+          "preparation_ms": 84.5624,
+          "frames": [
+            {
+              "gpu_device": "Intel(R) UHD Graphics 770",
+              "gpu_initialization_ms": 173.5287,
+              "gpu_layers": 5,
+              "gpu_prepare_call_ms": 61.2621,
+              "height": 530,
+              "layer_builds": 5,
+              "layer_hits": 0,
+              "mapping_ms": 5.1610000000000005,
+              "points": 1116635,
+              "range_ms": 0.0077,
+              "render_ms": 47.3983,
+              "segments": 1116630,
+              "stroke_ms": 14.4043,
+              "width": 687
+            },
+            {
+              "gpu_device": "Intel(R) UHD Graphics 770",
+              "gpu_initialization_ms": 173.5287,
+              "gpu_layers": 4,
+              "gpu_prepare_call_ms": 61.2621,
+              "height": 530,
+              "layer_builds": 9,
+              "layer_hits": 0,
+              "mapping_ms": 4.884499999999998,
+              "points": 893308,
+              "range_ms": 0.0063,
+              "render_ms": 35.6044,
+              "segments": 893304,
+              "stroke_ms": 8.304200000000002,
+              "width": 687
+            },
+            {
+              "gpu_device": "Intel(R) UHD Graphics 770",
+              "gpu_initialization_ms": 173.5287,
+              "gpu_layers": 1,
+              "gpu_prepare_call_ms": 61.2621,
+              "height": 530,
+              "layer_builds": 10,
+              "layer_hits": 0,
+              "mapping_ms": 1.2409,
+              "points": 223327,
+              "range_ms": 0.005,
+              "render_ms": 13.2554,
+              "segments": 223326,
+              "stroke_ms": 1.6277,
+              "width": 687
+            },
+            {
+              "height": 530,
+              "layer_builds": 10,
+              "layer_hits": 5,
+              "mapping_ms": 0,
+              "points": 1116635,
+              "range_ms": 0.0074,
+              "render_ms": 1.4733,
+              "segments": 1116630,
+              "stroke_ms": 0,
+              "width": 687
+            }
+          ]
+        },
+        {
+          "preparation_ms": 84.5624,
+          "frames": [
+            {
+              "gpu_device": "Intel(R) UHD Graphics 770",
+              "gpu_initialization_ms": 173.5287,
+              "gpu_layers": 5,
+              "gpu_prepare_call_ms": 61.2621,
+              "height": 502,
+              "layer_builds": 5,
+              "layer_hits": 0,
+              "mapping_ms": 6.3469999999999995,
+              "points": 1116635,
+              "range_ms": 0.0088,
+              "render_ms": 48.5925,
+              "segments": 1116630,
+              "stroke_ms": 12.1636,
+              "width": 1146
+            },
+            {
+              "gpu_device": "Intel(R) UHD Graphics 770",
+              "gpu_initialization_ms": 173.5287,
+              "gpu_layers": 4,
+              "gpu_prepare_call_ms": 61.2621,
+              "height": 502,
+              "layer_builds": 9,
+              "layer_hits": 0,
+              "mapping_ms": 5.251099999999999,
+              "points": 893308,
+              "range_ms": 0.0082,
+              "render_ms": 40.7764,
+              "segments": 893304,
+              "stroke_ms": 9.036100000000001,
+              "width": 1146
+            },
+            {
+              "gpu_device": "Intel(R) UHD Graphics 770",
+              "gpu_initialization_ms": 173.5287,
+              "gpu_layers": 1,
+              "gpu_prepare_call_ms": 61.2621,
+              "height": 502,
+              "layer_builds": 10,
+              "layer_hits": 0,
+              "mapping_ms": 1.4479,
+              "points": 223327,
+              "range_ms": 0.0062,
+              "render_ms": 45.6507,
+              "segments": 223326,
+              "stroke_ms": 1.8351,
+              "width": 1146
+            },
+            {
+              "height": 502,
+              "layer_builds": 10,
+              "layer_hits": 5,
+              "mapping_ms": 0,
+              "points": 1116635,
+              "range_ms": 0.0083,
+              "render_ms": 2.1604,
+              "segments": 1116630,
+              "stroke_ms": 0,
+              "width": 1146
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\calculation-chart-speed-20261109\\final\\qt-calculation-chart-speed\\report.json",
+      "sha256": "510bf0fe378b2721f1ccce24145c220855117bc3ee068511d27eea94a519aa66",
+      "counts": {
+        "pass": 249,
+        "fail": 0,
+        "review": 1,
+        "not_run": 1,
+        "error": 0
+      },
+      "timings": [
+        {
+          "preparation_ms": 83.1672,
+          "frames": [
+            {
+              "gpu_device": "Intel(R) UHD Graphics 770",
+              "gpu_initialization_ms": 162.1574,
+              "gpu_layers": 5,
+              "gpu_prepare_call_ms": 61.8893,
+              "height": 530,
+              "layer_builds": 5,
+              "layer_hits": 0,
+              "mapping_ms": 5.759399999999999,
+              "points": 1116635,
+              "range_ms": 0.0094,
+              "render_ms": 53.6713,
+              "segments": 1116630,
+              "stroke_ms": 16.7026,
+              "width": 687
+            },
+            {
+              "gpu_device": "Intel(R) UHD Graphics 770",
+              "gpu_initialization_ms": 162.1574,
+              "gpu_layers": 4,
+              "gpu_prepare_call_ms": 61.8893,
+              "height": 530,
+              "layer_builds": 9,
+              "layer_hits": 0,
+              "mapping_ms": 4.569,
+              "points": 893308,
+              "range_ms": 0.0093,
+              "render_ms": 35.8959,
+              "segments": 893304,
+              "stroke_ms": 7.8944,
+              "width": 687
+            },
+            {
+              "gpu_device": "Intel(R) UHD Graphics 770",
+              "gpu_initialization_ms": 162.1574,
+              "gpu_layers": 1,
+              "gpu_prepare_call_ms": 61.8893,
+              "height": 530,
+              "layer_builds": 10,
+              "layer_hits": 0,
+              "mapping_ms": 1.2306,
+              "points": 223327,
+              "range_ms": 0.0055,
+              "render_ms": 17.3755,
+              "segments": 223326,
+              "stroke_ms": 1.6688,
+              "width": 687
+            },
+            {
+              "height": 530,
+              "layer_builds": 10,
+              "layer_hits": 5,
+              "mapping_ms": 0,
+              "points": 1116635,
+              "range_ms": 0.0056,
+              "render_ms": 1.3143,
+              "segments": 1116630,
+              "stroke_ms": 0,
+              "width": 687
+            }
+          ]
+        },
+        {
+          "preparation_ms": 83.1672,
+          "frames": [
+            {
+              "gpu_device": "Intel(R) UHD Graphics 770",
+              "gpu_initialization_ms": 162.1574,
+              "gpu_layers": 5,
+              "gpu_prepare_call_ms": 61.8893,
+              "height": 502,
+              "layer_builds": 5,
+              "layer_hits": 0,
+              "mapping_ms": 7.203600000000002,
+              "points": 1116635,
+              "range_ms": 0.0092,
+              "render_ms": 50.6526,
+              "segments": 1116630,
+              "stroke_ms": 12.1344,
+              "width": 1146
+            },
+            {
+              "gpu_device": "Intel(R) UHD Graphics 770",
+              "gpu_initialization_ms": 162.1574,
+              "gpu_layers": 4,
+              "gpu_prepare_call_ms": 61.8893,
+              "height": 502,
+              "layer_builds": 9,
+              "layer_hits": 0,
+              "mapping_ms": 5.863899999999999,
+              "points": 893308,
+              "range_ms": 0.0069,
+              "render_ms": 43.3187,
+              "segments": 893304,
+              "stroke_ms": 10.1264,
+              "width": 1146
+            },
+            {
+              "gpu_device": "Intel(R) UHD Graphics 770",
+              "gpu_initialization_ms": 162.1574,
+              "gpu_layers": 1,
+              "gpu_prepare_call_ms": 61.8893,
+              "height": 502,
+              "layer_builds": 10,
+              "layer_hits": 0,
+              "mapping_ms": 1.3778000000000001,
+              "points": 223327,
+              "range_ms": 0.0058,
+              "render_ms": 43.7954,
+              "segments": 223326,
+              "stroke_ms": 1.8502,
+              "width": 1146
+            },
+            {
+              "height": 502,
+              "layer_builds": 10,
+              "layer_hits": 5,
+              "mapping_ms": 0,
+              "points": 1116635,
+              "range_ms": 0.0072,
+              "render_ms": 2.1285,
+              "segments": 1116630,
+              "stroke_ms": 0,
+              "width": 1146
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\calculation-chart-speed-20261109\\installed\\qt-calculation-chart-speed\\report.json",
+      "sha256": "8dc4fbf342fb94cc7d8d867c56aa4ecb45d5f88e4a74f2701cfb50db261ce043",
+      "counts": {
+        "pass": 207,
+        "fail": 0,
+        "review": 1,
+        "not_run": 1,
+        "error": 0
+      },
+      "timings": [
+        {
+          "preparation_ms": 86.0522,
+          "frames": [
+            {
+              "gpu_device": "Intel(R) UHD Graphics 770",
+              "gpu_initialization_ms": 458.4037,
+              "gpu_layers": 5,
+              "gpu_prepare_call_ms": 147.4524,
+              "height": 530,
+              "layer_builds": 5,
+              "layer_hits": 0,
+              "mapping_ms": 5.1193,
+              "points": 1116635,
+              "range_ms": 0.0078,
+              "render_ms": 45.8292,
+              "segments": 1116630,
+              "stroke_ms": 12.8946,
+              "width": 687
+            },
+            {
+              "gpu_device": "Intel(R) UHD Graphics 770",
+              "gpu_initialization_ms": 458.4037,
+              "gpu_layers": 4,
+              "gpu_prepare_call_ms": 147.4524,
+              "height": 530,
+              "layer_builds": 9,
+              "layer_hits": 0,
+              "mapping_ms": 3.9907,
+              "points": 893308,
+              "range_ms": 0.006,
+              "render_ms": 35.517,
+              "segments": 893304,
+              "stroke_ms": 7.8752,
+              "width": 687
+            },
+            {
+              "gpu_device": "Intel(R) UHD Graphics 770",
+              "gpu_initialization_ms": 458.4037,
+              "gpu_layers": 1,
+              "gpu_prepare_call_ms": 147.4524,
+              "height": 530,
+              "layer_builds": 10,
+              "layer_hits": 0,
+              "mapping_ms": 0.9708000000000001,
+              "points": 223327,
+              "range_ms": 0.0049,
+              "render_ms": 12.9034,
+              "segments": 223326,
+              "stroke_ms": 1.794,
+              "width": 687
+            },
+            {
+              "height": 530,
+              "layer_builds": 10,
+              "layer_hits": 5,
+              "mapping_ms": 0,
+              "points": 1116635,
+              "range_ms": 0.0053,
+              "render_ms": 1.5045,
+              "segments": 1116630,
+              "stroke_ms": 0,
+              "width": 687
+            }
+          ]
+        },
+        {
+          "preparation_ms": 86.0522,
+          "frames": [
+            {
+              "gpu_device": "Intel(R) UHD Graphics 770",
+              "gpu_initialization_ms": 458.4037,
+              "gpu_layers": 5,
+              "gpu_prepare_call_ms": 147.4524,
+              "height": 502,
+              "layer_builds": 5,
+              "layer_hits": 0,
+              "mapping_ms": 5.410899999999998,
+              "points": 1116635,
+              "range_ms": 0.0095,
+              "render_ms": 45.4101,
+              "segments": 1116630,
+              "stroke_ms": 10.5393,
+              "width": 1146
+            },
+            {
+              "gpu_device": "Intel(R) UHD Graphics 770",
+              "gpu_initialization_ms": 458.4037,
+              "gpu_layers": 4,
+              "gpu_prepare_call_ms": 147.4524,
+              "height": 502,
+              "layer_builds": 9,
+              "layer_hits": 0,
+              "mapping_ms": 3.7875000000000005,
+              "points": 893308,
+              "range_ms": 0.0056,
+              "render_ms": 36.1935,
+              "segments": 893304,
+              "stroke_ms": 7.6629,
+              "width": 1146
+            },
+            {
+              "gpu_device": "Intel(R) UHD Graphics 770",
+              "gpu_initialization_ms": 458.4037,
+              "gpu_layers": 1,
+              "gpu_prepare_call_ms": 147.4524,
+              "height": 502,
+              "layer_builds": 10,
+              "layer_hits": 0,
+              "mapping_ms": 1.0306000000000002,
+              "points": 223327,
+              "range_ms": 0.0053,
+              "render_ms": 17.2165,
+              "segments": 223326,
+              "stroke_ms": 1.6067,
+              "width": 1146
+            },
+            {
+              "height": 502,
+              "layer_builds": 10,
+              "layer_hits": 5,
+              "mapping_ms": 0,
+              "points": 1116635,
+              "range_ms": 0.0058,
+              "render_ms": 1.8232,
+              "segments": 1116630,
+              "stroke_ms": 0,
+              "width": 1146
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "before": {
+    "path": "C:\\Users\\12968\\FreeShip26-TestResults\\calculation-chart-speed-20261109\\before\\chart\\report.json",
+    "sha256": "6ae37fe3a3da09b708c0082ae8011c0ad351f9c8222dd48a876af583e312d652",
+    "observations": [
+      {
+        "cache_builds": 1,
+        "curves": [
+          {
+            "axis": "n mile",
+            "color": "#0000ff",
+            "index": 0,
+            "name": "距离",
+            "points": 223327,
+            "source": "",
+            "visible": true
+          },
+          {
+            "axis": "kn",
+            "color": "#008000",
+            "index": 1,
+            "name": "航速",
+            "points": 223327,
+            "source": "",
+            "visible": true
+          },
+          {
+            "axis": "0.1 × r/min",
+            "color": "#ff0000",
+            "index": 2,
+            "name": "桨转速 × 0.1",
+            "points": 223327,
+            "source": "",
+            "visible": true
+          },
+          {
+            "axis": "kN",
+            "color": "#000000",
+            "index": 3,
+            "name": "推力",
+            "points": 223327,
+            "source": "",
+            "visible": true
+          },
+          {
+            "axis": "kN·m",
+            "color": "#0000ff",
+            "index": 4,
+            "name": "转矩",
+            "points": 223327,
+            "source": "",
+            "visible": true
+          }
+        ],
+        "mapping_ms": 6.893700000000081,
+        "numeric_sha256": "6522b8da15b3ce8856b24ac28ddab1f58075c4905a7de83a09aba6b7c47ffd2d",
+        "paints": 2,
+        "panels": [
+          {
+            "axes": [
+              {
+                "maximum": 6,
+                "minimum": 0,
+                "side": "left",
+                "ticks": [
+                  0,
+                  2,
+                  4,
+                  6
+                ],
+                "title": "n mile"
+              },
+              {
+                "maximum": 20,
+                "minimum": 0,
+                "side": "right",
+                "ticks": [
+                  0,
+                  5,
+                  10,
+                  15,
+                  20
+                ],
+                "title": "kn"
+              }
+            ],
+            "curves": [
+              0,
+              1
+            ],
+            "plot": [
+              70,
+              7.5,
+              865,
+              133.5
+            ],
+            "x_maximum": 5000,
+            "x_minimum": 0,
+            "x_title": "时间 (s)"
+          },
+          {
+            "axes": [
+              {
+                "maximum": 15,
+                "minimum": 0,
+                "side": "left",
+                "ticks": [
+                  0,
+                  5,
+                  10,
+                  15
+                ],
+                "title": "0.1 × r/min"
+              },
+              {
+                "maximum": 200,
+                "minimum": -50,
+                "side": "right",
+                "ticks": [
+                  -50,
+                  0,
+                  50,
+                  100,
+                  150,
+                  200
+                ],
+                "title": "kN"
+              }
+            ],
+            "curves": [
+              2,
+              3
+            ],
+            "plot": [
+              70,
+              201.5,
+              865,
+              133.5
+            ],
+            "x_maximum": 5000,
+            "x_minimum": 0,
+            "x_title": "时间 (s)"
+          },
+          {
+            "axes": [
+              {
+                "maximum": 50,
+                "minimum": -150,
+                "side": "left",
+                "ticks": [
+                  -150,
+                  -100,
+                  -50,
+                  0,
+                  50
+                ],
+                "title": "kN·m"
+              }
+            ],
+            "curves": [
+              4
+            ],
+            "plot": [
+              70,
+              395.5,
+              865,
+              133.5
+            ],
+            "x_maximum": 5000,
+            "x_minimum": 0,
+            "x_title": "时间 (s)"
+          }
+        ],
+        "points": 1116635,
+        "range_ms": 3.0769,
+        "render_ms": 1478.0695,
+        "segments": 1116630,
+        "selected": 0,
+        "selected_only": false,
+        "stroke_ms": 1464.3942
+      },
+      {
+        "cache_builds": 5,
+        "curves": [
+          {
+            "axis": "n mile",
+            "color": "#0000ff",
+            "index": 0,
+            "name": "距离",
+            "points": 223327,
+            "source": "",
+            "visible": true
+          },
+          {
+            "axis": "kn",
+            "color": "#008000",
+            "index": 1,
+            "name": "航速",
+            "points": 223327,
+            "source": "",
+            "visible": true
+          },
+          {
+            "axis": "0.1 × r/min",
+            "color": "#ff0000",
+            "index": 2,
+            "name": "桨转速 × 0.1",
+            "points": 223327,
+            "source": "",
+            "visible": true
+          },
+          {
+            "axis": "kN",
+            "color": "#000000",
+            "index": 3,
+            "name": "推力",
+            "points": 223327,
+            "source": "",
+            "visible": true
+          },
+          {
+            "axis": "kN·m",
+            "color": "#0000ff",
+            "index": 4,
+            "name": "转矩",
+            "points": 223327,
+            "source": "",
+            "visible": true
+          }
+        ],
+        "mapping_ms": 5.943000000000239,
+        "numeric_sha256": "6522b8da15b3ce8856b24ac28ddab1f58075c4905a7de83a09aba6b7c47ffd2d",
+        "paints": 11,
+        "panels": [
+          {
+            "axes": [
+              {
+                "maximum": 5,
+                "minimum": 0,
+                "side": "left",
+                "ticks": [
+                  0,
+                  2.5,
+                  5
+                ],
+                "title": "n mile"
+              },
+              {
+                "maximum": 20,
+                "minimum": 0,
+                "side": "right",
+                "ticks": [
+                  0,
+                  10,
+                  20
+                ],
+                "title": "kn"
+              }
+            ],
+            "curves": [
+              0,
+              1
+            ],
+            "plot": [
+              104,
+              12,
+              792,
+              99
+            ],
+            "x_maximum": 5000,
+            "x_minimum": 0,
+            "x_title": "时间 (s)"
+          },
+          {
+            "axes": [
+              {
+                "maximum": 20,
+                "minimum": 0,
+                "side": "left",
+                "ticks": [
+                  0,
+                  10,
+                  20
+                ],
+                "title": "0.1 × r/min"
+              },
+              {
+                "maximum": 200,
+                "minimum": -100,
+                "side": "right",
+                "ticks": [
+                  -100,
+                  0,
+                  100,
+                  200
+                ],
+                "title": "kN"
+              }
+            ],
+            "curves": [
+              2,
+              3
+            ],
+            "plot": [
+              104,
+              203,
+              792,
+              99
+            ],
+            "x_maximum": 5000,
+            "x_minimum": 0,
+            "x_title": "时间 (s)"
+          },
+          {
+            "axes": [
+              {
+                "maximum": 100,
+                "minimum": -200,
+                "side": "left",
+                "ticks": [
+                  -200,
+                  -100,
+                  0,
+                  100
+                ],
+                "title": "kN·m"
+              }
+            ],
+            "curves": [
+              4
+            ],
+            "plot": [
+              104,
+              394,
+              792,
+              99
+            ],
+            "x_maximum": 5000,
+            "x_minimum": 0,
+            "x_title": "时间 (s)"
+          }
+        ],
+        "points": 1116635,
+        "range_ms": 3.1741,
+        "render_ms": 1415.0464,
+        "segments": 1116630,
+        "selected": 4,
+        "selected_only": false,
+        "stroke_ms": 1401.9391999999998
+      },
+      {
+        "cache_builds": 6,
+        "curves": [
+          {
+            "axis": "n mile",
+            "color": "#0000ff",
+            "index": 0,
+            "name": "距离",
+            "points": 223327,
+            "source": "",
+            "visible": true
+          },
+          {
+            "axis": "kn",
+            "color": "#008000",
+            "index": 1,
+            "name": "航速",
+            "points": 223327,
+            "source": "",
+            "visible": true
+          },
+          {
+            "axis": "0.1 × r/min",
+            "color": "#ff0000",
+            "index": 2,
+            "name": "桨转速 × 0.1",
+            "points": 223327,
+            "source": "",
+            "visible": true
+          },
+          {
+            "axis": "kN",
+            "color": "#000000",
+            "index": 3,
+            "name": "推力",
+            "points": 223327,
+            "source": "",
+            "visible": true
+          },
+          {
+            "axis": "kN·m",
+            "color": "#0000ff",
+            "index": 4,
+            "name": "转矩",
+            "points": 223327,
+            "source": "",
+            "visible": true
+          }
+        ],
+        "mapping_ms": 4.937199999999905,
+        "numeric_sha256": "6522b8da15b3ce8856b24ac28ddab1f58075c4905a7de83a09aba6b7c47ffd2d",
+        "paints": 13,
+        "panels": [
+          {
+            "axes": [
+              {
+                "maximum": 5,
+                "minimum": 0,
+                "side": "left",
+                "ticks": [
+                  0,
+                  2.5,
+                  5
+                ],
+                "title": "n mile"
+              },
+              {
+                "maximum": 20,
+                "minimum": 0,
+                "side": "right",
+                "ticks": [
+                  0,
+                  10,
+                  20
+                ],
+                "title": "kn"
+              }
+            ],
+            "curves": [
+              0,
+              1
+            ],
+            "plot": [
+              104,
+              12,
+              312,
+              89
+            ],
+            "x_maximum": 6000,
+            "x_minimum": 0,
+            "x_title": "时间 (s)"
+          },
+          {
+            "axes": [
+              {
+                "maximum": 20,
+                "minimum": 0,
+                "side": "left",
+                "ticks": [
+                  0,
+                  10,
+                  20
+                ],
+                "title": "0.1 × r/min"
+              },
+              {
+                "maximum": 200,
+                "minimum": -100,
+                "side": "right",
+                "ticks": [
+                  -100,
+                  0,
+                  100,
+                  200
+                ],
+                "title": "kN"
+              }
+            ],
+            "curves": [
+              2,
+              3
+            ],
+            "plot": [
+              104,
+              193,
+              312,
+              89
+            ],
+            "x_maximum": 6000,
+            "x_minimum": 0,
+            "x_title": "时间 (s)"
+          },
+          {
+            "axes": [
+              {
+                "maximum": 100,
+                "minimum": -200,
+                "side": "left",
+                "ticks": [
+                  -200,
+                  -100,
+                  0,
+                  100
+                ],
+                "title": "kN·m"
+              }
+            ],
+            "curves": [
+              4
+            ],
+            "plot": [
+              104,
+              374,
+              312,
+              89
+            ],
+            "x_maximum": 6000,
+            "x_minimum": 0,
+            "x_title": "时间 (s)"
+          }
+        ],
+        "points": 1116635,
+        "range_ms": 2.8721,
+        "render_ms": 738.5181,
+        "segments": 1116630,
+        "selected": 4,
+        "selected_only": false,
+        "stroke_ms": 724.5414000000001
+      }
+    ]
+  },
+  "source_sha256": {
+    "bridge/AdvancedEdits.inc": "b2d56ce569a061f0106c7b0046ecc4b94220f3f9ed842b6002c93b68d0aafa5f",
+    "bridge/AuxiliaryCurves.inc": "8d2aa3ad4c27b8ded23d4573887b6739aea3be292c7ba7472628c6947682e9cc",
+    "bridge/BackgroundEdits.inc": "ac010e3c712da7b5d79975ad4c9c951afdd49dd5134b2a2731787c2754db940d",
+    "bridge/build_bridge.py": "6a751af427eb5fcc073d81734caa7a2947fea65a821c5c4a67aa91e8321a9b53",
+    "bridge/cad_adapter.py": "877b2d2efd009ebbd8f385e72fa2d73e895d80c41f5622905be6215a544956aa",
+    "bridge/CadExportEngine.pas": "7566ccc33648f06494c64af06057e8f703e3a1259b9bc2a07e0315e39ee17512",
+    "bridge/DisplayEdits.inc": "1b2d17ac6a6429e0eb665263048654d32e6af2c58c473ea87970a32dbc62470d",
+    "bridge/DocumentAdapter.inc": "8fc2a71a1d08dd21980331d2460ea06e08243415f7556f936c835e3f4808589c",
+    "bridge/ExchangeImport.inc": "0128b060e3ad2f426eb019d389d088294a9774b683d1464eac098fb70681bf24",
+    "bridge/extract_scene.py": "817245c9ba34492b78cde672a1d01800ce2448a637fa1170ddf0a9e8a052f2b4",
+    "bridge/FreeLinesplanScene.pas": "6e9c65a70b3bccbadbf631dfe36a661765674b21373b911255a180aea8f23f92",
+    "bridge/HydrostaticsEdits.inc": "9b32448fc0ec8820cdf136480f561d97adf4c3c4b3e49b366f38045f8086b2b6",
+    "bridge/HydrostaticsEngine.pas": "c8fc4767a6bc5a69ac691974659c8b4ea5fb453ce62b2820e508738b72598d6d",
+    "bridge/LackenbyEngine.pas": "effe13168e8defae81bc7d0cb19d0edb3edaa46b30b1faee5181a67c9e80a107",
+    "bridge/ModelEdits.pas": "45f4f996b2bf19629e12ade68b7bff9b808c17fdc94cf076bf30ddeec4b28f80",
+    "bridge/ModelingEdits.inc": "eb25adfbfad98bd85070a7d21f7e660b60360014ae81c76e11676aefaf43077a",
+    "bridge/ModelService.pas": "f9266095dde6e91a3bc05e2ce4e86cca9aef762dbb93a41c795ed6460a6d0394",
+    "bridge/ModelTools.inc": "63a18bd613c2cdd95c09619e80bbf797670f62e4d93320c96a87b7cbaa812a34",
+    "bridge/NativeLinesplanInput.pas": "ddfb396816bf7512fd4d9b5b338b391079550a0656f2e9181d965433ecd43889",
+    "bridge/NewHull.inc": "4ecfa998063165dfa31cd297d35bff19029981906204e66b0ee8dc8b41550ae7",
+    "bridge/OverlaySnapshot.inc": "00afdbb13b7113150fa4d41fd3593d6b76b081d6ebca896279e8e2ae19f57117",
+    "bridge/performance_adapter.py": "73ae107774021a7a1e26b71c3c8bfd58740d7fd2a2d7311baa60ef4163c588bf",
+    "bridge/PerformanceEngine.pas": "7b34d9ab44cc3450fa8103ff136368dbc0681ab24d5e5dcc026dd0ce7fa4c33d",
+    "bridge/PerformanceHooks.pas": "218e750874ac04a2a8e21535869e6c39d307a490b87129db18bc03dd15644e5a",
+    "bridge/PilotBridge.pas": "e017e1ce260ee3aeb7dd4820aaaa5d10c7c31a895e715ebabc916739440c59d2",
+    "bridge/PilotCapture.pas": "4aca04907e65998daa0e56c2a3de869ddaaeab34bf039122757b2376c009cb61",
+    "bridge/plate_adapter.py": "7403e23675b53f237b4791fda08d31fa38bc117553fd2c55f01febe0ec46c516",
+    "bridge/PlateEngine.pas": "aee56396d3e10a0888489fe82bdd14204d5fb343949b207230700ef410b617e2",
+    "bridge/PlateHooks.pas": "922305bdfa754b61812b831e2327be9d8c6053a38634d3275694be3d6717cef6",
+    "bridge/PlateSnapshot.inc": "a0a8ea5d0909084a601b490854d84897512423a0487d1d2a0395ad7f83e34675",
+    "bridge/scene-origin.json": "87ef9e740086f01e737611b55fb2ff42160120c87810f6d62985a1ef281f2223",
+    "bridge/SceneHeader.inc": "b144836a9b98e3aaf7940018e5a1010e1bac60ade121f96b735652f75a34087c",
+    "bridge/SectionEdits.inc": "689ef961cf5f4c3cd8d6d69561642085a4c97c2a09d17179efbe1473639d9c6f",
+    "bridge/StableEdgeLoops.pas": "b00a2bf770cc07ef25fa83a57c3a6dd80ad653c13d8cf7b2acd8bbe674420309",
+    "bridge/TopologyEdits.inc": "01230ca00cfa4a170b00ff01ab35593bf3a60f01a6da8664e38599b77bd9f699",
+    "build.ps1": "2908d770a9b68760f98cc41f60d81ce238f35250a2b190c404f19450088075fe",
+    "CMakeLists.txt": "70190a1899f79ca57e2d4109e9a5f50b6d706834ea65e02a739d99cfe013a1a0",
+    "src/app/advanced_actions.cpp": "56b07b81e3960f1104e27d679740bf721764d61686e9981b31f97a1eb734b122",
+    "src/app/advanced_workflow.cpp": "3a8782f4b9dadd531fee7adadfa53e5822553e790b6e95789b51cf6c90cfb8fa",
+    "src/app/auxiliary_workflow.cpp": "918290dc64d4124d33ce59f336c9cd7aeeb0f350e91d378dcf7352afb23192ee",
+    "src/app/background_actions.cpp": "09944f09325dea717a659ed02f8ff542f25f4ff28236372f4e568206eb253d0d",
+    "src/app/background_workflow.cpp": "acb8f3d4132b561ce09b1c899bec808dd77356d6a639912ebada784f08b6a20d",
+    "src/app/calculation_charts-origin.json": "326b567bebb19106aa5e7261f548b792da36ba2042ac84c1c5963f9be91efbf0",
+    "src/app/calculation_charts.h": "838b47f6997a4519e0a3cc6e0b83ef66ba2df89503790a4dc67e1794fd3c718a",
+    "src/app/calculation_pages-origin.json": "917aeda482abec2847beff83fd4ad098c25c0403fdf4976650242116773ecae6",
+    "src/app/calculation_pages.h": "5b97b6d32f5d21da91cdd1df58183307f7bc994a0b2b01a3d4101d38fc4f30f2",
+    "src/app/calculation_plot.cpp": "82dcb14ae83bfcc39031290115d3206653892d483e59ebfdc3e109929af53ca2",
+    "src/app/calculation_plot.h": "a8921b6da5003fffda0164fab45c1f1d850c050bccc6621b4895c5451ca1bf76",
+    "src/app/display_workflow.cpp": "d0fff5cec2780897f68a96f6a765a2ffaa22f139289deda9f9437ec4f397bb92",
+    "src/app/editing_workflow.cpp": "12ce433d5e57dbca59f3b639be0c67770d1e4909e492a435b01a011187b2eb40",
+    "src/app/exchange_dialog.cpp": "cc43226e8897191419836d7b505973fe065473d7a0647665742efa896f3c33a5",
+    "src/app/exchange_dialog.h": "e4b5ee61f1535d9c56fc17b8eecc3a9e37b05c606fd1b5dece9c75919ea25941",
+    "src/app/exchange_workflow.cpp": "dbdd45f99d560b4243797e8d756371c0fd9b0ca495cf581774146c86e25320a5",
+    "src/app/file_history.cpp": "5b599e9591c263e261ed21bca5cc9b5a8c942aff110a7bc2931df71329d9544a",
+    "src/app/file_history.h": "b45c33999cb7a81e42372b18ae8c3008a577fd917e3403d8bbce989d319d1b1b",
+    "src/app/grid_preview_panel.cpp": "e378dbf0cd1405e7aa5c6bc9b424c4c83c96a04023d4cf41e19105d0c682bd41",
+    "src/app/grid_preview_panel.h": "5b431236f6258682b5d6dca694e03379a71011a3843b7ef4b4207d3ecb0359c4",
+    "src/app/hydro_dialog.cpp": "21444235790483d5dd1197f621ca79a5773d351bf3f5119440989a643c476a52",
+    "src/app/hydro_dialog.h": "4182e7a8d364313638db1a68cb98d8256a5be1f1c556d487adc5a500328c4b3f",
+    "src/app/hydro_workflow.cpp": "5bd8ce1a70cb82c9ccbcff66583461fbf330e2800eed7a0ab6c5865234df9906",
+    "src/app/layer_panel.cpp": "21845bceee05e54601496e6450ffe1dc25046cb1ee9d294331341fe24eadf7f8",
+    "src/app/layer_panel.h": "de3cf7829da09558e95ab9bc3a77b2487e48031d2063261d817eabdaa64ae6c1",
+    "src/app/light_dialog.cpp": "12b84ca1e855f3abdf6f0f99e940e940180e85c77b33737e4f2146a0c08206d2",
+    "src/app/light_dialog.h": "9c7c8c8fb83c10f96e5949e108e5513b518354e4d7f2a019defd4027ba722d48",
+    "src/app/main_window.cpp": "1a23cc1c28f3d9565aa7195cea94a636c03a12c9b3c0a0a617435f1e9867af55",
+    "src/app/main_window.h": "a385870242c66a93ef02d02349d2d777650cf3d613672029e10dab56b8a52a6f",
+    "src/app/model_session.cpp": "ee025c0fd18c491bd7584d30317516c301df1dce8aa908136eaea2df4e70e3e5",
+    "src/app/model_session.h": "d24ed35ae2939ba313ee6f351bf306ef7e4f0ad28ac1935e10134ea55308df8b",
+    "src/app/model_ui_workflow.cpp": "bcaf883c987542c7efcce32140daaa4a6f32236dd0fb04e7f2375837d342b3f5",
+    "src/app/modeling_actions.cpp": "9d3d7a9a73251c9ab78aead117cbdf8dfaa6d8eb933475a2702470c89622fd6b",
+    "src/app/modeling_workflow.cpp": "c00c7d73002fc0cc7e1021974d9f01cb34afd4cf87221fd26a5064895fa0bab6",
+    "src/app/overlay_workflow.cpp": "329f2a974b7068c66b617de3f113cf94d265a38cb26cd2e1925cfcedd14e3659",
+    "src/app/performance_dialog.cpp": "a5c6e86eeeafec362c3181c377e5f23664cd0a9e227fa09959cbe1716493dfcf",
+    "src/app/performance_dialog.h": "e44cf04cdd176df7fe7fedbddf424bf7f5d22d4cef3fa7102f7a7fd7024b328b",
+    "src/app/performance_workflow.cpp": "d002ba53f1a7f85051e01b33b8ef8a95486e8c72aeb3e4521aa5a7e5ad97659b",
+    "src/app/plates_dialog.cpp": "f68ce5e0ad6bfe81642fa8afc48da286a2833bb168471b1592e51ec6daab94ee",
+    "src/app/plates_dialog.h": "1681b679231852dafa999195f4864fdf39125e5ee450c340e344444c83ffd9a2",
+    "src/app/plates_workflow.cpp": "b79ba875ecf92dc61546554dd5f4d43cfd5d9364fdd16ead67b8770844d86938",
+    "src/app/preferences_actions.cpp": "77d961ab8617a1495603677cd3b2337c6999a4b10631fd1d861b137bc73379bf",
+    "src/app/preferences_dialog.cpp": "ab3a3a2a1d66ac48ba3ac0cfefba3676bf5cfabed0976b687df32215028b3615",
+    "src/app/preferences_dialog.h": "29bbdeb288a82e31e8311419c3f8d86157e9911ae77146408666b820c0737a11",
+    "src/app/preferences_store.cpp": "b6b5365a49680733e8733e3c5f57278bb2e2a006eb3e03fb57e8f3ba527b54a4",
+    "src/app/preferences_store.h": "47d0b1f13729b97171b39edf8c229c9a27b2d1eca3a60b28267854336fef5792",
+    "src/app/preferences_workflow.cpp": "c9aac16f4a78fbc238a50beae0b69d18258a9346d34b46468c4ea2f5ed60a5c9",
+    "src/app/project_dialog.cpp": "c5c409f33a3e2b1fba40f6bde672c0c4b4927708dafb541e62fa4fd976b64f34",
+    "src/app/project_dialog.h": "0fc032eb8b863e7e2bc576a1ae3a45d28d1cb6f03c10dadc32a78e61e5991b6b",
+    "src/app/recovery_dialog.cpp": "3be91b56fd0e5c6dc4ec6c23654394cba5c21f0b5beffe390420919d146a52ef",
+    "src/app/recovery_dialog.h": "5428bc2e05e11256338402ae9c4496476aa6e9955fa91cb7753cd365c2bd49ee",
+    "src/app/section_dialog.cpp": "b3ec225f416c2f297e527ee865b8e988d9dbd7110dca24970b415c84689afca2",
+    "src/app/section_dialog.h": "e8572fad37254b4ebb998195947dc5d940caabda1da3c8b5692a07a089be94c2",
+    "src/app/sections_workflow.cpp": "6d25de5e1091d02f9ed1992024b5ca210ca4702cebd6e20c339ebf0bbdbc22ea",
+    "src/app/shading_workflow.cpp": "6246b26836de717426dcf40a85f3a410a6ebd5753a11a39d02dc0d94b0659e56",
+    "src/app/startup.cpp": "fe4568fde446784ba82dc9f57b9f8286488088868b504fe23dc0ffe3a4bf4cf8",
+    "src/app/startup_workflow.cpp": "24c0190da1658416fe459a4f65a8805a504ccc25e2324c8a7d8bed6fa4903109",
+    "src/app/studio_actions.cpp": "14f022f58de94d80593bd377772abef333f6d5618362c247c2bde91f6463c35c",
+    "src/app/studio_ui.cpp": "1be54bb017cbe7b53dd7b40877f404bff94fbc270e53bff86f8453ed590eaa0e",
+    "src/app/studio_ui.h": "9d315045c863fa9f943620c83ee7dd45db1825f6bd0fdc17ab5e1fb1185c914d",
+    "src/app/topology_workflow.cpp": "7962252e85c6fe247f14a6b56f0248a78494172c133875b3dc7b460e93331ca6",
+    "src/app/view_actions.cpp": "1f5ee8686809f3ae90c715f542a3fedd4a8f44570c1314378ebf6fc02569b822",
+    "src/app/viewport_workflow.cpp": "04cf012588d41af837dd6bfed9304846b8e1279b6e38274a29226d250b0c9436",
+    "src/core/background_image.cpp": "915fb18ee9330695c1977a324a26f73d29b55ee7be17201b975289c101dc16fe",
+    "src/core/background_image.h": "7b0665cae193d6367ed5c75e0f355c2d474b52aa85f7445e4ce8fafc12cc1d91",
+    "src/core/cad_export.cpp": "3ee1516adaa1daa85360ee58217430352c6dc3f17b5a2022d88568a0698275b9",
+    "src/core/cad_export.h": "e62cc87286d39c9f2a9f54cedb129af24b7b5286e0e526e722058e1b6ba79c0d",
+    "src/core/curve_import.cpp": "16c104f1fdf8ec62685d65af6e331abcce6e7c75eda7ec22a85e2a222cfc04ea",
+    "src/core/curve_import.h": "e1157615e4a456514a2df5aa80a25ae05ead14fc88351855294ca245219116a5",
+    "src/core/developed_plates.cpp": "fa247e1a38a46ee4f9d9035f08633295148769bbcc2d2971a66a646f5256c050",
+    "src/core/developed_plates.h": "bf7a643841441c28ca521fde804681fd27ca6e14f1b375ab9e6ec6b508af67ac",
+    "src/core/ghs_export.cpp": "45435092907a5e1272f595ce0389ad68b51d1783cf52f95fc7159514ede8e15d",
+    "src/core/ghs_export.h": "9e55f93d8c0d9fa96c483a34470f0de28aa2bdd2dc491fcbd18323fee46c471d",
+    "src/core/grid_export.cpp": "0d245cf30cc71c66009e63160b6dc958d9cf010789862421d48a13a54c9bdfca",
+    "src/core/grid_export.h": "a0a4ac16e56ea7755527843b58e89b3dab3773d78c33425a233e3356d5ca9449",
+    "src/core/hull_sections.cpp": "cf90cbd8b422e63bdcbee67286c6a1c5948906dabfa4a4c6de47f4898f891584",
+    "src/core/hull_sections.h": "d91d72dfefac9d2783a24e94d9f7d6354e180d585e75a2a6018fd27e171cf128",
+    "src/core/legacy_exchange.inc": "4d6c28074ea1293188744e58e5098342f8a4fb314bd9d702ae983c6655443b16",
+    "src/core/model_checks.cpp": "f21f665e10d23ece57e7374c45e80fe8b4ac63033df09adb7c7b3729d084f96e",
+    "src/core/model_checks.h": "d065dae612225d7c4c36c806ea857c2218da595c33263aef8892659d6acbc33e",
+    "src/core/model_exchange.cpp": "81b0cf3d1e55ba3623517ab2708e0df0b7f017d2946baac2c2fa366683ef3d86",
+    "src/core/model_exchange.h": "24388bff7cad4b78a06697fa047ea0f09888ecc8b5c2c5f3531dc6f5e49459bd",
+    "src/core/model_file_save.cpp": "a033650af6ae100dc1916c018eea67ac540c60a4c64ea86a2e8a52ec60462192",
+    "src/core/model_file_save.h": "39c4cfe492c5fe881d192c9bf55df2261bfe4dfd27a2b0cb439e38244b29d85e",
+    "src/core/model_snapshot.cpp": "26c071fdec47fa799fdcb99a1655093f1f81dbd7e4e9ab5529ee0cd8122f8f36",
+    "src/core/model_snapshot.h": "895b2e5523223754b827c5493e919fc853adb0c343a526e41065893249cc5a25",
+    "src/core/recovery_store.cpp": "2d68eba41499ba7b594eccbfa0ada7f24a2c3f2d54850e582efb23193db4aae9",
+    "src/core/recovery_store.h": "f004c8a18a6c1bbe21c2e1b83ddd7c16a4b1653ef28addfcab9e2f3cdd581002",
+    "src/core/ship_formats.cpp": "1a780e991924a673217a3c28d0638074511310bc31f4889cdbbe092f8741ded4",
+    "src/core/ship_formats.h": "f12bcabed89dd721c66c51b20f41f9c65e45487ae80dd1a29add0aef990d1b35",
+    "src/core/vrml_import.inc": "a1c8cc4f9538c896c7ad4499c5ebcb49ed01b56ea3ab542add6dcc47787a93d3",
+    "src/core/water_viscosity.h": "d5c753df6f7954b1b72a3dcb0b36f901543406482eac67b7a150309c17087b05",
+    "src/document/added_mass.cpp": "a1a1b408e65c3a6798c14f587a37315743b9c9cf5636df0b2d2e775ec57554d2",
+    "src/document/added_mass.h": "d5e90b4e044f2d147f7a264b7496526aecf1abdb3c0ab5ae52e6f4f8d617e6c4",
+    "src/document/analysis-fields-origin.json": "603b7831609a5b1dc221fcef7e936ffa911f13f1c9de5e20c9fe10af41e63349",
+    "src/document/analysis_edit.cpp": "c40d458e16e075285e3b6e6c7f3da6c7952cd60bcaf16211811695807ebbc060",
+    "src/document/analysis_edit.h": "0b9b9ac5af098ded8f6b4d889a07c1aca421e88cff720cf82075df6e94d94a1f",
+    "src/document/analysis_fields.h": "1259b5d207803489d468d961bad613e3698c9ed251fd407f2720460e9427db19",
+    "src/document/attribute_edit.cpp": "d91faee441b739e302adaefe37e5bf20b214d76779aa2b368cf2032096ccfa29",
+    "src/document/attribute_edit.h": "be5632f24fd08f622f85105b6c06f4c6b9e041e2453619f9fcfb86d113df45c1",
+    "src/document/auxiliary_edit.cpp": "cd60dcc2c4c0291ae826883367ccdf0b4bc2710fd10c26f5b34309cc0977577f",
+    "src/document/auxiliary_edit.h": "fdef762928c348ce078dff39e817d5e1353ef7b785bb49b16bab7d3a24e8da56",
+    "src/document/background_edit.cpp": "db620f9b2befce5ffbdcb069ca2e8ef8d4658ef93b2e649fee21e39ceb35414c",
+    "src/document/background_edit.h": "3780872f1b1abb190fcfac70363d49f6a2fc433a1371bcc7561c2bc506d338f2",
+    "src/document/cad_patches.cpp": "b63aa5e7a4486951197b656de9151610160871fbd4bf7ebbd6a6045587073592",
+    "src/document/cad_patches.h": "3134a0cde5b085875fc8288f32324d5b5c270a10c84f0aaa293b9694738bbd73",
+    "src/document/construction.cpp": "3eaf7a972b5682409f61d3cf6922e20aa7c61339312220934fedc3f53883aafc",
+    "src/document/construction.h": "6c2f3fc31268519cf0e2b87d0205927b3a85e6949544b88df8584f8d9ed83ffb",
+    "src/document/definition_edit.cpp": "25cdfd65698a6e6774ceac5a41fbc593339f239875b4158e318a6be4031390c7",
+    "src/document/definition_edit.h": "e9528989a0bbd5d965e3ab3b06b0df166684ccb3ffdbac79fc83ac0873a97833",
+    "src/document/document_create.cpp": "cdd8d430d1cdb45f5c806e012f07c5b23396001f0b281ace85d29d8c22e3f1cc",
+    "src/document/document_create.h": "6d61b502ba5baca6d93edd92f1e9e3639b956464a3b158a05af9caba1c3e7b52",
+    "src/document/document_format.cpp": "01ddd377104ba535e1e20026f3938ce0fe8509b45bc98a2eed0de643e5386678",
+    "src/document/document_service.cpp": "fda77a27e82c181a65237368015949a233b28a00c9d77a136e1d9f7157d38b1e",
+    "src/document/dxf_palette.h": "635638e610d3ab2e08a74097e58dec1e6adb216fd3b0e3e7b30b8e2010be9e4e",
+    "src/document/face_tools.cpp": "ee3437a25cba945a5e7a82462b6a2141f215ee45b327fab84abf652d19c6edaf",
+    "src/document/face_tools.h": "01e63efad24ee6292260502aec03e8e3ae8a2c547261ee27cff49eac2cbc6e2d",
+    "src/document/fbm_codec.cpp": "f1622f0e0a9ba326e4fa4f55ec78392c5fe80c48eaa54553f81f49806ca2e521",
+    "src/document/fbm_codec.h": "deabb9a0da876151d69059a2da825b0909592c62f06f77070f317e1dd97c2f48",
+    "src/document/fbm_text.cpp": "9ced9d5b8f62fd283c25f76d11a4dc586153f34f9fd8ec136ff1ef5cb6f68488",
+    "src/document/fbm_text.h": "83f14b7d46d6cc1314410d35935a431a99e6188fcffbd5516c83cebba4cbd27f",
+    "src/document/geometry_input.cpp": "afd71d5f2b1080b99f7d30e43122f688403404ae07f557ca47f4d52694013c9a",
+    "src/document/geometry_input.h": "fa7bf6c6b9b25bf9a42603f1f01bd58a378f23e3a3ae01e09e850923a06286eb",
+    "src/document/hydrodynamics-origin.json": "5d8ae6f37c4ca9fb57f81f8e135404d4d69baa49f13d4c062726ba87ea2757c1",
+    "src/document/hydrodynamics.cpp": "a3e11d55b60d654b0746dc467e1dddc1655149eadf6bbf37946f8a9e748f1722",
+    "src/document/hydrodynamics.h": "12154bd2f459b9a3e7aa4c9a3abdf70ff48a50c37128e49b18f30f42f0174613",
+    "src/document/hydrodynamics_tables.h": "16d44e80578d7680bcd8a1d4d8d94abc948384937895bdf5f41cc3570f607c19",
+    "src/document/hydrostatics.cpp": "d1ef972a20569711dc0dae76657102cdfb327056e394e76983a4f204321538cd",
+    "src/document/hydrostatics.h": "3ea23daf666694e57ed59e74ca069a015aa379bb0bd60d51d79d2776479201ec",
+    "src/document/lackenby_edit.cpp": "6e0f6ab7e83abfc0b0d1f8b7ed746de7ce308cc828052b5e50ada99dcd5d9181",
+    "src/document/lackenby_edit.h": "b0d528ccb87285f69fbd71c99f9fd21e4decf7f43dd6c65274ca63176248453d",
+    "src/document/plates.cpp": "72e2efebf02200fd00d56ec61859caf2d30f9fb7e1595b983f22dbb070835ac0",
+    "src/document/plates.h": "4417770adac2780c10ebb24e1df022dd157166560d6ed5f611589c5145c7cfdb",
+    "src/document/point_edit.cpp": "ef7269affca8908617f5ed21d1e591b9d1be9ccbf7a630f8c9a5eaae27aceabd",
+    "src/document/point_edit.h": "321e32e3aca1f7e11b142553b86c4eba2ccdc9b9c3edaa05176d377e6a1f4b89",
+    "src/document/preferences.cpp": "dc17a4907853d9c9a9aafcac09d7301c627a62c4e2f0f15b7acc638960b04e5e",
+    "src/document/preferences.h": "818b7d0f493a8dc4526119cee12f9d50bb471d44dd4deed3c20060289caf14d0",
+    "src/document/preview_image.cpp": "4d640163e94772aaa8d65ca0a19e6d53fd5130a7f13087321117a2b68d01e190",
+    "src/document/preview_image.h": "8081d0188466e2b1136535a6c404d5115ea1ec8ae04df1c6b27534662ff5aa4a",
+    "src/document/project_edit.cpp": "4f6abbb97ae782dd0f79d2e744558ad0433d0f6517901d0c2a2f268f066d84f0",
+    "src/document/project_edit.h": "879a9020630cb08aa96ca6280ab62ee9a18f40713c51714d638a99422a57a2dc",
+    "src/document/propulsion-origin.json": "e7bc76152df5de13537d69b9c717f8eb5275088452c89d44f1c90963adadbea0",
+    "src/document/propulsion.cpp": "8f4b8a5a1b9f029644c27d2284e27e64b68b98b8b07b54974c46ad50ed2cf4dd",
+    "src/document/propulsion.h": "6eca8114b26bd6759cc63d8f22c51d14ade9e04eecbb30863cdc30011b4b4086",
+    "src/document/propulsion_reports.inc": "3f0547940e9f586630f542e1439b35801a0e13c1233f3b8b8a4efa313fe0da6f",
+    "src/document/propulsion_tables.h": "1c3d9dcdc0a4e5ccba77161a7dcac4dbba73168962efd4f44fdb09997f8e719d",
+    "src/document/publication.cpp": "47a1ca15db9b48a7e3881ad8f777a834f8b13bbc0d91a85b11fbdb81f4332e5f",
+    "src/document/publication.h": "8d1b6e4faffb4d71cb7e60a30d395cd43d1f53fc568d0492aa1aec6df0501544",
+    "src/document/resistance-origin.json": "5634f1f23e62b0e066328de0af9b0b31372ca26ae5eb6efe4192c98128858288",
+    "src/document/resistance.cpp": "be4721e7afd062a64a5510c3d647d56ad9520ff48b098a76add9181790f60133",
+    "src/document/resistance.h": "73cd2e143e193888c2bf4233727738803019000dcfb0396fefba55dccb2b69f0",
+    "src/document/resistance_delft.inc": "b84adda3e590823c8ae6fc3db9a0c5a1bdb6586a5959fca58345383a0702e336",
+    "src/document/resistance_factory.inc": "47621449cb6d79eb4663d54ca36e5cb26f582e762cc81006c2641c34288c8a2c",
+    "src/document/resistance_fung.inc": "18fe80428a513483aad0be332fdf63650d33c0067c6647d6c6dfa3d00e7d8e2b",
+    "src/document/resistance_hollenbach.inc": "35c61de9c71646ff050103c7475d9c152428928c188ef1348d8e4b2c98abb407",
+    "src/document/resistance_holtrop.inc": "bab7f32516b91f187f4823ba3ae691e2a69d8cb33ee1565f8bb424f9eb8fa7fb",
+    "src/document/resistance_interpolation.inc": "ea1ee796f39fbb49c2694dde54f8ad3acebc213ebc34889deebe894f43b5899c",
+    "src/document/resistance_kaper.inc": "21b8965618e1f67f669ef41de1b4db3a3b3b2fa2c083c99e100c000154384c93",
+    "src/document/resistance_mh.inc": "52992deb44226808f7e971df269eb86a6661ff4a156c794a5839527df62fc83b",
+    "src/document/resistance_oortmerssen.inc": "181ca9ad8a437c179eb25ced8633c18ed0cd3bed4eb33506243b1fcc7692659a",
+    "src/document/resistance_ost.inc": "668ae987b64aa75a55efcb587937d00806be495a7313d5d70c932a77886d2156",
+    "src/document/resistance_planing.inc": "70cb142535cc0dac9edf11e873926e4976345d19a7a1a44d99385442d956fddd",
+    "src/document/resistance_rbhs.inc": "7dc01b38025883d6fd4aa541c180ea3ff8ad7aa047c13bb894a0f57d71429202",
+    "src/document/resistance_tables.h": "4070a9a602c132f31a5c716367d7a7bd6fe7915a8cb9be399b973db24c41f77b",
+    "src/document/topology_edit.cpp": "934f5523da0ffb59d26be49d33890b93874fe421363bd084b6073c6e49f6155a",
+    "src/document/topology_edit.h": "cc70c6c7a0800aaeb501f9c087161eef3afdbf2441a03d17a34d3fe9949778fc",
+    "src/document/transform_edit.cpp": "417ade528af28c8b10917e3456bbac93cd8409c20838eb46b03a616597315c4f",
+    "src/document/transform_edit.h": "5df12e26c890c124dc0a23f92fa830f043c49146f967f6a934db432c86ad7442",
+    "src/gpu_fill.cpp": "42606751361edcea41490a2b28c9bdd978b2b1a2d6eda5ef04c4a4ea85b77086",
+    "src/gpu_fill.h": "2cd95ca3c926b6bd21a2eaea3710608e34207ac2c1c78db41b19762fbf896e54",
+    "src/main.cpp": "42cecc1cc452639bc15a5a219660aff834c54979dfce322af1ee166e1aede511",
+    "src/native/document.cpp": "9434e1ce9e02b219d046af3cf82d62fcc18b027cc9fee5656608a862659c6cfd",
+    "src/native/document.h": "78b486c41525aab370684ee6728def20fee7814e78bce4b55904c1efc6cc176a",
+    "src/native/export_worker.cpp": "0776cd62f82ca0b2dac1231d736b0b71c460adc274ad38cab5ef489d03939b09",
+    "src/native/flowlines.cpp": "b32dd6b05c2419ef890876e0d744b6310ad62c36ce1ef56a667648fdd8fcfaaf",
+    "src/native/flowlines.h": "2a007f76c7606fb55bd48edf1455c437c2bb3dc58adeac4b9c0cbf0cbfead301",
+    "src/native/geometry.h": "a9224d60652b1b0856d093d927c29e206dca18dfa58534ade458daf0601e3a18",
+    "src/native/linesplan.cpp": "b56052edee1e21ede258227bd9f5652d4195018e97805ca663114bc512095cf5",
+    "src/native/linesplan.h": "d6735d6bb9897e6d3408b8280b9084812fada3e836eead13789921f515a9e3c9",
+    "src/native/plane.cpp": "354d05cf21babdda63d934f9b99c3df545ebdda3c7cd80776214a30993733fb3",
+    "src/native/scene_builder.cpp": "276bf95da3db0e8fb0c18a0f705973d1102bfd7696193a7e86a82be22c9cce9b",
+    "src/native/scene_builder.h": "eac8d7df372b36e1836e97b803a395be3ed5430ae4038805637f1488cf1f862a",
+    "src/native/section_cache.cpp": "b9b15a6abc5afb37a51e9b7c350db0a661c8a69f9f8edaadb6050b5e9bf58a2f",
+    "src/native/section_cache.h": "4ba04ce36bc4173ddf3a50f669db788fb68d426daf1ac7fc9ff83d8b9a09b743",
+    "src/native/sections.cpp": "ba9119ff141ecbe108e13674ce4748ca8e9804382c05729dab95e87877fcdf0c",
+    "src/native/sections.h": "dfbc47caad34509d2c56b129d1f4d9792ba91f7bd630bf104712f68543a810a4",
+    "src/native/spline.cpp": "d7a43ca8ba27b018d00da2e6efa66a8cb8a760991723067dbb89cb31b3477691",
+    "src/native/subdivision.cpp": "6b4bf58d819a7f10cb66824b2e64e109e9b93f69540a65a749a10d42c4a37a9f",
+    "src/native/subdivision.h": "1ee3791a1d446f38697554f3d6bb6907c63f391a35157093c3c4abf35faaa8af",
+    "src/native/surface_display.cpp": "64af3d5ee622dd93095b2740f8e5ea0ecd0f90e335a4afc76d43a97b4a56d8cc",
+    "src/native/surface_display.h": "78baecad7f8d152f617b4c0d1ef2577b130ceb008ddcddfd364a369d2ffd50e5",
+    "src/native/worker.cpp": "654f9874a829ca8cbcc488b9e8bdd9a9328267dfba58fe9dbec642e718bc7e08",
+    "src/render/auxiliary_geometry.cpp": "bdd358ef1910fe4cc22071d8695f2d13478d353a4947d5a49af315c0640adf89",
+    "src/render/auxiliary_geometry.h": "5bb28f71e8a303775bfb71a34923bc767ba614fa118db067a6122eb24b9e4f3a",
+    "src/render/background_geometry.cpp": "8a5b02950e375fedbc3bbaeea4ebe966481e303124d7a380d45610071aea6c22",
+    "src/render/background_geometry.h": "0e836e337fdf8b653537fa436e37f3b4629c8b5979a7804bf1c6d9d3fe4d8443",
+    "src/render/body_projection.h": "a752aa9a9041c73571e0af2aa6687c2a91bf3b3bb98e9f316059ffde064bb113",
+    "src/render/curvature_comb.cpp": "8f34411a405de535169469dae36cfa37367158ac5bbb849232e39862e9ab5197",
+    "src/render/curvature_comb.h": "ea49e4098bda7675a1970cbfe96ec981b7bad8a91191b5dd0c81d3baabfb241e",
+    "src/render/grid_preview.cpp": "e908f5d26f823d60effb6e0fe3943ab6240212dad9c61b2a0d95152ea9ab162a",
+    "src/render/grid_preview.h": "0cb901cbc07994abd6447bb0fd4ca6f4db539308f3f0e6da4a8180c20f52228f",
+    "src/render/hull_gpu.cpp": "61211da8317e9cf0f0481f7e71d701df1ae23b9e042f6b993d0965f54bd1713a",
+    "src/render/hull_gpu.h": "045997d5db428e939f7e4bdea6ec2a19bb340cf1f2a62f6e1b7508c68f14e167",
+    "src/render/hull_view.cpp": "8693d7b545e72e5fbec043dfbb0e058c41be144d6a8d0822bd029ea3cd73eae9",
+    "src/render/hull_view.h": "c439c89c3d35806ceba1ff4eee2ee0d83c5c8d52f2f5707974ebebf9ce7b06e7",
+    "src/render/label_layout.cpp": "64db19f1fdbf47da2c4b187a23f6915598c336f97e2845b6885452269e5dbced",
+    "src/render/label_layout.h": "1ad63d9df1f95388094cce982d6845a3f6ec82fa0d0802d6e3e76a304b08c000",
+    "src/render/model_preview.cpp": "358825df552ecb7b8c7e3ae4f343f08c18a0f67e69cbf92bcebe87314717eb57",
+    "src/render/model_preview.h": "7177983439e41c757053fe29ca24caa8611032e8ea8fbb6593ba3f014c592efb",
+    "src/render/overlay_animation.cpp": "6a44a153bef810ed69dbd0d76fdeab13a3d72ce719ea9f7e7bb8edaa6814f51e",
+    "src/render/overlay_animation.h": "a94b6a290945927086bf5ed9e2c4069f79baef700d43b88dbe3f9c28e6815f0b",
+    "src/render/surface_analysis.cpp": "ac4bd9669428d2f2d09f623a133ac8aeab00924a0dbf94cb4735fec947324686",
+    "src/render/surface_analysis.h": "9b2c360dd7f35291681db81a53baaef574f9f6d9ed8f3c656d8109872d8c47c1",
+    "src/render/underwater_color.h": "2233e972eef95772bcf929123d3ef129e0728e81b8600c4a27a84a9d4a0404f3",
+    "src/render/view_lighting.h": "3f552e4a773c377567a61492317ce4bcdf748e518707707d27b4dbe8d83da5b1",
+    "src/render/view_overlay.cpp": "a7b95c3e8759976439869e97ce1a5ac6b61e66bbba818c58d30cf941efb80d3e",
+    "src/render/view_overlay.h": "5ebce658cf6893f98508100d2f3424b258a560ecfdfd67ea606376c2865ecdbf",
+    "src/scene.cpp": "7006c67b25b5aad45fcfd2f4eb2d9b7de1fd662d0095488a4d6903a71b9fc0c5",
+    "src/scene.h": "525b779cd60626c10c47137b73011533f738bacde37247fde204e76fbba9c873",
+    "src/view.cpp": "ea951e89ee66af2760d1d2dfd03ac4636c0bbe2954476bf2b8c9a24d925cf738",
+    "src/view.h": "0b5c43dc1908f7ef5fe23d0356c71fd06e4e820d57ccb6c711987bfaad8676ba",
+    "third_party/fpc/trig.h": "cec11344e094e2ab2fca4e27877562ef875120deca63f98515793652a7ada775",
+    "third_party/lazarus/fbm_codepages.h": "73d127262c0b30bd7b095cc4980c71951f87a6597fddbacddda666ad6e364d00",
+    "third_party/shipcad/provenance.json": "b2fbaaca84c0c0fe949d5629ad036c693f06d4c10450de9e027503fcb7ab5332"
+  },
+  "diagnostic_source_sha256": "e6bb4e4555eda95cb508d779cdc02221dc48b7a895665ab325a6e2a29c6ffb12",
+  "audit_script_sha256": "18b806009b02d63ed8971a175eb0562e89d042f439d22a0836538af8d33cdc3f",
+  "output_bytes": 31826567,
+  "free_bytes": {
+    "C": 20747599872,
+    "D": 10233483264
+  },
+  "limits": [
+    "Hidden Qt events/screenshots are not desktop acceptance.",
+    "GPU timings are local measurements; unsupported hardware uses full-resolution software rendering.",
+    "Numerical solvers/exports unchanged; real external CALCPROP remains outside this change."
+  ]
+}

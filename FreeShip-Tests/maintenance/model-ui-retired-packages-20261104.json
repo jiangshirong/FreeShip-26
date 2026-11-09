@@ -1,0 +1,16 @@
+{
+  "reports": "All reports retained",
+  "kept": "D:\\FreeShip26Tests\\build\\model-ui-package-03",
+  "created_utc": "2026-11-04T00:54:34.4588348Z",
+  "retired": [
+    {
+      "path": "D:\\FreeShip26Tests\\build\\model-ui-package-01",
+      "bytes": 118874458.0
+    },
+    {
+      "path": "D:\\FreeShip26Tests\\build\\model-ui-package-02",
+      "bytes": 118886828.0
+    }
+  ],
+  "bytes": 237761286.0
+}

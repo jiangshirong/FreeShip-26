@@ -1,0 +1,80 @@
+{
+  "created_utc": "2026-11-04T10:29:02.126435+00:00",
+  "status": "partial",
+  "scope": "Polycad control-grid import, Qt actions, native editing, failure preservation and FBM roundtrip. Not original NURBS surface reconstruction.",
+  "installed": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\dist",
+  "previous_installation": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\dist-before-polycad-20261104",
+  "package_manifest_sha256": "b34bbdde09ff10bdfccb3276252b9829338e76d478dc3a25dbccd043e60f468c",
+  "verified_files": 2547,
+  "executable_sha256": {
+    "bridge/FreeShipGeometryBridge.exe": "13c57ac758abf206d35ba5acc58df7cddab0484300533570442630103d068058",
+    "FreeShipDocumentService.exe": "9976a4329e79b3696c7dbdf71f8400b89fc99d7029b3c80511dae06e98440336",
+    "FreeShipGeometryExport.exe": "3438980e86f07a4f04e49f39849887413112151a94bbeaed82b2e1c42ce4cbc8",
+    "FreeShipNativeLinesplan.exe": "f38d013614382c9b58240e7725000d21fc5047cc7fc56d1154a0c76ef3c0f47a",
+    "FreeShipQt.exe": "5d3ecb626ef0a498c126d5dfaad60ba49dcbb503a7a6b04831c9d00e743cbc13",
+    "native_analysis_edit_probe.exe": "820fd0d50d8389a782c8c609bd684183d6a465fc394007e32d953124860578f8",
+    "native_auxiliary_edit_probe.exe": "3621c021eb4052d313f81117a75b2f032031f013a05ac8f605f8cfaa04e5b805",
+    "native_background_edit_probe.exe": "22bbd47800449be70582a77f123fc3ec983bca4afcd6f54684cd1bf6bb29b1c0",
+    "native_definition_edit_probe.exe": "ec276cdfc273446f0f5bcd8653a667aa91f5340ffbef0251b141c06a3aad4ae5",
+    "native_document_create_probe.exe": "d4fb3e49cf929be7721142968079fa5c9819fb660aac3ff74cf75a097147752e",
+    "native_face_tools_probe.exe": "5f567440bdb7fae8eb69ecbd3391f3c9fed105587806b42fc781cacd077a5915",
+    "native_flowline_probe.exe": "9ac33ba42fd925fbe9b57c317908cc6afd295155282e904c7f11bc7ef814de25",
+    "native_project_edit_probe.exe": "c68b77538c11719bd5c2c6f3cf69fe1f34abd383eed611ef3dad7539333412c0",
+    "qt_auxiliary_tests.exe": "1ab99b4187b8734a3aacb992b495087852f0e50586382cc347e19e052eb8b56b",
+    "qt_background_tests.exe": "46f582ae6e7aab7661c4aef5ac1b85dcb514c011a55bb228797ddee5834efc9a",
+    "qt_camera_lighting_tests.exe": "9070da62b7aafd42b5e355d89c6791c8e74f71df3804e5c82bc5726440cace41",
+    "qt_display_tests.exe": "143b035d8eff49605af751e1e34421dcb3742337d1ff5e6353edf2231f0ee8ba",
+    "qt_document_codec_tests.exe": "f40b86cf914224f185d73aa6139b412e2a6a401d904cb11715e9d288baa08edf",
+    "qt_editing_tests.exe": "b8070c342786330320b2e071f2dc1bb014cda74969eee3487907778a586d833d",
+    "qt_exchange_tests.exe": "3a7d951997a656e95bed6294c8c9aefedecc695db594e071dc12e8c4f964baac",
+    "qt_lines_tests.exe": "4fb749cec84336a745de24853f5c548b794f4c7b10cc8c397f046f2ccad741b3",
+    "qt_migration_tests.exe": "de4eaff05eea053f85a70127787a917df03c3e6d4402726cf66c4e3aa38d78f4",
+    "qt_model_ui_tests.exe": "9026261a2e6e900816500da563a8ad3ff499444c3801ebd60bf7eee47c4c0750",
+    "qt_overlay_tests.exe": "a2a229cf7fba9f4529c76ce30c6f2ed3bb77073f488cb4df7545e6e9133a5fd9",
+    "qt_session_tests.exe": "a08f12cb62c32fe1abf9229e3f297609d78a3a96dc32ba03159908b454e52d71",
+    "qt_shading_tests.exe": "39f14c047a6d31941e1fceeca2ed02f7fc7cb7fd378c6a0eca4edd98fcab91bb"
+  },
+  "legacy_source_sha256": "277a3c69392c86fe14c375e7dfc9c3197b4162e982673cbbcf4b4a2dfff0ab6b",
+  "reports": {
+    "installed_polycad": {
+      "path": "C:\\FreeShip26-PolycadTests\\installed-01\\qt-polycad\\report.json",
+      "sha256": "9e432c40ba358092ec7f52c2bf57b1807a34983deab34b0b142e2a0f1c1d4942",
+      "counts": {
+        "pass": 167,
+        "fail": 0,
+        "review": 1,
+        "not_run": 2,
+        "error": 0
+      }
+    },
+    "existing_exchange": {
+      "path": "C:\\FreeShip26-PolycadTests\\exchange-01\\qt-exchange\\report.json",
+      "sha256": "5087e074bb58d444cf214221fe6403b2ec041662f7960cffd2505c098a7d333d",
+      "counts": {
+        "pass": 280,
+        "fail": 0,
+        "review": 1,
+        "not_run": 1,
+        "error": 0
+      }
+    }
+  },
+  "limits": [
+    "Independent synthetic grids and source-derived grammar; no external Polycad installation or real Polycad export supplied.",
+    "Hidden Windows callbacks and screenshots do not certify full original UI parity or physical desktop interaction.",
+    "Other import/export formats and remaining migration work are tracked separately."
+  ],
+  "storage_receipt": {
+    "path": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\maintenance\\storage-cleanup-verified-20261104.json",
+    "sha256": "2ff43e70e94be40aa5d35e5c4620ca0f93c91e864c9cb23da3b66db54689c99b",
+    "scope": "Earlier storage maintenance, before this product update."
+  },
+  "retained_sources": [
+    "qt_polycad.py",
+    "qt_exchange.py",
+    "run_tests.py",
+    "test_artifacts.py",
+    "maintenance/record_polycad_delivery.py",
+    "maintenance/prune_polycad_intermediates.ps1"
+  ]
+}

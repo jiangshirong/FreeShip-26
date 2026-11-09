@@ -1,0 +1,119 @@
+{
+  "purpose": "Byte parity between direct and isolated solver runs. Numerical accuracy is not asserted.",
+  "cases": [
+    {
+      "id": "clempoup",
+      "exe": "CLEMPOUP.EXE",
+      "input": "clempoup.dat",
+      "output": "clempoup.res",
+      "protocol": 16,
+      "values": [
+        59,
+        9.15,
+        2.9,
+        3.965,
+        1,
+        10,
+        1025,
+        1.19e-06,
+        1,
+        2
+      ]
+    },
+    {
+      "id": "clemblou",
+      "exe": "CLEMBLOU.EXE",
+      "input": "clemblou.dat",
+      "output": "clemblou.res",
+      "protocol": 17,
+      "values": [
+        59,
+        2.9,
+        3.965,
+        1,
+        10,
+        0,
+        1025,
+        1.19e-06,
+        1,
+        2
+      ]
+    },
+    {
+      "id": "bunkov",
+      "exe": "BUNKOV.EXE",
+      "input": "bunkdata.dat",
+      "output": "bunkov00.res",
+      "protocol": 18,
+      "values": [
+        20,
+        4,
+        0.9,
+        40,
+        8,
+        0.7,
+        15,
+        7,
+        1025,
+        1.19e-06
+      ]
+    },
+    {
+      "id": "compton",
+      "exe": "COMPTON.EXE",
+      "input": "cmptdata.dat",
+      "output": "Compton0.res",
+      "protocol": 19,
+      "values": [
+        20,
+        4,
+        0.9,
+        40,
+        8,
+        90,
+        1025,
+        1.19e-06,
+        0,
+        0
+      ]
+    },
+    {
+      "id": "wolfson",
+      "exe": "WOLFSON.EXE",
+      "input": "wolfdata.dat",
+      "output": "Wolfson0.res",
+      "protocol": 20,
+      "values": [
+        20,
+        4,
+        0.9,
+        40,
+        8,
+        90,
+        1025,
+        1.19e-06,
+        0,
+        0
+      ]
+    },
+    {
+      "id": "radojcic",
+      "exe": "RADOJCIC.EXE",
+      "input": "radodata.dat",
+      "output": "Radojcic.res",
+      "protocol": 21,
+      "values": [
+        20,
+        4,
+        15,
+        40,
+        8,
+        0,
+        1025,
+        1.19e-06,
+        0,
+        0
+      ]
+    }
+  ]
+}

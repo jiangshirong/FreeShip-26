@@ -1,0 +1,139 @@
+﻿文件,行号,调用,图标键
+Forms\EnterThemeNameDlg.pas,47,"LoadImageIntoBitmap(BitBtn1.Glyph,'Ok');",Ok
+Forms\EnterThemeNameDlg.pas,48,"LoadImageIntoBitmap(BitBtn2.Glyph,'Cancel');",Cancel
+Forms\Free2DDXFExportDlg.pas,219,"LoadImageIntoBitmap(BitBtn1.Glyph, 'Ok');",Ok
+Forms\Free2DDXFExportDlg.pas,220,"LoadImageIntoBitmap(BitBtn2.Glyph, 'Cancel');",Cancel
+Forms\FreeAboutDlg.pas,242,LoadFromLazarusResource(ResourceName),代码绘制/资源/光标
+Forms\FreeAddMassOutputDlg.pas,651,"LoadImageIntoBitmap(OKbutton.Glyph, 'Ok');",Ok
+Forms\FreeAddMassOutputDlg.pas,652,"LoadImageIntoBitmap(CancelButton.Glyph, 'Cancel');",Cancel
+Forms\FreeBackgroundBlendingDlg.pas,101,"LoadImageIntoBitmap(BitBtn1.Glyph, 'Ok');",Ok
+Forms\FreeBackgroundBlendingDlg.pas,102,"LoadImageIntoBitmap(BitBtn2.Glyph, 'Cancel');",Cancel
+Forms\FreeBackgroundToleranceDlg.pas,50,"LoadImageIntoBitmap(BitBtn1.Glyph, 'Ok');",Ok
+Forms\FreeBackgroundToleranceDlg.pas,51,"LoadImageIntoBitmap(BitBtn2.Glyph, 'Cancel');",Cancel
+Forms\FreeCrosscurvesDlg.pas,219,"LoadImageIntoList(MenuImages, 0, 'Cancel');",Cancel
+Forms\FreeCrosscurvesDlg.pas,220,"LoadImageIntoList(MenuImages, 1, 'Ok');",Ok
+Forms\FreeCrosscurvesDlg.pas,221,"LoadImageIntoList(MenuImages, 2, 'Print');",Print
+Forms\FreeCrosscurvesDlg.pas,222,"LoadImageIntoList(MenuImages, 3, 'Calculate');",Calculate
+Forms\FreeCylinderDlg.pas,144,"LoadImageIntoBitmap(BitBtn1.Glyph, 'Ok');",Ok
+Forms\FreeCylinderDlg.pas,145,"LoadImageIntoBitmap(BitBtn2.Glyph, 'Cancel');",Cancel
+Forms\FreeEmptyModelChooserDlg.pas,97,"LoadImageIntoBitmap(OKbutton.Glyph,'Ok');",Ok
+Forms\FreeEmptyModelChooserDlg.pas,98,"LoadImageIntoBitmap(CancelButton.Glyph,'Cancel');",Cancel
+Forms\FreeExtrudeDlg.pas,143,"LoadImageIntoBitmap(BitBtn1.Glyph, 'Ok');",Ok
+Forms\FreeExtrudeDlg.pas,144,"LoadImageIntoBitmap(BitBtn2.Glyph, 'Cancel');",Cancel
+Forms\FreeGridDlg.pas,137,"LoadImageIntoBitmap(BitBtn1.Glyph, 'Ok');",Ok
+Forms\FreeGridDlg.pas,138,"LoadImageIntoBitmap(BitBtn2.Glyph, 'Cancel');",Cancel
+Forms\FreeHydrodyn_RVRSDlg.pas,780,"LoadImageIntoList(MenuImages, 0, 'Cancel');",Cancel
+Forms\FreeHydrodyn_RVRSDlg.pas,781,"LoadImageIntoList(MenuImages, 1, 'Ok');",Ok
+Forms\FreeHydrodyn_RVRSDlg.pas,782,"LoadImageIntoList(MenuImages, 2, 'Print');",Print
+Forms\FreeHydrodyn_RVRSDlg.pas,783,"LoadImageIntoList(MenuImages, 3, 'Calculate');",Calculate
+Forms\FreeHydrodyn_Task1Dlg.pas,674,"LoadImageIntoList(MenuImages, 0, 'Cancel');",Cancel
+Forms\FreeHydrodyn_Task1Dlg.pas,675,"LoadImageIntoList(MenuImages, 1, 'Ok');",Ok
+Forms\FreeHydrodyn_Task1Dlg.pas,676,"LoadImageIntoList(MenuImages, 2, 'Print');",Print
+Forms\FreeHydrodyn_Task1Dlg.pas,677,"LoadImageIntoList(MenuImages, 3, 'Calculate');",Calculate
+Forms\FreeHydrostaticsDlg.pas,155,"LoadImageIntoBitmap(ButtonPrint.Glyph, 'Print');",Print
+Forms\FreeHydrostaticsDlg.pas,156,"LoadImageIntoBitmap(ButtonSave.Glyph, 'Save');",Save
+Forms\FreeHydrostaticsDlg.pas,157,"LoadImageIntoBitmap(ButtonClose.Glyph, 'Ok');",Ok
+Forms\FreeHydrostaticsResultsDlg.pas,159,"LoadImageIntoBitmap(ButtonPrint.Glyph,'Print');",Print
+Forms\FreeHydrostaticsResultsDlg.pas,160,"LoadImageIntoBitmap(ButtonSave.Glyph,'Save');",Save
+Forms\FreeHydrostaticsResultsDlg.pas,161,"LoadImageIntoBitmap(ButtonClose.Glyph,'Ok');",Ok
+Forms\FreeInsertPlaneDlg.pas,160,"LoadImageIntoBitmap(BitBtn1.Glyph, 'Ok');",Ok
+Forms\FreeInsertPlaneDlg.pas,161,"LoadImageIntoBitmap(BitBtn2.Glyph, 'Cancel');",Cancel
+Forms\FreeIntersectLayerDlg.pas,165,"LoadImageIntoBitmap(BitBtn1.Glyph, 'Ok');",Ok
+Forms\FreeIntersectLayerDlg.pas,166,"LoadImageIntoBitmap(BitBtn2.Glyph, 'Cancel');",Cancel
+Forms\FreeKeelWizardDlg.pas,1703,"LoadImageIntoBitmap(BitBtn1.Glyph, 'Ok');",Ok
+Forms\FreeKeelWizardDlg.pas,1704,"LoadImageIntoBitmap(BitBtn2.Glyph, 'Cancel');",Cancel
+Forms\FreeLackenbyDlg.pas,813,"LoadImageIntoBitmap(Button1.Glyph, 'Calculate');",Calculate
+Forms\FreeLackenbyDlg.pas,814,"LoadImageIntoBitmap(SpeedButton1.Glyph, 'Ok');",Ok
+Forms\FreeLackenbyDlg.pas,815,"LoadImageIntoBitmap(BitBtn2.Glyph, 'Cancel');",Cancel
+Forms\FreeLayerDlg.pas,222,"LoadImageIntoList(MenuImages, 0, 'ExitProgram');",ExitProgram
+Forms\FreeLayerDlg.pas,223,"LoadImageIntoList(MenuImages, 1, 'NewLayer');",NewLayer
+Forms\FreeLayerDlg.pas,224,"LoadImageIntoList(MenuImages, 2, 'DeleteEmptyLayers');",DeleteEmptyLayers
+Forms\FreeLayerDlg.pas,225,"LoadImageIntoList(MenuImages, 3, 'MoveUp');",MoveUp
+Forms\FreeLayerDlg.pas,226,"LoadImageIntoList(MenuImages, 4, 'MoveDown');",MoveDown
+Forms\FreeNewModelDlg.pas,187,"LoadImageIntoBitmap(BitBtn1.Glyph, 'Ok');",Ok
+Forms\FreeNewModelDlg.pas,188,"LoadImageIntoBitmap(BitBtn2.Glyph, 'Cancel');",Cancel
+Forms\FreePreferencesDlg.pas,352,"LoadImageIntoBitmap(BitBtn1.Glyph, 'Ok');",Ok
+Forms\FreePreferencesDlg.pas,353,"LoadImageIntoBitmap(BitBtn2.Glyph, 'Cancel');",Cancel
+Forms\FreeProjectSettingsDlg.pas,406,"LoadImageIntoBitmap(BitBtn1.Glyph, 'Ok');",Ok
+Forms\FreeProjectSettingsDlg.pas,407,"LoadImageIntoBitmap(BitBtn2.Glyph, 'Cancel');",Cancel
+Forms\FreePropeller_Task1Dlg.pas,927,"LoadImageIntoList(MenuImages, 0, 'Cancel');",Cancel
+Forms\FreePropeller_Task1Dlg.pas,928,"LoadImageIntoList(MenuImages, 1, 'Ok');",Ok
+Forms\FreePropeller_Task1Dlg.pas,929,"LoadImageIntoList(MenuImages, 2, 'Print');",Print
+Forms\FreePropeller_Task1Dlg.pas,930,"LoadImageIntoList(MenuImages, 3, 'Calculate');",Calculate
+Forms\FreePropeller_Task2Dlg.pas,1214,"LoadImageIntoList(MenuImages, 0, 'Cancel');",Cancel
+Forms\FreePropeller_Task2Dlg.pas,1215,"LoadImageIntoList(MenuImages, 1, 'Ok');",Ok
+Forms\FreePropeller_Task2Dlg.pas,1216,"LoadImageIntoList(MenuImages, 2, 'Print');",Print
+Forms\FreePropeller_Task2Dlg.pas,1217,"LoadImageIntoList(MenuImages, 3, 'Calculate');",Calculate
+Forms\FreePropeller_Task3Dlg.pas,1050,"LoadImageIntoList(MenuImages, 0, 'Cancel');",Cancel
+Forms\FreePropeller_Task3Dlg.pas,1051,"LoadImageIntoList(MenuImages, 1, 'Ok');",Ok
+Forms\FreePropeller_Task3Dlg.pas,1052,"LoadImageIntoList(MenuImages, 2, 'Print');",Print
+Forms\FreePropeller_Task3Dlg.pas,1053,"LoadImageIntoList(MenuImages, 3, 'Calculate');",Calculate
+Forms\FreePropeller_Task4Dlg.pas,734,"LoadImageIntoList(MenuImages, 0, 'Cancel');",Cancel
+Forms\FreePropeller_Task4Dlg.pas,735,"LoadImageIntoList(MenuImages, 1, 'Ok');",Ok
+Forms\FreePropeller_Task4Dlg.pas,736,"LoadImageIntoList(MenuImages, 2, 'Print');",Print
+Forms\FreePropeller_Task4Dlg.pas,737,"LoadImageIntoList(MenuImages, 3, 'Calculate');",Calculate
+Forms\FreePropeller_Task5Dlg.pas,643,"LoadImageIntoList(MenuImages, 0, 'Cancel');",Cancel
+Forms\FreePropeller_Task5Dlg.pas,644,"LoadImageIntoList(MenuImages, 1, 'Ok');",Ok
+Forms\FreePropeller_Task5Dlg.pas,645,"LoadImageIntoList(MenuImages, 2, 'Print');",Print
+Forms\FreePropeller_Task5Dlg.pas,646,"LoadImageIntoList(MenuImages, 3, 'Calculate');",Calculate
+Forms\FreeResistance_DelftDlg.pas,1061,"LoadImageIntoList(MenuImages, 0, 'Cancel');",Cancel
+Forms\FreeResistance_DelftDlg.pas,1062,"LoadImageIntoList(MenuImages, 1, 'Ok');",Ok
+Forms\FreeResistance_DelftDlg.pas,1063,"LoadImageIntoList(MenuImages, 2, 'Print');",Print
+Forms\FreeResistance_DelftDlg.pas,1064,"LoadImageIntoList(MenuImages, 3, 'Calculate');",Calculate
+Forms\FreeResistance_FungLeibDlg.pas,1739,"LoadImageIntoList(MenuImages, 0, 'Cancel');",Cancel
+Forms\FreeResistance_FungLeibDlg.pas,1740,"LoadImageIntoList(MenuImages, 1, 'Ok');",Ok
+Forms\FreeResistance_FungLeibDlg.pas,1741,"LoadImageIntoList(MenuImages, 2, 'Print');",Print
+Forms\FreeResistance_FungLeibDlg.pas,1742,"LoadImageIntoList(MenuImages, 3, 'Calculate');",Calculate
+Forms\FreeResistance_HollenDlg.pas,1762,"LoadImageIntoList(MenuImages, 0, 'Cancel');",Cancel
+Forms\FreeResistance_HollenDlg.pas,1763,"LoadImageIntoList(MenuImages, 1, 'Ok');",Ok
+Forms\FreeResistance_HollenDlg.pas,1764,"LoadImageIntoList(MenuImages, 2, 'Print');",Print
+Forms\FreeResistance_HollenDlg.pas,1765,"LoadImageIntoList(MenuImages, 3, 'Calculate');",Calculate
+Forms\FreeResistance_HoltrDlg.pas,1871,"LoadImageIntoList(MenuImages, 0, 'Cancel');",Cancel
+Forms\FreeResistance_HoltrDlg.pas,1872,"LoadImageIntoList(MenuImages, 1, 'Ok');",Ok
+Forms\FreeResistance_HoltrDlg.pas,1873,"LoadImageIntoList(MenuImages, 2, 'Print');",Print
+Forms\FreeResistance_HoltrDlg.pas,1874,"LoadImageIntoList(MenuImages, 3, 'Calculate');",Calculate
+Forms\FreeResistance_KaperDlg.pas,719,"LoadImageIntoList(MenuImages, 0, 'Cancel');",Cancel
+Forms\FreeResistance_KaperDlg.pas,720,"LoadImageIntoList(MenuImages, 1, 'Ok');",Ok
+Forms\FreeResistance_KaperDlg.pas,721,"LoadImageIntoList(MenuImages, 2, 'Print');",Print
+Forms\FreeResistance_KaperDlg.pas,722,"LoadImageIntoList(MenuImages, 3, 'Calculate');",Calculate
+Forms\FreeResistance_MHDlg.pas,1591,"LoadImageIntoList(MenuImages, 0, 'Cancel');",Cancel
+Forms\FreeResistance_MHDlg.pas,1592,"LoadImageIntoList(MenuImages, 1, 'Ok');",Ok
+Forms\FreeResistance_MHDlg.pas,1593,"LoadImageIntoList(MenuImages, 2, 'Print');",Print
+Forms\FreeResistance_MHDlg.pas,1594,"LoadImageIntoList(MenuImages, 3, 'Calculate');",Calculate
+Forms\FreeResistance_OortmerDlg.pas,1902,"LoadImageIntoList(MenuImages, 0, 'Cancel');",Cancel
+Forms\FreeResistance_OortmerDlg.pas,1903,"LoadImageIntoList(MenuImages, 1, 'Ok');",Ok
+Forms\FreeResistance_OortmerDlg.pas,1904,"LoadImageIntoList(MenuImages, 2, 'Print');",Print
+Forms\FreeResistance_OortmerDlg.pas,1905,"LoadImageIntoList(MenuImages, 3, 'Calculate');",Calculate
+Forms\FreeResistance_OSTDlg.pas,1653,"LoadImageIntoList(MenuImages, 0, 'Cancel');",Cancel
+Forms\FreeResistance_OSTDlg.pas,1654,"LoadImageIntoList(MenuImages, 1, 'Ok');",Ok
+Forms\FreeResistance_OSTDlg.pas,1655,"LoadImageIntoList(MenuImages, 2, 'Print');",Print
+Forms\FreeResistance_OSTDlg.pas,1656,"LoadImageIntoList(MenuImages, 3, 'Calculate');",Calculate
+Forms\FreeResistance_PlaningDlg.pas,2560,"LoadImageIntoList(MenuImages, 0, 'Cancel');",Cancel
+Forms\FreeResistance_PlaningDlg.pas,2561,"LoadImageIntoList(MenuImages, 1, 'Ok');",Ok
+Forms\FreeResistance_PlaningDlg.pas,2562,"LoadImageIntoList(MenuImages, 2, 'Print');",Print
+Forms\FreeResistance_PlaningDlg.pas,2563,"LoadImageIntoList(MenuImages, 3, 'Calculate');",Calculate
+Forms\FreeResistance_RBHSDlg.pas,1603,"LoadImageIntoList(MenuImages, 0, 'Cancel');",Cancel
+Forms\FreeResistance_RBHSDlg.pas,1604,"LoadImageIntoList(MenuImages, 1, 'Ok');",Ok
+Forms\FreeResistance_RBHSDlg.pas,1605,"LoadImageIntoList(MenuImages, 2, 'Print');",Print
+Forms\FreeResistance_RBHSDlg.pas,1606,"LoadImageIntoList(MenuImages, 3, 'Calculate');",Calculate
+Forms\FreeRotateDlg.pas,133,"LoadImageIntoBitmap(OkButton.Glyph, 'Ok');",Ok
+Forms\FreeRotateDlg.pas,134,"LoadImageIntoBitmap(CancelButton.Glyph, 'Cancel');",Cancel
+Forms\FreeRotateDlgM.pas,151,"LoadImageIntoBitmap(OkButton.Glyph, 'Ok');",Ok
+Forms\FreeRotateDlgM.pas,152,"LoadImageIntoBitmap(CancelButton.Glyph, 'Cancel');",Cancel
+Forms\FreeSaveImageDlg.pas,180,"LoadImageIntoBitmap(BitBtn1.Glyph, 'Ok');",Ok
+Forms\FreeSaveImageDlg.pas,181,"LoadImageIntoBitmap(BitBtn2.Glyph, 'Cancel');",Cancel
+Forms\FreeSelectLayersDlg.pas,223,"LoadImageIntoBitmap(BitBtn1.Glyph,'Ok');",Ok
+Forms\FreeSelectLayersDlg.pas,224,"LoadImageIntoBitmap(BitBtn2.Glyph,'Cancel');",Cancel
+Forms\FreeUndoHistoryDlg.pas,180,"LoadImageIntoBitmap(Speedbutton1.Glyph,'Ok');",Ok
+Forms\FreeUndoHistoryDlg.pas,181,"LoadImageIntoBitmap(Speedbutton2.Glyph,'Cancel');",Cancel
+Units\FreeViewport.inc,661,"Screen.Cursors[crRotate] := LoadCursor(hInstance, pchar('ROTATE_'+curRes))",代码绘制/资源/光标
+Units\FreeViewport.inc,662,"Screen.Cursors[crSetOrigin] := LoadCursor(hInstance, pchar('SETORIGIN_'+curRes))",代码绘制/资源/光标
+Units\FreeViewport.inc,663,"Screen.Cursors[crSetScale] := LoadCursor(hInstance, pchar('SETSCALE_'+curRes))",代码绘制/资源/光标
+Units\FreeViewport.inc,664,"Screen.Cursors[crTranspCol] := LoadCursor(hInstance, pchar('COLORPICKER_'+curRes))",代码绘制/资源/光标
+Units\FreeViewport.inc,665,"Screen.Cursors[crSetPoint] := LoadCursor(hInstance, pchar('SETPOINT_'+curRes))",代码绘制/资源/光标
+Units\FreeViewport.inc,666,"Screen.Cursors[crSetLine] := LoadCursor(hInstance, pchar('SETLINE_'+curRes))",代码绘制/资源/光标
+Units\FreeViewport.inc,667,"Screen.Cursors[crSetSpline] := LoadCursor(hInstance, pchar('SETSPLINE_'+curRes))",代码绘制/资源/光标
+Units\MDIPanel.inc,473,Glyph.Assign(drawCloseIcon(IconSize)),代码绘制/资源/光标
+Units\MDIPanel.inc,501,Glyph.Assign(drawMaximizeIcon(IconSize)),代码绘制/资源/光标
+Units\MDIPanel.inc,527,Glyph.Assign(drawMinimizeIcon(IconSize)),代码绘制/资源/光标
+Units\MDIPanel.inc,553,Glyph.Assign(drawRestoreIcon(IconSize)),代码绘制/资源/光标

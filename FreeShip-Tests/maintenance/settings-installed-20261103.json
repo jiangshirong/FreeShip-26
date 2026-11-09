@@ -1,0 +1,115 @@
+{
+  "recorded_utc": "2026-11-03T04:47:35.430355+00:00",
+  "scope": "Native project settings and complete unit conversion, layer properties/management and all four section-definition edits, including history/save and existing Qt entry points.",
+  "installed": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\dist",
+  "previous_installation": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\dist-before-settings-20261103",
+  "manifest_sha256": "54b1ffecb4aa7ee46c99ab30d19239e3984a7620be276ae717a05b8cd0c17d78",
+  "verified_package_files": 2522,
+  "binaries_sha256": {
+    "FreeShipQt.exe": "1e0a8f8b3cdaa669e3736eb927945039b79bba7137b36e0c6cbcc13dff94be35",
+    "FreeShipDocumentService.exe": "a9bba39c1b6dd45301e25513fab11e47cfa63b00f78eea4f9a7b385a35308e09",
+    "FreeShipNativeLinesplan.exe": "a68e340a43e207773afa2cc0c74c3ed58d074514165e3dd5541bffcb6943fded",
+    "qt_document_codec_tests.exe": "4ca1b5185556153cb0adcecaf8b0f5f7a21538eb962f7bab6f30640dc69dd5ed",
+    "native_project_edit_probe.exe": "6ed62e553665be5803fab215597f411be0136984fd98f2e652f2aea750b1d42c",
+    "native_definition_edit_probe.exe": "9a47d6d9ac9b21533ff1398b27020edcec15d74cf7386ec2a9b1de358be9ec38",
+    "bridge/FreeShipGeometryBridge.exe": "f8523fcfce09776a33ea9c8d0c93fe8ddef5456182d169957fac6aa00753f8ae"
+  },
+  "legacy_source_sha256": "277a3c69392c86fe14c375e7dfc9c3197b4162e982673cbbcf4b4a2dfff0ab6b",
+  "reports": {
+    "qt-document": {
+      "path": "C:\\FreeShip26Tests\\reports\\settings-final-01\\qt-document\\report.json",
+      "sha256": "91edbb01f8312ae3ee85cca94466556367d8c8d7807c69679278ad49549b5b30",
+      "counts": {
+        "pass": 9264,
+        "fail": 0,
+        "review": 24,
+        "not_run": 3,
+        "error": 0
+      },
+      "phase_seconds": {
+        "runtime_ready_s": 6.381631000003836,
+        "codec_s": 0.9977306000000681,
+        "protocol_s": 90.02333060000092,
+        "native_point_edit_s": 6.152690099996107,
+        "native_topology_s": 13.53485940000246,
+        "native_modeling_s": 10.793636399997922,
+        "native_transforms_s": 22.038245999996434,
+        "native_construction_s": 13.297236599995813,
+        "native_lackenby_s": 40.307117699994706,
+        "native_attributes_s": 6.1302058000001125,
+        "native_face_tools_s": 23.36546780000208,
+        "native_project_s": 31.981615600001533,
+        "native_definitions_s": 25.188122100000328,
+        "modeling_service_s": 21.33201410000038,
+        "production_ui_s": 17.270478600003116
+      },
+      "elapsed_seconds": 329.2684502999982,
+      "scope": "Complete isolated document suite; tested binaries match installation."
+    },
+    "settings-installed-editing": {
+      "path": "C:\\FreeShip26Tests\\reports\\settings-installed-editing\\report.json",
+      "sha256": "36d4ea4772f92a48e76cb0685b3e2f0193656db877c63582fef8cda2a858a374",
+      "counts": {
+        "pass": 142,
+        "fail": 0,
+        "review": 0,
+        "not_run": 4,
+        "error": 0
+      },
+      "scope": "Actual installed Qt callbacks in private hidden windows."
+    },
+    "settings-installed-sections": {
+      "path": "C:\\FreeShip26Tests\\reports\\settings-installed-sections\\report.json",
+      "sha256": "95c85cec7dddcb3c0f72280940dff1ffb1a50e5228b077f43d16a29074344fe2",
+      "counts": {
+        "pass": 214,
+        "fail": 0,
+        "review": 0,
+        "not_run": 1,
+        "error": 0
+      },
+      "scope": "Actual installed Qt callbacks in private hidden windows."
+    }
+  },
+  "combined_counts": {
+    "pass": 9620,
+    "fail": 0,
+    "review": 24,
+    "not_run": 8,
+    "error": 0
+  },
+  "codec": {
+    "cases": 296,
+    "supplied_files": 80
+  },
+  "candidate_kernel_ms": {
+    "native_project_timings": {
+      "samples": 29,
+      "minimum": 0.0404,
+      "median": 0.1984,
+      "maximum": 1.8697
+    },
+    "native_definition_timings": {
+      "samples": 47,
+      "minimum": 0.0496,
+      "median": 0.2126,
+      "maximum": 0.7074
+    }
+  },
+  "notes": [
+    "No relaxed coordinate or export tolerances. Full unit conversion retains original Single/Double evaluation order.",
+    "The original loader still limits production opening of some pre-1.65 formats; direct native probes cover their layout.",
+    "All-zero principal dimensions and degenerate projection bounds still fail downstream checks; atomic rollback is verified.",
+    "Auxiliary/display/background editing, old format conversion/new/import, four-view mesh and professional analysis still have Pascal dependencies.",
+    "Hidden callbacks are not physical desktop acceptance. Reusable test source retained; outputs and builds are on C."
+  ],
+  "maintenance_sources_sha256": {
+    "record_settings_delivery.py": "1dd00d97ff413304602d5ac3c1987a300f454355a493408b6b7db25780f459c1",
+    "record_topology_delivery.py": "dcb355a690a034c8b84582d824685a9e1992d1de59576de712a5f2d1b96e4f6c",
+    "promote_runtime.ps1": "d0427a3964c2263a93768185d29f9f9cfba8600d48965c1b29518c443e4bb728"
+  },
+  "free_bytes_after": {
+    "C": 19470852096,
+    "D": 30431420416
+  }
+}

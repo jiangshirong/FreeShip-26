@@ -1,0 +1,12 @@
+{
+  "Plan": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\maintenance\\retention-hydro-20261102.json",
+  "Removed": [
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\reports\\qt-hydro-20261102-d",
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\reports\\qt-hydro-20261102-c",
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\reports\\qt-hydro-20261102-a"
+  ],
+  "RemovedCount": 3,
+  "FreeBefore": 13117001728,
+  "FreeAfter": 13570916352,
+  "FreedGiB": 0.42
+}

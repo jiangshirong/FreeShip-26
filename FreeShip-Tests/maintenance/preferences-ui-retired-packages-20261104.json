@@ -1,0 +1,28 @@
+{
+  "created_utc": "2026-11-03T16:09:00.4208211Z",
+  "reports": "All reports retained",
+  "retired": [
+    {
+      "bytes": 117253988.0,
+      "path": "D:\\FreeShip26Tests\\build\\preferences-ui-package-01"
+    },
+    {
+      "bytes": 117255542.0,
+      "path": "D:\\FreeShip26Tests\\build\\preferences-ui-package-02"
+    },
+    {
+      "bytes": 117260930.0,
+      "path": "D:\\FreeShip26Tests\\build\\preferences-ui-package-03"
+    },
+    {
+      "bytes": 117265398.0,
+      "path": "D:\\FreeShip26Tests\\build\\preferences-ui-package-04"
+    },
+    {
+      "bytes": 117266512.0,
+      "path": "D:\\FreeShip26Tests\\build\\preferences-ui-package-05"
+    }
+  ],
+  "kept": "D:\\FreeShip26Tests\\build\\preferences-ui-package-06",
+  "bytes": 586302370.0
+}

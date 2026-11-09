@@ -1,0 +1,6 @@
+{
+  "report_root": "D:/FreeShip26Tests/reports",
+  "report_roots": ["D:/FreeShip26Tests/reports", "C:/FreeShip26Tests/reports"],
+  "minimum_free_gib": 1,
+  "reason": "Choose the configured local drive with more current free space for an unspecified output. Explicit --output still wins. Completed unified runs discard only transient native lines-plan caches; source and published evidence remain."
+}

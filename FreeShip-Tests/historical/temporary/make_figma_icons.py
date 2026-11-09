@@ -1,0 +1,93 @@
+from pathlib import Path
+import json
+out=Path('K:/Docs/图标盘点/Figma-v1');out.mkdir(exist_ok=True)
+items=[
+('Menu','菜单','打开主菜单，容纳文件、编辑、工具等入口','主窗口顶栏左侧','Default/Hover/Pressed/Disabled/MenuOpen','三条等长圆头横线'),
+('Edge','线','按选中控制点创建边；至少选择2点且CanInsertEdge允许时启用','顶栏建模区','Default/Hover/Pressed/Disabled','两个空心端点与一条斜连线'),
+('Face','面','根据选中控制点创建控制面；选择至少3点时启用','顶栏建模区','Default/Hover/Pressed/Disabled','带顶点的闭合四边面，区别于线'),
+('Point','点','进入添加控制点模式','顶栏模式区','Default/Hover/Pressed/Disabled/Active','小中心点与四向定位短线'),
+('ControlNet','控制网格','开关控制点与控制边显示；独立于添加点模式','顶栏模式区','Default/Hover/Pressed/Disabled/Active','3×3节点与连接网格；不用表格图形'),
+('Layers','图层','打开图层属性与管理窗口','顶栏管理区','Default/Hover/Pressed/Disabled','三层错位平面轮廓'),
+('Sections','剖面线','打开剖面交线管理窗口','顶栏分析入口区','Default/Hover/Pressed/Disabled','简化船体轮廓中三条剖切线；不用普通尺子'),
+('LinesPlan','型线图','打开型线图窗口','顶栏分析入口区','Default/Hover/Pressed/Disabled','有端部收束的三条船体型线；不用通用波浪'),
+('Calculate','计算','展开计算下拉菜单，不直接执行某项计算','顶栏分析入口区','Default/Hover/Pressed/Disabled/MenuOpen','圆角计算器轮廓、显示区与四个键'),
+('Info','关于 / 版本信息','顶栏打开关于窗口；关于页打开版本信息浮窗','顶栏最右侧、关于页底部一侧','Default/Hover/Pressed/Disabled；浮窗开时可用MenuOpen表现','圆圈内小写i；两处同一图形'),
+('More','更多','窗口过窄时收纳被隐藏的顶栏功能','顶栏溢出入口，条件显示','Default/Hover/Pressed/Disabled/MenuOpen','2×2圆角小方块；不用省略号，不加新功能'),
+('Minimize','最小化视图','把当前子视图缩成标题栏','四视图标题栏右侧','Default/Hover/Pressed/Disabled','一条水平圆头线'),
+('Maximize','最大化视图','将当前子视图放大到工作区','四视图标题栏右侧','Default/Hover/Pressed/Disabled','单个圆角窗口轮廓'),
+('Restore','恢复视图','恢复当前子视图此前的普通尺寸','子视图最大化或最小化状态下的标题栏','Default/Hover/Pressed/Disabled','前后两个错位圆角窗口；不当成开关Active'),
+('Legal','许可证信息','打开版权与许可证信息浮窗','关于页底部另一侧','Default/Hover/Pressed/Disabled；浮窗开时可用MenuOpen表现','带折角的文档与简短勾选标记；不用商业授权锁')]
+shapes={
+'Menu':'<path d="M3 5h14M3 10h14M3 15h14"/>',
+'Edge':'<path d="M5 14.5 15 5.5"/><circle cx="3.5" cy="16" r="2"/><circle cx="16.5" cy="4" r="2"/>',
+'Face':'<path d="M4 4.5 15.5 3 17 14.5 6 17Z"/><path d="M6 17 4 4.5"/>',
+'Point':'<path d="M10 2.5v3M10 14.5v3M2.5 10h3M14.5 10h3"/><circle cx="10" cy="10" r="2.4"/>',
+'ControlNet':'<path d="M4 4h12v12H4ZM4 10h12M10 4v12"/><circle cx="4" cy="4" r="1" fill="currentColor" stroke="none"/><circle cx="16" cy="4" r="1" fill="currentColor" stroke="none"/><circle cx="10" cy="10" r="1" fill="currentColor" stroke="none"/><circle cx="4" cy="16" r="1" fill="currentColor" stroke="none"/><circle cx="16" cy="16" r="1" fill="currentColor" stroke="none"/>',
+'Layers':'<path d="m2.5 7 7.5-4 7.5 4-7.5 4Zm0 4 7.5 4 7.5-4M2.5 15l7.5 4 7.5-4"/>',
+'Sections':'<path d="M2.5 5.5h15c-.7 6.5-3.8 10-7.5 10s-6.8-3.5-7.5-10ZM6 5.5v7.9M10 5.5v10M14 5.5v7.9"/>',
+'LinesPlan':'<path d="M2.5 10c3.2-8 11.8-8 15 0-3.2 8-11.8 8-15 0ZM3 10h14M4.5 7.5c3.5-2 7.5-2 11 0M4.5 12.5c3.5 2 7.5 2 11 0"/>',
+'Calculate':'<rect x="4" y="2.5" width="12" height="15" rx="2"/><path d="M7 6h6M7 10h1M12 10h1M7 13.5h1M12 13.5h1"/>',
+'Info':'<circle cx="10" cy="10" r="7.3"/><path d="M10 9v5"/><circle cx="10" cy="6.2" r=".8" fill="currentColor" stroke="none"/>',
+'More':'<rect x="3.5" y="3.5" width="4.5" height="4.5" rx="1.1"/><rect x="12" y="3.5" width="4.5" height="4.5" rx="1.1"/><rect x="3.5" y="12" width="4.5" height="4.5" rx="1.1"/><rect x="12" y="12" width="4.5" height="4.5" rx="1.1"/>',
+'Minimize':'<path d="M4 13h12"/>',
+'Maximize':'<rect x="3.5" y="3.5" width="13" height="13" rx="1.5"/>',
+'Restore':'<path d="M7 3h8.5A1.5 1.5 0 0 1 17 4.5V13"/><rect x="3" y="7" width="10" height="10" rx="1.5"/>',
+'Legal':'<path d="M11.5 2.5H5A1.5 1.5 0 0 0 3.5 4v12A1.5 1.5 0 0 0 5 17.5h10a1.5 1.5 0 0 0 1.5-1.5V7.5ZM11.5 2.5V7a.5.5 0 0 0 .5.5h4.5M7 12l2 2 4-4"/>'}
+svgs={}
+for key,body in shapes.items():
+ svg=f'<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="#315B55" color="#315B55" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">{body}</svg>'
+ svgs[key]=svg;(out/(key+'.svg')).write_text(svg,encoding='utf8')
+(out/'icons.json').write_text(json.dumps({'items':items,'svgs':svgs},ensure_ascii=False),encoding='utf8')
+brief='''# RongShip 第一批15枚图标 · Figma设计说明 v1
+
+日期：2026-10-29。目标：现代、顺滑、清晰、风格统一的桌面船体建模图标。采用暖白背景、深海青线条、圆头圆角；不是复古彩色工具箱，也不是拟物、渐变或阴影图标。现有功能与入口不增删。此阶段是设计交付，不替换软件资源或发布。
+
+## 设计范围与原则
+
+共15个图形，Info在关于与版本信息两处复用；不包含应用Logo、自定义光标、相机、打印和低频分析窗口。More仅代表已有溢出入口，不新增省略号按钮。
+
+主稿20×20，建议图形位于2～18像素的视觉区域，1.6像素等粗描边；圆头、圆角连接。几何细节优先在20像素实尺寸辨认，不能只在放大稿中好看。窗口图标允许细调到1.5像素，保持与主图标视觉重量相近。避免细小装饰、字母缩写、模糊光晕、3D、Emoji及截图图标。SVG必须为可编辑矢量，不用文字字体拼图标。
+
+图形颜色用#315B55，强调色#087F79，文字#183B36；底色#FAFCFA。交互色由变量控制。Disabled用#A5B5B1，不能用更粗的黑线模拟禁用。
+
+## 逐枚任务
+
+| 稳定键 | 功能 | 使用位置 | 状态要求 | 造型要求 |
+|---|---|---|---|---|
+'''
+for key,zh,fn,loc,states,form in items:brief+=f'| {key} · {zh} | {fn} | {loc} | {states} | {form} |\n'
+brief+='''
+## 尺寸和触发区域
+
+- 顶栏：当前图标实际加载20、25、30、40像素四档，对应Windows缩放下的资源。Figma用20像素主组件，SVG保留viewBox；交付这四档透明PNG。不能把放大稿直接截屏当20像素资源。
+- 顶栏按钮：当前图标上文字下，中文常规按钮约60×48逻辑像素，关于约70×48；按钮、可点击区域与图标边界分离。不在图标中画按钮背景。
+- 子视图标题栏：当前代码按标题栏高度使用16、22、32像素图形；交付SVG及三档PNG。Figma示例以28×28点击区承载20像素图标；这是建议布局，不代表当前程序已实现28像素。
+- 关于页底部：Info和Legal用20像素示例，与文字并排；SVG可缩放，兼容20/25/30/40。保持现有两个按钮与两侧位置，不把它们再设计成常驻详情区。
+- 适配中、俄、英文标签；图标本体不含语言文字，标签保留真实文本控件。不要把英文图标名刻进图形。
+
+## 状态规范
+
+| 状态 | 外观 | 语义 |
+|---|---|---|
+| Default | 深海青描边、透明底 | 可执行的默认状态 |
+| Hover | 图标#183B36、按钮底#EAF2EF | 指针停留，不改变功能 |
+| Pressed | 图标#056B66、按钮底#D6E8E2 | 按下瞬时反馈，松开恢复 |
+| Disabled | 图标#A5B5B1、无强调背景 | 条件不满足；图标不变形，保留原按钮文字 |
+| Active | 图标#087F79、淡青底#E4F2ED、细边框 | 仅用于Point模式、ControlNet开关；不能套到所有动作 |
+| MenuOpen | 图标#087F79、淡青底#E4F2ED | 菜单展开，仅用于Menu/Calculate/More及相关浮窗预览；不表示永久模式 |
+
+Point和ControlNet是独立状态，允许同时开启；不能把整组背景染成一个大选中块。Edge/Face是条件动作，不应画成持续选中的模式。最大化/恢复通过切换图形表达，不使用Active来替代。Hover、Pressed不移动图标；避免跳动或缩放导致边缘发虚。
+
+## 交付要求与验收
+
+- Figma：15个独立命名的Icon组件；一个支持图标替换的IconButton状态组件，包含上述6种状态。不要为15图标×6状态机械复制90套源图形。
+- 变量：前景、背景、禁用、强调、边框颜色及常用尺寸建立可复用变量，组件绑定变量。状态主要由按钮容器表现。
+- 样张：15枚总览、20/25/30/40实尺寸、16/22/32窗口尺寸、6态对比、顶栏与子视图标题栏使用示例，以及两个关于页按钮。
+- 可辨认性：Point与Face、ControlNet与More、Layers与LinesPlan、Maximize与Restore必须能在20像素区分。
+- SVG：透明底，统一英文键，不嵌入字体；保留可编辑笔画。PNG应从矢量以各目标尺寸栅格化，不由小PNG放大。
+- 在100%、125%、150%、200%缩放预览中核对边缘与光学居中。视觉接受需要用户确认；Figma样张不代表Lazarus已完成接入。
+
+源码依据：Forms/Main.pas（CreateStudioBar与动作启用条件）、Units/MDIPanel.inc（标题栏图标尺寸分档）、Forms/FreeAboutDlg.pas（Info/Legal资源复用）。
+'''
+(out/'第一批15枚图标-设计说明.md').write_text(brief,encoding='utf8')
+print(out)

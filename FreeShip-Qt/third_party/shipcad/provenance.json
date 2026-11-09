@@ -1,0 +1,22 @@
+{
+  "project": "ShipCAD",
+  "repository": "https://github.com/gpgreen/ShipCAD",
+  "commit": "4d89e1498cbcea7b2c0c6b26aa7c8964b42279cd",
+  "license": "GPL-2.0-or-later",
+  "authors": ["Greg Green, 2015", "Martijn van Engeland, 2005"],
+  "scope": "Calculation-only plane and spline candidate; not linked into the application",
+  "source_sha256": {
+    "ShipCADlib/plane.h": "f1c04d85c6287137e0fe2e942a661eb9c41d02f7669b83a5c08179a7f939aead",
+    "ShipCADlib/plane.cpp": "6b09f9b2b129ad64523dbe026d2662519232807821bcbea3d65f16b3d078101c",
+    "ShipCADlib/spline.h": "6b73a06e1f2db98fd61e1b9cbd13545f39529545a6a46415a61d6c0b010211f8",
+    "ShipCADlib/spline.cpp": "d5019b40722842437ef874c16650a73a0ef352cc1b508339319f21b8651bcfcc",
+    "LICENSE": "ab3fe34d3c62e3348015a4dd0128b09a5da2024d1467a478311003373c18a3f0"
+  },
+  "derived_files": ["src/native/geometry.h", "src/native/plane.cpp", "src/native/spline.cpp"],
+  "compatibility_source": "../FreeShip-Plus-Lazarus",
+  "compatibility_sha256": {
+    "Units/FreeSpline.inc": "0286282e55fe6de01fd5d8f52b2cc1928030d4ee3721659a32880e8ddb824c10",
+    "Units/FreeGometry_Functions.inc": "a8a3db0cc3ababfe6e4878a29b02047b16170a542454d00bd27645319780b492",
+    "Units/FreeTypes.pas": "9d3783848296bf5b6c1f05c98ef2fb54fe662ae0a6e9fdfb70bfb6c2b90bbe69"
+  }
+}

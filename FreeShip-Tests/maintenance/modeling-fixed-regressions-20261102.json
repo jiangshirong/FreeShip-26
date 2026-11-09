@@ -1,0 +1,512 @@
+{
+  "purpose": "Retain failures and provenance; remove only superseded generated outputs separately.",
+  "product_fixes": [
+    "Rectangular grid allocation, endpoints and fixed-axis origin are checked independently.",
+    "Persist group locks through member locks; validate FBM text encoding before mutation.",
+    "Detach/rebind control curves during point collapse; split curves before point deletion.",
+    "Copy every layer participation flag, not only AssignProperties fields.",
+    "Use representable stored layer names during auto-grouping and undo.",
+    "Pivot rotation uses signed addition; original AddPoint clamps negative Y."
+  ],
+  "test_corrections": [
+    "Ordered point selection must use ordered callbacks, not QSet iteration.",
+    "FBM record IDs change on reload; constraints compare exact target coordinates.",
+    "Normal pointer traversal order is unspecified; compare exact vector multisets.",
+    "Box integral retains Single arithmetic; bound rounding over 82 samples explicitly."
+  ],
+  "runs": [
+    {
+      "retired_run": "qt-advanced-modeling-20261102-a",
+      "report_sha256": "53ed2ab387d4fbb6fc4c2ec7e1841227b0bbc72d05689d9054197826623027b9",
+      "counts": {
+        "pass": 1434,
+        "fail": 2,
+        "review": 15,
+        "not_run": 5,
+        "error": 0
+      },
+      "failures": [
+        {
+          "id": "whole.rotate90-analytic",
+          "status": "fail"
+        },
+        {
+          "id": "whole.checked-markers-rotate-exactly",
+          "status": "fail"
+        }
+      ],
+      "test_sources_sha256": {
+        "qt_advanced.py": "a70c419cd5916f93e4e5f02fd5e22f6386a22b2bae2465f77c7eaddba0f453a9",
+        "QtEditingFixture.pas": "286c015cd45b0e39640e499ee34c5e87d67aa72cac4b4850501c8d7ec2f1abf3",
+        "qt_editing_fixture.py": "8c15d28b05052c2354623ec4f4be53b8d8b3daff766aa2667670615487c7c27c",
+        "qt_migration.py": "45fc4d35b5fa5a9e96933863dbebbefe345a7d0be94c4c3a054bad2afd6e9473",
+        "qt_backgrounds.py": "27c34f8347e061f091217888747d177c0cc6d69e838383484b391595d2c63091",
+        "qt_auxiliary.py": "3d5067aad8f3185f855f20176bc2f344ba6e22e0a611204c6ad9c7dc20b8b717",
+        "run_tests.py": "d297e3b0d3715736cf5f426958823a77f270b197c7e939e81857bbe2261bffb9"
+      },
+      "bridge_build": {
+        "source_sha256": "277a3c69392c86fe14c375e7dfc9c3197b4162e982673cbbcf4b4a2dfff0ab6b",
+        "status": "pass",
+        "adapter_sha256": {
+          "FreeShip-Qt\\bridge\\build_bridge.py": "08c6f4559a23f692629dd59c0a45f7b0572e7c818f8befc8b035aed0e6d589bf",
+          "FreeShip-Qt\\bridge\\PilotBridge.pas": "e017e1ce260ee3aeb7dd4820aaaa5d10c7c31a895e715ebabc916739440c59d2",
+          "FreeShip-Qt\\bridge\\ModelService.pas": "2a3ec566f4710d1615e675508562f354cfe5e515df34b94ffa33bf64c7e1166b",
+          "FreeShip-Qt\\bridge\\ModelEdits.pas": "84f22b7533b49abdd8954049ce9537ab1f94c882c92c6ad78770a9bc3c30b91c",
+          "FreeShip-Qt\\bridge\\NativeLinesplanInput.pas": "823aab6ccdb20d70fa12e16b5932ac91179bb5b6984669dd60f5745572c013a7",
+          "FreeShip-Qt\\bridge\\TopologyEdits.inc": "01230ca00cfa4a170b00ff01ab35593bf3a60f01a6da8664e38599b77bd9f699",
+          "FreeShip-Qt\\bridge\\SectionEdits.inc": "689ef961cf5f4c3cd8d6d69561642085a4c97c2a09d17179efbe1473639d9c6f",
+          "FreeShip-Qt\\bridge\\OverlaySnapshot.inc": "00afdbb13b7113150fa4d41fd3593d6b76b081d6ebca896279e8e2ae19f57117",
+          "FreeShip-Qt\\bridge\\BackgroundEdits.inc": "ac010e3c712da7b5d79975ad4c9c951afdd49dd5134b2a2731787c2754db940d",
+          "FreeShip-Qt\\bridge\\DisplayEdits.inc": "1b2d17ac6a6429e0eb665263048654d32e6af2c58c473ea87970a32dbc62470d",
+          "FreeShip-Qt\\bridge\\AuxiliaryCurves.inc": "b33819ac6da7ae9e481d0aeb6e668ab8f0130ae97123cd7677975287ca43ee70",
+          "FreeShip-Qt\\bridge\\AdvancedEdits.inc": "6289f81c01d4419ff2fb197f3872aeeef18549ae508968d595a8fdb3d759e150",
+          "FreeShip-Qt\\bridge\\ModelingEdits.inc": "eb25adfbfad98bd85070a7d21f7e660b60360014ae81c76e11676aefaf43077a",
+          "FreeShip-Qt\\bridge\\ModelTools.inc": "53b4a9fe45a9773749b345b97180903c0444434319b56c1337db0cba3905d852",
+          "FreeShip-Qt\\bridge\\NewHull.inc": "4ecfa998063165dfa31cd297d35bff19029981906204e66b0ee8dc8b41550ae7",
+          "FreeShip-Qt\\bridge\\LackenbyEngine.pas": "effe13168e8defae81bc7d0cb19d0edb3edaa46b30b1faee5181a67c9e80a107",
+          "FreeShip-Qt\\bridge\\StableEdgeLoops.pas": "b00a2bf770cc07ef25fa83a57c3a6dd80ad653c13d8cf7b2acd8bbe674420309",
+          "FreeShip-Qt\\bridge\\PilotCapture.pas": "4aca04907e65998daa0e56c2a3de869ddaaeab34bf039122757b2376c009cb61",
+          "FreeShip-Qt\\bridge\\FreeLinesplanScene.pas": "6e9c65a70b3bccbadbf631dfe36a661765674b21373b911255a180aea8f23f92",
+          "FreeShip-Qt\\bridge\\scene-origin.json": "87ef9e740086f01e737611b55fb2ff42160120c87810f6d62985a1ef281f2223",
+          "FreeShip-Qt\\bridge\\extract_scene.py": "817245c9ba34492b78cde672a1d01800ce2448a637fa1170ddf0a9e8a052f2b4",
+          "FreeShip-Qt\\bridge\\SceneHeader.inc": "b144836a9b98e3aaf7940018e5a1010e1bac60ade121f96b735652f75a34087c",
+          "FreeShip-Tests\\native_flicker_test.py": "fcdde5b6d017b868781b44394161980f3c2b3bdec9eecab127a18a313ab22363",
+          "FreeShip-Tests\\freeship_ui_test.py": "66d9726a879db5e4822c4f5a134186b728f8408a0142e4bf059080c4ad7fa4c8",
+          "FreeShip-Tests\\QtLegacyBridge.pas": "56aab75755177d90946a1609b64438e510936126b7167233763d7d2d9d27c25d"
+        },
+        "reference": false,
+        "build": {
+          "instrumented_source_sha256": "7681114aceb90d9540c5f5598feb85f89dbfbd3f7f279ee8e749e77baea8a55c",
+          "executable_sha256": "b126fd16660e8d2cdcfc39fca84f8069905b83b0a87317838b1b0f8dd4eb39f2"
+        }
+      }
+    },
+    {
+      "retired_run": "qt-modeling-20261102-a",
+      "report_sha256": "9bffe3dc9ebbe43bf211f285c2450d7588eb00bcb383da6b08c4ad9377505684",
+      "counts": {
+        "pass": 1413,
+        "fail": 3,
+        "review": 2,
+        "not_run": 2,
+        "error": 0
+      },
+      "failures": [
+        {
+          "id": "production.constraint-cleared",
+          "status": "fail"
+        },
+        {
+          "id": "production.anchor-cleared",
+          "status": "fail"
+        },
+        {
+          "id": "production.saved-geometry",
+          "status": "fail"
+        }
+      ],
+      "test_sources_sha256": {
+        "qt_modeling.py": "59c02a6bf685f4c0247260d7e2337ea422c0b810cfe1035bc8a00e1c42506d09"
+      },
+      "bridge_build": {
+        "source_sha256": "277a3c69392c86fe14c375e7dfc9c3197b4162e982673cbbcf4b4a2dfff0ab6b",
+        "status": "pass",
+        "adapter_sha256": {
+          "FreeShip-Qt\\bridge\\build_bridge.py": "08c6f4559a23f692629dd59c0a45f7b0572e7c818f8befc8b035aed0e6d589bf",
+          "FreeShip-Qt\\bridge\\PilotBridge.pas": "e017e1ce260ee3aeb7dd4820aaaa5d10c7c31a895e715ebabc916739440c59d2",
+          "FreeShip-Qt\\bridge\\ModelService.pas": "ca9a43fcea0db0e32b99cadb776ff5290d7385f2f14e9cfac90df95113173686",
+          "FreeShip-Qt\\bridge\\ModelEdits.pas": "84f22b7533b49abdd8954049ce9537ab1f94c882c92c6ad78770a9bc3c30b91c",
+          "FreeShip-Qt\\bridge\\NativeLinesplanInput.pas": "823aab6ccdb20d70fa12e16b5932ac91179bb5b6984669dd60f5745572c013a7",
+          "FreeShip-Qt\\bridge\\TopologyEdits.inc": "3a6757b85c20e2da81af0c0a9547603299bf6979ec8353f2e027102ce0e43fb1",
+          "FreeShip-Qt\\bridge\\SectionEdits.inc": "689ef961cf5f4c3cd8d6d69561642085a4c97c2a09d17179efbe1473639d9c6f",
+          "FreeShip-Qt\\bridge\\OverlaySnapshot.inc": "00afdbb13b7113150fa4d41fd3593d6b76b081d6ebca896279e8e2ae19f57117",
+          "FreeShip-Qt\\bridge\\BackgroundEdits.inc": "ac010e3c712da7b5d79975ad4c9c951afdd49dd5134b2a2731787c2754db940d",
+          "FreeShip-Qt\\bridge\\DisplayEdits.inc": "1b2d17ac6a6429e0eb665263048654d32e6af2c58c473ea87970a32dbc62470d",
+          "FreeShip-Qt\\bridge\\AuxiliaryCurves.inc": "b33819ac6da7ae9e481d0aeb6e668ab8f0130ae97123cd7677975287ca43ee70",
+          "FreeShip-Qt\\bridge\\AdvancedEdits.inc": "6289f81c01d4419ff2fb197f3872aeeef18549ae508968d595a8fdb3d759e150",
+          "FreeShip-Qt\\bridge\\ModelingEdits.inc": "e5310159efad4e7b157df5bf886cf74fc24866fb8806b28a63e2345a956fde54",
+          "FreeShip-Qt\\bridge\\ModelTools.inc": "153855bacd8010594588015e540e5d904b00c7feb164057f7eaf5cb13833b822",
+          "FreeShip-Qt\\bridge\\NewHull.inc": "e0b09c0c5c28e31d279046ac29cb6f0f08dfa32b050afbdccaff260083258072",
+          "FreeShip-Qt\\bridge\\LackenbyEngine.pas": "effe13168e8defae81bc7d0cb19d0edb3edaa46b30b1faee5181a67c9e80a107",
+          "FreeShip-Qt\\bridge\\StableEdgeLoops.pas": "b00a2bf770cc07ef25fa83a57c3a6dd80ad653c13d8cf7b2acd8bbe674420309",
+          "FreeShip-Qt\\bridge\\PilotCapture.pas": "4aca04907e65998daa0e56c2a3de869ddaaeab34bf039122757b2376c009cb61",
+          "FreeShip-Qt\\bridge\\FreeLinesplanScene.pas": "6e9c65a70b3bccbadbf631dfe36a661765674b21373b911255a180aea8f23f92",
+          "FreeShip-Qt\\bridge\\scene-origin.json": "87ef9e740086f01e737611b55fb2ff42160120c87810f6d62985a1ef281f2223",
+          "FreeShip-Qt\\bridge\\extract_scene.py": "817245c9ba34492b78cde672a1d01800ce2448a637fa1170ddf0a9e8a052f2b4",
+          "FreeShip-Qt\\bridge\\SceneHeader.inc": "b144836a9b98e3aaf7940018e5a1010e1bac60ade121f96b735652f75a34087c",
+          "FreeShip-Tests\\native_flicker_test.py": "fcdde5b6d017b868781b44394161980f3c2b3bdec9eecab127a18a313ab22363",
+          "FreeShip-Tests\\freeship_ui_test.py": "66d9726a879db5e4822c4f5a134186b728f8408a0142e4bf059080c4ad7fa4c8",
+          "FreeShip-Tests\\QtLegacyBridge.pas": "56aab75755177d90946a1609b64438e510936126b7167233763d7d2d9d27c25d"
+        },
+        "reference": false,
+        "build": {
+          "instrumented_source_sha256": "f6a5db385c603dcbb5abb9f364b192e35894cfb5d3d93b2ca7bf6c061c594464",
+          "executable_sha256": "57a4e7c85fdeb7edf60900fba411a79d57ca3592c4e6f622e6e7676ddaef3181"
+        }
+      }
+    },
+    {
+      "retired_run": "qt-modeling-20261102-c",
+      "report_sha256": "c21383edfdb5f2fd218bd211ed58a7d6ab0735d7cd181dec10d845082840cad4",
+      "counts": {
+        "pass": 1778,
+        "fail": 0,
+        "review": 0,
+        "not_run": 1,
+        "error": 1
+      },
+      "failures": [
+        {
+          "id": "suite",
+          "status": "error",
+          "reason": "RuntimeError: Service rejected a required operation: Native lines-plan generation failed: Control curve requires at least two points"
+        }
+      ],
+      "test_sources_sha256": {
+        "qt_modeling.py": "7e00ff25da96fe8c839a04b17cec3532851fc54d0838fb1d1466a83620850462"
+      },
+      "bridge_build": {
+        "source_sha256": "277a3c69392c86fe14c375e7dfc9c3197b4162e982673cbbcf4b4a2dfff0ab6b",
+        "status": "pass",
+        "adapter_sha256": {
+          "FreeShip-Qt\\bridge\\build_bridge.py": "08c6f4559a23f692629dd59c0a45f7b0572e7c818f8befc8b035aed0e6d589bf",
+          "FreeShip-Qt\\bridge\\PilotBridge.pas": "e017e1ce260ee3aeb7dd4820aaaa5d10c7c31a895e715ebabc916739440c59d2",
+          "FreeShip-Qt\\bridge\\ModelService.pas": "ca9a43fcea0db0e32b99cadb776ff5290d7385f2f14e9cfac90df95113173686",
+          "FreeShip-Qt\\bridge\\ModelEdits.pas": "84f22b7533b49abdd8954049ce9537ab1f94c882c92c6ad78770a9bc3c30b91c",
+          "FreeShip-Qt\\bridge\\NativeLinesplanInput.pas": "823aab6ccdb20d70fa12e16b5932ac91179bb5b6984669dd60f5745572c013a7",
+          "FreeShip-Qt\\bridge\\TopologyEdits.inc": "3a6757b85c20e2da81af0c0a9547603299bf6979ec8353f2e027102ce0e43fb1",
+          "FreeShip-Qt\\bridge\\SectionEdits.inc": "689ef961cf5f4c3cd8d6d69561642085a4c97c2a09d17179efbe1473639d9c6f",
+          "FreeShip-Qt\\bridge\\OverlaySnapshot.inc": "00afdbb13b7113150fa4d41fd3593d6b76b081d6ebca896279e8e2ae19f57117",
+          "FreeShip-Qt\\bridge\\BackgroundEdits.inc": "ac010e3c712da7b5d79975ad4c9c951afdd49dd5134b2a2731787c2754db940d",
+          "FreeShip-Qt\\bridge\\DisplayEdits.inc": "1b2d17ac6a6429e0eb665263048654d32e6af2c58c473ea87970a32dbc62470d",
+          "FreeShip-Qt\\bridge\\AuxiliaryCurves.inc": "b33819ac6da7ae9e481d0aeb6e668ab8f0130ae97123cd7677975287ca43ee70",
+          "FreeShip-Qt\\bridge\\AdvancedEdits.inc": "6289f81c01d4419ff2fb197f3872aeeef18549ae508968d595a8fdb3d759e150",
+          "FreeShip-Qt\\bridge\\ModelingEdits.inc": "edc88b675833f0b9cafba3e471e0860ca5146a017db3b22af1b053e9d06d452c",
+          "FreeShip-Qt\\bridge\\ModelTools.inc": "a8b291e59846e049d11f2e51550b4cb9b96ca101de046a38a066c1901e3903ee",
+          "FreeShip-Qt\\bridge\\NewHull.inc": "4ecfa998063165dfa31cd297d35bff19029981906204e66b0ee8dc8b41550ae7",
+          "FreeShip-Qt\\bridge\\LackenbyEngine.pas": "effe13168e8defae81bc7d0cb19d0edb3edaa46b30b1faee5181a67c9e80a107",
+          "FreeShip-Qt\\bridge\\StableEdgeLoops.pas": "b00a2bf770cc07ef25fa83a57c3a6dd80ad653c13d8cf7b2acd8bbe674420309",
+          "FreeShip-Qt\\bridge\\PilotCapture.pas": "4aca04907e65998daa0e56c2a3de869ddaaeab34bf039122757b2376c009cb61",
+          "FreeShip-Qt\\bridge\\FreeLinesplanScene.pas": "6e9c65a70b3bccbadbf631dfe36a661765674b21373b911255a180aea8f23f92",
+          "FreeShip-Qt\\bridge\\scene-origin.json": "87ef9e740086f01e737611b55fb2ff42160120c87810f6d62985a1ef281f2223",
+          "FreeShip-Qt\\bridge\\extract_scene.py": "817245c9ba34492b78cde672a1d01800ce2448a637fa1170ddf0a9e8a052f2b4",
+          "FreeShip-Qt\\bridge\\SceneHeader.inc": "b144836a9b98e3aaf7940018e5a1010e1bac60ade121f96b735652f75a34087c",
+          "FreeShip-Tests\\native_flicker_test.py": "fcdde5b6d017b868781b44394161980f3c2b3bdec9eecab127a18a313ab22363",
+          "FreeShip-Tests\\freeship_ui_test.py": "66d9726a879db5e4822c4f5a134186b728f8408a0142e4bf059080c4ad7fa4c8",
+          "FreeShip-Tests\\QtLegacyBridge.pas": "56aab75755177d90946a1609b64438e510936126b7167233763d7d2d9d27c25d"
+        },
+        "reference": false,
+        "build": {
+          "instrumented_source_sha256": "86ff55c5f829e3e71f6db2d98a0cef698e02be331b7c9570095cd7d80dc4ac1d",
+          "executable_sha256": "32c508f507a04cbe0850713a19e24f0ba462033cd2bbaa35ff5e7a2ee78d4c72"
+        }
+      }
+    },
+    {
+      "retired_run": "qt-modeling-service-20261101-a",
+      "report_sha256": "383f320a5f94f7b6b56ee36ee1a977b2d5dee6e0175954f0204e9ef4aebb7741",
+      "counts": {
+        "pass": 17,
+        "fail": 0,
+        "review": 0,
+        "not_run": 2,
+        "error": 1
+      },
+      "failures": [
+        {
+          "id": "suite",
+          "status": "error",
+          "reason": "RuntimeError: Service rejected a required operation: Access violation"
+        }
+      ],
+      "test_sources_sha256": {
+        "qt_modeling.py": "1aa209791d8f2add2a11dc7e367445f51e503973459ad32fa1b9c61e8addce89"
+      },
+      "bridge_build": null
+    },
+    {
+      "retired_run": "qt-modeling-service-20261101-b",
+      "report_sha256": "9999e91bca05fb844dd681c9176b86bbe61be5207eda31955eadd225d1e5d913",
+      "counts": {
+        "pass": 536,
+        "fail": 0,
+        "review": 14,
+        "not_run": 2,
+        "error": 1
+      },
+      "failures": [
+        {
+          "id": "suite",
+          "status": "error",
+          "reason": "TypeError: services.<locals>.operation() got multiple values for argument 'name'"
+        }
+      ],
+      "test_sources_sha256": {
+        "qt_modeling.py": "1aa209791d8f2add2a11dc7e367445f51e503973459ad32fa1b9c61e8addce89"
+      },
+      "bridge_build": null
+    },
+    {
+      "retired_run": "qt-modeling-service-20261101-c",
+      "report_sha256": "36adc02ba4b4a07104097a94f05424bdd1e04ea3d5d0fb9fad53b6c1206c7160",
+      "counts": {
+        "pass": 1135,
+        "fail": 5,
+        "review": 32,
+        "not_run": 2,
+        "error": 1
+      },
+      "failures": [
+        {
+          "id": "group-lock.undo-all-fields",
+          "status": "fail"
+        },
+        {
+          "id": "group-lock.undo-exports.model",
+          "status": "fail"
+        },
+        {
+          "id": "group-lock.redo-all-fields",
+          "status": "fail"
+        },
+        {
+          "id": "group-lock.redo-exports.model",
+          "status": "fail"
+        },
+        {
+          "id": "group-dissolve.undo-all-fields",
+          "status": "fail"
+        },
+        {
+          "id": "suite",
+          "status": "error",
+          "reason": "RuntimeError: Service rejected a required operation: No retained source preview"
+        }
+      ],
+      "test_sources_sha256": {
+        "qt_modeling.py": "b9500c15929eb3fbe9447e3e85f53769b9bb93f973bc1aa0640da53ee37ed3ac"
+      },
+      "bridge_build": null
+    },
+    {
+      "retired_run": "qt-modeling-service-20261101-d",
+      "report_sha256": "8ef41f16b6d68bbd654c33bafc6226747138f71265b6d94adc17b12b849c0781",
+      "counts": {
+        "pass": 536,
+        "fail": 0,
+        "review": 14,
+        "not_run": 2,
+        "error": 1
+      },
+      "failures": [
+        {
+          "id": "suite",
+          "status": "error",
+          "reason": "TypeError: services.<locals>.invalid() got multiple values for argument 'name'"
+        }
+      ],
+      "test_sources_sha256": {
+        "qt_modeling.py": "27828ccb63eee2105e2f7aeb18ec727e54a0f02e9f7f522a70fbbf24716cb084"
+      },
+      "bridge_build": null
+    },
+    {
+      "retired_run": "qt-modeling-service-20261102-b",
+      "report_sha256": "4a29c1a60e41783429b324e898f4b81eeea406ba789e4db82cb4ce8f5b4a1ff2",
+      "counts": {
+        "pass": 1682,
+        "fail": 28,
+        "review": 44,
+        "not_run": 2,
+        "error": 1
+      },
+      "failures": [
+        {
+          "id": "grid-0.undo-all-fields",
+          "status": "fail"
+        },
+        {
+          "id": "grid-0.redo-all-fields",
+          "status": "fail"
+        },
+        {
+          "id": "grid-1.undo-all-fields",
+          "status": "fail"
+        },
+        {
+          "id": "grid-1.redo-all-fields",
+          "status": "fail"
+        },
+        {
+          "id": "grid-2.undo-all-fields",
+          "status": "fail"
+        },
+        {
+          "id": "grid-2.redo-all-fields",
+          "status": "fail"
+        },
+        {
+          "id": "align.undo-all-fields",
+          "status": "fail"
+        },
+        {
+          "id": "align.redo-all-fields",
+          "status": "fail"
+        },
+        {
+          "id": "constraint-propagation.undo-all-fields",
+          "status": "fail"
+        },
+        {
+          "id": "constraint-propagation.redo-all-fields",
+          "status": "fail"
+        },
+        {
+          "id": "group-lock.undo-all-fields",
+          "status": "fail"
+        },
+        {
+          "id": "group-lock.redo-all-fields",
+          "status": "fail"
+        },
+        {
+          "id": "group-dissolve.undo-all-fields",
+          "status": "fail"
+        },
+        {
+          "id": "group-dissolve.redo-all-fields",
+          "status": "fail"
+        },
+        {
+          "id": "collapse-points.undo-all-fields",
+          "status": "fail"
+        },
+        {
+          "id": "collapse-points.redo-all-fields",
+          "status": "fail"
+        },
+        {
+          "id": "markers-delete.undo-all-fields",
+          "status": "fail"
+        },
+        {
+          "id": "markers-delete.redo-all-fields",
+          "status": "fail"
+        },
+        {
+          "id": "merge-edge.undo-all-fields",
+          "status": "fail"
+        },
+        {
+          "id": "merge-edge.redo-all-fields",
+          "status": "fail"
+        },
+        {
+          "id": "repair-normals.undo-all-fields",
+          "status": "fail"
+        },
+        {
+          "id": "repair-normals.redo-all-fields",
+          "status": "fail"
+        },
+        {
+          "id": "insert-plane.undo-all-fields",
+          "status": "fail"
+        },
+        {
+          "id": "insert-plane.redo-all-fields",
+          "status": "fail"
+        },
+        {
+          "id": "cylinder.undo-all-fields",
+          "status": "fail"
+        },
+        {
+          "id": "cylinder.redo-all-fields",
+          "status": "fail"
+        },
+        {
+          "id": "lackenby.undo-all-fields",
+          "status": "fail"
+        },
+        {
+          "id": "lackenby.redo-all-fields",
+          "status": "fail"
+        },
+        {
+          "id": "suite",
+          "status": "error",
+          "reason": "RuntimeError: Service rejected a required operation: Access violation"
+        }
+      ],
+      "test_sources_sha256": {
+        "qt_modeling.py": "c79820f794c73bb64859379eb1ec053e84086db92c7f6439ba36da7913cfc030"
+      },
+      "bridge_build": null
+    },
+    {
+      "retired_run": "qt-modeling-service-20261102-d",
+      "report_sha256": "3c9039f1e970995fcf1f0ca30d92ac98c066d59af195401e47eb5c9fb1644104",
+      "counts": {
+        "pass": 2481,
+        "fail": 2,
+        "review": 61,
+        "not_run": 3,
+        "error": 0
+      },
+      "failures": [
+        {
+          "id": "auto-group.redo.model",
+          "status": "fail"
+        },
+        {
+          "id": "extra.box-volume-integral",
+          "status": "fail"
+        }
+      ],
+      "test_sources_sha256": {
+        "qt_modeling.py": "7e00ff25da96fe8c839a04b17cec3532851fc54d0838fb1d1466a83620850462"
+      },
+      "bridge_build": null
+    }
+  ],
+  "rotation_negative_control": {
+    "expected": [
+      [
+        2.5,
+        -1.25,
+        3.75
+      ],
+      [
+        3.0,
+        -2.0,
+        4.0
+      ]
+    ],
+    "before_fix": [
+      {
+        "points": [
+          [
+            2.5,
+            0.0,
+            3.75
+          ],
+          [
+            3.0,
+            0.0,
+            4.0
+          ]
+        ],
+        "knuckles": [
+          false,
+          false
+        ]
+      }
+    ],
+    "regressions": [
+      "whole.rotate90-analytic",
+      "whole.checked-markers-rotate-exactly",
+      "extra.rotation-pivot-signed-coordinates"
+    ]
+  }
+}

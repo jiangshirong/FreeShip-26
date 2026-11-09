@@ -1,0 +1,171 @@
+{
+  "date": "2026-11-02",
+  "installed": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\dist",
+  "previous_installation": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\dist-before-ghs-20261102",
+  "scope": "Native C++ GHS symmetric displacement-hull sections and Qt export/cancel route.",
+  "manifest_sha256": "7f3707a1da84fa76bbd0e2dcc9f269ca1458c2efc976acb6713d341dd47ae12b",
+  "verified_package_files": 2501,
+  "binaries_sha256": {
+    "FreeShipQt.exe": "22a5175074a459da9d3580480f965d5a9cb658cb005f800f9ce78f1a9a3b0e13",
+    "FreeShipGeometryExport.exe": "da7f8af6d57bc911aec856631caf7eedfd2ad2080340462cfa8a438c8ff66673",
+    "bridge/FreeShipGeometryBridge.exe": "782b536b888daa06dc031b79133c93b349d4a0af6d37bdf48421d85e73f44934"
+  },
+  "legacy_source_sha256": "277a3c69392c86fe14c375e7dfc9c3197b4162e982673cbbcf4b4a2dfff0ab6b",
+  "bridge_build": "C:/FreeShip26Tests/build/cad-service-02",
+  "reports": {
+    "qt-ghs-final": {
+      "path": "C:\\FreeShip26Tests\\reports\\qt-ghs-final\\report.json",
+      "sha256": "7df2d92212a82e9c1378287b2f2966d3085f1c554f8bb3af7a202d94688603b6",
+      "counts": {
+        "pass": 90,
+        "fail": 0,
+        "review": 1,
+        "not_run": 1,
+        "error": 0
+      },
+      "status": "partial"
+    },
+    "qt-ghs-unified/qt-ghs": {
+      "path": "C:\\FreeShip26Tests\\reports\\qt-ghs-unified\\qt-ghs\\report.json",
+      "sha256": "aeb61aed979545f06af6583fb017f02572c8da2192b937840b11e7adad58ea97",
+      "counts": {
+        "pass": 89,
+        "fail": 0,
+        "review": 1,
+        "not_run": 1,
+        "error": 0
+      },
+      "status": "partial"
+    },
+    "qt-cad-ghs": {
+      "path": "C:\\FreeShip26Tests\\reports\\qt-cad-ghs\\report.json",
+      "sha256": "fa40e6b8bcb9a959e9308bd0c6847ce9885d9e9cd6e08f9db4eefb92f267dfe8",
+      "counts": {
+        "pass": 461,
+        "fail": 0,
+        "review": 1,
+        "not_run": 1,
+        "error": 0
+      },
+      "status": "partial"
+    },
+    "qt-exchange-ghs": {
+      "path": "C:\\FreeShip26Tests\\reports\\qt-exchange-ghs\\report.json",
+      "sha256": "ecb8d41d4492f95a9328781f6499564801c2aac66bb062ae011083c27410ad19",
+      "counts": {
+        "pass": 280,
+        "fail": 0,
+        "review": 1,
+        "not_run": 1,
+        "error": 0
+      },
+      "status": "partial"
+    },
+    "qt-ghs-package": {
+      "path": "C:\\FreeShip26Tests\\reports\\qt-ghs-package\\report.json",
+      "sha256": "d4ed2014dea4015ccd383562f588a9c165972cea1ea785dff2a3fcee2797ca06",
+      "counts": {
+        "pass": 90,
+        "fail": 0,
+        "review": 1,
+        "not_run": 1,
+        "error": 0
+      },
+      "status": "partial"
+    },
+    "qt-migration-ghs-package": {
+      "path": "C:\\FreeShip26Tests\\reports\\qt-migration-ghs-package\\report.json",
+      "sha256": "021da8d03f772830723395335d055b1b4e909691c7e6572b5fd28fdfe5e3e413",
+      "counts": {
+        "pass": 85,
+        "fail": 0,
+        "review": 0,
+        "not_run": 4,
+        "error": 0
+      },
+      "status": "partial"
+    },
+    "qt-ghs-delivery": {
+      "path": "C:\\FreeShip26Tests\\reports\\qt-ghs-delivery\\report.json",
+      "sha256": "657e487d2975ba5ea21cd9cc507607d01d43eb4a989819c774ebc5d069c982f4",
+      "counts": {
+        "pass": 90,
+        "fail": 0,
+        "review": 1,
+        "not_run": 1,
+        "error": 0
+      },
+      "status": "partial"
+    },
+    "qt-cad-ghs-delivery": {
+      "path": "C:\\FreeShip26Tests\\reports\\qt-cad-ghs-delivery\\report.json",
+      "sha256": "51116ef7112f77f6b218e35e9af2542f305ce210eeca401f47fa4192722e13ad",
+      "counts": {
+        "pass": 461,
+        "fail": 0,
+        "review": 1,
+        "not_run": 1,
+        "error": 0
+      },
+      "status": "partial"
+    },
+    "qt-migration-ghs-delivery": {
+      "path": "C:\\FreeShip26Tests\\reports\\qt-migration-ghs-delivery\\report.json",
+      "sha256": "3ca5f95b415a36efa5ee5df6541c0e59432bc7ee111e3a06764d3af8b0f0d85e",
+      "counts": {
+        "pass": 85,
+        "fail": 0,
+        "review": 0,
+        "not_run": 4,
+        "error": 0
+      },
+      "status": "partial"
+    }
+  },
+  "real_9a_export": {
+    "centerline_lobes": [
+      {
+        "contours": 2,
+        "x": 189.1300048828125
+      }
+    ],
+    "chord_tolerance_m": 0.0001,
+    "closed_decks": [
+      0,
+      18.913000106811523,
+      37.82600021362305,
+      56.73899841308594,
+      75.6520004272461,
+      94.56500244140625,
+      113.47799682617188,
+      132.39100646972656,
+      151.3040008544922,
+      170.2169952392578,
+      189.1300048828125
+    ],
+    "document_id": "ec96e9c7-fb9d-485b-958c-bfcaca8b8d0d",
+    "empty_stations": [],
+    "points": 2171,
+    "revision": 1,
+    "sha256": "9c532b2fa2ba2c4648d2736bbf3951361ad49d5a68670821bac87ace957060d7",
+    "source_side": "starboard",
+    "stations": 11,
+    "status": "pass",
+    "total_ms": 204.1934,
+    "units": "m"
+  },
+  "notes": [
+    "The original document origin, every original ordinate and knuckle are preserved. Adaptive chord error refers to spline tessellation, not total hull accuracy.",
+    "Only hydrostatics layers and existing stations are used, independently of camera or display visibility. Deck closing requires an explicit option.",
+    "Separate lobes may connect on centerline only; analytic area and centroid tests ensure zero added area/moment. Lateral gaps, self-intersection and asymmetric hulls are rejected.",
+    "The closed-half-surface defect is a new migration issue, with a failing negative control retained in qt-ghs-closed-negative. It is not an upstream issue.",
+    "Installed-directory tests use hidden production Qt widgets. Physical desktop and commercial GHS, especially multi-lobe handling, remain unverified.",
+    "The unified suite ran before the last closed-centerplane regression. The final package and actual directory include and pass that regression.",
+    "Other specialist exports/imports and remaining Pascal model/computation ownership still require migration.",
+    "Tests and maintenance sources are retained in FreeShip-Tests. Outputs and disposable builds are on C. Legacy fs and QtPilot are unchanged."
+  ],
+  "free_bytes_after": {
+    "C": 41552470016,
+    "D": 30131478528
+  }
+}

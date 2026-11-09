@@ -1,0 +1,11 @@
+{
+  "Plan": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\maintenance\\retention-display-iterations-20261101.json",
+  "Removed": [
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\reports\\qt-display-20261101-b",
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\reports\\qt-startup-20261101-a"
+  ],
+  "RemovedCount": 2,
+  "FreeBefore": 15471378432,
+  "FreeAfter": 15955722240,
+  "FreedGiB": 0.45
+}

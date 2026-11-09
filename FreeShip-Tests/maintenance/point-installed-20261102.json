@@ -1,0 +1,319 @@
+{
+  "recorded_utc": "2026-11-02T15:58:58.139290+00:00",
+  "scope": "Native single/batch absolute point coordinates, anchor/line dependencies, FBM coordinate encoding and derived-cache invalidation.",
+  "installed": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\dist",
+  "previous_installation": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\dist-before-point-20261102",
+  "manifest_sha256": "fd724de117f44d174657286615885388ab062e19163f63bb82ab47a1c4a91863",
+  "verified_package_files": 2508,
+  "binaries_sha256": {
+    "FreeShipQt.exe": "33a8277d283802504cc91afdf9c3d1498da13d2faa2baa19ea1fd405ee2dc07b",
+    "FreeShipDocumentService.exe": "cf037e3b78df0dceb7d56b20e559e3cd946dfdcd2d4aba8c2c527d84374374d4",
+    "FreeShipNativeLinesplan.exe": "a68e340a43e207773afa2cc0c74c3ed58d074514165e3dd5541bffcb6943fded",
+    "qt_document_codec_tests.exe": "fade2087bb27cf092e2b16339ef816d4c64397e7955d16fc1c4e2af06a74483d",
+    "bridge/FreeShipGeometryBridge.exe": "b773bff910ee5252cd7a3fde9b62359108d58856b564a955e070b1139416ec90"
+  },
+  "legacy_source_sha256": "277a3c69392c86fe14c375e7dfc9c3197b4162e982673cbbcf4b4a2dfff0ab6b",
+  "reports": {
+    "qt-document": {
+      "path": "C:\\FreeShip26Tests\\reports\\qt-point-b\\qt-document\\report.json",
+      "sha256": "8e5524c96db6d8bffc726d621fa0291ecc910646196c5542f6f94c7efc72982f",
+      "counts": {
+        "pass": 2193,
+        "fail": 0,
+        "review": 2,
+        "not_run": 2,
+        "error": 0
+      },
+      "scope": "Full isolated core suite; all relevant binaries identical to installed package.",
+      "phase_seconds": {
+        "runtime_ready_s": 7.998964899999919,
+        "codec_s": 1.4399159000004147,
+        "protocol_s": 175.1921643000005,
+        "native_point_edit_s": 5.175107000000935,
+        "modeling_service_s": 10.730007199999818,
+        "production_ui_s": 8.533842999999251
+      },
+      "elapsed_seconds": 209.4139500000001
+    },
+    "editing": {
+      "path": "C:\\FreeShip26Tests\\reports\\qt-editing-point-installed\\report.json",
+      "sha256": "bff590a7c2cd630746b24ab263fda8036627782a0120797804baa5dd476e0d36",
+      "counts": {
+        "pass": 142,
+        "fail": 0,
+        "review": 0,
+        "not_run": 4,
+        "error": 0
+      },
+      "scope": "Actual installed production Qt callbacks."
+    },
+    "sections": {
+      "path": "C:\\FreeShip26Tests\\reports\\qt-sections-point-installed\\report.json",
+      "sha256": "079a0e5fa0dae3b6b53b236d226c7c8b5766921cd92e9f5f38078c737d9c6ee0",
+      "counts": {
+        "pass": 214,
+        "fail": 0,
+        "review": 0,
+        "not_run": 1,
+        "error": 0
+      },
+      "scope": "Actual installed production Qt callbacks."
+    },
+    "auxiliary": {
+      "path": "C:\\FreeShip26Tests\\reports\\qt-auxiliary-point-installed\\report.json",
+      "sha256": "e0520aa569d9ff9156bbf18cfc59b51051a4daeeadf2815d469a539e8bc3fc5b",
+      "counts": {
+        "pass": 151,
+        "fail": 0,
+        "review": 3,
+        "not_run": 1,
+        "error": 0
+      },
+      "scope": "Actual installed production Qt callbacks."
+    },
+    "advanced": {
+      "path": "C:\\FreeShip26Tests\\reports\\qt-advanced-point-installed\\report.json",
+      "sha256": "1e6dbca03a136ed76c226dadc2f88071adf273a9a05df000b188639fc1e9c538",
+      "counts": {
+        "pass": 151,
+        "fail": 0,
+        "review": 3,
+        "not_run": 1,
+        "error": 0
+      },
+      "scope": "Actual installed production Qt callbacks."
+    },
+    "hydro": {
+      "path": "C:\\FreeShip26Tests\\reports\\qt-hydro-point-installed\\report.json",
+      "sha256": "2aa12580777a197107e3e030c0b396537e7330c8e3c7fc16b831752b0223ab80",
+      "counts": {
+        "pass": 26,
+        "fail": 0,
+        "review": 0,
+        "not_run": 1,
+        "error": 0
+      },
+      "scope": "Actual installed production Qt callbacks."
+    }
+  },
+  "combined_counts": {
+    "pass": 2877,
+    "fail": 0,
+    "review": 8,
+    "not_run": 10,
+    "error": 0
+  },
+  "codec": {
+    "cases": 193,
+    "real_files_read": 80,
+    "real_files_coordinate_written": 77,
+    "coordinate_write_skipped": [
+      {
+        "fixture": "D:/桌面文件夹/项目/FreeShip_26/FreeShip-Plus-Lazarus/Ships/Database/FREE!ship demo 8_.fbm",
+        "points": 77,
+        "opaque_tail_bytes": 72
+      },
+      {
+        "fixture": "D:/桌面文件夹/项目/FreeShip_26/FreeShip-Plus-Lazarus/Ships/Database/Savitsky_imperial.fbm",
+        "points": 0,
+        "opaque_tail_bytes": 0
+      },
+      {
+        "fixture": "D:/桌面文件夹/项目/FreeShip_26/FreeShip-Plus-Lazarus/Ships/Database/Savitsky_metric.fbm",
+        "points": 0,
+        "opaque_tail_bytes": 0
+      }
+    ],
+    "note": "45 synthetic version branches also check exact preservation of unrelated blocks and complete invalidation of serialized section/flowline caches."
+  },
+  "latency": {
+    "path": "C:\\FreeShip26Tests\\reports\\point-latency-01\\report.json",
+    "sha256": "8d41c0c648857f7c90a162e8caa3bed1961d97f586c8ff0293b7f8ec46de4a7e",
+    "models": [
+      {
+        "source": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-MCP\\examples\\box.fbm",
+        "sha256": "dde4bc78eb4eb1393783b50498d09a532ee223d6bfb04338d4875e9ddd2aac48",
+        "samples": [
+          {
+            "engine": "baseline",
+            "wall_ms": 74.04080000014801,
+            "point_edit_ms": null,
+            "document_total_ms": 72.9448
+          },
+          {
+            "engine": "candidate",
+            "wall_ms": 75.43750000149885,
+            "point_edit_ms": 0.118,
+            "document_total_ms": 74.4385
+          },
+          {
+            "engine": "candidate",
+            "wall_ms": 74.92149999961839,
+            "point_edit_ms": 0.1062,
+            "document_total_ms": 73.9715
+          },
+          {
+            "engine": "baseline",
+            "wall_ms": 77.29500000095868,
+            "point_edit_ms": null,
+            "document_total_ms": 76.483
+          },
+          {
+            "engine": "baseline",
+            "wall_ms": 78.1572000014421,
+            "point_edit_ms": null,
+            "document_total_ms": 76.1874
+          },
+          {
+            "engine": "candidate",
+            "wall_ms": 93.59240000048885,
+            "point_edit_ms": 0.114,
+            "document_total_ms": 92.7946
+          }
+        ],
+        "median_ms": {
+          "baseline": 77.29500000095868,
+          "candidate": 75.43750000149885
+        },
+        "candidate_over_baseline": 0.9759686913844777
+      },
+      {
+        "source": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-MCP\\examples\\synthetic-hull.fbm",
+        "sha256": "a2899d0887b21d444e68d7966f1af129bc07c0c80bed6be22dc75deaaa6fe8bd",
+        "samples": [
+          {
+            "engine": "baseline",
+            "wall_ms": 1071.443900000304,
+            "point_edit_ms": null,
+            "document_total_ms": 1070.49
+          },
+          {
+            "engine": "candidate",
+            "wall_ms": 1082.1090999997978,
+            "point_edit_ms": 0.127,
+            "document_total_ms": 1081.2335
+          },
+          {
+            "engine": "candidate",
+            "wall_ms": 1146.8081000002712,
+            "point_edit_ms": 0.1248,
+            "document_total_ms": 1145.8633
+          },
+          {
+            "engine": "baseline",
+            "wall_ms": 1066.7102000006707,
+            "point_edit_ms": null,
+            "document_total_ms": 1065.8732
+          },
+          {
+            "engine": "baseline",
+            "wall_ms": 1067.0573000006698,
+            "point_edit_ms": null,
+            "document_total_ms": 1066.1242
+          },
+          {
+            "engine": "candidate",
+            "wall_ms": 1131.1574000010296,
+            "point_edit_ms": 0.1131,
+            "document_total_ms": 1130.2734
+          }
+        ],
+        "median_ms": {
+          "baseline": 1067.0573000006698,
+          "candidate": 1131.1574000010296
+        },
+        "candidate_over_baseline": 1.0600718443145645
+      },
+      {
+        "source": "D:\\桌面文件夹\\学习\\大学课程\\过考试\\船舶设计原理\\9a\\9a-Женя.fbm",
+        "sha256": "5ad8b84721cae6b3e04b92282a75800ef3aabce6152f2c6ba66db246659beed5",
+        "samples": [
+          {
+            "engine": "baseline",
+            "wall_ms": 1471.5575999998691,
+            "point_edit_ms": null,
+            "document_total_ms": 1470.5411
+          },
+          {
+            "engine": "candidate",
+            "wall_ms": 1408.9822999994794,
+            "point_edit_ms": 0.1962,
+            "document_total_ms": 1407.9624
+          },
+          {
+            "engine": "candidate",
+            "wall_ms": 1450.9555000004184,
+            "point_edit_ms": 0.1555,
+            "document_total_ms": 1449.9972
+          },
+          {
+            "engine": "baseline",
+            "wall_ms": 1476.2358000007225,
+            "point_edit_ms": null,
+            "document_total_ms": 1475.3235
+          },
+          {
+            "engine": "baseline",
+            "wall_ms": 1515.1378999998997,
+            "point_edit_ms": null,
+            "document_total_ms": 1514.0506
+          },
+          {
+            "engine": "candidate",
+            "wall_ms": 1519.9493000000075,
+            "point_edit_ms": 0.1869,
+            "document_total_ms": 1518.8625
+          }
+        ],
+        "median_ms": {
+          "baseline": 1476.2358000007225,
+          "candidate": 1450.9555000004184
+        },
+        "candidate_over_baseline": 0.9828751612714637
+      }
+    ],
+    "kernel_ms": {
+      "min": 0.0122,
+      "median": 0.1069,
+      "max": 0.1625
+    },
+    "note": "Paired complete document requests, three moves/model, order alternated. This is not desktop frame rate or a statistically established speedup. Baseline path in the probe now resides in the backup directory."
+  },
+  "development_report": {
+    "path": "C:\\FreeShip26Tests\\reports\\qt-point-a\\qt-document\\report.json",
+    "sha256": "3d7483952c5ccf8d6e3097f7f49e39cec9e3e4a7e003fa41dd8e2c1fe8e99a49",
+    "counts": {
+      "pass": 2193,
+      "fail": 0,
+      "review": 2,
+      "not_run": 2,
+      "error": 0
+    },
+    "note": "Correct first implementation reloaded the adapter after each edit. Replaced with absolute coordinate deltas; final core and installed checks cover that path."
+  },
+  "time_accounting": {
+    "first_observed_utc": "2026-11-02T15:00:06+00:00",
+    "receipt_utc": "2026-11-02T15:58:58.139290+00:00",
+    "elapsed_wall_seconds": 3532.13929,
+    "core_first_run_s": 234.42439390000072,
+    "core_final_run_s": 209.4139500000001,
+    "note": "Installed window suites ran concurrently. Reading/design/coding/integration/diagnosis were not separately timed; do not label remaining elapsed time as test waiting."
+  },
+  "notes": [
+    "Coordinate computation and FBM coordinate writes execute in C++; the adapter rejects delegated move_point and move_points. Its private apply_document_points publishes already-computed coordinates without propagating constraints again.",
+    "The existing adapter work copy is reused. Cold recovery and undo still reload a full state. The immutable C++ candidate is committed only after returned coordinates and derived artifacts validate.",
+    "Remaining Pascal dependencies include topology, transform-menu semantics, constraint definitions, other FBM fields, four-view mesh generation and professional calculations. This is not complete native FBM re-encoding.",
+    "Old format/unknown-tail constraints still apply; no test expectation or numeric tolerance was weakened. One corpus file with an opaque tail and two files with no control points are intentionally not coordinate-written.",
+    "Tests use hidden actual Qt callbacks. Physical desktop interaction and full visual fidelity remain review/not_run; no computer-use acceptance was performed.",
+    "Reusable tests are retained in FreeShip-Tests. Reports and disposable builds are on C. User models, old FreeShip, QtPilot and fs are preserved."
+  ],
+  "maintenance_sources_sha256": {
+    "promote_runtime.ps1": "d0427a3964c2263a93768185d29f9f9cfba8600d48965c1b29518c443e4bb728",
+    "point_latency.py": "860b11eb218e6aa7ce97f0af41c61831aff67bd7440c9e4c55df19f110636203",
+    "record_point_delivery.py": "cf6f811a91c1033b0e8280ca46a10d8b22f50323216b130fc531c444cdfb532f"
+  },
+  "free_bytes_after": {
+    "C": 36330860544,
+    "D": 31146557440
+  }
+}

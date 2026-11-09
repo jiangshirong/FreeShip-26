@@ -1,0 +1,95 @@
+{
+  "created_utc": "2026-11-09T08:04:09.012562+00:00",
+  "status": "partial",
+  "scope": "Actual asymmetric XZ silhouette union, report integration and four-view hydrostatic markers",
+  "installed": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\dist",
+  "previous": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\dist-before-lateral-projection-20261109",
+  "package_manifest_sha256": "bd238ec10a943bb4a48b5c081d58b20996b5214b247a4d890bd3ed6f524e589a",
+  "reports": {
+    "projection": {
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\lateral-projection-20261109\\focused\\qt-lateral-projection\\report.json",
+      "sha256": "3bf3e84074b9c3e3d4ad2cbea398ca1755d911636c36675b73a4a19a1175aaf4",
+      "counts": {
+        "pass": 394,
+        "fail": 0,
+        "review": 1,
+        "not_run": 2,
+        "error": 0
+      }
+    },
+    "asymmetric": {
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\lateral-projection-20261109\\focused\\qt-asymmetric-hydro\\report.json",
+      "sha256": "defe4d763dec9f7eece1faa50ce6881c8b37617cf9c79d1886de6c6ff079490b",
+      "counts": {
+        "pass": 356,
+        "fail": 0,
+        "review": 0,
+        "not_run": 1,
+        "error": 0
+      }
+    },
+    "hydro": {
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\lateral-projection-20261109\\regression\\qt-hydro-auxiliary\\report.json",
+      "sha256": "bc34788922acee2f505b7ae2c527c63b4e6badf57bb977c60abd760b8edf1070",
+      "counts": {
+        "pass": 1563,
+        "fail": 0,
+        "review": 1,
+        "not_run": 2,
+        "error": 0
+      }
+    },
+    "options": {
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\lateral-projection-20261109\\regression\\qt-project-hydro\\report.json",
+      "sha256": "d87d310910fe2171f6fc239d9a1955b07fe78ce11bbdf4f6caccf860edfe2a18",
+      "counts": {
+        "pass": 1799,
+        "fail": 0,
+        "review": 0,
+        "not_run": 2,
+        "error": 0
+      }
+    },
+    "publication": {
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\lateral-projection-20261109\\regression\\qt-publication\\report.json",
+      "sha256": "e36afa53aae2cbbcc540ba61f433a8646f892b875bf4c39a62f6347c75353658",
+      "counts": {
+        "pass": 163,
+        "fail": 0,
+        "review": 0,
+        "not_run": 1,
+        "error": 0
+      }
+    },
+    "installed": {
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\lateral-projection-20261109\\installed\\qt-lateral-projection\\report.json",
+      "sha256": "6bf03f75fb95fb70d78beea67850c8cf25c231335d0fabe678185a6d543ebe56",
+      "counts": {
+        "pass": 394,
+        "fail": 0,
+        "review": 1,
+        "not_run": 2,
+        "error": 0
+      }
+    }
+  },
+  "counts": {
+    "pass": 4669,
+    "fail": 0,
+    "review": 3,
+    "not_run": 10,
+    "error": 0
+  },
+  "first_run": {
+    "path": "C:\\Users\\12968\\FreeShip26-TestResults\\lateral-projection-20261109\\first\\qt-lateral-projection\\report.json",
+    "sha256": "0b484e1b75ed56fff0d58221492b986a4ad130a1cbf3dfd84d0f237565c114fd"
+  },
+  "audit_script_sha256": "de3742f22c68741d4e0162106419a96a6e391db976d688019c8f5e2cad316726",
+  "limitations": [
+    "Counts include repeated installed checks, not unique user scenarios.",
+    "Real desktop input, DPI and overall visual acceptance remain untested.",
+    "Only participating hydrostatic surfaces contribute to wind projection; this is not complete superstructure wind loading.",
+    "Legacy one-sided entrance angle remains null for asymmetric hulls; symmetric-only historical integration is retained.",
+    "The normalized integer clipping grid is finer than stored Single mesh coordinates, not exact real arithmetic."
+  ]
+}

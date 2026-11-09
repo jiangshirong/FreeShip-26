@@ -1,0 +1,15 @@
+{
+  "Plan": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\maintenance\\retention-curves-iterations-20261101.json",
+  "Removed": [
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\reports\\qt-auxiliary-20261101-c",
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\reports\\qt-auxiliary-20261101-b",
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\reports\\qt-auxiliary-20261101-a",
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\reports\\qt-curves-core-probe-20261101-c",
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\reports\\qt-curves-core-probe-20261101",
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\reports\\qt-curves-core-probe-20261101-b"
+  ],
+  "RemovedCount": 6,
+  "FreeBefore": 12712202240,
+  "FreeAfter": 14004469760,
+  "FreedGiB": 1.2
+}

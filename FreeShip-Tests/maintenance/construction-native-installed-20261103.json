@@ -1,0 +1,146 @@
+{
+  "recorded_utc": "2026-11-03T01:19:35.533710+00:00",
+  "scope": "Five native commands: grid panel, cylinder, plane insertion, layer intersection and Lackenby; native pre-transformation measurements included.",
+  "installed": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\dist",
+  "previous_installation": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\dist-before-construction-native-20261103",
+  "manifest_sha256": "84b4570cc89217ebba5360d56fe6b3a6280060f0ba1c4974bb1202f0faf2a7a1",
+  "verified_package_files": 2514,
+  "binaries_sha256": {
+    "FreeShipQt.exe": "33a8277d283802504cc91afdf9c3d1498da13d2faa2baa19ea1fd405ee2dc07b",
+    "FreeShipDocumentService.exe": "1ce96368098a9b617ca03e9508fc56e7a45ac2ec3217aa37abec8298689c9085",
+    "FreeShipNativeLinesplan.exe": "a68e340a43e207773afa2cc0c74c3ed58d074514165e3dd5541bffcb6943fded",
+    "qt_document_codec_tests.exe": "0eee15b28d17146bb71028837df1404892e2269692f7177de3786baf2af3df39",
+    "bridge/FreeShipGeometryBridge.exe": "9729f50677d8e7e97d095db7b5efd8f44cfd2a77a531c99fc961864dd9a8c7ba"
+  },
+  "legacy_source_sha256": "277a3c69392c86fe14c375e7dfc9c3197b4162e982673cbbcf4b4a2dfff0ab6b",
+  "reports": {
+    "qt-document": {
+      "path": "C:\\FreeShip26Tests\\reports\\construction-native-final\\qt-document\\report.json",
+      "sha256": "37123ddb039571ca5bdc57a7a571f0cc055814767128f74a831109ab96d9fac1",
+      "counts": {
+        "pass": 6296,
+        "fail": 0,
+        "review": 2,
+        "not_run": 3,
+        "error": 0
+      },
+      "phase_seconds": {
+        "runtime_ready_s": 4.722791600004712,
+        "codec_s": 1.181063299998641,
+        "protocol_s": 152.88930529999925,
+        "native_point_edit_s": 13.668868900000234,
+        "native_topology_s": 39.1826665999979,
+        "native_modeling_s": 30.648189199993794,
+        "native_transforms_s": 49.83102030000009,
+        "native_construction_s": 23.178868999995757,
+        "native_lackenby_s": 97.21452580000187,
+        "modeling_service_s": 48.62939339999866,
+        "production_ui_s": 28.72643789999711
+      },
+      "elapsed_seconds": 491.04267750000145,
+      "scope": "Complete isolated suite; relevant binaries match the installation exactly."
+    },
+    "construction-modeling-native-installed": {
+      "path": "C:\\FreeShip26Tests\\reports\\construction-modeling-native-installed\\report.json",
+      "sha256": "87f95dd80505e48aabe543554671b9af565b96de4653333a059739420cb2ce37",
+      "counts": {
+        "pass": 182,
+        "fail": 0,
+        "review": 0,
+        "not_run": 1,
+        "error": 0
+      },
+      "scope": "Actual installed production Qt callbacks, hidden windows."
+    },
+    "construction-topology-native-installed": {
+      "path": "C:\\FreeShip26Tests\\reports\\construction-topology-native-installed\\report.json",
+      "sha256": "23fbf1a879970355128c05592e7f720158d8e70cfedfe584c8420e077f04915a",
+      "counts": {
+        "pass": 64,
+        "fail": 0,
+        "review": 0,
+        "not_run": 1,
+        "error": 0
+      },
+      "scope": "Actual installed production Qt callbacks, hidden windows."
+    },
+    "construction-auxiliary-native-installed": {
+      "path": "C:\\FreeShip26Tests\\reports\\construction-auxiliary-native-installed\\report.json",
+      "sha256": "e405c88ead9d7b6ca0c4f87e57908de7aa6ce5ea22fb15d787a3b1ee5704ddcb",
+      "counts": {
+        "pass": 55,
+        "fail": 0,
+        "review": 1,
+        "not_run": 1,
+        "error": 0
+      },
+      "scope": "Actual installed production Qt callbacks, hidden windows."
+    }
+  },
+  "combined_counts": {
+    "pass": 6597,
+    "fail": 0,
+    "review": 3,
+    "not_run": 6,
+    "error": 0
+  },
+  "codec": {
+    "cases": 292,
+    "supplied_files": 80
+  },
+  "candidate_kernel_ms": {
+    "native_topology_timings": {
+      "minimum": 0.3639,
+      "median": 0.70175,
+      "maximum": 1.2956,
+      "samples": 40
+    },
+    "native_modeling_timings": {
+      "minimum": 0.1796,
+      "median": 0.6355999999999999,
+      "maximum": 1.1704,
+      "samples": 14
+    },
+    "native_transform_timings": {
+      "minimum": 0.5852,
+      "median": 0.8906,
+      "maximum": 1.4008,
+      "samples": 23
+    },
+    "native_construction_timings": {
+      "minimum": 0.185,
+      "median": 0.8488,
+      "maximum": 1.3337,
+      "samples": 11
+    },
+    "native_lackenby_timings": {
+      "minimum": 21.4769,
+      "median": 101.1111,
+      "maximum": 774.2041,
+      "samples": 12
+    }
+  },
+  "time_accounting": {
+    "first_observed_utc": null,
+    "elapsed_wall_seconds": null,
+    "core_final_seconds": 491.04267750000145,
+    "note": "Only final regression phases are timed here. Earlier diagnosis, coding, review, builds and integration are not attributed to test waiting."
+  },
+  "notes": [
+    "No new numerical tolerances in full model, scene, DXF or section comparisons.",
+    "New intersection names survive file roundtrips. Near-endpoint cuts skip rejected insertions without publishing a partial edit.",
+    "Legacy plane-cut heap-order variants are retained with exact files and hashes. Native deterministic traversal matches the recorded variant byte for byte; the other known live variant is review, never epsilon-pass.",
+    "Kernel timings are candidate construction/encoding only, not complete request latency or GUI frame rate.",
+    "Remaining modeling tools, other field encoding, format upgrades, four-view mesh and full professional analysis still have Pascal dependencies; the native Lackenby measure is not a replacement for full hydrostatics.",
+    "Hidden callbacks do not establish physical desktop/visual acceptance. Test sources retained; reports and builds on C."
+  ],
+  "maintenance_sources_sha256": {
+    "record_native_construction_delivery.py": "690c0a278ec24d5fa34654bdcd5814a362585fafb5545f9a41b11e3eff47ae4d",
+    "record_topology_delivery.py": "dcb355a690a034c8b84582d824685a9e1992d1de59576de712a5f2d1b96e4f6c",
+    "promote_runtime.ps1": "d0427a3964c2263a93768185d29f9f9cfba8600d48965c1b29518c443e4bb728"
+  },
+  "free_bytes_after": {
+    "C": 25545936896,
+    "D": 30781513728
+  }
+}

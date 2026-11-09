@@ -1,0 +1,78 @@
+{
+  "recorded_utc": "2026-11-03T11:22:08.201421+00:00",
+  "scope": "Five native C++ propulsion workflows, existing Qt dialogs and original external solvers.",
+  "installed": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\dist",
+  "previous_installation": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\dist-before-propulsion-native-20261103",
+  "manifest_sha256": "ff1b661f3fc25027379d46a14760b238b59e67561b69eb4cfa66c6758d52887b",
+  "verified_package_files": 2533,
+  "legacy_source_sha256": "277a3c69392c86fe14c375e7dfc9c3197b4162e982673cbbcf4b4a2dfff0ab6b",
+  "binaries_sha256": {
+    "FreeShipQt.exe": "8c5c334964f71631d96db8e9d2c21d91472b8f95bc1a9b7a2a060965ea0b758f",
+    "FreeShipDocumentService.exe": "28982568b0b2ea41bc5193c137c035bf6bea655ac689cda2351d2eb2710564f6",
+    "FreeShipNativeLinesplan.exe": "32be8b2bb691413a263c5cccbce755f981658167e266a7250319c2189a51900f",
+    "FreeShipGeometryExport.exe": "be13f3ca9fe6bfdc2406fd5a0aa4e2de858137be5962da5b6e7216660ee1200d",
+    "bridge/FreeShipGeometryBridge.exe": "21aa020a3cfb63993ad965ee3f233220c02313cd05e4bc45647a6f0ddef04671"
+  },
+  "reports": {
+    "core": {
+      "path": "C:\\FreeShip26Tests\\reports\\propulsion-native-final-01\\qt-performance\\report.json",
+      "sha256": "158592beff0118d7d353b8b7b3fc57b9876c1991396b40f00cff27274a82e023",
+      "counts": {
+        "pass": 1133,
+        "fail": 0,
+        "review": 2,
+        "not_run": 7,
+        "error": 0
+      }
+    },
+    "installed_workflow": {
+      "path": "C:\\FreeShip26Tests\\reports\\propulsion-native-installed-01\\qt-performance\\report.json",
+      "sha256": "9a9feb786dab16363b596077059fdd9ecb3cec221faf09347ac6802973b656ac",
+      "counts": {
+        "pass": 29,
+        "fail": 0,
+        "review": 0,
+        "not_run": 1,
+        "error": 0
+      }
+    },
+    "startup": {
+      "path": "C:\\FreeShip26Tests\\reports\\propulsion-native-startup-01\\report.json",
+      "sha256": "a0b18e10bb79edaa98f237e150ca9c39fc6c9ce0bbc0bfbe78f57cf5cfe4c740",
+      "counts": {
+        "pass": 54,
+        "fail": 0,
+        "review": 0,
+        "not_run": 17,
+        "error": 0
+      }
+    }
+  },
+  "combined_counts": {
+    "pass": 1216,
+    "fail": 0,
+    "review": 2,
+    "not_run": 25,
+    "error": 0
+  },
+  "core_elapsed_seconds": 142.95465879999392,
+  "notes": [
+    "PropPred and all 11 FPPCALC families compared with original real outputs. Task4 caption repairs are checked separately from numeric parity.",
+    "CALCPROP Task1-3 still produce no output; recorded not_run. Fixed protocol fixtures are not physical-solver validation.",
+    "Old Task3 rejects the fixed complete protocol; review retained, with independent matrix and linear expectations for native postprocessing.",
+    "Four-point interval overrun, Task3 area overwrite, eight-material strength verdicts and missing numbered captions repaired.",
+    "Running cancellation and forced backend shutdown terminate the owned solver; cache extraction is document/revision scoped.",
+    "All 15 hidden Qt performance callbacks checked; installed native propulsion report/CSV and geometry equal the tested runtime.",
+    "Desktop input and full visual parity remain separate. Resistance methods and other remaining Pascal modules are outside this delivery.",
+    "Test sources and generators remain in FreeShip-Tests; output is on C. Solver binaries are not redistributed."
+  ],
+  "maintenance_sources_sha256": {
+    "record_propulsion_native_delivery.py": "56cd9801b2479fb98a40ff319103592908ee3d82f6e718b779dbc0038e02c502",
+    "record_topology_delivery.py": "dcb355a690a034c8b84582d824685a9e1992d1de59576de712a5f2d1b96e4f6c",
+    "promote_runtime.ps1": "d0427a3964c2263a93768185d29f9f9cfba8600d48965c1b29518c443e4bb728"
+  },
+  "free_bytes_after": {
+    "C": 4073697280,
+    "D": 29668720640
+  }
+}

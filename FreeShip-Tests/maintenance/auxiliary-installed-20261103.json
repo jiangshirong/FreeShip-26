@@ -1,0 +1,156 @@
+{
+  "recorded_utc": "2026-11-03T05:34:17.623036+00:00",
+  "scope": "Native background image edits, display settings and control-curve/flowline definitions, including history/save and existing Qt entry points.",
+  "installed": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\dist",
+  "previous_installation": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\dist-before-auxiliary-20261103",
+  "manifest_sha256": "9ffb508e5c85b9ef7f3ba874389ee4b285204c7ebba42fdc1c672b2d9b9e41e6",
+  "verified_package_files": 2525,
+  "binaries_sha256": {
+    "FreeShipQt.exe": "1e0a8f8b3cdaa669e3736eb927945039b79bba7137b36e0c6cbcc13dff94be35",
+    "FreeShipDocumentService.exe": "b8fc0055d07bab0aca7d0828b0ff936d1fb6922cbf5edea76dba0220a72b6e98",
+    "FreeShipNativeLinesplan.exe": "a68e340a43e207773afa2cc0c74c3ed58d074514165e3dd5541bffcb6943fded",
+    "qt_document_codec_tests.exe": "6bea534e1060f50264796a13ebfbe782909dd15950ca0037fb9d6daef6e76f11",
+    "native_auxiliary_edit_probe.exe": "7966ba9aed4f696a9a8e4b44b1c0be47e0c23103ed4ce050e6fe07f5403c6d08",
+    "native_background_edit_probe.exe": "ed6689a226f60088180ad566b7af124f95781cad228c3b5b596655bc0cbc41de",
+    "bridge/FreeShipGeometryBridge.exe": "d52bd040823c9a4f13367ea86d1e8df5f0e507d971ba292c36b763a88dda6abf"
+  },
+  "legacy_source_sha256": "277a3c69392c86fe14c375e7dfc9c3197b4162e982673cbbcf4b4a2dfff0ab6b",
+  "reports": {
+    "qt-document": {
+      "path": "C:\\FreeShip26Tests\\reports\\auxiliary-effective-01\\report.json",
+      "sha256": "20912cda2e2b02bf2ea6e3f2669e0fa533e2992b395a28d12ebac3128e41a468",
+      "counts": {
+        "pass": 10219,
+        "fail": 0,
+        "review": 27,
+        "not_run": 3,
+        "error": 0
+      },
+      "phase_seconds": {
+        "runtime_ready_s": 7.043967300000077,
+        "codec_s": 1.0385578999994323,
+        "protocol_s": 93.61506319999899,
+        "native_point_edit_s": 5.4819824999940465,
+        "native_topology_s": 17.417641499996535,
+        "native_modeling_s": 16.269636599994556,
+        "native_transforms_s": 18.64377990000503,
+        "native_construction_s": 8.880424400005722,
+        "native_lackenby_s": 36.56549050000467,
+        "native_attributes_s": 5.347233699998469,
+        "native_face_tools_s": 20.073645899996336,
+        "native_project_s": 28.265121200005524,
+        "native_definitions_s": 21.90461420000065,
+        "native_auxiliary_s": 18.352321099999244,
+        "native_background_s": 10.211839199997485,
+        "modeling_service_s": 19.149981900001876,
+        "production_ui_s": 15.479856400001154
+      },
+      "elapsed_seconds": 353.44950610000524,
+      "scope": "Complete original run plus construction-only recheck; original report remains unchanged."
+    },
+    "auxiliary-installed-backgrounds": {
+      "path": "C:\\FreeShip26Tests\\reports\\auxiliary-installed-backgrounds\\report.json",
+      "sha256": "bc33f6c7780b346ad92b7e3a17c66c88c6df30e39df52d3604fef9c45a7579f6",
+      "counts": {
+        "pass": 214,
+        "fail": 0,
+        "review": 3,
+        "not_run": 4,
+        "error": 0
+      },
+      "scope": "Actual installed Qt callbacks in private hidden windows."
+    },
+    "auxiliary-installed-display": {
+      "path": "C:\\FreeShip26Tests\\reports\\auxiliary-installed-display\\report.json",
+      "sha256": "ed6cd9a34833c08814a70d9d0f6bd2db5b95b37aa200f3575ff08dcd2dc1fc27",
+      "counts": {
+        "pass": 130,
+        "fail": 0,
+        "review": 3,
+        "not_run": 1,
+        "error": 0
+      },
+      "scope": "Actual installed Qt callbacks in private hidden windows."
+    },
+    "auxiliary-installed-auxiliary": {
+      "path": "C:\\FreeShip26Tests\\reports\\auxiliary-installed-auxiliary\\report.json",
+      "sha256": "2ab18f03aa7be712b2f91c5bd248608d0ec55ef57913a6830f9c01b8c8dde5e7",
+      "counts": {
+        "pass": 151,
+        "fail": 0,
+        "review": 3,
+        "not_run": 1,
+        "error": 0
+      },
+      "scope": "Actual installed Qt callbacks in private hidden windows."
+    }
+  },
+  "combined_counts": {
+    "pass": 10714,
+    "fail": 0,
+    "review": 36,
+    "not_run": 9,
+    "error": 0
+  },
+  "codec": {
+    "cases": 296,
+    "supplied_files": 80
+  },
+  "candidate_kernel_ms": {
+    "native_auxiliary_timings": {
+      "samples": 35,
+      "minimum": 0.1113,
+      "median": 0.2496,
+      "maximum": 0.4312
+    },
+    "native_background_timings": {
+      "samples": 22,
+      "minimum": 0.0285,
+      "median": 2.826,
+      "maximum": 8.0252
+    }
+  },
+  "notes": [
+    "No relaxed coordinate or export tolerances. Existing JPEG bytes and quality fields are preserved.",
+    "The original loader still limits production opening of some pre-1.65 formats; direct native probes cover their layout.",
+    "Control curves retain graph ordering and stable IDs; invalid flow traces and failed publication do not commit.",
+    "Auxiliary spline/flowline computation, old format conversion/new/import, four-view mesh, analysis parameter editing and professional analysis still have Pascal dependencies.",
+    "Hidden callbacks are not physical desktop acceptance. Reusable test source retained; outputs and builds are on C."
+  ],
+  "validation_mode": "Complete original run plus construction-only recheck; original report remains unchanged.",
+  "validation_runs": [
+    {
+      "path": "C:\\FreeShip26Tests\\reports\\auxiliary-final-02\\qt-document\\report.json",
+      "sha256": "f9a6fc54984e9ab8e51a9193c752c57b9255ebf044b4b25ce1d15d0fb33abe74",
+      "counts": {
+        "pass": 10211,
+        "fail": 6,
+        "review": 21,
+        "not_run": 3,
+        "error": 0
+      }
+    },
+    {
+      "path": "C:\\FreeShip26Tests\\reports\\auxiliary-effective-01\\construction-report.json",
+      "sha256": "a4f71b1eef44f4f493408ecd6f703a937a5c1d6bb329193349509a4638737377",
+      "counts": {
+        "pass": 266,
+        "fail": 0,
+        "review": 9,
+        "not_run": 0,
+        "error": 0
+      }
+    }
+  ],
+  "maintenance_sources_sha256": {
+    "record_auxiliary_delivery.py": "cbe4a5f1ad7e3e2b74fae93989a429cd786b8a6463e3c86c785c9ab780ecc31d",
+    "record_topology_delivery.py": "dcb355a690a034c8b84582d824685a9e1992d1de59576de712a5f2d1b96e4f6c",
+    "plane_oracle_replay.py": "b3783be9e7c0dad705c3f48d80c5fc65201cb8d7f6b9d0d8b9bd8d3e4f82a7c0",
+    "recheck_document_construction.py": "672bf18eaaf1ac6dac652f9d27b7a71d114bebf53d1abe77f202a05cd1d09abe",
+    "promote_runtime.ps1": "d0427a3964c2263a93768185d29f9f9cfba8600d48965c1b29518c443e4bb728"
+  },
+  "free_bytes_after": {
+    "C": 16516702208,
+    "D": 30305517568
+  }
+}

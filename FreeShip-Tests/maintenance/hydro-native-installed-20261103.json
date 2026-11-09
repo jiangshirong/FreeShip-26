@@ -1,0 +1,375 @@
+{
+  "recorded_utc": "2026-11-03T10:37:09.423521+00:00",
+  "scope": "Native hydrostatics single/table, fixed/free-trim equilibrium, KN/GZ and defaults through existing Qt workflows.",
+  "installed": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\dist",
+  "previous_installation": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\dist-before-hydro-native-20261103",
+  "manifest_sha256": "c32febf8ea2c0d530d89f0ef7fdea0b76b6e41e4480d80af0d3045e53489c29e",
+  "verified_package_files": 2532,
+  "legacy_source_sha256": "277a3c69392c86fe14c375e7dfc9c3197b4162e982673cbbcf4b4a2dfff0ab6b",
+  "binaries_sha256": {
+    "FreeShipQt.exe": "8c5c334964f71631d96db8e9d2c21d91472b8f95bc1a9b7a2a060965ea0b758f",
+    "FreeShipDocumentService.exe": "d271da1a27fb78c690aeedfb645715e6bfe4dca17c543ea6c27e3bad4dee5ee0",
+    "FreeShipNativeLinesplan.exe": "32be8b2bb691413a263c5cccbce755f981658167e266a7250319c2189a51900f",
+    "qt_document_codec_tests.exe": "243b963035c11ba2c914eee6bf1c8feb5b2efe6d2ebab8fd6f67fc38f6d13f7c",
+    "qt_exchange_tests.exe": "b3764a18639819aaed4af8e6a9d40df568de21608fd9538f1985ae3aed19d505",
+    "bridge/FreeShipGeometryBridge.exe": "5a003cf2997a25a488c3eab5436d86962fabf2dfea67d51558e7c6e956c4e259"
+  },
+  "reports": {
+    "core": {
+      "path": "C:\\FreeShip26Tests\\reports\\hydro-native-final-01\\qt-document\\report.json",
+      "sha256": "aa1285862a942f1609eaabf5519bf9c9ac661e0f20b22689736c8af2c25d98d3",
+      "counts": {
+        "pass": 13917,
+        "fail": 0,
+        "review": 23,
+        "not_run": 3,
+        "error": 0
+      }
+    },
+    "exchange": {
+      "path": "C:\\FreeShip26Tests\\reports\\hydro-native-installed-exchange\\qt-exchange\\report.json",
+      "sha256": "f611a84e93b5f6ceb577eebc32949a09681bdf4356d367ffef4a97496d7b4fff",
+      "counts": {
+        "pass": 280,
+        "fail": 0,
+        "review": 1,
+        "not_run": 1,
+        "error": 0
+      }
+    },
+    "startup": {
+      "path": "C:\\FreeShip26Tests\\reports\\hydro-native-installed-startup\\report.json",
+      "sha256": "2c6a6a2432580ba8cce4424480cd9687e33e0565f0c020144a8c10d0317fa790",
+      "counts": {
+        "pass": 54,
+        "fail": 0,
+        "review": 0,
+        "not_run": 17,
+        "error": 0
+      }
+    }
+  },
+  "combined_counts": {
+    "pass": 14251,
+    "fail": 0,
+    "review": 24,
+    "not_run": 21,
+    "error": 0
+  },
+  "document_seconds": 711.9847697000077,
+  "phase_seconds": {
+    "runtime_ready_s": 1.0060706000076607,
+    "codec_s": 1.1546940999978688,
+    "protocol_s": 137.52632590000576,
+    "native_point_edit_s": 7.139991499992902,
+    "native_topology_s": 19.85322449999512,
+    "native_modeling_s": 16.55490839999402,
+    "native_transforms_s": 25.914409000004525,
+    "native_construction_s": 11.820342400009395,
+    "native_lackenby_s": 52.021174299996346,
+    "native_attributes_s": 7.498291900003096,
+    "native_face_tools_s": 27.43526510000811,
+    "native_project_s": 40.29727290000301,
+    "native_definitions_s": 29.496700399991823,
+    "native_auxiliary_s": 24.887703400003375,
+    "native_background_s": 13.183216899997205,
+    "native_surface_s": 77.69484219999867,
+    "native_create_s": 27.42276220000349,
+    "native_analysis_s": 25.51368379998894,
+    "native_flowlines_s": 16.58666080000694,
+    "native_hydrostatics_s": 110.84526720001304,
+    "modeling_service_s": 22.71971059999487,
+    "production_ui_s": 14.770028900005855
+  },
+  "hydro_timings": [
+    {
+      "model": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-MCP\\examples\\box.fbm",
+      "mode": "single",
+      "condition": {
+        "draft": 4.0,
+        "heel": 0,
+        "trim": 0
+      },
+      "native_ms": 13,
+      "legacy_ms": 0,
+      "mesh_reused": true,
+      "sections": 179
+    },
+    {
+      "model": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-MCP\\examples\\box.fbm",
+      "mode": "single",
+      "condition": {
+        "draft": 3.2,
+        "heel": 0,
+        "trim": 0
+      },
+      "native_ms": 13,
+      "legacy_ms": 0,
+      "mesh_reused": true,
+      "sections": 179
+    },
+    {
+      "model": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-MCP\\examples\\box.fbm",
+      "mode": "single",
+      "condition": {
+        "draft": 4.0,
+        "heel": 5,
+        "trim": 0
+      },
+      "native_ms": 12,
+      "legacy_ms": 15,
+      "mesh_reused": true,
+      "sections": 176
+    },
+    {
+      "model": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-MCP\\examples\\box.fbm",
+      "mode": "single",
+      "condition": {
+        "draft": 4.0,
+        "heel": 0,
+        "trim": 0.2
+      },
+      "native_ms": 13,
+      "legacy_ms": 15,
+      "mesh_reused": true,
+      "sections": 154
+    },
+    {
+      "model": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-MCP\\examples\\box.fbm",
+      "mode": "cross",
+      "free_trim": false,
+      "native_ms": 0,
+      "legacy_ms": 438,
+      "evaluations": 45
+    },
+    {
+      "model": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-MCP\\examples\\box.fbm",
+      "mode": "cross",
+      "free_trim": true,
+      "native_ms": 0,
+      "legacy_ms": 500,
+      "evaluations": 45
+    },
+    {
+      "model": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-MCP\\examples\\synthetic-hull.fbm",
+      "mode": "single",
+      "condition": {
+        "draft": 3.0,
+        "heel": 0,
+        "trim": 0
+      },
+      "native_ms": 68,
+      "legacy_ms": 78,
+      "mesh_reused": true,
+      "sections": 172
+    },
+    {
+      "model": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-MCP\\examples\\synthetic-hull.fbm",
+      "mode": "single",
+      "condition": {
+        "draft": 2.4000000000000004,
+        "heel": 0,
+        "trim": 0
+      },
+      "native_ms": 48,
+      "legacy_ms": 63,
+      "mesh_reused": true,
+      "sections": 172
+    },
+    {
+      "model": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-MCP\\examples\\synthetic-hull.fbm",
+      "mode": "single",
+      "condition": {
+        "draft": 3.0,
+        "heel": 5,
+        "trim": 0
+      },
+      "native_ms": 60,
+      "legacy_ms": 78,
+      "mesh_reused": true,
+      "sections": 172
+    },
+    {
+      "model": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-MCP\\examples\\synthetic-hull.fbm",
+      "mode": "single",
+      "condition": {
+        "draft": 3.0,
+        "heel": 0,
+        "trim": 0.4
+      },
+      "native_ms": 47,
+      "legacy_ms": 78,
+      "mesh_reused": true,
+      "sections": 172
+    },
+    {
+      "model": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-MCP\\examples\\synthetic-hull.fbm",
+      "mode": "cross",
+      "free_trim": false,
+      "native_ms": 63,
+      "legacy_ms": 1266,
+      "evaluations": 43
+    },
+    {
+      "model": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-MCP\\examples\\synthetic-hull.fbm",
+      "mode": "cross",
+      "free_trim": true,
+      "native_ms": 51,
+      "legacy_ms": 1563,
+      "evaluations": 43
+    },
+    {
+      "model": "D:\\桌面文件夹\\学习\\大学课程\\过考试\\船舶设计原理\\9a\\9a-Женя.fbm",
+      "mode": "single",
+      "condition": {
+        "draft": 10.850000381469727,
+        "heel": 0,
+        "trim": 0
+      },
+      "native_ms": 242,
+      "legacy_ms": 172,
+      "mesh_reused": true,
+      "sections": 901
+    },
+    {
+      "model": "D:\\桌面文件夹\\学习\\大学课程\\过考试\\船舶设计原理\\9a\\9a-Женя.fbm",
+      "mode": "single",
+      "condition": {
+        "draft": 8.680000305175781,
+        "heel": 0,
+        "trim": 0
+      },
+      "native_ms": 239,
+      "legacy_ms": 172,
+      "mesh_reused": true,
+      "sections": 788
+    },
+    {
+      "model": "D:\\桌面文件夹\\学习\\大学课程\\过考试\\船舶设计原理\\9a\\9a-Женя.fbm",
+      "mode": "single",
+      "condition": {
+        "draft": 10.850000381469727,
+        "heel": 5,
+        "trim": 0
+      },
+      "native_ms": 271,
+      "legacy_ms": 219,
+      "mesh_reused": true,
+      "sections": 881
+    },
+    {
+      "model": "D:\\桌面文件夹\\学习\\大学课程\\过考试\\船舶设计原理\\9a\\9a-Женя.fbm",
+      "mode": "single",
+      "condition": {
+        "draft": 10.850000381469727,
+        "heel": 0,
+        "trim": 1.891300048828125
+      },
+      "native_ms": 113,
+      "legacy_ms": 109,
+      "mesh_reused": true,
+      "sections": 362
+    },
+    {
+      "model": "D:\\桌面文件夹\\学习\\大学课程\\过考试\\船舶设计原理\\9a\\9a-Женя.fbm",
+      "mode": "cross",
+      "free_trim": false,
+      "native_ms": 81,
+      "legacy_ms": 9015,
+      "evaluations": 62
+    },
+    {
+      "model": "D:\\桌面文件夹\\学习\\大学课程\\过考试\\船舶设计原理\\9a\\9a-Женя.fbm",
+      "mode": "cross",
+      "free_trim": true,
+      "native_ms": 1151,
+      "legacy_ms": 54672,
+      "evaluations": 718
+    },
+    {
+      "model": "C:\\FreeShip26Tests\\reports\\hydro-native-final-01\\qt-document\\native-hydrostatics\\parity\\materials.fbm",
+      "mode": "single",
+      "condition": {
+        "draft": 1.0,
+        "heel": 0,
+        "trim": 0
+      },
+      "native_ms": 50,
+      "legacy_ms": 32,
+      "mesh_reused": true,
+      "sections": 321
+    },
+    {
+      "model": "C:\\FreeShip26Tests\\reports\\hydro-native-final-01\\qt-document\\native-hydrostatics\\parity\\materials.fbm",
+      "mode": "single",
+      "condition": {
+        "draft": 0.8,
+        "heel": 0,
+        "trim": 0
+      },
+      "native_ms": 69,
+      "legacy_ms": 47,
+      "mesh_reused": true,
+      "sections": 324
+    },
+    {
+      "model": "C:\\FreeShip26Tests\\reports\\hydro-native-final-01\\qt-document\\native-hydrostatics\\parity\\materials.fbm",
+      "mode": "single",
+      "condition": {
+        "draft": 1.0,
+        "heel": 5,
+        "trim": 0
+      },
+      "native_ms": 52,
+      "legacy_ms": 47,
+      "mesh_reused": true,
+      "sections": 324
+    },
+    {
+      "model": "C:\\FreeShip26Tests\\reports\\hydro-native-final-01\\qt-document\\native-hydrostatics\\parity\\materials.fbm",
+      "mode": "single",
+      "condition": {
+        "draft": 1.0,
+        "heel": 0,
+        "trim": 0.1
+      },
+      "native_ms": 25,
+      "legacy_ms": 16,
+      "mesh_reused": true,
+      "sections": 155
+    },
+    {
+      "model": "C:\\FreeShip26Tests\\reports\\hydro-native-final-01\\qt-document\\native-hydrostatics\\parity\\materials.fbm",
+      "mode": "cross",
+      "free_trim": false,
+      "native_ms": 2,
+      "legacy_ms": 2250,
+      "evaluations": 65
+    },
+    {
+      "model": "C:\\FreeShip26Tests\\reports\\hydro-native-final-01\\qt-document\\native-hydrostatics\\parity\\materials.fbm",
+      "mode": "cross",
+      "free_trim": true,
+      "native_ms": 1,
+      "legacy_ms": 1859,
+      "evaluations": 65
+    }
+  ],
+  "notes": [
+    "Original Single storage, sample density and numerical tolerances retained. Independent box formulas supplement old-core comparisons.",
+    "Equilibrium skips unused maximum-section searches; per-document mesh reuse is checked across edits and undo.",
+    "Asymmetric section/metacentre data remains explicitly unavailable; regulatory/damage-stability criteria are outside this migration.",
+    "Existing hidden Qt callbacks cover all hydro modes, cancellation and four report formats. Physical desktop acceptance is separate.",
+    "Other analysis and internal annotation routes still use the legacy adapter. This is not a claim that all migration is complete.",
+    "Test code remains in FreeShip-Tests; generated builds and reports are on C."
+  ],
+  "maintenance_sources_sha256": {
+    "record_hydro_native_delivery.py": "acd04762d765fd1fe0d707e03fae1898f0dac5a86228624f2fbab64355b93187",
+    "record_topology_delivery.py": "dcb355a690a034c8b84582d824685a9e1992d1de59576de712a5f2d1b96e4f6c",
+    "promote_runtime.ps1": "d0427a3964c2263a93768185d29f9f9cfba8600d48965c1b29518c443e4bb728"
+  },
+  "free_bytes_after": {
+    "C": 6359920640,
+    "D": 29799280640
+  }
+}

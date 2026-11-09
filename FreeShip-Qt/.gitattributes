@@ -1,0 +1,7 @@
+* text=auto eol=lf
+*.png binary
+*.jpg binary
+*.fbm binary
+*.fslp binary
+# Preserve the recorded upstream license bytes, including its original EOF.
+third_party/shipcad/LICENSE -text whitespace=cr-at-eol,-blank-at-eof

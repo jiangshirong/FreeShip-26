@@ -1,0 +1,156 @@
+{
+  "recorded_utc": "2026-11-03T00:31:54.827067+00:00",
+  "scope": "13 additional native commands: 3 transforms, point/edge extrusion, mirror, face merge and 6 point-constraint commands.",
+  "installed": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\dist",
+  "previous_installation": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\dist-before-modeling-native-20261103",
+  "manifest_sha256": "854f2f524167fbae2e619ff98ead3f4969a5f7c19d6179e816e2fb31e66105d3",
+  "verified_package_files": 2513,
+  "binaries_sha256": {
+    "FreeShipQt.exe": "33a8277d283802504cc91afdf9c3d1498da13d2faa2baa19ea1fd405ee2dc07b",
+    "FreeShipDocumentService.exe": "7b1d51cf54a28d726a3624ea6e9dd6b9b8d67c4e4d0a10728ac04908e46ee79e",
+    "FreeShipNativeLinesplan.exe": "a68e340a43e207773afa2cc0c74c3ed58d074514165e3dd5541bffcb6943fded",
+    "qt_document_codec_tests.exe": "3f50ae3ed0e4a320b8458bf68134ea848ccfd37256e6d54e1c0f030e65f0ac83",
+    "bridge/FreeShipGeometryBridge.exe": "c12e4686132139b58d79d9ee904bcecaee729700ced6ee628ab27848ae0c1b97"
+  },
+  "legacy_source_sha256": "277a3c69392c86fe14c375e7dfc9c3197b4162e982673cbbcf4b4a2dfff0ab6b",
+  "reports": {
+    "qt-document": {
+      "path": "C:\\FreeShip26Tests\\reports\\qt-modeling-native-final\\qt-document\\report.json",
+      "sha256": "35ef2f5d78d6536496fd3f25b372297555321a0366efb2f029f811b511026a3a",
+      "counts": {
+        "pass": 5390,
+        "fail": 0,
+        "review": 2,
+        "not_run": 3,
+        "error": 0
+      },
+      "phase_seconds": {
+        "runtime_ready_s": 30.193440199996985,
+        "codec_s": 3.1785177999990992,
+        "protocol_s": 174.0989588999946,
+        "native_point_edit_s": 8.62274669999897,
+        "native_topology_s": 43.45912540000427,
+        "native_modeling_s": 36.682313199999044,
+        "native_transforms_s": 56.46625859999767,
+        "modeling_service_s": 46.24845639999694,
+        "production_ui_s": 36.68470510000043
+      },
+      "elapsed_seconds": 438.2648679999984,
+      "scope": "Complete isolated suite; relevant binaries match the installation exactly."
+    },
+    "qt-advanced-native-installed": {
+      "path": "C:\\FreeShip26Tests\\reports\\qt-advanced-native-installed\\report.json",
+      "sha256": "6860f57db565f147e1245eadab958b3f70f6a2f36e712594cbcdfc996bc18d9c",
+      "counts": {
+        "pass": 151,
+        "fail": 0,
+        "review": 3,
+        "not_run": 1,
+        "error": 0
+      },
+      "scope": "Actual installed production Qt callbacks, hidden windows."
+    },
+    "qt-modeling-native-installed": {
+      "path": "C:\\FreeShip26Tests\\reports\\qt-modeling-native-installed\\report.json",
+      "sha256": "66e6cb067ed29050a6d8f2e9d5c3ad8224f4fef8c7bbdf809b3c50c2f564d4f8",
+      "counts": {
+        "pass": 176,
+        "fail": 0,
+        "review": 0,
+        "not_run": 1,
+        "error": 0
+      },
+      "scope": "Actual installed production Qt callbacks, hidden windows."
+    },
+    "qt-topology-modeling-native-installed": {
+      "path": "C:\\FreeShip26Tests\\reports\\qt-topology-modeling-native-installed\\report.json",
+      "sha256": "f97ce1bb34ec94ac73eefee84f3453dc5f8029585d20ee44ec62a48107cec424",
+      "counts": {
+        "pass": 64,
+        "fail": 0,
+        "review": 0,
+        "not_run": 1,
+        "error": 0
+      },
+      "scope": "Actual installed production Qt callbacks, hidden windows."
+    },
+    "qt-auxiliary-modeling-native-installed": {
+      "path": "C:\\FreeShip26Tests\\reports\\qt-auxiliary-modeling-native-installed\\report.json",
+      "sha256": "515cf3e5f2580f9cb3248a43b8a4f31ccfa148cbc3e5ef069095a61e3f7b0443",
+      "counts": {
+        "pass": 55,
+        "fail": 0,
+        "review": 1,
+        "not_run": 1,
+        "error": 0
+      },
+      "scope": "Actual installed production Qt callbacks, hidden windows."
+    },
+    "qt-sections-modeling-native-installed": {
+      "path": "C:\\FreeShip26Tests\\reports\\qt-sections-modeling-native-installed\\report.json",
+      "sha256": "ae2e3c28f80c1c5a6fdcfa9d70bd941e17abf90f10b3edf9a56814f055b90531",
+      "counts": {
+        "pass": 214,
+        "fail": 0,
+        "review": 0,
+        "not_run": 1,
+        "error": 0
+      },
+      "scope": "Actual installed production Qt callbacks, hidden windows."
+    }
+  },
+  "combined_counts": {
+    "pass": 6050,
+    "fail": 0,
+    "review": 6,
+    "not_run": 8,
+    "error": 0
+  },
+  "codec": {
+    "cases": 292,
+    "supplied_files": 80
+  },
+  "candidate_kernel_ms": {
+    "native_topology_timings": {
+      "minimum": 0.2517,
+      "median": 0.7862,
+      "maximum": 1.3822,
+      "samples": 40
+    },
+    "native_modeling_timings": {
+      "minimum": 0.1987,
+      "median": 0.7244999999999999,
+      "maximum": 1.2072,
+      "samples": 14
+    },
+    "native_transform_timings": {
+      "minimum": 0.2282,
+      "median": 1.0311,
+      "maximum": 1.4344,
+      "samples": 23
+    }
+  },
+  "time_accounting": {
+    "first_observed_utc": "2026-11-02T16:43:24+00:00",
+    "elapsed_wall_seconds": 28110.827067,
+    "core_final_seconds": 438.2648679999984,
+    "note": "Focused diagnosis, coding, review, builds and integration also occurred. Wall time minus this final suite is not a measurement of coding time."
+  },
+  "notes": [
+    "No new numerical tolerances in full model, scene, DXF or section comparisons.",
+    "Live reverse dependency order is captured and restored privately; FBM format is unchanged.",
+    "Whole-model scale covers the ten legacy resistance records; eight other calculation records and padding are preserved.",
+    "Kernel timings are candidate construction/encoding only, not complete request latency or GUI frame rate.",
+    "Remaining modeling tools, other field encoding, format upgrades, four-view mesh and professional analysis still have Pascal dependencies.",
+    "Hidden callbacks do not establish physical desktop/visual acceptance. Test sources retained; reports and builds on C."
+  ],
+  "maintenance_sources_sha256": {
+    "record_native_modeling_delivery.py": "87e5ad1440826cf67a17d6ff79a3234ed967e0c48c2b59902ff56b91c29f12e3",
+    "record_topology_delivery.py": "dcb355a690a034c8b84582d824685a9e1992d1de59576de712a5f2d1b96e4f6c",
+    "promote_runtime.ps1": "d0427a3964c2263a93768185d29f9f9cfba8600d48965c1b29518c443e4bb728"
+  },
+  "free_bytes_after": {
+    "C": 29161615360,
+    "D": 30912606208
+  }
+}

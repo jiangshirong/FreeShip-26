@@ -1,0 +1,240 @@
+{
+  "created_utc": "2026-11-09T04:26:41.398379+00:00",
+  "scope": "Correct historical snapshot/oracle expectations and complete document regression",
+  "product_runtime_unchanged": true,
+  "runtime": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\dist",
+  "build_manifest_sha256": "0cd124c25304df39548dac0ccc82252d8722a9c6a67792923ab1f74656213a17",
+  "previous_delivery": {
+    "path": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\maintenance\\save-confirmation-delivery-20261109.json",
+    "sha256": "50c047e742a7307039dfc2d9b6434e521d0592dd268e13937e735e50d6e256c5"
+  },
+  "original_failures": {
+    "path": "C:\\Users\\12968\\FreeShip26-TestResults\\save-confirmation-20261109\\related-regression\\qt-document\\report.json",
+    "sha256": "53fa9bd73eedf20f329051c5c6186e8bd543df34b802bf2b1de5bc498af5a353",
+    "counts": {
+      "pass": 4013,
+      "fail": 36,
+      "review": 0,
+      "not_run": 1,
+      "error": 1
+    }
+  },
+  "reports": {
+    "construction": {
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\document-regressions-20261109\\construction\\report.json",
+      "sha256": "e8e64e82c676167c5203c1dfaba3c79914b4387060b397121ba3cb0363035eab",
+      "counts": {
+        "pass": 272,
+        "fail": 0,
+        "review": 9,
+        "not_run": 0,
+        "error": 0
+      }
+    },
+    "lackenby": {
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\document-regressions-20261109\\lackenby\\report.json",
+      "sha256": "a4305d0316557720f0e29b8f3110a0edecda27559f22c7fefb69d6182e8b733a",
+      "counts": {
+        "pass": 682,
+        "fail": 0,
+        "review": 0,
+        "not_run": 0,
+        "error": 0
+      }
+    },
+    "face-tools": {
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\document-regressions-20261109\\face-tools\\report.json",
+      "sha256": "09c1a3d73d7fbe10c45ad4cb0cb32a5a32fe025f6ea70dff90155f688fb229d0",
+      "counts": {
+        "pass": 677,
+        "fail": 0,
+        "review": 12,
+        "not_run": 0,
+        "error": 0
+      }
+    },
+    "full": {
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\document-regressions-20261109\\rechecked\\report.json",
+      "sha256": "c5b422b952a130be2213add9e10a809da9b27a8419c9245ad236d59fcb183168",
+      "counts": {
+        "pass": 14385,
+        "fail": 0,
+        "review": 32,
+        "not_run": 3,
+        "error": 0
+      }
+    },
+    "initial-full": {
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\document-regressions-20261109\\full\\qt-document\\report.json",
+      "sha256": "0d35aece8c173f5777e51639614da5bd2971414e86a546e48d42a76c1572ee17",
+      "counts": {
+        "pass": 14237,
+        "fail": 29,
+        "review": 26,
+        "not_run": 3,
+        "error": 0
+      }
+    }
+  },
+  "phase_seconds": {
+    "runtime_ready_s": 1.2029713000520132,
+    "codec_s": 0.7179790000081994,
+    "protocol_s": 98.38629190000938,
+    "native-points_s": 4.701082400046289,
+    "native-topology_s": 16.296798399998806,
+    "native-modeling_s": 9.909940799989272,
+    "native-transforms_s": 13.539922900032252,
+    "native-construction_s": 6.775312400015537,
+    "native-lackenby_s": 39.51734879997093,
+    "native-attributes_s": 7.821891500032507,
+    "native-face-tools_s": 26.1466853999882,
+    "native-project_s": 42.98341839999193,
+    "native-definitions_s": 32.20789630000945,
+    "native-auxiliary_s": 16.37180459999945,
+    "native-background_s": 9.232680200017057,
+    "native-surface_s": 56.67229720001342,
+    "native-create_s": 18.359067099983804,
+    "native-analysis_s": 19.235384800005704,
+    "native-flowlines_s": 15.386545999965165,
+    "native-hydrostatics_s": 84.54889320000075,
+    "modeling-service_s": 8.297924500016961,
+    "modeling-extra_s": 9.639115899975877,
+    "production-ui_s": 23.920595499977935
+  },
+  "validation_runs": [
+    {
+      "name": "original-full",
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\document-regressions-20261109\\full\\qt-document\\report.json",
+      "sha256": "0d35aece8c173f5777e51639614da5bd2971414e86a546e48d42a76c1572ee17",
+      "counts": {
+        "pass": 14237,
+        "fail": 29,
+        "review": 26,
+        "not_run": 3,
+        "error": 0
+      }
+    },
+    {
+      "name": "construction",
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\document-regressions-20261109\\rechecked\\construction-report.json",
+      "sha256": "8be929dd1cd8726ab07f1b346c5be90eede979db21121f93fd3c1b6427bf9aac",
+      "counts": {
+        "pass": 277,
+        "fail": 0,
+        "review": 9,
+        "not_run": 0,
+        "error": 0
+      }
+    },
+    {
+      "name": "definitions",
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\document-regressions-20261109\\rechecked\\definitions-report.json",
+      "sha256": "04aef688b44aafb2657381aaf967250a66600bc8f903271d826945894209a4e9",
+      "counts": {
+        "pass": 823,
+        "fail": 0,
+        "review": 2,
+        "not_run": 0,
+        "error": 0
+      }
+    },
+    {
+      "name": "create",
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\document-regressions-20261109\\rechecked\\create-report.json",
+      "sha256": "ec855eb414bec83922fb8ce5b613caa52ddd02a490fe128907bfe3e4e3852ef3",
+      "counts": {
+        "pass": 1285,
+        "fail": 0,
+        "review": 0,
+        "not_run": 0,
+        "error": 0
+      }
+    }
+  ],
+  "validation_mode": "Full document run plus three audited stage rechecks; every case names its evidence run.",
+  "test_sources_sha256": {
+    "qt_document.py": "5f03d470e80c05ef133e9e59a834400972e5118b408982911aa853a71938e0fe",
+    "qt_point_edit.py": "ff830fe928ba172eb2bd0485ab7fb9d945d1cb5663833112eeed9d82310c3c05",
+    "qt_native_topology.py": "3e10391e7378b3fee5f11aabfb2fd94e9c9f117cc19ce1c6b8817a1d776a745a",
+    "qt_native_modeling.py": "5bdc0bb86009b45df2ac8e173ed8843c23fd10ee978a6e4955165189e13f7964",
+    "qt_native_transforms.py": "ee6162079ba9b8c803b4b943ddadf1b907ad432a2ba8b422b3f3d5d40a432f70",
+    "qt_native_construction.py": "8f93e03a2142436415defffc1eafd1d45c3c6c93de960d755849dfc24cd84f06",
+    "qt_native_lackenby.py": "b8dc4834d799db194d94edc6a3275b90c753b1bebe0f4aef5533a192c24b23a4",
+    "qt_advanced.py": "a70c419cd5916f93e4e5f02fd5e22f6386a22b2bae2465f77c7eaddba0f453a9",
+    "qt_migration.py": "e2f9cdb63ac3949a224f35b1188bc2a0fe276e7ec561b2f8e50fcd8775fc5f9f",
+    "qt_modeling.py": "7ea4596e41ccd96bab0b19a900e8d16690fc3e0033a476fb78d0085d74d32d54",
+    "qt_modeling_extra.py": "cbe368ab6d226546b487edb71709551597c221175fc08905c205d285e988f62c",
+    "qt_editing.py": "3734dcbb9141bf6b3da55e40224b0fd53f4f88fe31b41b94fb605d3a2a7ba9a0",
+    "native_linesplan_app.py": "8f9d8239f8e1989522f9c0210f378c9338d0454081ded546ae6ed833ea5c61fe",
+    "qt/fbm_codec_tests.cpp": "5a69aaf1a0f24e2ced19d51de36aaf0fc633c340c18426d377553a3c24db93f2",
+    "run_tests.py": "a903f0bb02eb42267f9c7c1db2565d1f620ba588f901e19fc1e9ce1afd32cdf5",
+    "fixtures/native-construction/plane-box/0/model.json": "959c3ea1a8ad24be589b5503b70b91b72b141e1f46a32b8363e136970168f407",
+    "fixtures/native-construction/plane-box/0/reference.dxf": "7cd73d03bec0bec9410e12becca1f3207028d01d5a33064d5da7a315309877a9",
+    "fixtures/native-construction/plane-box/0/scene.fslp": "99175e0a23dbcb1b26aa62fadc1cb91bd5c66e11a8294d79c417fcf0d5c63308",
+    "fixtures/native-construction/plane-box/0/sections.json": "329b915db1bf5f52d1f7cac05380d21d55307babe0c2c8b29d807479fb745fe5",
+    "fixtures/native-construction/plane-box/1/model.json": "b8e25402864ac7aee07873117d125e5cd28d8fee01761d73c2c5ce1a85de774f",
+    "fixtures/native-construction/plane-box/1/reference.dxf": "7cd73d03bec0bec9410e12becca1f3207028d01d5a33064d5da7a315309877a9",
+    "fixtures/native-construction/plane-box/1/scene.fslp": "7bfe7aa88fd41e47da309e6bc56a6d922cc83afc6b89b47658cf0e3a02b2f835",
+    "fixtures/native-construction/plane-box/1/sections.json": "329b915db1bf5f52d1f7cac05380d21d55307babe0c2c8b29d807479fb745fe5",
+    "fixtures/native-construction/plane-box/2/model.json": "1ba01575216ce3c57255472094086a7efab93fb620df755836f947c7cf5439b9",
+    "fixtures/native-construction/plane-box/2/reference.dxf": "3b8bfa2d83f17eb6f1eb2af1c4b5f60341cec8f6991bc37db0c132fa95a972bc",
+    "fixtures/native-construction/plane-box/2/scene.fslp": "93b95ca7580b39fe5448e775cbf47d8d433d8ac777e173d7abd3a3d27ab6b913",
+    "fixtures/native-construction/plane-box/2/sections.json": "329b915db1bf5f52d1f7cac05380d21d55307babe0c2c8b29d807479fb745fe5",
+    "fixtures/native-construction/plane-box/3/model.json": "7c96987f5da8aea6526b6bff2bf838c0ca516eb0b927b66293412b7611d9bde8",
+    "fixtures/native-construction/plane-box/3/reference.dxf": "3b8bfa2d83f17eb6f1eb2af1c4b5f60341cec8f6991bc37db0c132fa95a972bc",
+    "fixtures/native-construction/plane-box/3/scene.fslp": "8670ccff49691aa181957cdc1f9244bc6821e4a3004979108733b8b5b5d98591",
+    "fixtures/native-construction/plane-box/3/sections.json": "329b915db1bf5f52d1f7cac05380d21d55307babe0c2c8b29d807479fb745fe5",
+    "fixtures/native-construction/plane-box/provenance.json": "08970e7233a5d91fda804409e666ca138e049e5bf62c2e112ca3800e521b634d",
+    "qt/lackenby_probe.cpp": "990d3491d08f0cfbf8831789c1ca4cb68cd4a1632a24728ca24e5b813196b669",
+    "qt/lackenby_math_probe.pas": "6af304567b8dd225ddcf5013b2dab85e04dcfc95e62f3f502e9a05fd584356df",
+    "maintenance/lackenby_trace.py": "0d7e69372f3fb68520018426b75db2f39139f56e803e0b95a4672147f42b6794",
+    "maintenance/lackenby_math.py": "3e684a892c2fcc488b8d716f07cc175d221f9bb7f06ed09e6e49c000c3873eb1",
+    "qt_native_attributes.py": "e0d248361dc603212a7140b5c39e7c8722481dcfc9065f9e1e9b2610a03b1568",
+    "qt_native_face_tools.py": "2f8bbd65c065c2ca68269e98aa1e8bed54ef86613dac8452c7c4c7f07c4e6765",
+    "qt/face_tools_probe.cpp": "c4e8f9ce30730b4f5c4c44c248617dba39ab307d8dfc5e9cb2c38c97ac93ba08",
+    "maintenance/generate_fbm_codepages.py": "25540a08b8714412543932e71b465c1234c61406cf3d0c70f95252e1fc8dd8c7",
+    "qt_native_project.py": "8c126b9f3fc64a9e6f23c8cd174de66a3bfe4634e4cb90ecc20a72c6a5f20c54",
+    "qt_native_definitions.py": "8e415148aae12169b931cdbf1740df53aa7e6b3586ab4266a86c1867481a5523",
+    "qt/project_edit_probe.cpp": "6533a152c226ef229fb81c6b35d03d6e7243d6d708c9a7752a9adee26fba549f",
+    "qt/project_units_math.pas": "0740390ffd24c4339f1c476c281b4aca2d5a520d4a93e35c550397bcb0874013",
+    "qt/definition_edit_probe.cpp": "431fca4905d78c176f5a395cb0b56c5ee0440fd4871684aad8600dc037487740",
+    "qt_native_auxiliary.py": "6221a4a2fed2c578110d9e6750e5f06ecd67cf6b2426280e1ba278e982a8d47f",
+    "qt_native_background.py": "c289bc40675d808d6872946113d91f219c35ef8cd958a5fe008bf2c7ff11cbee",
+    "qt/auxiliary_edit_probe.cpp": "76ccc2f276bd12ef8ac2a26b866973e74d2896da017714b3a28a859af8a134d4",
+    "qt/background_edit_probe.cpp": "33516035e4bcf709f98bc70e63f1e7b2e0e1578e106ad26d59388692b25cffc3",
+    "qt_native_surface.py": "e6ad6689a20a69ca242e16b3ab4686f002065a1a827ffe30e75ae493c258f091",
+    "qt/auxiliary_tests.cpp": "8a9ebed75048f0a81f813714ca3d02b794936203df142d4c607efc39b16e951d",
+    "maintenance/inspect_surface_normals.py": "de1f4d4de05b4bad8041cc727b3fe24b3c4f377102d935c7468bf7335dab48fc",
+    "qt_native_create.py": "5cae08bc973e757d6088e1b834bcdc6b6f169b1b762d9c7d1aed9a08fd4a5e1b",
+    "qt/document_create_probe.cpp": "ce240cec9d81ba92b82df362f2070b5e5704ecee17474b775e15a15e1e877565",
+    "qt_native_analysis.py": "5fdfb62ebbd14769da1e9379cc46eaee199364f302427d6249195115150210b9",
+    "qt_native_flowlines.py": "577fc977418f1438f084d39b2329cc4c41bfc541465da1c971508aa5c1fa87d5",
+    "qt/analysis_edit_probe.cpp": "7d9d1ae42e4980c2d844d2f8b5451bc9946cf4d4ebeb9422f84f495be86b5300",
+    "qt/flowline_probe.cpp": "ab62c228acd404de77b49b3e402fa50d04a3dffd954192e661c3af8ec669f732",
+    "maintenance/generate_analysis_fields.py": "61e951d5994fffff864b89432a1624e8e1f0467c4e73f4f561b33b5e3b80b08f",
+    "qt_performance_checks.py": "5b37b7e5744ea775f8b4d1e3d5f797e92413c3cd6a34f251465231866cb949a9",
+    "qt_performance_cases.py": "1853d11a339a4bba9c99e60b80bd7d72e9ae06d43268f421d0e69766287ae515",
+    "qt_hydrostatics.py": "cb0e29b7db85b4969071e389a7c987ca6fef2123e2d2f016cd293b31b9d92b27",
+    "qt_hydro_cases.py": "232847a866a81070a4801abd014f138636dcf1a05de4014a51f3c86f9d94a818",
+    "qt_backgrounds.py": "27c34f8347e061f091217888747d177c0cc6d69e838383484b391595d2c63091",
+    "solver_launch_probe.py": "53eddc35afd51cd8f03b55c812ab577201abb31d012d479b6b70d010ebc64e3b",
+    "qt_native_hydrostatics.py": "f2f47bcc74daab97e7dcc50c49bd2572ef3a80d2cc6f45abf2f94fcab800ac1e",
+    "fbm_preview_bytes.py": "3d12c3c743ed33682777fc5bbff97fbe0e569d45a562c7ad13d34eb128ead681"
+  },
+  "diagnostic": {
+    "path": "C:\\Users\\12968\\FreeShip26-TestResults\\document-regressions-20261109\\plane-diagnostic.json",
+    "sha256": "0e59f6e416bfa28812ec90a594967965fc46a0228edcc043a4c56fcb3264fed5"
+  },
+  "diagnostic_sources_sha256": {
+    "record_document_regression_closure.py": "df4f5a8a6efa545e29b626c45573b4b71a29b8a680823340d0f8bb708ca54cdc",
+    "audit_construction_regression.py": "3fba6318c828f13cc9f74a40af77ebdb5c611cb1c18d69673bfa62c613acf53c",
+    "plane_oracle_replay.py": "6561dfa8b0a5567d4bc678a1097c220c1f722fedc72f931a536352f61ff762aa",
+    "capture_plane_oracle_variant.py": "d41c6722f29aa114d6e8c718c41a4ad1289f522775c9df59ccac7cf4e4bfbc61",
+    "recheck_document_regressions.py": "5786dc258207474268a498ec7d51df6938b4fd90100d48bd3fe0abe4586427b1"
+  },
+  "boundaries": [
+    "Known exact legacy pointer-order variants remain review.",
+    "Hidden callbacks are not real desktop acceptance.",
+    "No product binary, native algorithm, frozen geometry or export tolerance changed."
+  ]
+}

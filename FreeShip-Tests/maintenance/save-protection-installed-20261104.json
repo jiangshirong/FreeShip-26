@@ -1,0 +1,94 @@
+{
+  "created_utc": "2026-11-04T14:53:49.337137+00:00",
+  "status": "partial",
+  "scope": "Previous-version .Bak, conflicting-writer rejection, backup rollback, save confirmation interruption and installed startup.",
+  "installed": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\dist",
+  "previous_installation": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\dist-before-save-protection-20261104",
+  "verified_files": 2558,
+  "package_manifest_sha256": "0d811b0984d08c6eaf178e24ce891471cb619443d6706d2bed8450029c8dd06a",
+  "legacy_source_sha256": "277a3c69392c86fe14c375e7dfc9c3197b4162e982673cbbcf4b4a2dfff0ab6b",
+  "executable_sha256": {
+    "FreeShipDocumentService.exe": "45abe36c90c29a9c16e20f2c6172b6aff9fa895a728ac7f1d17a8be2405f1914",
+    "FreeShipGeometryExport.exe": "448315b2d09463695fe690cf326adbf4578505c69ca26a140d5e78ca2a59c36d",
+    "FreeShipNativeLinesplan.exe": "160a90d275994470e6ef309f86a28d015c0e4708342b4e920eca23b36d004598",
+    "FreeShipQt.exe": "9bf58317cfb3473ffedf8b9fba268da4894a1b0714fdb7e1dbf4300d8b36c3c3",
+    "native_analysis_edit_probe.exe": "c355544d2e60c0074a2fe0c90a3b70ff957cdce5da593deb20d1f8809ab787c9",
+    "native_auxiliary_edit_probe.exe": "a661b436e761634a44a1bfd391053f4c867d77c20e79f1e824b0a4fc12a78aea",
+    "native_background_edit_probe.exe": "0235a5818661a9aa1293f79951421a4079397a128b7237c0d6dacca5162d2619",
+    "native_definition_edit_probe.exe": "359fffa1da6096d2eddd59cd5efc6360d5bf3076a9e50edc7b346ce40a7dd636",
+    "native_document_create_probe.exe": "e290ed64c855636a11b36b6a03e3e106ffbc62c8174fbe10e78c743e925b1340",
+    "native_face_tools_probe.exe": "6bc5e75eab308a2232016afc644421673630f74423f4bdb04cf8dd3819024df1",
+    "native_flowline_probe.exe": "f7f1320c1adb6cf0fac11d46adaa4c57ed71f7b0c58f2629a5ab4e1d1766ce70",
+    "native_project_edit_probe.exe": "8bbf876e69d138debb64b0f44bdad14fe1d8597906143f2cbe328d9ecf95eb91",
+    "qt_added_mass_probe.exe": "5801fd12763eb93d3fb8a48fbcd3c18e37771c5ce03f569350fcfbfb602740ac",
+    "qt_auxiliary_tests.exe": "c59db833a906d4cb1177acbb333404636761670c396969393e8d64c5eabd6913",
+    "qt_background_tests.exe": "ac8e56e95751555aa6a42a4b0e42971d72316d6e511e60eb2d3089ce96fceb6d",
+    "qt_camera_lighting_tests.exe": "c72283e82de9de7c4fad4ee2bd93a1a118e3d5473fbdd0dd1be994eba73563c7",
+    "qt_display_tests.exe": "ac24db4d3dd0ba4eec34969c96ff6b5c188903f71b655c1d742759089a5699d0",
+    "qt_document_codec_tests.exe": "79e4f3f70ba062737842949eedc73d8c9d8435b200f1f8ca392a0035d7411eb7",
+    "qt_editing_tests.exe": "f5baf0318267351047299e743338c6bcb108dc01cffd230d23e1b5ae934de165",
+    "qt_exchange_tests.exe": "4d4b5994c242be75ab53956133c9fe385acc0247d89930851c7e4ad0e7940e76",
+    "qt_grid_preview_tests.exe": "24c1113d3eebc1e228150e3897887d688e7c49cbf79e8e22e24ab577722b7317",
+    "qt_lines_tests.exe": "2da67d5d4fc3316c976aaa6c8de70e6ad69fae3a2ff89228dc9d92bb1f8c9671",
+    "qt_migration_tests.exe": "31d317b9db2ca52bdcbe407a0bd2c6a61bb7439f2b45dbb355fe65f5ba2e1957",
+    "qt_model_ui_tests.exe": "ff26f7739d778fdf2b5c3a087ee54bd731e518e5f0f5db19d0450ba925ea2959",
+    "qt_overlay_tests.exe": "fca542545ff712476bb9851b35a654b5c385844e1a4c8b5fd67fbafa76e6c4be",
+    "qt_recovery_tests.exe": "b4ba1326944e3fa3e2308545943def174898338b9d32df9e96ea0f511d4820c4",
+    "qt_save_protection_tests.exe": "841e858b6fb1a8825e83f4fab578dcfef48bc7d16f78b988cf3d5348870ee962",
+    "qt_session_tests.exe": "3d2459e63bb2ccc248df156d5c5da7f63e1198aa46a6376e9440d66b56eb1c23",
+    "qt_shading_tests.exe": "626d57f686655a7ec4024a2da8d4b83d141cc053cb61276b7669888237a5163e",
+    "bridge/FreeShipGeometryBridge.exe": "13c57ac758abf206d35ba5acc58df7cddab0484300533570442630103d068058"
+  },
+  "reports": {
+    "save": {
+      "path": "C:\\FreeShip26-SaveProtectionTests\\installed\\qt-save-protection\\report.json",
+      "sha256": "7fb5d6a2867eafbd692ef94d8dddb9200353b671cd25492af48364388fb6a6ff",
+      "counts": {
+        "pass": 72,
+        "fail": 0,
+        "review": 0,
+        "not_run": 4,
+        "error": 0
+      }
+    },
+    "recovery": {
+      "path": "C:\\FreeShip26-SaveProtectionTests\\regression-recovery\\qt-recovery\\report.json",
+      "sha256": "e5dc9cb96afc735d455de127226829c19f54de5286c36ca9c768b84ecaa13ada",
+      "counts": {
+        "pass": 132,
+        "fail": 0,
+        "review": 0,
+        "not_run": 15,
+        "error": 0
+      }
+    },
+    "startup": {
+      "path": "C:\\FreeShip26-SaveProtectionTests\\installed-startup\\report.json",
+      "sha256": "23e1a2d13fe58289ec2ca5973ee856623d4e3115a4df7772f000583071d66405",
+      "counts": {
+        "pass": 54,
+        "fail": 0,
+        "review": 0,
+        "not_run": 17,
+        "error": 0
+      }
+    }
+  },
+  "counts": {
+    "pass": 258,
+    "fail": 0,
+    "review": 0,
+    "not_run": 36,
+    "error": 0
+  },
+  "limits": [
+    "Hidden production actions do not establish native desktop/file-picker acceptance.",
+    "Unrelated writers ignoring the shared lock can race the final check and replacement.",
+    "Target and backup are separate filesystem names; no hardware power-loss acceptance."
+  ],
+  "free_bytes_after": {
+    "C": 18865709056,
+    "D": 14823694336
+  },
+  "audit_script_sha256": "4faeae2b0c622054083a67a196944bfb193e39cab57095cf00218a874365cbd7"
+}

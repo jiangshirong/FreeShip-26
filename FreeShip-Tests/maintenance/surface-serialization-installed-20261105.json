@@ -1,0 +1,194 @@
+{
+  "created_utc": "2026-11-05T01:22:19.977683+00:00",
+  "status": "partial",
+  "scope": "Reuse exact vertex JSON encodings without changing geometry, wire format or exports.",
+  "installed": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\dist",
+  "previous_installation": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\dist-before-surface-serialization-20261105",
+  "verified_files": 2560,
+  "package_manifest_sha256": "07dbe8db824103795a4f2d0afa8c11eb4e9b1d83e63721a66157694ef72b22b3",
+  "legacy_source_sha256": "277a3c69392c86fe14c375e7dfc9c3197b4162e982673cbbcf4b4a2dfff0ab6b",
+  "executable_sha256": {
+    "FreeShipDocumentService.exe": "d33c1c65d1348cd553ca393d2f01bb85785caf1c6bdfe2d6aa7170ab9205249e",
+    "FreeShipGeometryExport.exe": "546041527bb609f297189e2afd05d0e11973c0a845090eadc88ad12aea148b2e",
+    "FreeShipNativeLinesplan.exe": "6bcce24b6e7263e3e5bc1a5c04af69474c5f2d11d17b454df38c43eddfe326a0",
+    "FreeShipQt.exe": "e4196f9e04fea1b55bee526aff8f1a2de1ff37fbbaf75f625d3994481e4c949e",
+    "native_analysis_edit_probe.exe": "eaa73d60969dca5ed20391883d27e4aa06e9ec8fd1b316e01e52a31f06de10b1",
+    "native_auxiliary_edit_probe.exe": "aa4955b691d593639b4b29ed2a5a4ac885c093de84a01dfe054a1a3ae1fcf9d6",
+    "native_background_edit_probe.exe": "c23840f9f22f207a2989d6ad3c58f8ad487a132fe3a7f3abaf3c8ba38a5c6357",
+    "native_definition_edit_probe.exe": "6be5cda0b5f3576581f493abc2c693e369f715353d51771e573b47e523045ff7",
+    "native_document_create_probe.exe": "d1fc718ffdb5ae668e6d5269ac0d75527cd15c9835c6475b974f61d97592efac",
+    "native_face_tools_probe.exe": "295861be2e16d3b5b73a9cf87ee0a4ecb3eb9d18b1e4d4a4218042228796384a",
+    "native_flowline_probe.exe": "880285bb9582522381544f0d2237dc1c341454ea18d8a81b4e63f9a4317b9e87",
+    "native_project_edit_probe.exe": "1eba91fbd604b93e9194856efa8b9d24d39c15f28ca465f5d2389778b2d2cba8",
+    "qt_added_mass_probe.exe": "3299dd153809253bd9b7ecf9cb92ed8c7cd07e1c8fd1baf76f409a8935bebe71",
+    "qt_auxiliary_tests.exe": "08b6063f6a1343435db5f44d3373f20aeddea3d05b7fe8e29fce616cd696b43e",
+    "qt_background_tests.exe": "2c2ef8e886ddf97d893aba189b15388ce539bbcde64e0c871315eee9741e8924",
+    "qt_camera_lighting_tests.exe": "8667ffef2b75074fd8b46b4658fbc65a6269112c27b012aab3d8dd3cba6b8829",
+    "qt_display_tests.exe": "e1357612837f3e83ac7857f848b7ae4b272acdf83c05b67cd5935f693a81554f",
+    "qt_document_codec_tests.exe": "6d3b2104c870cc1ba350447a556231ce41d00923ef1970fce15a189fcb3099a2",
+    "qt_editing_tests.exe": "ba433671440884332d0584057eb3fb155b9e5c711793a558d1a664b09bfafa52",
+    "qt_exchange_tests.exe": "97e8ddf68d9e443d85540f526a26e89a9cb026abc4b3caf6ea5943392d462b09",
+    "qt_grid_preview_tests.exe": "dd7f284a5f7c0c2ca1c6e032dc94af0d7c7c6a1e746323c9da9e48984286d9f9",
+    "qt_lines_tests.exe": "95c58d293a20b6c6e837b017d3a65eb35f4633e1e35bc27592b3b7898fac0aec",
+    "qt_migration_tests.exe": "12d9b99a4ce5b168acefa05483fcb7140ed5837d498c46443ac3ab456f13f1a7",
+    "qt_model_ui_tests.exe": "2dd3159f815ee5ad9e580e59afee16ffc8b9fdfe78b43ec4ce385f23f422383c",
+    "qt_overlay_tests.exe": "34c97dae3637f8dec4a49719e76c7fee9d19d6ac7740b9f429a7f839ea22b461",
+    "qt_recovery_tests.exe": "8d960b45f5785e90bd2f2838ff266a5a6bcc5076dfcf8a4ec8259fd1120b7dd2",
+    "qt_save_protection_tests.exe": "de5a35b66777013c13e4114c7ec2ecdc2de26e19d99013a726280cc8f5e4a27c",
+    "qt_session_tests.exe": "4c85c78d981a637a24e17f72d358dbdf4fbf29cf893217d0109d4056da70c27e",
+    "qt_shading_tests.exe": "f903c17396546983ee98a822dd1ef225518a287b99d6b35265f918a19a58f610",
+    "bridge/FreeShipGeometryBridge.exe": "13c57ac758abf206d35ba5acc58df7cddab0484300533570442630103d068058"
+  },
+  "reports": {
+    "surface": {
+      "path": "C:\\FreeShip26-SurfaceJsonTests\\installed\\qt-surface-serialization\\report.json",
+      "sha256": "a9c12adf585dd31309ecff8a440ce99d86c56efa57875597257b3f4e539a276f",
+      "counts": {
+        "pass": 70,
+        "fail": 0,
+        "review": 0,
+        "not_run": 1,
+        "error": 0
+      }
+    },
+    "publication": {
+      "path": "C:\\FreeShip26-SurfaceJsonTests\\publication\\qt-publication\\report.json",
+      "sha256": "2d0adacf2d76916587529a83d5bd69a008dcd1d79a37854692f9d4819a88c55f",
+      "counts": {
+        "pass": 163,
+        "fail": 0,
+        "review": 0,
+        "not_run": 1,
+        "error": 0
+      }
+    },
+    "cache": {
+      "path": "C:\\FreeShip26-SurfaceJsonTests\\installed-cache\\qt-lines-cache\\report.json",
+      "sha256": "a8eacf6ba86f9207006ebcc06bd20f41fc01e0a7cfaeb990162420d6de637e19",
+      "counts": {
+        "pass": 111,
+        "fail": 0,
+        "review": 0,
+        "not_run": 3,
+        "error": 0
+      }
+    }
+  },
+  "performance": {
+    "medians": {
+      "old_surface_ms": 177.7189,
+      "new_surface_ms": 42.849,
+      "old_total_ms": 577.2452,
+      "new_total_ms": 518.2706
+    },
+    "paired": [
+      {
+        "case": "model-0",
+        "old_surface_ms": 0.6103,
+        "new_surface_ms": 0.1408,
+        "old_total_ms": 17.1112,
+        "new_total_ms": 14.0983
+      },
+      {
+        "case": "model-1",
+        "old_surface_ms": 155.678,
+        "new_surface_ms": 61.6201,
+        "old_total_ms": 513.8227,
+        "new_total_ms": 567.6405
+      },
+      {
+        "case": "model-2",
+        "old_surface_ms": 214.4773,
+        "new_surface_ms": 49.1502,
+        "old_total_ms": 671.7909,
+        "new_total_ms": 636.8424
+      },
+      {
+        "case": "model-3",
+        "old_surface_ms": 1.685,
+        "new_surface_ms": 0.4654,
+        "old_total_ms": 22.7726,
+        "new_total_ms": 23.5465
+      },
+      {
+        "case": "flow",
+        "old_surface_ms": 1.8365,
+        "new_surface_ms": 0.7329,
+        "old_total_ms": 24.0868,
+        "new_total_ms": 23.8914
+      },
+      {
+        "case": "box-level-1-normals",
+        "old_surface_ms": 0.4366,
+        "new_surface_ms": 0.1242,
+        "old_total_ms": 14.5356,
+        "new_total_ms": 13.9042
+      },
+      {
+        "case": "box-level-2-normals",
+        "old_surface_ms": 1.6824,
+        "new_surface_ms": 0.3101,
+        "old_total_ms": 19.7815,
+        "new_total_ms": 17.1761
+      },
+      {
+        "case": "box-level-3-normals",
+        "old_surface_ms": 5.3001,
+        "new_surface_ms": 1.4937,
+        "old_total_ms": 28.3789,
+        "new_total_ms": 28.5673
+      },
+      {
+        "case": "box-level-4-normals",
+        "old_surface_ms": 19.331,
+        "new_surface_ms": 2.9052,
+        "old_total_ms": 80.9464,
+        "new_total_ms": 55.2564
+      },
+      {
+        "case": "real-normals",
+        "old_surface_ms": 279.0131,
+        "new_surface_ms": 67.5162,
+        "old_total_ms": 791.9767,
+        "new_total_ms": 689.4285
+      },
+      {
+        "case": "empty",
+        "old_surface_ms": 0.0173,
+        "new_surface_ms": 0.0161,
+        "old_total_ms": 6.976,
+        "new_total_ms": 11.1138
+      },
+      {
+        "case": "real-repeat-1",
+        "old_surface_ms": 177.7189,
+        "new_surface_ms": 38.5724,
+        "old_total_ms": 562.8419,
+        "new_total_ms": 518.2706
+      },
+      {
+        "case": "real-repeat-2",
+        "old_surface_ms": 176.8673,
+        "new_surface_ms": 42.849,
+        "old_total_ms": 577.2452,
+        "new_total_ms": 502.9884
+      }
+    ]
+  },
+  "counts": {
+    "pass": 344,
+    "fail": 0,
+    "review": 0,
+    "not_run": 5,
+    "error": 0
+  },
+  "limits": [
+    "Paired worker times are not whole-window latency or a guarantee for other models.",
+    "Subdivision, fill and layout still rebuild; desktop acceptance remains separate."
+  ],
+  "free_bytes_after": {
+    "C": 14683521024,
+    "D": 14026088448
+  },
+  "audit_script_sha256": "876c960219c62ab4dbb843a402d31a0f0acd90dddf50c12f9dab664a7ee3a3d8"
+}

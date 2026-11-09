@@ -1,0 +1,22 @@
+object ExceptionDlg: TExceptionDlg
+  Left = 529
+  Height = 493
+  Top = 183
+  Width = 544
+  Caption = 'Exception'
+  ClientHeight = 493
+  ClientWidth = 544
+  LCLVersion = '3.2.0.0'
+  object Message: TMemo
+    Left = 10
+    Height = 423
+    Top = 10
+    Width = 524
+    Align = alClient
+    BorderSpacing.Around = 10
+    ReadOnly = True
+    ScrollBars = ssAutoBoth
+    TabOrder = 0
+    WordWrap = False
+  end
+end

@@ -1,0 +1,107 @@
+{
+  "created_utc": "2026-11-04T11:02:45.788221+00:00",
+  "status": "partial",
+  "scope": "Hull, Carene, chine-text and surface-text: native fitting, layers, creases, markers, control curves, stations, Qt actions and saved-file roundtrip.",
+  "installed": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\dist",
+  "previous_installation": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\dist-before-curve-import-20261104",
+  "package_manifest_sha256": "7e803bbbd28eb3a47a5daec70699597318994ac9efe62ecbefb49938205eee98",
+  "verified_files": 2548,
+  "executable_sha256": {
+    "bridge/FreeShipGeometryBridge.exe": "13c57ac758abf206d35ba5acc58df7cddab0484300533570442630103d068058",
+    "FreeShipDocumentService.exe": "a840b7c7d6970082d8b6ba7696333bd412f448cd2755c53999155a388325b077",
+    "FreeShipGeometryExport.exe": "ba466545c8b8704d85f20a9704d6c03f783ea8df84291aca321af2dec4ccd511",
+    "FreeShipNativeLinesplan.exe": "f38d013614382c9b58240e7725000d21fc5047cc7fc56d1154a0c76ef3c0f47a",
+    "FreeShipQt.exe": "41662ed7731c3d065ef873272c49d348d9efe293dab1fc7464583fd75f06f1c2",
+    "native_analysis_edit_probe.exe": "2e5a43febceceeb0a1cdf59db59b08889b11323e06427fd228ac82deab47fc99",
+    "native_auxiliary_edit_probe.exe": "7a5ff1642527ead194a06072c560918dede4e881e4a3b386e1495c1d1806e60c",
+    "native_background_edit_probe.exe": "19f9774aff72bbd60e304020209a1c1a303105bd0aef327555e2baf5aaf933c4",
+    "native_definition_edit_probe.exe": "ba478fe0d4bdfa002259d5a7104cbf1fa4bdc04ba2972cc1d42fa0da127ac353",
+    "native_document_create_probe.exe": "151294e194c02c12f2a6cf42b85c75646ac6056062570f960d0a11d3f9378dab",
+    "native_face_tools_probe.exe": "f90246637d8e180576cb2d2118d086def1523ac85493c8953ea3350c34f5a9b7",
+    "native_flowline_probe.exe": "9ac33ba42fd925fbe9b57c317908cc6afd295155282e904c7f11bc7ef814de25",
+    "native_project_edit_probe.exe": "60775a22ec9e89ee4cb82b0fc6f38731fe62aeb20881b7fa5a75e79e97a9c8c9",
+    "qt_auxiliary_tests.exe": "08ff6e985e31322947550dfd17f57bd1d6f9f94c29d671b4aa3654362446592e",
+    "qt_background_tests.exe": "816cf8157422590c664ef6287863abde40c2eab67ef3dd33758688cb0f9cd5cb",
+    "qt_camera_lighting_tests.exe": "7104caf5912f876016d2b203204bccb077521aff9a70aa17477bfde2f86d403a",
+    "qt_display_tests.exe": "e68a7f2d546376f71fec3a6be256351034bb39783a8cfdf0a5c9f3704f03ec00",
+    "qt_document_codec_tests.exe": "1bb6ec153814d49e1ae86ec4d1038ba2df73427cf93f217ef50cbd0b1ef74f25",
+    "qt_editing_tests.exe": "e11da1b6898875d529bfd9e68f0fcb365dcb705a85137ba9592f6a59881c3003",
+    "qt_exchange_tests.exe": "97918d77c76737f809ccc9c704144e6f9a14fc2cd843ee898c0a191140af2327",
+    "qt_lines_tests.exe": "4fb749cec84336a745de24853f5c548b794f4c7b10cc8c397f046f2ccad741b3",
+    "qt_migration_tests.exe": "df6b136ac3beb37703a68116470df6369e253b5fccdf0f9af507cf20c2c7eec2",
+    "qt_model_ui_tests.exe": "14c1da878eab2ee569094a087bb6c8be96c4e14a9148521cc8ba267cbfe52b63",
+    "qt_overlay_tests.exe": "81e183efa00a20c5954aadcab2c8df8bbac17a0027ce036901fb53f1d49ae170",
+    "qt_session_tests.exe": "c8533d064a2133c71ba172dc01c9553cfa8de6375ac77ed47037cf56abfa0cfc",
+    "qt_shading_tests.exe": "bd0a3788f67bd9d3509c181ac2aa1fba3be84bc6902570cc7ce5da68d97f9ba1"
+  },
+  "legacy_source_sha256": "277a3c69392c86fe14c375e7dfc9c3197b4162e982673cbbcf4b4a2dfff0ab6b",
+  "reports": {
+    "qt-curve-import": {
+      "path": "C:\\FreeShip26-CurveImportTests\\installed-01\\qt-curve-import\\report.json",
+      "sha256": "4ac503d18dc00d72fdc379b69ee7a18103cba88dede9d7016ed608cdc88e6adc",
+      "counts": {
+        "pass": 265,
+        "fail": 0,
+        "review": 1,
+        "not_run": 2,
+        "error": 0
+      },
+      "tested_runtime": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\dist"
+    },
+    "qt-exchange": {
+      "path": "C:\\FreeShip26-CurveImportTests\\formats-01\\qt-exchange\\report.json",
+      "sha256": "9954029bb2e60008d88e20808a497aef94947962945aa485aa34f80ec0fc476a",
+      "counts": {
+        "pass": 280,
+        "fail": 0,
+        "review": 1,
+        "not_run": 1,
+        "error": 0
+      },
+      "tested_runtime": "C:\\FreeShip26-CurveImportTests\\package-04"
+    },
+    "qt-polycad": {
+      "path": "C:\\FreeShip26-CurveImportTests\\formats-01\\qt-polycad\\report.json",
+      "sha256": "4006043427b65056a0c95de5d447cca05db64ee2b4dcb72daa8eff8427603916",
+      "counts": {
+        "pass": 167,
+        "fail": 0,
+        "review": 1,
+        "not_run": 2,
+        "error": 0
+      },
+      "tested_runtime": "C:\\FreeShip26-CurveImportTests\\package-04"
+    },
+    "qt-publication": {
+      "path": "D:\\FreeShip26Tests\\reports\\curve-publication-01\\qt-publication\\report.json",
+      "sha256": "8d83646d1f4919820f73ffb3881f2a2de3d4a2f68683fae81f48d7a2ea4bb3f4",
+      "counts": {
+        "pass": 163,
+        "fail": 0,
+        "review": 0,
+        "not_run": 1,
+        "error": 0
+      },
+      "tested_runtime": "C:\\FreeShip26-CurveImportTests\\package-04"
+    }
+  },
+  "counts": {
+    "pass": 875,
+    "fail": 0,
+    "review": 3,
+    "not_run": 6,
+    "error": 0
+  },
+  "limits": [
+    "Fitted nets, not arbitrary lossless surface exchange; original input curves are retained as markers.",
+    "Synthetic source-compatible files and independent decimal fitting oracle; no real external Hull/Carene samples supplied.",
+    "Hidden Windows Qt callbacks and screenshots; full visual parity and physical desktop acceptance remain separate."
+  ],
+  "retained_sources": [
+    "qt_curve_import.py",
+    "qt/exchange_tests.cpp",
+    "run_tests.py",
+    "maintenance/record_curve_import_delivery.py",
+    "maintenance/prune_curve_import_intermediates.ps1"
+  ]
+}

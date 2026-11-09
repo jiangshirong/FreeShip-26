@@ -1,0 +1,90 @@
+{
+  "date": "2026-11-02",
+  "scope": "Qt hydrostatics and stability workflows, bounded equilibrium solver, parameter persistence and reports. Pascal integration and documented asymmetric derived-data limits remain.",
+  "installed": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\dist",
+  "previous_installation": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\dist-before-hydro-20261102",
+  "binaries_sha256": {
+    "FreeShipQt.exe": "87eba26a015f725b45c79276675185921805d4e99e77b592df28e52372da4fb4",
+    "bridge/FreeShipGeometryBridge.exe": "d1347be9286b840986112b2d23b3f45cbf54fcd3ac9aeb4a684203eecd1805ed"
+  },
+  "legacy_source_sha256": "277a3c69392c86fe14c375e7dfc9c3197b4162e982673cbbcf4b4a2dfff0ab6b",
+  "bridge_build": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\hydro-service-03",
+  "reports": {
+    "qt-hydro-20261102-e": {
+      "status": "partial",
+      "counts": {
+        "pass": 941,
+        "fail": 0,
+        "review": 2,
+        "not_run": 1,
+        "error": 0
+      },
+      "report_sha256": "2c4eea41cc3c8878f82df096bdd9bab224f8ed8525669b593c5129779f706352"
+    },
+    "qt-modeling-hydro-20261102-a": {
+      "status": "partial",
+      "counts": {
+        "pass": 2781,
+        "fail": 0,
+        "review": 2,
+        "not_run": 2,
+        "error": 0
+      },
+      "report_sha256": "3fbb4bc5c7e968b9502fe091a23a7fc691f7a97861f1d3fbd1a4af9b3b4f8c65"
+    },
+    "qt-hydro-package-20261102-b": {
+      "status": "partial",
+      "counts": {
+        "pass": 26,
+        "fail": 0,
+        "review": 0,
+        "not_run": 1,
+        "error": 0
+      },
+      "report_sha256": "7486ee8b602ed5f16e3fe497939f2d23aa9e5dddbb3ef2d8b95405322f172f99"
+    },
+    "qt-hydro-delivery-20261102-a": {
+      "status": "partial",
+      "counts": {
+        "pass": 26,
+        "fail": 0,
+        "review": 0,
+        "not_run": 1,
+        "error": 0
+      },
+      "report_sha256": "126bec02fcdbf632c2ecd1ececb793d73b24943bb95034ecbf8aab697a158209"
+    },
+    "qt-startup-hydro-delivery-20261102-a": {
+      "status": "partial",
+      "counts": {
+        "pass": 54,
+        "fail": 0,
+        "review": 0,
+        "not_run": 17,
+        "error": 0
+      },
+      "report_sha256": "fa533f0da28db724f906a0c628c4f14e1fbaa7700542aa6386b3006013875b3d"
+    }
+  },
+  "failure_evidence": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\maintenance\\hydro-fixed-regressions-20261102.json",
+  "retention": {
+    "Plan": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\maintenance\\retention-hydro-20261102.json",
+    "Removed": [
+      "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\reports\\qt-hydro-20261102-d",
+      "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\reports\\qt-hydro-20261102-c",
+      "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\reports\\qt-hydro-20261102-a"
+    ],
+    "RemovedCount": 3,
+    "FreeBefore": 13117001728,
+    "FreeAfter": 13570916352,
+    "FreedGiB": 0.42
+  },
+  "notes": [
+    "All numerical checks use bridge hydro-service-03.",
+    "After the full hydro suite, only report wording was clarified to identify trapezoidal GZ integration. The final installed executable and CSV/JSON numerical rows were then checked against the complete suite.",
+    "The full modeling suite preceded the hydro-only Windows font backend selection in the shared runner; the modeling path was unchanged.",
+    "Qt hydro dialogs and PDF were reviewed through the Windows font backend using hidden windows, never native desktop input automation.",
+    "Legacy fs, the accepted pilot, user models and user settings were not replaced.",
+    "Reusable tests are registered as qt-hydrostatics in FreeShip-Tests/run_tests.py. Non-symmetric legacy-derived fields remain explicitly unavailable."
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "retired": [
+    {
+      "path": "C:\\FreeShip26-ViewportTests\\package-01",
+      "bytes": 120030814.0
+    },
+    {
+      "path": "C:\\FreeShip26-ViewportTests\\package-02",
+      "bytes": 120063098.0
+    }
+  ],
+  "bytes": 240093912.0,
+  "kept": [
+    "package-03",
+    "package-final",
+    "all reports and screenshots",
+    "installed runtime and backup"
+  ],
+  "created_utc": "2026-11-04T01:27:13.5116457Z"
+}

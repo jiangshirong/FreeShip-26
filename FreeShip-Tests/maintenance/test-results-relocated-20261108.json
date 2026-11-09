@@ -1,0 +1,37 @@
+[
+  {
+    "source": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\reports\\qt-migration-20261101-c",
+    "files": 7863,
+    "destination": "C:\\Users\\12968\\FreeShip26-TestResults\\relocated-20261108\\qt-migration-20261101-c",
+    "bytes": 1401588720,
+    "sha256_verified": true
+  },
+  {
+    "source": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\reports\\qt-migration-m2-20261101-c",
+    "files": 7833,
+    "destination": "C:\\Users\\12968\\FreeShip26-TestResults\\relocated-20261108\\qt-migration-m2-20261101-c",
+    "bytes": 1399348714,
+    "sha256_verified": true
+  },
+  {
+    "source": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\reports\\qt-migration-20261101-d",
+    "files": 7832,
+    "destination": "C:\\Users\\12968\\FreeShip26-TestResults\\relocated-20261108\\qt-migration-20261101-d",
+    "bytes": 1398061068,
+    "sha256_verified": true
+  },
+  {
+    "source": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\reports\\qt-editing-20261101-d",
+    "files": 10407,
+    "destination": "C:\\Users\\12968\\FreeShip26-TestResults\\relocated-20261108\\qt-editing-20261101-d",
+    "bytes": 1343808251,
+    "sha256_verified": true
+  },
+  {
+    "source": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\reports\\qt-migration-20261101-b",
+    "files": 7816,
+    "destination": "C:\\Users\\12968\\FreeShip26-TestResults\\relocated-20261108\\qt-migration-20261101-b",
+    "bytes": 1294973948,
+    "sha256_verified": true
+  }
+]

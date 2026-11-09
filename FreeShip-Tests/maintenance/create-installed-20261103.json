@@ -1,0 +1,104 @@
+{
+  "recorded_utc": "2026-11-03T07:18:23.555076+00:00",
+  "scope": "Native FBM document loading/construction, new hull, exchange import and version transitions; old analysis hydration remains.",
+  "installed": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\dist",
+  "previous_installation": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\dist-before-create-20261103",
+  "manifest_sha256": "1b25b50a1c5bad85341a84ae9a47f08057bcfa2f4a93a97ce30c7ab924ee2fb7",
+  "verified_package_files": 2528,
+  "legacy_source_sha256": "277a3c69392c86fe14c375e7dfc9c3197b4162e982673cbbcf4b4a2dfff0ab6b",
+  "binaries_sha256": {
+    "FreeShipQt.exe": "8c5c334964f71631d96db8e9d2c21d91472b8f95bc1a9b7a2a060965ea0b758f",
+    "FreeShipDocumentService.exe": "ac0bcfa57f480ebfbf12d882e359e1f3fd26c08c593ae1196455221ab3593da0",
+    "FreeShipNativeLinesplan.exe": "2eced26821d9e1fb9b4f0db9e619335728008934de108ae1a8b2254adb8288fc",
+    "native_document_create_probe.exe": "58e97384a1b474b523a5d0801aaeb334acc501ce6e2378f1c8411a9de5d69e24",
+    "qt_document_codec_tests.exe": "4d348fdafae1dbb0d25545a1d69e68cdf0e4b49f848ed3d2b12e09eb8b839ccf",
+    "qt_exchange_tests.exe": "9e13cdc836c42f02750d48dd456a86b10eeb90686798be036d543e8288e539ec",
+    "bridge/FreeShipGeometryBridge.exe": "beb043b116c107bec66faebbddf4ea17452f6244991f7aedc4d57ec2f2a30a6b"
+  },
+  "reports": {
+    "core": {
+      "path": "C:\\FreeShip26Tests\\reports\\create-final-02\\qt-document\\report.json",
+      "sha256": "5c55fd5f9c914a8d9dbcb37ecdc5a0deb14509fa15dc68cc938063bb1f663328",
+      "counts": {
+        "pass": 11794,
+        "fail": 0,
+        "review": 28,
+        "not_run": 3,
+        "error": 0
+      },
+      "elapsed_seconds": 427.5314655999973,
+      "phase_seconds": {
+        "runtime_ready_s": 0.6113957000052324,
+        "codec_s": 0.7233196999877691,
+        "protocol_s": 98.79825490000076,
+        "native_point_edit_s": 4.829443200011156,
+        "native_topology_s": 13.71024290000787,
+        "native_modeling_s": 11.207703000007314,
+        "native_transforms_s": 17.818027100001927,
+        "native_construction_s": 8.379582400011714,
+        "native_lackenby_s": 39.61318929999834,
+        "native_attributes_s": 5.327704099996481,
+        "native_face_tools_s": 19.87353740000981,
+        "native_project_s": 30.00352909999492,
+        "native_definitions_s": 24.908303799995338,
+        "native_auxiliary_s": 21.55672060001234,
+        "native_background_s": 11.098507699993206,
+        "native_surface_s": 66.31742209999356,
+        "native_create_s": 20.518223399994895,
+        "modeling_service_s": 17.64958630000183,
+        "production_ui_s": 14.254564500006381
+      }
+    },
+    "exchange": {
+      "path": "C:\\FreeShip26Tests\\reports\\create-installed-exchange\\qt-exchange\\report.json",
+      "sha256": "aac7d1144a7079e4ba08464e1f1fa4ea2d6388c228387974879c3fd64ffd1207",
+      "counts": {
+        "pass": 280,
+        "fail": 0,
+        "review": 1,
+        "not_run": 1,
+        "error": 0
+      }
+    },
+    "startup": {
+      "path": "C:\\FreeShip26Tests\\reports\\create-installed-startup\\report.json",
+      "sha256": "76db126e3e75c9a5ffd41f170fe0cce706eded4d094387a8d08462565cb52436",
+      "counts": {
+        "pass": 54,
+        "fail": 0,
+        "review": 0,
+        "not_run": 17,
+        "error": 0
+      }
+    }
+  },
+  "combined_counts": {
+    "pass": 12128,
+    "fail": 0,
+    "review": 29,
+    "not_run": 21,
+    "error": 0
+  },
+  "native_creation_ms": {
+    "samples": 9,
+    "minimum": 0.6627,
+    "median": 1.259,
+    "maximum": 5.1723
+  },
+  "notes": [
+    "All 45 FBM versions have independent format fixtures; early 0..6 transport promotion does not alter unchanged saved files.",
+    "Native/Plus comparison retains exact coordinates, topology, surface, lines-plan scene, sections and DXF entities.",
+    "Creation timings exclude preference context, old analysis hydration and snapshot publication; not total UI open time.",
+    "Old analysis object loading, flow tracing, analysis settings, hydrostatics/stability, resistance/propulsion, plates and IGES preparation remain.",
+    "Installed Qt callbacks run privately; physical desktop acceptance is not claimed. Source stays in the project; reports/builds are on C."
+  ],
+  "maintenance_sources_sha256": {
+    "record_create_delivery.py": "72e6d4a4debc6401eebd7684c26ab0d0aea534f6a114624954826e005f48535d",
+    "record_topology_delivery.py": "dcb355a690a034c8b84582d824685a9e1992d1de59576de712a5f2d1b96e4f6c",
+    "promote_runtime.ps1": "d0427a3964c2263a93768185d29f9f9cfba8600d48965c1b29518c443e4bb728"
+  },
+  "free_bytes_after": {
+    "C": 13811027968,
+    "D": 30053830656
+  }
+}

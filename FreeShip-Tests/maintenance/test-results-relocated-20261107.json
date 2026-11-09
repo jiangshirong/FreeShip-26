@@ -1,0 +1,212 @@
+[
+  {
+    "sha256_verified": true,
+    "destination": "C:\\Users\\12968\\FreeShip26-TestResults\\relocated-20261107\\resistance-native-final-02",
+    "source": "D:\\FreeShip26Tests\\reports\\resistance-native-final-02",
+    "files": 4363,
+    "bytes": 1068033635
+  },
+  {
+    "sha256_verified": true,
+    "destination": "C:\\Users\\12968\\FreeShip26-TestResults\\relocated-20261107\\cad-native-core-01",
+    "source": "D:\\FreeShip26Tests\\reports\\cad-native-core-01",
+    "files": 3282,
+    "bytes": 742438437
+  },
+  {
+    "sha256_verified": true,
+    "destination": "C:\\Users\\12968\\FreeShip26-TestResults\\relocated-20261107\\preview-complete-20261105",
+    "source": "D:\\FreeShip26Tests\\reports\\preview-complete-20261105",
+    "files": 409,
+    "bytes": 345509109
+  },
+  {
+    "sha256_verified": true,
+    "destination": "C:\\Users\\12968\\FreeShip26-TestResults\\relocated-20261107\\publication-migration-02",
+    "source": "D:\\FreeShip26Tests\\reports\\publication-migration-02",
+    "files": 7695,
+    "bytes": 220633739
+  },
+  {
+    "sha256_verified": true,
+    "destination": "C:\\Users\\12968\\FreeShip26-TestResults\\relocated-20261107\\cad-native-migration-01",
+    "source": "D:\\FreeShip26Tests\\reports\\cad-native-migration-01",
+    "files": 7695,
+    "bytes": 220546013
+  },
+  {
+    "sha256_verified": true,
+    "destination": "C:\\Users\\12968\\FreeShip26-TestResults\\relocated-20261107\\plates-native-migration-03",
+    "source": "D:\\FreeShip26Tests\\reports\\plates-native-migration-03",
+    "files": 7694,
+    "bytes": 220486489
+  },
+  {
+    "sha256_verified": true,
+    "destination": "C:\\Users\\12968\\FreeShip26-TestResults\\relocated-20261107\\plates-native-migration-02",
+    "source": "D:\\FreeShip26Tests\\reports\\plates-native-migration-02",
+    "files": 7694,
+    "bytes": 220483276
+  },
+  {
+    "sha256_verified": true,
+    "destination": "C:\\Users\\12968\\FreeShip26-TestResults\\relocated-20261107\\legacy-exchange-delivery-publication",
+    "source": "D:\\FreeShip26Tests\\reports\\legacy-exchange-delivery-publication",
+    "files": 558,
+    "bytes": 204192046
+  },
+  {
+    "sha256_verified": true,
+    "destination": "C:\\Users\\12968\\FreeShip26-TestResults\\relocated-20261107\\legacy-exchange-publication-final",
+    "source": "D:\\FreeShip26Tests\\reports\\legacy-exchange-publication-final",
+    "files": 558,
+    "bytes": 204188671
+  },
+  {
+    "sha256_verified": true,
+    "destination": "C:\\Users\\12968\\FreeShip26-TestResults\\relocated-20261107\\legacy-exchange-publication",
+    "source": "D:\\FreeShip26Tests\\reports\\legacy-exchange-publication",
+    "files": 558,
+    "bytes": 204181885
+  },
+  {
+    "sha256_verified": true,
+    "destination": "C:\\Users\\12968\\FreeShip26-TestResults\\relocated-20261107\\curve-publication-01",
+    "source": "D:\\FreeShip26Tests\\reports\\curve-publication-01",
+    "files": 558,
+    "bytes": 204173977
+  },
+  {
+    "sha256_verified": true,
+    "destination": "C:\\Users\\12968\\FreeShip26-TestResults\\relocated-20261107\\publication-installed-02",
+    "source": "D:\\FreeShip26Tests\\reports\\publication-installed-02",
+    "files": 556,
+    "bytes": 197150503
+  },
+  {
+    "sha256_verified": true,
+    "destination": "C:\\Users\\12968\\FreeShip26-TestResults\\relocated-20261107\\preferences-ui-publication-02",
+    "source": "D:\\FreeShip26Tests\\reports\\preferences-ui-publication-02",
+    "files": 554,
+    "bytes": 197139190
+  },
+  {
+    "sha256_verified": true,
+    "destination": "C:\\Users\\12968\\FreeShip26-TestResults\\relocated-20261107\\preferences-ui-publication-01",
+    "source": "D:\\FreeShip26Tests\\reports\\preferences-ui-publication-01",
+    "files": 554,
+    "bytes": 197139148
+  },
+  {
+    "sha256_verified": true,
+    "destination": "C:\\Users\\12968\\FreeShip26-TestResults\\relocated-20261107\\preferences-publication-02",
+    "source": "D:\\FreeShip26Tests\\reports\\preferences-publication-02",
+    "files": 554,
+    "bytes": 197135826
+  },
+  {
+    "sha256_verified": true,
+    "destination": "C:\\Users\\12968\\FreeShip26-TestResults\\relocated-20261107\\model-ui-publication-03",
+    "source": "D:\\FreeShip26Tests\\reports\\model-ui-publication-03",
+    "files": 554,
+    "bytes": 197133520
+  },
+  {
+    "sha256_verified": true,
+    "destination": "C:\\Users\\12968\\FreeShip26-TestResults\\relocated-20261107\\plates-native-final-01",
+    "source": "D:\\FreeShip26Tests\\reports\\plates-native-final-01",
+    "files": 3524,
+    "bytes": 184952042
+  },
+  {
+    "sha256_verified": true,
+    "destination": "C:\\Users\\12968\\FreeShip26-TestResults\\relocated-20261107\\plates-native-final-03",
+    "source": "D:\\FreeShip26Tests\\reports\\plates-native-final-03",
+    "files": 3524,
+    "bytes": 184951435
+  },
+  {
+    "sha256_verified": true,
+    "destination": "C:\\Users\\12968\\FreeShip26-TestResults\\relocated-20261107\\plates-native-final-02",
+    "source": "D:\\FreeShip26Tests\\reports\\plates-native-final-02",
+    "files": 3524,
+    "bytes": 184937975
+  },
+  {
+    "sha256_verified": true,
+    "destination": "C:\\Users\\12968\\FreeShip26-TestResults\\relocated-20261107\\plates-native-workflow-03",
+    "source": "D:\\FreeShip26Tests\\reports\\plates-native-workflow-03",
+    "files": 3522,
+    "bytes": 184909016
+  },
+  {
+    "sha256_verified": true,
+    "destination": "C:\\Users\\12968\\FreeShip26-TestResults\\relocated-20261107\\resistance-native-hydro-01",
+    "source": "D:\\FreeShip26Tests\\reports\\resistance-native-hydro-01",
+    "files": 490,
+    "bytes": 179847088
+  },
+  {
+    "sha256_verified": true,
+    "destination": "C:\\Users\\12968\\FreeShip26-TestResults\\relocated-20261107\\preview-safety-20261105",
+    "source": "D:\\FreeShip26Tests\\reports\\preview-safety-20261105",
+    "files": 496,
+    "bytes": 179349160
+  },
+  {
+    "sha256_verified": true,
+    "destination": "C:\\Users\\12968\\FreeShip26-TestResults\\relocated-20261107\\plates-native-workflow-02",
+    "source": "D:\\FreeShip26Tests\\reports\\plates-native-workflow-02",
+    "files": 3386,
+    "bytes": 159957434
+  },
+  {
+    "sha256_verified": true,
+    "destination": "C:\\Users\\12968\\FreeShip26-TestResults\\relocated-20261107\\publication-core-02",
+    "source": "D:\\FreeShip26Tests\\reports\\publication-core-02",
+    "files": 559,
+    "bytes": 157529205
+  },
+  {
+    "sha256_verified": true,
+    "destination": "C:\\Users\\12968\\FreeShip26-TestResults\\relocated-20261107\\publication-core-03",
+    "source": "D:\\FreeShip26Tests\\reports\\publication-core-03",
+    "files": 559,
+    "bytes": 157529203
+  },
+  {
+    "sha256_verified": true,
+    "destination": "C:\\Users\\12968\\FreeShip26-TestResults\\relocated-20261107\\model-ui-final-03",
+    "source": "D:\\FreeShip26Tests\\reports\\model-ui-final-03",
+    "files": 573,
+    "bytes": 151705622
+  },
+  {
+    "sha256_verified": true,
+    "destination": "C:\\Users\\12968\\FreeShip26-TestResults\\relocated-20261107\\publication-installed-01",
+    "source": "D:\\FreeShip26Tests\\reports\\publication-installed-01",
+    "files": 466,
+    "bytes": 149241744
+  },
+  {
+    "sha256_verified": true,
+    "destination": "C:\\Users\\12968\\FreeShip26-TestResults\\relocated-20261107\\model-ui-installed-01",
+    "source": "D:\\FreeShip26Tests\\reports\\model-ui-installed-01",
+    "files": 262,
+    "bytes": 148767577
+  },
+  {
+    "sha256_verified": true,
+    "destination": "C:\\Users\\12968\\FreeShip26-TestResults\\relocated-20261107\\publication-core-01",
+    "source": "D:\\FreeShip26Tests\\reports\\publication-core-01",
+    "files": 466,
+    "bytes": 136596763
+  },
+  {
+    "sha256_verified": true,
+    "destination": "C:\\Users\\12968\\FreeShip26-TestResults\\relocated-20261107\\plates-native-workflow-01",
+    "source": "D:\\FreeShip26Tests\\reports\\plates-native-workflow-01",
+    "files": 2900,
+    "bytes": 122468124
+  }
+]

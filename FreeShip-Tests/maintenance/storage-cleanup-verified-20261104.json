@@ -1,0 +1,1261 @@
+{
+  "created_utc": "2026-11-04T10:08:50.767228+00:00",
+  "scope": "Test storage maintenance; no product feature migration in this change",
+  "status": "complete",
+  "actual_free_delta": {
+    "D": 10854014976,
+    "C": 11368591360
+  },
+  "logical_bytes": 37276885827,
+  "removed_files": 128554,
+  "plan": {
+    "path": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\maintenance\\storage-cleanup-20261104.json",
+    "sha256": "42e70da6f88cf1d30348340c3432d4389d1674d20f17983cd41243aa635b98fc"
+  },
+  "result": {
+    "path": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\maintenance\\storage-cleanup-20261104.json.result.json",
+    "sha256": "3e90e3fe0a83dfed039e588e84760548c5a1bcf01990ad0fcce2b09965fc5da6"
+  },
+  "reports": {
+    "storage": {
+      "path": "D:\\FreeShip26Tests\\reports\\storage-retention-02\\test-storage\\report.json",
+      "sha256": "2168316fe66f5a22f243d8873ca1ebb8732cbbfe8e9c6f912d185755b4f7d1c2",
+      "counts": {
+        "pass": 14,
+        "fail": 0,
+        "review": 0,
+        "not_run": 0,
+        "error": 0
+      }
+    },
+    "installed_viewport": {
+      "path": "C:\\FreeShip26Tests\\reports\\combined-20261104-180600\\qt-viewport\\report.json",
+      "sha256": "9bb652aea683d8d46638a0e08a28a052e8bc8d9cb1ac046a01b72a999b8f78ba",
+      "counts": {
+        "pass": 239,
+        "fail": 0,
+        "review": 2,
+        "not_run": 7,
+        "error": 0
+      }
+    }
+  },
+  "source_sha256": "277a3c69392c86fe14c375e7dfc9c3197b4162e982673cbbcf4b4a2dfff0ab6b",
+  "installed_manifest_sha256": "87b2ae839e2a670167c61ed5fd6fb1febfd53c711c26b53b3c12ee1d448ae6dc",
+  "frozen_baselines": [
+    {
+      "path": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\reports\\qt-startup-delivery-20261101\\model-1\\original\\scene.fslp",
+      "sha256": "a743aa5532f767d7bdb34888739ccdf96d9795b25d8efee6a8096e2953052f97"
+    },
+    {
+      "path": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\reports\\qt-startup-delivery-20261101\\model-1\\original\\reference.dxf",
+      "sha256": "1598ec378c7941420eacb59a09279c140508e9929d642024d66876f71bc0215d"
+    },
+    {
+      "path": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\reports\\qt-startup-delivery-20261101\\model-1\\move-point\\scene.fslp",
+      "sha256": "e0b4a5c7ecb29fc3a9b199eb694453e2e906ab3826d6c917615ef8548dd19946"
+    },
+    {
+      "path": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\reports\\qt-startup-delivery-20261101\\model-1\\move-point\\reference.dxf",
+      "sha256": "a2a89061e98380d225434d30db501b1c425715db721f7ed5a1f9566e1d74e677"
+    },
+    {
+      "path": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\reports\\qt-startup-delivery-20261101\\model-2\\original\\scene.fslp",
+      "sha256": "170cf6e495f560aa8c085df49cd0ec1ffd392028342ff2413d607ad6f056ec00"
+    },
+    {
+      "path": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\reports\\qt-startup-delivery-20261101\\model-2\\original\\reference.dxf",
+      "sha256": "18e4584c1a29af506bb3589522a372663a7f4b1ed87ba128f31c7364d06991e5"
+    },
+    {
+      "path": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\reports\\qt-startup-delivery-20261101\\model-2\\move-point\\scene.fslp",
+      "sha256": "2fee4e27f95c2fa3750026d5e52b3304b99e8d4eb1d5d4bcad2cac4bbdc62160"
+    },
+    {
+      "path": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\reports\\qt-startup-delivery-20261101\\model-2\\move-point\\reference.dxf",
+      "sha256": "bebb3611a173398d14e016e79ae4e9cdf3366a0300202f7e27e8109d7020f76f"
+    },
+    {
+      "path": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\reports\\qt-startup-delivery-20261101\\model-3\\original\\scene.fslp",
+      "sha256": "4493bfec6b54e6ca8cab5604f813fba57322421cb7f52a77a8481a5c92c8375c"
+    },
+    {
+      "path": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\reports\\qt-startup-delivery-20261101\\model-3\\original\\reference.dxf",
+      "sha256": "c4f06db475893c210a7af543071795d9fb4a73b044ac8806edf7752c30deba7c"
+    },
+    {
+      "path": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\reports\\qt-startup-delivery-20261101\\model-3\\move-point\\scene.fslp",
+      "sha256": "96496174e5029d3ecc9abe5b16f0a4a34603917981d3d23f79b3cacf1ba71813"
+    },
+    {
+      "path": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\reports\\qt-startup-delivery-20261101\\model-3\\move-point\\reference.dxf",
+      "sha256": "59b8bcdf3613fc454c47c16c653417efc43aa5e13780f3fb90a15aea87454cf2"
+    }
+  ],
+  "retired_builds": {
+    "C:\\FreeShip26Tests\\build\\topology-service-02": {
+      "files": 1,
+      "bytes": 11154432
+    },
+    "C:\\FreeShip26Tests\\build\\topology-service-01": {
+      "files": 1,
+      "bytes": 11151872
+    },
+    "C:\\FreeShip26Tests\\build\\topology-runtime-03": {
+      "files": 34,
+      "bytes": 50157055
+    },
+    "C:\\FreeShip26Tests\\build\\topology-runtime-02": {
+      "files": 34,
+      "bytes": 50151213
+    },
+    "C:\\FreeShip26Tests\\build\\topology-runtime-01": {
+      "files": 34,
+      "bytes": 50149513
+    },
+    "C:\\FreeShip26Tests\\build\\topology-package-01": {
+      "files": 35,
+      "bytes": 61311487
+    },
+    "C:\\FreeShip26Tests\\build\\surface-service-01": {
+      "files": 1,
+      "bytes": 11164672
+    },
+    "C:\\FreeShip26Tests\\build\\surface-package-02": {
+      "files": 40,
+      "bytes": 63993833
+    },
+    "C:\\FreeShip26Tests\\build\\surface-package-01": {
+      "files": 40,
+      "bytes": 63989327
+    },
+    "C:\\FreeShip26Tests\\build\\ship-runtime-01": {
+      "files": 32,
+      "bytes": 49157742
+    },
+    "C:\\FreeShip26Tests\\build\\ship-package-01": {
+      "files": 33,
+      "bytes": 60299622
+    },
+    "C:\\FreeShip26Tests\\build\\settings-service-02": {
+      "files": 1,
+      "bytes": 11161088
+    },
+    "C:\\FreeShip26Tests\\build\\settings-service-01": {
+      "files": 1,
+      "bytes": 11160576
+    },
+    "C:\\FreeShip26Tests\\build\\settings-runtime-01": {
+      "files": 36,
+      "bytes": 51827559
+    },
+    "C:\\FreeShip26Tests\\build\\settings-final-package-02": {
+      "files": 38,
+      "bytes": 63274514
+    },
+    "C:\\FreeShip26Tests\\build\\settings-final-package-01": {
+      "files": 38,
+      "bytes": 63274514
+    },
+    "C:\\FreeShip26Tests\\build\\settings-dev-package-03": {
+      "files": 38,
+      "bytes": 63274514
+    },
+    "C:\\FreeShip26Tests\\build\\settings-dev-package-02": {
+      "files": 38,
+      "bytes": 63272754
+    },
+    "C:\\FreeShip26Tests\\build\\settings-dev-package-01": {
+      "files": 37,
+      "bytes": 62988135
+    },
+    "C:\\FreeShip26Tests\\build\\propulsion-native-service-01": {
+      "files": 1,
+      "bytes": 11169280
+    },
+    "C:\\FreeShip26Tests\\build\\propulsion-native-package-02": {
+      "files": 43,
+      "bytes": 66102715
+    },
+    "C:\\FreeShip26Tests\\build\\propulsion-native-package-01": {
+      "files": 43,
+      "bytes": 68887372
+    },
+    "C:\\FreeShip26Tests\\build\\project-native-math-a": {
+      "files": 2,
+      "bytes": 374941
+    },
+    "C:\\FreeShip26Tests\\build\\project-native-a": {
+      "files": 1,
+      "bytes": 303300
+    },
+    "C:\\FreeShip26Tests\\build\\point-service-02": {
+      "files": 1,
+      "bytes": 11150848
+    },
+    "C:\\FreeShip26Tests\\build\\point-service-01": {
+      "files": 1,
+      "bytes": 11147264
+    },
+    "C:\\FreeShip26Tests\\build\\point-runtime-02": {
+      "files": 34,
+      "bytes": 49918285
+    },
+    "C:\\FreeShip26Tests\\build\\point-runtime-01": {
+      "files": 34,
+      "bytes": 49910982
+    },
+    "C:\\FreeShip26Tests\\build\\point-package-01": {
+      "files": 35,
+      "bytes": 61069133
+    },
+    "C:\\FreeShip26Tests\\build\\modeling-native-service-02": {
+      "files": 1,
+      "bytes": 11158016
+    },
+    "C:\\FreeShip26Tests\\build\\modeling-native-service-01": {
+      "files": 1,
+      "bytes": 11155456
+    },
+    "C:\\FreeShip26Tests\\build\\modeling-native-runtime-04": {
+      "files": 35,
+      "bytes": 61551313
+    },
+    "C:\\FreeShip26Tests\\build\\modeling-native-runtime-03": {
+      "files": 35,
+      "bytes": 61528282
+    },
+    "C:\\FreeShip26Tests\\build\\modeling-native-runtime-02": {
+      "files": 35,
+      "bytes": 61518597
+    },
+    "C:\\FreeShip26Tests\\build\\modeling-native-runtime-01": {
+      "files": 34,
+      "bytes": 50330117
+    },
+    "C:\\FreeShip26Tests\\build\\modeling-native-package-01": {
+      "files": 35,
+      "bytes": 61551313
+    },
+    "C:\\FreeShip26Tests\\build\\modeling-complete-service-02": {
+      "files": 1,
+      "bytes": 11160064
+    },
+    "C:\\FreeShip26Tests\\build\\modeling-complete-service-01": {
+      "files": 1,
+      "bytes": 11160064
+    },
+    "C:\\FreeShip26Tests\\build\\modeling-complete-runtime-06": {
+      "files": 35,
+      "bytes": 51395500
+    },
+    "C:\\FreeShip26Tests\\build\\modeling-complete-runtime-05": {
+      "files": 35,
+      "bytes": 51391168
+    },
+    "C:\\FreeShip26Tests\\build\\modeling-complete-runtime-04": {
+      "files": 36,
+      "bytes": 62427466
+    },
+    "C:\\FreeShip26Tests\\build\\modeling-complete-runtime-03": {
+      "files": 36,
+      "bytes": 62427466
+    },
+    "C:\\FreeShip26Tests\\build\\modeling-complete-runtime-02": {
+      "files": 36,
+      "bytes": 62427466
+    },
+    "C:\\FreeShip26Tests\\build\\modeling-complete-runtime-01": {
+      "files": 35,
+      "bytes": 62148786
+    },
+    "C:\\FreeShip26Tests\\build\\modeling-complete-package-01": {
+      "files": 36,
+      "bytes": 62555564
+    },
+    "C:\\FreeShip26Tests\\build\\lackenby-trace-b": {
+      "files": 274,
+      "bytes": 106231835
+    },
+    "C:\\FreeShip26Tests\\build\\lackenby-trace-a": {
+      "files": 274,
+      "bytes": 106231557
+    },
+    "C:\\FreeShip26Tests\\build\\lackenby-native-a": {
+      "files": 4,
+      "bytes": 1228912
+    },
+    "C:\\FreeShip26Tests\\build\\hydro-native-service-01": {
+      "files": 1,
+      "bytes": 11168768
+    },
+    "C:\\FreeShip26Tests\\build\\hydro-native-package-04": {
+      "files": 43,
+      "bytes": 65754573
+    },
+    "C:\\FreeShip26Tests\\build\\hydro-native-package-03": {
+      "files": 43,
+      "bytes": 65754573
+    },
+    "C:\\FreeShip26Tests\\build\\hydro-native-package-02": {
+      "files": 43,
+      "bytes": 65754555
+    },
+    "C:\\FreeShip26Tests\\build\\hydro-native-package-01": {
+      "files": 43,
+      "bytes": 65754555
+    },
+    "C:\\FreeShip26Tests\\build\\ghs-runtime-05": {
+      "files": 32,
+      "bytes": 49107275
+    },
+    "C:\\FreeShip26Tests\\build\\ghs-runtime-04": {
+      "files": 32,
+      "bytes": 49099451
+    },
+    "C:\\FreeShip26Tests\\build\\ghs-runtime-03": {
+      "files": 32,
+      "bytes": 49098939
+    },
+    "C:\\FreeShip26Tests\\build\\ghs-runtime-02": {
+      "files": 32,
+      "bytes": 48900808
+    },
+    "C:\\FreeShip26Tests\\build\\ghs-runtime-01": {
+      "files": 32,
+      "bytes": 48890500
+    },
+    "C:\\FreeShip26Tests\\build\\ghs-package-01": {
+      "files": 33,
+      "bytes": 60249419
+    },
+    "C:\\FreeShip26Tests\\build\\flow-settings-service-03": {
+      "files": 1,
+      "bytes": 11168768
+    },
+    "C:\\FreeShip26Tests\\build\\flow-settings-service-02": {
+      "files": 1,
+      "bytes": 11168256
+    },
+    "C:\\FreeShip26Tests\\build\\flow-settings-service-01": {
+      "files": 1,
+      "bytes": 11167744
+    },
+    "C:\\FreeShip26Tests\\build\\flow-settings-package-04": {
+      "files": 43,
+      "bytes": 65648471
+    },
+    "C:\\FreeShip26Tests\\build\\flow-settings-package-03": {
+      "files": 43,
+      "bytes": 65648471
+    },
+    "C:\\FreeShip26Tests\\build\\flow-settings-package-02": {
+      "files": 43,
+      "bytes": 65638411
+    },
+    "C:\\FreeShip26Tests\\build\\flow-settings-package-01": {
+      "files": 41,
+      "bytes": 65118259
+    },
+    "C:\\FreeShip26Tests\\build\\fbm-transform-20261103-a": {
+      "files": 1,
+      "bytes": 451740
+    },
+    "C:\\FreeShip26Tests\\build\\fbm-net-20261103-a": {
+      "files": 1,
+      "bytes": 332806
+    },
+    "C:\\FreeShip26Tests\\build\\face-tools-runtime-a": {
+      "files": 36,
+      "bytes": 62424842
+    },
+    "C:\\FreeShip26Tests\\build\\face-tools-native-a": {
+      "files": 2,
+      "bytes": 391360
+    },
+    "C:\\FreeShip26Tests\\build\\document-service-01": {
+      "files": 1,
+      "bytes": 11147264
+    },
+    "C:\\FreeShip26Tests\\build\\document-runtime-02": {
+      "files": 34,
+      "bytes": 49816604
+    },
+    "C:\\FreeShip26Tests\\build\\document-runtime-01": {
+      "files": 34,
+      "bytes": 49816092
+    },
+    "C:\\FreeShip26Tests\\build\\document-package-01": {
+      "files": 35,
+      "bytes": 60963868
+    },
+    "C:\\FreeShip26Tests\\build\\create-service-02": {
+      "files": 1,
+      "bytes": 11166720
+    },
+    "C:\\FreeShip26Tests\\build\\create-service-01": {
+      "files": 1,
+      "bytes": 11166720
+    },
+    "C:\\FreeShip26Tests\\build\\create-package-07": {
+      "files": 41,
+      "bytes": 64988292
+    },
+    "C:\\FreeShip26Tests\\build\\create-package-06": {
+      "files": 41,
+      "bytes": 64988292
+    },
+    "C:\\FreeShip26Tests\\build\\create-package-05": {
+      "files": 41,
+      "bytes": 64987138
+    },
+    "C:\\FreeShip26Tests\\build\\create-package-04": {
+      "files": 41,
+      "bytes": 64985396
+    },
+    "C:\\FreeShip26Tests\\build\\create-package-03": {
+      "files": 41,
+      "bytes": 64983348
+    },
+    "C:\\FreeShip26Tests\\build\\create-package-02": {
+      "files": 41,
+      "bytes": 64982324
+    },
+    "C:\\FreeShip26Tests\\build\\create-package-01": {
+      "files": 40,
+      "bytes": 64095213
+    },
+    "C:\\FreeShip26Tests\\build\\construction-native-service-02": {
+      "files": 1,
+      "bytes": 11159040
+    },
+    "C:\\FreeShip26Tests\\build\\construction-native-service-01": {
+      "files": 1,
+      "bytes": 11158528
+    },
+    "C:\\FreeShip26Tests\\build\\construction-native-runtime-03": {
+      "files": 34,
+      "bytes": 50703104
+    },
+    "C:\\FreeShip26Tests\\build\\construction-native-runtime-02": {
+      "files": 35,
+      "bytes": 61862918
+    },
+    "C:\\FreeShip26Tests\\build\\construction-native-runtime-01": {
+      "files": 35,
+      "bytes": 61713842
+    },
+    "C:\\FreeShip26Tests\\build\\construction-native-package-01": {
+      "files": 35,
+      "bytes": 61862144
+    },
+    "C:\\FreeShip26Tests\\build\\cad-service-02": {
+      "files": 1,
+      "bytes": 11142144
+    },
+    "C:\\FreeShip26Tests\\build\\cad-service-01": {
+      "files": 1,
+      "bytes": 11140608
+    },
+    "C:\\FreeShip26Tests\\build\\cad-runtime-02": {
+      "files": 31,
+      "bytes": 48285511
+    },
+    "C:\\FreeShip26Tests\\build\\cad-runtime-01": {
+      "files": 31,
+      "bytes": 48284638
+    },
+    "C:\\FreeShip26Tests\\build\\cad-qt": {
+      "files": 139,
+      "bytes": 41296176
+    },
+    "C:\\FreeShip26Tests\\build\\cad-package-01": {
+      "files": 32,
+      "bytes": 59427655
+    },
+    "C:\\FreeShip26Tests\\build\\background-native-a": {
+      "files": 1,
+      "bytes": 223494
+    },
+    "C:\\FreeShip26Tests\\build\\auxiliary-service-01": {
+      "files": 1,
+      "bytes": 11161600
+    },
+    "C:\\FreeShip26Tests\\build\\auxiliary-final-package-03": {
+      "files": 40,
+      "bytes": 63894299
+    },
+    "C:\\FreeShip26Tests\\build\\auxiliary-final-package-02": {
+      "files": 40,
+      "bytes": 63894299
+    },
+    "C:\\FreeShip26Tests\\build\\auxiliary-final-package-01": {
+      "files": 40,
+      "bytes": 63882339
+    },
+    "C:\\FreeShip26Tests\\build\\auxiliary-dev-package-01": {
+      "files": 40,
+      "bytes": 63882339
+    },
+    "D:\\FreeShip26Tests\\build\\resistance-native-service-01": {
+      "files": 1,
+      "bytes": 11169792
+    },
+    "D:\\FreeShip26Tests\\build\\resistance-native-package-04": {
+      "files": 43,
+      "bytes": 68888396
+    },
+    "D:\\FreeShip26Tests\\build\\resistance-native-package-03": {
+      "files": 43,
+      "bytes": 68888396
+    },
+    "D:\\FreeShip26Tests\\build\\resistance-native-package-02": {
+      "files": 43,
+      "bytes": 68888396
+    },
+    "D:\\FreeShip26Tests\\build\\resistance-native-package-01": {
+      "files": 43,
+      "bytes": 68887884
+    },
+    "D:\\FreeShip26Tests\\build\\publication-native-package-04": {
+      "files": 43,
+      "bytes": 69143070
+    },
+    "D:\\FreeShip26Tests\\build\\publication-native-package-03": {
+      "files": 43,
+      "bytes": 69135495
+    },
+    "D:\\FreeShip26Tests\\build\\publication-native-package-02": {
+      "files": 43,
+      "bytes": 69135495
+    },
+    "D:\\FreeShip26Tests\\build\\publication-native-package-01": {
+      "files": 43,
+      "bytes": 69136519
+    },
+    "D:\\FreeShip26Tests\\build\\preferences-ui-package-06": {
+      "files": 43,
+      "bytes": 69507671
+    },
+    "D:\\FreeShip26Tests\\build\\preferences-native-package-05": {
+      "files": 43,
+      "bytes": 69222480
+    },
+    "D:\\FreeShip26Tests\\build\\plates-native-package-05": {
+      "files": 43,
+      "bytes": 68969271
+    },
+    "D:\\FreeShip26Tests\\build\\plates-native-package-04": {
+      "files": 43,
+      "bytes": 68966215
+    },
+    "D:\\FreeShip26Tests\\build\\plates-native-package-03": {
+      "files": 43,
+      "bytes": 68965173
+    },
+    "D:\\FreeShip26Tests\\build\\plates-native-package-02": {
+      "files": 43,
+      "bytes": 68965173
+    },
+    "D:\\FreeShip26Tests\\build\\plates-native-package-01": {
+      "files": 43,
+      "bytes": 68965173
+    },
+    "D:\\FreeShip26Tests\\build\\plates-native-bridge-01": {
+      "files": 1,
+      "bytes": 11170304
+    },
+    "D:\\FreeShip26Tests\\build\\model-ui-package-03": {
+      "files": 44,
+      "bytes": 71118259
+    },
+    "D:\\FreeShip26Tests\\build\\cad-native-package-03": {
+      "files": 43,
+      "bytes": 69027567
+    },
+    "D:\\FreeShip26Tests\\build\\cad-native-package-02": {
+      "files": 43,
+      "bytes": 69027867
+    },
+    "D:\\FreeShip26Tests\\build\\cad-native-package-01": {
+      "files": 43,
+      "bytes": 69025271
+    },
+    "D:\\FreeShip26Tests\\build\\cad-native-bridge-01": {
+      "files": 1,
+      "bytes": 11170304
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\topology-service-03": {
+      "files": 1,
+      "bytes": 10903040
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\topology-service-02": {
+      "files": 1,
+      "bytes": 10903040
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\topology-runtime-05": {
+      "files": 25,
+      "bytes": 40478694
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\topology-runtime-04": {
+      "files": 25,
+      "bytes": 40467111
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\topology-runtime-03": {
+      "files": 25,
+      "bytes": 40466387
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\topology-runtime-02": {
+      "files": 25,
+      "bytes": 40418516
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\topology-runtime-01": {
+      "files": 25,
+      "bytes": 40408743
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\topology-qt-01": {
+      "files": 86,
+      "bytes": 18090849
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\sections-service-01": {
+      "files": 1,
+      "bytes": 10910720
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\sections-runtime-04": {
+      "files": 25,
+      "bytes": 40731609
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\sections-runtime-03": {
+      "files": 25,
+      "bytes": 40727001
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\sections-runtime-02": {
+      "files": 25,
+      "bytes": 40724441
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\sections-runtime-01": {
+      "files": 25,
+      "bytes": 40711171
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\qt-m1": {
+      "files": 21,
+      "bytes": 2691317
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\plates-service-05": {
+      "files": 1,
+      "bytes": 11121664
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\plates-service-04": {
+      "files": 1,
+      "bytes": 11121664
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\plates-service-03": {
+      "files": 1,
+      "bytes": 11121152
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\plates-service-02": {
+      "files": 1,
+      "bytes": 11121152
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\plates-runtime-06": {
+      "files": 30,
+      "bytes": 47407929
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\plates-runtime-05": {
+      "files": 30,
+      "bytes": 47404710
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\plates-runtime-04": {
+      "files": 30,
+      "bytes": 47404374
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\plates-runtime-03": {
+      "files": 30,
+      "bytes": 47384183
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\plates-runtime-02": {
+      "files": 30,
+      "bytes": 47383367
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\plates-runtime-01": {
+      "files": 30,
+      "bytes": 47383367
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\performance-service-12": {
+      "files": 1,
+      "bytes": 11114496
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\performance-service-11": {
+      "files": 1,
+      "bytes": 11114496
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\performance-service-10": {
+      "files": 1,
+      "bytes": 11113984
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\performance-service-09": {
+      "files": 1,
+      "bytes": 11110912
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\performance-service-08": {
+      "files": 1,
+      "bytes": 11110912
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\performance-service-07": {
+      "files": 1,
+      "bytes": 11110912
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\performance-service-06": {
+      "files": 1,
+      "bytes": 11109376
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\performance-service-05": {
+      "files": 1,
+      "bytes": 11107328
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\performance-service-04": {
+      "files": 1,
+      "bytes": 11103232
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\performance-service-03": {
+      "files": 1,
+      "bytes": 11102208
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\performance-service-02": {
+      "files": 1,
+      "bytes": 11098624
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\performance-runtime-06": {
+      "files": 29,
+      "bytes": 46756985
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\performance-runtime-05": {
+      "files": 29,
+      "bytes": 46754179
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\performance-runtime-04": {
+      "files": 29,
+      "bytes": 46754179
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\performance-runtime-03": {
+      "files": 29,
+      "bytes": 46754179
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\performance-runtime-02": {
+      "files": 29,
+      "bytes": 46744799
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\performance-runtime-01": {
+      "files": 29,
+      "bytes": 46735067
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\package-e875d287e84946aeb9e554f4b8f05fda": {
+      "files": 25,
+      "bytes": 50684767
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\overlay-service-05": {
+      "files": 1,
+      "bytes": 10916352
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\overlay-service-04": {
+      "files": 1,
+      "bytes": 10916352
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\overlay-service-03": {
+      "files": 1,
+      "bytes": 10915840
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\overlay-service-01": {
+      "files": 1,
+      "bytes": 10914816
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\overlay-runtime-01": {
+      "files": 26,
+      "bytes": 42013293
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\native-service-03": {
+      "files": 1,
+      "bytes": 10891776
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\native-service-02": {
+      "files": 1,
+      "bytes": 10890240
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\native-service-01": {
+      "files": 1,
+      "bytes": 10890240
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\native-delivery-01": {
+      "files": 26,
+      "bytes": 51178356
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\native-app-runtime-04": {
+      "files": 25,
+      "bytes": 40286580
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\native-app-runtime-03": {
+      "files": 25,
+      "bytes": 40286580
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\native-app-runtime-02": {
+      "files": 26,
+      "bytes": 51143759
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\native-app-runtime-01": {
+      "files": 26,
+      "bytes": 51133537
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\native-app-01": {
+      "files": 40,
+      "bytes": 5784213
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\modeling-service-11": {
+      "files": 1,
+      "bytes": 11003392
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\modeling-service-10": {
+      "files": 1,
+      "bytes": 11003392
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\modeling-service-09": {
+      "files": 1,
+      "bytes": 11003392
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\modeling-service-08": {
+      "files": 1,
+      "bytes": 11002880
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\modeling-service-07": {
+      "files": 1,
+      "bytes": 11002880
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\modeling-service-05": {
+      "files": 1,
+      "bytes": 10998272
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\modeling-service-04": {
+      "files": 1,
+      "bytes": 10997760
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\modeling-service-03": {
+      "files": 1,
+      "bytes": 10997248
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\modeling-service-02": {
+      "files": 1,
+      "bytes": 10996224
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\modeling-runtime-01": {
+      "files": 29,
+      "bytes": 46474755
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\m2-runtime-02": {
+      "files": 24,
+      "bytes": 39803231
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\m2-runtime-01": {
+      "files": 24,
+      "bytes": 39802719
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\m2-qt-01": {
+      "files": 27,
+      "bytes": 4286409
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\m2-core-05": {
+      "files": 1,
+      "bytes": 10881536
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\m2-core-04": {
+      "files": 1,
+      "bytes": 10881536
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\m2-core-03": {
+      "files": 1,
+      "bytes": 10881024
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\m2-core-02": {
+      "files": 1,
+      "bytes": 10881024
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\label-boundary-runtime-20261101": {
+      "files": 26,
+      "bytes": 42240497
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\label-boundary-20261101": {
+      "files": 52,
+      "bytes": 9227720
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\hydro-service-03": {
+      "files": 1,
+      "bytes": 11033600
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\hydro-service-02": {
+      "files": 1,
+      "bytes": 11028992
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\hydro-service-01": {
+      "files": 1,
+      "bytes": 11027968
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\hydro-runtime-01": {
+      "files": 29,
+      "bytes": 46622370
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\format-tool": {
+      "files": 4,
+      "bytes": 3420246
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\exchange-service-04": {
+      "files": 1,
+      "bytes": 11129856
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\exchange-service-03": {
+      "files": 1,
+      "bytes": 11129856
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\exchange-service-02": {
+      "files": 1,
+      "bytes": 11129344
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\exchange-runtime-06": {
+      "files": 31,
+      "bytes": 48095249
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\exchange-runtime-05": {
+      "files": 31,
+      "bytes": 48094737
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\exchange-runtime-04": {
+      "files": 31,
+      "bytes": 48094737
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\exchange-runtime-03": {
+      "files": 31,
+      "bytes": 48093713
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\exchange-runtime-02": {
+      "files": 31,
+      "bytes": 48087298
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\exchange-runtime-01": {
+      "files": 30,
+      "bytes": 47592320
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\exchange-package-01": {
+      "files": 32,
+      "bytes": 59225105
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\dist-stable-restored-before-advanced": {
+      "files": 30,
+      "bytes": 56756512
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\dist-plates-before-label-20261102": {
+      "files": 31,
+      "bytes": 58526374
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\dist-before-viewport-20261104": {
+      "files": 44,
+      "bytes": 71118259
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\dist-before-topology-20261103": {
+      "files": 35,
+      "bytes": 61069133
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\dist-before-topology-20261101": {
+      "files": 26,
+      "bytes": 51178356
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\dist-before-surface-20261103": {
+      "files": 40,
+      "bytes": 63894299
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\dist-before-ship-formats-20261102": {
+      "files": 33,
+      "bytes": 60249419
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\dist-before-shading-20261104": {
+      "files": 45,
+      "bytes": 72294913
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\dist-before-settings-20261103": {
+      "files": 36,
+      "bytes": 62555564
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\dist-before-sections-20261101": {
+      "files": 26,
+      "bytes": 51381734
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\dist-before-resistance-native-20261103": {
+      "files": 43,
+      "bytes": 66102715
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\dist-before-publication-native-20261103": {
+      "files": 43,
+      "bytes": 69027567
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\dist-before-propulsion-native-20261103": {
+      "files": 43,
+      "bytes": 65754573
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\dist-before-preferences-ui-20261104": {
+      "files": 43,
+      "bytes": 69222480
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\dist-before-preferences-native-20261103": {
+      "files": 43,
+      "bytes": 69143070
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\dist-before-point-20261102": {
+      "files": 35,
+      "bytes": 60963868
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\dist-before-plates-native-cancel-20261103": {
+      "files": 43,
+      "bytes": 68966215
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\dist-before-plates-native-20261103": {
+      "files": 43,
+      "bytes": 68888396
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\dist-before-plates-20261102": {
+      "files": 30,
+      "bytes": 57871481
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\dist-before-performance-20261102": {
+      "files": 30,
+      "bytes": 57656482
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\dist-before-overlays-20261101": {
+      "files": 26,
+      "bytes": 51642329
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\dist-before-modeling-native-20261103": {
+      "files": 35,
+      "bytes": 61311487
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\dist-before-modeling-complete-20261103": {
+      "files": 35,
+      "bytes": 61862144
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\dist-before-modeling-20261102": {
+      "files": 30,
+      "bytes": 56821290
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\dist-before-model-ui-20261104": {
+      "files": 43,
+      "bytes": 69507671
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\dist-before-hydro-native-20261103": {
+      "files": 43,
+      "bytes": 65648471
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\dist-before-hydro-20261102": {
+      "files": 30,
+      "bytes": 57478147
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\dist-before-ghs-20261102": {
+      "files": 32,
+      "bytes": 59427655
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\dist-before-flow-settings-20261103": {
+      "files": 41,
+      "bytes": 64988292
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\dist-before-exchange-20261102": {
+      "files": 31,
+      "bytes": 58529593
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\dist-before-document-20261102": {
+      "files": 33,
+      "bytes": 60299622
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\dist-before-display-20261101": {
+      "files": 28,
+      "bytes": 54043938
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\dist-before-curves-20261101": {
+      "files": 29,
+      "bytes": 55437052
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\dist-before-create-20261103": {
+      "files": 40,
+      "bytes": 63993833
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\dist-before-construction-native-20261103": {
+      "files": 35,
+      "bytes": 61551313
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\dist-before-cad-native-20261103": {
+      "files": 43,
+      "bytes": 68969271
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\dist-before-cad-20261102": {
+      "files": 32,
+      "bytes": 59227847
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\dist-before-backgrounds-20261101": {
+      "files": 27,
+      "bytes": 53020018
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\dist-before-auxiliary-20261103": {
+      "files": 38,
+      "bytes": 63274514
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\dist-before-advanced-20261101": {
+      "files": 30,
+      "bytes": 56756512
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\dist-advanced-before-corner-fix": {
+      "files": 30,
+      "bytes": 56821290
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\display-service-01": {
+      "files": 1,
+      "bytes": 10926592
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\display-runtime-01": {
+      "files": 28,
+      "bytes": 44510460
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\curves-service-03": {
+      "files": 1,
+      "bytes": 10937344
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\curves-service-02": {
+      "files": 1,
+      "bytes": 10937344
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\curves-runtime-01": {
+      "files": 29,
+      "bytes": 45819168
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\core-service-12": {
+      "files": 1,
+      "bytes": 10866176
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\core-service-11": {
+      "files": 1,
+      "bytes": 10866176
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\core-service-10": {
+      "files": 1,
+      "bytes": 10859520
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\core-service-09": {
+      "files": 1,
+      "bytes": 10857472
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\core-service-08": {
+      "files": 1,
+      "bytes": 10857472
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\core-service-07": {
+      "files": 1,
+      "bytes": 10854400
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\core-service-06": {
+      "files": 1,
+      "bytes": 10853888
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\core-service-05": {
+      "files": 1,
+      "bytes": 10853888
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\core-service-04": {
+      "files": 1,
+      "bytes": 10853888
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\core-service-03": {
+      "files": 1,
+      "bytes": 10852352
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\core-service-02": {
+      "files": 1,
+      "bytes": 10848256
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\candidate-m1": {
+      "files": 23,
+      "bytes": 49487385
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\before-label-boundary-20261101": {
+      "files": 2,
+      "bytes": 1943900
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\background-service-03": {
+      "files": 1,
+      "bytes": 10925056
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\background-service-02": {
+      "files": 1,
+      "bytes": 10925056
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\background-runtime-01": {
+      "files": 27,
+      "bytes": 43118882
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\advanced-service-03": {
+      "files": 1,
+      "bytes": 10949632
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\advanced-service-02": {
+      "files": 1,
+      "bytes": 10949632
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\advanced-service-01": {
+      "files": 1,
+      "bytes": 10949632
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\advanced-runtime-01": {
+      "files": 29,
+      "bytes": 45871658
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\advanced-package-02": {
+      "files": 30,
+      "bytes": 56821290
+    },
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\advanced-package-01": {
+      "files": 30,
+      "bytes": 56821290
+    }
+  },
+  "new_run_retention": {
+    "created_utc": "2026-11-04T10:06:16.702710+00:00",
+    "status": "complete",
+    "removed_files": 5,
+    "logical_bytes": 14039155,
+    "caches": [
+      "qt-viewport\\native-lines-cache"
+    ],
+    "skipped": [],
+    "retained": "Source, reports, logs, screenshots, published models/scenes/exports and external baselines. Cache-hit checks finished before retirement."
+  },
+  "default_output_selection": {
+    "selected": "C:\\FreeShip26Tests\\reports",
+    "free_bytes": 20970962944,
+    "candidates": [
+      {
+        "root": "D:\\FreeShip26Tests\\reports",
+        "free_bytes": 18905112576
+      },
+      {
+        "root": "C:\\FreeShip26Tests\\reports",
+        "free_bytes": 20970962944
+      }
+    ]
+  },
+  "tool_sources_sha256": {
+    "run_tests.py": "3eebf7ca03fb455ac76ab02eb97ec2e2a206e293ae6802b9adcbb18d85104f19",
+    "test_artifacts.py": "952fce1ae9d94b4be07115a6d1d578dae2b21682aa6a774ee6a09d65532fa2e3",
+    "test_storage.py": "17deb9ba4eb892e15c5a9cacf5366f0571804a3be02ddac45d09eeca053ded1e",
+    "output-location.json": "254dadd2ace049b2388260490112cf7f11cce5a060b30cb0d0c794a0163062a9",
+    "maintenance/storage_inventory.py": "ecd470eac3c6a46c62e06eb1462e82f0aa80123376797645cd82fe67cb81630b",
+    "maintenance/plan_storage_cleanup.py": "4aa08951aa44e7a377c35d662a36cfa9d7e661df3399606697f016d041a4a4af",
+    "maintenance/apply_storage_cleanup.ps1": "2bfc48ae3d1a0a90cb6fe0ed56e076dd3c3983db4c739946abb3c5f715024dcc",
+    "maintenance/record_storage_cleanup.py": "bec82b99ed06f22a9bbf2d9f70dc3d09a3fce2d84a558282d1c9fd1553e8a255"
+  },
+  "limitations": [
+    "Free-space delta is measured and can include unrelated concurrent writes; logical removed bytes are exact.",
+    "Older compiled runtimes require rebuilding. Their historical reports are not changed into current validation.",
+    "Desktop acceptance remains outside hidden Qt tests."
+  ]
+}

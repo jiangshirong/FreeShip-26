@@ -1,0 +1,120 @@
+{
+  "date": "2026-11-02",
+  "installed": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\dist",
+  "previous_installation": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\dist-before-cad-20261102",
+  "scope": "IGES surfaces, 3D DXF section/control splines, 3DFACE mesh, offsets and coordinates.",
+  "binaries_sha256": {
+    "FreeShipQt.exe": "1d979f7d988a0a108b80dd7d2d25d82fba8725c97d21dbd7d7e7a3babfc1e086",
+    "bridge/FreeShipGeometryBridge.exe": "782b536b888daa06dc031b79133c93b349d4a0af6d37bdf48421d85e73f44934"
+  },
+  "package_manifest_sha256": "97f0c9ea598a9d0e00939792b692a85d050eb4033165483c4b66d3266aabbf57",
+  "package_files_verified": 2498,
+  "legacy_source_sha256": "277a3c69392c86fe14c375e7dfc9c3197b4162e982673cbbcf4b4a2dfff0ab6b",
+  "bridge_build": "C:/FreeShip26Tests/build/cad-service-02",
+  "reports": {
+    "qt-cad-c": {
+      "path": "C:\\FreeShip26Tests\\reports\\qt-cad-c\\report.json",
+      "status": "partial",
+      "counts": {
+        "pass": 461,
+        "fail": 0,
+        "review": 1,
+        "not_run": 1,
+        "error": 0
+      },
+      "report_sha256": "16912aafdfc235cd0a0aa01c14adf776493dec9f692bc72e3d530560b6ed3a09"
+    },
+    "qt-cad-unified/qt-cad": {
+      "path": "C:\\FreeShip26Tests\\reports\\qt-cad-unified\\qt-cad\\report.json",
+      "status": "partial",
+      "counts": {
+        "pass": 461,
+        "fail": 0,
+        "review": 1,
+        "not_run": 1,
+        "error": 0
+      },
+      "report_sha256": "5a5b5f31b518f8c6a6ebe98512cac63404e302bef55456f73d2897d91890598c"
+    },
+    "qt-exchange-cad": {
+      "path": "C:\\FreeShip26Tests\\reports\\qt-exchange-cad\\report.json",
+      "status": "partial",
+      "counts": {
+        "pass": 280,
+        "fail": 0,
+        "review": 1,
+        "not_run": 1,
+        "error": 0
+      },
+      "report_sha256": "20de9a759228bacebbe7ef7e3630bc0ed753f9665baeb6d5d05f064b70d99cd0"
+    },
+    "qt-migration-cad": {
+      "path": "C:\\FreeShip26Tests\\reports\\qt-migration-cad\\report.json",
+      "status": "partial",
+      "counts": {
+        "pass": 2154,
+        "fail": 0,
+        "review": 27,
+        "not_run": 18,
+        "error": 0
+      },
+      "report_sha256": "b28294df40663bdbc63962351efaa2e33433986fbd1f0b621c34543a1d887bad"
+    },
+    "qt-cad-package": {
+      "path": "C:\\FreeShip26Tests\\reports\\qt-cad-package\\report.json",
+      "status": "partial",
+      "counts": {
+        "pass": 203,
+        "fail": 0,
+        "review": 1,
+        "not_run": 1,
+        "error": 0
+      },
+      "report_sha256": "63f8e3f96fff33345939f245c369f50f88196c78aaaf33b43658a224ff5b5969"
+    },
+    "qt-cad-delivery": {
+      "path": "C:\\FreeShip26Tests\\reports\\qt-cad-delivery\\report.json",
+      "status": "partial",
+      "counts": {
+        "pass": 461,
+        "fail": 0,
+        "review": 1,
+        "not_run": 1,
+        "error": 0
+      },
+      "report_sha256": "7478e4b773ca658e0ce02822fbdbc63374a8fdd80e5af702be1984c37b8b9c9c"
+    },
+    "qt-migration-cad-delivery": {
+      "path": "C:\\FreeShip26Tests\\reports\\qt-migration-cad-delivery\\report.json",
+      "status": "partial",
+      "counts": {
+        "pass": 85,
+        "fail": 0,
+        "review": 0,
+        "not_run": 4,
+        "error": 0
+      },
+      "report_sha256": "c9b70efc3eb934528dec4641b734130c9b11e3b76c1860c877935fc06e76c418"
+    }
+  },
+  "independent_consumers": {
+    "ezdxf": "1.4.4",
+    "cadquery-ocp": "7.8.1.1.post1",
+    "vtk": "9.3.1"
+  },
+  "notes": [
+    "IGES patch construction retains the original Plus algorithm on a disposable document. It is not exact equivalence to a subdivision surface or a sewn solid.",
+    "All 166 IGES patches from real 9a are transferred by OpenCascade. Planar fixtures check independent physical bounds and areas; cubic curves check an analytic polynomial.",
+    "Roundtrip compares every coordinate/knot and oriented triangle; camera state, hidden layers, negative-Y, centre and near-centre cases are separate checks.",
+    "Numeric IGES parameters no longer span physical records. The failed first implementation remains in qt-cad-a as migration evidence, not an upstream defect.",
+    "Repeated patch conversion uses a fixed grid rotation independent of pointer order. Original geometry, settings, undo, dirty state, scene and existing DXF are unchanged by export/cancel/failure.",
+    "Independent consumer libraries are optional test dependencies outside the package, not shipped application dependencies.",
+    "Actual installed-directory checks use hidden Windows Qt widgets. Commercial CAD desktop workflows, real mouse/file chooser, manufacturing and full original UI fidelity remain unverified.",
+    "GHS, other specialist formats, remaining imports and the remaining native C++ core migration are still pending.",
+    "All test and maintenance sources remain in FreeShip-Tests; new output/build directories are on C. The legacy fs entry and QtPilot were not replaced."
+  ],
+  "free_bytes_after": {
+    "C": 44137385984,
+    "D": 30302744576
+  }
+}

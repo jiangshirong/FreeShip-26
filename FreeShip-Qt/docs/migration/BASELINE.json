@@ -1,0 +1,11 @@
+{
+  "date": "2026-11-01",
+  "purpose": "Preserved local migration baselines; these include earlier FreeShip_26 fixes.",
+  "legacy_source_sha256": "277a3c69392c86fe14c375e7dfc9c3197b4162e982673cbbcf4b4a2dfff0ab6b",
+  "legacy_executable_sha256": "521b7d33bc5cbfc91a9decbe27227a2ae4ac3406c69c4e880300fc06bbbbde59",
+  "accepted_pilot_executable_sha256": "2c63f4fc9693312c2e8773da66d799f8a4855a56c81f48427f4fd9acb12fd324",
+  "accepted_pilot_bridge_sha256": "771a524643a4e2526fafcb0379eb9ced60545a3d863db24bf1b47f4c9fb2d9bb",
+  "accepted_pilot_report": "../../../FreeShip-Tests/reports/qt-startup-delivery-20261101/report.json",
+  "new_repository_initial_commit": "8a2df78",
+  "fs_launcher": "Kept unchanged; still starts the existing Lazarus application."
+}

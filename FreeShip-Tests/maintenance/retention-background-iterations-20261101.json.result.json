@@ -1,0 +1,14 @@
+{
+  "Plan": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\maintenance\\retention-background-iterations-20261101.json",
+  "Removed": [
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\reports\\qt-backgrounds-20261101-e",
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\reports\\qt-backgrounds-20261101-d",
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\reports\\qt-backgrounds-20261101-a",
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\reports\\qt-backgrounds-20261101-c",
+    "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Tests\\reports\\qt-backgrounds-20261101-b"
+  ],
+  "RemovedCount": 5,
+  "FreeBefore": 17263042560,
+  "FreeAfter": 18474917888,
+  "FreedGiB": 1.13
+}

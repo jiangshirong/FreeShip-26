@@ -1,0 +1,105 @@
+"""Exercise the real file-buffer unit with bounded/faulting streams in a private build.
+
+No source instrumentation, model files, profile or desktop interaction are used.
+"""
+from __future__ import annotations
+import argparse
+from collections import Counter
+import json
+import os
+from pathlib import Path
+import shutil
+import subprocess
+import tempfile
+import time
+import freeship_ui_test as common
+
+ROOT = Path(__file__).resolve().parent
+DEPENDENCIES = (
+    'Units/FreeFileBuffer.pas', 'Units/FreeVersionUnit.pas', 'Units/FreeTypes.pas',
+    'Units/FreeTypes.inc', 'Units/FreeStringsUnit.pas', 'Units/FreeResourceStrings.inc',
+    'Units/FreeUserStringsArray.inc', 'Units/FreeLogger.pas',
+    'Forms/FreeExceptionDlg.pas', 'Forms/FreeExceptionDlg.lfm',
+    'GITLastChangeRevision.inc', 'GitCommit.inc',
+)
+TEST_FILES = ('buffer_safety.py', 'BufferSafetyProbe.pas', 'freeship_ui_test.py')
+
+def hashes(root, paths):
+    return {name: common.digest_file(root/name) for name in paths}
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--source', type=Path, default=common.DEFAULT_SOURCE)
+    parser.add_argument('--lazarus', type=Path, default=common.DEFAULT_LAZARUS)
+    parser.add_argument('--output', type=Path, default=ROOT/'reports'/('buffer-safety-'+time.strftime('%Y%m%d-%H%M%S')))
+    parser.add_argument('--timeout', type=int, default=90)
+    args = parser.parse_args()
+    source, output = args.source.resolve(), args.output.resolve()
+    if output.exists() or output == source or source in output.parents:
+        raise SystemExit('Output must be new and outside the source tree')
+    output.mkdir(parents=True)
+    report = {'status': 'error', 'cases': [], 'limitations': [
+        'Only the listed real source dependencies are compiled; this is not a full application test.',
+        'Faults come from deterministic TStream implementations; no physical disk-full or power-loss test.',
+        'No native desktop interaction or complete model-format compatibility claim.',
+    ]}
+    try:
+        report['source_dependencies_sha256'] = hashes(source, DEPENDENCIES)
+        report['test_code_sha256'] = hashes(ROOT, TEST_FILES)
+        toolchain = common.junction_for(args.lazarus.resolve(), Path(tempfile.gettempdir()))
+        compiler = toolchain/'fpc/3.2.2/bin/x86_64-win64/fpc.exe'
+        report['compiler_sha256'] = common.digest_file(compiler)
+        with common.temporary_workspace('fs-buffer-safety-') as run:
+            work = run/'source'; work.mkdir()
+            for name in DEPENDENCIES:
+                destination = work/name
+                destination.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copy2(source/name, destination)
+            if hashes(work, DEPENDENCIES) != report['source_dependencies_sha256']:
+                raise RuntimeError('Source changed while copying')
+            shutil.copy2(ROOT/'BufferSafetyProbe.pas', work/'BufferSafetyProbe.pas')
+            units = run/'units'; units.mkdir()
+            evidence = run/'evidence'; evidence.mkdir()
+            from PIL import Image
+            jpeg = evidence/'valid.jpg'; Image.new('RGB', (8, 6), (80, 120, 160)).save(jpeg, format='JPEG')
+            report['jpeg_fixture_sha256'] = common.digest_file(jpeg)
+            paths = [work/'Units', work/'Forms', toolchain/'lcl/units/x86_64-win64/win32',
+                     toolchain/'lcl/units/x86_64-win64', toolchain/'components/lazutils/lib/x86_64-win64',
+                     toolchain/'packager/units/x86_64-win64']
+            paths += [p for p in (toolchain/'fpc/3.2.2/units/x86_64-win64').iterdir() if p.is_dir() and p.name!='fv']
+            exe = work/'buffer-safety-probe.exe'
+            cmd = [str(compiler), '-dLCL', '-gl', '-Cr', '-Co', '-Ci', '-Sa', '-Fi'+str(work), '-FU'+str(units), '-o'+str(exe)]
+            cmd += ['-Fu'+str(p) for p in paths]
+            cmd.append(str(work/'BufferSafetyProbe.pas'))
+            env = os.environ.copy(); env.update(TEMP=str(run), TMP=str(run), APPDATA=str(run/'profile'), LOCALAPPDATA=str(run/'profile'))
+            build = subprocess.run(cmd, cwd=work, env=env, capture_output=True, timeout=args.timeout, creationflags=common.FLAGS)
+            (output/'build.log').write_bytes(build.stdout+b'\n'+build.stderr)
+            if build.returncode: raise RuntimeError('Compile failed; see build.log')
+            report['exe_sha256'] = common.digest_file(exe)
+            child = subprocess.run([str(exe), str(evidence), str(jpeg)], cwd=work, env=env,
+                                   capture_output=True, timeout=args.timeout, creationflags=common.FLAGS)
+            (output/'runtime.log').write_bytes(child.stdout+b'\n'+child.stderr)
+            if not (evidence/'probe.json').exists(): raise RuntimeError(f'No report: exit {child.returncode}')
+            native = json.loads((evidence/'probe.json').read_text(encoding='utf-8-sig'))
+            shutil.copy2(evidence/'probe.json', output/'probe.json')
+            report['cases'] = native['cases']
+            if native.get('error'): raise RuntimeError(native['error'])
+            if len(report['cases']) != 90 or len({x['id'] for x in report['cases']}) != 90:
+                raise RuntimeError('Incomplete or duplicate probe results')
+            if child.returncode and not any(x['status']=='fail' for x in report['cases']):
+                raise RuntimeError(f'Unexpected process exit {child.returncode}')
+            report['status'] = 'fail' if any(x['status']=='fail' for x in report['cases']) else 'pass'
+    except Exception as exc:
+        report.update(status='error', error=f'{type(exc).__name__}: {exc}')
+    finally:
+        if report.get('source_dependencies_sha256') != hashes(source, DEPENDENCIES):
+            report.update(status='error', error='Compiled source dependencies changed during the run')
+        if report.get('test_code_sha256') != hashes(ROOT, TEST_FILES):
+            report.update(status='error', error='Test code changed during the run')
+        report['summary'] = dict(Counter(x['status'] for x in report['cases']))
+        (output/'report.json').write_text(json.dumps(report, indent=2, ensure_ascii=False), encoding='utf8')
+    print(json.dumps({'status': report['status'], 'summary': report['summary'], 'report': str(output/'report.json'), 'error': report.get('error')}, ensure_ascii=False))
+    return 0 if report['status']=='pass' else 1
+
+if __name__ == '__main__':
+    raise SystemExit(main())

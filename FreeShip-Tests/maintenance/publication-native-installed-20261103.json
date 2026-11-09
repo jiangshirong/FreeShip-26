@@ -1,0 +1,79 @@
+{
+  "created_utc": "2026-11-03T14:31:40.777300+00:00",
+  "status": "partial",
+  "scope": "C++ document snapshot, scene input and hydrostatic annotations; not complete application migration",
+  "installed": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\dist",
+  "previous": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\dist-before-publication-native-20261103",
+  "package_manifest_sha256": "f65917971cb908d49447bb0bd957dc1aeb10f92005ee72d20c36e1cdf5b22329",
+  "source_sha256": "277a3c69392c86fe14c375e7dfc9c3197b4162e982673cbbcf4b4a2dfff0ab6b",
+  "reports": {
+    "core": {
+      "path": "D:\\FreeShip26Tests\\reports\\publication-core-03\\report.json",
+      "sha256": "ce64ede1c4cd18998665918895c25fdc0b65363cdc8ff8bf920012bd6889d6a6",
+      "counts": {
+        "pass": 179,
+        "fail": 0,
+        "review": 0,
+        "not_run": 1,
+        "error": 0
+      }
+    },
+    "document": {
+      "path": "D:\\FreeShip26Tests\\reports\\publication-document-02\\report.json",
+      "sha256": "3ba0950dfb827817585ee5bf2cb13934615360d3ededb1bd32122933190755f6",
+      "counts": {
+        "pass": 13219,
+        "fail": 0,
+        "review": 29,
+        "not_run": 3,
+        "error": 0
+      }
+    },
+    "migration": {
+      "path": "D:\\FreeShip26Tests\\reports\\publication-migration-02\\report.json",
+      "sha256": "e9f869d2a557332d4b10e4003f7e2c3a616c19e056c195d745bf300b9a8572eb",
+      "counts": {
+        "pass": 751,
+        "fail": 0,
+        "review": 9,
+        "not_run": 7,
+        "error": 0
+      }
+    },
+    "installed": {
+      "path": "D:\\FreeShip26Tests\\reports\\publication-installed-02\\qt-publication\\report.json",
+      "sha256": "256a640e9df9571855f0258debd60c28bf93fe003365cbfff59ca0fdb3711eb8",
+      "counts": {
+        "pass": 153,
+        "fail": 0,
+        "review": 0,
+        "not_run": 1,
+        "error": 0
+      }
+    },
+    "startup": {
+      "path": "D:\\FreeShip26Tests\\reports\\publication-startup-01\\report.json",
+      "sha256": "2d42e765b4a35301f7ff6218d0aaeec0d1802cd185f1ad7e6cb36e6f63627c56",
+      "counts": {
+        "pass": 54,
+        "fail": 0,
+        "review": 0,
+        "not_run": 17,
+        "error": 0
+      }
+    }
+  },
+  "counts": {
+    "pass": 14356,
+    "fail": 0,
+    "review": 38,
+    "not_run": 29,
+    "error": 0
+  },
+  "limitations": [
+    "Preference/translation bootstrap and explicit old diagnostic/compatibility paths remain.",
+    "Open asymmetric half-hull hydro labels are intentionally suppressed; original differences remain review.",
+    "Hidden Qt callbacks do not establish desktop visual, mouse, focus or device acceptance."
+  ],
+  "audit_script_sha256": "389e768ec9f9f11ae74c029b55c384a7ab4d564d316450f5289d625b74fc469a"
+}

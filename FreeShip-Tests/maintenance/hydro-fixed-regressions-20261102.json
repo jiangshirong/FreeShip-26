@@ -1,0 +1,40 @@
+{
+  "date": "2026-11-02",
+  "suite": "qt-hydrostatics",
+  "failed_report_sha256": "cb48c52775780de67c00d40989cdbf2f32cd0e2e727a8465ff550f83532814e4",
+  "failure_cases": [
+    {
+      "id": "asymmetric-centerline-leak",
+      "status": "fail"
+    },
+    {
+      "id": "settings.failed-publish",
+      "status": "fail"
+    },
+    {
+      "id": "execution",
+      "status": "error",
+      "reason": "KeyError: 'rows'"
+    }
+  ],
+  "fixes": [
+    "Count participating faces per side to detect non-symmetric centerline leaks.",
+    "Reconstruct design hydro cache for defaults after transactional rollback.",
+    "Keep hydro-report.json separate from the workflow report.json.",
+    "Use the Windows font backend for hidden hydro dialogs and PDF evidence."
+  ],
+  "observed_offscreen_font": {
+    "exact_match": false,
+    "point_size": 9,
+    "requested": "Microsoft YaHei UI",
+    "resolved": "AcadEref",
+    "style": "Regular"
+  },
+  "current_regression": "FreeShip-Tests/reports/qt-hydro-20261102-e",
+  "test_sources": [
+    "FreeShip-Tests/qt_hydrostatics.py",
+    "FreeShip-Tests/qt_hydro_cases.py",
+    "FreeShip-Tests/QtEditingFixture.pas",
+    "FreeShip-Qt/src/app/hydro_workflow.cpp"
+  ]
+}

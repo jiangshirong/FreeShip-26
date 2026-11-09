@@ -1,0 +1,3082 @@
+{
+  "created_utc": "2026-11-04T03:26:16.2962207Z",
+  "kept": "All source, reports, original solver protocol files, screenshots, logs, manifests, diagnostics, final runs, package-06, package-final and installed backup",
+  "bytes": 1019712166.0,
+  "packages": [
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\package-01",
+      "name": "package-01",
+      "bytes": 122510609.0
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\package-02",
+      "name": "package-02",
+      "bytes": 122517937.0
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\package-03",
+      "name": "package-03",
+      "bytes": 122519517.0
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\package-04",
+      "name": "package-04",
+      "bytes": 122524861.0
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\package-05",
+      "name": "package-05",
+      "bytes": 122523744.0
+    }
+  ],
+  "files": [
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\service-01\\service\\acceleration-defaults\\performance.json",
+      "bytes": 6731
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\service-01\\service\\isherwood-1\\performance.json",
+      "bytes": 12392
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\service-01\\service\\isherwood-2\\performance.json",
+      "bytes": 12389
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\service-01\\service\\isherwood-3\\performance.json",
+      "bytes": 12370
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\service-01\\service\\isherwood-4\\performance.json",
+      "bytes": 12384
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\service-01\\service\\load\\model.json",
+      "bytes": 7522
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\service-01\\service\\load\\native-input.json",
+      "bytes": 2077
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\service-01\\service\\load\\reference.dxf",
+      "bytes": 8908
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\service-01\\service\\load\\scene.fslp",
+      "bytes": 15948
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\service-01\\service\\load\\sections.json",
+      "bytes": 61
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\service-01\\service\\load\\surface.json",
+      "bytes": 4352
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\service-01\\service\\maneuver-defaults\\performance.json",
+      "bytes": 11701
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\service-01\\service\\native-lines-cache\\5afaaa5d01dc4bbd5e181809b4f7ae29a0646d4446daaa61c0809be43dd92e39\\entry.json",
+      "bytes": 1354
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\service-01\\service\\native-lines-cache\\5afaaa5d01dc4bbd5e181809b4f7ae29a0646d4446daaa61c0809be43dd92e39\\reference.dxf",
+      "bytes": 8908
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\service-01\\service\\native-lines-cache\\5afaaa5d01dc4bbd5e181809b4f7ae29a0646d4446daaa61c0809be43dd92e39\\scene.fslp",
+      "bytes": 15948
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\service-01\\service\\native-lines-cache\\5afaaa5d01dc4bbd5e181809b4f7ae29a0646d4446daaa61c0809be43dd92e39\\sections.json",
+      "bytes": 61
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\service-01\\service\\native-lines-cache\\5afaaa5d01dc4bbd5e181809b4f7ae29a0646d4446daaa61c0809be43dd92e39\\surface.json",
+      "bytes": 4352
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\service-01\\service\\process\\protocol.jsonl",
+      "bytes": 22035
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\service-01\\service\\wind-calm\\performance.json",
+      "bytes": 11124
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\service-01\\service\\wind-defaults\\performance.json",
+      "bytes": 3971
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\service-01\\service\\wind-math\\performance.json",
+      "bytes": 11141
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\service-01\\service\\wind-port\\performance.json",
+      "bytes": 11144
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\service-01\\service\\wind-type-12\\performance.json",
+      "bytes": 11183
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\service-01\\service\\wind-type-13\\performance.json",
+      "bytes": 11253
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\service-01\\service\\wind-type-14\\performance.json",
+      "bytes": 11187
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\service-01\\service\\wind-type-15\\performance.json",
+      "bytes": 11162
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\service-01\\solver-fixture\\DBFview.EXE",
+      "bytes": 2698663
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\service-01\\solver-fixture\\Ishercof.exe",
+      "bytes": 2698663
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\service-01\\solver-fixture\\PROPCALC.EXE",
+      "bytes": 80800
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\service-02\\service\\acceleration-defaults\\performance.json",
+      "bytes": 6731
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\service-02\\service\\direct-wind\\OUT",
+      "bytes": 2976
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\service-02\\service\\isherwood-1\\performance.json",
+      "bytes": 12392
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\service-02\\service\\isherwood-10\\performance.json",
+      "bytes": 12385
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\service-02\\service\\isherwood-11\\performance.json",
+      "bytes": 12385
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\service-02\\service\\isherwood-2\\performance.json",
+      "bytes": 12389
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\service-02\\service\\isherwood-3\\performance.json",
+      "bytes": 12370
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\service-02\\service\\isherwood-4\\performance.json",
+      "bytes": 12384
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\service-02\\service\\isherwood-5\\performance.json",
+      "bytes": 12385
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\service-02\\service\\isherwood-6\\performance.json",
+      "bytes": 12365
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\service-02\\service\\isherwood-7\\performance.json",
+      "bytes": 12384
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\service-02\\service\\isherwood-8\\performance.json",
+      "bytes": 12384
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\service-02\\service\\isherwood-9\\performance.json",
+      "bytes": 12384
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\service-02\\service\\load\\model.json",
+      "bytes": 7522
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\service-02\\service\\load\\native-input.json",
+      "bytes": 2077
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\service-02\\service\\load\\reference.dxf",
+      "bytes": 8908
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\service-02\\service\\load\\scene.fslp",
+      "bytes": 15948
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\service-02\\service\\load\\sections.json",
+      "bytes": 61
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\service-02\\service\\load\\surface.json",
+      "bytes": 4352
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\service-02\\service\\maneuver-000\\cancel.flag",
+      "bytes": 8
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\service-02\\service\\maneuver-defaults\\performance.json",
+      "bytes": 11701
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\service-02\\service\\native-lines-cache\\5afaaa5d01dc4bbd5e181809b4f7ae29a0646d4446daaa61c0809be43dd92e39\\entry.json",
+      "bytes": 1355
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\service-02\\service\\native-lines-cache\\5afaaa5d01dc4bbd5e181809b4f7ae29a0646d4446daaa61c0809be43dd92e39\\reference.dxf",
+      "bytes": 8908
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\service-02\\service\\native-lines-cache\\5afaaa5d01dc4bbd5e181809b4f7ae29a0646d4446daaa61c0809be43dd92e39\\scene.fslp",
+      "bytes": 15948
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\service-02\\service\\native-lines-cache\\5afaaa5d01dc4bbd5e181809b4f7ae29a0646d4446daaa61c0809be43dd92e39\\sections.json",
+      "bytes": 61
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\service-02\\service\\native-lines-cache\\5afaaa5d01dc4bbd5e181809b4f7ae29a0646d4446daaa61c0809be43dd92e39\\surface.json",
+      "bytes": 4352
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\service-02\\service\\process\\protocol.jsonl",
+      "bytes": 35998
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\service-02\\service\\wind-calm\\performance.json",
+      "bytes": 11124
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\service-02\\service\\wind-defaults\\performance.json",
+      "bytes": 3971
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\service-02\\service\\wind-math\\performance.json",
+      "bytes": 11141
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\service-02\\service\\wind-port\\performance.json",
+      "bytes": 11144
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\service-02\\service\\wind-type-12\\performance.json",
+      "bytes": 11183
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\service-02\\service\\wind-type-13\\performance.json",
+      "bytes": 11253
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\service-02\\service\\wind-type-14\\performance.json",
+      "bytes": 11187
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\service-02\\service\\wind-type-15\\performance.json",
+      "bytes": 11162
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\service-02\\solver-fixture\\DBFview.EXE",
+      "bytes": 2698663
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\service-02\\solver-fixture\\Ishercof.exe",
+      "bytes": 2698663
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\service-02\\solver-fixture\\PROPCALC.EXE",
+      "bytes": 80800
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-01\\qt-hydrodynamics\\service\\acceleration-defaults\\performance.json",
+      "bytes": 6731
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-01\\qt-hydrodynamics\\service\\direct-maneuver\\INM",
+      "bytes": 189
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-01\\qt-hydrodynamics\\service\\direct-maneuver\\OUT",
+      "bytes": 6089
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-01\\qt-hydrodynamics\\service\\direct-wind\\OUT",
+      "bytes": 2976
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-01\\qt-hydrodynamics\\service\\holtrop-schema\\performance.json",
+      "bytes": 11979
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-01\\qt-hydrodynamics\\service\\isherwood-1\\performance.json",
+      "bytes": 12392
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-01\\qt-hydrodynamics\\service\\isherwood-10\\performance.json",
+      "bytes": 12385
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-01\\qt-hydrodynamics\\service\\isherwood-11\\performance.json",
+      "bytes": 12385
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-01\\qt-hydrodynamics\\service\\isherwood-2\\performance.json",
+      "bytes": 12389
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-01\\qt-hydrodynamics\\service\\isherwood-3\\performance.json",
+      "bytes": 12370
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-01\\qt-hydrodynamics\\service\\isherwood-4\\performance.json",
+      "bytes": 12384
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-01\\qt-hydrodynamics\\service\\isherwood-5\\performance.json",
+      "bytes": 12385
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-01\\qt-hydrodynamics\\service\\isherwood-6\\performance.json",
+      "bytes": 12365
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-01\\qt-hydrodynamics\\service\\isherwood-7\\performance.json",
+      "bytes": 12384
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-01\\qt-hydrodynamics\\service\\isherwood-8\\performance.json",
+      "bytes": 12384
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-01\\qt-hydrodynamics\\service\\isherwood-9\\performance.json",
+      "bytes": 12384
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-01\\qt-hydrodynamics\\service\\load\\model.json",
+      "bytes": 7522
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-01\\qt-hydrodynamics\\service\\load\\native-input.json",
+      "bytes": 2077
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-01\\qt-hydrodynamics\\service\\load\\reference.dxf",
+      "bytes": 8908
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-01\\qt-hydrodynamics\\service\\load\\scene.fslp",
+      "bytes": 15948
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-01\\qt-hydrodynamics\\service\\load\\sections.json",
+      "bytes": 61
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-01\\qt-hydrodynamics\\service\\load\\surface.json",
+      "bytes": 4352
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-01\\qt-hydrodynamics\\service\\maneuver-000\\performance.json",
+      "bytes": 21650
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-01\\qt-hydrodynamics\\service\\maneuver-100\\performance.json",
+      "bytes": 23764
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-01\\qt-hydrodynamics\\service\\maneuver-110\\performance.json",
+      "bytes": 24573
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-01\\qt-hydrodynamics\\service\\maneuver-111\\performance.json",
+      "bytes": 25701
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-01\\qt-hydrodynamics\\service\\maneuver-defaults\\performance.json",
+      "bytes": 11680
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-01\\qt-hydrodynamics\\service\\native-lines-cache\\5afaaa5d01dc4bbd5e181809b4f7ae29a0646d4446daaa61c0809be43dd92e39\\entry.json",
+      "bytes": 1355
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-01\\qt-hydrodynamics\\service\\native-lines-cache\\5afaaa5d01dc4bbd5e181809b4f7ae29a0646d4446daaa61c0809be43dd92e39\\reference.dxf",
+      "bytes": 8908
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-01\\qt-hydrodynamics\\service\\native-lines-cache\\5afaaa5d01dc4bbd5e181809b4f7ae29a0646d4446daaa61c0809be43dd92e39\\scene.fslp",
+      "bytes": 15948
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-01\\qt-hydrodynamics\\service\\native-lines-cache\\5afaaa5d01dc4bbd5e181809b4f7ae29a0646d4446daaa61c0809be43dd92e39\\sections.json",
+      "bytes": 61
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-01\\qt-hydrodynamics\\service\\native-lines-cache\\5afaaa5d01dc4bbd5e181809b4f7ae29a0646d4446daaa61c0809be43dd92e39\\surface.json",
+      "bytes": 4352
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-01\\qt-hydrodynamics\\service\\performance-cache\\doc-65c34bef3d2f4b4b9426959679172b54-r1\\current",
+      "bytes": 44
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-01\\qt-hydrodynamics\\service\\performance-cache\\doc-65c34bef3d2f4b4b9426959679172b54-r1\\set-{655410e3-ca67-4692-9569-3e77a0cd69dd}\\RESIST.dat",
+      "bytes": 260
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-01\\qt-hydrodynamics\\service\\performance-cache\\doc-65c34bef3d2f4b4b9426959679172b54-r1\\set-{655410e3-ca67-4692-9569-3e77a0cd69dd}\\RESISTp.dat",
+      "bytes": 1211
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-01\\qt-hydrodynamics\\service\\process\\protocol.jsonl",
+      "bytes": 48753
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-01\\qt-hydrodynamics\\service\\resistance\\performance.json",
+      "bytes": 22248
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-01\\qt-hydrodynamics\\service\\wind-calm\\performance.json",
+      "bytes": 11124
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-01\\qt-hydrodynamics\\service\\wind-defaults\\performance.json",
+      "bytes": 3971
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-01\\qt-hydrodynamics\\service\\wind-math\\performance.json",
+      "bytes": 11141
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-01\\qt-hydrodynamics\\service\\wind-port\\performance.json",
+      "bytes": 11144
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-01\\qt-hydrodynamics\\service\\wind-type-12\\performance.json",
+      "bytes": 11183
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-01\\qt-hydrodynamics\\service\\wind-type-13\\performance.json",
+      "bytes": 11253
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-01\\qt-hydrodynamics\\service\\wind-type-14\\performance.json",
+      "bytes": 11187
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-01\\qt-hydrodynamics\\service\\wind-type-15\\performance.json",
+      "bytes": 11162
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-01\\qt-hydrodynamics\\solver-fixture\\DBFview.EXE",
+      "bytes": 2698663
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-01\\qt-hydrodynamics\\solver-fixture\\Ishercof.exe",
+      "bytes": 2698663
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-01\\qt-hydrodynamics\\solver-fixture\\PROPCALC.EXE",
+      "bytes": 80800
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-02\\qt-hydrodynamics\\service\\acceleration-1\\performance.json",
+      "bytes": 4002083
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-02\\qt-hydrodynamics\\service\\acceleration-defaults\\performance.json",
+      "bytes": 6731
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-02\\qt-hydrodynamics\\service\\direct-maneuver\\INM",
+      "bytes": 189
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-02\\qt-hydrodynamics\\service\\direct-maneuver\\OUT",
+      "bytes": 6089
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-02\\qt-hydrodynamics\\service\\direct-wind\\OUT",
+      "bytes": 2976
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-02\\qt-hydrodynamics\\service\\holtrop-schema\\performance.json",
+      "bytes": 11979
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-02\\qt-hydrodynamics\\service\\isherwood-1\\performance.json",
+      "bytes": 12392
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-02\\qt-hydrodynamics\\service\\isherwood-10\\performance.json",
+      "bytes": 12385
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-02\\qt-hydrodynamics\\service\\isherwood-11\\performance.json",
+      "bytes": 12385
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-02\\qt-hydrodynamics\\service\\isherwood-2\\performance.json",
+      "bytes": 12389
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-02\\qt-hydrodynamics\\service\\isherwood-3\\performance.json",
+      "bytes": 12370
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-02\\qt-hydrodynamics\\service\\isherwood-4\\performance.json",
+      "bytes": 12384
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-02\\qt-hydrodynamics\\service\\isherwood-5\\performance.json",
+      "bytes": 12385
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-02\\qt-hydrodynamics\\service\\isherwood-6\\performance.json",
+      "bytes": 12365
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-02\\qt-hydrodynamics\\service\\isherwood-7\\performance.json",
+      "bytes": 12384
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-02\\qt-hydrodynamics\\service\\isherwood-8\\performance.json",
+      "bytes": 12384
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-02\\qt-hydrodynamics\\service\\isherwood-9\\performance.json",
+      "bytes": 12384
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-02\\qt-hydrodynamics\\service\\load\\model.json",
+      "bytes": 7522
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-02\\qt-hydrodynamics\\service\\load\\native-input.json",
+      "bytes": 2077
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-02\\qt-hydrodynamics\\service\\load\\reference.dxf",
+      "bytes": 8908
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-02\\qt-hydrodynamics\\service\\load\\scene.fslp",
+      "bytes": 15948
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-02\\qt-hydrodynamics\\service\\load\\sections.json",
+      "bytes": 61
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-02\\qt-hydrodynamics\\service\\load\\surface.json",
+      "bytes": 4352
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-02\\qt-hydrodynamics\\service\\maneuver-000\\performance.json",
+      "bytes": 21650
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-02\\qt-hydrodynamics\\service\\maneuver-100\\performance.json",
+      "bytes": 23764
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-02\\qt-hydrodynamics\\service\\maneuver-110\\performance.json",
+      "bytes": 24573
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-02\\qt-hydrodynamics\\service\\maneuver-111\\performance.json",
+      "bytes": 25701
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-02\\qt-hydrodynamics\\service\\maneuver-defaults\\performance.json",
+      "bytes": 11680
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-02\\qt-hydrodynamics\\service\\native-lines-cache\\5afaaa5d01dc4bbd5e181809b4f7ae29a0646d4446daaa61c0809be43dd92e39\\entry.json",
+      "bytes": 1355
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-02\\qt-hydrodynamics\\service\\native-lines-cache\\5afaaa5d01dc4bbd5e181809b4f7ae29a0646d4446daaa61c0809be43dd92e39\\reference.dxf",
+      "bytes": 8908
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-02\\qt-hydrodynamics\\service\\native-lines-cache\\5afaaa5d01dc4bbd5e181809b4f7ae29a0646d4446daaa61c0809be43dd92e39\\scene.fslp",
+      "bytes": 15948
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-02\\qt-hydrodynamics\\service\\native-lines-cache\\5afaaa5d01dc4bbd5e181809b4f7ae29a0646d4446daaa61c0809be43dd92e39\\sections.json",
+      "bytes": 61
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-02\\qt-hydrodynamics\\service\\native-lines-cache\\5afaaa5d01dc4bbd5e181809b4f7ae29a0646d4446daaa61c0809be43dd92e39\\surface.json",
+      "bytes": 4352
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-02\\qt-hydrodynamics\\service\\performance-cache\\doc-84b6cf1bf215491d98022293bf3f2b5a-r1\\current",
+      "bytes": 44
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-02\\qt-hydrodynamics\\service\\performance-cache\\doc-84b6cf1bf215491d98022293bf3f2b5a-r1\\set-{de7e102f-8aca-4fbb-928c-fb2053fb470b}\\RESIST.dat",
+      "bytes": 260
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-02\\qt-hydrodynamics\\service\\performance-cache\\doc-84b6cf1bf215491d98022293bf3f2b5a-r1\\set-{de7e102f-8aca-4fbb-928c-fb2053fb470b}\\RESISTp.dat",
+      "bytes": 1211
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-02\\qt-hydrodynamics\\service\\process\\protocol.jsonl",
+      "bytes": 50772
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-02\\qt-hydrodynamics\\service\\resistance\\performance.json",
+      "bytes": 22248
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-02\\qt-hydrodynamics\\service\\wind-calm\\performance.json",
+      "bytes": 11124
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-02\\qt-hydrodynamics\\service\\wind-defaults\\performance.json",
+      "bytes": 3971
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-02\\qt-hydrodynamics\\service\\wind-math\\performance.json",
+      "bytes": 11141
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-02\\qt-hydrodynamics\\service\\wind-port\\performance.json",
+      "bytes": 11144
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-02\\qt-hydrodynamics\\service\\wind-type-12\\performance.json",
+      "bytes": 11183
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-02\\qt-hydrodynamics\\service\\wind-type-13\\performance.json",
+      "bytes": 11253
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-02\\qt-hydrodynamics\\service\\wind-type-14\\performance.json",
+      "bytes": 11187
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-02\\qt-hydrodynamics\\service\\wind-type-15\\performance.json",
+      "bytes": 11162
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-02\\qt-hydrodynamics\\solver-fixture\\DBFview.EXE",
+      "bytes": 2698663
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-02\\qt-hydrodynamics\\solver-fixture\\Ishercof.exe",
+      "bytes": 2698663
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-02\\qt-hydrodynamics\\solver-fixture\\PROPCALC.EXE",
+      "bytes": 80800
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-03\\qt-hydrodynamics\\service\\acceleration-1\\performance.json",
+      "bytes": 4002083
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-03\\qt-hydrodynamics\\service\\acceleration-2\\performance.json",
+      "bytes": 41258068
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-03\\qt-hydrodynamics\\service\\acceleration-3\\performance.json",
+      "bytes": 16264140
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-03\\qt-hydrodynamics\\service\\acceleration-defaults\\performance.json",
+      "bytes": 6731
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-03\\qt-hydrodynamics\\service\\after-calculations\\model.json",
+      "bytes": 7522
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-03\\qt-hydrodynamics\\service\\after-calculations\\native-input.json",
+      "bytes": 2077
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-03\\qt-hydrodynamics\\service\\after-calculations\\reference.dxf",
+      "bytes": 8908
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-03\\qt-hydrodynamics\\service\\after-calculations\\scene.fslp",
+      "bytes": 15948
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-03\\qt-hydrodynamics\\service\\after-calculations\\sections.json",
+      "bytes": 61
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-03\\qt-hydrodynamics\\service\\after-calculations\\surface.json",
+      "bytes": 4352
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-03\\qt-hydrodynamics\\service\\direct-maneuver\\INM",
+      "bytes": 189
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-03\\qt-hydrodynamics\\service\\direct-maneuver\\OUT",
+      "bytes": 6089
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-03\\qt-hydrodynamics\\service\\direct-wind\\OUT",
+      "bytes": 2976
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-03\\qt-hydrodynamics\\service\\holtrop-schema\\performance.json",
+      "bytes": 11979
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-03\\qt-hydrodynamics\\service\\hydro-extraction\\hydro.json",
+      "bytes": 1329
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-03\\qt-hydrodynamics\\service\\isherwood-1\\performance.json",
+      "bytes": 12392
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-03\\qt-hydrodynamics\\service\\isherwood-10\\performance.json",
+      "bytes": 12385
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-03\\qt-hydrodynamics\\service\\isherwood-11\\performance.json",
+      "bytes": 12385
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-03\\qt-hydrodynamics\\service\\isherwood-2\\performance.json",
+      "bytes": 12389
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-03\\qt-hydrodynamics\\service\\isherwood-3\\performance.json",
+      "bytes": 12370
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-03\\qt-hydrodynamics\\service\\isherwood-4\\performance.json",
+      "bytes": 12384
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-03\\qt-hydrodynamics\\service\\isherwood-5\\performance.json",
+      "bytes": 12385
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-03\\qt-hydrodynamics\\service\\isherwood-6\\performance.json",
+      "bytes": 12365
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-03\\qt-hydrodynamics\\service\\isherwood-7\\performance.json",
+      "bytes": 12384
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-03\\qt-hydrodynamics\\service\\isherwood-8\\performance.json",
+      "bytes": 12384
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-03\\qt-hydrodynamics\\service\\isherwood-9\\performance.json",
+      "bytes": 12384
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-03\\qt-hydrodynamics\\service\\load\\model.json",
+      "bytes": 7522
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-03\\qt-hydrodynamics\\service\\load\\native-input.json",
+      "bytes": 2077
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-03\\qt-hydrodynamics\\service\\load\\reference.dxf",
+      "bytes": 8908
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-03\\qt-hydrodynamics\\service\\load\\scene.fslp",
+      "bytes": 15948
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-03\\qt-hydrodynamics\\service\\load\\sections.json",
+      "bytes": 61
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-03\\qt-hydrodynamics\\service\\load\\surface.json",
+      "bytes": 4352
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-03\\qt-hydrodynamics\\service\\maneuver-000\\performance.json",
+      "bytes": 21650
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-03\\qt-hydrodynamics\\service\\maneuver-100\\performance.json",
+      "bytes": 23764
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-03\\qt-hydrodynamics\\service\\maneuver-110\\performance.json",
+      "bytes": 24573
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-03\\qt-hydrodynamics\\service\\maneuver-111\\performance.json",
+      "bytes": 25701
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-03\\qt-hydrodynamics\\service\\maneuver-defaults\\performance.json",
+      "bytes": 11680
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-03\\qt-hydrodynamics\\service\\maneuver-extract\\performance.json",
+      "bytes": 11690
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-03\\qt-hydrodynamics\\service\\native-lines-cache\\5afaaa5d01dc4bbd5e181809b4f7ae29a0646d4446daaa61c0809be43dd92e39\\entry.json",
+      "bytes": 1355
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-03\\qt-hydrodynamics\\service\\native-lines-cache\\5afaaa5d01dc4bbd5e181809b4f7ae29a0646d4446daaa61c0809be43dd92e39\\reference.dxf",
+      "bytes": 8908
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-03\\qt-hydrodynamics\\service\\native-lines-cache\\5afaaa5d01dc4bbd5e181809b4f7ae29a0646d4446daaa61c0809be43dd92e39\\scene.fslp",
+      "bytes": 15948
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-03\\qt-hydrodynamics\\service\\native-lines-cache\\5afaaa5d01dc4bbd5e181809b4f7ae29a0646d4446daaa61c0809be43dd92e39\\sections.json",
+      "bytes": 61
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-03\\qt-hydrodynamics\\service\\native-lines-cache\\5afaaa5d01dc4bbd5e181809b4f7ae29a0646d4446daaa61c0809be43dd92e39\\surface.json",
+      "bytes": 4352
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-03\\qt-hydrodynamics\\service\\performance-cache\\doc-35020d32fb1a432ab2374a5fab862e86-r1\\current",
+      "bytes": 44
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-03\\qt-hydrodynamics\\service\\performance-cache\\doc-35020d32fb1a432ab2374a5fab862e86-r1\\set-{a5d4aa0c-8161-4e3a-b657-ad82d1f37ff2}\\RESIST.dat",
+      "bytes": 260
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-03\\qt-hydrodynamics\\service\\performance-cache\\doc-35020d32fb1a432ab2374a5fab862e86-r1\\set-{a5d4aa0c-8161-4e3a-b657-ad82d1f37ff2}\\RESISTp.dat",
+      "bytes": 1211
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-03\\qt-hydrodynamics\\service\\process\\protocol.jsonl",
+      "bytes": 67006
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-03\\qt-hydrodynamics\\service\\resistance\\performance.json",
+      "bytes": 22248
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-03\\qt-hydrodynamics\\service\\wind-before\\performance.json",
+      "bytes": 3971
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-03\\qt-hydrodynamics\\service\\wind-calm\\performance.json",
+      "bytes": 11124
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-03\\qt-hydrodynamics\\service\\wind-defaults\\performance.json",
+      "bytes": 3971
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-03\\qt-hydrodynamics\\service\\wind-extract\\performance.json",
+      "bytes": 3969
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-03\\qt-hydrodynamics\\service\\wind-file\\saved.fbm",
+      "bytes": 2726
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-03\\qt-hydrodynamics\\service\\wind-math\\performance.json",
+      "bytes": 11141
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-03\\qt-hydrodynamics\\service\\wind-port\\performance.json",
+      "bytes": 11144
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-03\\qt-hydrodynamics\\service\\wind-reopen-process\\protocol.jsonl",
+      "bytes": 980
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-03\\qt-hydrodynamics\\service\\wind-restored\\performance.json",
+      "bytes": 3971
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-03\\qt-hydrodynamics\\service\\wind-save\\model.json",
+      "bytes": 7522
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-03\\qt-hydrodynamics\\service\\wind-save\\native-input.json",
+      "bytes": 2077
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-03\\qt-hydrodynamics\\service\\wind-save\\reference.dxf",
+      "bytes": 8908
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-03\\qt-hydrodynamics\\service\\wind-save\\scene.fslp",
+      "bytes": 15948
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-03\\qt-hydrodynamics\\service\\wind-save\\sections.json",
+      "bytes": 61
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-03\\qt-hydrodynamics\\service\\wind-save\\surface.json",
+      "bytes": 4352
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-03\\qt-hydrodynamics\\service\\wind-saved\\performance.json",
+      "bytes": 3975
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-03\\qt-hydrodynamics\\service\\wind-type-12\\performance.json",
+      "bytes": 11183
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-03\\qt-hydrodynamics\\service\\wind-type-13\\performance.json",
+      "bytes": 11253
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-03\\qt-hydrodynamics\\service\\wind-type-14\\performance.json",
+      "bytes": 11187
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-03\\qt-hydrodynamics\\service\\wind-type-15\\performance.json",
+      "bytes": 11162
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-03\\qt-hydrodynamics\\service\\wind-undo\\model.json",
+      "bytes": 7522
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-03\\qt-hydrodynamics\\service\\wind-undo\\native-input.json",
+      "bytes": 2077
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-03\\qt-hydrodynamics\\service\\wind-undo\\reference.dxf",
+      "bytes": 8908
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-03\\qt-hydrodynamics\\service\\wind-undo\\scene.fslp",
+      "bytes": 15948
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-03\\qt-hydrodynamics\\service\\wind-undo\\sections.json",
+      "bytes": 61
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-03\\qt-hydrodynamics\\service\\wind-undo\\surface.json",
+      "bytes": 4352
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-03\\qt-hydrodynamics\\solver-fixture\\DBFview.EXE",
+      "bytes": 2698663
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-03\\qt-hydrodynamics\\solver-fixture\\Ishercof.exe",
+      "bytes": 2698663
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-03\\qt-hydrodynamics\\solver-fixture\\PROPCALC.EXE",
+      "bytes": 80800
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\production\\acceleration\\request.json",
+      "bytes": 880
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\production\\acceleration\\qt\\performance-report.csv",
+      "bytes": 76966062
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\production\\acceleration\\qt\\performance-report.pdf",
+      "bytes": 34574
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\production\\acceleration\\qt\\performance-report.txt",
+      "bytes": 4392
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\production\\acceleration\\qt\\protected-report.txt",
+      "bytes": 15
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\production\\acceleration\\qt\\after\\model.json",
+      "bytes": 7522
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\production\\acceleration\\qt\\after\\reference.dxf",
+      "bytes": 8908
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\production\\acceleration\\qt\\after\\scene.fslp",
+      "bytes": 15948
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\production\\acceleration\\qt\\after\\sections.json",
+      "bytes": 61
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\production\\acceleration\\qt\\original\\model.json",
+      "bytes": 7522
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\production\\acceleration\\qt\\original\\reference.dxf",
+      "bytes": 8908
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\production\\acceleration\\qt\\original\\scene.fslp",
+      "bytes": 15948
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\production\\acceleration\\qt\\original\\sections.json",
+      "bytes": 61
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\production\\cancel\\request.json",
+      "bytes": 425
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\production\\cancel\\qt\\after\\model.json",
+      "bytes": 7522
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\production\\cancel\\qt\\after\\reference.dxf",
+      "bytes": 8908
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\production\\cancel\\qt\\after\\scene.fslp",
+      "bytes": 15948
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\production\\cancel\\qt\\after\\sections.json",
+      "bytes": 61
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\production\\cancel\\qt\\original\\model.json",
+      "bytes": 7522
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\production\\cancel\\qt\\original\\reference.dxf",
+      "bytes": 8908
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\production\\cancel\\qt\\original\\scene.fslp",
+      "bytes": 15948
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\production\\cancel\\qt\\original\\sections.json",
+      "bytes": 61
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\production\\fixture-db\\request.json",
+      "bytes": 346
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\production\\fixture-db\\qt\\protected-report.txt",
+      "bytes": 15
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\production\\fixture-db\\qt\\after\\model.json",
+      "bytes": 7522
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\production\\fixture-db\\qt\\after\\reference.dxf",
+      "bytes": 8908
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\production\\fixture-db\\qt\\after\\scene.fslp",
+      "bytes": 15948
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\production\\fixture-db\\qt\\after\\sections.json",
+      "bytes": 61
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\production\\fixture-db\\qt\\original\\model.json",
+      "bytes": 7522
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\production\\fixture-db\\qt\\original\\reference.dxf",
+      "bytes": 8908
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\production\\fixture-db\\qt\\original\\scene.fslp",
+      "bytes": 15948
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\production\\fixture-db\\qt\\original\\sections.json",
+      "bytes": 61
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\production\\maneuver\\request.json",
+      "bytes": 583
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\production\\maneuver\\qt\\performance-report.csv",
+      "bytes": 45
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\production\\maneuver\\qt\\performance-report.pdf",
+      "bytes": 59049
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\production\\maneuver\\qt\\performance-report.txt",
+      "bytes": 13226
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\production\\maneuver\\qt\\protected-report.txt",
+      "bytes": 15
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\production\\maneuver\\qt\\after\\model.json",
+      "bytes": 7522
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\production\\maneuver\\qt\\after\\reference.dxf",
+      "bytes": 8908
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\production\\maneuver\\qt\\after\\scene.fslp",
+      "bytes": 15948
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\production\\maneuver\\qt\\after\\sections.json",
+      "bytes": 61
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\production\\maneuver\\qt\\original\\model.json",
+      "bytes": 7522
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\production\\maneuver\\qt\\original\\reference.dxf",
+      "bytes": 8908
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\production\\maneuver\\qt\\original\\scene.fslp",
+      "bytes": 15948
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\production\\maneuver\\qt\\original\\sections.json",
+      "bytes": 61
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\production\\missing-db\\request.json",
+      "bytes": 392
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\production\\missing-db\\qt\\after\\model.json",
+      "bytes": 7522
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\production\\missing-db\\qt\\after\\reference.dxf",
+      "bytes": 8908
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\production\\missing-db\\qt\\after\\scene.fslp",
+      "bytes": 15948
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\production\\missing-db\\qt\\after\\sections.json",
+      "bytes": 61
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\production\\missing-db\\qt\\original\\model.json",
+      "bytes": 7522
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\production\\missing-db\\qt\\original\\reference.dxf",
+      "bytes": 8908
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\production\\missing-db\\qt\\original\\scene.fslp",
+      "bytes": 15948
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\production\\missing-db\\qt\\original\\sections.json",
+      "bytes": 61
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\production\\preset\\request.json",
+      "bytes": 611
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\production\\preset\\qt\\parameters.json",
+      "bytes": 641
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\production\\preset\\qt\\performance-report.csv",
+      "bytes": 45
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\production\\preset\\qt\\performance-report.pdf",
+      "bytes": 55327
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\production\\preset\\qt\\performance-report.txt",
+      "bytes": 10407
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\production\\preset\\qt\\protected-report.txt",
+      "bytes": 15
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\production\\preset\\qt\\after\\model.json",
+      "bytes": 7522
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\production\\preset\\qt\\after\\reference.dxf",
+      "bytes": 8908
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\production\\preset\\qt\\after\\scene.fslp",
+      "bytes": 15948
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\production\\preset\\qt\\after\\sections.json",
+      "bytes": 61
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\production\\preset\\qt\\original\\model.json",
+      "bytes": 7522
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\production\\preset\\qt\\original\\reference.dxf",
+      "bytes": 8908
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\production\\preset\\qt\\original\\scene.fslp",
+      "bytes": 15948
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\production\\preset\\qt\\original\\sections.json",
+      "bytes": 61
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\production\\save\\request.json",
+      "bytes": 903
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\production\\save\\qt\\performance-report.csv",
+      "bytes": 7318843
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\production\\save\\qt\\performance-report.pdf",
+      "bytes": 34562
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\production\\save\\qt\\performance-report.txt",
+      "bytes": 4388
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\production\\save\\qt\\protected-report.txt",
+      "bytes": 15
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\production\\save\\qt\\after\\model.json",
+      "bytes": 7522
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\production\\save\\qt\\after\\reference.dxf",
+      "bytes": 8908
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\production\\save\\qt\\after\\scene.fslp",
+      "bytes": 15948
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\production\\save\\qt\\after\\sections.json",
+      "bytes": 61
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\production\\save\\qt\\original\\model.json",
+      "bytes": 7522
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\production\\save\\qt\\original\\reference.dxf",
+      "bytes": 8908
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\production\\save\\qt\\original\\scene.fslp",
+      "bytes": 15948
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\production\\save\\qt\\original\\sections.json",
+      "bytes": 61
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\production\\wind\\request.json",
+      "bytes": 409
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\production\\wind\\qt\\performance-report.csv",
+      "bytes": 6563
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\production\\wind\\qt\\performance-report.pdf",
+      "bytes": 35415
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\production\\wind\\qt\\performance-report.txt",
+      "bytes": 5431
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\production\\wind\\qt\\protected-report.txt",
+      "bytes": 15
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\production\\wind\\qt\\after\\model.json",
+      "bytes": 7522
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\production\\wind\\qt\\after\\reference.dxf",
+      "bytes": 8908
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\production\\wind\\qt\\after\\scene.fslp",
+      "bytes": 15948
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\production\\wind\\qt\\after\\sections.json",
+      "bytes": 61
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\production\\wind\\qt\\original\\model.json",
+      "bytes": 7522
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\production\\wind\\qt\\original\\reference.dxf",
+      "bytes": 8908
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\production\\wind\\qt\\original\\scene.fslp",
+      "bytes": 15948
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\production\\wind\\qt\\original\\sections.json",
+      "bytes": 61
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\acceleration-1\\performance.json",
+      "bytes": 4002083
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\acceleration-2\\performance.json",
+      "bytes": 41258068
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\acceleration-3\\performance.json",
+      "bytes": 16264140
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\acceleration-before\\performance.json",
+      "bytes": 6731
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\acceleration-defaults\\performance.json",
+      "bytes": 6731
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\acceleration-file\\saved.fbm",
+      "bytes": 2726
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\acceleration-reopen\\model.json",
+      "bytes": 7522
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\acceleration-reopen\\native-input.json",
+      "bytes": 2077
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\acceleration-reopen\\reference.dxf",
+      "bytes": 8908
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\acceleration-reopen\\scene.fslp",
+      "bytes": 15948
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\acceleration-reopen\\sections.json",
+      "bytes": 61
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\acceleration-reopen\\surface.json",
+      "bytes": 4352
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\acceleration-reopen-process\\protocol.jsonl",
+      "bytes": 3804
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\acceleration-restored\\performance.json",
+      "bytes": 6731
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\acceleration-roundtrip\\performance.json",
+      "bytes": 6816
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\acceleration-save\\model.json",
+      "bytes": 7522
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\acceleration-save\\native-input.json",
+      "bytes": 2077
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\acceleration-save\\reference.dxf",
+      "bytes": 8908
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\acceleration-save\\scene.fslp",
+      "bytes": 15948
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\acceleration-save\\sections.json",
+      "bytes": 61
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\acceleration-save\\surface.json",
+      "bytes": 4352
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\acceleration-saved\\performance.json",
+      "bytes": 6816
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\acceleration-undo\\model.json",
+      "bytes": 7522
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\acceleration-undo\\native-input.json",
+      "bytes": 2077
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\acceleration-undo\\reference.dxf",
+      "bytes": 8908
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\acceleration-undo\\scene.fslp",
+      "bytes": 15948
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\acceleration-undo\\sections.json",
+      "bytes": 61
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\acceleration-undo\\surface.json",
+      "bytes": 4352
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\after-calculations\\model.json",
+      "bytes": 7522
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\after-calculations\\native-input.json",
+      "bytes": 2077
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\after-calculations\\reference.dxf",
+      "bytes": 8908
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\after-calculations\\scene.fslp",
+      "bytes": 15948
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\after-calculations\\sections.json",
+      "bytes": 61
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\after-calculations\\surface.json",
+      "bytes": 4352
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\cancel\\cancel.flag",
+      "bytes": 6
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\direct-maneuver\\INM",
+      "bytes": 189
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\direct-maneuver\\OUT",
+      "bytes": 6089
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\direct-wind\\OUT",
+      "bytes": 2976
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\holtrop-schema\\performance.json",
+      "bytes": 11979
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\hydro-extraction\\hydro.json",
+      "bytes": 1329
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\isherwood-1\\performance.json",
+      "bytes": 12392
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\isherwood-10\\performance.json",
+      "bytes": 12385
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\isherwood-11\\performance.json",
+      "bytes": 12385
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\isherwood-2\\performance.json",
+      "bytes": 12389
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\isherwood-3\\performance.json",
+      "bytes": 12370
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\isherwood-4\\performance.json",
+      "bytes": 12384
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\isherwood-5\\performance.json",
+      "bytes": 12385
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\isherwood-6\\performance.json",
+      "bytes": 12365
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\isherwood-7\\performance.json",
+      "bytes": 12384
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\isherwood-8\\performance.json",
+      "bytes": 12384
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\isherwood-9\\performance.json",
+      "bytes": 12384
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\load\\model.json",
+      "bytes": 7522
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\load\\native-input.json",
+      "bytes": 2077
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\load\\reference.dxf",
+      "bytes": 8908
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\load\\scene.fslp",
+      "bytes": 15948
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\load\\sections.json",
+      "bytes": 61
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\load\\surface.json",
+      "bytes": 4352
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\maneuver-000\\performance.json",
+      "bytes": 21650
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\maneuver-100\\performance.json",
+      "bytes": 23764
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\maneuver-110\\performance.json",
+      "bytes": 24573
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\maneuver-111\\performance.json",
+      "bytes": 25701
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\maneuver-before\\performance.json",
+      "bytes": 11680
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\maneuver-defaults\\performance.json",
+      "bytes": 11680
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\maneuver-extract\\performance.json",
+      "bytes": 11690
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\maneuver-file\\saved.fbm",
+      "bytes": 2726
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\maneuver-reopen\\model.json",
+      "bytes": 7522
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\maneuver-reopen\\native-input.json",
+      "bytes": 2077
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\maneuver-reopen\\reference.dxf",
+      "bytes": 8908
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\maneuver-reopen\\scene.fslp",
+      "bytes": 15948
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\maneuver-reopen\\sections.json",
+      "bytes": 61
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\maneuver-reopen\\surface.json",
+      "bytes": 4352
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\maneuver-reopen-process\\protocol.jsonl",
+      "bytes": 3744
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\maneuver-restored\\performance.json",
+      "bytes": 11680
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\maneuver-roundtrip\\performance.json",
+      "bytes": 11729
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\maneuver-save\\model.json",
+      "bytes": 7522
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\maneuver-save\\native-input.json",
+      "bytes": 2077
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\maneuver-save\\reference.dxf",
+      "bytes": 8908
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\maneuver-save\\scene.fslp",
+      "bytes": 15948
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\maneuver-save\\sections.json",
+      "bytes": 61
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\maneuver-save\\surface.json",
+      "bytes": 4352
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\maneuver-saved\\performance.json",
+      "bytes": 11729
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\maneuver-undo\\model.json",
+      "bytes": 7522
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\maneuver-undo\\native-input.json",
+      "bytes": 2077
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\maneuver-undo\\reference.dxf",
+      "bytes": 8908
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\maneuver-undo\\scene.fslp",
+      "bytes": 15948
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\maneuver-undo\\sections.json",
+      "bytes": 61
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\maneuver-undo\\surface.json",
+      "bytes": 4352
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\native-lines-cache\\5afaaa5d01dc4bbd5e181809b4f7ae29a0646d4446daaa61c0809be43dd92e39\\entry.json",
+      "bytes": 1354
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\native-lines-cache\\5afaaa5d01dc4bbd5e181809b4f7ae29a0646d4446daaa61c0809be43dd92e39\\reference.dxf",
+      "bytes": 8908
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\native-lines-cache\\5afaaa5d01dc4bbd5e181809b4f7ae29a0646d4446daaa61c0809be43dd92e39\\scene.fslp",
+      "bytes": 15948
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\native-lines-cache\\5afaaa5d01dc4bbd5e181809b4f7ae29a0646d4446daaa61c0809be43dd92e39\\sections.json",
+      "bytes": 61
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\native-lines-cache\\5afaaa5d01dc4bbd5e181809b4f7ae29a0646d4446daaa61c0809be43dd92e39\\surface.json",
+      "bytes": 4352
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\performance-cache\\doc-6450035ea4884b8994056185835082da-r1\\current",
+      "bytes": 44
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\performance-cache\\doc-6450035ea4884b8994056185835082da-r1\\set-{3013fbe7-56d2-4a25-8ea0-c0419b4972c2}\\RESIST.dat",
+      "bytes": 260
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\performance-cache\\doc-6450035ea4884b8994056185835082da-r1\\set-{3013fbe7-56d2-4a25-8ea0-c0419b4972c2}\\RESISTp.dat",
+      "bytes": 1211
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\process\\protocol.jsonl",
+      "bytes": 102302
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\resistance\\performance.json",
+      "bytes": 22248
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\wind-before\\performance.json",
+      "bytes": 3971
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\wind-calm\\performance.json",
+      "bytes": 11124
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\wind-defaults\\performance.json",
+      "bytes": 3971
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\wind-extract\\performance.json",
+      "bytes": 3969
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\wind-file\\saved.fbm",
+      "bytes": 2726
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\wind-math\\performance.json",
+      "bytes": 11141
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\wind-port\\performance.json",
+      "bytes": 11144
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\wind-reopen\\model.json",
+      "bytes": 7522
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\wind-reopen\\native-input.json",
+      "bytes": 2077
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\wind-reopen\\reference.dxf",
+      "bytes": 8908
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\wind-reopen\\scene.fslp",
+      "bytes": 15948
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\wind-reopen\\sections.json",
+      "bytes": 61
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\wind-reopen\\surface.json",
+      "bytes": 4352
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\wind-reopen-process\\protocol.jsonl",
+      "bytes": 3684
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\wind-restored\\performance.json",
+      "bytes": 3971
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\wind-roundtrip\\performance.json",
+      "bytes": 3975
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\wind-save\\model.json",
+      "bytes": 7522
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\wind-save\\native-input.json",
+      "bytes": 2077
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\wind-save\\reference.dxf",
+      "bytes": 8908
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\wind-save\\scene.fslp",
+      "bytes": 15948
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\wind-save\\sections.json",
+      "bytes": 61
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\wind-save\\surface.json",
+      "bytes": 4352
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\wind-saved\\performance.json",
+      "bytes": 3975
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\wind-type-12\\performance.json",
+      "bytes": 11183
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\wind-type-13\\performance.json",
+      "bytes": 11253
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\wind-type-14\\performance.json",
+      "bytes": 11187
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\wind-type-15\\performance.json",
+      "bytes": 11162
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\wind-undo\\model.json",
+      "bytes": 7522
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\wind-undo\\native-input.json",
+      "bytes": 2077
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\wind-undo\\reference.dxf",
+      "bytes": 8908
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\wind-undo\\scene.fslp",
+      "bytes": 15948
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\wind-undo\\sections.json",
+      "bytes": 61
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\service\\wind-undo\\surface.json",
+      "bytes": 4352
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\solver-fixture\\DBFview.EXE",
+      "bytes": 2698663
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\solver-fixture\\Ishercof.exe",
+      "bytes": 2698663
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\solver-fixture\\mode.txt",
+      "bytes": 7
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\solver-fixture\\PROPCALC.EXE",
+      "bytes": 80800
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-04\\qt-hydrodynamics\\solver-fixture\\started.txt",
+      "bytes": 5
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\acceleration\\request.json",
+      "bytes": 880
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\acceleration\\qt\\performance-report.csv",
+      "bytes": 76966062
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\acceleration\\qt\\performance-report.pdf",
+      "bytes": 34574
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\acceleration\\qt\\performance-report.txt",
+      "bytes": 4392
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\acceleration\\qt\\protected-report.txt",
+      "bytes": 15
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\acceleration\\qt\\after\\model.json",
+      "bytes": 7522
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\acceleration\\qt\\after\\reference.dxf",
+      "bytes": 8908
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\acceleration\\qt\\after\\scene.fslp",
+      "bytes": 15948
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\acceleration\\qt\\after\\sections.json",
+      "bytes": 61
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\acceleration\\qt\\original\\model.json",
+      "bytes": 7522
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\acceleration\\qt\\original\\reference.dxf",
+      "bytes": 8908
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\acceleration\\qt\\original\\scene.fslp",
+      "bytes": 15948
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\acceleration\\qt\\original\\sections.json",
+      "bytes": 61
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\cancel\\request.json",
+      "bytes": 425
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\cancel\\qt\\after\\model.json",
+      "bytes": 7522
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\cancel\\qt\\after\\reference.dxf",
+      "bytes": 8908
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\cancel\\qt\\after\\scene.fslp",
+      "bytes": 15948
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\cancel\\qt\\after\\sections.json",
+      "bytes": 61
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\cancel\\qt\\original\\model.json",
+      "bytes": 7522
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\cancel\\qt\\original\\reference.dxf",
+      "bytes": 8908
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\cancel\\qt\\original\\scene.fslp",
+      "bytes": 15948
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\cancel\\qt\\original\\sections.json",
+      "bytes": 61
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\fixture-db\\request.json",
+      "bytes": 346
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\fixture-db\\qt\\performance-report.csv",
+      "bytes": 11038
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\fixture-db\\qt\\performance-report.pdf",
+      "bytes": 73822
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\fixture-db\\qt\\performance-report.txt",
+      "bytes": 7658
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\fixture-db\\qt\\protected-report.txt",
+      "bytes": 15
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\fixture-db\\qt\\after\\model.json",
+      "bytes": 7522
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\fixture-db\\qt\\after\\reference.dxf",
+      "bytes": 8908
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\fixture-db\\qt\\after\\scene.fslp",
+      "bytes": 15948
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\fixture-db\\qt\\after\\sections.json",
+      "bytes": 61
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\fixture-db\\qt\\original\\model.json",
+      "bytes": 7522
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\fixture-db\\qt\\original\\reference.dxf",
+      "bytes": 8908
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\fixture-db\\qt\\original\\scene.fslp",
+      "bytes": 15948
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\fixture-db\\qt\\original\\sections.json",
+      "bytes": 61
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\maneuver\\request.json",
+      "bytes": 583
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\maneuver\\qt\\performance-report.csv",
+      "bytes": 45
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\maneuver\\qt\\performance-report.pdf",
+      "bytes": 59049
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\maneuver\\qt\\performance-report.txt",
+      "bytes": 13226
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\maneuver\\qt\\protected-report.txt",
+      "bytes": 15
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\maneuver\\qt\\after\\model.json",
+      "bytes": 7522
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\maneuver\\qt\\after\\reference.dxf",
+      "bytes": 8908
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\maneuver\\qt\\after\\scene.fslp",
+      "bytes": 15948
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\maneuver\\qt\\after\\sections.json",
+      "bytes": 61
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\maneuver\\qt\\original\\model.json",
+      "bytes": 7522
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\maneuver\\qt\\original\\reference.dxf",
+      "bytes": 8908
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\maneuver\\qt\\original\\scene.fslp",
+      "bytes": 15948
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\maneuver\\qt\\original\\sections.json",
+      "bytes": 61
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\missing-db\\request.json",
+      "bytes": 392
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\missing-db\\qt\\after\\model.json",
+      "bytes": 7522
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\missing-db\\qt\\after\\reference.dxf",
+      "bytes": 8908
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\missing-db\\qt\\after\\scene.fslp",
+      "bytes": 15948
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\missing-db\\qt\\after\\sections.json",
+      "bytes": 61
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\missing-db\\qt\\original\\model.json",
+      "bytes": 7522
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\missing-db\\qt\\original\\reference.dxf",
+      "bytes": 8908
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\missing-db\\qt\\original\\scene.fslp",
+      "bytes": 15948
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\missing-db\\qt\\original\\sections.json",
+      "bytes": 61
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\preset\\request.json",
+      "bytes": 611
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\preset\\qt\\parameters.json",
+      "bytes": 641
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\preset\\qt\\performance-report.csv",
+      "bytes": 45
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\preset\\qt\\performance-report.pdf",
+      "bytes": 55327
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\preset\\qt\\performance-report.txt",
+      "bytes": 10407
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\preset\\qt\\protected-report.txt",
+      "bytes": 15
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\preset\\qt\\after\\model.json",
+      "bytes": 7522
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\preset\\qt\\after\\reference.dxf",
+      "bytes": 8908
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\preset\\qt\\after\\scene.fslp",
+      "bytes": 15948
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\preset\\qt\\after\\sections.json",
+      "bytes": 61
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\preset\\qt\\original\\model.json",
+      "bytes": 7522
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\preset\\qt\\original\\reference.dxf",
+      "bytes": 8908
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\preset\\qt\\original\\scene.fslp",
+      "bytes": 15948
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\preset\\qt\\original\\sections.json",
+      "bytes": 61
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\regression-delft\\performance-request.json",
+      "bytes": 477
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\regression-delft\\load\\model.json",
+      "bytes": 7522
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\regression-delft\\load\\native-input.json",
+      "bytes": 2077
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\regression-delft\\load\\reference.dxf",
+      "bytes": 8908
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\regression-delft\\load\\scene.fslp",
+      "bytes": 15948
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\regression-delft\\load\\sections.json",
+      "bytes": 61
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\regression-delft\\load\\surface.json",
+      "bytes": 4352
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\regression-delft\\native-lines-cache\\5afaaa5d01dc4bbd5e181809b4f7ae29a0646d4446daaa61c0809be43dd92e39\\entry.json",
+      "bytes": 1355
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\regression-delft\\native-lines-cache\\5afaaa5d01dc4bbd5e181809b4f7ae29a0646d4446daaa61c0809be43dd92e39\\reference.dxf",
+      "bytes": 8908
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\regression-delft\\native-lines-cache\\5afaaa5d01dc4bbd5e181809b4f7ae29a0646d4446daaa61c0809be43dd92e39\\scene.fslp",
+      "bytes": 15948
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\regression-delft\\native-lines-cache\\5afaaa5d01dc4bbd5e181809b4f7ae29a0646d4446daaa61c0809be43dd92e39\\sections.json",
+      "bytes": 61
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\regression-delft\\native-lines-cache\\5afaaa5d01dc4bbd5e181809b4f7ae29a0646d4446daaa61c0809be43dd92e39\\surface.json",
+      "bytes": 4352
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\regression-delft\\qt\\performance-report.csv",
+      "bytes": 2607
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\regression-delft\\qt\\performance-report.pdf",
+      "bytes": 35943
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\regression-delft\\qt\\performance-report.txt",
+      "bytes": 4672
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\regression-delft\\qt\\protected-report.txt",
+      "bytes": 15
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\regression-delft\\qt\\after\\model.json",
+      "bytes": 7522
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\regression-delft\\qt\\after\\reference.dxf",
+      "bytes": 8908
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\regression-delft\\qt\\after\\scene.fslp",
+      "bytes": 15948
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\regression-delft\\qt\\after\\sections.json",
+      "bytes": 61
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\regression-delft\\qt\\original\\model.json",
+      "bytes": 7522
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\regression-delft\\qt\\original\\reference.dxf",
+      "bytes": 8908
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\regression-delft\\qt\\original\\scene.fslp",
+      "bytes": 15948
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\regression-delft\\qt\\original\\sections.json",
+      "bytes": 61
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\regression-delft\\schema\\performance.json",
+      "bytes": 4410
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\regression-delft\\schema-process\\protocol.jsonl",
+      "bytes": 3786
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\regression-holtrop\\performance-request.json",
+      "bytes": 576
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\regression-holtrop\\load\\model.json",
+      "bytes": 7522
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\regression-holtrop\\load\\native-input.json",
+      "bytes": 2077
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\regression-holtrop\\load\\reference.dxf",
+      "bytes": 8908
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\regression-holtrop\\load\\scene.fslp",
+      "bytes": 15948
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\regression-holtrop\\load\\sections.json",
+      "bytes": 61
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\regression-holtrop\\load\\surface.json",
+      "bytes": 4352
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\regression-holtrop\\native-lines-cache\\5afaaa5d01dc4bbd5e181809b4f7ae29a0646d4446daaa61c0809be43dd92e39\\entry.json",
+      "bytes": 1355
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\regression-holtrop\\native-lines-cache\\5afaaa5d01dc4bbd5e181809b4f7ae29a0646d4446daaa61c0809be43dd92e39\\reference.dxf",
+      "bytes": 8908
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\regression-holtrop\\native-lines-cache\\5afaaa5d01dc4bbd5e181809b4f7ae29a0646d4446daaa61c0809be43dd92e39\\scene.fslp",
+      "bytes": 15948
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\regression-holtrop\\native-lines-cache\\5afaaa5d01dc4bbd5e181809b4f7ae29a0646d4446daaa61c0809be43dd92e39\\sections.json",
+      "bytes": 61
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\regression-holtrop\\native-lines-cache\\5afaaa5d01dc4bbd5e181809b4f7ae29a0646d4446daaa61c0809be43dd92e39\\surface.json",
+      "bytes": 4352
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\regression-holtrop\\qt\\performance-report.csv",
+      "bytes": 4943
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\regression-holtrop\\qt\\performance-report.pdf",
+      "bytes": 67798
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\regression-holtrop\\qt\\performance-report.txt",
+      "bytes": 8117
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\regression-holtrop\\qt\\protected-report.txt",
+      "bytes": 15
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\regression-holtrop\\qt\\after\\model.json",
+      "bytes": 7522
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\regression-holtrop\\qt\\after\\reference.dxf",
+      "bytes": 8908
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\regression-holtrop\\qt\\after\\scene.fslp",
+      "bytes": 15948
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\regression-holtrop\\qt\\after\\sections.json",
+      "bytes": 61
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\regression-holtrop\\qt\\original\\model.json",
+      "bytes": 7522
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\regression-holtrop\\qt\\original\\reference.dxf",
+      "bytes": 8908
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\regression-holtrop\\qt\\original\\scene.fslp",
+      "bytes": 15948
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\regression-holtrop\\qt\\original\\sections.json",
+      "bytes": 61
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\regression-holtrop\\schema\\performance.json",
+      "bytes": 11979
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\regression-holtrop\\schema-process\\protocol.jsonl",
+      "bytes": 3812
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\save\\request.json",
+      "bytes": 903
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\save\\qt\\performance-report.csv",
+      "bytes": 7318843
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\save\\qt\\performance-report.pdf",
+      "bytes": 34562
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\save\\qt\\performance-report.txt",
+      "bytes": 4388
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\save\\qt\\protected-report.txt",
+      "bytes": 15
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\save\\qt\\after\\model.json",
+      "bytes": 7522
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\save\\qt\\after\\reference.dxf",
+      "bytes": 8908
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\save\\qt\\after\\scene.fslp",
+      "bytes": 15948
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\save\\qt\\after\\sections.json",
+      "bytes": 61
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\save\\qt\\original\\model.json",
+      "bytes": 7522
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\save\\qt\\original\\reference.dxf",
+      "bytes": 8908
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\save\\qt\\original\\scene.fslp",
+      "bytes": 15948
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\save\\qt\\original\\sections.json",
+      "bytes": 61
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\wind\\request.json",
+      "bytes": 409
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\wind\\qt\\performance-report.csv",
+      "bytes": 6563
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\wind\\qt\\performance-report.pdf",
+      "bytes": 35415
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\wind\\qt\\performance-report.txt",
+      "bytes": 5431
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\wind\\qt\\protected-report.txt",
+      "bytes": 15
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\wind\\qt\\after\\model.json",
+      "bytes": 7522
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\wind\\qt\\after\\reference.dxf",
+      "bytes": 8908
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\wind\\qt\\after\\scene.fslp",
+      "bytes": 15948
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\wind\\qt\\after\\sections.json",
+      "bytes": 61
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\wind\\qt\\original\\model.json",
+      "bytes": 7522
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\wind\\qt\\original\\reference.dxf",
+      "bytes": 8908
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\wind\\qt\\original\\scene.fslp",
+      "bytes": 15948
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\production\\wind\\qt\\original\\sections.json",
+      "bytes": 61
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\acceleration-1\\performance.json",
+      "bytes": 4002083
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\acceleration-2\\performance.json",
+      "bytes": 41258068
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\acceleration-3\\performance.json",
+      "bytes": 16264140
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\acceleration-before\\performance.json",
+      "bytes": 6731
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\acceleration-defaults\\performance.json",
+      "bytes": 6731
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\acceleration-extract\\performance.json",
+      "bytes": 6789
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\acceleration-file\\saved.fbm",
+      "bytes": 2726
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\acceleration-reopen\\model.json",
+      "bytes": 7522
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\acceleration-reopen\\native-input.json",
+      "bytes": 2077
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\acceleration-reopen\\reference.dxf",
+      "bytes": 8908
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\acceleration-reopen\\scene.fslp",
+      "bytes": 15948
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\acceleration-reopen\\sections.json",
+      "bytes": 61
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\acceleration-reopen\\surface.json",
+      "bytes": 4352
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\acceleration-reopen-process\\protocol.jsonl",
+      "bytes": 3804
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\acceleration-restored\\performance.json",
+      "bytes": 6731
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\acceleration-roundtrip\\performance.json",
+      "bytes": 6816
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\acceleration-save\\model.json",
+      "bytes": 7522
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\acceleration-save\\native-input.json",
+      "bytes": 2077
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\acceleration-save\\reference.dxf",
+      "bytes": 8908
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\acceleration-save\\scene.fslp",
+      "bytes": 15948
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\acceleration-save\\sections.json",
+      "bytes": 61
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\acceleration-save\\surface.json",
+      "bytes": 4352
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\acceleration-saved\\performance.json",
+      "bytes": 6816
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\acceleration-undo\\model.json",
+      "bytes": 7522
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\acceleration-undo\\native-input.json",
+      "bytes": 2077
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\acceleration-undo\\reference.dxf",
+      "bytes": 8908
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\acceleration-undo\\scene.fslp",
+      "bytes": 15948
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\acceleration-undo\\sections.json",
+      "bytes": 61
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\acceleration-undo\\surface.json",
+      "bytes": 4352
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\after-calculations\\model.json",
+      "bytes": 7522
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\after-calculations\\native-input.json",
+      "bytes": 2077
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\after-calculations\\reference.dxf",
+      "bytes": 8908
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\after-calculations\\scene.fslp",
+      "bytes": 15948
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\after-calculations\\sections.json",
+      "bytes": 61
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\after-calculations\\surface.json",
+      "bytes": 4352
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\cancel\\cancel.flag",
+      "bytes": 6
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\direct-maneuver\\INM",
+      "bytes": 189
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\direct-maneuver\\OUT",
+      "bytes": 6089
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\direct-wind\\OUT",
+      "bytes": 2976
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\holtrop-schema\\performance.json",
+      "bytes": 11979
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\hydro-extraction\\hydro.json",
+      "bytes": 1329
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\isherwood-1\\performance.json",
+      "bytes": 12392
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\isherwood-10\\performance.json",
+      "bytes": 12385
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\isherwood-11\\performance.json",
+      "bytes": 12385
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\isherwood-2\\performance.json",
+      "bytes": 12389
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\isherwood-3\\performance.json",
+      "bytes": 12370
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\isherwood-4\\performance.json",
+      "bytes": 12384
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\isherwood-5\\performance.json",
+      "bytes": 12385
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\isherwood-6\\performance.json",
+      "bytes": 12365
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\isherwood-7\\performance.json",
+      "bytes": 12384
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\isherwood-8\\performance.json",
+      "bytes": 12384
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\isherwood-9\\performance.json",
+      "bytes": 12384
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\load\\model.json",
+      "bytes": 7522
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\load\\native-input.json",
+      "bytes": 2077
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\load\\reference.dxf",
+      "bytes": 8908
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\load\\scene.fslp",
+      "bytes": 15948
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\load\\sections.json",
+      "bytes": 61
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\load\\surface.json",
+      "bytes": 4352
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\maneuver-000\\performance.json",
+      "bytes": 21650
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\maneuver-100\\performance.json",
+      "bytes": 23764
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\maneuver-110\\performance.json",
+      "bytes": 24573
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\maneuver-111\\performance.json",
+      "bytes": 25701
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\maneuver-before\\performance.json",
+      "bytes": 11680
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\maneuver-defaults\\performance.json",
+      "bytes": 11680
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\maneuver-extract\\performance.json",
+      "bytes": 11690
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\maneuver-file\\saved.fbm",
+      "bytes": 2726
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\maneuver-reopen\\model.json",
+      "bytes": 7522
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\maneuver-reopen\\native-input.json",
+      "bytes": 2077
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\maneuver-reopen\\reference.dxf",
+      "bytes": 8908
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\maneuver-reopen\\scene.fslp",
+      "bytes": 15948
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\maneuver-reopen\\sections.json",
+      "bytes": 61
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\maneuver-reopen\\surface.json",
+      "bytes": 4352
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\maneuver-reopen-process\\protocol.jsonl",
+      "bytes": 3744
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\maneuver-restored\\performance.json",
+      "bytes": 11680
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\maneuver-roundtrip\\performance.json",
+      "bytes": 11729
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\maneuver-save\\model.json",
+      "bytes": 7522
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\maneuver-save\\native-input.json",
+      "bytes": 2077
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\maneuver-save\\reference.dxf",
+      "bytes": 8908
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\maneuver-save\\scene.fslp",
+      "bytes": 15948
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\maneuver-save\\sections.json",
+      "bytes": 61
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\maneuver-save\\surface.json",
+      "bytes": 4352
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\maneuver-saved\\performance.json",
+      "bytes": 11729
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\maneuver-undo\\model.json",
+      "bytes": 7522
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\maneuver-undo\\native-input.json",
+      "bytes": 2077
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\maneuver-undo\\reference.dxf",
+      "bytes": 8908
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\maneuver-undo\\scene.fslp",
+      "bytes": 15948
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\maneuver-undo\\sections.json",
+      "bytes": 61
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\maneuver-undo\\surface.json",
+      "bytes": 4352
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\native-lines-cache\\5afaaa5d01dc4bbd5e181809b4f7ae29a0646d4446daaa61c0809be43dd92e39\\entry.json",
+      "bytes": 1355
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\native-lines-cache\\5afaaa5d01dc4bbd5e181809b4f7ae29a0646d4446daaa61c0809be43dd92e39\\reference.dxf",
+      "bytes": 8908
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\native-lines-cache\\5afaaa5d01dc4bbd5e181809b4f7ae29a0646d4446daaa61c0809be43dd92e39\\scene.fslp",
+      "bytes": 15948
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\native-lines-cache\\5afaaa5d01dc4bbd5e181809b4f7ae29a0646d4446daaa61c0809be43dd92e39\\sections.json",
+      "bytes": 61
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\native-lines-cache\\5afaaa5d01dc4bbd5e181809b4f7ae29a0646d4446daaa61c0809be43dd92e39\\surface.json",
+      "bytes": 4352
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\performance-cache\\doc-8056b536c44f4bf0a5e026303ac6b184-r1\\current",
+      "bytes": 44
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\performance-cache\\doc-8056b536c44f4bf0a5e026303ac6b184-r1\\set-{89bb779e-0814-4674-b118-8ad6791f25a7}\\RESIST.dat",
+      "bytes": 260
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\performance-cache\\doc-8056b536c44f4bf0a5e026303ac6b184-r1\\set-{89bb779e-0814-4674-b118-8ad6791f25a7}\\RESISTp.dat",
+      "bytes": 1211
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\performance-cache\\doc-8056b536c44f4bf0a5e026303ac6b184-r1\\set-{9323ffc8-027a-4e8a-8bbe-a75102455181}\\Propres.dat",
+      "bytes": 164
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\performance-cache\\doc-8056b536c44f4bf0a5e026303ac6b184-r1\\set-{9323ffc8-027a-4e8a-8bbe-a75102455181}\\RESIST.dat",
+      "bytes": 260
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\performance-cache\\doc-8056b536c44f4bf0a5e026303ac6b184-r1\\set-{9323ffc8-027a-4e8a-8bbe-a75102455181}\\RESISTp.dat",
+      "bytes": 1211
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\process\\protocol.jsonl",
+      "bytes": 106654
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\propulsion-fixture\\CALCPROP.EXE",
+      "bytes": 2472735
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\propulsion-fixture\\FPPCALC.EXE",
+      "bytes": 2472735
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\propulsion-fixture-result\\performance.json",
+      "bytes": 18868
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\propulsion-schema\\performance.json",
+      "bytes": 5601
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\resistance\\performance.json",
+      "bytes": 22248
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\wind-before\\performance.json",
+      "bytes": 3971
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\wind-calm\\performance.json",
+      "bytes": 11124
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\wind-defaults\\performance.json",
+      "bytes": 3971
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\wind-extract\\performance.json",
+      "bytes": 3969
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\wind-file\\saved.fbm",
+      "bytes": 2726
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\wind-math\\performance.json",
+      "bytes": 11141
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\wind-port\\performance.json",
+      "bytes": 11144
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\wind-reopen\\model.json",
+      "bytes": 7522
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\wind-reopen\\native-input.json",
+      "bytes": 2077
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\wind-reopen\\reference.dxf",
+      "bytes": 8908
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\wind-reopen\\scene.fslp",
+      "bytes": 15948
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\wind-reopen\\sections.json",
+      "bytes": 61
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\wind-reopen\\surface.json",
+      "bytes": 4352
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\wind-reopen-process\\protocol.jsonl",
+      "bytes": 3683
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\wind-restored\\performance.json",
+      "bytes": 3971
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\wind-roundtrip\\performance.json",
+      "bytes": 3975
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\wind-save\\model.json",
+      "bytes": 7522
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\wind-save\\native-input.json",
+      "bytes": 2077
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\wind-save\\reference.dxf",
+      "bytes": 8908
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\wind-save\\scene.fslp",
+      "bytes": 15948
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\wind-save\\sections.json",
+      "bytes": 61
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\wind-save\\surface.json",
+      "bytes": 4352
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\wind-saved\\performance.json",
+      "bytes": 3975
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\wind-type-12\\performance.json",
+      "bytes": 11183
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\wind-type-13\\performance.json",
+      "bytes": 11253
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\wind-type-14\\performance.json",
+      "bytes": 11187
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\wind-type-15\\performance.json",
+      "bytes": 11162
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\wind-undo\\model.json",
+      "bytes": 7522
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\wind-undo\\native-input.json",
+      "bytes": 2077
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\wind-undo\\reference.dxf",
+      "bytes": 8908
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\wind-undo\\scene.fslp",
+      "bytes": 15948
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\wind-undo\\sections.json",
+      "bytes": 61
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\service\\wind-undo\\surface.json",
+      "bytes": 4352
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\solver-fixture\\DBFview.EXE",
+      "bytes": 2698663
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\solver-fixture\\Ishercof.exe",
+      "bytes": 2698663
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\solver-fixture\\mode.txt",
+      "bytes": 7
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\solver-fixture\\PropPred.EXE",
+      "bytes": 264192
+    },
+    {
+      "path": "C:\\FreeShip26-HydrodynamicsTests\\reports-05\\qt-hydrodynamics\\solver-fixture\\started.txt",
+      "bytes": 5
+    }
+  ]
+}

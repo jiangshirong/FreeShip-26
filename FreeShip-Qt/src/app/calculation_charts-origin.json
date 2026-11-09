@@ -1,0 +1,19 @@
+{
+  "Forms/FreeHydrodyn_RVRSDlg.lfm": "1fbe8608b3f1337a48f40ec8bdea71bb82f337a5207b59481a6000338a8307ff",
+  "Forms/FreeHydrodyn_Task1Dlg.lfm": "3f8c99565af9f731bf3da534cfe1b6005c8bdaf2181399d8f3e0ce7f8a62f1a5",
+  "Forms/FreePropeller_Task1Dlg.lfm": "c999df04396324923772bf4b596a6b5947094416e799a721ba24dd0ffc417002",
+  "Forms/FreePropeller_Task2Dlg.lfm": "597291d4ae79d4429b0a924d15fc74f67c11532138fb6d954858b12ad9ec6378",
+  "Forms/FreePropeller_Task3Dlg.lfm": "e35b47a446ba94ebef1b99ca18093122d8949ef884eb8e14dc3ffe8aa504ee77",
+  "Forms/FreePropeller_Task4Dlg.lfm": "1e99219b50ff0236a38e4588159999262f745ea92b1777872edfde8a201bef12",
+  "Forms/FreePropeller_Task5Dlg.lfm": "32dfeb1f00b6eb73fdd06414d82b5903900f654a78e6526f41123d09b2053b3b",
+  "Forms/FreeResistance_DelftDlg.lfm": "7de1d1ba7f68dede42af0ed8189d64789bea3022754a918a7722a438f88710a3",
+  "Forms/FreeResistance_FungLeibDlg.lfm": "bbb0138247d09c4d94b0595171f3034058e33d19c51973b9524cb8658ecf38ea",
+  "Forms/FreeResistance_HollenDlg.lfm": "72c0029377fd0cd437017536c5987aabb9db4ae93676072637a26549442a5af5",
+  "Forms/FreeResistance_HoltrDlg.lfm": "11b5755ad4edd1d2865aa43dbf91ba045e185aba9947d9bc53f4cf806aadc9d9",
+  "Forms/FreeResistance_KaperDlg.lfm": "4a15cb8afb7baa2c43f65265e91baead37f0d071d80f26cbd8efea7ca46d901c",
+  "Forms/FreeResistance_MHDlg.lfm": "910bf0aa8084abd5c0f82e342c12130e0bb873f8743bbac5efcc5533ea2830ab",
+  "Forms/FreeResistance_OSTDlg.lfm": "dcd065b5ca4b9a7025c91619c61dff15f6cde65cbdfa46115654bc001ddeb1cf",
+  "Forms/FreeResistance_OortmerDlg.lfm": "6cb395f5ee3e86cfa32f09985b0c84ebbc0274e301be00a7351d72e03e02ac63",
+  "Forms/FreeResistance_PlaningDlg.lfm": "496fe91faea9c6a350db7adfc114552192fb23c6ee748b2ce00cc1390805e651",
+  "Forms/FreeResistance_RBHSDlg.lfm": "ad0c9b625b7a080bf162d752b9e4dcd04b7aece21e826558ae468ccc6cfa7b07"
+}

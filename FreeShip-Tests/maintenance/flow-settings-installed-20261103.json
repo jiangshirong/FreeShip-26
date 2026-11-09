@@ -1,0 +1,101 @@
+{
+  "recorded_utc": "2026-11-03T08:05:44.510259+00:00",
+  "scope": "Native surface flow tracing and persistent hydro/performance settings; professional calculation/default extraction remains in the analysis adapter.",
+  "installed": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\dist",
+  "previous_installation": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\dist-before-flow-settings-20261103",
+  "manifest_sha256": "11c1f33f7faaafafba048468b7a93f59865f4cce88e2600c414cb213f1d40389",
+  "verified_package_files": 2531,
+  "legacy_source_sha256": "277a3c69392c86fe14c375e7dfc9c3197b4162e982673cbbcf4b4a2dfff0ab6b",
+  "binaries_sha256": {
+    "FreeShipQt.exe": "8c5c334964f71631d96db8e9d2c21d91472b8f95bc1a9b7a2a060965ea0b758f",
+    "FreeShipDocumentService.exe": "fbe3c33e5be24fb7a78f10db3f48122bf3fbc29bd5ee4b5a6351420cee301bd2",
+    "FreeShipNativeLinesplan.exe": "32be8b2bb691413a263c5cccbce755f981658167e266a7250319c2189a51900f",
+    "native_analysis_edit_probe.exe": "e4a1b763c427f1dd655aa1a26943cdfa06119be49093c1e9e28d946dfb1d4ff8",
+    "native_flowline_probe.exe": "e9dee388f5571b10eb5e210b8a6d6eeb00dcd96250cebc23ae87b4745bb82f97",
+    "qt_document_codec_tests.exe": "2114146a90d3afc9d2bbb299121f23321bde627a1faa7a5329ddcca114fb3fa3",
+    "qt_exchange_tests.exe": "b3764a18639819aaed4af8e6a9d40df568de21608fd9538f1985ae3aed19d505",
+    "bridge/FreeShipGeometryBridge.exe": "418ff70ccd482969bf8718de33b4142a1aebf0f0d659dabb5264cedd05acc58f"
+  },
+  "reports": {
+    "core": {
+      "path": "C:\\FreeShip26Tests\\reports\\flow-settings-final-01\\qt-document\\report.json",
+      "sha256": "0de10a377626e55fd64e0ee5e1b1f71c0a0a3e0a8b362c4585edfbfac8613ce4",
+      "counts": {
+        "pass": 12703,
+        "fail": 0,
+        "review": 21,
+        "not_run": 3,
+        "error": 0
+      }
+    },
+    "exchange": {
+      "path": "C:\\FreeShip26Tests\\reports\\flow-settings-installed-exchange\\qt-exchange\\report.json",
+      "sha256": "76205e2d8cc18590938a670079fb80f4f4f144c678980d2bb910d23ee3e4f7d1",
+      "counts": {
+        "pass": 280,
+        "fail": 0,
+        "review": 1,
+        "not_run": 1,
+        "error": 0
+      }
+    },
+    "startup": {
+      "path": "C:\\FreeShip26Tests\\reports\\flow-settings-installed-startup\\report.json",
+      "sha256": "6a0d756ba4be626108a55cde9c44431eafba0b1d41b0ea6ad0106a762a9baf9e",
+      "counts": {
+        "pass": 54,
+        "fail": 0,
+        "review": 0,
+        "not_run": 17,
+        "error": 0
+      }
+    }
+  },
+  "combined_counts": {
+    "pass": 13037,
+    "fail": 0,
+    "review": 22,
+    "not_run": 21,
+    "error": 0
+  },
+  "document_seconds": 458.19662719999906,
+  "phase_seconds": {
+    "runtime_ready_s": 1.1549685000063619,
+    "codec_s": 0.9040138999989722,
+    "protocol_s": 112.76127909999923,
+    "native_point_edit_s": 4.774127199998475,
+    "native_topology_s": 13.930627299996559,
+    "native_modeling_s": 11.502173000000766,
+    "native_transforms_s": 18.05572440000833,
+    "native_construction_s": 8.691504400005215,
+    "native_lackenby_s": 38.84350930000073,
+    "native_attributes_s": 5.815373100005672,
+    "native_face_tools_s": 20.145401899993885,
+    "native_project_s": 29.633577800006606,
+    "native_definitions_s": 22.10647009999957,
+    "native_auxiliary_s": 18.124540099990554,
+    "native_background_s": 10.810184799993294,
+    "native_surface_s": 58.52557759999763,
+    "native_create_s": 19.306108000004315,
+    "native_analysis_s": 17.153942200005986,
+    "native_flowlines_s": 11.993994800010114,
+    "modeling_service_s": 18.391176699995412,
+    "production_ui_s": 14.809904800000368
+  },
+  "notes": [
+    "Original flow helper leaves its edge parameter uninitialized. Isolated reference explicitly assigns mub; independent varying-tangent fixture checks the intended fraction.",
+    "All 15 persisted calculator input sets compare against the old complete-payload setter. Partial patches independently preserve omitted bytes.",
+    "Four flow precision levels, edits/history/roundtrip/cache/error rollback retain exact reference comparisons; lines-plan and DXF checks remain exact.",
+    "Hidden production Qt callbacks cover settings saving, import/export and startup. Physical desktop acceptance is separate.",
+    "Reusable tests stay in FreeShip-Tests; builds and reports are stored on C."
+  ],
+  "maintenance_sources_sha256": {
+    "record_flow_settings_delivery.py": "d6e0d29d8ed41414663cdf0f277a7d8e19453d2aba9a8732a8d4ec4a100514db",
+    "record_topology_delivery.py": "dcb355a690a034c8b84582d824685a9e1992d1de59576de712a5f2d1b96e4f6c",
+    "promote_runtime.ps1": "d0427a3964c2263a93768185d29f9f9cfba8600d48965c1b29518c443e4bb728"
+  },
+  "free_bytes_after": {
+    "C": 8714969088,
+    "D": 29935046656
+  }
+}

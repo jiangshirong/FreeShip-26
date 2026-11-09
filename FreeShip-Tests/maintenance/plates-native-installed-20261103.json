@@ -1,0 +1,141 @@
+{
+  "created_utc": "2026-11-03T13:21:58.741185+00:00",
+  "status": "partial",
+  "scope": "Native C++ plate calculation and existing Qt/export workflow; not complete application migration",
+  "installed": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\dist",
+  "previous": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\dist-before-plates-native-20261103",
+  "package_manifest_sha256": "116cd68861397494cd42f56793c4149d187f7c647c4b491cb4fbf01fd0b08b7d",
+  "source_sha256": "277a3c69392c86fe14c375e7dfc9c3197b4162e982673cbbcf4b4a2dfff0ab6b",
+  "reports": {
+    "core": {
+      "path": "D:\\FreeShip26Tests\\reports\\plates-native-final-03\\qt-plates\\report.json",
+      "sha256": "8270448f06a19b8bff52a71b291c0a832d371fb28c8d4e205c6eedbe9757b255",
+      "counts": {
+        "pass": 580,
+        "fail": 0,
+        "review": 1,
+        "not_run": 1,
+        "error": 0
+      }
+    },
+    "migration": {
+      "path": "D:\\FreeShip26Tests\\reports\\plates-native-migration-03\\report.json",
+      "sha256": "9b29b585a23ed5d1dda03c23522a8a25a6bf9b70862f5de32ff5b0c1a0570bf8",
+      "counts": {
+        "pass": 751,
+        "fail": 0,
+        "review": 9,
+        "not_run": 7,
+        "error": 0
+      }
+    },
+    "installed_workflow": {
+      "path": "D:\\FreeShip26Tests\\reports\\plates-native-installed-02\\qt-plates\\report.json",
+      "sha256": "59a1d7b2609d27fa22a461f823acda1782477988264dba3cc3f3d4cd22ddda24",
+      "counts": {
+        "pass": 35,
+        "fail": 0,
+        "review": 0,
+        "not_run": 1,
+        "error": 0
+      }
+    },
+    "startup": {
+      "path": "D:\\FreeShip26Tests\\reports\\plates-native-startup-02\\report.json",
+      "sha256": "bda0e4e9c47c7c17f2c61375ed45c9111c5daf67374b45f5c3415365ba46f817",
+      "counts": {
+        "pass": 54,
+        "fail": 0,
+        "review": 0,
+        "not_run": 17,
+        "error": 0
+      }
+    }
+  },
+  "counts": {
+    "pass": 1420,
+    "fail": 0,
+    "review": 10,
+    "not_run": 26,
+    "error": 0
+  },
+  "timings": [
+    {
+      "model": "plane",
+      "precision": 1,
+      "faces": 144,
+      "native_ms": 1.6443,
+      "native_request_ms": 4.08410000090953,
+      "legacy_request_ms": 15.170700004091486
+    },
+    {
+      "model": "saddle",
+      "precision": 1,
+      "faces": 144,
+      "native_ms": 1.4067,
+      "native_request_ms": 4.058199992869049,
+      "legacy_request_ms": 9.650499996496364
+    },
+    {
+      "model": "mirror-bottom",
+      "precision": 1,
+      "faces": 288,
+      "native_ms": 2.2275,
+      "native_request_ms": 5.6035000015981495,
+      "legacy_request_ms": 19.13990000321064
+    },
+    {
+      "model": "plane",
+      "precision": 2,
+      "faces": 576,
+      "native_ms": 5.5961,
+      "native_request_ms": 10.239499999443069,
+      "legacy_request_ms": 143.1663999974262
+    },
+    {
+      "model": "saddle",
+      "precision": 2,
+      "faces": 576,
+      "native_ms": 4.7589,
+      "native_request_ms": 9.214000005158596,
+      "legacy_request_ms": 63.53539999690838
+    },
+    {
+      "model": "mirror-bottom",
+      "precision": 2,
+      "faces": 1152,
+      "native_ms": 9.3601,
+      "native_request_ms": 15.607799999997951,
+      "legacy_request_ms": 157.40139999252278
+    },
+    {
+      "model": "plane",
+      "precision": 3,
+      "faces": 2304,
+      "native_ms": 26.8385,
+      "native_request_ms": 37.240800011204556,
+      "legacy_request_ms": 2731.1574000050314
+    },
+    {
+      "model": "saddle",
+      "precision": 3,
+      "faces": 2304,
+      "native_ms": 17.532,
+      "native_request_ms": 33.10480000800453,
+      "legacy_request_ms": 503.2200000132434
+    },
+    {
+      "model": "mirror-bottom",
+      "precision": 3,
+      "faces": 4608,
+      "native_ms": 46.4532,
+      "native_request_ms": 81.8829000054393,
+      "legacy_request_ms": 2355.0136999983806
+    }
+  ],
+  "limitations": [
+    "Hidden Qt callbacks do not cover desktop input, physical printing or machining.",
+    "Full migration still includes IGES preparation, legacy analysis loading and remaining tools/UI."
+  ],
+  "audit_script_sha256": "0ed05277d5584b0efa126df06e8ba183722f301fd55507b36de40276a1845529"
+}
