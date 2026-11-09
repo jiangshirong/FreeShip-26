@@ -1,0 +1,82 @@
+{
+  "created_utc": "2026-11-09T11:07:33.708439+00:00",
+  "status": "partial",
+  "scope": "Resume current editor after actual service death, recover committed edits and confirmed saves, continue editing and saving",
+  "installed": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\dist",
+  "previous": "D:\\桌面文件夹\\项目\\FreeShip_26\\FreeShip-Qt\\build\\dist-before-backend-recovery-20261109",
+  "package_manifest_sha256": "3b668530839f173e5d317cf0ca70169928ffff32071a0910f0dd0e2a738432c6",
+  "reports": {
+    "focused": {
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\backend-recovery-20261109\\verified\\qt-backend-recovery\\report.json",
+      "sha256": "171af93ed77639581a57a850d0a65808bfd2dd5e129e629064c94a89ea49ffe0",
+      "counts": {
+        "pass": 326,
+        "fail": 0,
+        "review": 0,
+        "not_run": 5,
+        "error": 0
+      }
+    },
+    "saving": {
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\backend-recovery-20261109\\verified\\qt-save-protection\\report.json",
+      "sha256": "114140a3655749358734c707f4a17fff53d11382d748e9c8f4730b3fc99dfa71",
+      "counts": {
+        "pass": 129,
+        "fail": 0,
+        "review": 0,
+        "not_run": 4,
+        "error": 0
+      }
+    },
+    "recovery": {
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\backend-recovery-20261109\\verified-regression\\qt-recovery\\report.json",
+      "sha256": "7ca5501a927ffdf8884ee5202d16f425fefa5829ac13f3e1f28deb97f8f8099c",
+      "counts": {
+        "pass": 132,
+        "fail": 0,
+        "review": 0,
+        "not_run": 15,
+        "error": 0
+      }
+    },
+    "publication": {
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\backend-recovery-20261109\\verified-regression\\qt-publication\\report.json",
+      "sha256": "08d78b31c1ec00f50b58fc4654c9885b6b158dd209b5f23804bf6ee2c176aa92",
+      "counts": {
+        "pass": 163,
+        "fail": 0,
+        "review": 0,
+        "not_run": 1,
+        "error": 0
+      }
+    },
+    "installed": {
+      "path": "C:\\Users\\12968\\FreeShip26-TestResults\\backend-recovery-20261109\\installed\\qt-backend-recovery\\report.json",
+      "sha256": "1b3fe5b0a4d93a1ac95ef873a0a5bc45587960a6fec082a3a6f13138884011f9",
+      "counts": {
+        "pass": 326,
+        "fail": 0,
+        "review": 0,
+        "not_run": 5,
+        "error": 0
+      }
+    }
+  },
+  "counts": {
+    "pass": 1076,
+    "fail": 0,
+    "review": 0,
+    "not_run": 30,
+    "error": 0
+  },
+  "first_run": {
+    "path": "C:\\Users\\12968\\FreeShip26-TestResults\\backend-recovery-20261109\\first\\qt-backend-recovery\\report.json",
+    "sha256": "1509f7a7136a7f58fe9cbbc6e4e12117b8bbec1a2393d4d4d99c949a5e582573"
+  },
+  "audit_script_sha256": "82a64f335cf4927af28f672f64a518ec4c674817b999e34469343020a65da2ac",
+  "limitations": [
+    "Counts include repeated installed checks, not unique user scenarios.",
+    "Only successfully persisted revisions survive; unsubmitted input, old undo history and camera state are not recovered.",
+    "Actual desktop input, DPI and hardware power-loss behavior remain untested."
+  ]
+}

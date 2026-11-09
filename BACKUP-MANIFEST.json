@@ -278,7 +278,7 @@
     },
     {
       "path": "FreeShip-Qt/docs/migration/FEATURES.md",
-      "sha256": "cff302500142c1bf8bcb1d1b83b75c095df74c586cd5589db6f2590e55b70e04"
+      "sha256": "7f8b97ed4f2bb122c46d1fe725d59a52f7f40284306c55d66815a194427c2a58"
     },
     {
       "path": "FreeShip-Qt/docs/migration/GHS-EXPORT.md",
@@ -474,11 +474,11 @@
     },
     {
       "path": "FreeShip-Qt/docs/migration/RECOVERY.md",
-      "sha256": "455b16cedb891cab346f6ace7fd69c0462598b3622debabb4c5f05d72ebbfff8"
+      "sha256": "ff6829946a81b1045093cb63304df69eb668df872b207afde0f292092784e442"
     },
     {
       "path": "FreeShip-Qt/docs/migration/SAVE-PROTECTION.md",
-      "sha256": "4e4633768f6096f60f938a79c23182efe7a0997c66282d715dcaf6455dc85c71"
+      "sha256": "fbd8da709472706eea675d90c3234c11c08db01109108007c49bc40a1d4eb875"
     },
     {
       "path": "FreeShip-Qt/docs/migration/SECTIONS-AND-LAYERS.md",
@@ -498,7 +498,7 @@
     },
     {
       "path": "FreeShip-Qt/docs/migration/STATUS.md",
-      "sha256": "d21533977134be01309475fecb33e1d025f898d583c60af7b88c59448ef73b28"
+      "sha256": "8cc8e0e57e34d07fa1e85db3480576d5892af586925964b8cca3ecfd27a18429"
     },
     {
       "path": "FreeShip-Qt/docs/migration/SURFACE-SERIALIZATION.md",
@@ -638,7 +638,7 @@
     },
     {
       "path": "FreeShip-Qt/src/app/main_window.cpp",
-      "sha256": "1a23cc1c28f3d9565aa7195cea94a636c03a12c9b3c0a0a617435f1e9867af55"
+      "sha256": "8ca1a2027a4060d8d52718e3ed182a0001218896d1672b66ef15c15d25e63bf4"
     },
     {
       "path": "FreeShip-Qt/src/app/main_window.h",
@@ -646,11 +646,11 @@
     },
     {
       "path": "FreeShip-Qt/src/app/model_session.cpp",
-      "sha256": "5a97b54c20f19f16c1353280d252ace71f7fcd71cac57eb77ee7dff2d95a5663"
+      "sha256": "89dd66ee31db4a4c30707b1f8f459c1d2d8730744e426241b6d142540263f9ec"
     },
     {
       "path": "FreeShip-Qt/src/app/model_session.h",
-      "sha256": "63f0138150230216e5c889abbcc26ca2acbe32b4a384ffa9ffaa0563b69d139a"
+      "sha256": "28664ba165b8c440e31266b6c1f670037f854848ff490dc6d68e37eb5d4f0d5c"
     },
     {
       "path": "FreeShip-Qt/src/app/model_ui_workflow.cpp",
@@ -750,11 +750,11 @@
     },
     {
       "path": "FreeShip-Qt/src/app/startup.cpp",
-      "sha256": "fe4568fde446784ba82dc9f57b9f8286488088868b504fe23dc0ffe3a4bf4cf8"
+      "sha256": "ff850e9780194d4f6374bf044df9fd9564bb838ada18cc587a5ff7d1fa6fc8f3"
     },
     {
       "path": "FreeShip-Qt/src/app/startup_workflow.cpp",
-      "sha256": "24c0190da1658416fe459a4f65a8805a504ccc25e2324c8a7d8bed6fa4903109"
+      "sha256": "5db75d0a4621f6120e268682112dc1e949a8e0bd04e15346c76c715e24fbff05"
     },
     {
       "path": "FreeShip-Qt/src/app/studio_actions.cpp",
@@ -17414,7 +17414,7 @@
     },
     {
       "path": "FreeShip-Tests/README.md",
-      "sha256": "116d3600d9e4f2338aed906be2eeb507fa27f5bc8462acc360dacd4396eefd37"
+      "sha256": "8526f08f757be7ed22cce23664dac66f08152a9f1dd6e665133ff170251dfb10"
     },
     {
       "path": "FreeShip-Tests/ReportPresentationProbe.pas",
@@ -17430,7 +17430,7 @@
     },
     {
       "path": "FreeShip-Tests/run_tests.py",
-      "sha256": "d9b0fd7538abc83432e4cf7973b570a79fbfeaecc22a8a8ba9bf10b15daab29d"
+      "sha256": "2f8a1fb4b4d53055f520340efa7c257167d25791575a9d145f118b5012c5ce41"
     },
     {
       "path": "FreeShip-Tests/SaveSafetyHooks.pas",
@@ -19862,7 +19862,7 @@
     },
     {
       "path": "FreeShip-Tests/qt/recovery_tests.cpp",
-      "sha256": "3623ec5306eee1ee85e8527ca8fabe56f4aa30cc2ef7ac38d9a3a31897c85249"
+      "sha256": "c72a15b797e8017ce1c1633a682ede8c59347dfd2511857b3dd1b38079412695"
     },
     {
       "path": "FreeShip-Tests/qt/resistance_math.pas",
@@ -19947,6 +19947,26 @@
     {
       "path": "FreeShip-Tests/tests/test_window_analysis.py",
       "sha256": "166612db3f21c1e485f21178ec121e1e4b70f35333416112b99f4fc6fc21d821"
+    },
+    {
+      "path": "FreeShip-Qt/docs/migration/BACKEND-RECOVERY.md",
+      "sha256": "78d98f0f05fceb7e7a059800b6f20853582b7348399f163b6b1a5d3a1e7e3f66"
+    },
+    {
+      "path": "FreeShip-Tests/maintenance/backend-recovery-delivery-20261109.json",
+      "sha256": "38bc16b85fe13a7c173577b6c9653c9b5a1062335061f14f5051cd76c2a77566"
+    },
+    {
+      "path": "FreeShip-Tests/maintenance/record_backend_recovery_delivery.py",
+      "sha256": "82a64f335cf4927af28f672f64a518ec4c674817b999e34469343020a65da2ac"
+    },
+    {
+      "path": "FreeShip-Tests/maintenance/sync_source_backup.py",
+      "sha256": "86b46ee1db15787a3993c6476393778bcaffe005170dedddcc8aede00f689430"
+    },
+    {
+      "path": "FreeShip-Tests/qt_backend_recovery.py",
+      "sha256": "220014876140470180cdc87134ef587818c5ac7d95e095323cfa7751ecfdb423"
     }
   ],
   "excluded_artifacts": [
@@ -19976,5 +19996,6 @@
     "FreeShip-Tests/fixtures/solvers35/unpacked/Freeship/Exec/UBCRT.EXE",
     "FreeShip-Tests/fixtures/solvers35/unpacked/Freeship/Exec/WOLFSON.EXE",
     "FreeShip-Tests/maintenance/storage-cleanup-20261104.json"
-  ]
+  ],
+  "updated_utc": "2026-11-09T11:07:34.318036+00:00"
 }

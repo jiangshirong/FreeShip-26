@@ -78,6 +78,9 @@ MainWindow::MainWindow(QWidget* parent,bool rememberFiles) : QMainWindow(parent)
     refreshRecentFiles();
     auto* recover=file->addAction("恢复未保存的船模…",this,[this]{showRecoveries();});
     recover->setProperty("file_operation","recover");
+    auto* resume=file->addAction("恢复当前工作",this,[this]{session_.resumeCurrent();});
+    resume->setProperty("file_operation","resume_current");
+    resume->setEnabled(false);
     file->addSeparator();
     png_ = file->addAction("保存当前视图图片…", this, &MainWindow::exportImage);
     dxf_ = file->addAction("导出型线图 DXF…", this, &MainWindow::exportDxf);
@@ -227,6 +230,8 @@ void MainWindow::updateModel() {
     if(preferencesPending_){for(size_t i=0;i<3;++i){QSignalBlocker block(coordinates_[i]);coordinates_[i]->setValue(draft[i]);}coordinatesChanged_=changed;}
 }
 void MainWindow::updateState() {
+    for(auto* action:findChildren<QAction*>())if(action->property("file_operation")=="resume_current")
+        action->setEnabled(session_.canResumeCurrent());
     if(preferencesAction_)preferencesAction_->setEnabled(!session_.busy());
     if(exchangeDialog_)exchangeDialog_->refreshState();
     for(auto* a:exchangeActions_)a->setEnabled(!session_.busy()&&(a->property("importing").toBool()||session_.ready()));
@@ -429,7 +434,7 @@ void MainWindow::operationCompleted(const QString& method) {
             .arg(session_.model()->points.size()).arg(session_.lastOperationMs(), 0, 'f', 0));
     if(!workflow_&&(method=="load"||method=="save"))rememberFile(session_.sourcePath());
     if(!session_.recoveryError().isEmpty())statusBar()->showMessage("自动恢复副本未更新："+session_.recoveryError());
-    else if(method=="load"&&session_.modified()&&session_.sourcePath().isEmpty())statusBar()->showMessage("已恢复未保存的船模，请另存为文件。");
+    else if(method=="load"&&session_.modified()&&session_.sourcePath().isEmpty())statusBar()->showMessage("已恢复未保存的船模，请另存为文件。撤销历史从恢复后重新开始。");
     if(startupProbe_){startupStep(method);return;}
     if(preferencesWorkflow_){preferencesStep(method);return;}
     if(modelUiWorkflow_){modelUiStep();return;}

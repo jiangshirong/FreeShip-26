@@ -21,6 +21,8 @@ public:
     ~ModelSession() override;
     bool load(const QString& file);
     bool recover(const QString& id);
+    bool resumeCurrent();
+    bool canResumeCurrent()const{return !busy_&&!healthy_&&bool(model_);}
     bool discardRecovery();
     void setRecoveryRoot(const QString& root) { if(!model_&&!busy_)recoveryRoot_=root; }
     QString recoveryRoot()const{return recoveryRoot_;}
@@ -91,7 +93,9 @@ public:
 
 private:
     friend struct SaveConfirmationProbe;
-    bool loadInput(const QString& file,bool recovered);
+    friend struct BackendExitProbe;
+    friend struct BackendRecoveryProbe;
+    bool loadInput(const QString& file,bool recovered,const fs::ModelFileVersion* requiredVersion=nullptr);
     bool currentRequest(const QString& method, QJsonObject fields = {});
     bool request(const QString& method, QJsonObject fields);
     void startProcess();

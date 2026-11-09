@@ -73,6 +73,7 @@ SUITES = {
     'qt-hydro-auxiliary': ('qt_hydro_auxiliary.py', []),
     'qt-asymmetric-hydro': ('qt_asymmetric_hydro.py', []),
     'qt-lateral-projection': ('qt_lateral_projection.py', []),
+    'qt-backend-recovery': ('qt_backend_recovery.py', []),
     'qt-project-completion': ('qt_project_completion.py', []),
     'qt-calculation-layout': ('qt_calculation_layout.py', []),
     'qt-calculation-charts': ('qt_calculation_charts.py', []),
@@ -103,6 +104,7 @@ def main():
     reusable.add('qt-hydro-auxiliary')
     reusable.add('qt-asymmetric-hydro')
     reusable.add('qt-lateral-projection')
+    reusable.add('qt-backend-recovery')
     reusable.add('qt-project-completion')
     reusable.add('qt-calculation-layout')
     reusable.add('qt-calculation-charts')

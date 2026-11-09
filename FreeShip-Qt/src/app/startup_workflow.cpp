@@ -18,6 +18,9 @@
 #include <QMessageBox>
 #include <QStatusBar>
 #include <QTimer>
+// Only the explicitly requested hidden startup probe can kill its own service.
+// This is an actual QProcess exit, not a simulated successful recovery reply.
+struct BackendExitProbe {static void terminate(ModelSession& s){s.process_.kill();}};
 void MainWindow::verifyStartup(const QString& request,const QString& output){
     startupProbe_=true;workflowOutput_=QFileInfo(output).absoluteFilePath();workflowTimer_.start();
     QDir().mkpath(workflowOutput_);QFile file(request);
@@ -40,6 +43,8 @@ void MainWindow::startupStep(const QString& operation,const QString& error){
             {"last",fileHistory_->read().last},{"recent",recent},{"actions",actions},{"status_text",statusBar()->currentMessage()}};
         item["recovery_file"]=session_.recoveryFile();item["recovery_error"]=session_.recoveryError();item["recovery_origin"]=session_.recoveryOrigin();
         item["backup_file"]=session_.lastBackupPath();
+        item["can_resume_current"]=session_.canResumeCurrent();
+        item["can_undo"]=session_.canUndo();item["can_redo"]=session_.canRedo();
         item["save_preview_ms"]=session_.lastSavePreviewMs();
         if(!session_.lastBackupPath().isEmpty()&&QFileInfo(session_.lastBackupPath()).isFile()){
             const auto saved=workflowOutput_+"/backup-"+QString::number(startupCommand_)+".fbm";
@@ -130,6 +135,16 @@ void MainWindow::startupStep(const QString& operation,const QString& error){
         else if(kind=="undo")session_.undo();
         else if(kind=="redo")session_.redo();
         else if(kind=="discard_recovery")session_.discardRecovery();
+        else if(kind=="backend_exit"){
+            if(!session_.ready()||session_.busy()){finishWorkflow("Backend exit probe requires its own idle live document");return;}
+            BackendExitProbe::terminate(session_);return; // Advance on the actual process error.
+        }
+        else if(kind=="resume_current"){
+            QList<QAction*> found;for(auto* action:findChildren<QAction*>())if(action->property("file_operation")=="resume_current")found.append(action);
+            if(found.size()!=1||!found[0]->isEnabled()){
+                workflowCases_.append(QJsonObject{{"name","resume_current_action_unavailable"},{"status","not_run"}});finishWorkflow();return;
+            }found[0]->trigger();
+        }
         else if(kind=="close"){
             startupClosing_=true;
             QTimer::singleShot(0,this,[this,command]{

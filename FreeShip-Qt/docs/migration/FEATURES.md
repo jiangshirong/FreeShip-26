@@ -59,7 +59,7 @@ ShipCAD 的样条参数化与当前 Plus 不同，文件基线也较早；其原
 | 原生 FBM 版本及旧计算参数 | `Units/FreeShip.inc` 的 `LoadProject`、`SaveProject`、`DetectMinFileVersion`；`Units/FreeProjectSettings.inc` 的 `LoadBinary`、`SaveBinary` | 已接入 C++ 文档构造、版本转换、建模与设置字段写入；未修改文件仍原样保存，派生缓存随输入失效。Qt 快照不替代完整 FBM，见 [文档核心](NATIVE-DOCUMENT.md) 和[控制点编辑](NATIVE-POINT-EDITING.md)。 |
 | 失败不破坏正式文件和备份 | `Units/FreeSafeFile.pas` 的 `SaveProjectFile`、`ReplaceFileAtomically`；`Units/FreeFileBuffer.pas` | 服务先写私有文件，Qt 安装到目标后才确认保存点。现已补齐 `.Bak`、无变化不轮换、原文件冲突检测和失败回退；两个会话、真实文件占用及确认中断已验证，详见[保存保护](SAVE-PROTECTION.md)。硬件断电与不遵守锁的外部写入竞争仍有边界。 |
 | 损坏文件防护、读写中断 | `Units/FreeFileBuffer.pas`；`Units/FreeSubdivisionSurface.inc` 的 `LoadBinary`；各集合读取函数 | 延续长度、数量、索引、零进度检查。用户选中损坏文件后，旧文档、撤销和选择仍可用。 |
-| 恢复快照、启动容错 | `Forms/Main.pas` 的 `InitiallyLoadModel`；`Units/FreeShip.inc` 的 `FGetPreview` | 已接入完整 FBM 恢复副本、重启提示、未保存状态恢复、另存为和关闭清理；并发窗口、损坏副本和写入失败分别处理。见 [未保存船模的恢复](RECOVERY.md)。撤销历史和未提交输入不持久化。 |
+| 恢复快照、启动容错 | `Forms/Main.pas` 的 `InitiallyLoadModel`；`Units/FreeShip.inc` 的 `FGetPreview` | 已接入完整 FBM 恢复副本、重启提示、未保存状态恢复、另存为和关闭清理；并发窗口、损坏副本和写入失败分别处理。另补齐[计算组件退出后恢复当前工作](BACKEND-RECOVERY.md)，处理编辑与保存确认回复丢失。见 [未保存船模的恢复](RECOVERY.md)。撤销历史和未提交输入不持久化。 |
 
 回归入口：`save_safety.py`、`file_safety.py`、`buffer_safety.py`、`legacy_compatibility.py`、`qt_recovery.py`、`qt_save_protection.py`。上游记录 **01–04、08、09、17** 在当前 Pascal 代码已按记录范围修复，迁移时要保留；**O01** 的恢复副本已在 Qt 接入。恢复容器有校验，原 FBM 格式本身没有校验和，不能承诺识别所有恰好落在字段边界的截断。
 

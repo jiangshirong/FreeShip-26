@@ -1,5 +1,13 @@
 # FreeShip UI 测试试点
 
+## 计算组件异常退出后的恢复
+
+`python -B run_tests.py --suite qt-backend-recovery --runtime <候选包> --output <隔离目录>`，
+支持 `--verify-deployment <正式目录>`。测试代码 `qt_backend_recovery.py`、
+`qt/recovery_tests.cpp` 保留真实子进程退出、回复丢失、过期/损坏/占用副本、外部文件
+改写及失败后重试用例；隐藏窗口通过正式动作恢复、保存、继续编辑和撤销。
+不模拟成功回复，不操作用户进程或文件，不将隐藏窗口当作实际桌面验收。
+
 ## Qt 工程设置收尾
 
 `python -B run_tests.py --suite qt-project-completion --runtime <Qt运行目录>`

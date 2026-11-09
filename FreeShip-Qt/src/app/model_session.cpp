@@ -34,7 +34,7 @@ ModelSession::ModelSession(QObject* parent) : QObject(parent) {
     timeout_.setSingleShot(true);
     timeout_.setInterval(120000);
     connect(&timeout_, &QTimer::timeout, this, [this] {
-        fail("模型计算超时。当前画面已保留，请重新打开模型。", true);
+        fail("模型计算超时。当前画面已保留。", true);
     });
     saveRetry_.setSingleShot(true);saveRetry_.setInterval(3000);
     connect(&saveRetry_,&QTimer::timeout,this,[this]{
@@ -62,7 +62,7 @@ ModelSession::ModelSession(QObject* parent) : QObject(parent) {
     });
     connect(&process_, &QProcess::finished, this, [this](int, QProcess::ExitStatus) {
         if (!stopping_ && (busy_ || healthy_))
-            fail("计算组件已退出。当前画面已保留，请重新打开模型。\n" + QString::fromUtf8(diagnostics_), true);
+            fail("计算组件已退出。当前画面已保留。\n" + QString::fromUtf8(diagnostics_), true);
     });
 }
 
@@ -122,11 +122,33 @@ void ModelSession::startProcess() {
 }
 
 bool ModelSession::load(const QString& file) {return loadInput(file,false);}
+bool ModelSession::resumeCurrent() {
+    if(!canResumeCurrent())return false;
+    try {
+        // A request can commit its checkpoint before the UI receives the reply.
+        // Find the document's capsule even when recoveryFile_ is still empty.
+        if(!recoveryRoot_.isEmpty() && QFileInfo::exists(recoveryRoot_+'/'+model_->documentId+".fsr"))
+            return recover(model_->documentId);
+        // Confirmation may have committed and removed the checkpoint before the
+        // service exited. The receipt must still describe this exact revision.
+        const bool committed=saveReceipt_["document_id"]==model_->documentId &&
+            saveReceipt_["revision"].toDouble(-1)==double(model_->revision) &&
+            saveReceipt_["bytes"].toDouble(-1)==double(sourceVersion_.bytes) &&
+            saveReceipt_["sha256"].toString().toLatin1()==sourceVersion_.sha256.toHex();
+        if(sourcePath_.isEmpty() || (modified_&&!committed))
+            error("没有包含当前修改的完整恢复副本。当前画面和已有副本已保留，请勿放弃修改或覆盖原船模。");
+        // Bind the expected version to the staged bytes actually loaded, not
+        // an earlier path check that another writer could invalidate.
+        return loadInput(sourcePath_,false,&sourceVersion_);
+    } catch(const std::exception& ex) {fail(QString::fromUtf8(ex.what()));return false;}
+}
 bool ModelSession::recover(const QString& id) {
     if(busy_)return false;
     try{
         auto lease=std::make_unique<fs::RecoveryLease>(recoveryRoot_,id);
         fs::RecoveryEntry entry;const auto bytes=lease->read(&entry);
+        if(canResumeCurrent() && model_->documentId==id && entry.revision<model_->revision)
+            error("恢复副本不包含当前画面的全部修改，未替换当前模型。副本仍保留；重新启动后可从恢复菜单找回较早版本。");
         QTemporaryDir stage((temporaryDirectory_.isEmpty()?QDir::tempPath():temporaryDirectory_)+"/freeship-recover-XXXXXX");
         if(!stage.isValid())error("无法准备恢复船模。");
         QSaveFile file(stage.filePath("model.fbm"));file.setDirectWriteFallback(false);
@@ -144,7 +166,7 @@ bool ModelSession::discardRecovery(){
         if(onCompleted)onCompleted("discard_recovery");return true;
     }catch(const std::exception& ex){if(onError)onError(QString::fromUtf8(ex.what()));return false;}
 }
-bool ModelSession::loadInput(const QString& file,bool recovered) {
+bool ModelSession::loadInput(const QString& file,bool recovered,const fs::ModelFileVersion* requiredVersion) {
     if (busy_ || file.isEmpty()) return false;
     try {
         const QFileInfo info(file);
@@ -164,6 +186,8 @@ bool ModelSession::loadInput(const QString& file,bool recovered) {
             const auto observed=fs::observeModelFile(info.absoluteFilePath());
             auto copied=fs::observeModelFile(copy);copied.path=observed.path;
             if(!fs::sameModelVersion(observed,copied))error("船模在打开过程中发生变化，请重新打开。");
+            if(requiredVersion&&!fs::sameModelVersion(*requiredVersion,copied))
+                error("原船模文件已被改动，未用它替换当前画面。请先检查文件及恢复副本。");
             pendingSourceVersion_=copied;
         }
         pendingInputDir_ = folder;
@@ -598,6 +622,7 @@ void ModelSession::fail(const QString& message, bool lostBackend) {
         process_.kill();
         process_.waitForFinished(1000);
         stopping_ = false;
+        if(model_)detail+="\n可从“文件 → 恢复当前工作”重新连接并找回已提交的模型。恢复后撤销历史会重新开始。";
     }
     discardOldArtifacts();
     notifyState();

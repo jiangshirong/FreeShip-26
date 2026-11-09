@@ -33,5 +33,10 @@ bool MainWindow::showRecoveries(){
     if(session_.busy())return false;
     RecoveryDialog dialog(session_.recoveryRoot(),this);
     if(dialog.exec()!=QDialog::Accepted||dialog.selectedId().isEmpty())return false;
+    // Reclaiming the same interrupted editor is not replacing another live
+    // document. A Save prompt here offers an operation the dead service cannot
+    // perform. Let the session validate revision and capsule before publishing.
+    if(session_.canResumeCurrent() && session_.model()->documentId==dialog.selectedId())
+        return session_.recover(dialog.selectedId());
     withSavedChanges([this,id=dialog.selectedId()]{session_.recover(id);});return true;
 }
