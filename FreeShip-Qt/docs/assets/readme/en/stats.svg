@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="252" viewBox="0 0 1200 252" role="img" aria-labelledby="title desc">
+<title id="title">Measured speedups in three workflows</title>
+<desc id="desc">Lines-plan pan and zoom: 4.7× (44.6 ms → 9.4 ms); Dragging dense plate meshes: 1776× (803 ms → 0.45 ms); Confirming project settings: 23× (1238 ms → 53 ms)</desc>
+<rect width="1200" height="252" rx="24" fill="#f3f6f5"/>
+<rect x="36.0" y="36" width="362.7" height="180" rx="16" fill="#ffffff" stroke="#cfdcd7"/>
+<text x="64.0" y="80" font-family="'Microsoft YaHei UI','Microsoft YaHei','PingFang SC','Noto Sans CJK SC','Segoe UI',Arial,sans-serif" font-size="21" fill="#50645f">Lines-plan pan and zoom</text>
+<text x="62.0" y="148" font-family="'Microsoft YaHei UI','Microsoft YaHei','PingFang SC','Noto Sans CJK SC','Segoe UI',Arial,sans-serif" font-size="60" font-weight="600" fill="#183b36">4.7×</text>
+<rect x="64.0" y="164" width="40" height="3" rx="1.5" fill="#176c5c"/>
+<text x="64.0" y="200" font-family="'Microsoft YaHei UI','Microsoft YaHei','PingFang SC','Noto Sans CJK SC','Segoe UI',Arial,sans-serif" font-size="20" fill="#50645f">44.6 ms → 9.4 ms</text>
+<rect x="418.7" y="36" width="362.7" height="180" rx="16" fill="#ffffff" stroke="#cfdcd7"/>
+<text x="446.7" y="80" font-family="'Microsoft YaHei UI','Microsoft YaHei','PingFang SC','Noto Sans CJK SC','Segoe UI',Arial,sans-serif" font-size="21" fill="#50645f">Dragging dense plate meshes</text>
+<text x="444.7" y="148" font-family="'Microsoft YaHei UI','Microsoft YaHei','PingFang SC','Noto Sans CJK SC','Segoe UI',Arial,sans-serif" font-size="60" font-weight="600" fill="#183b36">1776×</text>
+<rect x="446.7" y="164" width="40" height="3" rx="1.5" fill="#176c5c"/>
+<text x="446.7" y="200" font-family="'Microsoft YaHei UI','Microsoft YaHei','PingFang SC','Noto Sans CJK SC','Segoe UI',Arial,sans-serif" font-size="20" fill="#50645f">803 ms → 0.45 ms</text>
+<rect x="801.3" y="36" width="362.7" height="180" rx="16" fill="#ffffff" stroke="#cfdcd7"/>
+<text x="829.3" y="80" font-family="'Microsoft YaHei UI','Microsoft YaHei','PingFang SC','Noto Sans CJK SC','Segoe UI',Arial,sans-serif" font-size="21" fill="#50645f">Confirming project settings</text>
+<text x="827.3" y="148" font-family="'Microsoft YaHei UI','Microsoft YaHei','PingFang SC','Noto Sans CJK SC','Segoe UI',Arial,sans-serif" font-size="60" font-weight="600" fill="#183b36">23×</text>
+<rect x="829.3" y="164" width="40" height="3" rx="1.5" fill="#176c5c"/>
+<text x="829.3" y="200" font-family="'Microsoft YaHei UI','Microsoft YaHei','PingFang SC','Noto Sans CJK SC','Segoe UI',Arial,sans-serif" font-size="20" fill="#50645f">1238 ms → 53 ms</text>
+</svg>

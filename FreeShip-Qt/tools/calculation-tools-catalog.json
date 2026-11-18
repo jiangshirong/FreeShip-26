@@ -1,0 +1,377 @@
+{
+  "version": 1,
+  "reviewed_date": "2026-11-17",
+  "source": "Original FreeShip Plus 3.5 binaries; canonical delivery copy: third_party/hydronship",
+  "evidence_urls": [
+    "https://hydro.ucoz.net/programsE.html",
+    "https://hydro.ucoz.net/programs.html",
+    "https://github.com/markmal/freeship-plus-in-lazarus/issues/102#issuecomment-2062874995",
+    "https://github.com/markmal/freeship-plus-in-lazarus/issues/96#issuecomment-1368580141"
+  ],
+  "decision": "User requested restoration based on documented upstream binary bundling; preserve notices and use restrictions. This project decision is not an unrestricted license grant.",
+  "tools": [
+    {
+      "program": "hship.EXE",
+      "redistribution": "upstream-bundled",
+      "permission_evidence": null,
+      "files": [
+        "Exec/hship.EXE",
+        "Exec/CONF.PRO",
+        "Exec/RESIST.CNF",
+        "BD/RESIST1.BD",
+        "BD/RESIST2.BD",
+        "BD/RESIST3.BD",
+        "BD/RESIST4.BD",
+        "Exec/ReadMe1st.txt",
+        "NOTICE.md"
+      ],
+      "project_distribution_decision": "2026-11-17-user-request",
+      "upstream_distribution_evidence": "https://github.com/markmal/freeship-plus-in-lazarus/issues/102#issuecomment-2062874995",
+      "license": "Proprietary freeware; separate unrestricted grant not located"
+    },
+    {
+      "program": "CALCPROP.EXE",
+      "redistribution": "upstream-bundled",
+      "permission_evidence": null,
+      "files": [
+        "Exec/CALCPROP.EXE",
+        "Exec/CONF.PRO",
+        "Exec/ReadMe1st.txt",
+        "NOTICE.md"
+      ],
+      "project_distribution_decision": "2026-11-17-user-request",
+      "upstream_distribution_evidence": "https://github.com/markmal/freeship-plus-in-lazarus/issues/102#issuecomment-2062874995",
+      "license": "Proprietary freeware; separate unrestricted grant not located"
+    },
+    {
+      "program": "HOLLENBH.EXE",
+      "redistribution": "upstream-bundled",
+      "permission_evidence": null,
+      "files": [
+        "Exec/HOLLENBH.EXE",
+        "Exec/CONF.PRO",
+        "Exec/ReadMe1st.txt",
+        "NOTICE.md"
+      ],
+      "project_distribution_decision": "2026-11-17-user-request",
+      "upstream_distribution_evidence": "https://github.com/markmal/freeship-plus-in-lazarus/issues/102#issuecomment-2062874995",
+      "license": "Proprietary freeware; separate unrestricted grant not located"
+    },
+    {
+      "program": "fungleib.EXE",
+      "redistribution": "upstream-bundled",
+      "permission_evidence": null,
+      "files": [
+        "Exec/fungleib.EXE",
+        "Exec/CONF.PRO",
+        "Exec/ReadMe1st.txt",
+        "NOTICE.md"
+      ],
+      "project_distribution_decision": "2026-11-17-user-request",
+      "upstream_distribution_evidence": "https://github.com/markmal/freeship-plus-in-lazarus/issues/102#issuecomment-2062874995",
+      "license": "Proprietary freeware; separate unrestricted grant not located"
+    },
+    {
+      "program": "OORTMERS.EXE",
+      "redistribution": "upstream-bundled",
+      "permission_evidence": null,
+      "files": [
+        "Exec/OORTMERS.EXE",
+        "Exec/CONF.PRO",
+        "Exec/ReadMe1st.txt",
+        "NOTICE.md"
+      ],
+      "project_distribution_decision": "2026-11-17-user-request",
+      "upstream_distribution_evidence": "https://github.com/markmal/freeship-plus-in-lazarus/issues/102#issuecomment-2062874995",
+      "license": "Proprietary freeware; separate unrestricted grant not located"
+    },
+    {
+      "program": "RNTSP.EXE",
+      "redistribution": "upstream-bundled",
+      "permission_evidence": null,
+      "files": [
+        "Exec/RNTSP.EXE",
+        "Exec/CONF.PRO",
+        "Exec/ReadMe1st.txt",
+        "NOTICE.md"
+      ],
+      "project_distribution_decision": "2026-11-17-user-request",
+      "upstream_distribution_evidence": "https://github.com/markmal/freeship-plus-in-lazarus/issues/102#issuecomment-2062874995",
+      "license": "Proprietary freeware; separate unrestricted grant not located"
+    },
+    {
+      "program": "UBCRT.EXE",
+      "redistribution": "upstream-bundled",
+      "permission_evidence": null,
+      "files": [
+        "Exec/UBCRT.EXE",
+        "Exec/CONF.PRO",
+        "Exec/ReadMe1st.txt",
+        "NOTICE.md"
+      ],
+      "project_distribution_decision": "2026-11-17-user-request",
+      "upstream_distribution_evidence": "https://github.com/markmal/freeship-plus-in-lazarus/issues/102#issuecomment-2062874995",
+      "license": "Proprietary freeware; separate unrestricted grant not located"
+    },
+    {
+      "program": "SeaMargn.EXE",
+      "redistribution": "upstream-bundled",
+      "permission_evidence": null,
+      "files": [
+        "Exec/SeaMargn.EXE",
+        "Exec/CONF.PRO",
+        "Exec/ReadMe1st.txt",
+        "NOTICE.md"
+      ],
+      "project_distribution_decision": "2026-11-17-user-request",
+      "upstream_distribution_evidence": "https://github.com/markmal/freeship-plus-in-lazarus/issues/102#issuecomment-2062874995",
+      "license": "Proprietary freeware; separate unrestricted grant not located"
+    },
+    {
+      "program": "PowerPrd.EXE",
+      "redistribution": "upstream-bundled",
+      "permission_evidence": null,
+      "files": [
+        "Exec/PowerPrd.EXE",
+        "Exec/CONF.PRO",
+        "Exec/ReadMe1st.txt",
+        "NOTICE.md"
+      ],
+      "project_distribution_decision": "2026-11-17-user-request",
+      "upstream_distribution_evidence": "https://github.com/markmal/freeship-plus-in-lazarus/issues/102#issuecomment-2062874995",
+      "license": "Proprietary freeware; separate unrestricted grant not located"
+    },
+    {
+      "program": "CLEMPOUP.EXE",
+      "redistribution": "upstream-bundled",
+      "permission_evidence": null,
+      "files": [
+        "Exec/CLEMPOUP.EXE",
+        "Exec/CONF.PRO",
+        "Exec/ReadMe1st.txt",
+        "NOTICE.md"
+      ],
+      "project_distribution_decision": "2026-11-17-user-request",
+      "upstream_distribution_evidence": "https://github.com/markmal/freeship-plus-in-lazarus/issues/102#issuecomment-2062874995",
+      "license": "Proprietary freeware; separate unrestricted grant not located"
+    },
+    {
+      "program": "CLEMBLOU.EXE",
+      "redistribution": "upstream-bundled",
+      "permission_evidence": null,
+      "files": [
+        "Exec/CLEMBLOU.EXE",
+        "Exec/CONF.PRO",
+        "Exec/ReadMe1st.txt",
+        "NOTICE.md"
+      ],
+      "project_distribution_decision": "2026-11-17-user-request",
+      "upstream_distribution_evidence": "https://github.com/markmal/freeship-plus-in-lazarus/issues/102#issuecomment-2062874995",
+      "license": "Proprietary freeware; separate unrestricted grant not located"
+    },
+    {
+      "program": "BUNKOV.EXE",
+      "redistribution": "upstream-bundled",
+      "permission_evidence": null,
+      "files": [
+        "Exec/BUNKOV.EXE",
+        "Exec/CONF.PRO",
+        "Exec/ReadMe1st.txt",
+        "NOTICE.md"
+      ],
+      "project_distribution_decision": "2026-11-17-user-request",
+      "upstream_distribution_evidence": "https://github.com/markmal/freeship-plus-in-lazarus/issues/102#issuecomment-2062874995",
+      "license": "Proprietary freeware; separate unrestricted grant not located"
+    },
+    {
+      "program": "COMPTON.EXE",
+      "redistribution": "upstream-bundled",
+      "permission_evidence": null,
+      "files": [
+        "Exec/COMPTON.EXE",
+        "Exec/CONF.PRO",
+        "Exec/ReadMe1st.txt",
+        "NOTICE.md"
+      ],
+      "project_distribution_decision": "2026-11-17-user-request",
+      "upstream_distribution_evidence": "https://github.com/markmal/freeship-plus-in-lazarus/issues/102#issuecomment-2062874995",
+      "license": "Proprietary freeware; separate unrestricted grant not located"
+    },
+    {
+      "program": "WOLFSON.EXE",
+      "redistribution": "upstream-bundled",
+      "permission_evidence": null,
+      "files": [
+        "Exec/WOLFSON.EXE",
+        "Exec/CONF.PRO",
+        "Exec/ReadMe1st.txt",
+        "NOTICE.md"
+      ],
+      "project_distribution_decision": "2026-11-17-user-request",
+      "upstream_distribution_evidence": "https://github.com/markmal/freeship-plus-in-lazarus/issues/102#issuecomment-2062874995",
+      "license": "Proprietary freeware; separate unrestricted grant not located"
+    },
+    {
+      "program": "RADOJCIC.EXE",
+      "redistribution": "upstream-bundled",
+      "permission_evidence": null,
+      "files": [
+        "Exec/RADOJCIC.EXE",
+        "Exec/CONF.PRO",
+        "Exec/ReadMe1st.txt",
+        "NOTICE.md"
+      ],
+      "project_distribution_decision": "2026-11-17-user-request",
+      "upstream_distribution_evidence": "https://github.com/markmal/freeship-plus-in-lazarus/issues/102#issuecomment-2062874995",
+      "license": "Proprietary freeware; separate unrestricted grant not located"
+    },
+    {
+      "program": "PropPred.EXE",
+      "redistribution": "upstream-bundled",
+      "permission_evidence": null,
+      "files": [
+        "Exec/PropPred.EXE",
+        "Exec/CONF.PRO",
+        "Exec/ReadMe1st.txt",
+        "NOTICE.md"
+      ],
+      "project_distribution_decision": "2026-11-17-user-request",
+      "upstream_distribution_evidence": "https://github.com/markmal/freeship-plus-in-lazarus/issues/102#issuecomment-2062874995",
+      "license": "Proprietary freeware; separate unrestricted grant not located"
+    },
+    {
+      "program": "FPPCALC.EXE",
+      "redistribution": "upstream-bundled",
+      "permission_evidence": null,
+      "files": [
+        "Exec/FPPCALC.EXE",
+        "Exec/CONF.PRO",
+        "Exec/ReadMe1st.txt",
+        "NOTICE.md"
+      ],
+      "project_distribution_decision": "2026-11-17-user-request",
+      "upstream_distribution_evidence": "https://github.com/markmal/freeship-plus-in-lazarus/issues/102#issuecomment-2062874995",
+      "license": "Proprietary freeware; separate unrestricted grant not located"
+    },
+    {
+      "program": "Ishercof.exe",
+      "redistribution": "upstream-bundled",
+      "permission_evidence": null,
+      "files": [
+        "Exec/Ishercof.exe",
+        "Exec/CONF.PRO",
+        "Exec/ReadMe1st.txt",
+        "NOTICE.md"
+      ],
+      "project_distribution_decision": "2026-11-17-user-request",
+      "upstream_distribution_evidence": "https://github.com/markmal/freeship-plus-in-lazarus/issues/102#issuecomment-2062874995",
+      "license": "Proprietary freeware; separate unrestricted grant not located"
+    },
+    {
+      "program": "ManeuvPP.EXE",
+      "redistribution": "upstream-bundled",
+      "permission_evidence": null,
+      "files": [
+        "Exec/ManeuvPP.EXE",
+        "Exec/CONF.PRO",
+        "Exec/ReadMe1st.txt",
+        "NOTICE.md"
+      ],
+      "project_distribution_decision": "2026-11-17-user-request",
+      "upstream_distribution_evidence": "https://github.com/markmal/freeship-plus-in-lazarus/issues/102#issuecomment-2062874995",
+      "license": "Proprietary freeware; separate unrestricted grant not located"
+    },
+    {
+      "program": "RVRSSHIP.EXE",
+      "redistribution": "upstream-bundled",
+      "permission_evidence": null,
+      "files": [
+        "Exec/RVRSSHIP.EXE",
+        "Exec/CONF.PRO",
+        "Exec/ReadMe1st.txt",
+        "NOTICE.md"
+      ],
+      "project_distribution_decision": "2026-11-17-user-request",
+      "upstream_distribution_evidence": "https://github.com/markmal/freeship-plus-in-lazarus/issues/102#issuecomment-2062874995",
+      "license": "Proprietary freeware; separate unrestricted grant not located"
+    },
+    {
+      "program": "ADD_MASS.EXE",
+      "redistribution": "upstream-bundled",
+      "permission_evidence": null,
+      "files": [
+        "Exec/ADD_MASS.EXE",
+        "Exec/CONF.PRO",
+        "Exec/ReadMe1st.txt",
+        "NOTICE.md"
+      ],
+      "project_distribution_decision": "2026-11-17-user-request",
+      "upstream_distribution_evidence": "https://github.com/markmal/freeship-plus-in-lazarus/issues/102#issuecomment-2062874995",
+      "license": "Proprietary freeware; separate unrestricted grant not located",
+      "use_restriction": "Original help: education and noncommercial use only; v1.04 waiver not verified"
+    },
+    {
+      "program": "PROPOL.EXE",
+      "files": [
+        "Exec/PROPOL.EXE",
+        "Exec/CONF.PRO",
+        "Exec/ReadMe1st.txt",
+        "NOTICE.md"
+      ],
+      "role": "historical upstream companion; not required by current native entry points",
+      "redistribution": "upstream-bundled",
+      "permission_evidence": null,
+      "project_distribution_decision": "2026-11-17-user-request",
+      "upstream_distribution_evidence": "https://github.com/markmal/freeship-plus-in-lazarus/issues/102#issuecomment-2062874995",
+      "license": "Proprietary freeware; separate unrestricted grant not located"
+    },
+    {
+      "program": "PROPCALC.EXE",
+      "files": [
+        "Exec/PROPCALC.EXE",
+        "Exec/CONF.PRO",
+        "Exec/ReadMe1st.txt",
+        "NOTICE.md"
+      ],
+      "role": "historical upstream companion; not required by current native entry points",
+      "redistribution": "upstream-bundled",
+      "permission_evidence": null,
+      "project_distribution_decision": "2026-11-17-user-request",
+      "upstream_distribution_evidence": "https://github.com/markmal/freeship-plus-in-lazarus/issues/102#issuecomment-2062874995",
+      "license": "Proprietary freeware; separate unrestricted grant not located"
+    }
+  ],
+  "sha256": {
+    "Exec/hship.EXE": "f120c31bc52028e28584dfc41df738f53b5c11eebb79f61f5d82d8755bd29151",
+    "Exec/CONF.PRO": "c721188d098e7e30f024ba54ed2cf2c5167a7792038063009dcc3dc6388bd3cc",
+    "Exec/RESIST.CNF": "576d8771f717596db762ac4f85c0314ecab2047239b70e40b2c503d3e0a28100",
+    "BD/RESIST1.BD": "1e871c1454984ed4c61f39ad0d265fe6fce6c5aa046488e0a040a58b1d4da08b",
+    "BD/RESIST2.BD": "de1fbd7b3e234bffe5c2734fa33090a1908b45990b354ce572ddc83d5c80daba",
+    "BD/RESIST3.BD": "693b3e03b5fd196bf2c08c376a648fe3deb66723e9dc76200baf5dfa0d08b9f3",
+    "BD/RESIST4.BD": "db4c63f0ba78b6f9fa1d08c3ac1acd75cd1a43594088f7f816127e45f58fabce",
+    "Exec/CALCPROP.EXE": "947757d7bf58eb4a087033b1206f15613053057d0ccf79f307bdfe6183b0f3a8",
+    "Exec/HOLLENBH.EXE": "9ce377455d8607fcd5377918e370ea6f843ef58108ed3068da426a2d82db85ff",
+    "Exec/fungleib.EXE": "f75962995e6ab12f881be67e50411002758be4f2e9fd4eaecf8ca47825359458",
+    "Exec/OORTMERS.EXE": "c9611ef3e9d4e069ee9b71a5cdcd9dfc09f8e116dddb119cf2b0a94e2add0fe6",
+    "Exec/RNTSP.EXE": "d75b27b52fd668fa459e04bceafe1e826e5fe31f6b100cac0d3bfe45cca889e6",
+    "Exec/UBCRT.EXE": "16260dbaf4a80c6d009c4159d87e491e3290ec9e7ea03f32a58c651096c1ad88",
+    "Exec/SeaMargn.EXE": "392cb24c9382549667e4398c491c40c36bb0584bd2a62a766825eb250b20a950",
+    "Exec/PowerPrd.EXE": "b859fb2fa4711f0fe21579235b058823cfe6d948ae71654df722a51e788eafcf",
+    "Exec/CLEMPOUP.EXE": "529437b9685eeaf111a7810d1ff11b0a5039fdc0761c61a057c5b27dfd5da80c",
+    "Exec/CLEMBLOU.EXE": "cd84d3e2b12468844f3fdb33519b82c5a4467bc55ae30cd3087fdccc1b10ab57",
+    "Exec/BUNKOV.EXE": "7409e884083afc558418ae0e8fd04fc13baa4e4b111c5ea1b8bf9e304ba449fe",
+    "Exec/COMPTON.EXE": "0cc352b43ad42c1fb90768530ec2d87b42fe81cab716d5198c2ae1cd4ad55863",
+    "Exec/WOLFSON.EXE": "00394eae55735edaacddc311da170a52c2ec5dfa7542aad1c2e421baf738e42c",
+    "Exec/RADOJCIC.EXE": "61701443f0c78a8838f67813d35cd416648da94fcb74f04438a69d691b695448",
+    "Exec/PropPred.EXE": "4916b84dc3fa18c4583be28624f2ce409aa659b0c8fbdd779d64212e8e155336",
+    "Exec/FPPCALC.EXE": "01804f6b19b3d4b4a8eabce6ac7cb1df0e4b2afb72f075ea352617ddacd755c1",
+    "Exec/Ishercof.exe": "44968e316ed4cc4d9696ada6b8991bc0eefc21faaf32936d7f0620d5f4eb5214",
+    "Exec/ManeuvPP.EXE": "3a58718215b5b0cbbdbd60767da4ae3d7d784537bf54c3cc7b53c87834e7bed1",
+    "Exec/RVRSSHIP.EXE": "50b9b1c79d27fb05a12902181b0c23d5b98050c764bcfcdfb3351d16336ec2e6",
+    "Exec/ADD_MASS.EXE": "47bdf0296b5e93734a77fbcc2bca5a1a7d074acacf15652832034aa229a56521",
+    "Exec/PROPCALC.EXE": "edaa99cf61b73df460f63c5c483bd14909717c707cb30cab2d79f2685f8222b9",
+    "Exec/PROPOL.EXE": "7c026be2b60b4716263f4c5861ff7a876480e3ae5b3b30941268b4ec84e971a3",
+    "Exec/ReadMe1st.txt": "651c90ef5f893ece1690a8f43d0e2eb9f8461d0d3cefc3a03dd286b88c9065d5",
+    "NOTICE.md": "e2eaa58be70dae18b69abd1891a6a21de89f365fa060696294d770d747f2bbe1"
+  }
+}

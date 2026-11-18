@@ -1,0 +1,382 @@
+{
+  "date": "2026-11-12",
+  "scope": "documentation and historical evidence audit",
+  "upstream_repository": "https://github.com/markmal/freeship-plus-in-lazarus",
+  "upstream_commit": "1de17e99fb2b1cc559cdf27c5cafb595a627a641",
+  "new_product_regression_run": false,
+  "current_source_snapshot_is_not_a_tested_build": true,
+  "upstream_files": {
+    "Units/FreeEdit.inc": {
+      "sha256": "952de01ba658d9f83bd1a3adcfa0a63499c8c6ca1d337b43bf8d65a176ba952e",
+      "lines": 10606
+    },
+    "Units/FreeShip.inc": {
+      "sha256": "a5b8e56d8c881e9fb36a85fd1608988a4be5ea8e0d7a35074761d9dc5a34b0ee",
+      "lines": 3730
+    },
+    "Units/FreeFileBuffer.pas": {
+      "sha256": "f204518aa49e6349084e2808bc77571f7b2e5cd901c665d1756450d09662c5a5",
+      "lines": 2605
+    },
+    "Units/FreeSubdivisionControlFace.inc": {
+      "sha256": "a3853f1d4e47b3e018232efe0325393270de59df3f29ab51a692adae5af14d6a",
+      "lines": 1693
+    },
+    "Units/FreeGeometry.pas": {
+      "sha256": "c5580e4c4083bba2bf235825ed1db2992c3ab81322dfefdb0a13926c3bf35491",
+      "lines": 2417
+    },
+    "Units/FreeProjectSettings.inc": {
+      "sha256": "f6db0f30f4fbc2a0f4d65ae9b52930aa69f7fd520c652ff30d20169625a6bf21",
+      "lines": 610
+    },
+    "Units/FreeHydrostaticCalc.inc": {
+      "sha256": "07b995d93dd5b05bb6fcafedb3d27f74290ce453649d673098e787b131e99f39",
+      "lines": 2466
+    },
+    "Units/FreeSubdivisionSurface.inc": {
+      "sha256": "bb3aedb2cdbb6665d3ccd08a83236fc2cd3fdd0b7a8d84614d89f5c7cdd88af1",
+      "lines": 5272
+    },
+    "Units/freeprocess.pas": {
+      "sha256": "b84385c0bd8c49a35519c01d2f8261ffa23dd14e78c1b5e0a4c652a5130cace2",
+      "lines": 160
+    },
+    "Forms/FreeHydrostaticsFrm.pas": {
+      "sha256": "e015cfa9d3568da96994bdae7a8ad8f7ddf544eba6d5418c97b06357f9772d4e",
+      "lines": 365
+    },
+    "Units/FreeBackgroundImage.inc": {
+      "sha256": "a5e5216302f73f955a7aa97ff87c9c05bb7bbc39f3b9237057a0c280b81bc2e2",
+      "lines": 419
+    },
+    "Units/FreeDevelopedPatch.inc": {
+      "sha256": "f4dbbf9db0901700a5fba462796a50a20f19d6bfd6e2087f681f6ba634e228ea",
+      "lines": 1928
+    },
+    "Units/FreeShipUnit_Functions.inc": {
+      "sha256": "fb242aa40143c54c6bdb2f44577c2b8b42dd1d70022c540d12a6c623b8249f8e",
+      "lines": 147
+    },
+    "Units/FreeIntersection.inc": {
+      "sha256": "09e66661857518e4d3971237ae5ff7230bb4429170f4ca126326a7028fc33bbf",
+      "lines": 894
+    },
+    "Forms/FreeHydrodyn_RVRSDlg.lfm": {
+      "sha256": "63d489fac1a3b143b14051791b0c4289421541e221cfefee3edc43f18b4a5e23",
+      "lines": 619
+    },
+    "Forms/FreeHydrodyn_RVRSDlg.pas": {
+      "sha256": "2e6d79071e19b71dcc70c060ddcfced1634a499bfbc60116342d2557193cd92d",
+      "lines": 1003
+    }
+  },
+  "current_sources": {
+    "src/app/model_session.cpp": "c2552b0e10a9b5af710eeba214dd8fb17df8f4628bc689dc0f1d9b57c503924e",
+    "src/core/model_exchange.cpp": "81b0cf3d1e55ba3623517ab2708e0df0b7f017d2946baac2c2fa366683ef3d86",
+    "src/core/model_file_save.cpp": "651710385084041ac343ec84b91aeae6140ceecd92253bcacd0276c624adcb79",
+    "src/core/ship_formats.cpp": "1a780e991924a673217a3c28d0638074511310bc31f4889cdbbe092f8741ded4",
+    "src/core/water_viscosity.h": "d5c753df6f7954b1b72a3dcb0b36f901543406482eac67b7a150309c17087b05",
+    "src/document/document_service.cpp": "808303b7b9e878f04235681e9de5da598194b941ebeff090077fcfa425cbdf3d",
+    "src/document/fbm_codec.cpp": "f1622f0e0a9ba326e4fa4f55ec78392c5fe80c48eaa54553f81f49806ca2e521",
+    "src/document/hydrodynamics.cpp": "063d91f6dce5640d553cc471b883b62901b9cfb196e74a033925dffc3c4ce883",
+    "src/document/hydrostatics.cpp": "099669436219ed01ea9014e1bb6ea46d5e0492474212c1b81e548283cd5890eb",
+    "src/document/plates.cpp": "72e2efebf02200fd00d56ec61859caf2d30f9fb7e1595b983f22dbb070835ac0",
+    "src/document/project_edit.cpp": "4f6abbb97ae782dd0f79d2e744558ad0433d0f6517901d0c2a2f268f066d84f0"
+  },
+  "test_sources": {
+    "buffer_safety.py": "d8d83894b88acedc07d0c319bff733df87eaa0a7cab816de114295f062e6c72f",
+    "calculation_contracts.py": "69079959f0b04aeebd06aa0c85364b3bf31a335ce0626405f4414558bf854e15",
+    "file_safety.py": "cf76de0e56be9189ff959e5d56792c02b9339b4a92bfd60f5db9ca0d2f53b7fb",
+    "hydro_corrections.py": "a734cce761fb3e0fc60d377c037867dfa21b3af47a73f1b9970d0336ddb65df8",
+    "hydro_search.py": "b4469774306c505fd992e2b5f27a5860f8d8c33202cb8bab466a8fe105e5f030",
+    "legacy_compatibility.py": "77d72eafe612faa66ac12a6d5843448007f97f2ef25834e2bcc578e11563e4eb",
+    "plate_errors.py": "eea2304c09e34abcc55cc026170e9b62b85ebe6266db09d6de3db129fe3cea5d",
+    "process_callers.py": "0db7b1a47a3fc0ca0349f8ae179ae24c86738c502e9e101203aaea49175f807c",
+    "process_safety.py": "b44ba5c80d932111591b392f7f9ddb8f0fd1ae2dcd3400b6338482378adab107",
+    "qt_asymmetric_hydro.py": "c0256ad2d5fd180c60ce2b41692328b976a16136823f3b0af1868a13a63ce25f",
+    "qt_document.py": "5f03d470e80c05ef133e9e59a834400972e5118b408982911aa853a71938e0fe",
+    "qt_exchange.py": "b585033e267e74d947beaf6910c4f87865de383575527489a694af16f3bef46b",
+    "qt_hydro_auxiliary.py": "d6bd1cd951d042820e25341aa4188b20be5e3d39c6ec43e27d25d9647394145c",
+    "qt_hydro_surface_integrals.py": "1354478c8c0c7acb6f4be27942f5ca504e3fdb18337124da5ea10c12ba165c15",
+    "qt_hydrostatics.py": "acbe55fc44023b5a1e0ab366d66ed2abeb8bab952e49bba266c4771d596f4355",
+    "qt_inertia_identification.py": "4aa71d36fcd12f4388bb14324f520007055dbc4952d3e609ccb9912e8799b83b",
+    "qt_native_plates.py": "833dd5aade050a361da3f4c9d3096287f963fa092469ec12e9f801395b0e4494",
+    "qt_native_project.py": "2b5700f67a6c9352f28c8b72f91e170c0e95ad7446e6c45c2169bde5e059b3f9",
+    "qt_project_completion.py": "ddced10861a466c6914eaa73c21dda694ea3a1cc9873e2823b933ceb22c64d06",
+    "qt_save_protection.py": "5f408e2703f0ba1cc88e6a064bcae30da7337f1ee4567b4e89ba9a2ae3f7a33b",
+    "qt_ship_formats.py": "55bcd8d26314352f9f8c0153ddd003d5bd0e8284b23e2a334008abc0878621f0",
+    "qt_symmetric_hydro.py": "8ad615fddb764712d97e1cdb34f4ad7da5f14d15368d4df84af5d57f0eea0cb7",
+    "save_safety.py": "2424d3dafdf97ae3ee0e8d5814efe5a1e57a20d3547a3ad04cc7696b97cd0267",
+    "stl_symmetry.py": "be4c9a0d4e74e84abe85d84e9c19cab76a085e79d55ee214927ff744d087e543",
+    "undo_background_safety.py": "2992fc1266f99d44babf725581957cafcb8e11c8f9e36c3b638a296a26ae1157",
+    "units_conversion.py": "a7337f6ff161450613bf61a29b86810d1d4ac604dd707ca560f35f699c12b92b"
+  },
+  "historical_reports": [
+    {
+      "group": "buffer",
+      "branch": "local-lazarus",
+      "date": "2026-10-30",
+      "path": "FreeShip-Tests/reports/remaining-final-20261030-2/buffer/report.json",
+      "sha256": "2b19816f7fdadf3a4216d91de473a6a4bbdf8200bd9df34ca4bc83f9c1bd571d",
+      "counts": {
+        "pass": 90
+      }
+    },
+    {
+      "group": "save",
+      "branch": "local-lazarus",
+      "date": "2026-10-30",
+      "path": "FreeShip-Tests/reports/remaining-final-20261030-2/save/report.json",
+      "sha256": "384ebf402a01ad1bf0aea4045184f31f4f318579435d7d4f22d326c02bd5ae9f",
+      "counts": {
+        "pass": 13
+      }
+    },
+    {
+      "group": "load",
+      "branch": "local-lazarus",
+      "date": "2026-10-30",
+      "path": "FreeShip-Tests/reports/remaining-final-20261030-2/load/report.json",
+      "sha256": "af71792fded2b39eb6e6e2c5b447939abbb7b4ef202a6ceb4f43f8391b15c765",
+      "counts": {
+        "pass": 275,
+        "not_run": 1
+      }
+    },
+    {
+      "group": "units",
+      "branch": "local-lazarus",
+      "date": "2026-10-30",
+      "path": "FreeShip-Tests/reports/remaining-final-20261030-2/units/report.json",
+      "sha256": "70d0408a23e0e4284303c5231e4e706a9f533ee2e40606b4914b58505de23ebe",
+      "counts": {
+        "pass": 426
+      }
+    },
+    {
+      "group": "hydro",
+      "branch": "local-lazarus",
+      "date": "2026-10-30",
+      "path": "FreeShip-Tests/reports/remaining-final-20261030-2/hydro/report.json",
+      "sha256": "68f560b261e48fb47a0f9c4c4ce320f4adcdb3f2834910c5c6d2972ceb240ae4",
+      "counts": {
+        "pass": 161,
+        "not_run": 1
+      }
+    },
+    {
+      "group": "hydro-search",
+      "branch": "local-lazarus",
+      "date": "2026-10-30",
+      "path": "FreeShip-Tests/reports/remaining-final-20261030-2/hydro-search/report.json",
+      "sha256": "7a4c9b73eab7ed2f28fab4bf0089173eece07a8291da568e8551030807dfef69",
+      "counts": {
+        "pass": 28,
+        "review": 1
+      }
+    },
+    {
+      "group": "undo-background",
+      "branch": "local-lazarus",
+      "date": "2026-10-30",
+      "path": "FreeShip-Tests/reports/remaining-final-20261030-2/undo-background/report.json",
+      "sha256": "d6b591524348bb531499044b55f6369a3d9973579560d5e33fa43ab98f9a7eb3",
+      "counts": {
+        "pass": 59
+      }
+    },
+    {
+      "group": "process",
+      "branch": "local-lazarus",
+      "date": "2026-10-30",
+      "path": "FreeShip-Tests/reports/remaining-final-20261030-2/process/report.json",
+      "sha256": "05b9e2fc6db7bfc50b0ea53400ce605b0d0aad403647bb2f6003ff4dd651e4a7",
+      "counts": {
+        "pass": 30
+      }
+    },
+    {
+      "group": "process-callers",
+      "branch": "local-lazarus",
+      "date": "2026-10-30",
+      "path": "FreeShip-Tests/reports/remaining-final-20261030-2/process-callers/report.json",
+      "sha256": "d9866c0287701db66c5c43fbcb859755c544e7f73b7a5ffc0a5a721162490c6d",
+      "counts": {
+        "pass": 23
+      }
+    },
+    {
+      "group": "calculation-contracts",
+      "branch": "local-lazarus",
+      "date": "2026-10-30",
+      "path": "FreeShip-Tests/reports/remaining-final-20261030-2/calculation-contracts/report.json",
+      "sha256": "b377bc9e956f52daa66519274be568ec94e20fe8e6d44e25042789339cbf55e1",
+      "counts": {
+        "pass": 124
+      }
+    },
+    {
+      "group": "stl",
+      "branch": "local-lazarus",
+      "date": "2026-10-30",
+      "path": "FreeShip-Tests/reports/remaining-final-20261030-2/stl/report.json",
+      "sha256": "e9cd6ba7ce7a44b15b22ab6c86c65869dee0ddf7de779eaef033db9fbfe93270",
+      "counts": {
+        "pass": 24
+      }
+    },
+    {
+      "group": "plate",
+      "branch": "local-lazarus",
+      "date": "2026-10-30",
+      "path": "FreeShip-Tests/reports/remaining-final-20261030-2/plate/report.json",
+      "sha256": "9bc0df4b53e63028b4dd6d095f6f5a8de79c7fd1b62a2a0e1e9ab44585e49751",
+      "counts": {
+        "pass": 70,
+        "not_run": 1
+      }
+    },
+    {
+      "group": "legacy",
+      "branch": "local-lazarus",
+      "date": "2026-10-30",
+      "path": "FreeShip-Tests/reports/remaining-final-20261030-2/legacy/report.json",
+      "sha256": "394ee73ce4bffc22d50bb6791d20c5c7badccc40239cf34aa5bc4ea6994ce6c3",
+      "counts": {
+        "pass": 80,
+        "review": 2
+      }
+    }
+  ],
+  "receipts": [
+    {
+      "path": "FreeShip-Tests/maintenance/symmetric-hydro-delivery-20261109.json",
+      "sha256": "2bc54c327894d99ff4a1486f0cd7a2172cea34faf3fcee8ce54e2a451526a75e",
+      "reports": [
+        {
+          "key": "symmetric",
+          "sha256": "7db0e8e0c6a792b5be86fb21ce2474d9e0d0a7f152a33accfa533b42d30d50d0",
+          "receipt_hash_matches": true,
+          "counts": {
+            "pass": 680,
+            "fail": 0,
+            "review": 1,
+            "not_run": 2,
+            "error": 0
+          },
+          "report_name": "report.json"
+        },
+        {
+          "key": "asymmetric",
+          "sha256": "54800b2bebb4a3082473d56f6f66fb5bb5b00d64b60955a2b339489dad583d20",
+          "receipt_hash_matches": true,
+          "counts": {
+            "pass": 356,
+            "fail": 0,
+            "review": 0,
+            "not_run": 1,
+            "error": 0
+          },
+          "report_name": "report.json"
+        },
+        {
+          "key": "installed",
+          "sha256": "58d04f3daf575c4619117135ba54afb7391ec4b0eeecf00e9556dbbe5379ba10",
+          "receipt_hash_matches": true,
+          "counts": {
+            "pass": 680,
+            "fail": 0,
+            "review": 1,
+            "not_run": 2,
+            "error": 0
+          },
+          "report_name": "report.json"
+        }
+      ]
+    },
+    {
+      "path": "FreeShip-Tests/maintenance/inertia-wind-delivery-20261110.json",
+      "sha256": "05f2793e999ca7cda29c7cb6ef64498b74f8ec1d596babdde8896cc025fec9f4",
+      "reports": [
+        {
+          "key": "inertia",
+          "sha256": "691b45586a52991027e1412fbbff869471b7dd0cb672b2c9d0ca84bd619a11b1",
+          "receipt_hash_matches": true,
+          "counts": {
+            "pass": 26,
+            "fail": 0,
+            "review": 0,
+            "not_run": 0,
+            "error": 0
+          },
+          "report_name": "report.json"
+        },
+        {
+          "key": "hydrodynamics",
+          "sha256": "248c9355214bb4adcf3a14910534eb2a0e12c3a2605cbd18b11afa2f20f242e8",
+          "receipt_hash_matches": true,
+          "counts": {
+            "pass": 386,
+            "fail": 0,
+            "review": 2,
+            "not_run": 2,
+            "error": 0
+          },
+          "report_name": "report.json"
+        }
+      ]
+    },
+    {
+      "path": "FreeShip-Tests/maintenance/project-completion-installed-20261109.json",
+      "sha256": "5101a8775ae0d0c5c2ad1e6a41ff2a6c220e97b002e4bbd658c23b7dc5d8318f",
+      "reports": [
+        {
+          "key": 0,
+          "sha256": "2833fd414ad1f314430fae3da0dc430012b690ca1c3d017381aede30290513f6",
+          "receipt_hash_matches": true,
+          "counts": {
+            "pass": 909,
+            "fail": 0,
+            "review": 0,
+            "not_run": 2,
+            "error": 0
+          },
+          "report_name": "report.json"
+        }
+      ]
+    },
+    {
+      "path": "FreeShip-Tests/maintenance/ship-formats-installed-20261102.json",
+      "sha256": "c45bfa698c5b9080fff6ef93632b721745dfedcf45c817eae95f95b3d3d06010",
+      "reports": [
+        {
+          "key": "qt-ship-formats-unified/qt-ship-formats",
+          "sha256": "8eddf7b62e7a59a2fe7202f58181aeae7100a9091ac051b4f14c7abe660a8aec",
+          "receipt_hash_matches": true,
+          "counts": {
+            "pass": 215,
+            "fail": 0,
+            "review": 1,
+            "not_run": 2,
+            "error": 0
+          },
+          "report_name": "report.json"
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "legacy_counts": {
+    "pass": 1403,
+    "fail": 0,
+    "review": 3,
+    "not_run": 3,
+    "error": 0
+  },
+  "document_sources": {
+    "catalog.md": "f2b8d80838a4134c42da14acf1312a4fcb6d63dcc1202f5c469e4a4ed09ad3c8",
+    "README-excerpt.md": "c0a2958cc738f25e24d2fc91d4493b7dcf2ed9a99d50264881adbe126ed845e9",
+    "README.md": "71a7cca36a56f46999cdf0a0d488e10e1d84122bfd0cbbc644c74b823f75612c"
+  }
+}

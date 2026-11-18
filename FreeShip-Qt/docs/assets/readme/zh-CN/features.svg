@@ -1,0 +1,77 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1188" height="592" viewBox="0 0 1188 592" role="img" aria-labelledby="title desc">
+<title id="title">FreeShip 26 的八项主要功能</title>
+<desc id="desc">船体建模：细分曲面控制网、点、边、面编辑与约束、Lackenby 船型变换；形状检查：横剖、纵剖、水线、斜剖、曲率梳与法向显示、模型检查与朝向修复；型线图：由模型几何直接生成、标注文字自动避让、导出 PNG 和 DXF；静水力与稳性：静水力与吃水表、KN、GZ 稳性曲线、Bonjean 与横剖面面积；阻力与推进：Holtrop、Delft 等方法、B 系列敞水计算、螺旋桨与主机匹配；板材展开：展开可展图层、边长与面积误差、导出 DXF 和 PDF；文件交换：FBM 读写，FTM 读取、IGES、DXF、STL、OBJ、GHS、PAM 等船舶格式；七种界面语言：中文、English、Русский、Deutsch、Français、Español、日本語</desc>
+<rect width="1188" height="592" rx="24" fill="#f3f6f5"/>
+<g id="feature-1">
+<rect x="36" y="36" width="264" height="250" rx="16" fill="#ffffff" stroke="#cfdcd7"/>
+<rect x="60" y="60" width="56" height="56" rx="14" fill="#e3eeea"/>
+<svg x="72" y="72" width="32" height="32" viewBox="0 0 20 20" fill="none" stroke="#183b36" color="#183b36" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h12v12H4ZM4 10h12M10 4v12"/><circle cx="4" cy="4" r="1" fill="currentColor" stroke="none"/><circle cx="16" cy="4" r="1" fill="currentColor" stroke="none"/><circle cx="10" cy="10" r="1" fill="currentColor" stroke="none"/><circle cx="4" cy="16" r="1" fill="currentColor" stroke="none"/><circle cx="16" cy="16" r="1" fill="currentColor" stroke="none"/></svg>
+<text x="60" y="158" font-family="'Microsoft YaHei UI','Microsoft YaHei','PingFang SC','Noto Sans CJK SC','Segoe UI',Arial,sans-serif" font-size="26" font-weight="700" fill="#183b36">船体建模</text>
+<text x="60" y="198" font-family="'Microsoft YaHei UI','Microsoft YaHei','PingFang SC','Noto Sans CJK SC','Segoe UI',Arial,sans-serif" font-size="20" fill="#50645f">细分曲面控制网</text>
+<text x="60" y="228" font-family="'Microsoft YaHei UI','Microsoft YaHei','PingFang SC','Noto Sans CJK SC','Segoe UI',Arial,sans-serif" font-size="20" fill="#50645f">点、边、面编辑与约束</text>
+<text x="60" y="258" font-family="'Microsoft YaHei UI','Microsoft YaHei','PingFang SC','Noto Sans CJK SC','Segoe UI',Arial,sans-serif" font-size="20" fill="#50645f">Lackenby 船型变换</text>
+</g>
+<g id="feature-2">
+<rect x="320" y="36" width="264" height="250" rx="16" fill="#ffffff" stroke="#cfdcd7"/>
+<rect x="344" y="60" width="56" height="56" rx="14" fill="#e3eeea"/>
+<svg x="356" y="72" width="32" height="32" viewBox="0 0 20 20" fill="none" stroke="#183b36" color="#183b36" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 5.5h15c-.7 6.5-3.8 10-7.5 10s-6.8-3.5-7.5-10ZM6 5.5v7.9M10 5.5v10M14 5.5v7.9"/></svg>
+<text x="344" y="158" font-family="'Microsoft YaHei UI','Microsoft YaHei','PingFang SC','Noto Sans CJK SC','Segoe UI',Arial,sans-serif" font-size="26" font-weight="700" fill="#183b36">形状检查</text>
+<text x="344" y="198" font-family="'Microsoft YaHei UI','Microsoft YaHei','PingFang SC','Noto Sans CJK SC','Segoe UI',Arial,sans-serif" font-size="20" fill="#50645f">横剖、纵剖、水线、斜剖</text>
+<text x="344" y="228" font-family="'Microsoft YaHei UI','Microsoft YaHei','PingFang SC','Noto Sans CJK SC','Segoe UI',Arial,sans-serif" font-size="20" fill="#50645f">曲率梳与法向显示</text>
+<text x="344" y="258" font-family="'Microsoft YaHei UI','Microsoft YaHei','PingFang SC','Noto Sans CJK SC','Segoe UI',Arial,sans-serif" font-size="20" fill="#50645f">模型检查与朝向修复</text>
+</g>
+<g id="feature-3">
+<rect x="604" y="36" width="264" height="250" rx="16" fill="#ffffff" stroke="#cfdcd7"/>
+<rect x="628" y="60" width="56" height="56" rx="14" fill="#e3eeea"/>
+<svg x="640" y="72" width="32" height="32" viewBox="0 0 20 20" fill="none" stroke="#183b36" color="#183b36" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 10c3.2-8 11.8-8 15 0-3.2 8-11.8 8-15 0ZM3 10h14M4.5 7.5c3.5-2 7.5-2 11 0M4.5 12.5c3.5 2 7.5 2 11 0"/></svg>
+<text x="628" y="158" font-family="'Microsoft YaHei UI','Microsoft YaHei','PingFang SC','Noto Sans CJK SC','Segoe UI',Arial,sans-serif" font-size="26" font-weight="700" fill="#183b36">型线图</text>
+<text x="628" y="198" font-family="'Microsoft YaHei UI','Microsoft YaHei','PingFang SC','Noto Sans CJK SC','Segoe UI',Arial,sans-serif" font-size="20" fill="#50645f">由模型几何直接生成</text>
+<text x="628" y="228" font-family="'Microsoft YaHei UI','Microsoft YaHei','PingFang SC','Noto Sans CJK SC','Segoe UI',Arial,sans-serif" font-size="20" fill="#50645f">标注文字自动避让</text>
+<text x="628" y="258" font-family="'Microsoft YaHei UI','Microsoft YaHei','PingFang SC','Noto Sans CJK SC','Segoe UI',Arial,sans-serif" font-size="20" fill="#50645f">导出 PNG 和 DXF</text>
+</g>
+<g id="feature-4">
+<rect x="888" y="36" width="264" height="250" rx="16" fill="#ffffff" stroke="#cfdcd7"/>
+<rect x="912" y="60" width="56" height="56" rx="14" fill="#e3eeea"/>
+<svg x="924" y="72" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#183b36" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M7 16.3c2.2 0 4-1.83 4-4.05 0-1.16-.57-2.26-1.71-3.19S7.29 6.75 7 5.3c-.29 1.45-1.14 2.84-2.29 3.76S3 11.1 3 12.25c0 2.22 1.8 4.05 4 4.05z"/><path d="M12.56 6.6A10.97 10.97 0 0 0 14 3.02c.5 2.5 2 4.9 4 6.5s3 3.5 3 5.5a6.98 6.98 0 0 1-11.91 4.97"/></svg>
+<text x="912" y="158" font-family="'Microsoft YaHei UI','Microsoft YaHei','PingFang SC','Noto Sans CJK SC','Segoe UI',Arial,sans-serif" font-size="26" font-weight="700" fill="#183b36">静水力与稳性</text>
+<text x="912" y="198" font-family="'Microsoft YaHei UI','Microsoft YaHei','PingFang SC','Noto Sans CJK SC','Segoe UI',Arial,sans-serif" font-size="20" fill="#50645f">静水力与吃水表</text>
+<text x="912" y="228" font-family="'Microsoft YaHei UI','Microsoft YaHei','PingFang SC','Noto Sans CJK SC','Segoe UI',Arial,sans-serif" font-size="20" fill="#50645f">KN、GZ 稳性曲线</text>
+<text x="912" y="258" font-family="'Microsoft YaHei UI','Microsoft YaHei','PingFang SC','Noto Sans CJK SC','Segoe UI',Arial,sans-serif" font-size="20" fill="#50645f">Bonjean 与横剖面面积</text>
+</g>
+<g id="feature-5">
+<rect x="36" y="306" width="264" height="250" rx="16" fill="#ffffff" stroke="#cfdcd7"/>
+<rect x="60" y="330" width="56" height="56" rx="14" fill="#e3eeea"/>
+<svg x="72" y="342" width="32" height="32" viewBox="0 0 20 20" fill="none" stroke="#183b36" color="#183b36" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2.5" width="12" height="15" rx="2"/><path d="M7 6h6M7 10h1M12 10h1M7 13.5h1M12 13.5h1"/></svg>
+<text x="60" y="428" font-family="'Microsoft YaHei UI','Microsoft YaHei','PingFang SC','Noto Sans CJK SC','Segoe UI',Arial,sans-serif" font-size="26" font-weight="700" fill="#183b36">阻力与推进</text>
+<text x="60" y="468" font-family="'Microsoft YaHei UI','Microsoft YaHei','PingFang SC','Noto Sans CJK SC','Segoe UI',Arial,sans-serif" font-size="20" fill="#50645f">Holtrop、Delft 等方法</text>
+<text x="60" y="498" font-family="'Microsoft YaHei UI','Microsoft YaHei','PingFang SC','Noto Sans CJK SC','Segoe UI',Arial,sans-serif" font-size="20" fill="#50645f">B 系列敞水计算</text>
+<text x="60" y="528" font-family="'Microsoft YaHei UI','Microsoft YaHei','PingFang SC','Noto Sans CJK SC','Segoe UI',Arial,sans-serif" font-size="20" fill="#50645f">螺旋桨与主机匹配</text>
+</g>
+<g id="feature-6">
+<rect x="320" y="306" width="264" height="250" rx="16" fill="#ffffff" stroke="#cfdcd7"/>
+<rect x="344" y="330" width="56" height="56" rx="14" fill="#e3eeea"/>
+<svg x="356" y="342" width="32" height="32" viewBox="0 0 20 20" fill="none" stroke="#183b36" color="#183b36" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4.5 15.5 3 17 14.5 6 17Z"/><path d="M6 17 4 4.5"/></svg>
+<text x="344" y="428" font-family="'Microsoft YaHei UI','Microsoft YaHei','PingFang SC','Noto Sans CJK SC','Segoe UI',Arial,sans-serif" font-size="26" font-weight="700" fill="#183b36">板材展开</text>
+<text x="344" y="468" font-family="'Microsoft YaHei UI','Microsoft YaHei','PingFang SC','Noto Sans CJK SC','Segoe UI',Arial,sans-serif" font-size="20" fill="#50645f">展开可展图层</text>
+<text x="344" y="498" font-family="'Microsoft YaHei UI','Microsoft YaHei','PingFang SC','Noto Sans CJK SC','Segoe UI',Arial,sans-serif" font-size="20" fill="#50645f">边长与面积误差</text>
+<text x="344" y="528" font-family="'Microsoft YaHei UI','Microsoft YaHei','PingFang SC','Noto Sans CJK SC','Segoe UI',Arial,sans-serif" font-size="20" fill="#50645f">导出 DXF 和 PDF</text>
+</g>
+<g id="feature-7">
+<rect x="604" y="306" width="264" height="250" rx="16" fill="#ffffff" stroke="#cfdcd7"/>
+<rect x="628" y="330" width="56" height="56" rx="14" fill="#e3eeea"/>
+<svg x="640" y="342" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#183b36" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="m6 14 1.5-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.54 6a2 2 0 0 1-1.95 1.5H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3.9a2 2 0 0 1 1.69.9l.81 1.2a2 2 0 0 0 1.67.9H18a2 2 0 0 1 2 2v2"/></svg>
+<text x="628" y="428" font-family="'Microsoft YaHei UI','Microsoft YaHei','PingFang SC','Noto Sans CJK SC','Segoe UI',Arial,sans-serif" font-size="26" font-weight="700" fill="#183b36">文件交换</text>
+<text x="628" y="468" font-family="'Microsoft YaHei UI','Microsoft YaHei','PingFang SC','Noto Sans CJK SC','Segoe UI',Arial,sans-serif" font-size="20" fill="#50645f">FBM 读写，FTM 读取</text>
+<text x="628" y="498" font-family="'Microsoft YaHei UI','Microsoft YaHei','PingFang SC','Noto Sans CJK SC','Segoe UI',Arial,sans-serif" font-size="20" fill="#50645f">IGES、DXF、STL、OBJ</text>
+<text x="628" y="528" font-family="'Microsoft YaHei UI','Microsoft YaHei','PingFang SC','Noto Sans CJK SC','Segoe UI',Arial,sans-serif" font-size="20" fill="#50645f">GHS、PAM 等船舶格式</text>
+</g>
+<g id="feature-8">
+<rect x="888" y="306" width="264" height="250" rx="16" fill="#ffffff" stroke="#cfdcd7"/>
+<rect x="912" y="330" width="56" height="56" rx="14" fill="#e3eeea"/>
+<svg x="924" y="342" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#183b36" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="m5 8 6 6"/><path d="m4 14 6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="m22 22-5-10-5 10"/><path d="M14 18h6"/></svg>
+<text x="912" y="428" font-family="'Microsoft YaHei UI','Microsoft YaHei','PingFang SC','Noto Sans CJK SC','Segoe UI',Arial,sans-serif" font-size="26" font-weight="700" fill="#183b36">七种界面语言</text>
+<text x="912" y="468" font-family="'Microsoft YaHei UI','Microsoft YaHei','PingFang SC','Noto Sans CJK SC','Segoe UI',Arial,sans-serif" font-size="20" fill="#50645f">中文、English、Русский</text>
+<text x="912" y="498" font-family="'Microsoft YaHei UI','Microsoft YaHei','PingFang SC','Noto Sans CJK SC','Segoe UI',Arial,sans-serif" font-size="20" fill="#50645f">Deutsch、Français</text>
+<text x="912" y="528" font-family="'Microsoft YaHei UI','Microsoft YaHei','PingFang SC','Noto Sans CJK SC','Segoe UI',Arial,sans-serif" font-size="20" fill="#50645f">Español、日本語</text>
+</g>
+</svg>

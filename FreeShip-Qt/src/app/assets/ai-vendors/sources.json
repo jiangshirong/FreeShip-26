@@ -1,0 +1,45 @@
+[
+  {
+    "file": "openai.png",
+    "organization": "https://github.com/openai",
+    "source": "https://avatars.githubusercontent.com/u/14957082?v=4&s=256",
+    "sha256": "a4c36896a019505b19414a21f1c2faa1cbfad20af7df81ad09769040d395a9a5",
+    "attribution": "Logo and trademark belong to the named organization. Used to identify the credited AI service."
+  },
+  {
+    "file": "deepseek.png",
+    "organization": "https://github.com/deepseek-ai",
+    "source": "https://avatars.githubusercontent.com/u/148330874?v=4&s=256",
+    "sha256": "db5bde1698487f3a7b6f85e0d9c25bc06007eb186bb78b4c5c55385a2e69af1f",
+    "attribution": "Logo and trademark belong to the named organization. Used to identify the credited AI service."
+  },
+  {
+    "file": "deepl.png",
+    "organization": "https://www.deepl.com/en/press",
+    "source": "https://static.deepl.com/img/logo/deepl-logo-blue.svg",
+    "sha256": "1696915de63fd122a61d1a3759e489aa2ceb88d8a59ce755bb0853953badd64e",
+    "attribution": "Logo and trademark belong to the named organization. Used to identify the credited AI service.",
+    "original_sha256": "71df5c84f31125f2f585a82489a570efb6fb371c6ca2b8c1deabca4463e601ba",
+    "conversion": "Rasterized the unmodified official SVG at 3x with QtSvg."
+  },
+  {
+    "file": "qwen.png",
+    "organization": "https://github.com/QwenLM",
+    "source": "https://raw.githubusercontent.com/QwenLM/qwen-code/501d0a6432c258a51aaf9b623b956ffeab247dfa/packages/zed-extension/qwen-code.svg",
+    "sha256": "d3f9d4f5d610bb8817bab155158600f6503ea106cacd8e0566a73fbc574fd64c",
+    "attribution": "Logo and trademark belong to the named organization. Used to identify the credited AI service.",
+    "previous_source": "https://avatars.githubusercontent.com/u/141221163?v=4&s=256",
+    "previous_sha256": "320f9755bb4bac2dce2c4dc3683fae26596d38e6f5709ca4da4e0a3e6dcce7d9",
+    "source_file": "qwen.svg",
+    "original_sha256": "181afc72472a122670d5d891c768c848937de07653b321b8c91bedf16dcae322",
+    "conversion": "User-requested purple inherited SVG fill (#6950ef); official paths and proportions unchanged. QtSvg transparent PNG master; runtime VendorIcon normalizes and area-filters at the actual device size. Original qwen.svg remains the editable source.",
+    "variants": [
+      {
+        "file": "qwen.png",
+        "pixels": 1024,
+        "sha256": "d3f9d4f5d610bb8817bab155158600f6503ea106cacd8e0566a73fbc574fd64c"
+      }
+    ],
+    "display_color": "#6950ef"
+  }
+]

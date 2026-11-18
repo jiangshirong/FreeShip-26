@@ -1,0 +1,69 @@
+{
+  "captured": "2026-11-18",
+  "capture": {
+    "suite": "qt-readme-media (FreeShip-Tests unified entry, private non-input desktop)",
+    "report": "readme-media-20261118-en (local FreeShip-Tests report archive)",
+    "runtime": "private copy of the installed FreeShip 26 runtime (FreeShipQt.exe 2026-11-17 21:21); languages/zh.json replaced by the en.json messages (id zh) so verification probes start in English; binaries unchanged and checked against build-manifest.json",
+    "model": "FREE!ship demo 3+deck.fbm (FREE!ship Plus sample set, GPL; copied, source unchanged)",
+    "suite_status": "45 pass, 1 fail (plates.tiled-pdf: fixed 1:10 print scale exceeds the 500-page limit for this 125 m hull), 3 not_run; screenshots unaffected"
+  },
+  "raw": [
+    {
+      "file": "raw/main-window.png",
+      "capture_source": "qt-readme-media/workflow/views/typography-2.png",
+      "sha256": "71c6d9cae15c3dcbd798e3c657301e6f08a3b4b8e96418d2fbf44a7a81106a5c",
+      "app_binary_sha256": "85e9e1d7db765e05574a18344bdac26e737bb6388b1fd2a0387fa9492c6af787"
+    },
+    {
+      "file": "raw/about.png",
+      "capture_source": "qt-readme-media/workflow/views/about.png",
+      "sha256": "21aa63117af622b15998fe5fae54ce23e2216948bb1bae1bc4220f354a452b10",
+      "app_binary_sha256": "9de283f71486f3cc45ace95551a890edbb2799b07f0accae2adfaad16a9e2d4d",
+      "capture_report": "readme-media-20261118-about-settled (local FreeShip-Tests report archive)",
+      "note": "Recaptured 2026-11-18 after the About capture began waiting for the 160 ms feature-window entrance to finish; the previous capture showed the first entrance frame (content about 68% blended into the background). Binary rebuilt from the 0.1.12 sources plus this capture fix (FreeShipQt target only); the other three captures are byte-identical with this binary."
+    },
+    {
+      "file": "raw/linesplan.png",
+      "capture_source": "qt-readme-media/lines/views/linesplan.png",
+      "sha256": "9118cb8d9a40377d346938859819f29b20171af41463e3d587e2ef3a2362c9db",
+      "app_binary_sha256": "85e9e1d7db765e05574a18344bdac26e737bb6388b1fd2a0387fa9492c6af787"
+    },
+    {
+      "file": "raw/plates.png",
+      "capture_source": "qt-readme-media/plates/views/plates.png",
+      "sha256": "16c144fdf06ce9fdbf8bd73f3a52875311ac5661dc4e42f6c437f4fdbe42e091",
+      "app_binary_sha256": "85e9e1d7db765e05574a18344bdac26e737bb6388b1fd2a0387fa9492c6af787"
+    }
+  ],
+  "framed": {
+    "main-window.png": {
+      "from": "raw/main-window.png",
+      "by": "source/build_readme_assets.py --frames",
+      "note": "panel, rounded corners, border and soft shadow added",
+      "sha256": "b869519257952f86bbb680ec01b2c370adb5a97c06753dd1ce805fe060b1e09d"
+    },
+    "linesplan.png": {
+      "from": "raw/linesplan.png",
+      "by": "source/build_readme_assets.py --frames",
+      "note": "whitespace cropped; panel, rounded corners, border and soft shadow added",
+      "sha256": "a892c48e70399743ef8f238cdc4d2f78ec071ad440e3f4077ee207c590f2f414"
+    },
+    "plates.png": {
+      "from": "raw/plates.png",
+      "by": "source/build_readme_assets.py --frames",
+      "note": "panel, rounded corners, border and soft shadow added",
+      "sha256": "6493e061aee8fb5f53f90bc11dc9cb5a9aa0892afe1cafa724c0732c2e4501be"
+    },
+    "about.png": {
+      "from": "raw/about.png",
+      "by": "source/build_readme_assets.py --frames",
+      "note": "panel, rounded corners, border and soft shadow added",
+      "sha256": "a7b6d34790c1d2c1ff1dd9a5578dc9b12ce2e30b6f7b14f2564cd5479739e3b9"
+    }
+  },
+  "generated": {
+    "zh-CN/hero.svg": "source/build_hero.py from the lines-plan DXF (readme-media-20261117-public, sha256 148294736c640b057a422b56d1b9ceabd2ee487e6e4436ab2a87678851d76df4)",
+    "zh-CN/section-*.svg, features.svg, stats.svg": "source/build_readme_assets.py; motif from source/body-plan-stations.json (same DXF); icons from source/icons (StudioLight toolbar icons shipped in the runtime, ISC) plus the Lucide languages icon (ISC)",
+    "stats values": "docs/migration/LINESPLAN-CPU-RASTER.md, PLATES-DRAG-PERFORMANCE.md, PUBLICATION-PERFORMANCE-AUDIT.md"
+  }
+}

@@ -1,0 +1,77 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1188" height="592" viewBox="0 0 1188 592" role="img" aria-labelledby="title desc">
+<title id="title">Восемь возможностей FreeShip 26</title>
+<desc id="desc">Модель корпуса: Сетка подразделения, Точки, рёбра, грани, связи, Преобразование Лакенби; Проверка обводов: Шпангоуты, батоксы, ВЛ, Рыбины, кривизна, нормали, Проверка модели и граней; Теоретический чертёж: По геометрии корпуса, Размещение подписей, Экспорт PNG и DXF; Гидростатика: Таблицы по осадкам, Кривые KN и GZ, Бонжан и площади сечений; Ходкость: Методы Холтропа, Делфта, Серия B в свободной воде, Подбор двигателя и винта; Развёртка листов: Развёртываемые слои, Погрешности развёртки, Экспорт DXF и PDF; Обмен файлами: Чт./зап. FBM, чтение FTM, IGES, DXF, STL и OBJ, GHS, PAM и др.; Семь языков: 中文, English, Русский, Deutsch, Français, Español, 日本語</desc>
+<rect width="1188" height="592" rx="24" fill="#f3f6f5"/>
+<g id="feature-1">
+<rect x="36" y="36" width="264" height="250" rx="16" fill="#ffffff" stroke="#cfdcd7"/>
+<rect x="60" y="60" width="56" height="56" rx="14" fill="#e3eeea"/>
+<svg x="72" y="72" width="32" height="32" viewBox="0 0 20 20" fill="none" stroke="#183b36" color="#183b36" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h12v12H4ZM4 10h12M10 4v12"/><circle cx="4" cy="4" r="1" fill="currentColor" stroke="none"/><circle cx="16" cy="4" r="1" fill="currentColor" stroke="none"/><circle cx="10" cy="10" r="1" fill="currentColor" stroke="none"/><circle cx="4" cy="16" r="1" fill="currentColor" stroke="none"/><circle cx="16" cy="16" r="1" fill="currentColor" stroke="none"/></svg>
+<text x="60" y="158" font-family="'Microsoft YaHei UI','Microsoft YaHei','PingFang SC','Noto Sans CJK SC','Segoe UI',Arial,sans-serif" font-size="18" font-weight="700" fill="#183b36">Модель корпуса</text>
+<text x="60" y="198" font-family="'Microsoft YaHei UI','Microsoft YaHei','PingFang SC','Noto Sans CJK SC','Segoe UI',Arial,sans-serif" font-size="15" fill="#50645f">Сетка подразделения</text>
+<text x="60" y="228" font-family="'Microsoft YaHei UI','Microsoft YaHei','PingFang SC','Noto Sans CJK SC','Segoe UI',Arial,sans-serif" font-size="15" fill="#50645f">Точки, рёбра, грани, связи</text>
+<text x="60" y="258" font-family="'Microsoft YaHei UI','Microsoft YaHei','PingFang SC','Noto Sans CJK SC','Segoe UI',Arial,sans-serif" font-size="15" fill="#50645f">Преобразование Лакенби</text>
+</g>
+<g id="feature-2">
+<rect x="320" y="36" width="264" height="250" rx="16" fill="#ffffff" stroke="#cfdcd7"/>
+<rect x="344" y="60" width="56" height="56" rx="14" fill="#e3eeea"/>
+<svg x="356" y="72" width="32" height="32" viewBox="0 0 20 20" fill="none" stroke="#183b36" color="#183b36" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 5.5h15c-.7 6.5-3.8 10-7.5 10s-6.8-3.5-7.5-10ZM6 5.5v7.9M10 5.5v10M14 5.5v7.9"/></svg>
+<text x="344" y="158" font-family="'Microsoft YaHei UI','Microsoft YaHei','PingFang SC','Noto Sans CJK SC','Segoe UI',Arial,sans-serif" font-size="18" font-weight="700" fill="#183b36">Проверка обводов</text>
+<text x="344" y="198" font-family="'Microsoft YaHei UI','Microsoft YaHei','PingFang SC','Noto Sans CJK SC','Segoe UI',Arial,sans-serif" font-size="15" fill="#50645f">Шпангоуты, батоксы, ВЛ</text>
+<text x="344" y="228" font-family="'Microsoft YaHei UI','Microsoft YaHei','PingFang SC','Noto Sans CJK SC','Segoe UI',Arial,sans-serif" font-size="15" fill="#50645f">Рыбины, кривизна, нормали</text>
+<text x="344" y="258" font-family="'Microsoft YaHei UI','Microsoft YaHei','PingFang SC','Noto Sans CJK SC','Segoe UI',Arial,sans-serif" font-size="15" fill="#50645f">Проверка модели и граней</text>
+</g>
+<g id="feature-3">
+<rect x="604" y="36" width="264" height="250" rx="16" fill="#ffffff" stroke="#cfdcd7"/>
+<rect x="628" y="60" width="56" height="56" rx="14" fill="#e3eeea"/>
+<svg x="640" y="72" width="32" height="32" viewBox="0 0 20 20" fill="none" stroke="#183b36" color="#183b36" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 10c3.2-8 11.8-8 15 0-3.2 8-11.8 8-15 0ZM3 10h14M4.5 7.5c3.5-2 7.5-2 11 0M4.5 12.5c3.5 2 7.5 2 11 0"/></svg>
+<text x="628" y="158" font-family="'Microsoft YaHei UI','Microsoft YaHei','PingFang SC','Noto Sans CJK SC','Segoe UI',Arial,sans-serif" font-size="18" font-weight="700" fill="#183b36">Теоретический чертёж</text>
+<text x="628" y="198" font-family="'Microsoft YaHei UI','Microsoft YaHei','PingFang SC','Noto Sans CJK SC','Segoe UI',Arial,sans-serif" font-size="15" fill="#50645f">По геометрии корпуса</text>
+<text x="628" y="228" font-family="'Microsoft YaHei UI','Microsoft YaHei','PingFang SC','Noto Sans CJK SC','Segoe UI',Arial,sans-serif" font-size="15" fill="#50645f">Размещение подписей</text>
+<text x="628" y="258" font-family="'Microsoft YaHei UI','Microsoft YaHei','PingFang SC','Noto Sans CJK SC','Segoe UI',Arial,sans-serif" font-size="15" fill="#50645f">Экспорт PNG и DXF</text>
+</g>
+<g id="feature-4">
+<rect x="888" y="36" width="264" height="250" rx="16" fill="#ffffff" stroke="#cfdcd7"/>
+<rect x="912" y="60" width="56" height="56" rx="14" fill="#e3eeea"/>
+<svg x="924" y="72" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#183b36" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M7 16.3c2.2 0 4-1.83 4-4.05 0-1.16-.57-2.26-1.71-3.19S7.29 6.75 7 5.3c-.29 1.45-1.14 2.84-2.29 3.76S3 11.1 3 12.25c0 2.22 1.8 4.05 4 4.05z"/><path d="M12.56 6.6A10.97 10.97 0 0 0 14 3.02c.5 2.5 2 4.9 4 6.5s3 3.5 3 5.5a6.98 6.98 0 0 1-11.91 4.97"/></svg>
+<text x="912" y="158" font-family="'Microsoft YaHei UI','Microsoft YaHei','PingFang SC','Noto Sans CJK SC','Segoe UI',Arial,sans-serif" font-size="18" font-weight="700" fill="#183b36">Гидростатика</text>
+<text x="912" y="198" font-family="'Microsoft YaHei UI','Microsoft YaHei','PingFang SC','Noto Sans CJK SC','Segoe UI',Arial,sans-serif" font-size="15" fill="#50645f">Таблицы по осадкам</text>
+<text x="912" y="228" font-family="'Microsoft YaHei UI','Microsoft YaHei','PingFang SC','Noto Sans CJK SC','Segoe UI',Arial,sans-serif" font-size="15" fill="#50645f">Кривые KN и GZ</text>
+<text x="912" y="258" font-family="'Microsoft YaHei UI','Microsoft YaHei','PingFang SC','Noto Sans CJK SC','Segoe UI',Arial,sans-serif" font-size="15" fill="#50645f">Бонжан и площади сечений</text>
+</g>
+<g id="feature-5">
+<rect x="36" y="306" width="264" height="250" rx="16" fill="#ffffff" stroke="#cfdcd7"/>
+<rect x="60" y="330" width="56" height="56" rx="14" fill="#e3eeea"/>
+<svg x="72" y="342" width="32" height="32" viewBox="0 0 20 20" fill="none" stroke="#183b36" color="#183b36" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2.5" width="12" height="15" rx="2"/><path d="M7 6h6M7 10h1M12 10h1M7 13.5h1M12 13.5h1"/></svg>
+<text x="60" y="428" font-family="'Microsoft YaHei UI','Microsoft YaHei','PingFang SC','Noto Sans CJK SC','Segoe UI',Arial,sans-serif" font-size="18" font-weight="700" fill="#183b36">Ходкость</text>
+<text x="60" y="468" font-family="'Microsoft YaHei UI','Microsoft YaHei','PingFang SC','Noto Sans CJK SC','Segoe UI',Arial,sans-serif" font-size="15" fill="#50645f">Методы Холтропа, Делфта</text>
+<text x="60" y="498" font-family="'Microsoft YaHei UI','Microsoft YaHei','PingFang SC','Noto Sans CJK SC','Segoe UI',Arial,sans-serif" font-size="15" fill="#50645f">Серия B в свободной воде</text>
+<text x="60" y="528" font-family="'Microsoft YaHei UI','Microsoft YaHei','PingFang SC','Noto Sans CJK SC','Segoe UI',Arial,sans-serif" font-size="15" fill="#50645f">Подбор двигателя и винта</text>
+</g>
+<g id="feature-6">
+<rect x="320" y="306" width="264" height="250" rx="16" fill="#ffffff" stroke="#cfdcd7"/>
+<rect x="344" y="330" width="56" height="56" rx="14" fill="#e3eeea"/>
+<svg x="356" y="342" width="32" height="32" viewBox="0 0 20 20" fill="none" stroke="#183b36" color="#183b36" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4.5 15.5 3 17 14.5 6 17Z"/><path d="M6 17 4 4.5"/></svg>
+<text x="344" y="428" font-family="'Microsoft YaHei UI','Microsoft YaHei','PingFang SC','Noto Sans CJK SC','Segoe UI',Arial,sans-serif" font-size="18" font-weight="700" fill="#183b36">Развёртка листов</text>
+<text x="344" y="468" font-family="'Microsoft YaHei UI','Microsoft YaHei','PingFang SC','Noto Sans CJK SC','Segoe UI',Arial,sans-serif" font-size="15" fill="#50645f">Развёртываемые слои</text>
+<text x="344" y="498" font-family="'Microsoft YaHei UI','Microsoft YaHei','PingFang SC','Noto Sans CJK SC','Segoe UI',Arial,sans-serif" font-size="15" fill="#50645f">Погрешности развёртки</text>
+<text x="344" y="528" font-family="'Microsoft YaHei UI','Microsoft YaHei','PingFang SC','Noto Sans CJK SC','Segoe UI',Arial,sans-serif" font-size="15" fill="#50645f">Экспорт DXF и PDF</text>
+</g>
+<g id="feature-7">
+<rect x="604" y="306" width="264" height="250" rx="16" fill="#ffffff" stroke="#cfdcd7"/>
+<rect x="628" y="330" width="56" height="56" rx="14" fill="#e3eeea"/>
+<svg x="640" y="342" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#183b36" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="m6 14 1.5-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.54 6a2 2 0 0 1-1.95 1.5H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3.9a2 2 0 0 1 1.69.9l.81 1.2a2 2 0 0 0 1.67.9H18a2 2 0 0 1 2 2v2"/></svg>
+<text x="628" y="428" font-family="'Microsoft YaHei UI','Microsoft YaHei','PingFang SC','Noto Sans CJK SC','Segoe UI',Arial,sans-serif" font-size="18" font-weight="700" fill="#183b36">Обмен файлами</text>
+<text x="628" y="468" font-family="'Microsoft YaHei UI','Microsoft YaHei','PingFang SC','Noto Sans CJK SC','Segoe UI',Arial,sans-serif" font-size="15" fill="#50645f">Чт./зап. FBM, чтение FTM</text>
+<text x="628" y="498" font-family="'Microsoft YaHei UI','Microsoft YaHei','PingFang SC','Noto Sans CJK SC','Segoe UI',Arial,sans-serif" font-size="15" fill="#50645f">IGES, DXF, STL и OBJ</text>
+<text x="628" y="528" font-family="'Microsoft YaHei UI','Microsoft YaHei','PingFang SC','Noto Sans CJK SC','Segoe UI',Arial,sans-serif" font-size="15" fill="#50645f">GHS, PAM и др.</text>
+</g>
+<g id="feature-8">
+<rect x="888" y="306" width="264" height="250" rx="16" fill="#ffffff" stroke="#cfdcd7"/>
+<rect x="912" y="330" width="56" height="56" rx="14" fill="#e3eeea"/>
+<svg x="924" y="342" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#183b36" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="m5 8 6 6"/><path d="m4 14 6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="m22 22-5-10-5 10"/><path d="M14 18h6"/></svg>
+<text x="912" y="428" font-family="'Microsoft YaHei UI','Microsoft YaHei','PingFang SC','Noto Sans CJK SC','Segoe UI',Arial,sans-serif" font-size="18" font-weight="700" fill="#183b36">Семь языков</text>
+<text x="912" y="468" font-family="'Microsoft YaHei UI','Microsoft YaHei','PingFang SC','Noto Sans CJK SC','Segoe UI',Arial,sans-serif" font-size="15" fill="#50645f">中文, English, Русский</text>
+<text x="912" y="498" font-family="'Microsoft YaHei UI','Microsoft YaHei','PingFang SC','Noto Sans CJK SC','Segoe UI',Arial,sans-serif" font-size="15" fill="#50645f">Deutsch, Français</text>
+<text x="912" y="528" font-family="'Microsoft YaHei UI','Microsoft YaHei','PingFang SC','Noto Sans CJK SC','Segoe UI',Arial,sans-serif" font-size="15" fill="#50645f">Español, 日本語</text>
+</g>
+</svg>

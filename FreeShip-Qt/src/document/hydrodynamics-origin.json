@@ -1,0 +1,12 @@
+{
+  "Forms/FreeHydrodyn_ManeuvDlg.lfm": "77b9023592bb18617b30a8f9ff4ffb29cbda64db829db90784799112d490b67b",
+  "Forms/FreeHydrodyn_ManeuvDlg.pas": "8b5f2304f66dff7f061515904cda09a9cf4b09d3d6946c23483a47df042d5f66",
+  "Forms/FreeHydrodyn_RVRSDlg.lfm": "1fbe8608b3f1337a48f40ec8bdea71bb82f337a5207b59481a6000338a8307ff",
+  "Forms/FreeHydrodyn_RVRSDlg.pas": "6818b8369d489030fc08eec8a1303d4ab5ca1afe9a9a5479c241541e1f7a43c0",
+  "Forms/FreeHydrodyn_Task1Dlg.lfm": "3f8c99565af9f731bf3da534cfe1b6005c8bdaf2181399d8f3e0ce7f8a62f1a5",
+  "Forms/FreeHydrodyn_Task1Dlg.pas": "7ef0dc56beeb3c604d8e68c8cd199a4450b2972e9ab6668db249a68b0a4a7b17",
+  "Locale/FreeShip.cn.po": "4c0166e4ba605c5b3009ea9e9dc117ff275adc10902f439c55a3318764067578",
+  "Units/FreeEdit.inc": "09592b0547071baf0f1c511607b15612e5d1e70c50dd3548b77639c712b62908",
+  "Units/FreeResourceStrings.inc": "324928c89a2210d96a2fc65370b27099f52f6018cf4e3567f012456cf78a8a66",
+  "Units/FreeTypes.pas": "9d3783848296bf5b6c1f05c98ef2fb54fe662ae0a6e9fdfb70bfb6c2b90bbe69"
+}

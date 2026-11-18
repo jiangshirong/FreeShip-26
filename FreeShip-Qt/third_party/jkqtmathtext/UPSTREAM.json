@@ -1,0 +1,433 @@
+{
+  "repository": "https://github.com/jkriege2/JKQtPlotter",
+  "commit": "9e9f0af8b140192e3de7ff866a0013e7da5e1e93",
+  "license": "LGPL-2.1-or-later",
+  "components": [
+    "JKQTMathText",
+    "JKQTCommon"
+  ],
+  "omitted": [
+    "plotting widgets",
+    "optional bundled fonts",
+    "examples"
+  ],
+  "files": [
+    {
+      "path": "LICENSE",
+      "upstream_path": "LICENSE",
+      "sha256": "5525fbd0911b8dcbdc6f0c081ac27fd55b75d6d261c62fa05b9bdc0b72b481f6"
+    },
+    {
+      "path": "jkqtcommon/jkqtcommon_imexport.h",
+      "upstream_path": "lib/jkqtcommon/jkqtcommon_imexport.h",
+      "sha256": "6502be467cb3438b26a6612fa04c8ac877f4f477156d024190a1854cf61a81e4"
+    },
+    {
+      "path": "jkqtcommon/jkqtpbasicimagetools.cpp",
+      "upstream_path": "lib/jkqtcommon/jkqtpbasicimagetools.cpp",
+      "sha256": "c0ce5657dc852f232df749ad6173ac742deca24cdcef126ca407cc79f3109079"
+    },
+    {
+      "path": "jkqtcommon/jkqtpbasicimagetools.h",
+      "upstream_path": "lib/jkqtcommon/jkqtpbasicimagetools.h",
+      "sha256": "a362fa9e6b456c15ceb26f0f5fc8731a9ae64527cf0687354f64f688974456fb"
+    },
+    {
+      "path": "jkqtcommon/jkqtpcachingtools.cpp",
+      "upstream_path": "lib/jkqtcommon/jkqtpcachingtools.cpp",
+      "sha256": "c98c91c1c19a6b769d1c76bf5b72a95410daec816b70f445ab2f8bd89a459e6c"
+    },
+    {
+      "path": "jkqtcommon/jkqtpcachingtools.h",
+      "upstream_path": "lib/jkqtcommon/jkqtpcachingtools.h",
+      "sha256": "6a80c211e8c34644de4abe2ae490ef84e60e09a24ab247ff40e43eeb141ffc19"
+    },
+    {
+      "path": "jkqtcommon/jkqtpcodestructuring.cpp",
+      "upstream_path": "lib/jkqtcommon/jkqtpcodestructuring.cpp",
+      "sha256": "b95c26de70fc123b1bec9575438f9f414371c182b02b4f97d9b5a338d0944cb7"
+    },
+    {
+      "path": "jkqtcommon/jkqtpcodestructuring.h",
+      "upstream_path": "lib/jkqtcommon/jkqtpcodestructuring.h",
+      "sha256": "c8127fd3fdad3db29d79c3d250d14d918492d642e02d68255e1240383fae71f8"
+    },
+    {
+      "path": "jkqtcommon/jkqtpconcurrencytools.cpp",
+      "upstream_path": "lib/jkqtcommon/jkqtpconcurrencytools.cpp",
+      "sha256": "666b4d793cf8e74d146ad2642f432493f3df63eb1fe91b076c181af823d21b1f"
+    },
+    {
+      "path": "jkqtcommon/jkqtpconcurrencytools.h",
+      "upstream_path": "lib/jkqtcommon/jkqtpconcurrencytools.h",
+      "sha256": "9e1bdbe5517e72936116e2d825a1e74f926c51e13a3adeb58e551a31bb20151c"
+    },
+    {
+      "path": "jkqtcommon/jkqtpcsstools.cpp",
+      "upstream_path": "lib/jkqtcommon/jkqtpcsstools.cpp",
+      "sha256": "090f8a9f9d1eb81b2e4d898fe58af9e02ef2fc2188b720d9227aacdf51221cbc"
+    },
+    {
+      "path": "jkqtcommon/jkqtpcsstools.h",
+      "upstream_path": "lib/jkqtcommon/jkqtpcsstools.h",
+      "sha256": "612bf278ea32b84b2759f57c3ba7bc1063f5578e977ccacc0b71b49d6aa97c26"
+    },
+    {
+      "path": "jkqtcommon/jkqtpdebuggingtools.cpp",
+      "upstream_path": "lib/jkqtcommon/jkqtpdebuggingtools.cpp",
+      "sha256": "0767e6e3b644463ce43dcecc7109ca630916729995d05655f4cda7fcdc749fa7"
+    },
+    {
+      "path": "jkqtcommon/jkqtpdebuggingtools.h",
+      "upstream_path": "lib/jkqtcommon/jkqtpdebuggingtools.h",
+      "sha256": "aa9bec3e35725ce5fe47dc7f6935b230ddc97948d40f72487a4c0f8b7b121bfe"
+    },
+    {
+      "path": "jkqtcommon/jkqtpdrawingtools.cpp",
+      "upstream_path": "lib/jkqtcommon/jkqtpdrawingtools.cpp",
+      "sha256": "5bb4fc022ccdd5f5c9a7ce4f71ceac1f392ddd7594113db18d887ba0ffc7df41"
+    },
+    {
+      "path": "jkqtcommon/jkqtpdrawingtools.h",
+      "upstream_path": "lib/jkqtcommon/jkqtpdrawingtools.h",
+      "sha256": "e03831b3fcc992352f41823f2f52987f431e162ac0e5c408049073663e2648a4"
+    },
+    {
+      "path": "jkqtcommon/jkqtpenhancedpainter.cpp",
+      "upstream_path": "lib/jkqtcommon/jkqtpenhancedpainter.cpp",
+      "sha256": "c63018f74e22a50f03226663877ae292b4542c6e0d9741817bd2bcd681a7feca"
+    },
+    {
+      "path": "jkqtcommon/jkqtpenhancedpainter.h",
+      "upstream_path": "lib/jkqtcommon/jkqtpenhancedpainter.h",
+      "sha256": "09aaa89129372ee43e2e220e53f3b804f6d9200f838db8df76f78e2408b86458"
+    },
+    {
+      "path": "jkqtcommon/jkqtpexpected.cpp",
+      "upstream_path": "lib/jkqtcommon/jkqtpexpected.cpp",
+      "sha256": "100a7ea7da2f59438af720f7050079c1c772a51c2c71a30bf02204504b835bb7"
+    },
+    {
+      "path": "jkqtcommon/jkqtpexpected.h",
+      "upstream_path": "lib/jkqtcommon/jkqtpexpected.h",
+      "sha256": "589fbfab5cefd11ff8748b19af29a37455198b461009f21dfc9eaf1062171d27"
+    },
+    {
+      "path": "jkqtcommon/jkqtpgeometrytools.cpp",
+      "upstream_path": "lib/jkqtcommon/jkqtpgeometrytools.cpp",
+      "sha256": "711abe380298af28a26089b2e996bc570b292b45dbce1ad968fecf32ded900bb"
+    },
+    {
+      "path": "jkqtcommon/jkqtpgeometrytools.h",
+      "upstream_path": "lib/jkqtcommon/jkqtpgeometrytools.h",
+      "sha256": "ca23e4a6180f2b7c7349ef8c37c177040d0eb2098642f9f067a9aaa04e296cbb"
+    },
+    {
+      "path": "jkqtcommon/jkqtphighrestimer.cpp",
+      "upstream_path": "lib/jkqtcommon/jkqtphighrestimer.cpp",
+      "sha256": "23a5214652e968fea9cfd71617085d9ff90f422f5714f86d19f3756c95c8d8d5"
+    },
+    {
+      "path": "jkqtcommon/jkqtphighrestimer.h",
+      "upstream_path": "lib/jkqtcommon/jkqtphighrestimer.h",
+      "sha256": "643c527f40b0042ff4418366d0d9b0540d3b6d20ed1ecbe5b4435556f68658d1"
+    },
+    {
+      "path": "jkqtcommon/jkqtpicons.cpp",
+      "upstream_path": "lib/jkqtcommon/jkqtpicons.cpp",
+      "sha256": "ffade73e20a8c0b051a8346072d5ec01eb06fee8683e814e7b92e05f3d75f402"
+    },
+    {
+      "path": "jkqtcommon/jkqtpicons.h",
+      "upstream_path": "lib/jkqtcommon/jkqtpicons.h",
+      "sha256": "9c0931bb013081fbff5e70a06bf43fe98b0dcad136565d969c5d552191fb417f"
+    },
+    {
+      "path": "jkqtcommon/jkqtpmathtools.cpp",
+      "upstream_path": "lib/jkqtcommon/jkqtpmathtools.cpp",
+      "sha256": "b1906ddd52281ac55c2b0d9cca311ce76e25ae33542e4f0f9d3fb4a1162e0d45"
+    },
+    {
+      "path": "jkqtcommon/jkqtpmathtools.h",
+      "upstream_path": "lib/jkqtcommon/jkqtpmathtools.h",
+      "sha256": "e606e356c4f508352d2011bfd131641f9048f6542067357a54358ca19318822f"
+    },
+    {
+      "path": "jkqtcommon/jkqtpstringtools.cpp",
+      "upstream_path": "lib/jkqtcommon/jkqtpstringtools.cpp",
+      "sha256": "0a5c97712940748e5dc3920b37bc12784e91550efe4b56e8980aa58cc58fb68b"
+    },
+    {
+      "path": "jkqtcommon/jkqtpstringtools.h",
+      "upstream_path": "lib/jkqtcommon/jkqtpstringtools.h",
+      "sha256": "83ad0dcd5287793081f9ccca7a362e087b7a26db5fe4e656abc6eca08b1009a1"
+    },
+    {
+      "path": "jkqtcommon/jkqttools.cpp",
+      "upstream_path": "lib/jkqtcommon/jkqttools.cpp",
+      "sha256": "a37ea55897bdee2d6cfec7e0736ba1bd1f2a7fe0bd3a8813ac40f1165a6de094"
+    },
+    {
+      "path": "jkqtcommon/jkqttools.h",
+      "upstream_path": "lib/jkqtcommon/jkqttools.h",
+      "sha256": "278f4fc1a0fb82c57e0e996792c2c75ab2c37e9a6d7648d8fd46a8a3eece6fc0"
+    },
+    {
+      "path": "jkqtcommon/private/jkqtcommon_precomp.h",
+      "upstream_path": "lib/jkqtcommon/private/jkqtcommon_precomp.h",
+      "sha256": "3629e9f3ee887dd643502f96d6bcd4564bc0e1018e13969f7a6e24eb7229d700"
+    },
+    {
+      "path": "jkqtmathtext/jkqtmathtext.cpp",
+      "upstream_path": "lib/jkqtmathtext/jkqtmathtext.cpp",
+      "sha256": "4ddc901af9026241648b5ad69441b8bef73e32f9cc302ecd411ca5edacaed5e0"
+    },
+    {
+      "path": "jkqtmathtext/jkqtmathtext.h",
+      "upstream_path": "lib/jkqtmathtext/jkqtmathtext.h",
+      "sha256": "74d720d2cd5d708becc2ee58649772e83778eb45053ac3a7c15c37a76e369f63"
+    },
+    {
+      "path": "jkqtmathtext/jkqtmathtext_imexport.h",
+      "upstream_path": "lib/jkqtmathtext/jkqtmathtext_imexport.h",
+      "sha256": "d939a81d24df470f2fff6f6863daba7688b69004e34ad1bc25dabe4c624bcc67"
+    },
+    {
+      "path": "jkqtmathtext/jkqtmathtextlabel.cpp",
+      "upstream_path": "lib/jkqtmathtext/jkqtmathtextlabel.cpp",
+      "sha256": "0d3bf979f5327982675b6a7ccba9c845a96505e8de8df9731a41945d1d64d993"
+    },
+    {
+      "path": "jkqtmathtext/jkqtmathtextlabel.h",
+      "upstream_path": "lib/jkqtmathtext/jkqtmathtextlabel.h",
+      "sha256": "ddf263376295c5e03711fa0092961ab221e3f876ff0057d0bb8659cf6199ca37"
+    },
+    {
+      "path": "jkqtmathtext/jkqtmathtexttools.cpp",
+      "upstream_path": "lib/jkqtmathtext/jkqtmathtexttools.cpp",
+      "sha256": "c34c06caa892846748d177afed982d2752e38ce9af74550b94b2860e205b4420"
+    },
+    {
+      "path": "jkqtmathtext/jkqtmathtexttools.h",
+      "upstream_path": "lib/jkqtmathtext/jkqtmathtexttools.h",
+      "sha256": "b8272f8ba7b4da327e105c3f7a6f7c5eec599577f2301427876a1074a3911d62"
+    },
+    {
+      "path": "jkqtmathtext/nodes/jkqtmathtextboxinstructionnode.cpp",
+      "upstream_path": "lib/jkqtmathtext/nodes/jkqtmathtextboxinstructionnode.cpp",
+      "sha256": "18bc8f586120f55f42e2a35377e99dc8fa5b5c634033ceb7a0370a6351e81ad8"
+    },
+    {
+      "path": "jkqtmathtext/nodes/jkqtmathtextboxinstructionnode.h",
+      "upstream_path": "lib/jkqtmathtext/nodes/jkqtmathtextboxinstructionnode.h",
+      "sha256": "01769922a96b03e6b999fa2b935f1d2557a9ecbdbaf3010b4b25d38f52b710e0"
+    },
+    {
+      "path": "jkqtmathtext/nodes/jkqtmathtextbracenode.cpp",
+      "upstream_path": "lib/jkqtmathtext/nodes/jkqtmathtextbracenode.cpp",
+      "sha256": "b564c24a4204eaaf4fc43c8983e65235eb816e696f13e1533fe134a0188921af"
+    },
+    {
+      "path": "jkqtmathtext/nodes/jkqtmathtextbracenode.h",
+      "upstream_path": "lib/jkqtmathtext/nodes/jkqtmathtextbracenode.h",
+      "sha256": "a965a068ef1d753d7880d37a08c93f450835dbae0f467716a394a4c9df917055"
+    },
+    {
+      "path": "jkqtmathtext/nodes/jkqtmathtextdecoratednode.cpp",
+      "upstream_path": "lib/jkqtmathtext/nodes/jkqtmathtextdecoratednode.cpp",
+      "sha256": "a6b47d1192e55a3fd7ddd19aafee991d4e43b6071c8423068d8d5a79b5d33428"
+    },
+    {
+      "path": "jkqtmathtext/nodes/jkqtmathtextdecoratednode.h",
+      "upstream_path": "lib/jkqtmathtext/nodes/jkqtmathtextdecoratednode.h",
+      "sha256": "02315f7f61d089d1f46f1f1977e604599b197c7e51005cb2e731b023b174050a"
+    },
+    {
+      "path": "jkqtmathtext/nodes/jkqtmathtextfracnode.cpp",
+      "upstream_path": "lib/jkqtmathtext/nodes/jkqtmathtextfracnode.cpp",
+      "sha256": "1b4abfab2456491aa2eeb05b4bf15cc9d65f4918163994aa6854386191db57e3"
+    },
+    {
+      "path": "jkqtmathtext/nodes/jkqtmathtextfracnode.h",
+      "upstream_path": "lib/jkqtmathtext/nodes/jkqtmathtextfracnode.h",
+      "sha256": "b1225c5bef277382651e5a480d22815fdfe2be0b1324a60128b1fc407bb0248c"
+    },
+    {
+      "path": "jkqtmathtext/nodes/jkqtmathtexthorizontallistnode.cpp",
+      "upstream_path": "lib/jkqtmathtext/nodes/jkqtmathtexthorizontallistnode.cpp",
+      "sha256": "1a3590b7b8bda52f8fce9aeb50e420f7b052a2fe4963b74c58b112ae891ed799"
+    },
+    {
+      "path": "jkqtmathtext/nodes/jkqtmathtexthorizontallistnode.h",
+      "upstream_path": "lib/jkqtmathtext/nodes/jkqtmathtexthorizontallistnode.h",
+      "sha256": "115cf64cad2ba4e4f35eb4ca04e9d9fa6125098076549cd3d9ce69990ca4c123"
+    },
+    {
+      "path": "jkqtmathtext/nodes/jkqtmathtextinstructionnode.cpp",
+      "upstream_path": "lib/jkqtmathtext/nodes/jkqtmathtextinstructionnode.cpp",
+      "sha256": "5e1291c4e01975626deba0a04e18e66b3d46c0ba3eb2d0a0700a18df986c1333"
+    },
+    {
+      "path": "jkqtmathtext/nodes/jkqtmathtextinstructionnode.h",
+      "upstream_path": "lib/jkqtmathtext/nodes/jkqtmathtextinstructionnode.h",
+      "sha256": "9d85db90408983d8a68a2c6651c27d9762d954c83786a440f3b2bece82f92635"
+    },
+    {
+      "path": "jkqtmathtext/nodes/jkqtmathtextlistnode.h",
+      "upstream_path": "lib/jkqtmathtext/nodes/jkqtmathtextlistnode.h",
+      "sha256": "0523c1b7addccd1abf5a20ae91efc7dc69acc81e9d2bc0b146d0f275cf8424da"
+    },
+    {
+      "path": "jkqtmathtext/nodes/jkqtmathtextmatrixnode.cpp",
+      "upstream_path": "lib/jkqtmathtext/nodes/jkqtmathtextmatrixnode.cpp",
+      "sha256": "404b3799a3a684fdbf319e9f792ce4f2dd377d5abbab76f1337447b23564b9ff"
+    },
+    {
+      "path": "jkqtmathtext/nodes/jkqtmathtextmatrixnode.h",
+      "upstream_path": "lib/jkqtmathtext/nodes/jkqtmathtextmatrixnode.h",
+      "sha256": "70c17d1fab12332946f891b0374ef26b41eca4d730f7b2b42e46ae328e1f6b8f"
+    },
+    {
+      "path": "jkqtmathtext/nodes/jkqtmathtextmodifyenvironmentnode.cpp",
+      "upstream_path": "lib/jkqtmathtext/nodes/jkqtmathtextmodifyenvironmentnode.cpp",
+      "sha256": "30296fc4e2c524f28c5a0d69a6102f54c051984dcece3adcd4115ac154a97212"
+    },
+    {
+      "path": "jkqtmathtext/nodes/jkqtmathtextmodifyenvironmentnode.h",
+      "upstream_path": "lib/jkqtmathtext/nodes/jkqtmathtextmodifyenvironmentnode.h",
+      "sha256": "6e667775596bd199f8c50601b5786297df381b16fe62e5a17bc9c6303eed85f0"
+    },
+    {
+      "path": "jkqtmathtext/nodes/jkqtmathtextnode.cpp",
+      "upstream_path": "lib/jkqtmathtext/nodes/jkqtmathtextnode.cpp",
+      "sha256": "6e96676f592a93c87669be1a6d97a6b94c503e88bc374b68a50d11b271ebc4c3"
+    },
+    {
+      "path": "jkqtmathtext/nodes/jkqtmathtextnode.h",
+      "upstream_path": "lib/jkqtmathtext/nodes/jkqtmathtextnode.h",
+      "sha256": "d9d0095d928c3085e16a1f5fca0495f03d0e0ef5f409e5b7bc4cb617d28f5cf9"
+    },
+    {
+      "path": "jkqtmathtext/nodes/jkqtmathtextnodetools.cpp",
+      "upstream_path": "lib/jkqtmathtext/nodes/jkqtmathtextnodetools.cpp",
+      "sha256": "754a52f40bd61ccccb88dfbfb8e8d0d111cbe3c96396fc29adba53d52bd34896"
+    },
+    {
+      "path": "jkqtmathtext/nodes/jkqtmathtextnodetools.h",
+      "upstream_path": "lib/jkqtmathtext/nodes/jkqtmathtextnodetools.h",
+      "sha256": "9b2d01b052df22dacc61f94c9dfcc0a47090fa70343f4cf205e5fda6aeea017e"
+    },
+    {
+      "path": "jkqtmathtext/nodes/jkqtmathtextnoopnode.cpp",
+      "upstream_path": "lib/jkqtmathtext/nodes/jkqtmathtextnoopnode.cpp",
+      "sha256": "7e3cfd2ada5e593da236e3e29c39baf1eb12bcf0cb0ff0670ab64e023add7c1e"
+    },
+    {
+      "path": "jkqtmathtext/nodes/jkqtmathtextnoopnode.h",
+      "upstream_path": "lib/jkqtmathtext/nodes/jkqtmathtextnoopnode.h",
+      "sha256": "43b57af6d960d4dd9d79be0eefe17811776b359526d4aa5322dc4a5f6c718399"
+    },
+    {
+      "path": "jkqtmathtext/nodes/jkqtmathtextsqrtnode.cpp",
+      "upstream_path": "lib/jkqtmathtext/nodes/jkqtmathtextsqrtnode.cpp",
+      "sha256": "f1f3729ce6f079a6620c75a6440eb731f67a48a1a90fb5ac51c9e3a9e9810d6a"
+    },
+    {
+      "path": "jkqtmathtext/nodes/jkqtmathtextsqrtnode.h",
+      "upstream_path": "lib/jkqtmathtext/nodes/jkqtmathtextsqrtnode.h",
+      "sha256": "f5a02906c9979cbd31922684885479bec7efdbc8674dc6a84b7a09d84cd5a7ca"
+    },
+    {
+      "path": "jkqtmathtext/nodes/jkqtmathtextsubsupernode.cpp",
+      "upstream_path": "lib/jkqtmathtext/nodes/jkqtmathtextsubsupernode.cpp",
+      "sha256": "45f02ccf3890ef035990894bfe1bcbd896689c329c933530b202d14bf0d0ba23"
+    },
+    {
+      "path": "jkqtmathtext/nodes/jkqtmathtextsubsupernode.h",
+      "upstream_path": "lib/jkqtmathtext/nodes/jkqtmathtextsubsupernode.h",
+      "sha256": "ba7ed0b31fdfae2f794189793cf2d72768d61fae9cf75f4b78ee65d46f3c98c2"
+    },
+    {
+      "path": "jkqtmathtext/nodes/jkqtmathtextsymbolnode.cpp",
+      "upstream_path": "lib/jkqtmathtext/nodes/jkqtmathtextsymbolnode.cpp",
+      "sha256": "6ef7ff162568d860eb8925672bd13981e6d07d801aba8661655fbd214715aa5c"
+    },
+    {
+      "path": "jkqtmathtext/nodes/jkqtmathtextsymbolnode.h",
+      "upstream_path": "lib/jkqtmathtext/nodes/jkqtmathtextsymbolnode.h",
+      "sha256": "a80a76ad5dc2284747fc1d87f628c7f925eb96a897877f95dd49f95afc5e49b5"
+    },
+    {
+      "path": "jkqtmathtext/nodes/jkqtmathtexttextnode.cpp",
+      "upstream_path": "lib/jkqtmathtext/nodes/jkqtmathtexttextnode.cpp",
+      "sha256": "283e34737179232d1a91b7f8f6d8f668359beaa2785d4314a1e269806b017416"
+    },
+    {
+      "path": "jkqtmathtext/nodes/jkqtmathtexttextnode.h",
+      "upstream_path": "lib/jkqtmathtext/nodes/jkqtmathtexttextnode.h",
+      "sha256": "71f16d6eee4fad9a51d87089bce40ecdf0540cfe3debc8aad970392aad90528e"
+    },
+    {
+      "path": "jkqtmathtext/nodes/jkqtmathtextverbatimnode.cpp",
+      "upstream_path": "lib/jkqtmathtext/nodes/jkqtmathtextverbatimnode.cpp",
+      "sha256": "ba90b198b59300f3de7c8927816cb0be792ac5935403c2719aaa8632e94165d6"
+    },
+    {
+      "path": "jkqtmathtext/nodes/jkqtmathtextverbatimnode.h",
+      "upstream_path": "lib/jkqtmathtext/nodes/jkqtmathtextverbatimnode.h",
+      "sha256": "6d80a917647303348fea05456d141f28e4bab39b2a94535d59d28f4d1fd77e52"
+    },
+    {
+      "path": "jkqtmathtext/nodes/jkqtmathtextverticallistnode.cpp",
+      "upstream_path": "lib/jkqtmathtext/nodes/jkqtmathtextverticallistnode.cpp",
+      "sha256": "338c28c8c719af12e9a3d2b616e6eb59cc3c189966d0975b75f8291e41acfb4b"
+    },
+    {
+      "path": "jkqtmathtext/nodes/jkqtmathtextverticallistnode.h",
+      "upstream_path": "lib/jkqtmathtext/nodes/jkqtmathtextverticallistnode.h",
+      "sha256": "55f65c39fe991ed001069fdf7217bb4d3d043b9255590f5258f5a1c9f2ae159e"
+    },
+    {
+      "path": "jkqtmathtext/nodes/jkqtmathtextwhitespacenode.cpp",
+      "upstream_path": "lib/jkqtmathtext/nodes/jkqtmathtextwhitespacenode.cpp",
+      "sha256": "6851da2ae337a9e79f1866ed93062bba5741b45a5b38123f58d48313062c7c7e"
+    },
+    {
+      "path": "jkqtmathtext/nodes/jkqtmathtextwhitespacenode.h",
+      "upstream_path": "lib/jkqtmathtext/nodes/jkqtmathtextwhitespacenode.h",
+      "sha256": "641338a139956c7c2443d6f6260d697ffd9b0b7bdd34698405c05e1be0a915f2"
+    },
+    {
+      "path": "jkqtmathtext/parsers/jkqtmathtextlatexparser.cpp",
+      "upstream_path": "lib/jkqtmathtext/parsers/jkqtmathtextlatexparser.cpp",
+      "sha256": "1c366698d638002dd44ef7764061afcfbbfb0e272dcff044c272d5ba89a8cb68"
+    },
+    {
+      "path": "jkqtmathtext/parsers/jkqtmathtextlatexparser.h",
+      "upstream_path": "lib/jkqtmathtext/parsers/jkqtmathtextlatexparser.h",
+      "sha256": "2d3f78b2796aac8e257d15605edebe9a59b67d44f4da72a3f33375e562564668"
+    },
+    {
+      "path": "jkqtmathtext/parsers/jkqtmathtextparser.cpp",
+      "upstream_path": "lib/jkqtmathtext/parsers/jkqtmathtextparser.cpp",
+      "sha256": "a6f684dc0d07bcd22d98a1628096b71f3c67d7c1c22011e822b2c6bbf5c9e849"
+    },
+    {
+      "path": "jkqtmathtext/parsers/jkqtmathtextparser.h",
+      "upstream_path": "lib/jkqtmathtext/parsers/jkqtmathtextparser.h",
+      "sha256": "df3b708bf35040564049f1927d709655cd22bc7342f34bc8002c0485be49656d"
+    },
+    {
+      "path": "jkqtmathtext/private/jkqtmathtext_precomp.h",
+      "upstream_path": "lib/jkqtmathtext/private/jkqtmathtext_precomp.h",
+      "sha256": "a14c2bfde02b943fa6ac6a51435399bdb5490c1027615ccc26422c4abdd32ed4"
+    }
+  ],
+  "local_patches": [
+    {
+      "path": "jkqtmathtext/jkqtmathtexttools.cpp",
+      "patched_sha256": "d4e6bbdc4eff5f26e72cb9d7a424607002ddeb1896b2bd0035d8213e06ac4fea",
+      "reason": "Correct inverted italic flag in HTML export; see PATCHES.md"
+    }
+  ]
+}

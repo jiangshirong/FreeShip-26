@@ -1,0 +1,5 @@
+{
+  "endpoint": "https://updates.freeship26.work/freeship/stable/latest.json",
+  "public_key_xml": "<RSAKeyValue><Modulus>0w/oNxzKO23xrVjB303eZ1pzf467S7hNbELDmkRm4yXea0wCRmQETgOHqMq/oxzmyPKfKhZDaUoOI3wHhyoIhTYql/hrvYceLJkD1bGn2mnS0c9et/xrta90Mx/3X6WELIXLl6mJksZ3ckp+fMMXN4P/BvJVe4z2wvJpAdMs44s81SJJRKU6DotDaLFX23uC18ac0hkzIbtjXUjzyE14nV/fbN7x7PEoW/zQK0SDF0iMITdEiJU8icQTjwHmGW0kyWP8q3DC+OJ9o1MZ4441hqU4eUZqjXDjnYIkdNzEhgUlxJIJJ8zNavc7NeCYsmaQ9RhZfHtlw2Sa7zbSpZ1nCjZDQJJF8iwJzP2hBY59yTa29cMOAH0J7rOy4ccHjdFJ1JNyUJVg+vWHDWtG9fwA0UhmooHNTHmN/sicLEVjzejh98dMzkbk0M/2uGj0hBtyRr3kmr/NTYwD4WvaCuJuzA1fl+DyvgJHnh7qqA+bn59NDAOOb5IHv9HHNG1sh49x</Modulus><Exponent>AQAB</Exponent></RSAKeyValue>",
+  "family": "ad4aa28d-89c6-5dad-8ead-46843a810838"
+}

@@ -1,0 +1,244 @@
+#include "feedback_text.h"
+#include "core/platform_process.h"
+#include "app/ui_language.h"
+#include "preferences_store.h"
+// SPDX-License-Identifier: GPL-2.0-or-later
+#include "exchange_dialog.h"
+#include "model_session.h"
+#include "core/model_exchange.h"
+#include "core/cad_export.h"
+#include "studio_ui.h"
+#include "grid_preview_panel.h"
+#include <QCheckBox>
+#include <QComboBox>
+#include <QDialogButtonBox>
+#include <QFileDialog>
+#include <QFileInfo>
+#include <QFormLayout>
+#include <QLabel>
+#include <QLineEdit>
+#include <QMessageBox>
+#include <QPushButton>
+#include <QPointer>
+#include <QVBoxLayout>
+#include <QCoreApplication>
+#include <QCryptographicHash>
+#include <QJsonDocument>
+#include <QJsonArray>
+#include <QDir>
+#include <QSaveFile>
+#include <QSpinBox>
+#include <QTabWidget>
+#include <cmath>
+namespace {
+bool sectionFormat(const QString& f){return f=="dxfcrease"||f=="offset_table"||f=="michlet"||f=="addmass"||f=="ghs"||f=="arch_hll"||f=="arch_app"||f=="pam";}
+bool metricFormat(const QString& f){return f=="michlet"||f=="addmass"||f=="arch_hll"||f=="arch_app"||f=="pam";}
+bool fileUnits(const QString& f){return f=="part"||f=="waves"||f=="fef"||f=="chines"||f=="surface"||f=="hull";}
+bool chineFormat(const QString& f){return f=="chines"||f=="carene"||f=="hull";}
+}
+
+ExchangeDialog::ExchangeDialog(ModelSession& session,bool importing,QString format,QWidget* parent)
+    :QDialog(parent),session_(session),importing_(importing),format_(std::move(format)){
+    setWindowTitle((importing?uiText("导入 "):uiText("导出 "))+fs::cad::title(format_));resize(620,460);
+    setWindowIcon(studioFormatWindowIcon(fs::cad::extension(format_),importing));setProperty("studio_window_icon","format:"+fs::cad::extension(format_).toUpper());
+    confirmOverwrite=[this](const QString& path){return confirmStudioAction(this,uiText("替换文件"),uiText("文件已存在，是否替换？\n")+path);};
+    auto* layout=new QVBoxLayout(this);layout->setContentsMargins(22,18,22,18);layout->setSpacing(12);
+    auto* form=new QFormLayout;auto* fileRow=new QHBoxLayout;path_=new QLineEdit;path_->setProperty("exchange_field","path");
+    auto* browse=studioFolderButton(uiText("浏览…"));
+    fileRow->addWidget(path_,1);fileRow->addWidget(browse);form->addRow(uiText("文件"),fileRow);
+    connect(browse,&QPushButton::clicked,this,[this]{
+        if(busy())return;
+        const auto ext=fs::cad::extension(format_);
+        const auto filter=fs::cad::title(format_)+" (*."+ext+(format_=="iges"?" *.iges":"")+")";
+        const auto start=path_->text().isEmpty()?preferenceFileLocation(importing_?"import":"export"):path_->text();
+        auto path=importing_?QFileDialog::getOpenFileName(this,windowTitle(),start,filter):
+            QFileDialog::getSaveFileName(this,windowTitle(),start,filter,nullptr,QFileDialog::DontConfirmOverwrite);
+        if(path.isEmpty())return;
+        if(!importing_&&QFileInfo(path).suffix().isEmpty())path+='.'+ext;
+        path_->setText(path);
+    });
+    units_=new QComboBox;units_->setProperty("exchange_field","units");for(auto pair:{std::pair{uiText("米 (m)"),"m"},{uiText("毫米 (mm)"),"mm"},{uiText("厘米 (cm)"),"cm"},{uiText("英尺 (ft)"),"ft"},{uiText("英寸 (in)"),"in"}})units_->addItem(pair.first,pair.second);
+    if(!importing&&session.model()&&session.model()->units=="imperial")units_->setCurrentIndex(3);
+    form->addRow(uiText("文件中的长度单位"),units_);
+    if(format_=="part"){encoding_=new QComboBox;encoding_->setProperty("exchange_field","text_encoding");for(auto pair:{std::pair{"UTF-8","utf8"},{uiText("西欧 Windows-1252"),"cp1252"},{uiText("俄语 Windows-1251"),"cp1251"},{uiText("简体中文 GBK"),"cp936"}})encoding_->addItem(pair.first,pair.second);if(importing_){auto current=session.model()?session.model()->textEncoding:QString("cp1252");int i=encoding_->findData(current);if(i>=0)encoding_->setCurrentIndex(i);}form->addRow(uiText("部件文字编码（与来源/接收软件一致）"),encoding_);}
+    auto check=[&](QString caption,QString key){auto* c=new QCheckBox(caption);c->setProperty("exchange_field",key);form->addRow(c);return c;};
+    axes_=check(uiText("按旧版 FreeShip OBJ 的轴顺序 (Y, Z, X)"),"legacy_axes");
+    control_=check(importing?uiText("作为控制网导入，允许细分平滑"):uiText("导出控制网"),"control_net");
+    symmetric_=check(importing?uiText("文件仅有半船，按中心线镜像"):uiText("补全对称图层的另一舷"),"symmetric");symmetric_->setChecked(!importing);
+    hidden_=check(uiText("包含隐藏图层"),"include_hidden");binary_=check(uiText("二进制 STL"),"binary_stl");binary_->setChecked(true);
+    closeDeck_=check(uiText("将敞开甲板按水平线封到中心线"),"close_deck");closeDeck_->setVisible(format_=="ghs"||format_=="arch_hll"||format_=="arch_app"||format_=="pam");
+    axes_->setVisible(format_=="obj");control_->setVisible(format_=="obj");hidden_->setVisible(!importing&&format_!="fef");binary_->setVisible(!importing&&format_=="stl");symmetric_->setVisible(format_!="fef");units_->setEnabled(format_!="fef");
+    if(format_=="coordinates"){control_->setVisible(true);control_->setText(uiText("导出原控制点（不补镜像，不按图层显隐筛选）"));connect(control_,&QCheckBox::toggled,this,[this](bool b){hidden_->setEnabled(!b);symmetric_->setEnabled(!b);});}
+    if(format_=="offset_table"||format_=="offsets"||format_=="dxf3d"){hidden_->hide();symmetric_->hide();}
+    if(format_=="ghs"){hidden_->hide();symmetric_->hide();units_->clear();units_->addItem(uiText("米 (m)"),"m");units_->addItem(uiText("英尺 (ft)"),"ft");if(session.model()&&session.model()->units=="imperial")units_->setCurrentIndex(1);}
+    if(metricFormat(format_)){
+        hidden_->hide();symmetric_->hide();units_->clear();units_->addItem(uiText("米 (m)"),"m");
+        const auto model=session.model();const double scale=model&&model->units=="imperial"?.3048:1.;
+        const double length=model?model->length*scale:0;
+        auto number=[&](const QString& label,const QString& key,double value){
+            auto* edit=new QLineEdit(QString::number(value,'g',17));edit->setProperty("exchange_number",key);
+            references_.insert(key,edit);form->addRow(label+" (m)",edit);
+        };
+        if(format_=="michlet"||format_=="addmass"){
+            QFormLayout* fields=form;QTabWidget* tabs=nullptr;
+            auto tab=[&](const QString& title){auto* page=new QWidget;fields=new QFormLayout(page);fields->setContentsMargins(14,16,14,16);fields->setVerticalSpacing(12);tabs->addTab(page,title);};
+            tabs=new QTabWidget;tabs->setProperty("exchange_tabs",true);form->addRow(tabs);tab(uiText("船体几何"));
+            auto parameter=[&](QString label,QString key,double value){auto* edit=new QLineEdit(QString::number(value,'g',12));edit->setProperty("exchange_number",key);references_.insert(key,edit);fields->addRow(label,edit);};
+            auto automatic=[&](QString label,QString key){parameter(label,key,0);auto* edit=references_[key];edit->clear();edit->setProperty("exchange_optional",true);edit->setPlaceholderText(uiText("自动：按实际水下船长"));};
+            auto choice=[&](QString label,QString key){auto* box=new QComboBox;box->setProperty("exchange_parameter",key);referenceChoices_[key]=box;fields->addRow(label,box);return box;};
+            parameter(uiText("横剖站数（奇数）"),"stations",format_=="michlet"?31:21);parameter(uiText("水线数（奇数）"),"waterlines",format_=="michlet"?21:11);
+            parameter(uiText("吃水 (m)"),"draft",model?model->draft*scale:0);
+            if(format_=="michlet"){
+                auto* mode=choice(uiText("船体布置"),"hull_mode");mode->addItem(uiText("单体船"),"monohull");mode->addItem(uiText("单体船，输出为双体船"),"duplicate");mode->addItem(uiText("已建好的双体船"),"catamaran");
+                parameter(uiText("片体中心面间距 (m)"),"separation",0);references_["separation"]->setToolTip(uiText("单体复制：设置两片体的间距。已有双体：必须等于模型中两片体中心面的实际间距。"));
+                connect(mode,&QComboBox::currentIndexChanged,this,[this]{refreshState();});
+                tab(uiText("环境与计算"));parameter(uiText("水深 (m)"),"depth",10000);parameter(uiText("重力加速度 (m/s²)"),"gravity",9.80665);
+                parameter(uiText("起始速度 (m/s)"),"start_speed",1);parameter(uiText("结束速度 (m/s)"),"end_speed",5);parameter(uiText("速度数量"),"speeds",50);parameter(uiText("运动黏度 (10⁻⁶ m²/s)"),"viscosity",1.18831);
+                auto* friction=choice(uiText("摩擦方法"),"friction");friction->addItem(uiText("无"),0);friction->addItem("ITTC 1957",1);friction->addItem("Grigson",2);friction->setCurrentIndex(1);
+                auto* factor=choice(uiText("形状因子方法"),"form_factor");factor->addItem(uiText("无"),0);factor->addItem("Dual",3);
+                tab(uiText("波形区域"));automatic(uiText("扇形起始半径 R0 (m)"),"r0");automatic(uiText("扇形结束半径 R1 (m)"),"r1");parameter(uiText("扇形半角 β (°)"),"beta",22.5);parameter(uiText("径向采样数"),"nr",100);parameter(uiText("角向采样数"),"nbeta",100);
+                automatic(uiText("矩形 X0 (m)"),"wave_x0");automatic(uiText("矩形 X1 (m)"),"wave_x1");automatic(uiText("矩形 Y0 (m)"),"wave_y0");automatic(uiText("矩形 Y1 (m)"),"wave_y1");parameter(uiText("X 采样数"),"wave_nx",100);parameter(uiText("Y 采样数"),"wave_ny",100);
+                tabs->setCurrentIndex(0);
+            }
+            else{parameter(uiText("面元数量"),"panels",1000);parameter(uiText("面积比例 (%)"),"area_percent",100);parameter(uiText("计算精度"),"accuracy",.2);parameter(uiText("面元（1 三角形 / 2 梯形）"),"panel_type",1);parameter(uiText("漂角 (°)"),"drift",0);parameter(uiText("航速 (kn)"),"velocity_knots",10);parameter(uiText("角速度 (1/s)"),"omega",0);parameter(uiText("对象类型编号"),"object_type",1);}
+            if(format_=="addmass")parameter(uiText("水深 (m)"),"depth",10000);
+            if(!importing_){preview_=new GridPreviewPanel(session_,format_,[this]{return referenceValues();});tabs->addTab(preview_,uiText("型值预览"));
+                for(auto* field:references_)connect(field,&QLineEdit::textChanged,preview_,[this]{preview_->invalidate();});
+                for(auto* choice:referenceChoices_)connect(choice,qOverload<int>(&QComboBox::currentIndexChanged),preview_,[this]{preview_->invalidate();});}
+            resize(680,format_=="michlet"?760:820);
+        }else if(format_=="pam"){
+            number(uiText("中船纵向位置"),"midship",length/2);
+            number(uiText("设计水线 Z"),"waterline",model?model->waterlineZ*scale:0);
+        }else{
+            number(uiText("艉垂线 AP · 模型 X"),"ap",0);number(uiText("艏垂线 FP · 模型 X"),"fp",length);
+            if(format_=="arch_hll"){
+                number(uiText("艉吃水标志 · 模型 X"),"aft_mark",0);number(uiText("中吃水标志 · 模型 X"),"mid_mark",length/2);number(uiText("艏吃水标志 · 模型 X"),"fwd_mark",length);
+            }
+        }
+    }
+    if((format_=="fef"||format_=="part")&&importing_){units_->clear();units_->addItem(uiText("使用文件内记录的单位"));}
+    if(format_=="polycad"||format_=="surface"||chineFormat(format_))symmetric_->setChecked(true);
+    if(chineFormat(format_))symmetric_->hide();
+    if(importing&&format_!="fef"&&format_!="part"&&format_!="waves"&&fileUnits(format_)){units_->clear();units_->addItem(format_=="hull"?uiText("英寸（转换为英尺，使用英制工程）"):uiText("使用文件首行：0 为米，1 为英尺"));}
+    if(importing&&(format_=="chines"||format_=="carene"||format_=="surface")){
+        columns_=new QSpinBox;columns_->setProperty("exchange_count","columns");columns_->setRange(format_=="surface"?0:2,100);columns_->setValue(format_=="surface"?0:8);
+        if(format_=="surface")columns_->setSpecialValueText(uiText("按原曲线数量（至少 3 列）"));
+        form->addRow(format_=="surface"?uiText("拟合网格列数"):uiText("每条折角线的拟合点数"),columns_);
+        if(format_=="surface"){rows_=new QSpinBox;rows_->setProperty("exchange_count","rows");rows_->setRange(3,100);rows_->setValue(10);form->addRow(uiText("拟合网格行数"),rows_);}
+    }
+    if(importing&&format_=="hull"){intermediate_=check(uiText("使用文件中的 13 个中间肋位（取消后使用 5 个主肋位）"),"intermediate_bulkheads");intermediate_->setChecked(true);}
+    if(importing&&format_=="waves"){
+        auto model=session.model();double scale=model&&model->units=="imperial"?.3048:1.;
+        for(auto key:{QString("origin_x"),QString("origin_y")}){auto* edit=new QLineEdit(QString::number(key=="origin_x"&&model?.5*model->length*scale:0,'g',17));edit->setProperty("exchange_number",key);references_[key]=edit;form->addRow(key=="origin_x"?uiText("波形原点 · 模型 X (m)"):uiText("波形原点 · 模型 Y (m)"),edit);}
+    }
+    layout->addLayout(form);details_=new StudioMessage(StudioMessageRole::Explanation);
+    if(!importing_&&format_=="fef")details_->setText(uiText("FEF 不保存剖面线、参考曲线、背景图和约束。"));
+    if(format_=="polycad")details_->setText(uiText("曲面将拟合为细分控制网，不能无损还原原 B 样条曲面。"));
+    if(chineFormat(format_))details_->setText(uiText("输入 Y≥0 的半船；折角线按龙骨至舷缘排列，方向均为艏至艉。"));
+    if(format_=="surface")details_->setText(uiText("曲线将拟合为控制网，不能无损还原原曲面。"));
+    if(format_=="iges")details_->setText(uiText("输出 NURBS 曲面片，不是缝合实体。名称仅支持 ASCII。"));
+    if(format_=="dxf3d")details_->setText(uiText("输出原侧三维剖面线和控制曲线，不含曲面，不补镜像。"));
+    if(format_=="ghs")details_->setText(uiText("仅支持对称单体船，不含舱室。使用全部静水力图层；敞开甲板需选择封顶。"));
+    if(format_=="arch_hll"||format_=="arch_app")details_->setText(uiText("仅支持对称船体，使用全部静水力图层。")+(format_=="arch_app"?QString(uiText("\nAPP 不支持中文等非 ASCII 文字，将替换为 ?。")):QString{}));
+    
+    if(format_=="part"){symmetric_->hide();units_->setEnabled(false);details_->setText(importing_?uiText(""):uiText("导出所选面；未选面时按图层显隐选项导出。不含背景图、工程参数和跨部件约束。"));}
+    if(format_=="waves"){symmetric_->hide();units_->clear();units_->addItem(uiText("米 (m)"),"m");details_->setText(uiText("原点取 Michlet 第一船体中心。波高以设计水线为零，X 方向反转；波形不参与静水力。"));}
+    if(format_=="vrml"){control_->show();details_->setText(uiText("材质、纹理和动画不导入。"));}
+    if(format_=="addmass")details_->setText(uiText("输入 Y≥0 的对称半船。"));
+    if(format_=="michlet")details_->setText(uiText("单体输入 Y≥0 半船；双体输入 Y>0 的完整片体，由图层镜像生成另一片体。"));
+    details_->setObjectName("ExchangeNotice");
+    const bool formatWarning=(!importing_&&(format_=="fef"||format_=="iges"||format_=="arch_app"||format_=="part"))||format_=="polycad"||format_=="surface"||format_=="vrml";
+    details_->setMessage(details_->text(),formatWarning?StudioMessageRole::Warning:StudioMessageRole::Explanation);
+    details_->setVisible(!details_->text().isEmpty());
+    layout->addWidget(details_);status_=new StudioMessage(StudioMessageRole::Feedback);status_->setProperty("exchange_status",true);layout->addWidget(status_);layout->addStretch();
+    auto* buttons=new QDialogButtonBox;run_=buttons->addButton(importing?uiText("导入"):uiText("导出"),QDialogButtonBox::ActionRole);run_->setProperty("exchange_action",importing?"import":"export");
+    if(!importing)setStudioFormatButton(run_,fs::cad::extension(format_),uiText("导出 ")+fs::cad::title(format_));
+    connect(run_,&QPushButton::clicked,this,&ExchangeDialog::submit);layout->addWidget(buttons);
+    refreshState();
+    exportTimeout_.setSingleShot(true);exportTimeout_.setInterval(90000);
+    connect(&exportTimeout_,&QTimer::timeout,this,[this]{cancelled_=true;exportProcess_.kill();showFailure(uiText("导出超时，原文件未被替换。"));});
+    connect(&exportProcess_,&QProcess::finished,this,[this](int code,QProcess::ExitStatus){finishSections(code);});
+    connect(&exportProcess_,&QProcess::errorOccurred,this,[this](QProcess::ProcessError e){if(e==QProcess::FailedToStart){exportTimeout_.stop();exporting_=false;showFailure(uiText("无法启动几何导出组件。"));}});
+}
+ExchangeDialog::~ExchangeDialog(){exportTimeout_.stop();cancelled_=true;exportProcess_.disconnect(this);if(exportProcess_.state()!=QProcess::NotRunning){exportProcess_.kill();exportProcess_.waitForFinished(2000);}}
+bool ExchangeDialog::busy()const{return session_.busy()||exporting_;}
+void ExchangeDialog::refreshState(){
+    const bool idle=!busy();run_->setEnabled(idle&&(importing_||session_.ready()));path_->setReadOnly(!idle);
+    units_->setEnabled(idle&&!fileUnits(format_)&&!metricFormat(format_));for(auto* box:{axes_,control_,symmetric_,hidden_,binary_,closeDeck_})box->setEnabled(idle);
+    if(columns_)columns_->setEnabled(idle);if(rows_)rows_->setEnabled(idle);if(intermediate_)intermediate_->setEnabled(idle);
+    for(auto* edit:references_)edit->setReadOnly(!idle);
+    for(auto* box:referenceChoices_)box->setEnabled(idle);
+    if(referenceChoices_.contains("hull_mode"))references_["separation"]->setEnabled(idle&&referenceChoices_["hull_mode"]->currentData().toString()!="monohull");
+    if(format_=="coordinates"&&control_->isChecked()){symmetric_->setEnabled(false);hidden_->setEnabled(false);}
+}
+void ExchangeDialog::reject(){if(exporting_){cancelled_=true;exportProcess_.kill();status_->setMessage(uiText("正在取消导出…"),StudioMessageRole::Feedback,true);}else if(!session_.busy())QDialog::reject();else if(format_=="iges"){session_.cancelCad();status_->setMessage(uiText("正在取消曲面生成…"),StudioMessageRole::Feedback,true);}}
+QString ExchangeDialog::failure()const{return status_->property("error").toString();}
+void ExchangeDialog::showFailure(const QString& error){status_->setProperty("error",error);status_->setMessage(error,StudioMessageRole::Warning);refreshState();}
+void ExchangeDialog::imported(){succeeded_=true;accept();}
+void ExchangeDialog::receiveCad(const QJsonObject& data){
+    if(pendingCadPath_.isEmpty())return;
+    try{fs::cad::write(pendingCadPath_,"iges",*session_.model(),pendingCadOptions_,data);succeeded_=true;status_->setMessage(uiText("已导出：")+pendingCadPath_,StudioMessageRole::Feedback);pendingCadPath_.clear();}
+    catch(const std::exception& e){pendingCadPath_.clear();showFailure(QString::fromUtf8(e.what()));}
+}
+void ExchangeDialog::submit(){
+    if(busy())return;
+    status_->setProperty("error",QString{});status_->clear();succeeded_=false;
+    try{
+        auto path=path_->text().trimmed();if(path.isEmpty())throw std::runtime_error(uiText("请先选择文件。"));
+        fs::exchange::Options o;o.units=units_->currentData().toString();o.legacyAxes=format_=="obj"&&axes_->isChecked();o.controlNet=(format_=="obj"||format_=="coordinates"||format_=="vrml")&&control_->isChecked();o.symmetric=symmetric_->isChecked();o.fullHull=symmetric_->isChecked();o.includeHidden=hidden_->isChecked();o.binaryStl=binary_->isChecked();
+        o.faceIds=faceIds;o.textEncoding=encoding_?encoding_->currentData().toString():QString("cp1252");
+        if(columns_)o.columns=columns_->value();if(rows_)o.rows=rows_->value();if(intermediate_)o.intermediateBulkheads=intermediate_->isChecked();
+        if(importing_){const bool append=format_=="part"||format_=="waves";if(append&&!session_.ready())throw std::runtime_error(uiText("请先打开或新建工程，再追加部件或波形。"));auto d=fs::exchange::read(path,format_,o);if(d.discardedZeroAreaFaces&&!confirmStudioAction(this,uiText("导入 VRML"),QString(uiText("文件含 %1 个零面积面。忽略这些面并导入其余模型？")).arg(d.discardedZeroAreaFaces)))return;auto data=d.bridgeData();if(format_=="waves"){auto refs=referenceValues();data["wave_patch"]=true;data["wave_origin_m"]=QJsonObject{{"x",refs["origin_x"]},{"y",refs["origin_y"]}};}auto submit=[guard=QPointer<ExchangeDialog>(this),data,append]{if(!guard||!guard->isVisible())return;guard->status_->setMessage(uiText("正在生成模型…"),StudioMessageRole::Feedback,true);guard->session_.importModel(data,append);guard->refreshState();};if(beforeImport&&!append)beforeImport(submit);else submit();}
+        else{
+            if(!session_.ready())return;
+            if(QFileInfo(path).suffix().isEmpty()){path+='.'+fs::cad::extension(format_);path_->setText(path);}
+            if(!fs::cad::acceptsExtension(format_,QFileInfo(path).suffix()))throw std::runtime_error(uiText("文件扩展名与所选导出格式不一致。"));
+            if(!session_.sourcePath().isEmpty()&&QFileInfo(path).absoluteFilePath().compare(QFileInfo(session_.sourcePath()).absoluteFilePath(),Qt::CaseInsensitive)==0)throw std::runtime_error(uiText("请另选导出路径，避免覆盖当前 FBM 工程。"));
+            if(QFileInfo::exists(path)&&(!confirmOverwrite||!confirmOverwrite(path)))return;
+            if(sectionFormat(format_)){startSections(path);return;}
+            if(format_=="iges"){pendingCadPath_=path;pendingCadOptions_=o;status_->setMessage(uiText("正在生成曲面…"),StudioMessageRole::Feedback,true);session_.cadPatches();return;}
+            if(fs::cad::supports(format_))fs::cad::write(path,format_,*session_.model(),o);
+            else fs::exchange::write(path,format_,*session_.model(),o);
+            succeeded_=true;status_->setMessage(uiText("已导出：")+path,StudioMessageRole::Feedback);
+        }
+    }catch(const std::exception& e){showFailure(QString::fromUtf8(e.what()));}
+}
+QJsonObject ExchangeDialog::referenceValues() const {
+    QJsonObject refs;for(auto it=references_.cbegin();it!=references_.cend();++it){if(!it.value()->isEnabled())continue;auto text=it.value()->text().trimmed();if(text.isEmpty()&&it.value()->property("exchange_optional").toBool())continue;bool ok=false;double value=text.toDouble(&ok);if(!ok||!std::isfinite(value)||std::abs(value)>1e9)throw std::runtime_error(uiText("参数必须是有限数值，请使用小数点。"));refs[it.key()]=value;}
+    for(auto it=referenceChoices_.cbegin();it!=referenceChoices_.cend();++it)refs[it.key()]=QJsonValue::fromVariant(it.value()->currentData());
+    return refs;
+}
+void ExchangeDialog::startSections(const QString& path){
+    exportWork_=std::make_unique<QTemporaryDir>(QDir::tempPath()+"/FreeShip26-export-XXXXXX");
+    if(!exportWork_->isValid())throw std::runtime_error(uiText("无法创建导出临时目录。"));
+    exportPath_=path;exportDocument_=session_.model()->documentId;exportRevision_=session_.model()->revision;
+    auto refs=referenceValues();
+    refs["include_hidden"]=hidden_->isChecked();refs["full_hull"]=symmetric_->isChecked();
+    QJsonObject request{{"format",format_},{"references",refs},{"model",session_.modelPath()},{"input",QFileInfo(session_.modelPath()).dir().filePath("native-input.json")},
+        {"document_id",exportDocument_},{"revision",double(exportRevision_)},{"units",units_->currentData().toString()},
+        {"close_deck",closeDeck_->isChecked()},{"output",exportWork_->filePath("hull.export")}};
+    QSaveFile file(exportWork_->filePath("request.json"));auto data=QJsonDocument(request).toJson();
+    if(!file.open(QIODevice::WriteOnly)||file.write(data)!=data.size()||!file.commit())throw std::runtime_error(uiText("无法准备导出请求。"));
+    exportProcess_.setProgram(fs::platform::siblingExecutable("FreeShipGeometryExport"));
+    exportProcess_.setArguments({file.fileName(),exportWork_->filePath("report.json"),QString::number(QCoreApplication::applicationPid())});
+    exportProcess_.setStandardOutputFile(QProcess::nullDevice());exportProcess_.setStandardErrorFile(exportWork_->filePath("worker.log"));
+#ifdef Q_OS_WIN
+    exportProcess_.setCreateProcessArgumentsModifier([](QProcess::CreateProcessArguments* args){args->flags|=0x08000000;});
+#endif
+    cancelled_=false;exporting_=true;status_->setMessage(uiText("正在生成横剖断面…"),StudioMessageRole::Feedback,true);refreshState();exportTimeout_.start();exportProcess_.start();
+}
+void ExchangeDialog::finishSections(int code){
+    if(!exporting_)return;exportTimeout_.stop();exporting_=false;
+    if(cancelled_){if(failure().isEmpty())QDialog::reject();else refreshState();return;}
+    try{
+        QFile reportFile(exportWork_->filePath("report.json"));if(!reportFile.open(QIODevice::ReadOnly)||reportFile.size()>1024*1024)throw std::runtime_error(uiText("几何导出组件未返回有效结果。"));
+        auto report=QJsonDocument::fromJson(reportFile.readAll()).object();
+        if(code||report["status"]!="pass")throw std::runtime_error(report["error"].toString(uiText("几何导出失败。")).toStdString());
+        if(!session_.ready()||session_.model()->documentId!=exportDocument_||session_.model()->revision!=exportRevision_||report["document_id"]!=exportDocument_||report["revision"].toDouble(-1)!=double(exportRevision_))throw std::runtime_error(uiText("模型版本已改变，请重新导出。"));
+        QFile result(exportWork_->filePath("hull.export"));if(!result.open(QIODevice::ReadOnly)||result.size()>256*1024*1024)throw std::runtime_error(uiText("无法读取几何导出文件。"));QCryptographicHash hash(QCryptographicHash::Sha256);
+        if(!hash.addData(&result)||report["sha256"].toString().toLatin1()!=hash.result().toHex())throw std::runtime_error(uiText("几何导出结果校验失败。"));result.close();
+        ModelSession::atomicCopy(result.fileName(),exportPath_);succeeded_=true;
+        if(format_=="michlet"||format_=="addmass")status_->setMessage(QString(uiText("已导出 %1 个船体，每个 %2 个断面；每个船体排水体积 %3 m³。\n%4")).arg(report["hulls"].toInt()).arg(report["stations"].toInt()).arg(report["volume_m3"].toDouble(),0,'g',10).arg(exportPath_),StudioMessageRole::Feedback);
+        else status_->setMessage(sectionsFeedbackText(report["stations"].toInt(),report["points"].toInt(),report["closed_decks"].toArray().size(),report["empty_stations"].toArray().size(),exportPath_),StudioMessageRole::Feedback);refreshState();
+    }catch(const std::exception& e){showFailure(QString::fromUtf8(e.what()));}
+}

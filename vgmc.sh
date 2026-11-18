@@ -1,1 +1,0 @@
-valgrind --tool=memcheck --leak-check=full --show-reachable=yes --leak-resolution=high --track-origins=yes --num-callers=50 --trace-children=yes --log-file=vgmc.log ./FreeShip $*

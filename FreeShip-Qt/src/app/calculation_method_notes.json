@@ -1,0 +1,679 @@
+{
+  "delft": {},
+  "holtrop": {
+    "parameters": [
+      {
+        "zh": "纵倾差 $dT=T_f-T_a$；$T_f=T+\\frac{dT}{2}$，$T_a=T-\\frac{dT}{2}$。",
+        "en": "Trim $dT=T_f-T_a$; $T_f=T+\\frac{dT}{2}$ and $T_a=T-\\frac{dT}{2}$."
+      },
+      {
+        "zh": "湿表面积 S=0 时使用 Holtrop 公式估算；AT 为艉封板浸水面积，ABT 为艏垂线处球鼻艏浸水横剖面面积，hb 为其形心距基线高度。",
+        "en": "S=0 requests the Holtrop wetted-area estimate. AT is immersed transom area; ABT is immersed bulb cross-sectional area at the forward perpendicular; hb is its centroid height above baseline."
+      }
+    ],
+    "sources": [
+      {
+        "zh": "Holtrop & Mennen, An Approximate Power Prediction Method, International Shipbuilding Progress 29(335), 1982；Holtrop, A Statistical Reanalysis of Resistance and Propulsion Data, 31(363), 1984.",
+        "en": "Holtrop & Mennen, An Approximate Power Prediction Method, International Shipbuilding Progress 29(335), 1982; Holtrop, A Statistical Reanalysis of Resistance and Propulsion Data, 31(363), 1984."
+      }
+    ]
+  },
+  "hollenbach": {
+    "original_limits_in_report": true,
+    "limits": [
+      {
+        "zh": "原方法数据库参数范围",
+        "en": "Parameter ranges of the original method database",
+        "table": {
+          "headers": [
+            {
+              "zh": "参数",
+              "en": "Parameter"
+            },
+            {
+              "zh": "单桨船（设计吃水）",
+              "en": "Single-screw (design draft)"
+            },
+            {
+              "zh": "单桨船（压载吃水）",
+              "en": "Single-screw (ballast draft)"
+            },
+            {
+              "zh": "双桨船",
+              "en": "Twin-screw"
+            }
+          ],
+          "rows": [
+            [
+              "L/V^0.3333",
+              "4.490–6.008",
+              "5.450–7.047",
+              "4.405–7.265"
+            ],
+            [
+              "Cb",
+              "0.601–0.830",
+              "0.559–0.790",
+              "0.512–0.775"
+            ],
+            [
+              "L/B",
+              "4.710–7.106",
+              "4.949–6.623",
+              "3.960–7.130"
+            ],
+            [
+              "B/T",
+              "1.989–4.002",
+              "2.967–6.120",
+              "2.308–6.110"
+            ],
+            [
+              "Los/Lwl",
+              "1.000–1.050",
+              "1.000–1.050",
+              "1.000–1.050"
+            ],
+            [
+              "Lwl/L",
+              "1.000–1.055",
+              "0.945–1.000",
+              "1.000–1.070"
+            ],
+            [
+              "Dp/Ta",
+              "0.430–0.840",
+              "0.655–1.050",
+              "0.495–0.860"
+            ]
+          ]
+        }
+      }
+    ],
+    "parameters": [
+      {
+        "zh": "纵倾差 $dT=T_f-T_a$；$T_f=T+\\frac{dT}{2}$，$T_a=T-\\frac{dT}{2}$。",
+        "en": "Trim $dT=T_f-T_a$; $T_f=T+\\frac{dT}{2}$ and $T_a=T-\\frac{dT}{2}$."
+      }
+    ]
+  },
+  "oortmerssen": {
+    "limits": [
+      {
+        "zh": "van Oortmerssen 分支：Lwl=8–80 m，排水体积=5–3000 m³，L/B=3–6.2，B/T=1.9–4，Cp=0.50–0.73，Cm=0.70–0.97，LCB=−7%～2.8%L，水线半进角=10–46°，Fr≤0.5。",
+        "en": "van Oortmerssen branch: Lwl=8–80 m, displacement volume=5–3000 m³, L/B=3–6.2, B/T=1.9–4, Cp=0.50–0.73, Cm=0.70–0.97, LCB=−7% to 2.8%L, entrance half-angle=10–46°, Fr≤0.5."
+      }
+    ],
+    "parameters": [
+      {
+        "zh": "纵倾差 $dT=T_f-T_a$；$T_f=T+\\frac{dT}{2}$，$T_a=T-\\frac{dT}{2}$。",
+        "en": "Trim $dT=T_f-T_a$; $T_f=T+\\frac{dT}{2}$ and $T_a=T-\\frac{dT}{2}$."
+      }
+    ]
+  },
+  "fung": {
+    "original_limits_in_report": true,
+    "limits": [
+      {
+        "zh": "原方法数据库参数范围",
+        "en": "Parameter ranges of the original method database",
+        "table": {
+          "headers": [
+            {
+              "zh": "参数",
+              "en": "Parameter"
+            },
+            {
+              "zh": "适用范围",
+              "en": "Range"
+            },
+            "单位"
+          ],
+          "rows": [
+            [
+              {
+                "zh": "长宽比 Lwl/B",
+                "en": "Length/beam Lwl/B"
+              },
+              "2.520–17.935"
+            ],
+            [
+              {
+                "zh": "宽吃水比 B/T",
+                "en": "Beam/draft B/T"
+              },
+              "1.696–10.204"
+            ],
+            [
+              {
+                "zh": "棱形系数 Cp",
+                "en": "Prismatic coefficient Cp"
+              },
+              "0.526–0.774"
+            ],
+            [
+              {
+                "zh": "中横剖面系数 Cm",
+                "en": "Midship coefficient Cm"
+              },
+              "0.556–0.994"
+            ],
+            [
+              {
+                "zh": "水线面系数 Cwp",
+                "en": "Waterplane coefficient Cwp"
+              },
+              "0.662–0.841"
+            ],
+            [
+              {
+                "zh": "水线半进角 ie",
+                "en": "Entrance half-angle ie"
+              },
+              "2.6–31.73",
+              "°"
+            ],
+            [
+              {
+                "zh": "艉封板面积系数 Ta",
+                "en": "Transom-area coefficient Ta"
+              },
+              "0.00–0.74"
+            ],
+            [
+              {
+                "zh": "艉封板宽度系数 Tw",
+                "en": "Transom-width coefficient Tw"
+              },
+              "0.00–1.00"
+            ],
+            [
+              {
+                "zh": "排水体积/长度 DLR=V/Lwl^3",
+                "en": "Volume/length DLR=V/Lwl^3"
+              },
+              "16.24–359.2"
+            ],
+            [
+              {
+                "zh": "弗劳德数 Fr",
+                "en": "Froude number Fr"
+              },
+              "0.15–0.90"
+            ]
+          ]
+        }
+      }
+    ],
+    "parameters": [
+      {
+        "zh": "纵倾差 $dT=T_f-T_a$；$T_f=T+\\frac{dT}{2}$，$T_a=T-\\frac{dT}{2}$。",
+        "en": "Trim $dT=T_f-T_a$; $T_f=T+\\frac{dT}{2}$ and $T_a=T-\\frac{dT}{2}$."
+      }
+    ]
+  },
+  "ost": {
+    "original_limits_in_report": true,
+    "limits": [
+      {
+        "zh": "9.1 系列 N 1——高速及中速船舶：集装箱船、Ro-Ro 船、载驳船；",
+        "en": "9.1 Series No. 1 — high- and medium-speed ships: container ships, Ro-Ro ships and lighter carriers."
+      },
+      {
+        "zh": "9.2 系列 N 2——客船及客货船：",
+        "en": "9.2 Series No. 2 — passenger and passenger/cargo ships."
+      },
+      {
+        "zh": "9.3 系列 N 3——海运运输船：通用货船、中型油船、散货船，\n运输渔船、冷藏船；",
+        "en": "9.3 Series No. 3 — seagoing transport ships: general cargo ships, medium-sized tankers, bulk carriers, fish carriers and refrigerated ships."
+      },
+      {
+        "zh": "9.4 系列 N 4——大型排水量运输船：大型油船和矿砂船；\n表. 按 OCT 5.0181-75 方法各系列典型阻力的数据库标准偏差",
+        "en": "9.4 Series No. 4 — large-displacement transport ships: large tankers and ore carriers.\nParameter ranges for the series in the OCT 5.0181-75 method",
+        "after": {
+          "zh": "注：Np - 螺旋桨数量；Nf - 船首类型；Na - 船尾类型：\n- Nf   = 1 ... 5 (U形、V形、圆筒形（鼓形）、冲角锥形、球鼻首)；\n- Na   = 1 ... 3 (U形、V形横剖面、雪茄形船尾)。",
+          "en": "Note: Np — number of propellers; Nf — bow type; Na — stern type.\n- Nf = 1 ... 5: U-shaped, V-shaped, cylindrical (drum-shaped), ram/conical, bulbous.\n- Na = 1 ... 3: U-shaped, V-shaped transverse sections, cigar-shaped stern."
+        },
+        "table": {
+          "headers": [
+            {
+              "zh": "参数",
+              "en": "Parameter"
+            },
+            {
+              "zh": "系列 1",
+              "en": "Series 1"
+            },
+            {
+              "zh": "系列 2",
+              "en": "Series 2"
+            },
+            {
+              "zh": "系列 3",
+              "en": "Series 3"
+            },
+            {
+              "zh": "系列 4",
+              "en": "Series 4"
+            }
+          ],
+          "rows": [
+            [
+              "Cb",
+              "0.500–0.650",
+              "0.550–0.650",
+              "0.600–0.800",
+              "0.800–0.875"
+            ],
+            [
+              "Lpp/B",
+              "4.80–7.00",
+              "4.80–7.30",
+              "-",
+              "5.80–8.30"
+            ],
+            [
+              "B/T",
+              "2.00–5.00",
+              "2.00–5.00",
+              "2.00–5.00",
+              "2.20–3.50"
+            ],
+            [
+              "Xc/Lpp",
+              "-",
+              "-0.05–0.00",
+              "-0.025–0.030",
+              "0.015–0.044"
+            ],
+            [
+              "Psi=L/V^0.333",
+              "-",
+              "-",
+              "-",
+              "5.00–7.50"
+            ],
+            [
+              "Fr",
+              "0.17–0.34",
+              "0.17–0.38",
+              "0.16–0.30",
+              "0.10–0.23"
+            ],
+            [
+              "Nser",
+              "1",
+              "2",
+              "3",
+              "4"
+            ],
+            [
+              "Np",
+              "1–2",
+              "2",
+              "1",
+              "1"
+            ],
+            [
+              "Nf",
+              "2,4",
+              "2",
+              "1,2,4",
+              "2–5"
+            ],
+            [
+              "Na",
+              "2",
+              "2",
+              "2",
+              "1–3"
+            ]
+          ]
+        }
+      }
+    ],
+    "parameters": [
+      {
+        "zh": "纵倾差 $dT=T_f-T_a$；$T_f=T+\\frac{dT}{2}$，$T_a=T-\\frac{dT}{2}$。",
+        "en": "Trim $dT=T_f-T_a$; $T_f=T+\\frac{dT}{2}$ and $T_a=T-\\frac{dT}{2}$."
+      },
+      {
+        "zh": "湿表面积 S 为 0 或负值时，按该取值对应的公式估算。",
+        "en": "When the wetted surface area S is zero or negative, use the formula corresponding to that input value."
+      }
+    ]
+  },
+  "rbhs": {
+    "original_limits_in_report": true,
+    "limits": [
+      {
+        "zh": "9.5 按 Braun 图谱计算阻力与功率预报：\n- 船型 - 高速船处于预滑行状态；\n- Cb   = 0,290 ... 0,540;  L/B  = 3,50 ... 7,40;  B/T  = 3,10 ... 4,40;\n- FrV  = v/(g*V^0,3333)^0,5 = 0,8 ... 2,6;\n- Nser = 5 ;\n- Np   = 1 ;\n- Nf   = 1 ... 2 (U形、V形横剖面)；\n- Na   = 1 ... 2 (U形、V形横剖面)。",
+        "en": "9.5 Resistance and power prediction using Braun charts:\n- Ship type: high-speed craft in the pre-planing regime;\n- Cb   = 0,290 ... 0,540;  L/B  = 3,50 ... 7,40;  B/T  = 3,10 ... 4,40;\n- FrV  = v/(g*V^0,3333)^0,5 = 0,8 ... 2,6;\n- Nser = 5 ;\n- Np   = 1 ;\n- Nf   = 1 ... 2 (U-shaped and V-shaped transverse sections);\n- Na   = 1 ... 2 (U-shaped and V-shaped transverse sections)."
+      },
+      {
+        "zh": "9.6 按 Neyman 图谱计算阻力与功率预报：\n- 船舶类型——拖船、拖网渔船和破冰船；\n- Cp   = 0,500 ... 0,680;       B/T  =  2,4 ... 3,2;    Psi=L/V^0,333 = 4,00 ... 7,20;\n- Fr   = 0,07 ... 0,45;\n- Nser = 6 ;\n- Nship= 1 ... 4 (1-拖船，2-拖网渔船，3 和 4-小型军舰)；\n- Np   = 1 ;",
+        "en": "9.6 Resistance and power prediction using Neyman charts:\n- Ship types: tugs, trawlers and icebreakers;\n- Cp   = 0,500 ... 0,680;       B/T  =  2,4 ... 3,2;    Psi=L/V^0,333 = 4,00 ... 7,20;\n- Fr   = 0,07 ... 0,45;\n- Nser = 6 ;\n- Nship= 1 ... 4 (1-tug, 2-trawler, 3 and 4-small naval vessels);\n- Np   = 1 ;"
+      },
+      {
+        "zh": "9.7 按 NIEWT 法（俄罗斯）计算阻力和功率预报：\n- 船舶类型——内河及江海联运（河-海）货船；\n- Cp   = 0,800 ... 0,930;       L/B  = 4,00 ... 8,50;   B/T  = 3,70 ... 14,0;\n- Fr   = 0,07 ... 0,25;\n- Nser = 7 ;\n- Np   = 1,2 ;",
+        "en": "9.7 Resistance and power prediction using the NIEWT method (Russia):\n- Ship types: inland and river–sea cargo ships;\n- Cp   = 0,800 ... 0,930;       L/B  = 4,00 ... 8,50;   B/T  = 3,70 ... 14,0;\n- Fr   = 0,07 ... 0,25;\n- Nser = 7 ;\n- Np   = 1,2 ;"
+      },
+      {
+        "zh": "9.8 按 Volodin 图谱计算阻力和功率预报：\n- 船舶类型——高速圆舭艇；",
+        "en": "9.8 Resistance and power prediction using Volodin charts: high-speed round-bilge craft."
+      },
+      {
+        "zh": "9.9 按 Nordstrom 图谱计算阻力和功率预报：\n- 船舶类型——高速圆舭艇（1936 年，14 个模型）；\n- V = 10 ... 30 m^3;",
+        "en": "9.9 Resistance and power prediction using Nordstrom charts: high-speed round-bilge craft (1936; 14 models); V = 10 ... 30 m^3."
+      },
+      {
+        "zh": "9.10  按 de Groot 图谱计算阻力和功率预报：\n- 船型 - 高速圆舭艇（1951年31个模型）；",
+        "en": "9.10 Resistance and power prediction using de Groot charts: high-speed round-bilge craft (1951; 31 models)."
+      },
+      {
+        "zh": "9.11 按 SSPA 图谱计算阻力和功率预报：\n- 船型 - 高速圆舭艇（1968年9个模型）；",
+        "en": "9.11 Resistance and power prediction using SSPA charts: high-speed round-bilge craft (1968; 9 models)."
+      },
+      {
+        "zh": "9.12 按 NPL 图谱计算阻力和功率预报：\n- 船型 - 高速圆舭艇（1969年和1976年22个模型）；",
+        "en": "9.12 Resistance and power prediction using NPL charts: high-speed round-bilge craft (1969 and 1976; 22 models)."
+      },
+      {
+        "zh": "9.13 按 64 系列泰勒水池图谱计算阻力和功率预报\n- 船型 - 高速圆舭艇（1965年27个模型）；",
+        "en": "9.13 Resistance and power prediction using the Taylor Model Basin Series 64 charts: high-speed round-bilge craft (1965; 27 models).\nOriginal per-series parameter ranges",
+        "after": {
+          "zh": "其中 FrV = v/(g*V^0,3333)^0,5 ；   SVLR = S/(VL)^0,5 ；   Pr-Shl - 按 Prandl-Schlichting 公式",
+          "en": "Here FrV = v/(g*V^0,3333)^0,5; SVLR = S/(VL)^0,5; Pr-Shl denotes the Prandtl–Schlichting formula."
+        },
+        "table": {
+          "headers": [
+            {
+              "zh": "参数",
+              "en": "Parameter"
+            },
+            "Volodin",
+            "Nordstrom",
+            "de Groote",
+            "SSPA",
+            "NPL",
+            {
+              "zh": "64 系列",
+              "en": "64 series"
+            },
+            "单位"
+          ],
+          "rows": [
+            [
+              "Cb",
+              "0.4–0.7",
+              "0.373–0.41",
+              "0.293–0.56",
+              "0.4",
+              "0.397",
+              "0.35–0.55"
+            ],
+            [
+              "Cp",
+              "-",
+              "0.576–0.6",
+              "0.463–0.781",
+              "0.68",
+              "0.693",
+              "0.63"
+            ],
+            [
+              "L/B",
+              "-",
+              "4.83–6.94",
+              "3.53–10.09",
+              "4.62–8.20",
+              "3.33–7.5",
+              "8.45–18.26"
+            ],
+            [
+              "B/T",
+              "-",
+              "3.70–14.0",
+              "2.72–6.58",
+              "3.0; 3.5; 4.0",
+              "1.76–6.87",
+              "2.0–4.0"
+            ],
+            [
+              "Xc/Lpp",
+              "-",
+              "-1.79–2.88",
+              "-11.5–3.09",
+              "-",
+              "-6.4",
+              "Xg/Lpp = 6.56",
+              "%"
+            ],
+            [
+              "Psi",
+              "-",
+              "-",
+              "-",
+              "6; 7; 8",
+              "-",
+              "-"
+            ],
+            [
+              "SVLR",
+              "-",
+              "2.67–2.70",
+              "2.75",
+              "2.9–3.0",
+              "-",
+              "-"
+            ],
+            [
+              "a_f",
+              "-",
+              "15.1–22.5",
+              "-",
+              "8.2–14.4",
+              "-",
+              "3.7–7.8",
+              "°"
+            ],
+            [
+              "FrV",
+              "1.0–2.5",
+              "0.90–2.00",
+              "0.8–2.7",
+              "1.0–2.0",
+              "0.5–2.8",
+              "0.8–3.0"
+            ],
+            [
+              "Cfo(Re)",
+              "Pr-Shl",
+              "Pr-Shl",
+              "Pr-Shl",
+              "by ITTC-57",
+              "by ITTC-57",
+              "Pr-Shl"
+            ],
+            [
+              "Nser",
+              "8",
+              "9",
+              "10",
+              "11",
+              "12",
+              "13"
+            ],
+            [
+              "Np",
+              "1",
+              "1",
+              "1",
+              "1",
+              "1",
+              "1"
+            ]
+          ]
+        }
+      },
+      {
+        "zh": "9.14 按 Doubrovsky 方法计算阻力和功率预报：\n- 船型 - 排水量双体船；\n- Cb   = 0,3 ... 0,55 ;    C/L = 0,01 ... 0,15 ;   Psi  =  8,0 ... 18,0 ;\n- FrV  = 0,8 ... 2,2;\n- Nser = 14 ;\n- Np   = 1 ... 2 - 船体数量；",
+        "en": "9.14 Resistance and power prediction using the Doubrovsky method:\n- Ship type: displacement catamarans;\n- Cb   = 0,3 ... 0,55 ;    C/L = 0,01 ... 0,15 ;   Psi  =  8,0 ... 18,0 ;\n- FrV  = 0,8 ... 2,2;\n- Nser = 14 ;\n- Np   = 1 ... 2 - number of hulls;"
+      }
+    ],
+    "parameters": [
+      {
+        "zh": "纵倾差 $dT=T_f-T_a$；$T_f=T+\\frac{dT}{2}$，$T_a=T-\\frac{dT}{2}$。",
+        "en": "Trim $dT=T_f-T_a$; $T_f=T+\\frac{dT}{2}$ and $T_a=T-\\frac{dT}{2}$."
+      },
+      {
+        "zh": "湿表面积 S 为 0 或负值时，按该取值对应的公式估算。",
+        "en": "When the wetted surface area S is zero or negative, use the formula corresponding to that input value."
+      }
+    ]
+  },
+  "mh": {
+    "original_limits_in_report": true,
+    "limits": [
+      {
+        "zh": "9.14 按 Doubrovsky 方法计算阻力和功率预报：\n- 船型 - 排水量双体船；\n- Cb   = 0,3 ... 0,55 ;    C/L = 0,01 ... 0,15 ;   Psi  =  8,0 ... 18,0 ;\n- FrV  = 0,8 ... 2,2;\n- Nser = 14 ;\n- Np   = 1 ... 2 - 船体数量；",
+        "en": "9.14 Resistance and power prediction using the Doubrovsky method:\n- Ship type: displacement catamarans;\n- Cb   = 0,3 ... 0,55 ;    C/L = 0,01 ... 0,15 ;   Psi  =  8,0 ... 18,0 ;\n- FrV  = 0,8 ... 2,2;\n- Nser = 14 ;\n- Np   = 1 ... 2 - number of hulls;"
+      },
+      {
+        "zh": "9.15 按 Doubrovsky 方法计算阻力和功率预报：\n- 船型 - 排水量双体船和三体船；\n- Cb   = 0,35 ... 0,55 ;    S/Lwl = 0,15 ... 0,45 ;\n- Psi  =  8,0 ... 18,0 ;     A/Lwl = 0,0  ... 0,5  (对于 S/Lwl = 0,3);\n- Fr   = 0,25 ... 0,6;\n- Nser = 15 ;\n- Nh   = 1 ... 3 - 船体数量 ;",
+        "en": "9.15 Resistance and power prediction using the Doubrovsky method:\n- Ship types: displacement catamarans and trimarans;\n- Cb   = 0,35 ... 0,55 ;    S/Lwl = 0,15 ... 0,45 ;\n- Psi  =  8,0 ... 18,0 ;     A/Lwl = 0,0  ... 0,5  (for S/Lwl = 0,3);\n- Fr   = 0,25 ... 0,6;\n- Nser = 15 ;\n- Nh   = 1 ... 3 - number of hulls ;"
+      },
+      {
+        "zh": "9.19 按折角型双体船计算阻力和功率预报：\n- 船舶类型 - 排水型折角型双体船；\n- Cb   = 0,5 ... 0,6 ;   L/B = 10,0 ... 20,0 ;  B/T =  1,5 ... 2,5 ;  S/Lwl = 0,15 ... 0,55 ;\n- Psi  = 6,6 ... 12,6;\n- Fr   = 0,4 ... 1,5 ;\n- Nser = 19 ;\n- Nh   = 2 - 船体数量；",
+        "en": "9.19 Resistance and power prediction for hard-chine catamarans:\n- Ship type: displacement hard-chine catamarans;\n- Cb   = 0,5 ... 0,6 ;   L/B = 10,0 ... 20,0 ;  B/T =  1,5 ... 2,5 ;  S/Lwl = 0,15 ... 0,55 ;\n- Psi  = 6,6 ... 12,6;\n- Fr   = 0,4 ... 1,5 ;\n- Nser = 19 ;\n- Nh   = 2 - number of hulls;"
+      }
+    ],
+    "parameters": [
+      {
+        "zh": "纵倾差 $dT=T_f-T_a$；$T_f=T+\\frac{dT}{2}$，$T_a=T-\\frac{dT}{2}$。",
+        "en": "Trim $dT=T_f-T_a$; $T_f=T+\\frac{dT}{2}$ and $T_a=T-\\frac{dT}{2}$."
+      },
+      {
+        "zh": "湿表面积 S 为 0 或负值时，按该取值对应的公式估算。",
+        "en": "When the wetted surface area S is zero or negative, use the formula corresponding to that input value."
+      }
+    ]
+  },
+  "kaper": {},
+  "planing": {},
+  "propeller1": {},
+  "propeller2": {},
+  "propeller3": {},
+  "propeller4": {
+    "limits": [
+      {
+        "zh": "POP.1.5 提供 3–7 叶 Wageningen B 系列回归和雷诺数修正，可选择 Burrill 5% 或 10% 背空泡准则。",
+        "en": "POP.1.5 provides Reynolds-corrected Wageningen B-series regressions for 3–7 blades, with a choice of the 5% or 10% Burrill back-cavitation criterion."
+      }
+    ],
+    "sources": [
+      {
+        "zh": "M. G. Parsons, Propeller Optimization Program POP.1.5, December 1994；Oosterveld 与 van Oossanen 的 Wageningen B 系列回归。",
+        "en": "M. G. Parsons, Propeller Optimization Program POP.1.5, December 1994; Wageningen B-series regression by Oosterveld and van Oossanen."
+      }
+    ]
+  },
+  "propeller5": {
+    "limits": [
+      {
+        "zh": "3≤桨叶数≤7，0.30≤Ae/Ao≤1.05，0.50≤P/D≤1.40，0≤J≤1.6。",
+        "en": "3–7 blades, 0.30≤Ae/Ao≤1.05, 0.50≤P/D≤1.40 and 0≤J≤1.6."
+      }
+    ],
+    "sources": [
+      {
+        "zh": "M. W. C. Oosterveld & P. van Oossanen, Further Computer-Analyzed Data of Wageningen B-Screw Series, ISP 22(251), July 1975; NMSB Report 479.",
+        "en": "M. W. C. Oosterveld & P. van Oossanen, Further Computer-Analyzed Data of Wageningen B-Screw Series, ISP 22(251), July 1975; NMSB Report 479."
+      }
+    ],
+    "variants": {
+      "native_b": {
+        "limits": []
+      }
+    }
+  },
+  "wind": {
+    "parameters": [
+      {
+        "zh": "SLOA：总长；B：船宽；AL：侧向受风投影面积；AS：上层建筑侧向投影面积；AT：横向受风投影面积。",
+        "en": "SLOA: overall length; B: beam; AL: lateral projected wind area; AS: lateral projected superstructure area; AT: transverse projected wind area."
+      },
+      {
+        "zh": "S 为侧向投影周长，不含水线及细长构件；C 为船首至侧向投影形心的距离。",
+        "en": "S is the perimeter of the lateral projection, excluding the waterline and slender bodies; C is the distance from the bow to its centroid."
+      },
+      {
+        "zh": "M：独立的桅杆或起货柱组数。",
+        "en": "M: Number of distinct groups of masts or kingposts."
+      },
+      {
+        "zh": "船型编号：\n1 — 客船和渡船\n2 — 机舱中置货船（满载）\n3 — 机舱中置货船（压载）\n4 — 机舱后置货船（满载）\n5 — 机舱后置货船（压载）\n6 — 驾驶台中置油船和矿砂船（满载）\n7 — 驾驶台中置油船和矿砂船（压载）\n8 — 驾驶台后置油船和矿砂船（满载）\n9 — 驾驶台后置油船和矿砂船（压载）\n10 — 艉拖网渔船\n11 — 拖船\n12 — 机舱后置油船、散货船和货船\n13 — 客船、渡船及甲板载货集装箱船\n14 — 甲板载货载驳船\n15 — 空载载驳船",
+        "en": "Ship-type indices:\n1 — Passenger ships and ferries\n2 — Cargo ships with engines amidships, loaded\n3 — Cargo ships with engines amidships, ballast\n4 — Cargo ships with engines aft, loaded\n5 — Cargo ships with engines aft, ballast\n6 — Tankers and ore carriers with bridge amidships, loaded\n7 — Tankers and ore carriers with bridge amidships, ballast\n8 — Tankers and ore carriers with bridge aft, loaded\n9 — Tankers and ore carriers with bridge aft, ballast\n10 — Stern trawlers\n11 — Tugs\n12 — Tankers, bulk carriers and cargo ships with engines aft\n13 — Passenger ships, ferries and container ships with deck cargo\n14 — Lighter ships with deck cargo\n15 — Lighter ships without cargo"
+      }
+    ],
+    "results": [
+      {
+        "zh": "$C_x=\\frac{F_x}{\\frac{1}{2}\\rho_a V_r^2 A_T}$；$C_y=\\frac{F_y}{\\frac{1}{2}\\rho_a V_r^2 A_T}$；$C_{mz}=\\frac{M_z}{\\frac{1}{2}\\rho_a V_r^2 A_T L_{OA}}$。",
+        "en": "$C_x=\\frac{F_x}{\\frac{1}{2}\\rho_a V_r^2 A_T}$; $C_y=\\frac{F_y}{\\frac{1}{2}\\rho_a V_r^2 A_T}$; $C_{mz}=\\frac{M_z}{\\frac{1}{2}\\rho_a V_r^2 A_T L_{OA}}$."
+      }
+    ],
+    "sources": [
+      {
+        "zh": "R. M. Isherwood, Wind Resistance of Merchant Ships, Proceedings of the Royal Institution of Naval Architects, 1973。",
+        "en": "R. M. Isherwood, Wind Resistance of Merchant Ships, Proceedings of the Royal Institution of Naval Architects, 1973."
+      }
+    ]
+  },
+  "maneuver": {
+    "limits": [
+      {
+        "zh": "线性评估的浅水修正适用于 $\\frac{H}{T}\\geq 1.3$。回转预估采用深水模型。",
+        "en": "The shallow-water correction for linear evaluation applies at $\\frac{H}{T}\\geq 1.3$. Turning prediction uses a deep-water model."
+      },
+      {
+        "zh": "回转预估样本范围\n单桨：$L_{\\mathrm{pp}}=54.9\\text{–}329.2\\,\\mathrm{m}$，$C_b=0.56\\text{–}0.87$，$\\delta=10^\\circ\\text{–}45^\\circ$，$\\frac{L}{B}=5.56\\text{–}9.09$，$F_r=0.06\\text{–}0.298$\n双桨：$L_{\\mathrm{pp}}=76.2\\text{–}225.6\\,\\mathrm{m}$，$C_b=0.42\\text{–}0.62$，$\\delta=10^\\circ\\text{–}35^\\circ$，$\\frac{L}{B}=5\\text{–}16.67$，$F_r=0.074\\text{–}0.655$",
+        "en": "Turning prediction sample ranges\nSingle-screw: $L_{\\mathrm{pp}}=54.9\\text{–}329.2\\,\\mathrm{m}$, $C_b=0.56\\text{–}0.87$, $\\delta=10^\\circ\\text{–}45^\\circ$, $\\frac{L}{B}=5.56\\text{–}9.09$, $F_r=0.06\\text{–}0.298$\nTwin-screw: $L_{\\mathrm{pp}}=76.2\\text{–}225.6\\,\\mathrm{m}$, $C_b=0.42\\text{–}0.62$, $\\delta=10^\\circ\\text{–}35^\\circ$, $\\frac{L}{B}=5\\text{–}16.67$, $F_r=0.074\\text{–}0.655$"
+      }
+    ],
+    "parameters": [
+      {
+        "zh": "TF、TA 为首尾吃水；LCG 从船中起以 %LWL 表示，向艏为正；舵作用点 XR 从船中起以 %LWL 表示，向艉为正。",
+        "en": "TF and TA are forward and aft drafts. LCG is %LWL from amidships, positive forward; rudder force center XR is %LWL from amidships, positive aft."
+      },
+      {
+        "zh": "GYRAD 为艏摇回转半径与 LWL 的比值；AR=舵面积/(LWL·T)；H/T 为水深吃水比，原说明以 1000 表示深水。",
+        "en": "GYRAD is yaw radius of gyration divided by LWL; AR=rudder area/(LWL·T); H/T is depth/draft ratio, with 1000 representing deep water in the inherited help."
+      }
+    ],
+    "results": [
+      {
+        "zh": "线性评估给出 Nomoto 时间常数与增益、Clarke 回转指标、裸船体动稳定性和相位裕度；除相位裕度以 ° 表示外，原说明采用无量纲输出。",
+        "en": "Linear evaluation gives Nomoto time constants/gains, Clarke turning index, bare-hull dynamic stability and phase margin. The inherited help uses nondimensional outputs except phase margin in °."
+      },
+      {
+        "zh": "回转预估给出稳定回转直径、战术直径、进距、横距和回转中稳定航速。",
+        "en": "Turning prediction gives steady turning diameter, tactical diameter, advance, transfer and steady turning speed."
+      }
+    ],
+    "sources": [
+      {
+        "zh": "M. G. Parsons, MPP-1.3, December 1994；Clarke, Gedling & Hine (RINA 124, 1982)；Lyster & Knights (NECIES 1978–1979)；Fugino (Michigan NAME Report 184, 1976)；Inoue, Hirano & Kijima (ISP 28(321), 1981)。",
+        "en": "M. G. Parsons, MPP-1.3, December 1994; Clarke, Gedling & Hine (RINA 124, 1982); Lyster & Knights (NECIES 1978–1979); Fugino (Michigan NAME Report 184, 1976); Inoue, Hirano & Kijima (ISP 28(321), 1981)."
+      }
+    ]
+  },
+  "acceleration": {},
+  "addmass": {
+    "limits": [
+      {
+        "zh": "船体表面不得与海底相交。",
+        "en": "The hull surface must not intersect the seabed."
+      }
+    ]
+  }
+}
