@@ -4,6 +4,12 @@
   "id": "en",
   "name": "English",
   "messages": {
+    "installer\u0004创建桌面快捷方式": "Create a desktop shortcut",
+    "installer\u0004安装完成后打开 FreeShip 26": "Launch FreeShip 26 after installation",
+    "installer\u0004删除个人设置和最近文件记录（保留船模）": "Remove preferences and recent file history (keep hull models)",
+    "installer\u0004桌面已有其他同名快捷方式。": "A different desktop shortcut already uses this name.",
+    "installer\u0004浏览…": "Browse…",
+    "installer\u0004选择安装文件夹": "Select the installation folder",
     "%1 小时 %2 分钟": "%1 h %2 min",
     "%1 分钟 %2 秒": "%1 min %2 s",
     "%1 秒": "%1 s",

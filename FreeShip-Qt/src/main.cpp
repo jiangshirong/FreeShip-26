@@ -55,9 +55,14 @@ int main(int argc, char** argv) {
     const bool verifyDevelopment=arguments.removeAll("--development")>0;
     const bool verification=arguments.size()>1&&arguments[1].startsWith("--verify-");
     QFile manifest(app.applicationDirPath()+"/build-manifest.json");
-    const bool developmentInstall=manifest.open(QIODevice::ReadOnly)&&manifest.size()<=1024*1024&&
-        QJsonDocument::fromJson(manifest.readAll()).object()["local_installation_role"].toString()
-            .startsWith("development;");
+    const auto buildInfo=manifest.open(QIODevice::ReadOnly)&&manifest.size()<=1024*1024?
+        QJsonDocument::fromJson(manifest.readAll()).object():QJsonObject{};
+    const bool developmentInstall=buildInfo["local_installation_role"].toString().startsWith("development;");
+#ifdef Q_OS_WIN
+    // Installed releases must never clear or reuse development settings on a clean install.
+    if(!developmentInstall&&buildInfo["settings_profile"].toString()=="installed")
+        QCoreApplication::setOrganizationName("FreeShip26Installed");
+#endif
     app.setProperty("freeship_development",developmentInstall||(verification&&verifyDevelopment));
     QString languageIssue;
     // Resolve captions before constructing widgets. Probes never read user settings.

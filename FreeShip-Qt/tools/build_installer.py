@@ -210,6 +210,7 @@ def build(runtime,output,wix,version=DEFAULT_VERSION,test_id=None):
         'test_source_sha256','binaries_sha256','runtime_profile','packaged_utc',
         'package_source_manifest_sha256','runtime_packager_sha256') if key in packaged}
     stamped['release_version']=version
+    stamped['settings_profile']='installed'
     version_manifest.write_text(json.dumps(stamped,ensure_ascii=False,indent=2)+'\n','utf8')
     ids,portable,files=author(output/'payload',output,version,test_id)
     msi=compile_msi(output,wix)

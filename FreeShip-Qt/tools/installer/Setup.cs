@@ -198,6 +198,10 @@ static class Setup {
                 Target=Path.GetFullPath(Target).TrimEnd('\\');
                 if(installed!=null&&!Uninstall&&new Version(next.version)<new Version(Validate(installed.product).version)) {Report["status"]="downgrade_rejected";return 1638;}
                 Preflight(installed,next,Target);
+                bool migrateProfile=false;
+                if(!Uninstall&&installed!=null&&Bundle!=null){var oldMarker=Path.Combine(Target,"build-manifest.json");
+                    if(File.Exists(oldMarker)){var oldInfo=Read<Dictionary<string,object>>(oldMarker);migrateProfile=!oldInfo.ContainsKey("settings_profile");}}
+
                 if(Bundle!=null&&!Uninstall) {
                     string file=FileName(next.product_code,".msi");var bytes=Resource("payload.msi");
                     if(File.Exists(file)&&Hash(file)!=next.msi_sha256)throw new IOException(T("同版本安装包已改变，不能覆盖已有恢复包"));
@@ -222,7 +226,13 @@ static class Setup {
                         Register(installed,next);Save(StatePath,installed);
                         if(Test&&Identity.Fault=="after-msi")throw new IOException("Regression failure after MSI and outer registration commit");
                     }
-                    File.Delete(JournalPath);Report["status"]=Uninstall?"uninstalled":"installed";Trim(installed);return 0;
+                    File.Delete(JournalPath);Report["status"]=Uninstall?"uninstalled":"installed";Trim(installed);
+                    // Optional user actions run after commit; their failure must never roll back a verified MSI.
+                    try {
+                        if(Uninstall){DesktopLink(false);if(ResetRequested)ResetPersonalFiles();}
+                        else {if(migrateProfile)ImportLegacyPreferences();if(CreateShortcut)DesktopLink(true);}
+                    } catch(Exception ex){Report["post_install_error"]=ex.Message;return 1;}
+                    return 0;
                 } catch(Exception ex) {
                     Report["installation_error"]=ex.Message;
                     Report["states_before_recovery"]=new {candidate=State(next),previous=tx.before==null?-1:State(Validate(tx.before.product))};
@@ -235,6 +245,33 @@ static class Setup {
             finally {if(acquired)gate.ReleaseMutex();}
         }
     }
+    static string DataRoot(bool legacy) {
+        return Test?Path.Combine(Cache,legacy?"legacy-test-profile":"installed-test-profile"):
+            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),legacy?"FreeShip26":"FreeShip26Installed","FreeShip_26 Qt");
+    }
+    static readonly string[] PersonalFiles={"preferences.json","recent-files.json"};
+    static void ImportLegacyPreferences() {
+        // Only on upgrade from a registered legacy build. Never move or erase the development profile.
+        foreach(var n in PersonalFiles) {
+            var src=Path.Combine(DataRoot(true),n);var dst=Path.Combine(DataRoot(false),n);
+            NoLinks(src);NoLinks(dst);if(File.Exists(src)&&!File.Exists(dst)){Directory.CreateDirectory(DataRoot(false));File.Copy(src,dst,false);}
+        }
+    }
+    static void ResetPersonalFiles() {
+        foreach(var n in PersonalFiles){var f=Path.Combine(DataRoot(false),n);NoLinks(f);if(File.Exists(f))File.Delete(f);}
+    }
+    static void DesktopLink(bool create) {
+        var directory=Test?Path.Combine(Cache,"test-desktop"):Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
+        if(String.IsNullOrEmpty(directory))throw new DirectoryNotFoundException();
+        var dest=Path.Combine(directory,Identity.Name+".lnk");var receipt=Path.Combine(Cache,"desktop-link.sha256");
+        NoLinks(dest);NoLinks(receipt);
+        bool owned=File.Exists(dest)&&File.Exists(receipt)&&Hash(dest)==File.ReadAllText(receipt);
+        if(!create){if(owned)File.Delete(dest);File.Delete(receipt);return;}
+        var src=Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Programs),Identity.Name,Identity.Name+".lnk");
+        if(File.Exists(dest)&&!owned){if(Hash(dest)==Hash(src))return;throw new IOException(T("桌面已有其他同名快捷方式。"));}
+        Directory.CreateDirectory(directory);File.Copy(src,dest,owned);File.WriteAllText(receipt,Hash(dest));
+    }
+    static bool ResetRequested, CreateShortcut;
     static int Run() {
         var code=Execute();Report["exit_code"]=code;Report["operations"]=Operations;Report["cache"]=Cache;Report["directory"]=Target;
         Report["stage"]=Stage;Report["utc"]=DateTime.UtcNow.ToString("o");
@@ -269,31 +306,58 @@ static class Setup {
             if(Quiet)return Run();
             Application.EnableVisualStyles();Application.SetCompatibleTextRenderingDefault(false);
             int result=1602;bool running=false,finished=false;
-            using(var form=new Form {Text=Identity.Name+T(" 安装"),Width=560,Height=280,StartPosition=FormStartPosition.CenterScreen,FormBorderStyle=FormBorderStyle.FixedDialog,MaximizeBox=false}) {
+            using(var form=new Form {Text=Identity.Name+T(" 安装"),Width=560,Height=345,StartPosition=FormStartPosition.CenterScreen,FormBorderStyle=FormBorderStyle.FixedDialog,MaximizeBox=false}) {
                 var label=new Label {Left=24,Top=24,Width=490,Height=50,Text=Uninstall?T("卸载程序并保留船模和偏好设置。"):T("安装或更新 FreeShip 26。升级失败时将自动恢复此前版本。")};
                 var path=new TextBox {Left=24,Top=80,Width=490,Text=Target??(File.Exists(StatePath)?Read<Installed>(StatePath).directory:Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),"Programs",Bundle==null?"FreeShip26Qt":Bundle.folder))};
                 path.ReadOnly=Uninstall||File.Exists(StatePath);
+                var browse=new Button {Left=414,Top=77,Width=100,Height=26,Visible=!path.ReadOnly};
+                if(!path.ReadOnly)path.Width=browse.Left-path.Left-8;
+                browse.Click+=delegate {
+                    using(var picker=new FolderBrowserDialog {Description=T("选择安装文件夹"),ShowNewFolderButton=true}) {
+                        // An initial destination need not exist yet. Open at its nearest existing parent.
+                        try {
+                            var dir=new DirectoryInfo(path.Text);
+                            while(dir!=null&&!dir.Exists)dir=dir.Parent;
+                            if(dir!=null)picker.SelectedPath=dir.FullName;
+                        } catch(ArgumentException) {} catch(IOException) {} catch(NotSupportedException) {}
+                        if(picker.ShowDialog(form)==DialogResult.OK)path.Text=picker.SelectedPath;
+                    }
+                };
                 var languageLabel=new Label {Left=24,Top=125,Width=90,Height=24};
                 var language=new ComboBox {Left=120,Top=122,Width=180,DropDownStyle=ComboBoxStyle.DropDownList};
                 foreach(var option in InstallerLanguage.Options) {language.Items.Add(option);if(option.Id==InstallerLanguage.Id)language.SelectedItem=option;}
-                var progress=new ProgressBar {Left=24,Top=160,Width=490,Visible=false,Style=ProgressBarStyle.Marquee};
-                var start=new Button {Left=320,Top=198,Width=90,Text=Uninstall?T("卸载"):T("开始")};var close=new Button {Left=424,Top=198,Width=90,Text=T("取消")};
+                var shortcut=new CheckBox {Left=24,Top=153,Width=490,Checked=true,Visible=!Uninstall};
+                var launch=new CheckBox {Left=24,Top=180,Width=490,Checked=true,Visible=!Uninstall};
+                var reset=new CheckBox {Left=24,Top=153,Width=490,Checked=false,Visible=Uninstall};
+                var progress=new ProgressBar {Left=24,Top=211,Width=490,Visible=false,Style=ProgressBarStyle.Marquee};
+                var start=new Button {Left=320,Top=252,Width=90,Text=Uninstall?T("卸载"):T("开始")};var close=new Button {Left=424,Top=252,Width=90,Text=T("取消")};
                 Action applyLanguage=delegate {
-                    form.Text=Identity.Name+T(" 安装");languageLabel.Text=T("语言");
+                    form.Text=Identity.Name+T(" 安装");languageLabel.Text=T("语言");browse.Text=T("浏览…");
+                    shortcut.Text=T("创建桌面快捷方式");launch.Text=T("安装完成后打开 FreeShip 26");reset.Text=T("删除个人设置和最近文件记录（保留船模）");
                     label.Text=finished?(result==0?(Report.ContainsKey("status")&&(string)Report["status"]=="recovered_interrupted"?T("上次安装被中断，已恢复此前版本。"):Uninstall?T("卸载完成，用户文件和设置已保留。"):T("操作完成。")):Report.ContainsKey("recovered")?T("本次安装未完成，已恢复此前安装状态。"):T("操作未完成，请查看安装日志：")+Path.Combine(Cache,"last-result.json")):
                         Uninstall?T("卸载程序并保留船模和偏好设置。"):T("安装或更新 FreeShip 26。升级失败时将自动恢复此前版本。");
                     start.Text=Uninstall?T("卸载"):T("开始");if(!close.IsDisposed)close.Text=T("取消");
                 };
                 language.SelectedIndexChanged+=delegate {InstallerLanguage.Select(((InstallerLanguage.Option)language.SelectedItem).Id);applyLanguage();};
                 applyLanguage();
-                form.Controls.AddRange(new Control[]{label,path,languageLabel,language,progress,start,close});close.Click+=delegate {form.Close();};
+                form.Controls.AddRange(new Control[]{label,path,browse,shortcut,launch,reset,languageLabel,language,progress,start,close});close.Click+=delegate {form.Close();};
                 form.FormClosing+=delegate(object sender,FormClosingEventArgs e) {if(running)e.Cancel=true;};
                 Status=delegate(string text) {form.BeginInvoke((Action)delegate {label.Text=text;});};
                 start.Click+=delegate {
                     try {Target=Path.GetFullPath(path.Text);}catch(Exception ex) {label.Text=T("目录无效：")+ex.Message;return;}
-                    running=true;start.Enabled=false;close.Enabled=false;path.Enabled=false;language.Enabled=false;progress.Visible=true;
+                    ResetRequested=Uninstall&&reset.Checked;CreateShortcut=!Uninstall&&shortcut.Checked;shortcut.Enabled=launch.Enabled=reset.Enabled=false;
+                    running=true;start.Enabled=false;close.Enabled=false;path.Enabled=false;browse.Enabled=false;language.Enabled=false;progress.Visible=true;
                     var worker=new BackgroundWorker();worker.DoWork+=delegate {result=Run();};worker.RunWorkerCompleted+=delegate(object sender,RunWorkerCompletedEventArgs e) {
-                        running=false;finished=true;form.Controls.Remove(close);close.Dispose();progress.Visible=false;language.Enabled=true;applyLanguage();
+                        running=false;finished=true;progress.Visible=false;applyLanguage();
+                        if(result==0){
+                            if(!Uninstall&&launch.Checked&&Convert.ToString(Report["status"])=="installed"){
+                                try {Process.Start(new ProcessStartInfo(Path.Combine(Target,"FreeShipQt.exe")){WorkingDirectory=Target,UseShellExecute=false});}
+                                catch(Exception ex){MessageBox.Show(form,ex.Message,Identity.Name,MessageBoxButtons.OK,MessageBoxIcon.Warning);}
+                            }
+                            form.Close();return;
+                        }
+                        if(Report.ContainsKey("post_install_error"))label.Text=Convert.ToString(Report["post_install_error"]);
+                        close.Enabled=true;
                     };worker.RunWorkerAsync();
                 };
                 if(observeLanguageUi) {

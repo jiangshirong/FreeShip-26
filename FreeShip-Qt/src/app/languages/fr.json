@@ -4,6 +4,12 @@
   "id": "fr",
   "name": "Français",
   "messages": {
+    "installer\u0004创建桌面快捷方式": "Créer un raccourci sur le bureau",
+    "installer\u0004安装完成后打开 FreeShip 26": "Lancer FreeShip 26 après l’installation",
+    "installer\u0004删除个人设置和最近文件记录（保留船模）": "Supprimer les préférences et la liste des fichiers récents (conserver les modèles)",
+    "installer\u0004桌面已有其他同名快捷方式。": "Un autre raccourci du bureau porte déjà ce nom.",
+    "installer\u0004浏览…": "Parcourir…",
+    "installer\u0004选择安装文件夹": "Sélectionnez le dossier d’installation",
     "受风面积、投影形心及桅杆资料等请手动核对。": "Vérifiez manuellement les surfaces exposées au vent, le centre de la surface projetée et les données des mâts.",
     "无法从当前船模自动填入总长和水线宽，请手动核对这两项。": "La longueur hors tout et la largeur à la flottaison n’ont pas pu être renseignées à partir du modèle. Vérifiez ces deux valeurs manuellement.",
     "计算结果": "Résultat du calcul",

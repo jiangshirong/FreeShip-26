@@ -4,6 +4,12 @@
   "id": "de",
   "name": "Deutsch",
   "messages": {
+    "installer\u0004创建桌面快捷方式": "Desktopverknüpfung erstellen",
+    "installer\u0004安装完成后打开 FreeShip 26": "FreeShip 26 nach der Installation starten",
+    "installer\u0004删除个人设置和最近文件记录（保留船模）": "Einstellungen und Liste zuletzt geöffneter Dateien löschen (Modelle behalten)",
+    "installer\u0004桌面已有其他同名快捷方式。": "Eine andere Desktopverknüpfung hat bereits diesen Namen.",
+    "installer\u0004浏览…": "Durchsuchen…",
+    "installer\u0004选择安装文件夹": "Installationsordner auswählen",
     "受风面积、投影形心及桅杆资料等请手动核对。": "Windangriffsflächen, Schwerpunkt der Projektionsfläche und Mastdaten bitte manuell prüfen.",
     "无法从当前船模自动填入总长和水线宽，请手动核对这两项。": "Gesamtlänge und Wasserlinienbreite konnten nicht aus dem Modell übernommen werden. Bitte beide Werte manuell prüfen.",
     "计算结果": "Berechnungsergebnis",

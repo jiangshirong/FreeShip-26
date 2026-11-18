@@ -1,4 +1,4 @@
-## Windows x64 release source (0.1.13)
+## Windows x64 release source (0.1.14)
 
 `FreeShip-Qt/` contains the application; `FreeShip-Tests/qt/` contains its C++ test sources. From the repository root, with Qt 6.8.3, its matching MinGW 13.1 compiler, Ninja, CMake and Python on PATH:
 
