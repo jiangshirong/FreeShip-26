@@ -3,6 +3,9 @@
 #include <QJsonArray>
 #include <QPair>
 #include <QString>
+#include <QVariant>
+#include <functional>
+class QComboBox;
 class QWidget;
 class QObject;
 class QJsonObject;
@@ -18,6 +21,10 @@ QString uiText(const QString& source,const QString& context);
 QString uiTextParts(const QJsonArray& parts);
 QString uiMetadataText(const QJsonObject& metadata,const char* key);
 void bindUiText(QObject* object,const char* property,const QString& source,const QString& context = {});
+// Rebuild UI-owned composite captions from their source while the owner lives.
+void bindUiRefresh(QObject* owner,std::function<void()> refresh);
+void addUiItem(QComboBox* combo,const QString& source,const QVariant& data = {});
+void addUiItems(QComboBox* combo,const QStringList& sources);
 QString uiLanguage();
 QString uiLanguageError();
 QJsonArray uiLanguages();

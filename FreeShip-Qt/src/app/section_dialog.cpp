@@ -15,11 +15,20 @@
 #include <QToolButton>
 #include <QHBoxLayout>
 #include <QScreen>
+#include <QSignalBlocker>
 #include <QVBoxLayout>
 #include <algorithm>
 #include <cmath>
 
 namespace {
+using Rows=QVector<fs::Section>;
+Rows definitions(const fs::ModelSnapshot* model){
+    Rows out;if(model){out.reserve(model->sections.size());for(const auto& s:model->sections){
+        fs::Section row;row.kind=s.kind;row.index=s.index;row.distance=s.distance;row.plane=s.plane;row.showCurvature=s.showCurvature;out.append(row);
+    }}return out;
+}
+bool sameRow(const fs::Section& a,const fs::Section& b){return a.kind==b.kind&&a.plane==b.plane&&a.distance==b.distance&&a.showCurvature==b.showCurvature;}
+bool sameRows(const Rows& a,const Rows& b){return a.size()==b.size()&&std::equal(a.cbegin(),a.cend(),b.cbegin(),sameRow);}
 class SectionHeader final:public QHeaderView {
 public:
     SectionHeader(QTableWidget* parent,const QList<QAction*>& actions):QHeaderView(Qt::Horizontal,parent){
@@ -55,7 +64,13 @@ SectionDialog::SectionDialog(QWidget* parent):QDialog(parent) {
     tabs_->setSizePolicy(QSizePolicy::Preferred,QSizePolicy::Fixed);layout->addWidget(tabs_);
     table_=new QTableWidget(0,3);table_->setObjectName("SectionDefinitions");
     table_->setHorizontalHeader(new SectionHeader(table_,{addOne_,addRange_,clear_}));
-    table_->setHorizontalHeaderLabels({uiText("编号"),uiText("距离"),uiText("曲率")});
+    refreshHeaders();
+    bindUiRefresh(table_,[this]{
+        const QSignalBlocker guard(table_);
+        refreshHeaders();
+        for(int row=0;row<table_->rowCount();++row)if(auto* item=table_->item(row,2))
+            item->setToolTip(uiText("显示这条剖面线的曲率梳"));
+    });
     applyStudioScrollbars(table_);
     table_->verticalHeader()->hide();table_->setSelectionBehavior(QAbstractItemView::SelectRows);table_->setSelectionMode(QAbstractItemView::ExtendedSelection);
     table_->horizontalHeader()->setSectionResizeMode(1,QHeaderView::ResizeToContents);
@@ -81,12 +96,35 @@ int SectionDialog::kind()const{return tabs_->currentIndex()+1;}
 QSet<int> SectionDialog::selectedIndices()const{
     QSet<int> ids;for(auto index:table_->selectionModel()->selectedRows())ids.insert(table_->item(index.row(),0)->data(Qt::UserRole).toInt());return ids;
 }
-void SectionDialog::setSnapshot(std::shared_ptr<const fs::ModelSnapshot> model){
-    model_=std::move(model);if(pending_>0)--pending_;
-    setProperty("section_pending_count",pending_);
-    if(!pending_){draft_=model_?model_->sections:QVector<fs::Section>{};refill();}
+void SectionDialog::setSnapshot(std::shared_ptr<const fs::ModelSnapshot> model,int historyStates){
+    if(model==model_)return; // reopening a busy window is not an acknowledgement
+    auto rows=definitions(model.get());
+    const bool valid=!expected_.isEmpty()&&model&&model_&&model->documentId==model_->documentId&&
+        model->revision==model_->revision+1&&sameRows(rows,expected_.front());
+    model_=std::move(model);
+    if(valid)expected_.removeFirst();
+    else {
+        if(!expected_.isEmpty()&&onPredictionMismatch)onPredictionMismatch();
+        expected_.clear();before_.clear();after_.clear();
+    }
+    pending_=expected_.size();setProperty("section_pending_count",pending_);
+    if(!pending_){
+        // A new edit forks document history. Confirmed local redo entries then
+        // account for the retained states ahead of the document cursor.
+        if(historyStates>0){
+            const auto available=qMax<qsizetype>(0,historyStates-1-after_.size());
+            if(before_.size()>available)before_.remove(0,before_.size()-available);
+        }
+        draft_=std::move(rows);refill();
+    }
 }
-void SectionDialog::discardPending(){pending_=0;setProperty("section_pending_count",0);draft_=model_?model_->sections:QVector<fs::Section>{};refill();}
+void SectionDialog::discardPending(){expected_.clear();before_.clear();after_.clear();pending_=0;setProperty("section_pending_count",0);draft_=definitions(model_.get());refill();}
+void SectionDialog::previewHistory(bool redo){
+    auto& from=redo?after_:before_;auto& to=redo?before_:after_;
+    if(!enabled_||from.isEmpty()||!onPreviewHistory||!onPreviewHistory(redo))return;
+    to.append(draft_);draft_=from.takeLast();expected_.append(draft_);pending_=expected_.size();
+    setProperty("section_pending_count",pending_);refill();
+}
 void SectionDialog::submit(const QString& operation,int sectionKind,QJsonObject fields){
     if(!enabled_||!model_||!onEdit)return;
     const auto previous=draft_;QVector<fs::Section> list;
@@ -116,41 +154,72 @@ void SectionDialog::submit(const QString& operation,int sectionKind,QJsonObject 
     }
     // Match the backend's exchange ordering, including legacy equal-plane ties.
     std::function<void(int,int)> sort=[&](int left,int right){int a=left,b=right;const double pivot=-list[(left+right)/2].plane[3];do{while(-list[a].plane[3]<pivot)++a;while(-list[b].plane[3]>pivot)--b;if(a<=b){std::swap(list[a],list[b]);++a;--b;}}while(a<=b);if(left<b)sort(left,b);if(a<right)sort(a,right);};
-    if(changed&&list.size()>1)sort(0,list.size()-1);
+    if(!changed){refill();return;}
+    if(list.size()>1)sort(0,list.size()-1);
     for(int i=0;i<list.size();++i)list[i].index=i;
-    draft_.erase(std::remove_if(draft_.begin(),draft_.end(),[&](const auto& section){return section.kind==sectionKind;}),draft_.end());
-    draft_+=list;++pending_;
-    if(!onEdit(operation,sectionKind,fields)&&pending_>0){--pending_;draft_=previous;}
+    if(!onEdit(operation,sectionKind,fields))return;
+    const auto first=std::lower_bound(previous.cbegin(),previous.cend(),sectionKind,[](const auto& s,int k){return s.kind<k;});
+    const auto end=std::find_if(first,previous.cend(),[&](const auto& s){return s.kind!=sectionKind;});
+    Rows ordered=previous.mid(0,first-previous.cbegin());ordered+=list;ordered+=previous.mid(end-previous.cbegin());draft_=std::move(ordered);
+    before_.append(previous);after_.clear();
+    expected_.append(draft_);pending_=expected_.size();
     setProperty("section_pending_count",pending_);refill();
 }
 void SectionDialog::setEditingEnabled(bool enabled){enabled_=enabled;table_->setEnabled(enabled);tabs_->setEnabled(enabled);updateActions();}
 void SectionDialog::updateActions(){addOne_->setEnabled(enabled_);addRange_->setEnabled(enabled_);clear_->setEnabled(enabled_&&table_->rowCount()>0);}
 void SectionDialog::selectionChanged(){updateActions();if(onSelection)onSelection(kind(),pending_?QSet<int>{}:selectedIndices());}
 void SectionDialog::showError(const QString& message){error_->setText(message);error_->setVisible(!message.isEmpty());}
+void SectionDialog::refreshHeaders(){
+    const auto distance=uiText("距离 (")+(model_&&model_->units=="imperial"?QString("ft"):QString("m"))+")";
+    table_->setHorizontalHeaderLabels({uiText("编号"),distance,uiText("曲率")});
+}
 void SectionDialog::refill(){
-    data_motion::beginRowUpdate(table_);QStringList rowIdentities;
-    filling_=true;table_->clearSelection();table_->setRowCount(0);showError({});
-    table_->horizontalHeaderItem(1)->setText(uiText("距离 (")+(model_&&model_->units=="imperial"?QString("ft"):QString("m"))+")");
-    if(model_)for(const auto& s:draft_)if(s.kind==kind()){
-        rowIdentities.append(QString::number(s.kind)+":"+QString::number(s.distance,'g',17));
-        int row=table_->rowCount();table_->insertRow(row);
+    Rows next;QStringList rowIdentities;for(const auto& s:draft_)if(s.kind==kind()){
+        next.append(s);rowIdentities.append(QString::number(s.kind)+":"+QString::number(s.distance,'g',17));
+    }
+    const bool sameKind=renderedKind_==kind();int prefix=0,suffix=0;
+    if(sameKind){while(prefix<next.size()&&prefix<rendered_.size()&&sameRow(next[prefix],rendered_[prefix]))++prefix;
+        while(suffix<next.size()-prefix&&suffix<rendered_.size()-prefix&&sameRow(next[next.size()-1-suffix],rendered_[rendered_.size()-1-suffix]))++suffix;}
+    const int removed=rendered_.size()-prefix-suffix,inserted=next.size()-prefix-suffix;
+    const QSignalBlocker block(table_);
+    if(removed||inserted||!sameKind)data_motion::beginRowSplice(table_,sameKind?prefix:0,sameKind?removed:0);
+    filling_=true;table_->clearSelection();showError({});
+    refreshHeaders();
+    for(int i=0;i<removed;++i)table_->removeRow(prefix);
+    for(int row=prefix;row<prefix+inserted;++row){const auto& s=next[row];table_->insertRow(row);
         auto* number=new QTableWidgetItem(QString::number(s.index+1));number->setData(Qt::UserRole,s.index);number->setFlags(Qt::ItemIsEnabled|Qt::ItemIsSelectable);table_->setItem(row,0,number);
         auto* cell=new QWidget;auto* controls=new QHBoxLayout(cell);controls->setContentsMargins(4,0,4,0);
         auto* caption=new QLabel(number->text());caption->setObjectName("SectionNumber");caption->setAttribute(Qt::WA_TransparentForMouseEvents);
         controls->addWidget(caption);controls->addStretch();
         auto* remove=new QToolButton;remove->setIcon(studioIcon("DeleteOne"));remove->setIconSize({18,18});remove->setAutoRaise(true);remove->setFixedSize(28,28);
-        remove->setToolTip(QString(uiText("删除第 %1 条剖面线")).arg(s.index+1));remove->setAccessibleName(remove->toolTip());
+        const auto refreshDelete=[remove]{
+            const int index=remove->property("section_index").toInt();
+            remove->setToolTip(QString(uiText("删除第 %1 条剖面线")).arg(index+1));
+            remove->setAccessibleName(remove->toolTip());
+        };
+        bindUiRefresh(remove,refreshDelete);
         remove->setProperty("section_operation","delete");remove->setProperty("section_index",s.index);remove->setProperty("section_kind",s.kind);
-        controls->addWidget(remove);table_->setCellWidget(row,0,cell);table_->setRowHeight(row,36);
-        connect(remove,&QToolButton::clicked,this,[this,index=s.index,sectionKind=s.kind]{
+        refreshDelete();controls->addWidget(remove);table_->setCellWidget(row,0,cell);table_->setRowHeight(row,36);
+        connect(remove,&QToolButton::clicked,this,[this,remove,sectionKind=s.kind]{
+            const int index=remove->property("section_index").toInt();
             if(enabled_&&model_&&kind()==sectionKind&&onEdit)submit("delete",sectionKind,{{"indices",QJsonArray{index}}});
         });
         table_->setItem(row,1,new QTableWidgetItem(QString::number(s.distance,'g',9)));
         auto* curvature=new QTableWidgetItem;curvature->setCheckState(s.showCurvature?Qt::Checked:Qt::Unchecked);
         curvature->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled|Qt::ItemIsUserCheckable);curvature->setData(Qt::UserRole,QString("show_curvature"));curvature->setToolTip(uiText("显示这条剖面线的曲率梳"));table_->setItem(row,2,curvature);
     }
+    // Retained rows keep their widgets, but their revision-local indices may shift.
+    if(removed!=inserted)for(int row=prefix+inserted;row<next.size();++row){
+        auto* number=table_->item(row,0);const int index=next[row].index;const auto label=QString::number(index+1);
+        number->setText(label);number->setData(Qt::UserRole,index);auto* cell=table_->cellWidget(row,0);
+        cell->findChild<QLabel*>("SectionNumber")->setText(label);auto* b=cell->findChild<QToolButton*>();b->setProperty("section_index",index);
+        b->setToolTip(QString(uiText("删除第 %1 条剖面线")).arg(index+1));b->setAccessibleName(b->toolTip());
+    }
+    // Normalize the active editor's text even if the parsed value did not change.
+    for(int row=0;row<next.size();++row){auto* item=table_->item(row,1);auto value=QString::number(next[row].distance,'g',9);if(item->text()!=value)item->setText(value);}
+    renderedKind_=kind();rendered_=std::move(next);
     filling_=false;selectionChanged();
-    data_motion::finishRowUpdate(table_,QString::number(kind()),rowIdentities);
+    if(removed||inserted||!sameKind)data_motion::finishRowUpdate(table_,QString::number(kind()),rowIdentities);
     const int limit=screen()?screen()->availableGeometry().height()-80:900;
     const int desired=qMin(qMax(480,limit),qMax(680,table_->rowCount()*36+110));
     if(height()<desired)resize(width(),desired);

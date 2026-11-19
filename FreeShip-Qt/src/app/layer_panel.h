@@ -5,23 +5,34 @@
 #include <QWidget>
 #include <functional>
 #include <memory>
-class QAction;
 class QDialog;
 
-// Existing layers only. Properties are submitted as one explicit edit command.
+// Layer structure changes are immediate; property edits are applied separately.
 class LayerPanel final : public QWidget {
 public:
     explicit LayerPanel(QWidget* parent = nullptr);
     ~LayerPanel() override;
-    void setSnapshot(std::shared_ptr<const fs::ModelSnapshot> snapshot);
-    void setEditingEnabled(bool enabled);
+    void setSnapshot(std::shared_ptr<const fs::ModelSnapshot> snapshot,int historyStates=-1,int highWater=0);
+    void previewCreate();
+    void setEditingEnabled(bool enabled,bool allowList=false);
+    bool canDelete(fs::EntityId id) const;
+    void previewDelete(fs::EntityId id);
+    bool previewHistory(bool redo);
+    void discardPredictions();
+    QSet<fs::EntityId> projectedVisibilityChanges() const;
+    std::function<void()> onVisibilityPreview;
+    std::function<bool(const QString&,QJsonObject)> onListCommand;
+    std::function<void()> onMismatch;
     fs::EntityId selectedLayerId() const;
     void setSelectedLayerId(fs::EntityId id);
     QJsonObject changes() const;
     QString validationError() const;
     QWidget* fieldEditor(const QString& field) const;
     void applyChanges();
-    void setManagementActions(const QList<QAction*>& actions);
+    void editLayerName(fs::EntityId id);
+    std::function<void()> onCreateLayer;
+    std::function<void(fs::EntityId)> onDeleteLayer;
+    std::function<void(fs::EntityId,int)> onMoveLayer;
     void discardDrafts();
     std::function<void(fs::EntityId,bool)> onControlNetChanged;
     std::function<void()> onSelectionChanged;
@@ -29,9 +40,15 @@ public:
 private:
     struct State;
     std::unique_ptr<State> state_;
+    void previewValue(fs::EntityId id,const QJsonObject& value);
+    void updateValueRow(int index);
+    void rebuildRows();
+    void refreshRow(int index,bool remove);
+    void insertRow(int index,const fs::Layer& layer);
     void loadSelected();
     void updateEnabledState();
     void updateMeasurements();
 };
 
+QString layerDisplayName(const fs::Layer& layer);
 QDialog* createLayerPropertiesDialog(QWidget* parent,LayerPanel*& panel);

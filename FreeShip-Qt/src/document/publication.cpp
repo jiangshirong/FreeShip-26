@@ -187,13 +187,19 @@ Publication::Publication(const Fbm &source,const QJsonObject &bindings,const Pub
         faces.append(QJsonObject{{"id",faceIds[qsizetype(i)]},{"layer",layerIds[l]},{"points",controls}});
         gFaces.append(QJsonObject{{"points",indices},{"layer",l}});
     }
+    int lastLayerNumber=bindings.value("last_used_layer_id").toInt(-1);
     for(size_t i=0;i<geometry.layers.size();++i) {
+        lastLayerNumber=std::max(lastLayerNumber,geometry.layers[i].layerId);
         const auto &l=geometry.layers[i];auto label=decodeFbmText(QByteArray::fromStdString(l.name),encoding);
-        if(label.isEmpty())label=bindings["layer_name_prefix"].toString()+' '+QString::number(l.layerId);
+        const bool generated=label.isEmpty();
+        if(generated)label=bindings["layer_name_prefix"].toString()+' '+QString::number(l.layerId);
         layers.append(QJsonObject{{"id",layerIds[qsizetype(i)]},{"name",label},{"color",resolved(l.color,bindings)},
             {"visible",l.surfaceVisible},{"symmetric",l.symmetric},{"developable",l.developable},{"use_in_hydrostatics",l.useInHydrostatics},
             {"show_in_linesplan",l.showInLinesplan},{"use_for_intersections",l.useForIntersections},{"thickness",l.thickness},{"material_density",l.materialDensity}});
-        if(l.alphaBlend!=255){auto item=layers.last().toObject();item["alpha_blend"]=int(l.alphaBlend);layers[layers.size()-1]=item;}
+        if(generated||l.alphaBlend!=255){auto item=layers.last().toObject();
+            if(generated)item["default_name_number"]=l.layerId;
+            if(l.alphaBlend!=255)item["alpha_blend"]=int(l.alphaBlend);
+            layers[layers.size()-1]=item;}
         gLayers.append(QJsonObject{{"name",label},{"layer_id",l.layerId},{"color",l.color},{"alpha_blend",int(l.alphaBlend)},
             {"symmetric",l.symmetric},{"surface_visible",l.surfaceVisible},{"control_net_visible",l.controlNetVisible},
             {"use_for_intersections",l.useForIntersections},{"use_in_hydrostatics",l.useInHydrostatics},{"show_in_linesplan",l.showInLinesplan},
@@ -204,6 +210,8 @@ Publication::Publication(const Fbm &source,const QJsonObject &bindings,const Pub
         curves.append(QJsonObject{{"id",curveIds[qsizetype(i)]},{"name",curveNames[i]},{"controls",controls},{"color",context["control_curve_color"]}});
         gCurves.append(QJsonObject{{"points",indices},{"visible",geometry.curves[i].visible}});
     }
+    model_["last_layer_number"]=lastLayerNumber;
+    model_["new_layer_color"]=resolved(bindings["default_layer_color"].toInt(),bindings);
     model_["control_points"]=ordered(points);model_["control_edges"]=ordered(edges);model_["control_faces"]=ordered(faces);model_["layers"]=ordered(layers);
     bool sortedLayers=true;for(qsizetype i=1;i<layerIds.size();++i)if(layerIds[i-1].toDouble()>layerIds[i].toDouble())sortedLayers=false;
     if(!sortedLayers)model_["layer_order"]=layerIds;

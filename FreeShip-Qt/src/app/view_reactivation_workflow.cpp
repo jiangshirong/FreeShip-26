@@ -131,7 +131,18 @@ void MainWindow::auditViewGridResize(bool frameTiming){
         QJsonArray costs;
         for(int i=1;i<=12;++i){QElapsedTimer cost;cost.start();send(QEvent::MouseMove,start+(target-start)*i/12,Qt::NoButton,Qt::LeftButton);QApplication::processEvents(QEventLoop::ExcludeUserInputEvents);costs.append(cost.nsecsElapsed()/1e6);}
         if(axis=="xy"&&!workflowArtifacts_.contains("center_drag_ms"))workflowArtifacts_["center_drag_ms"]=costs;
+        const auto anchors=[&]{QVector<QPointF> values;if(original)for(auto* view:views_){
+            values<<view->project(original->minimum)<<view->project(original->maximum);
+        }return values;};
+        const auto before=anchors();
         send(QEvent::MouseButtonRelease,target,Qt::LeftButton,Qt::NoButton);wait(40);
+        if(frameTiming&&axis=="xy"){
+            workflowCase("motion.release-keeps-projections",before==anchors());
+            int used=0;bool exact=true;
+            for(auto* view:views_){const int result=view->verifyResizeSectionPixels();if(result>=0){++used;exact&=result==1;}}
+            workflowArtifacts_["parallel_section_layers_checked"]=used;
+            workflowCase("motion.parallel-section-pixels-match-inline",exact);
+        }
     };
     showStudioMainWindow(this);sample("first-show");wait(300);sample("initial");
     if(frameTiming && original){

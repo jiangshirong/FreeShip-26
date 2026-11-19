@@ -21,7 +21,7 @@ private:
     void buildScene();void updateItems();void positionChanged(int row);void select(int row);void transformActive();
     void translatePlateNames();
     void fit();void renderPages(QPagedPaintDevice& device);void chooseExport(const QString& format);
-    ModelSession& session_;bool hidden_,updating_=false;QString failure_;
+    ModelSession& session_;bool hidden_,updating_=false;QString failure_,completionMessage_;
     std::unique_ptr<fs::DevelopedPlates> data_;
     QListWidget* list_;StudioMessage *status_,*plateNote_;QTableWidget* metrics_;QPushButton *calculate_,*cancel_;
     QDoubleSpinBox *rotation_,*x_,*y_,*scale_,*gridX_,*gridY_;

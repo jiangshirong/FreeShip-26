@@ -12,6 +12,7 @@ namespace studio_motion {
 constexpr int MenuMs=140,StateMs=120,TabMs=180;
 bool enabled();
 QToolButton* toolButton(QWidget* parent);
+void setMenuButtonHovered(QToolButton* button,bool hovered);
 QSize verticalToolButtonSize(const QToolButton& button);
 void installMenu(QMenu* menu);
 void installTabs(QTabWidget* tabs);

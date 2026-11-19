@@ -7,6 +7,7 @@
 #include <QDoubleSpinBox>
 #include <QFile>
 #include <QLineEdit>
+#include <QKeyEvent>
 #include <QPlainTextEdit>
 #include <QPushButton>
 #include <QTimer>
@@ -85,8 +86,18 @@ void MainWindow::editingStep(const QString& method) {
             captureWorkflow("units_undo");
             workflowCase("units_undo_exact_scene", bytes(session_.scenePath()) == workflowOriginalDigest_ && model->units == editingChanged_->units);
             if (model->layers.isEmpty()) throw std::runtime_error("Fixture has no layer");
-            editingLayer_ = model->layers.first().id; layers_->setSelectedLayerId(editingLayer_);
-            editor<QLineEdit>(layers_->fieldEditor("name"))->setText("Qt M2 layer");
+            editingLayer_ = model->layers.first().id;
+            openLayers();
+            layers_->editLayerName(editingLayer_);
+            auto* name=editor<QLineEdit>(layers_->findChild<QLineEdit*>("layer_inline_name"));
+            name->setText("Qt M2 layer");
+            workflowStage_=30;
+            QKeyEvent enter(QEvent::KeyPress,Qt::Key_Return,Qt::NoModifier);QApplication::sendEvent(name,&enter);
+            if(!session_.busy())throw std::runtime_error("Layer rename did not submit a command");
+            break;
+        }
+        case 30: {
+            if(method!="update_layer")throw std::runtime_error("Expected inline layer rename");
             auto* color = layers_->fieldEditor("color");
             // The color editor exposes its stored Windows RGB value for hidden
             // verification; its ordinary button still opens the color chooser.
@@ -95,13 +106,14 @@ void MainWindow::editingStep(const QString& method) {
             editor<QDoubleSpinBox>(layers_->fieldEditor("material_density"))->setValue(7.5);
             if (!layers_->validationError().isEmpty()) throw std::runtime_error(layers_->validationError().toUtf8().constData());
             if (!layers_->grab().save(workflowOutput_ + "/views/layers.png")) throw std::runtime_error("Cannot save layer evidence");
+            workflowStage_=4;
             layers_->applyChanges();
             if (!session_.busy()) throw std::runtime_error("Layer apply did not submit a command");
             break;
         }
         case 4: {
             if (method != "update_layer") throw std::runtime_error("Expected layer update");
-            captureWorkflow("layer");
+            layerDialog_->close();captureWorkflow("layer");
             const auto* layer = model->layer(editingLayer_);
             workflowCase("layer_fields_applied", layer && layer->name == "Qt M2 layer" && layer->color == 0x112233 &&
                 layer->thickness == 12.5 && layer->materialDensity == 7.5);

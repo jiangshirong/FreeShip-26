@@ -143,15 +143,16 @@ public:
 }
 PlatesDialog::PlatesDialog(ModelSession& session,bool hidden,QWidget* parent):QDialog(parent),session_(session),hidden_(hidden){
     setStudioWindowIcon(this,"Face");
-    setWindowTitle(uiText("板材展开"));resize(1320,850);if(hidden)setAttribute(Qt::WA_DontShowOnScreen);
+    setProperty("calculation_title_source",QStringLiteral("板材展开"));setWindowTitle(uiText("板材展开"));resize(1320,850);if(hidden)setAttribute(Qt::WA_DontShowOnScreen);
     auto* layout=new QVBoxLayout(this);auto* tools=new QHBoxLayout;layout->addLayout(tools);
     auto button=[&](QString text,QString op,std::function<void()> fn){auto*b=new QPushButton(text,this);b->setProperty("plates_action",op);connect(b,&QPushButton::clicked,this,fn);tools->addWidget(b);return b;};
     calculate_=button(uiText("生成展开图"),"calculate",[this]{failure_.clear();status_->setMessage(uiText("正在生成展开图…"),StudioMessageRole::Feedback,true);session_.developPlates();refreshState();});
     cancel_=button(uiText("取消计算"),"cancel",[this]{session_.cancelPlates();});
     button(uiText("适合窗口"),"fit",[this]{fit();});button(uiText("重新排列"),"arrange",[this]{if(data_){data_->arrange();updateItems();fit();select(list_->currentRow());}});
-    for(const auto& pair:QVector<QPair<QString,QString>>{{uiText("展开图"),"dxf"},{uiText("坐标表"),"txt"},{uiText("展开数据"),"json"},{uiText("图片"),"png"},{uiText("展开图"),"pdf"}}){
-        auto* control=button(pair.first,pair.second,[this,format=pair.second]{chooseExport(format);});
-        setStudioFormatButton(control,pair.second,uiText("导出 ")+pair.first+" ("+pair.second.toUpper()+")");
+    for(const auto& pair:QVector<QPair<QString,QString>>{{"展开图","dxf"},{"坐标表","txt"},{"展开数据","json"},{"图片","png"},{"展开图","pdf"}}){
+        auto* control=button(uiText(pair.first),pair.second,[this,format=pair.second]{chooseExport(format);});
+        const auto refreshFormat=[control,pair]{setStudioFormatButton(control,pair.second,uiText("导出 ")+uiText(pair.first)+" ("+pair.second.toUpper()+")");};
+        refreshFormat();bindUiRefresh(control,refreshFormat);
     }
     button(uiText("打印预览"),"print",[this]{if(!data_)return;QPrinter printer(QPrinter::HighResolution);printer.setPageSize(QPageSize(QPageSize::A4));printer.setPageOrientation(QPageLayout::Landscape);
         QPrintPreviewDialog preview(&printer,this);styleStudioPrintPreview(&preview,true);preview.setAttribute(Qt::WA_DontShowOnScreen,testAttribute(Qt::WA_DontShowOnScreen));connect(&preview,&QPrintPreviewDialog::paintRequested,this,[this](QPrinter*p){try{renderPages(*p);}catch(const std::exception&e){showFailure(QString::fromUtf8(e.what()));}});preview.exec();});
@@ -171,7 +172,8 @@ PlatesDialog::PlatesDialog(ModelSession& session,bool hidden,QWidget* parent):QD
     fontSize_=new QSpinBox;fontSize_->setRange(6,36);fontSize_->setValue(10);gridForm->addRow(uiText("标注字号"),fontSize_);connect(fontSize_,qOverload<int>(&QSpinBox::valueChanged),this,[this]{updateItems();});
     auto* printForm=new QFormLayout;side->addLayout(printForm);scale_=new QDoubleSpinBox;scale_->setRange(0,100000);scale_->setDecimals(3);scale_->setSpecialValueText(uiText("适合单页"));scale_->setValue(0);scale_->setProperty("plate_field","print_scale");printForm->addRow(uiText("打印比例 1 :"),scale_);
     metrics_=new QTableWidget(6,3);metrics_->setObjectName("PlateMetrics");metrics_->setProperty("studio_content_role","result_data");
-    metrics_->setHorizontalHeaderLabels({uiText("参数"),uiText("数值"),uiText("单位")});metrics_->verticalHeader()->hide();
+    const auto refreshHeaders=[this]{metrics_->setHorizontalHeaderLabels({uiText("参数"),uiText("数值"),uiText("单位")});};
+    refreshHeaders();bindUiRefresh(metrics_,refreshHeaders);metrics_->verticalHeader()->hide();
     metrics_->setEditTriggers(QAbstractItemView::NoEditTriggers);metrics_->setSelectionMode(QAbstractItemView::NoSelection);
     metrics_->setItemDelegate(new StudioWidgetCellDelegate(metrics_));metrics_->setAlternatingRowColors(false);metrics_->setShowGrid(false);
     metrics_->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);metrics_->horizontalHeader()->setStretchLastSection(false);
@@ -208,7 +210,7 @@ void PlatesDialog::refreshState(){
 }
 void PlatesDialog::showFailure(const QString& text){failure_=text;status_->setMessage(uiText(text),StudioMessageRole::Warning);refreshState();}
 void PlatesDialog::receive(const QJsonObject& object){
-    try{auto next=std::make_unique<fs::DevelopedPlates>(fs::DevelopedPlates::parse(object));scene_->clear();items_.clear();list_->clear();data_=std::move(next);translatePlateNames();buildScene();failure_.clear();status_->setMessage(completionText(data_->plates.size(),"已展开 %1 块板片。"),StudioMessageRole::Feedback);refreshState();}
+    try{auto next=std::make_unique<fs::DevelopedPlates>(fs::DevelopedPlates::parse(object));scene_->clear();items_.clear();list_->clear();data_=std::move(next);translatePlateNames();buildScene();failure_.clear();completionMessage_=completionText(data_->plates.size(),"已展开 %1 块板片。");status_->setMessage(completionMessage_,StudioMessageRole::Feedback);refreshState();}
     catch(const std::exception&e){showFailure(QString::fromUtf8(e.what()));}
 }
 void PlatesDialog::translatePlateNames(){
@@ -225,6 +227,10 @@ void PlatesDialog::changeEvent(QEvent* event){
     if(event->type()!=QEvent::LanguageChange||!data_)return;
     translatePlateNames();
     updateItems();
+    if(!completionMessage_.isEmpty()&&status_->text()==completionMessage_){
+        completionMessage_=completionText(data_->plates.size(),"已展开 %1 块板片。");
+        status_->setMessage(completionMessage_,StudioMessageRole::Feedback);
+    }
 }
 void PlatesDialog::buildScene(){
     updating_=true;list_->clear();submerged_->setChecked(data_->shadeSubmerged);

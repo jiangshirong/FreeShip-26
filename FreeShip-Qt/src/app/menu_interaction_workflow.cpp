@@ -210,6 +210,26 @@ void MainWindow::auditMenuInteraction(){
             toolbarBehavior["enter_event_opens_without_mouse_move"]=menu->isVisible();menu->close();
             first->setEnabled(false);moveTo(first,first);waitHover();toolbarBehavior["disabled_does_not_open"]=!menu->isVisible();first->setEnabled(true);
         }
+        // A hover-open menu grabs pointer moves. The anchor can miss Leave;
+        // its painted surface must still return to idle after dismissal.
+        for(auto* button:hoverButtons){
+            auto* menu=menuFor(button);const auto rows=menu->actions();
+            if(std::none_of(rows.begin(),rows.end(),[](auto* row){return row->property("operation")=="both_sides";}))continue;
+            const auto sample=[button]{const auto image=button->grab().toImage();const auto px=qRound(6*image.devicePixelRatio());return image.pixelColor(px,px);};
+            const auto idle=sample();
+            const QPointF local=button->rect().center(),global=button->mapToGlobal(local.toPoint());
+            QEnterEvent enter(local,button->mapTo(window(),local.toPoint()),global);QApplication::sendEvent(button,&enter);
+            waitHover();sample();waitHover();
+            const auto lit=sample();const bool open=menu->isVisible()&&button->isDown();
+            const auto outside=menu->frameGeometry().bottomRight()+QPoint(60,60);
+            QMouseEvent exit(QEvent::MouseMove,menu->mapFromGlobal(outside),outside,Qt::NoButton,Qt::NoButton,Qt::NoModifier);
+            QApplication::sendEvent(menu,&exit);
+            for(int i=0;i<4;++i){waitHover();sample();}
+            const auto after=sample();
+            toolbarBehavior["view_popup_highlight"]=QJsonObject{{"opened",open},{"closed",!menu->isVisible()&&!button->isDown()},
+                {"idle",idle.name(QColor::HexArgb)},{"open",lit.name(QColor::HexArgb)},{"after",after.name(QColor::HexArgb)}};
+            menu->close();break;
+        }
         QPointer<QMenu> previous;
         for(auto* button:hoverButtons){
             auto* menu=menuFor(button);QElapsedTimer elapsed;elapsed.start();

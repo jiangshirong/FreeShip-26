@@ -134,11 +134,14 @@ public:
         badge_.setEndValue(1.0);
         connect(&badge_,&QVariantAnimation::valueChanged,this,[this]{update(badgeRect().toAlignedRect());});
     }
+    void setHovered(bool hovered){hover_.to(hovered?1:0,StateMs);}
 protected:
     bool event(QEvent* event)override{
         const bool result=QToolButton::event(event);
-        if(event->type()==QEvent::Enter)hover_.to(1,StateMs);
-        if(event->type()==QEvent::Leave)hover_.to(0,StateMs);
+        if(!property("studio_hover_popup").toBool()){
+            if(event->type()==QEvent::Enter)setHovered(true);
+            if(event->type()==QEvent::Leave)setHovered(false);
+        }
         if(event->type()==QEvent::Hide){hover_.reset(0);sync(true);}
         if(event->type()==QEvent::Show)sync(true);
         if(event->type()==QEvent::ActionChanged||event->type()==QEvent::Show||event->type()==QEvent::Hide)syncBadge();
@@ -180,7 +183,8 @@ private:
         else if(!animate)badge_.stop();
     }
     void sync(bool snap=false){
-        const bool target=isChecked()||isDown();
+        auto* popup=property("studio_hover_popup").toBool()&&defaultAction()?defaultAction()->menu():nullptr;
+        const bool target=isChecked()||(popup?popup->isVisible():isDown());
         if(target==checkedTarget_&&!snap)return;
         checkedTarget_=target;
         if(snap||!isVisible())checked_.reset(target?1:0);else checked_.to(target?1:0,StateMs);
@@ -445,6 +449,9 @@ bool enabled(){
     return true;
 }
 QToolButton* toolButton(QWidget* parent){return new MotionButton(parent);}
+void setMenuButtonHovered(QToolButton* button,bool hovered){
+    if(auto* motion=dynamic_cast<MotionButton*>(button))motion->setHovered(hovered);
+}
 QSize verticalToolButtonSize(const QToolButton& button){
     const auto label=verticalLabel(button.text(),button.fontMetrics());
     const auto icon=button.iconSize();

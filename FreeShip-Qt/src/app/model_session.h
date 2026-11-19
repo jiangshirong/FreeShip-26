@@ -1,4 +1,5 @@
 #pragma once
+#include <algorithm>
 
 #include "core/model_snapshot.h"
 #include "scene.h"
@@ -72,9 +73,14 @@ public:
     bool updateLayer(fs::EntityId id, const QJsonObject& changes);
     bool editTopology(const QString& operation, QJsonObject fields = {});
     bool editSections(const QString& operation, int kind, QJsonObject fields = {});
-    bool editingSections()const{return busy_&&method_=="sections";}
-    bool sectionHistoryPending()const{for(const auto& request:sectionQueue_)if(request.contains("_queued_history"))return true;return false;}
-    bool canQueueSectionEdits()const{return editingSections()&&!sectionHistoryPending();}
+    bool editingSections()const{return busy_&&(method_=="sections"||sectionPreviewActive_);}
+    bool sectionPreviewHistory(bool redo);
+    void dropQueuedSectionCommands(){if(editingSections())editorQueue_.clear();}
+    bool editingLayerList()const{return busy_&&layerPreviewActive_;}
+    bool layerListCommand(const QString& method,QJsonObject fields={});
+    void dropQueuedLayerCommands(){if(editingLayerList())editorQueue_.clear();}
+    bool sectionHistoryPending()const{for(const auto& request:editorQueue_)if(request.contains("_queued_history"))return true;return false;}
+    bool canQueueSectionEdits()const{return editingSections()&&std::none_of(editorQueue_.cbegin(),editorQueue_.cend(),[](const auto& r){return r.contains("_queued_history")&&!r.value("_section_preview").toBool();});}
     bool editDisplay(const QJsonObject& changes);
     bool editAuxiliary(const QString& operation,QJsonObject fields = {});
     bool editAdvanced(const QString& operation,QJsonObject fields = {});
@@ -94,6 +100,8 @@ public:
     bool drawingUnchanged() const {return drawingUnchanged_;}
     bool modified() const { return modified_; }
     bool canUndo() const { return ready() && canUndo_; }
+    int layerIdHighWater() const { return layerIdHighWater_; }
+    int historyStates() const { return historyStates_; }
     bool canRedo() const { return ready() && canRedo_; }
     QString sourcePath() const { return sourcePath_; }
     QString lastBackupPath()const{return lastBackupPath_;}
@@ -188,6 +196,8 @@ private:
     QJsonObject pendingPerformance_,pendingHydro_;
     QString temporaryDirectory_;
     qint64 nextId_ = 0, pendingId_ = 0;
+    int layerIdHighWater_=0;
+    int historyStates_ = -1;
     bool busy_ = false, healthy_ = false, canUndo_ = false, canRedo_ = false;
     bool modified_ = false, stopping_ = false;
     bool previewEnabled_ = false;
@@ -203,7 +213,8 @@ private:
     bool performanceCancelRequested_ = false;
     bool hydroCancelRequested_ = false;
     QJsonObject lastLoadTimings_;
-    QList<QJsonObject> sectionQueue_;
+    QList<QJsonObject> editorQueue_;
+    bool sectionPreviewActive_=false,layerPreviewActive_=false;
     double lastOperationMs_ = 0;
     double lastSavePreviewMs_ = 0;
     std::shared_ptr<const fs::ModelSnapshot> model_;

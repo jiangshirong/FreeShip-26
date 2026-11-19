@@ -9,6 +9,7 @@ class QTableWidget;
 namespace data_motion {
 void beginTableUpdate(QTableView* table);
 void finishTableUpdate(QTableView* table,const QString& domain);
+void beginRowSplice(QTableWidget* table,int first,int count);
 void beginRowUpdate(QTableWidget* table);
 void finishRowUpdate(QTableWidget* table,const QString& domain,const QStringList& identities);
 void installProperties(QWidget* panel);

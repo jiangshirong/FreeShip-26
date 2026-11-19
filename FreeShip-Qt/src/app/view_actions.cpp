@@ -56,7 +56,9 @@ void MainWindow::viewAction(HullView* view,const QString& action){
 void MainWindow::openLightDialog(HullView* view){
     auto* dialog=lightDialogs_.value(view,nullptr);
     if(!dialog){
-        dialog=new LightDialog(this);lightDialogs_.insert(view,dialog);dialog->setWindowTitle(uiText("光源 · ")+view->projectionLabel());
+        dialog=new LightDialog(this);lightDialogs_.insert(view,dialog);
+        const auto refreshTitle=[dialog,view=QPointer<HullView>(view)]{if(view)dialog->setWindowTitle(uiText("光源 · ")+view->projectionLabel());};
+        refreshTitle();bindUiRefresh(dialog,refreshTitle);
         dialog->setProperty("light_projection",int(view->projection()));dialog->onLightChanged=[view](const HullLight& light){view->setLight(light);};
     }
     dialog->setLight(view->light());dialog->setAttribute(Qt::WA_DontShowOnScreen,workflow_);dialog->show();dialog->raise();dialog->activateWindow();

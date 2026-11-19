@@ -107,7 +107,7 @@ FEEDBACK={
 
 
 def main():
-    revision=tool.QT.parent/'TranslationContext_Qt_20261113_verified'
+    revision=tool.QT.parent/'翻译工作档案'/'TranslationContext_Qt_20261113_verified'
     conflicts=tool.load(revision/'english.conflicts.json')
     if len(conflicts)!=174 or conflicts[8]['source_text']!='计算' or conflicts[173]['variants']:
         raise ValueError('This decision set applies only to the frozen 174-key review')

@@ -143,6 +143,20 @@ void MainWindow::auditCloseControls(){
                     hydro->rect().contains(QRect(bar->mapTo(hydro,QPoint{}),bar->size())));
                 hydro->grab().save(workflowOutput_+"/views/auxiliary-layout-"+QString::number(width)+".png");
             }
+            // Even a wide window has a finite slot beside the tabs. Long
+            // translations belong in the page so the final line stays visible.
+            hydro->resize(1536,900);
+            notice->setText(QStringLiteral("The lowest hull opening is above the requested level. ").repeated(4)+"The remaining waterlines were calculated.");
+            QApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+            for(auto* layout:hydro->findChildren<QLayout*>())layout->activate();
+            QEventLoop settle;
+            QTimer::singleShot(180,&settle,&QEventLoop::quit);
+            settle.exec(QEventLoop::ExcludeUserInputEvents);
+            workflowCase("auxiliary-long-warning-wraps-below-tabs",bar->property("studio_warning_layout")=="wrapped"&&notice->isVisible()&&
+                notice->height()>=notice->heightForWidth(notice->width())&&
+                hydro->rect().contains(QRect(notice->mapTo(hydro,QPoint{}),notice->size())),
+                QString("%1: %2x%3, required %4, visible %5").arg(bar->property("studio_warning_layout").toString())
+                    .arg(notice->width()).arg(notice->height()).arg(notice->heightForWidth(notice->width())).arg(notice->isVisible()));
             notice->setText(oldText);hydro->resize(oldSize);
         }
         QJsonArray dropdowns,reportExports;

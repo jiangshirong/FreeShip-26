@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 #include "data_motion.h"
+#include <climits>
 #include "studio_motion.h"
 #include <QAbstractAnimation>
 #include <QApplication>
@@ -8,6 +9,7 @@
 #include <QHeaderView>
 #include <QPainter>
 #include <QPointer>
+#include <QSet>
 #include <QTableView>
 #include <QTableWidget>
 #include <QTimer>
@@ -76,9 +78,9 @@ public:
   table_->setProperty("studio_motion_result_active",true);flash_.begin(420);
  }
  void scheduleCells(const QString& domain){const quint64 token=++cellGeneration_;QTimer::singleShot(0,this,[this,domain,token]{if(token==cellGeneration_)afterCells(domain);});}
- void beforeRows(){
+ void beforeRows(int first=0,int count=INT_MAX){
   rows_.finish();oldRows_.clear();auto* widget=qobject_cast<QTableWidget*>(table_);if(!widget)return;
-  if(table_->isVisible())for(int row=0;row<rowIds_.size()&&row<widget->rowCount();++row){
+  if(studio_motion::enabled()&&table_->isVisible())for(int row=first;row-first<count&&row<rowIds_.size()&&row<widget->rowCount();++row){
    const QRect rect(0,table_->rowViewportPosition(row),table_->viewport()->width(),widget->rowHeight(row));
    if(rect.intersects(table_->viewport()->rect())&&oldRows_.size()<12)oldRows_.insert(rowIds_[row],{rect,table_->viewport()->grab(rect)});
   }
@@ -87,10 +89,11 @@ public:
   auto* widget=qobject_cast<QTableWidget*>(table_);if(!widget)return;
   const bool same=rowDomain_==domain;rowDomain_=domain;const auto oldIds=rowIds_;rowIds_=identities;growing_.clear();overlay_->ghosts.clear();
   if(!same||oldIds.isEmpty()||!studio_motion::enabled()||!table_->isVisible())return;
-  for(int row=0;row<identities.size();++row)if(!oldIds.contains(identities[row])){
+  const QSet<QString> previous(oldIds.cbegin(),oldIds.cend()),current(identities.cbegin(),identities.cend());
+  for(int row=0;row<identities.size();++row)if(!previous.contains(identities[row])){
    const QRect rect=table_->visualRect(table_->model()->index(row,0));if(rect.intersects(table_->viewport()->rect()))growing_.append({row,widget->rowHeight(row)});
   }
-  for(auto it=oldRows_.cbegin();it!=oldRows_.cend();++it)if(!identities.contains(it.key()))overlay_->ghosts.append(it.value());
+  for(auto it=oldRows_.cbegin();it!=oldRows_.cend();++it)if(!current.contains(it.key()))overlay_->ghosts.append(it.value());
   table_->setProperty("studio_motion_rows_inserted",growing_.size());table_->setProperty("studio_motion_rows_removed",overlay_->ghosts.size());
   if(growing_.isEmpty()&&overlay_->ghosts.isEmpty())return;
   rowMinimum_=table_->verticalHeader()->minimumSectionSize();table_->verticalHeader()->setMinimumSectionSize(1);
@@ -143,6 +146,7 @@ Properties* properties(QWidget* panel){auto* existing=panel->findChild<QObject*>
 }
 void beginTableUpdate(QTableView* table){if(table)tableMotion(table)->beforeCells();}
 void finishTableUpdate(QTableView* table,const QString& domain){if(table)tableMotion(table)->scheduleCells(domain);}
+void beginRowSplice(QTableWidget* table,int first,int count){if(table)tableMotion(table)->beforeRows(first,count);}
 void beginRowUpdate(QTableWidget* table){if(table)tableMotion(table)->beforeRows();}
 void finishRowUpdate(QTableWidget* table,const QString& domain,const QStringList& identities){if(table)tableMotion(table)->afterRows(domain,identities);}
 void installProperties(QWidget* panel){if(panel)properties(panel);}

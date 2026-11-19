@@ -66,7 +66,7 @@ class ColorEditor final : public QPushButton {
 public:
     explicit ColorEditor(QWidget* parent = nullptr) : QPushButton(parent) {
         connect(this, &QPushButton::clicked, this, [this] {
-            const auto color = QColorDialog::getColor(displayColor(property("colorValue").toUInt()), this, uiText("选择颜色"));
+            const auto color = QColorDialog::getColor(displayColor(property("colorValue").toUInt()), this, uiText("选择颜色"), QColorDialog::DontUseNativeDialog);
             if (color.isValid()) setProperty("colorValue", storedColor(color));
         });
     }
@@ -170,14 +170,16 @@ ProjectDialog::ProjectDialog(const fs::ModelSnapshot& snapshot, QWidget* parent)
     // untouched text control must not rewrite the original file's text.
     s.displayedText.insert("comment", comment->toPlainText());
     if (!snapshot.textEncoding.isEmpty()) {
-        auto* encoding = new QLabel(uiText("文件文字编码：") + snapshot.textEncoding);
+        auto* encoding = new QLabel;
+        const auto refreshEncoding=[encoding,code=snapshot.textEncoding]{encoding->setText(uiText("文件文字编码：") + code);};
+        refreshEncoding();bindUiRefresh(encoding,refreshEncoding);
         encoding->setWordWrap(true); encoding->setStyleSheet("color: #586472;"); general->addRow(encoding);
     }
 
     auto* dimensions = page(uiText("主尺度"));
     auto* hydrostatics = page(uiText("静水力"));
     s.unitBox = new QComboBox;
-    s.unitBox->addItem(uiText("公制"), "metric"); s.unitBox->addItem(uiText("英制"), "imperial");
+    addUiItem(s.unitBox,"公制", "metric"); addUiItem(s.unitBox,"英制", "imperial");
     s.unitBox->setCurrentIndex(snapshot.units == "imperial" ? 1 : 0);
     bind("units", s.unitBox); general->addRow(uiText("单位"), s.unitBox);
     auto addNumber = [&](QFormLayout* form, const QString& field, const QString& label, Quantity quantity, double minimum) {
@@ -222,14 +224,14 @@ ProjectDialog::ProjectDialog(const fs::ModelSnapshot& snapshot, QWidget* parent)
     addNumber(hydrostatics, "appendage_coefficient", uiText("附体系数"), Quantity::None, 0);
 
     s.precision = new QComboBox;
-    s.precision->addItems({uiText("低"), uiText("中"), uiText("高"), uiText("很高")}); s.precision->setCurrentIndex(snapshot.precision);
+    addUiItems(s.precision,{"低", "中", "高", "很高"}); s.precision->setCurrentIndex(snapshot.precision);
     bind("precision", s.precision); general->addRow(uiText("细分精度"), s.precision);
     auto addCheck = [&](QFormLayout* form, const QString& field, const QString& label) {
         auto* box = new QCheckBox(label);
         box->setChecked(s.original[field].toBool()); bind(field, box); form->addRow(box); return box;
     };
     s.coefficientBasis=new QComboBox;
-    s.coefficientBasis->addItems({uiText("工程设置中的主尺度"),uiText("实际水下船体尺度")});
+    addUiItems(s.coefficientBasis,{"工程设置中的主尺度","实际水下船体尺度"});
     s.coefficientBasis->setCurrentIndex(snapshot.coefficientBasis);
     bind("coefficient_basis",s.coefficientBasis);hydrostatics->addRow(uiText("系数计算依据"),s.coefficientBasis);
     auto* features=new QGroupBox(uiText("显示静水力特征"));

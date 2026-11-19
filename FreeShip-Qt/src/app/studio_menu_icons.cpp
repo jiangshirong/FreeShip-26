@@ -9,6 +9,7 @@
 QStringList studioSupplementIconKeys(){return {"History","RenderMode","Wireframe","GaussianCurvature","Developability","Zebra",
     "BackgroundImage","CropFrame","PickColor","Blend","Tolerance","Coordinates","CoordinateX","CoordinateY","CoordinateZ","CoordinateOff","Resistance","Propeller","Person","Copy",
     "MessageQuestion","MessageInformation","MessageWarning","MessageCritical","MessageSuccess",
+    "LayerVisible","LayerHidden",
     "PrintPreviewFitWidth","PrintPreviewFitPage","PrintPreviewZoomIn","PrintPreviewZoomOut",
     "PrintPreviewPrevious","PrintPreviewNext","PrintPreviewOverview","PrintPreviewSetup","PrintPreviewPrint"};}
 namespace {
@@ -61,6 +62,20 @@ public:
                 page({6,2,12,7});page({3,8,18,10});p->fillRect(QRectF(6,14,12,8),mode==QIcon::Disabled?QColor("#f1f4f2"):QColor("#f6f9f7"));
                 page({6,14,12,8});line(9,18,15,18);p->drawPoint(QPointF(17.5,11.5));
             }
+        }else if(key_=="LayerVisible"||key_=="LayerHidden"){
+            const bool hidden=key_=="LayerHidden";
+            const QColor stroke(mode==QIcon::Disabled?"#888888":mode==QIcon::Selected?"#173b34":
+                                mode==QIcon::Active?"#234b42":"#315f56");
+            p->setPen(QPen(stroke,1.8,Qt::SolidLine,Qt::RoundCap,Qt::RoundJoin));
+            // Leave a gap either side of the slash so the icon works on hover and selection backgrounds.
+            if(hidden){
+                QPainterPath gap;gap.addPolygon(QPolygonF{{0,1.6},{1.6,0},{24,22.4},{22.4,24}});
+                QPainterPath canvas;canvas.addRect(0,0,24,24);
+                p->save();p->setClipPath(canvas.subtracted(gap),Qt::IntersectClip);
+            }
+            QPainterPath eye;eye.moveTo(2,12);eye.cubicTo(7.5,4.5,16.5,4.5,22,12);eye.cubicTo(16.5,19.5,7.5,19.5,2,12);
+            p->drawPath(eye);p->drawEllipse(QPointF(12,12),2.6,2.6);
+            if(hidden){p->restore();line(3,3,21,21);}
         }else if(key_.startsWith("Message")){
             const bool warning=key_=="MessageWarning",critical=key_=="MessageCritical";
             const QColor color(mode==QIcon::Disabled?"#91a29b":warning?"#966321":critical?"#a34438":"#24675b");

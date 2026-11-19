@@ -1,6 +1,24 @@
 """Archive corresponding build sources and a compact first-install download."""
-import argparse,hashlib,json,zipfile
+import argparse,hashlib,json,zipfile,shutil,tempfile
 from pathlib import Path
+
+def direct_setup(setup, target, expected):
+    def digest(path):
+        with path.open('rb') as f:
+            h=hashlib.sha256()
+            for block in iter(lambda:f.read(1024*1024),b''):h.update(block)
+            return h.hexdigest()
+    if target.exists():
+        if digest(target)!=expected or digest(setup)!=expected:raise ValueError('Installer hash mismatch')
+        return
+    with tempfile.NamedTemporaryFile(dir=target.parent,delete=False) as f:tmp=Path(f.name)
+    try:
+        shutil.copyfile(setup,tmp)
+        if digest(tmp)!=expected:raise ValueError('Installer hash mismatch')
+        # Hard-link the verified file without replacing an existing release.
+        import os
+        os.link(tmp,target)
+    finally:tmp.unlink()
 
 def main():
     p=argparse.ArgumentParser();p.add_argument('--installer',type=Path,required=True)
@@ -48,15 +66,8 @@ def main():
                 frozen['FreeShip-Qt/'+relative]=path.read_bytes()
             frozen['PACKAGING-ONLY-RELEASE.txt']=b'Calculation binaries are unchanged from the previous release. Qt has a verified Windows icon-resource-only patch; non-resource sections and overlay are unchanged. Exact original compiled source inputs were verified against the runtime manifest. Updated Python packaging tools and external tool notices are included; prior versions of recorded packaging helpers are retained under build-inputs-original. Proprietary external executables in third_party/hydronship are binary dependencies, not GPL source: read their NOTICE.md.\n'
             for name,content in sorted(frozen.items()):z.writestr(name,content)
-    setup=Path(info['setup']);download=output/('FreeShip-26-'+version+'-Windows-x64.zip')
-    if download.exists():
-        with zipfile.ZipFile(download) as z:
-            if hashlib.sha256(z.read('FreeShip 26 Setup.exe')).hexdigest()!=info['setup_sha256']:
-                raise ValueError('Existing setup archive differs')
-    else:
-        with zipfile.ZipFile(download,'x',zipfile.ZIP_DEFLATED,compresslevel=9) as z:
-            z.write(setup,'FreeShip 26 Setup.exe')
-            z.writestr('SOURCE.txt','Corresponding source: '+source.name+'\nLicense: GPL-2.0-or-later; see included project notices.\n')
+    setup=Path(info['setup']);download=output/('FreeShip-26-'+version+'-Windows-x64-Setup.exe')
+    direct_setup(setup,download,info['setup_sha256'])
     hashes={f.name:hashlib.sha256(f.read_bytes()).hexdigest() for f in (source,download)}
     (output/'SHA256SUMS.txt').write_text(''.join(d+'  '+name+'\n' for name,d in hashes.items()),'ascii')
     print(json.dumps(dict(downloads=str(output),sha256=hashes)))

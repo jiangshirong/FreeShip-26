@@ -237,6 +237,11 @@ QString legacyResult(const QString& source,bool html,const QJsonArray& warnings)
             }
             flush();text+=report::render(table,html);i=next-1;continue;
         }
+        static const QString holtropNote="注：系数 Wt、t 和 EtaR 按 Holtrop 方法的公式计算 -";
+        if(line.startsWith(holtropNote)){
+            if(!fields.rows.isEmpty())flush();
+            notes.append(uiText(holtropNote)+line.mid(holtropNote.size()));continue;
+        }
         QList<QStringList> parsed;
         static const QRegularExpression entrySeparator("[；;]");
         const auto parts=line.split(entrySeparator);
@@ -248,8 +253,23 @@ QString legacyResult(const QString& source,bool html,const QJsonArray& warnings)
                (parts.size()>1&&((explicitAssignment&&!part.contains('='))||match.captured(2).endsWith(QChar(0x3002))))){parsed.clear();break;}
             // The label is program report metadata. The value may be a model
             // name/path and must remain byte-for-byte as supplied.
-            auto label=notation::splitLabelUnit(uiText(match.captured(1).trimmed()));
+            auto labelSource=match.captured(1).trimmed();
+            auto caption=uiText(labelSource);
+            // The legacy dictionaries include the padded assignment up to
+            // '='. Reuse that key before formatting the label and value into
+            // separate cells. Leave the value itself outside translation.
+            const auto assignment=part.trimmed().left(match.capturedStart(2)).trimmed();
+            if(caption==labelSource&&explicitAssignment&&assignment.endsWith('=')){
+                auto translated=uiText(assignment);
+                if(translated!=assignment&&translated.endsWith('='))caption=translated.chopped(1).simplified();
+            }
+            auto label=notation::splitLabelUnit(caption);
             auto value=formatNumericRanges(match.captured(2).trimmed());
+            // Only the known numerical annotations are product captions.
+            // A project name, designer or arbitrary solver payload remains intact.
+            static const QRegularExpression annotated(QStringLiteral("^([+-]?[0-9.]+) (- (?:计算|用于选择螺旋桨图谱|按螺旋桨最佳频率曲线))$"));
+            if(const auto note=annotated.match(value);note.hasMatch())
+                value=note.captured(1)+" "+uiText(note.captured(2));
             const auto alternatives=value.split('=');
             if(alternatives.size()>1){
                 QList<QStringList> conversions;
@@ -272,7 +292,13 @@ QString legacyResult(const QString& source,bool html,const QJsonArray& warnings)
             fields.rows.append(parsed);
         }else{
             if(!fields.rows.isEmpty())flush();
-            notes.append(uiText(line));
+            const auto series=QRegularExpression(QStringLiteral("^螺旋桨 ([A-Z]+) (I\\.Titov 系列|V\\.Mishkevich 系列|M\\.Zavadovsky 系列|V\\.Turbal 系列|KSRI-BIHS 系列)$")).match(line);
+            if(series.hasMatch())notes.append(uiText(QStringLiteral("螺旋桨"))+" "+series.captured(1)+" · "+uiText(series.captured(2)));
+            else if(line.endsWith(':')&&(line.chopped(1).trimmed()=="工程"||line.chopped(1).trimmed()=="设计者"))
+                notes.append(uiText(line.chopped(1).trimmed())+" :");
+            else if(line=="根据副教授 Timoshenko 方法，估计海上船舶阻力.")
+                notes.append(QString(uiText("根据副教授 Timoshenko 方法，估计海上船舶阻力"))+".");
+            else notes.append(uiText(line));
         }
     }
     flush();return text;
@@ -297,25 +323,32 @@ class PerformanceTable final:public QAbstractTableModel {
     QVector<QJsonArray> sharedCurves_;
 public:
     explicit PerformanceTable(QObject* parent):QAbstractTableModel(parent){}
+    static QStringList curveHeaders(const QJsonArray& series){
+        if(series.isEmpty())return {};
+        const auto axis=notation::splitLabelUnit(uiMetadataText(series.first().toObject(),"x_title").trimmed());
+        QStringList headers{axis.second.isEmpty()?axis.first:axis.first+" ("+axis.second+")"};
+        for(const auto& value:series)headers.append(tableCurveHeading(value.toObject()));
+        return headers;
+    }
+    void refreshHeaders(const QVariant& dataset,bool table){
+        if(table){
+            headers_.clear();for(auto value:dataset.toJsonObject()["columns"].toArray())headers_<<uiText(value.toVariant().toString());
+        }else headers_=curveHeaders(dataset.toJsonArray());
+        if(!headers_.isEmpty())emit headerDataChanged(Qt::Horizontal,0,headers_.size()-1);
+    }
     void setCurves(const QJsonArray& series,bool axisVerified=false){
-        QStringList headers;
+        auto headers=curveHeaders(series);
         QMap<QPair<double,int>,QJsonArray> rows;
-        if(!series.isEmpty()){
-            const auto axis=notation::splitLabelUnit(uiMetadataText(series.first().toObject(),"x_title").trimmed());
-            headers.append(axis.second.isEmpty()?axis.first:axis.first+" ("+axis.second+")");
-        }
         // Time histories normally share an ordered time axis. Keep their
         // immutable arrays instead of allocating and sorting every table cell.
         QVector<QJsonArray> shared;const bool aligned=axisVerified||sharedAxis(series);
         if(aligned)for(const auto& value:series)shared.append(value.toObject()["points"].toArray());
         if(aligned){
-            for(const auto& value:series)headers.append(tableCurveHeading(value.toObject()));
             beginResetModel();headers_=headers;points_={};rowHeaders_={};sharedCurves_=std::move(shared);endResetModel();return;
         }
         sharedCurves_.clear();
         for(qsizetype column=0;column<series.size();++column){
             const auto curve=series[column].toObject();
-            headers.append(tableCurveHeading(curve));
             QHash<double,int> occurrences;
             for(const auto& sample:curve["points"].toArray()){
                 const auto point=sample.toArray();
@@ -368,7 +401,7 @@ PerformanceDialog::PerformanceDialog(ModelSession& session,const QJsonObject& sc
     if(session_.model())principalSource_=session_.model()->principalDimensions;
     setStudioWindowIcon(this,"Calculate");
     if(method_=="acceleration")CalculationPlot::prepareRenderer();
-    setAttribute(Qt::WA_DontShowOnScreen,hidden);setWindowTitle(uiText(schema["title"].toString()));resize(1280,820);setMinimumSize(740,480);
+    setAttribute(Qt::WA_DontShowOnScreen,hidden);setProperty("calculation_title_source",schema["title"].toString());setWindowTitle(uiText(schema["title"].toString()));resize(1280,820);setMinimumSize(740,480);
     auto* outer=new QVBoxLayout(this);auto* toolbar=new QHBoxLayout;outer->addLayout(toolbar);toolbar->addStretch();
     pages_=new QTabWidget;pages_->setObjectName("PerformancePages");pages_->setProperty("calculation_pages",true);outer->addWidget(pages_,1);
     auto* split=new QSplitter;split->setProperty("calculation_page","general");pages_->addTab(split,uiText("常规"));
@@ -422,10 +455,11 @@ PerformanceDialog::PerformanceDialog(ModelSession& session,const QJsonObject& sc
     help_=new report::Browser;help_->setObjectName("PerformanceHelp");help_->setProperty("calculation_page","help");pages_->addTab(help_,uiText("方法说明"));
     status_=new StudioMessage(StudioMessageRole::Feedback);status_->enableMathNotation();status_->setObjectName("PerformanceStatus");outer->addWidget(status_);
     int exportPosition=0;toolbar->setSpacing(8);
-    for(const auto& entry:QList<QPair<QString,QString>>{{"csv",uiText("表格数据")},{"txt",uiText("纯文本报告")},{"json",uiText("结构化数据")},{"pdf",uiText("打印版报告")}}){
+    for(const auto& entry:QList<QPair<QString,QString>>{{"csv","表格数据"},{"txt","纯文本报告"},{"json","结构化数据"},{"pdf","打印版报告"}}){
         const auto& format=entry.first;
         auto* control=new QPushButton(this);control->setProperty("performance_export",format);
-        setStudioFormatButton(control,format,QString(uiText("导出 "))+format.toUpper()+" · "+entry.second);
+        const auto refreshFormat=[control,entry]{setStudioFormatButton(control,entry.first,QString(uiText("导出 "))+entry.first.toUpper()+" · "+uiText(entry.second));};
+        refreshFormat();bindUiRefresh(control,refreshFormat);
         exports_.append(control);toolbar->insertWidget(exportPosition++,control);
         connect(control,&QPushButton::clicked,this,[this,format]{const auto path=QFileDialog::getSaveFileName(this,uiText("保存计算报告"),preferenceFileLocation("export"),format.toUpper()+" (*."+format+")");if(path.isEmpty())return;const auto err=exportReport(path,format);status_->setMessage(err.isEmpty()?uiText("报告已保存：")+path:err,err.isEmpty()?StudioMessageRole::Feedback:StudioMessageRole::Warning);});
     }
@@ -462,6 +496,15 @@ void PerformanceDialog::loadDevelopmentSample(){
         {"solver_directory",solverDirectory_.trimmed()},{"report_language",uiLanguage()},{"development_sample",true}}))
         showFailure(uiText("无法载入计算参数。"));
 }
+namespace {
+QString parameterCaption(const QString& method,const QJsonObject& field,const QJsonObject& values){
+    const auto title=methodHelp::parameterLabel(method,field,values);
+    const auto unit=notation::unit(field["unit"].toString());
+    if(!unit.isEmpty())return title+" ("+unit+")";
+    const auto [label,legacyUnit]=notation::splitLabelUnit(title);
+    return legacyUnit.isEmpty()?title:label+" ("+legacyUnit+")";
+}
+}
 void PerformanceDialog::setParameters(const QJsonObject& schema){
     additionalLayout_=nullptr;
     const int generalScroll=parameters_->verticalScrollBar()->value(),extraScroll=additional_->verticalScrollBar()->value();
@@ -470,10 +513,11 @@ void PerformanceDialog::setParameters(const QJsonObject& schema){
     auto* extraBody=new QWidget;auto* extraLayout=new QGridLayout(extraBody);additionalGroups_.clear();
     for(int i=0;i<2;++i){auto* column=new QWidget(extraBody);additionalColumnLayouts_[i]=new QVBoxLayout(column);additionalColumnLayouts_[i]->setContentsMargins(0,0,0,0);additionalColumnLayouts_[i]->addStretch();extraLayout->addWidget(column,0,i);}
     const auto pageMap=parameterPages(method_);bool hasAdditional=false;
+    QJsonObject values;for(const auto& item:schema["fields"].toArray()){const auto field=item.toObject();values[field["key"].toString()]=field["value"];}
     for(auto v:schema["fields"].toArray()){
         const auto f=v.toObject();const auto key=f["key"].toString(),group=f["group"].toString();
         const bool extra=pageMap[key]=="additional";const auto groupKey=(extra?"additional/":"general/")+group;
-        if(!groups.contains(groupKey)){auto* box=new QGroupBox(uiText(group));auto* rows=new QGridLayout(box);rows->setVerticalSpacing(12);rows->setHorizontalSpacing(16);rows->setColumnStretch(0,1);rows->setColumnStretch(1,0);groups[groupKey]=rows;
+        if(!groups.contains(groupKey)){auto* box=new QGroupBox(uiText(group));auto* rows=new QGridLayout(box);rows->setVerticalSpacing(12);rows->setHorizontalSpacing(16);rows->setColumnStretch(0,1);groups[groupKey]=rows;
             if(extra){additionalColumnLayouts_[0]->insertWidget(additionalColumnLayouts_[0]->count()-1,box);additionalGroups_.append(box);hasAdditional=true;}else layout->addWidget(box);}
         QWidget* widget=nullptr;const auto kind=f["kind"].toString();
         if(kind=="number"){
@@ -503,23 +547,21 @@ void PerformanceDialog::setParameters(const QJsonObject& schema){
         widget->setProperty("calculation_parameter_page","general");widget->setProperty("calculation_declared_visible",f["visible"].toBool(true));
         if(preview_){if(auto* n=qobject_cast<QDoubleSpinBox*>(widget))connect(n,qOverload<double>(&QDoubleSpinBox::valueChanged),preview_,[this]{preview_->invalidate();});else if(auto* c=qobject_cast<QComboBox*>(widget))connect(c,qOverload<int>(&QComboBox::currentIndexChanged),preview_,[this]{preview_->invalidate();});}
         widget->setEnabled(f["enabled"].toBool(true));
-        QJsonObject values;for(const auto& item:schema["fields"].toArray()){const auto field=item.toObject();values[field["key"].toString()]=field["value"];}
-        auto title=methodHelp::parameterLabel(method_,f,values);if(!f["unit"].toString().isEmpty())title+=" ("+notation::unit(f["unit"].toString())+")";
+        const auto title=parameterCaption(method_,f,values);
         auto* label=new QLabel(notation::html(title));label->setTextFormat(Qt::RichText);label->setProperty("performance_label",key);label->setWordWrap(true);label->setMinimumWidth(100);label->setBuddy(widget);auto* rows=groups[groupKey];const int row=rows->rowCount();
         if(method_=="wind")if(auto* number=qobject_cast<QDoubleSpinBox*>(widget))connect(number,qOverload<double>(&QDoubleSpinBox::valueChanged),this,[this]{refreshWindLabels();});
-        auto* caption=calculationInput::caption(label,widget,key);
+        auto* caption=calculationInput::caption(label,widget,key,true);
         widget->setProperty("calculation_declared_enabled",f["enabled"].toBool(true));
         calculationInput::watch(widget,this,[this]{run_->setEnabled(!session_.busy()&&refreshInputValidity());});
         rows->addWidget(caption,row,0,Qt::AlignVCenter);
+        rows->addWidget(widget,row,2,Qt::AlignLeft|Qt::AlignVCenter);
         if((method_=="maneuver"&&key=="Edit11")||(method_=="propeller4"&&key=="WaterViscosity")){
             auto* temperature=new QPushButton(uiText("按水温换算黏度…"));
             temperature->setProperty("performance_action","water_temperature");
             connect(temperature,&QPushButton::clicked,this,&PerformanceDialog::convertViscosityFromTemperature);
-            auto* editor=new QHBoxLayout;
-            editor->addWidget(widget,0,Qt::AlignVCenter);editor->addWidget(temperature,0,Qt::AlignVCenter);editor->addStretch();
-            rows->addLayout(editor,row,1);
+            rows->addWidget(temperature,row,1,Qt::AlignRight|Qt::AlignVCenter);
             temperature->setVisible(f["visible"].toBool(true));
-        }else rows->addWidget(widget,row,1,Qt::AlignVCenter);
+        }
         if(!f["visible"].toBool(true)){caption->hide();widget->hide();}
     }
     refreshAccelerationStopControls();
@@ -542,7 +584,7 @@ void PerformanceDialog::refreshWindLabels(){
     const auto values=inputs()["values"].toObject();
     for(auto* label:findChildren<QLabel*>()){
         const auto key=label->property("performance_label").toString();if(key!="Edit9")continue;
-        const auto title=methodHelp::parameterLabel(method_,QJsonObject{{"key",key}},values);
+        const auto title=parameterCaption(method_,QJsonObject{{"key",key}},values);
         label->setText(notation::html(title));
     }
 }
@@ -564,7 +606,31 @@ void PerformanceDialog::arrangeAdditional(){
     additionalLayout_->setColumnStretch(0,1);additionalLayout_->setColumnStretch(1,columns==2?1:0);
 }
 void PerformanceDialog::resizeEvent(QResizeEvent* event){QDialog::resizeEvent(event);arrangeAdditional();}
-void PerformanceDialog::changeEvent(QEvent* event){QDialog::changeEvent(event);if(event->type()==QEvent::FontChange||event->type()==QEvent::StyleChange)arrangeAdditional();}
+void PerformanceDialog::refreshParameterLanguage(){
+    if(schema_.isEmpty())return;
+    const auto values=inputs()["values"].toObject();
+    QHash<QString,QLabel*> labels;
+    for(auto* label:findChildren<QLabel*>()){
+        const auto key=label->property("performance_label").toString();
+        if(!key.isEmpty())labels.insert(key,label);
+    }
+    for(const auto& entry:schema_["fields"].toArray()){
+        const auto field=entry.toObject();const auto key=field["key"].toString();
+        if(auto* label=labels.value(key))label->setText(notation::html(parameterCaption(method_,field,values)));
+        if(auto* combo=qobject_cast<QComboBox*>(fields_.value(key))){
+            const QSignalBlocker blocked(combo);const auto choices=field["choices"].toArray();
+            for(int i=0;i<combo->count()&&i<choices.size();++i)combo->setItemText(i,uiText(choices.at(i).toString()));
+        }
+    }
+    const int scroll=help_->verticalScrollBar()->value();
+    help_->setReport(methodHelp::document(method_,result_));help_->verticalScrollBar()->setValue(scroll);
+    refreshInputValidity();arrangeAdditional();
+}
+void PerformanceDialog::changeEvent(QEvent* event){
+    QDialog::changeEvent(event);
+    if(event->type()==QEvent::LanguageChange){refreshParameterLanguage();refreshResultLanguage();}
+    if(event->type()==QEvent::FontChange||event->type()==QEvent::StyleChange)arrangeAdditional();
+}
 bool PerformanceDialog::eventFilter(QObject* object,QEvent* event){
     if(additional_&&object==additional_->viewport()&&event->type()==QEvent::Resize)arrangeAdditional();
     return QDialog::eventFilter(object,event);
@@ -692,9 +758,36 @@ void PerformanceDialog::receive(const QJsonObject& result,bool defaults){
         },Qt::QueuedConnection);
     });
 }
+namespace {
+QString datasetCaption(const QVariant& data,bool table){
+    if(table)return uiMetadataText(data.toJsonObject(),"name");
+    const auto group=data.toJsonArray();if(group.isEmpty())return {};
+    const auto first=group.first().toObject();const auto heading=uiMetadataText(first,"x_title").trimmed();
+    return heading.isEmpty()?uiMetadataText(first,"name").trimmed():heading;
+}
+}
+void PerformanceDialog::refreshResultLanguage(){
+    if(result_.isEmpty())return;
+    const bool tables=result_.contains("tables");
+    const QSignalBlocker blocked(series_);
+    for(int i=0;i<series_->count();++i)series_->setItemText(i,datasetCaption(series_->itemData(i),tables));
+    static_cast<PerformanceTable*>(table_->model())->refreshHeaders(series_->currentData(),tables);
+    refreshStudioDataTable(table_);
+    static_cast<CalculationPlot*>(plot_)->refreshLanguage(result_["series"].toArray());
+    const auto scroll=text_->verticalScrollBar()->value();
+    text_->setReport(reportText(true));text_->verticalScrollBar()->setValue(scroll);
+    if(!completionMessage_.isEmpty()&&status_->text()==completionMessage_){
+        completionMessage_=performanceFeedbackText(result_[tables?"tables":"series"].toArray().size(),method_=="addmass",result_["elapsed_ms"].toDouble());
+        status_->setMessage(completionMessage_,StudioMessageRole::Feedback);
+    }
+}
 void PerformanceDialog::applyResult(const QJsonObject& result,bool defaults,std::shared_ptr<CalculationChartState> state){
     QElapsedTimer timing;timing.start();QJsonObject timings;
-    if(!defaults)static_cast<CalculationPlot*>(plot_)->setState(state);
+    if(!defaults){
+        auto* plot=static_cast<CalculationPlot*>(plot_);plot->setState(state);
+        // A background decoder may finish after a language switch.
+        if(state->data->captionLanguage!=uiLanguage())plot->refreshLanguage(result["series"].toArray());
+    }
     timings["chart_ms"]=timing.nsecsElapsed()/1e6;
     if(defaults){
         developmentSample_=result["development_sample"].toBool();
@@ -710,18 +803,14 @@ void PerformanceDialog::applyResult(const QJsonObject& result,bool defaults,std:
             if(result.contains("tables")){
                 for(const auto& dataset:datasets)series_->addItem(uiMetadataText(dataset.toObject(),"name"),dataset.toObject());
             }else{
-                for(const auto& group:curveTables(datasets,method_)){
-                    const auto first=group.first().toObject();
-                    auto heading=uiMetadataText(first,"x_title").trimmed();
-                    if(heading.isEmpty())heading=uiMetadataText(first,"name").trimmed();
-                    series_->addItem(heading,group);
-                }
+                for(const auto& group:curveTables(datasets,method_))series_->addItem(datasetCaption(group,false),group);
             }
             series_->parentWidget()->setVisible(series_->count()>1);
         }
         timings["before_table_ms"]=timing.nsecsElapsed()/1e6;renderSeries();timings["after_table_ms"]=timing.nsecsElapsed()/1e6;
         const auto html=reportText(true);text_->setReport(html);
-        status_->setMessage(performanceFeedbackText(datasets.size(),method_=="addmass",result["elapsed_ms"].toDouble()),StudioMessageRole::Feedback);
+        completionMessage_=performanceFeedbackText(datasets.size(),method_=="addmass",result["elapsed_ms"].toDouble());
+        status_->setMessage(completionMessage_,StudioMessageRole::Feedback);
     }
     if(!result["parameter_record_error"].toString().isEmpty())status_->setMessage(result["parameter_record_error"].toString(),StudioMessageRole::Warning);
     refreshState();timings["total_ms"]=timing.nsecsElapsed()/1e6;setProperty("performance_receive_timings",timings);

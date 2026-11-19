@@ -27,7 +27,7 @@ void MainWindow::startSession(const QString& explicitFile){
     const auto path=fileHistory_?fileHistory_->read().last:QString{};if(path.isEmpty())return;
     if(!QFileInfo(path).isFile()){
         fileHistory_->stopRestore(path);refreshRecentFiles();
-        showStatusMessage(uiText("找不到上次打开的船模，请从“打开模型”重新选择：")+path,StudioMessageRole::Warning);return;
+        showStartupRestoreWarning(QString::fromUtf8(uiText("找不到上次打开的船模，请从“打开模型”重新选择："))+"\n"+path);return;
     }
     restoringFile_=path;session_.load(path);
 }

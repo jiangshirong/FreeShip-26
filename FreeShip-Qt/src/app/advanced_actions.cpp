@@ -52,14 +52,14 @@ void MainWindow::advancedDialog(const QString& operation){
     std::array<QDoubleSpinBox*,3> vector{};QComboBox *axis=nullptr,*layer=nullptr;QDoubleSpinBox* distance=nullptr;QCheckBox *weld=nullptr,*markers=nullptr;
     auto number=[&](const QString& role,double initial,double minimum,double maximum){auto* value=new TransformNumber;value->setProperty("field",role);value->setDecimals(12);value->setRange(minimum,maximum);value->setValue(initial);value->setMinimumWidth(170);value->setKeyboardTracking(false);return value;};
     if(mirror){
-        axis=new QComboBox;axis->setProperty("field","axis");axis->addItems({uiText("X 方向（横剖平面）"),uiText("Y 方向（纵剖平面）"),uiText("Z 方向（水平面）")});axis->setCurrentIndex(1);form->addRow(uiText("镜像平面"),axis);
+        axis=new QComboBox;axis->setProperty("field","axis");addUiItems(axis,{"X 方向（横剖平面）","Y 方向（纵剖平面）","Z 方向（水平面）"});axis->setCurrentIndex(1);form->addRow(uiText("镜像平面"),axis);
         distance=number("distance",0,-1e9,1e9);form->addRow(uiText("平面坐标 (")+units+")",distance);
         weld=new QCheckBox(uiText("合并重合的控制点"));weld->setProperty("field","weld");weld->setChecked(true);form->addRow(weld);
     }else{
         if(scale||rotation)layout->addWidget(new StudioMessage(StudioMessageRole::Explanation,operation=="rotate_midship"?uiText("以船中位置为旋转基准。"):uiText("以模型原点为基准。")));
         for(int i=0;i<3;++i){vector[i]=number(QString(QChar('x'+i)),scale?1:0,scale?1e-6:rotation?-360000:-1e9,scale?1e6:rotation?360000:1e9);
             form->addRow(QString(QChar('X'+i))+(scale?uiText(" 倍率"):rotation?" (°)":" ("+units+")"),vector[i]);}
-        if(extrusion){layer=new QComboBox;layer->setProperty("field","layer");for(const auto& l:m->layers)layer->addItem(l.name,QVariant::fromValue(l.id));
+        if(extrusion){layer=new QComboBox;layer->setProperty("field","layer");for(const auto& l:m->layers)layer->addItem(layerDisplayName(l),QVariant::fromValue(l.id));
             auto chosen=layers_->selectedLayerId();int index=layer->findData(QVariant::fromValue(chosen));if(index>=0)layer->setCurrentIndex(index);form->addRow(uiText("新面的图层"),layer);
         }else if(transformPoints().size()==m->points.size()){
             markers=new QCheckBox(uiText("同步变换参考曲线"));markers->setProperty("field","adjust_markers");markers->setChecked(true);form->addRow(markers);

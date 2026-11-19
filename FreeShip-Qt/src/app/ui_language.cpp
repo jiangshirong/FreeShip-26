@@ -3,6 +3,8 @@
 #include "math_notation.h"
 #include "numeric_range_text.h"
 #include <QApplication>
+#include <QComboBox>
+#include <QSignalBlocker>
 #include <QAbstractButton>
 #include <QAction>
 #include <QDir>
@@ -63,6 +65,9 @@ QString lookup(const QString& source){
 }
 struct Binding{QPointer<QObject> object;QByteArray property;int tab=-1;QString source,last;};
 QList<Binding> bindings;
+struct Refresh{QPointer<QObject> owner;std::function<void()> update;};
+QList<Refresh> refreshers;
+constexpr int ComboSourceRole=Qt::UserRole+701;
 bool applying=false;
 QString value(const Binding& b){if(!b.object)return {};if(b.tab>=0)return static_cast<QTabWidget*>(b.object.data())->tabText(b.tab);return b.object->property(b.property.constData()).toString();}
 void capture(QObject* object,const char* property,int tab=-1){
@@ -84,6 +89,9 @@ void apply(){
         if(value(*it)==it->last){auto t=uiText(it->source);if(it->tab>=0)static_cast<QTabWidget*>(it->object.data())->setTabText(it->tab,t);else it->object->setProperty(it->property.constData(),t);it->last=t;}
         ++it;
     }
+    refreshers.removeIf([](const Refresh& entry){return entry.owner.isNull();});
+    const auto pending=refreshers;
+    for(const auto& entry:pending)if(entry.owner)entry.update();
     for(auto* w:QApplication::topLevelWidgets())w->update();
     applying=false;
 }
@@ -106,6 +114,21 @@ public:
                 {"Show single page","单页显示"},{"Show facing pages","双页显示"},{"Show overview of all pages","所有页面概览"},
                 {"Print","打印"},{"Page setup","页面设置"}};
             const auto it=printSources.constFind(QString::fromUtf8(text));return it==printSources.cend()?QString{}:uiText(*it);
+        }
+        // QColorDialog retranslates its own widgets on LanguageChange.
+        // Use its Qt 6.8 source strings, including the mnemonic markers.
+        if(QByteArray(context)=="QColorDialog"){
+            static const QHash<QString,QString> colorSources{
+                {"Select Color","选择颜色"},{"&Basic colors","基本颜色"},{"&Custom colors","自定义颜色"},
+                {"&Add to Custom Colors","添加到自定义颜色"},{"&Pick Screen Color","屏幕取色"},
+                {"Hu&e:","色相："},{"&Sat:","饱和度："},{"&Val:","明度："},
+                {"&Red:","红色："},{"&Green:","绿色："},{"Bl&ue:","蓝色："},
+                {"A&lpha channel:","Alpha 通道："},{"&HTML:","HTML:"},
+                {"Cursor at %1, %2\nPress ESC to cancel","光标位置：%1, %2\n按 Esc 取消"}};
+            const auto it=colorSources.constFind(QString::fromUtf8(text));
+            if(it==colorSources.cend())return {};
+            if(*it==QStringLiteral("选择颜色"))return lookup(*it);
+            return lookup(QStringLiteral("qt-color-dialog\x04")+*it);
         }
         if(QByteArray(context)!="QPlatformTheme")return {};
         static const QHash<QString,QString> sources{{"OK","确定"},{"Cancel","取消"},{"Save","保存"},{"Open","打开"},{"Close","关闭"},{"Apply","应用"},{"Yes","是"},{"No","否"},{"Help","帮助"}};
@@ -157,6 +180,25 @@ void bindUiText(QObject* object,const char* property,const QString& source,const
         binding.source=key;binding.last=text;return;
     }
     bindings.append(Binding{object,property,-1,key,text});
+}
+void bindUiRefresh(QObject* owner,std::function<void()> refresh){
+    refreshers.append({owner,std::move(refresh)});
+}
+void addUiItem(QComboBox* combo,const QString& source,const QVariant& data){
+    combo->addItem(uiText(source),data);
+    combo->setItemData(combo->count()-1,source,ComboSourceRole);
+    if(combo->property("ui_localized_items").toBool())return;
+    combo->setProperty("ui_localized_items",true);
+    bindUiRefresh(combo,[combo]{
+        const QSignalBlocker guard(combo);
+        for(int i=0;i<combo->count();++i){
+            const auto key=combo->itemData(i,ComboSourceRole);
+            if(key.isValid())combo->setItemText(i,uiText(key.toString()));
+        }
+    });
+}
+void addUiItems(QComboBox* combo,const QStringList& sources){
+    for(const auto& source:sources)addUiItem(combo,source);
 }
 QString uiLanguage(){return language;}
 QString uiLanguageError(){return lastError;}

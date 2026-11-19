@@ -1,4 +1,4 @@
-param(
+﻿param(
     [Parameter(Mandatory = $true)][string]$BridgeBuild,
     [string]$BuildDir,
     [string]$DeployDir,
@@ -16,6 +16,7 @@ function Get-Sha256([string]$Path) {
 $qtPackageRoot = [IO.Path]::GetFullPath($PSScriptRoot)
 if (!$WorkspaceRoot) { $WorkspaceRoot = Split-Path $qtPackageRoot -Parent }
 $WorkspaceRoot = [IO.Path]::GetFullPath($WorkspaceRoot)
+if (!$LegacySource) { $LegacySource = $env:FREESHIP_LEGACY_SOURCE }
 if (!$LegacySource) { $LegacySource = Join-Path $WorkspaceRoot 'FreeShip-Plus-Lazarus' }
 $LegacySource = [IO.Path]::GetFullPath($LegacySource)
 $BridgeBuild = [IO.Path]::GetFullPath($BridgeBuild)

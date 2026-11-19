@@ -19,11 +19,12 @@ public:
     GridPreviewView* view()const{return view_;}
 protected:
     void showEvent(QShowEvent*)override;
+    void changeEvent(QEvent*)override;
 private:
-    void finish(int code);void fail(QString text);QByteArray key()const;
+    void finish(int code);void fail(QString source);void refreshError();QByteArray key()const;
     ModelSession& session_;QString format_;std::function<QJsonObject()> options_;
     GridPreviewView* view_;StudioMessage* status_;QPushButton* refresh_;QPushButton* stop_;
     QProcess process_;QTimer delay_,timeout_;std::unique_ptr<QTemporaryDir> work_;
-    QJsonObject data_;QByteArray launchedKey_,completedKey_;QString inputHash_,error_;
+    QJsonObject data_;QByteArray launchedKey_,completedKey_;QString inputHash_,errorSource_;
     quint64 generation_=0,launched_=0,launchCount_=0;bool dirty_=true,running_=false,current_=false;
 };

@@ -89,9 +89,13 @@ print('Reused verified server blocks:',count)
         if a.downloads:
             version=manifest['version']
             if not re.fullmatch(r'\d+\.\d+\.\d+',version):raise ValueError('Invalid release version')
-            names=['FreeShip-26-'+version+'-source.zip','FreeShip-26-'+version+'-Windows-x64.zip','SHA256SUMS.txt']
+            names=['FreeShip-26-'+version+'-source.zip','FreeShip-26-'+version+'-Windows-x64-Setup.exe','SHA256SUMS.txt']
             folder=root+'/releases/'+version;command('mkdir -p -- '+shlex.quote(folder))
             sums={name:hashlib.sha256((a.downloads/name).read_bytes()).hexdigest() for name in names}
+            if sums[names[1]]!=manifest['sha256'] or (a.downloads/names[1]).stat().st_size!=manifest['size']:
+                raise ValueError('Direct installer differs from the signed release')
+            lines=(a.downloads/names[2]).read_text('ascii').splitlines()
+            if sorted(lines)!=sorted(sums[n]+'  '+n for n in names[:2]):raise ValueError('Incorrect published checksums')
             sftp=client.open_sftp()
             try:
                 for name in names:

@@ -2,10 +2,17 @@
 #include "main_window.h"
 #include "ui_language.h"
 #include "project_dialog.h"
+#include "exchange_dialog.h"
+#include "section_dialog.h"
+#include "preferences_dialog.h"
+#include "layer_panel.h"
+#include "light_dialog.h"
+#include <QGroupBox>
 #include "plates_dialog.h"
 #include "studio_ui.h"
 #include <QAction>
 #include <QCheckBox>
+#include <QColorDialog>
 #include <QComboBox>
 #include <QSpinBox>
 #include <QDoubleSpinBox>
@@ -21,6 +28,7 @@
 #include <QPushButton>
 #include <QMessageBox>
 #include <QStatusBar>
+#include <QSplitter>
 #include <QTimer>
 #include <QTableWidget>
 #include <QHeaderView>
@@ -36,6 +44,7 @@
 #include <QScopeGuard>
 #include <QToolBar>
 #include <QToolButton>
+#include <QTextEdit>
 #include "studio_motion.h"
 #include <QContextMenuEvent>
 #include <QCryptographicHash>
@@ -46,6 +55,27 @@
 #include <QScreen>
 #include <QEventLoop>
 #include <QElapsedTimer>
+
+namespace {
+// Installed only by the queued-edit close probe, immediately before its decision.
+class CloseDialogObserver final : public QObject {
+public:
+    explicit CloseDialogObserver(QObject* owner):QObject(owner){
+        owner->setProperty("probe_exit_dialogs",0);
+        qApp->installEventFilter(this);
+    }
+protected:
+    bool eventFilter(QObject* object,QEvent* event) override {
+        if(event->type()==QEvent::Show){
+            const auto* dialog=qobject_cast<QDialog*>(object);
+            if(dialog&&dialog->isWindow())parent()->setProperty("probe_exit_dialogs",++shown_);
+        }
+        return false;
+    }
+private:
+    int shown_=0;
+};
+}
 #include <QPointer>
 #ifdef Q_OS_WIN
 #ifndef NOMINMAX
@@ -61,7 +91,7 @@ void MainWindow::verifyStartup(const QString& request,const QString& output){
     QDir().mkpath(workflowOutput_);QFile file(request);
     if(!file.open(QIODevice::ReadOnly)){finishWorkflow("Cannot read startup request");return;}
     const auto config=QJsonDocument::fromJson(file.readAll()).object();
-    if(config["measure_first_frame"].toBool()) {
+    if(config["measure_first_frame"].toBool()||config["observe_restore_notice"].toBool()) {
 #ifdef Q_OS_WIN
         wchar_t name[256]{};DWORD bytes=0;
         if(!GetUserObjectInformationW(GetThreadDesktop(GetCurrentThreadId()),UOI_NAME,name,sizeof(name),&bytes)||
@@ -70,7 +100,11 @@ void MainWindow::verifyStartup(const QString& request,const QString& output){
             finishWorkflow("First-frame measurement requires the isolated QA desktop");return;
         }
 #endif
-        show();
+        if(config["observe_restore_notice"].toBool()){
+            const auto language=config["language"].toString("en");
+            if(!setUiLanguage(language).isEmpty()){finishWorkflow("Notice language unavailable: "+language);return;}
+            showNormal();resize(980,700);
+        }else show();
     }
     session_.setProperty("disable_first_frame",config["disable_first_frame"].toBool());
     session_.setProperty("disable_startup_cache",config["disable_startup_cache"].toBool());
@@ -100,6 +134,7 @@ void MainWindow::verifyStartup(const QString& request,const QString& output){
 void MainWindow::startupStep(const QString& completedOperation,const QString& error){
     QString operation=completedOperation;
     if(workflowFinished_)return;
+    if(property("probe_edit_during_close").toBool()&&startupClosing_&&operation!="close"&&operation!="error")return;
     if(operation=="snapshot"&&property("deferred_startup_probe").toBool()){
         setProperty("deferred_startup_probe",false);operation="load";
         auto evidence=property("deferred_drawing_evidence").toJsonObject();
@@ -133,6 +168,15 @@ void MainWindow::startupStep(const QString& completedOperation,const QString& er
         item["window_title"]=windowTitle();item["status_bar_visible"]=statusBar()->isVisibleTo(this);
         item["window_full_screen"]=isFullScreen();
         item["window_visible"]=isVisible();item["lines_visible"]=linesDialog_->isVisible();
+        if(property("probe_close_decision_ms").isValid()){
+            if(property("probe_exit_dialogs").isValid())item["dialogs_shown_after_decision"]=property("probe_exit_dialogs").toInt();
+            item["decision_to_observation_ms"]=workflowTimer_.elapsed()-property("probe_close_decision_ms").toLongLong();
+            item["window_enabled"]=isEnabled();
+            item["decision_to_close_return_ms"]=property("probe_close_return_ms").toLongLong();
+            item["main_hidden_on_close_return"]=property("probe_main_hidden").toBool();
+            item["main_enabled_on_close_return"]=property("probe_main_enabled").toBool();
+            item["revision_after_decision"]=session_.model()?double(session_.model()->revision)-property("probe_close_revision").toDouble():0.;
+        }
         item["close_prompt_count"]=property("close_probe_prompt_count").toInt();
         item["discard_caption"]=property("close_probe_discard_caption").toString();
         item["recovery_file"]=session_.recoveryFile();item["recovery_error"]=session_.recoveryError();item["recovery_origin"]=session_.recoveryOrigin();
@@ -208,6 +252,142 @@ void MainWindow::startupStep(const QString& completedOperation,const QString& er
                 if(!error.isEmpty()){finishWorkflow(error);return;}
             }
             auditCloseControls();
+        }
+        else if(kind=="live_window_language"){
+            if(!session_.model())throw std::runtime_error("Live window language probe needs a model");
+            loadPreferences(command["settings"].toString());
+            if(!languageShortcut_||!languageShortcut_->isEnabled())throw std::runtime_error("Live language shortcut did not load");
+            const auto alternate=command["target"].toString("en");
+            // The shortcut resolver uses the active widget window. Show the
+            // owner too, on the runner's non-input desktop only.
+#ifdef Q_OS_WIN
+            wchar_t desktop[256]{};DWORD bytes=0;
+            if(!GetUserObjectInformationW(GetThreadDesktop(GetCurrentThreadId()),UOI_NAME,desktop,sizeof(desktop),&bytes)||
+               !QString::fromWCharArray(desktop).startsWith("FreeShip26-QA-")||
+               QString::fromWCharArray(desktop)!=qEnvironmentVariable("FREESHIP_QA_DESKTOP"))
+                throw std::runtime_error("Live language probe requires the private desktop");
+#endif
+            const bool wasVisible=isVisible();const auto restoreOwner=qScopeGuard([this,wasVisible]{if(!wasVisible)hide();});
+            if(!wasVisible)show();
+            const auto collect=[this](QDialog* dialog){
+                QJsonArray labels,tooltips,values,headers,tabs,choices,sectionHints,cad;
+                for(auto* widget:dialog->findChildren<QWidget*>()){
+                    if(!widget->toolTip().isEmpty())tooltips.append(widget->toolTip());
+                    if(auto* label=qobject_cast<QLabel*>(widget);label&&!label->text().isEmpty())labels.append(label->text());
+                    if(auto* button=qobject_cast<QAbstractButton*>(widget);button&&!button->text().isEmpty())labels.append(button->text());
+                    if(auto* group=qobject_cast<QGroupBox*>(widget);group&&!group->title().isEmpty())labels.append(group->title());
+                    if(auto* line=qobject_cast<QLineEdit*>(widget);line&&!line->isReadOnly()){
+                        if(!line->placeholderText().isEmpty())tooltips.append(line->placeholderText());
+                        if(line->property("modelField").isValid()||line->property("exchange_field").isValid()||line->property("exchange_number").isValid())values.append(line->text());
+                    }
+                    if(auto* box=qobject_cast<QComboBox*>(widget)){
+                        values.append(QJsonArray{box->currentIndex(),QJsonValue::fromVariant(box->currentData())});
+                        QJsonArray list;for(int i=0;i<box->count();++i)list.append(box->itemText(i));choices.append(list);
+                    }
+                    if(auto* tab=qobject_cast<QTabWidget*>(widget)){
+                        QJsonArray list;for(int i=0;i<tab->count();++i)list.append(tab->tabText(i));tabs.append(list);
+                    }
+                    if(auto* table=qobject_cast<QTableWidget*>(widget)){
+                        QJsonArray list;for(int i=0;i<table->columnCount();++i)if(auto* h=table->horizontalHeaderItem(i))list.append(h->text());headers.append(list);
+                        if(table->objectName()=="SectionDefinitions")for(int i=0;i<table->rowCount();++i)
+                            if(auto* item=table->item(i,2)){sectionHints.append(item->toolTip());values.append(int(item->checkState()));}
+                    }
+                }
+                if(auto* layers=dialog->findChild<QListWidget*>("layer_list");layers&&layers->count()>1)
+                    values.append(layers->item(0)->text());
+                for(const auto* action:exchangeActions_)cad.append(action->text());
+                return QJsonObject{{"language",uiLanguage()},{"title",dialog->windowTitle()},{"labels",labels},{"tooltips",tooltips},
+                    {"choices",choices},{"headers",headers},{"tabs",tabs},{"section_hints",sectionHints},{"values",values},{"exchange_actions",cad}};
+            };
+            auto snapshot=std::make_shared<fs::ModelSnapshot>(*session_.model());
+            // A fixture with an arbitrary user caption verifies that only product text changes.
+            const auto name=QStringLiteral("客户自定义船体");
+            if(!snapshot->layers.isEmpty()){snapshot->layers.front().name=name;snapshot->layers.front().defaultNameNumber.reset();}
+            if(std::none_of(snapshot->sections.cbegin(),snapshot->sections.cend(),[](const auto& section){return section.kind==1;})){
+                fs::Section section{};section.kind=1;snapshot->sections.append(section);
+            }
+            const auto make=[&](const QString& kind)->std::unique_ptr<QDialog>{
+                if(kind=="project")return std::make_unique<ProjectDialog>(*snapshot,this);
+                if(kind=="sections"){
+                    auto dialog=std::make_unique<SectionDialog>(this);dialog->setSnapshot(snapshot);dialog->setEditingEnabled(true);return dialog;
+                }
+                if(kind=="layer"){
+                    LayerPanel* panel=nullptr;std::unique_ptr<QDialog> dialog(createLayerPropertiesDialog(this,panel));
+                    panel->setSnapshot(snapshot);panel->setEditingEnabled(true);return dialog;
+                }
+                if(kind=="preferences")return std::make_unique<PreferencesDialog>(preferences_,this);
+                if(kind=="plates")return std::make_unique<PlatesDialog>(session_,true,this);
+                if(kind=="lighting"){
+                    auto* view=views_[0];openLightDialog(view);return std::unique_ptr<QDialog>(lightDialogs_.take(view));
+                }
+                const bool importing=kind.startsWith("import:");
+                return std::make_unique<ExchangeDialog>(session_,importing,importing?kind.mid(7):kind,this);
+            };
+            const auto chord=[](QWidget* window){
+                auto* target=window->focusWidget();if(!target)target=window;
+                QKeyEvent press(QEvent::KeyPress,Qt::Key_L,Qt::ControlModifier|Qt::ShiftModifier,"l");QApplication::sendEvent(target,&press);
+                QKeyEvent release(QEvent::KeyRelease,Qt::Key_L,Qt::NoModifier);QApplication::sendEvent(target,&release);
+            };
+            QJsonObject colorCoverage;
+            for(const auto& entry:command["color_pickers"].toArray()){
+                const auto id=entry.toString();
+                const auto observePicker=[&](bool switchWhileOpen){
+                    auto owner=make(id);owner->show();
+                    QApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+                    QPushButton* trigger=nullptr;
+                    for(auto* button:owner->findChildren<QPushButton*>()){
+                        const bool matches=id=="preferences"?button->property("preference_field")=="graphic.viewportcolor":button->property("colorValue").isValid();
+                        if(!matches)continue;
+                        if(trigger)throw std::runtime_error("Ambiguous color-picker action");
+                        trigger=button;
+                    }
+                    if(!trigger||!trigger->isEnabled())throw std::runtime_error("Missing enabled color-picker action");
+                    QPointer<QPushButton> colorButton(trigger);
+                    const auto currentColor=[&]{return !colorButton?QVariant{}:colorButton->property(id=="preferences"?"color":"colorValue");};
+                    const auto original=currentColor();
+                    QJsonObject result;
+                    QTimer ready;ready.setSingleShot(true);
+                    connect(&ready,&QTimer::timeout,owner.get(),[&]{
+                        auto* picker=qobject_cast<QColorDialog*>(QApplication::activeModalWidget());
+                        if(!picker){if(auto* modal=qobject_cast<QDialog*>(QApplication::activeModalWidget()))modal->reject();return;}
+                        if(picker->parentWidget()!=(id=="preferences"?static_cast<QWidget*>(owner.get()):static_cast<QWidget*>(colorButton.data()))){picker->reject();return;}
+                        picker->setCurrentColor(QColor("#3a70a1"));
+                        QApplication::setActiveWindow(picker);
+                        const auto frame=[&]{
+                            auto surface=collect(picker);
+                            surface["color"]=picker->currentColor().name(QColor::HexArgb);
+                            return surface;
+                        };
+                        result["before"]=frame();
+                        if(switchWhileOpen){chord(picker);result["after"]=frame();chord(picker);result["restored"]=frame();}
+                        picker->reject();
+                    });
+                    ready.start(0);trigger->click();
+                    result["cancel_keeps_original"]=bool(colorButton)&&original==currentColor();
+                    return result;
+                };
+                auto observed=observePicker(true);
+                if(!setUiLanguage(alternate).isEmpty())throw std::runtime_error("Cannot load color-picker target language");
+                observed["fresh"]=observePicker(false).value("before");
+                if(!setUiLanguage("zh").isEmpty())throw std::runtime_error("Cannot restore Chinese after color picker");
+                colorCoverage[id]=observed;
+            }
+            workflowArtifacts_["color_picker_language"]=colorCoverage;
+            QJsonObject coverage;
+            for(const auto& entry:command["windows"].toArray()){
+                const auto id=entry.toString();
+                auto dialog=make(id);dialog->show();
+                QApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+                QApplication::setActiveWindow(dialog.get());
+                const auto before=collect(dialog.get());chord(dialog.get());const auto after=collect(dialog.get());chord(dialog.get());const auto restored=collect(dialog.get());
+                dialog.reset();
+                if(!setUiLanguage(alternate).isEmpty())throw std::runtime_error("Cannot load target language");
+                auto fresh=make(id);fresh->setAttribute(Qt::WA_DontShowOnScreen);fresh->show();
+                coverage[id]=QJsonObject{{"before",before},{"after",after},{"restored",restored},{"fresh",collect(fresh.get())}};
+                fresh.reset();
+                if(!setUiLanguage("zh").isEmpty())throw std::runtime_error("Cannot restore Chinese");
+            }
+            workflowArtifacts_["live_window_language"]=coverage;
         }
         else if(kind=="read_surfaces_check")auditReadSurfaces(command["copy_only"].toBool());
         else if(kind=="print_preview_check")auditPrintPreview();
@@ -405,10 +585,11 @@ void MainWindow::startupStep(const QString& completedOperation,const QString& er
                 {"caption_tooltip",title?title->parentWidget()->toolTip():QString{}},{"views",views},{"image",image}};
             if(command["feedback"].toBool()){
                 showStatusMessage("Private typography feedback",StudioMessageRole::Feedback);
-                sample["notice_visible"]=statusNotice_&&!statusNotice_->isHidden();sample["notice_role"]=statusNotice_->property("studio_message_role").toString();
-                sample["notice_inside"]=centralWidget()->rect().contains(statusNotice_->geometry());
+                auto* notice=findChild<QWidget*>("ShellStatusNotice");
+                sample["notice_visible"]=notice&&!notice->isHidden();sample["notice_role"]=notice?notice->property("studio_message_role").toString():QString{};
+                sample["notice_inside"]=notice&&notice->parentWidget()->contentsRect().contains(notice->geometry());
                 const auto before=centralWidget()->geometry();QEventLoop wait;QTimer::singleShot(4700,&wait,&QEventLoop::quit);wait.exec();
-                sample["notice_expired"]=statusNotice_->isHidden();sample["notice_did_not_reflow"]=before==centralWidget()->geometry();
+                sample["notice_expired"]=notice&&notice->isHidden();sample["notice_did_not_reflow"]=before==centralWidget()->geometry();
             }
             auto samples=workflowArtifacts_["typography"].toArray();samples.append(sample);workflowArtifacts_["typography"]=samples;
         }
@@ -810,6 +991,88 @@ void MainWindow::startupStep(const QString& completedOperation,const QString& er
             if(!requestedLanguage.isEmpty())setUiLanguage(previousLanguage);
         }
         else if(kind=="startup")startSession(path);
+        else if(kind=="canvas_notice_check"){
+            auto* split=qobject_cast<QSplitter*>(centralWidget());
+            if(!split){finishWorkflow("Workspace splitter missing");return;}
+            resize(1100,700);split->widget(1)->show();split->setSizes({830,270});
+            qApp->setProperty("studio_motion_enabled",true);
+            // The close workflow can now use its own confirmation. Exercise
+            // the screenshot's exact translated text through the shared notice.
+            showStatusMessage(uiText("请等当前模型操作完成后再关闭。"),StudioMessageRole::Warning);
+            auto* notice=findChild<QWidget*>("ShellStatusNotice");
+            auto* body=notice?notice->findChild<QTextEdit*>("ShellStatusNoticeText"):nullptr;
+            auto* dismiss=notice?notice->findChild<QToolButton*>("ShellStatusNoticeClose"):nullptr;
+            if(!notice||!body||!dismiss){workflowCase("canvas-notice-controls-present",false);return;}
+            const auto endVisible=[&]{
+                auto end=body->textCursor();end.movePosition(QTextCursor::End);
+                return body->viewport()->rect().contains(body->cursorRect(end));
+            };
+            const auto fits=[&]{
+                return notice->isVisible()&&notice->parentWidget()->contentsRect().contains(notice->geometry())
+                    &&body->verticalScrollBar()->maximum()==0&&endVisible();
+            };
+            workflowCase("canvas-close-warning-text",body->toPlainText()==command["text"].toString());
+            workflowCase("canvas-close-warning-fits-immediately",fits());
+            if(notice->grab().save(workflowOutput_+"/close-busy-warning.png"))workflowArtifacts_["close_busy_warning"]=workflowOutput_+"/close-busy-warning.png";
+            const auto wide=notice->size();
+            split->setSizes({430,670});
+            workflowCase("canvas-close-warning-refits-on-split",notice->width()<wide.width()&&fits());
+            if(notice->grab().save(workflowOutput_+"/close-busy-warning-narrow.png"))workflowArtifacts_["close_busy_warning_narrow"]=workflowOutput_+"/close-busy-warning-narrow.png";
+            const bool canPlace=addFlow_&&addFlow_->isEnabled()&&!addFlow_->isChecked();
+            if(canPlace)addFlow_->trigger();
+            workflowCase("canvas-menu-action-shows-complete-hint",canPlace&&fits()&&
+                body->toPlainText()==uiText("在横剖、纵剖或俯视图连续点击流线起点；Esc 或右键结束。"));
+            endFlowline();
+            auto* scroll=body->verticalScrollBar();
+            const auto longPath=QString(460,QChar('x'))+".fbm";
+            showStatusMessage(longPath,StudioMessageRole::Warning);
+            workflowCase("canvas-unbroken-text-wraps",body->toPlainText()==longPath&&body->horizontalScrollBar()->maximum()==0&&fits(),
+                QString("%1x%2, horizontal range %3, vertical range %4, end visible %5")
+                    .arg(body->viewport()->width()).arg(body->viewport()->height()).arg(body->horizontalScrollBar()->maximum())
+                    .arg(scroll->maximum()).arg(endVisible()));
+            auto paragraphs=QString("Directory: %1\n").arg(longPath).repeated(12)+"End of notice.";
+            showStatusMessage(paragraphs,StudioMessageRole::Feedback);
+            workflowCase("canvas-oversize-scrolls-without-overflow",notice->parentWidget()->contentsRect().contains(notice->geometry())&&scroll->maximum()>0&&dismiss->isVisible());
+            scroll->setValue(scroll->maximum());
+            workflowCase("canvas-last-line-reachable",endVisible());
+            dismiss->click();
+            workflowCase("canvas-notice-dismisses",notice->isHidden());
+            showStatusMessage("Saved.",StudioMessageRole::Feedback);
+            workflowCase("canvas-short-feedback-does-not-block-canvas",fits()&&dismiss->isHidden()&&notice->testAttribute(Qt::WA_TransparentForMouseEvents));
+        }
+        else if(kind=="restore_notice_check"){
+            auto* notice=findChild<QWidget*>("StartupRestoreNotice");
+            if(command["action"]=="verify_open"){
+                workflowCase("successful-model-open-dismisses-startup-notice",session_.ready()&&notice&&notice->isHidden());
+            }else{
+                auto* body=notice?notice->findChild<QTextEdit*>("StartupRestoreNoticeText"):nullptr;
+                auto* close=notice?notice->findChild<QToolButton*>("StartupRestoreNoticeClose"):nullptr;
+                if(!notice||!body||!close){workflowCase("startup-notice-controls-present",false);finishWorkflow();return;}
+                QApplication::processEvents();
+                const auto text=body->toPlainText();
+                workflowCase("startup-notice-is-visible-and-nonmodal",notice->isVisible()&&!QApplication::activeModalWidget());
+                workflowCase("startup-notice-text-and-path-complete",text==command["text"].toString());
+                auto last=body->textCursor();last.movePosition(QTextCursor::End);
+                workflowCase("startup-notice-wrapped-text-fits",body->viewport()->rect().contains(body->cursorRect(last))&&
+                    !body->verticalScrollBar()->maximum()&&notice->parentWidget()->rect().contains(notice->geometry()));
+                const auto image=workflowOutput_+"/restore-notice.png";
+                if(notice->grab().save(image))workflowArtifacts_["restore_notice"]=image;
+                if(command["action"]=="close"){
+                    const QPoint point=close->rect().center();
+                    const auto global=close->mapToGlobal(point);
+                    workflowCase("startup-notice-close-receives-pointer",notice->childAt(close->mapTo(notice,point))==close);
+                    QMouseEvent press(QEvent::MouseButtonPress,point,global,Qt::LeftButton,Qt::LeftButton,Qt::NoModifier);
+                    QMouseEvent release(QEvent::MouseButtonRelease,point,global,Qt::LeftButton,Qt::NoButton,Qt::NoModifier);
+                    QApplication::sendEvent(close,&press);QApplication::sendEvent(close,&release);
+                    workflowCase("startup-notice-dismisses-on-click",notice->isHidden());
+                }else if(command["action"]=="wait"){
+                    QEventLoop waiting;
+                    QTimer::singleShot(13000,&waiting,&QEventLoop::quit);
+                    waiting.exec();
+                    workflowCase("startup-notice-dismisses-without-input",notice->isHidden());
+                }
+            }
+        }
         else if(kind=="open")openModel(path);
         else if(kind=="lines_window_check"){
             qApp->setQuitOnLastWindowClosed(false);
@@ -1060,7 +1323,7 @@ void MainWindow::startupStep(const QString& completedOperation,const QString& er
             connect(responder,&QTimer::timeout,this,[this,command,responder]{
                 auto* dialog=qobject_cast<QMessageBox*>(QApplication::activeModalWidget());
                 if(!dialog)return;
-                QJsonObject evidence{{"owner_minimized",isMinimized()},{"owner_visible",isVisible()},
+                QJsonObject evidence{{"edit_in_flight",session_.busy()},{"owner_minimized",isMinimized()},{"owner_visible",isVisible()},
                     {"dialog_frame_x",dialog->frameGeometry().x()},{"dialog_frame_y",dialog->frameGeometry().y()},
                     {"dialog_frame_w",dialog->frameGeometry().width()},{"dialog_frame_h",dialog->frameGeometry().height()},
                     {"icon_key",dialog->property("studio_window_icon").toString()},
@@ -1096,6 +1359,9 @@ void MainWindow::startupStep(const QString& completedOperation,const QString& er
                 }
                 const auto decision=command["choice"].toString(command["discard"].toBool()?"discard":"cancel");
                 const auto choice=decision=="discard"?QMessageBox::Discard:decision=="save"?QMessageBox::Save:QMessageBox::Cancel;
+                setProperty("probe_close_decision_ms",workflowTimer_.elapsed());
+                setProperty("probe_close_revision",session_.model()?double(session_.model()->revision):0.);
+                if(command["queued_layers"].toInt()>0&&choice!=QMessageBox::Cancel)new CloseDialogObserver(this);
                 if(auto* button=dialog->button(choice))button->click();
                 if(choice==QMessageBox::Cancel){
                     responder->stop();
@@ -1107,6 +1373,34 @@ void MainWindow::startupStep(const QString& completedOperation,const QString& er
                 }
             });
             responder->start();
+            if(command["busy_edit"].toBool()){
+                // Exercise the earliest possible close: the real session has accepted
+                // the edit but cannot finish it until this state callback returns.
+                setProperty("probe_edit_during_close",true);
+                auto previous=session_.onStateChanged;
+                bool requested=false;
+                session_.onStateChanged=[&,previous]{
+                    previous();
+                    if(!requested&&session_.busy()){
+                        requested=true;
+                        for(int i=0;i<command["queued_layers"].toInt();++i){
+                            if(!session_.layerListCommand("update_layer",{{"layer_id",double(session_.model()->layers.front().id)},
+                                    {"changes",QJsonObject{{"name",QString("close-probe-%1").arg(i)}}}})){
+                                finishWorkflow("Cannot queue layer edit");return;
+                            }
+                        }
+                        close();
+                        setProperty("probe_close_return_ms",workflowTimer_.elapsed()-property("probe_close_decision_ms").toLongLong());
+                        setProperty("probe_main_hidden",!isVisible());setProperty("probe_main_enabled",isEnabled());
+                    }
+                };
+                const bool accepted=command["queued_layers"].toInt()?session_.layerListCommand("update_layer",
+                    {{"layer_id",double(session_.model()->layers.front().id)},{"changes",QJsonObject{{"name","close-probe-first"}}}}):session_.updateProject({{"water_density",1.027}});
+                session_.onStateChanged=previous;
+                if(!accepted||!requested){finishWorkflow("Close probe did not start an edit");return;}
+                if(command["choice"]=="cancel")startupClosing_=false;
+                return;
+            }
             if(command["native_system_close"].toBool()){
 #ifdef Q_OS_WIN
                 SendMessageW(reinterpret_cast<HWND>(winId()),WM_SYSCOMMAND,SC_CLOSE,0);

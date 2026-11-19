@@ -147,7 +147,7 @@ Lazarus 已改为先在内存生成，明确保存报告时写入新的附表目
 
 本项目识别已确认的四种布局，保留有效字段并提示迁移；四个样本中无效的 Task5 段要求重新填写，不编造恢复值。Lazarus 在 `FreeFileBuffer.pas::PrepareLegacyCalculations`；Qt 对应 [fbm_codec.cpp](../../src/document/fbm_codec.cpp)。
 
-依据：[原读取器](https://github.com/markmal/freeship-plus-in-lazarus/blob/1de17e99fb2b1cc559cdf27c5cafb595a627a641/Units/FreeFileBuffer.pas)与[布局排查记录](../../../FreeShip-Plus-Lazarus/Docs/上游问题记录/17-旧文件兼容性仍需定位.md)；`legacy_compatibility.py`、Qt 文档回归。历史 82 个样本均可读取，有 2 项 JPEG 往返差异保留为待复核；原 FBM 无校验和，不能识别所有恰好落在合法字段边界的截断。
+依据：[原读取器](https://github.com/markmal/freeship-plus-in-lazarus/blob/1de17e99fb2b1cc559cdf27c5cafb595a627a641/Units/FreeFileBuffer.pas)与[布局排查记录](history/17-旧文件兼容性仍需定位.md)；`legacy_compatibility.py`、Qt 文档回归。历史 82 个样本均可读取，有 2 项 JPEG 往返差异保留为待复核；原 FBM 无校验和，不能识别所有恰好落在合法字段边界的截断。
 
 <a id="u18"></a>
 ## 18 · 工程设置的隐式改模、黏度端点及无效输入〔重点〕

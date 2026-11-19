@@ -9,6 +9,7 @@
 #include "math_notation.h"
 #include "numeric_range_text.h"
 #include <QStyleOptionHeader>
+#include <QStyleOptionTab>
 #include <QPushButton>
 #include <QStyleOptionViewItem>
 #include "studio_caption.h"
@@ -420,6 +421,7 @@ public:
         return QProxyStyle::pixelMetric(metric,option,widget);
     }
     int styleHint(StyleHint hint,const QStyleOption* option=nullptr,const QWidget* widget=nullptr,QStyleHintReturn* result=nullptr)const override{
+        if(hint==SH_ToolTip_WakeUpDelay)return 0;
         if(qobject_cast<const QMenu*>(widget)){
             if(hint==SH_Menu_SubMenuPopupDelay)return 0;
             if(hint==SH_Menu_MouseTracking)return 1;
@@ -543,15 +545,13 @@ public:
     }
     void drawControl(ControlElement element, const QStyleOption* option, QPainter* painter,
                      const QWidget* widget) const override {
-        if(element==CE_TabBarTab&&option){
-            // The active tab already has a filled background and indicator.
-            // Keep keyboard focus for navigation, but do not paint the native
-            // dotted focus frame on top of the selected tab label.
-            auto base=*option;
-            base.state&=~State_HasFocus;
-            QProxyStyle::drawControl(element,&base,painter,widget);
-            return;
-        }
+        if(element==CE_TabBarTab)
+            if(const auto* tab=qstyleoption_cast<const QStyleOptionTab*>(option)){
+                // Handle native tabs; the stylesheet handles its own outline below.
+                auto base=*tab;base.state&=~State_HasFocus;
+                QProxyStyle::drawControl(element,&base,painter,widget);
+                return;
+            }
         if(element==CE_HeaderLabel&&widget&&widget->property("studio_table_navigation_header").toBool())
             if(const auto* header=qstyleoption_cast<const QStyleOptionHeader*>(option)){
                 // Native Windows header themes can retain the system text size.
@@ -684,13 +684,19 @@ bool studioMenuOpensDialog(const QAction* action) {
     return explicitKind.isValid()?explicitKind.toBool():dialogCaption(action->text());
 }
 
+void applyStudioToolTipPolicy() {
+    if (!dynamic_cast<StudioMenuStyle*>(QApplication::style()))
+        QApplication::setStyle(new StudioMenuStyle(QApplication::style()->objectName()));
+    QApplication::setEffectEnabled(Qt::UI_AnimateTooltip,false);
+    QApplication::setEffectEnabled(Qt::UI_FadeTooltip,false);
+}
+
 void applyStudioTheme() {
+    applyStudioToolTipPolicy();
     QApplication::setEffectEnabled(Qt::UI_AnimateMenu,false);
     QApplication::setEffectEnabled(Qt::UI_FadeMenu,false);
     installStudioCaptionEvents();
     const QIcon brand(":/brand/freeship26.png");if(!brand.isNull())QApplication::setWindowIcon(brand);
-    if (!dynamic_cast<StudioMenuStyle*>(QApplication::style()))
-        QApplication::setStyle(new StudioMenuStyle(QApplication::style()->objectName()));
     QFont face("Microsoft YaHei UI");face.setPointSizeF(10.5);
     face.setStyleStrategy(QFont::StyleStrategy(QFont::PreferAntialias|QFont::PreferQuality));
     QApplication::setFont(studioTextFont(face));
@@ -709,11 +715,12 @@ void applyStudioTheme() {
     qApp->setStyleSheet(qApp->styleSheet()+QStringLiteral(
         "QTabWidget::pane {border:0;background:transparent;}"
         "QTabWidget::tab-bar {left:0px;}"
+        // Qt paints PE_FrameFocusRect using the bar's rule, not the tab subcontrol.
+        "QTabBar {outline:none;}"
         "QTabBar::tab {background:transparent;color:#526f66;border:0;border-bottom:2px solid transparent;"
         "padding:9px 16px;margin:0 4px 8px 0;min-height:20px;}"
         "QTabBar::tab:hover {background:#edf3ef;color:#245b51;}"
         "QTabBar::tab:selected {background:#e2eee7;color:#007e74;border-bottom-color:#007e74;}"
-        "QTabBar::tab:focus {outline: none;}"
         "QTabBar[studio_tab_motion=true]::tab:selected {border-bottom-color:transparent;}"
         "QTabBar::tab:disabled {color:#929b96;}"));
 }
@@ -967,6 +974,13 @@ void StudioBar::watchMenuButton(QToolButton* button){
         if(openMenu_==menu){openMenu_.clear();openMenuButton_.clear();closeMenuTimer_->stop();keepMenuRelease_=false;}
     });
 }
+void StudioBar::setHoveredMenuButton(QToolButton* button){
+    if(button&&(!button->property("studio_hover_popup").toBool()||!button->isEnabled()))button=nullptr;
+    if(hoveredMenuButton_==button)return;
+    if(hoveredMenuButton_)studio_motion::setMenuButtonHovered(hoveredMenuButton_,false);
+    hoveredMenuButton_=button;
+    if(button)studio_motion::setMenuButtonHovered(button,true);
+}
 void StudioBar::queueHoverMenu(QToolButton* button){
     if(!button||!button->isVisible()||!button->isEnabled()||!button->property("studio_hover_popup").toBool()){
         hoverMenuTimer_->stop();pendingMenuButton_.clear();return;
@@ -1024,9 +1038,16 @@ bool StudioBar::eventFilter(QObject* watched,QEvent* event){
     if(watched==window()&&event->type()==QEvent::LanguageChange)
         QTimer::singleShot(0,this,[this]{layoutButtons();});
     const auto type=event->type();
+    // Popup grabs can route pointer motion to another widget without sending
+    // Leave to the tool button. Keyboard use also supersedes a pending hover.
+    if(type==QEvent::KeyPress||type==QEvent::Shortcut){
+        setHoveredMenuButton(nullptr);
+        hoverMenuTimer_->stop();pendingMenuButton_.clear();
+    }
     const bool click=type==QEvent::MouseButtonPress||type==QEvent::MouseButtonDblClick||type==QEvent::MouseButtonRelease;
     const bool tracking=click||type==QEvent::MouseMove||type==QEvent::WindowActivate;
     if(tracking&&!toolbarPointerReceiver(watched,window(),openMenu_)){
+        setHoveredMenuButton(nullptr);
         hoverMenuTimer_->stop();pendingMenuButton_.clear();keepMenuRelease_=false;
         return QWidget::eventFilter(watched,event);
     }
@@ -1051,22 +1072,28 @@ bool StudioBar::eventFilter(QObject* watched,QEvent* event){
         }
     }
     if(event->type()==QEvent::Enter||event->type()==QEvent::HoverEnter||event->type()==QEvent::HoverMove){
-        if(auto* button=qobject_cast<QToolButton*>(watched);button&&(isAncestorOf(button)||sideContents_->isAncestorOf(button)))
+        if(auto* button=qobject_cast<QToolButton*>(watched);button&&(isAncestorOf(button)||sideContents_->isAncestorOf(button))){
+            setHoveredMenuButton(button);
             queueHoverMenu(button);
+        }
     }else if(event->type()==QEvent::FocusIn){
         if(auto* button=qobject_cast<QToolButton*>(watched);button&&sideContents_->isAncestorOf(button))
             sideScroll_->ensureWidgetVisible(button,0,2);
-    }else if(event->type()==QEvent::Leave){
+    }else if(event->type()==QEvent::Leave||event->type()==QEvent::Hide){
+        if(watched==hoveredMenuButton_)setHoveredMenuButton(nullptr);
         if(watched==pendingMenuButton_){hoverMenuTimer_->stop();pendingMenuButton_.clear();}
     }else if(event->type()==QEvent::MouseMove){
         // A popup grabs mouse delivery. Use that event's position to switch
         // toolbar menus even while the receiving widget is the previous menu.
         const auto* mouse=static_cast<QMouseEvent*>(event);
-        if(mouse->buttons()!=Qt::NoButton){hoverMenuTimer_->stop();pendingMenuButton_.clear();}
-        else queueHoverMenu(buttonAt(mouse->globalPosition().toPoint()));
+        auto* button=mouse->buttons()==Qt::NoButton?buttonAt(mouse->globalPosition().toPoint()):nullptr;
+        setHoveredMenuButton(button);
+        queueHoverMenu(button);
         trackHoverMenu(mouse->globalPosition().toPoint(),mouse->buttons()!=Qt::NoButton);
     }else if(event->type()==QEvent::ApplicationDeactivate){
+        setHoveredMenuButton(nullptr);
         hoverMenuTimer_->stop();closeMenuTimer_->stop();pendingMenuButton_.clear();
+        if(openMenu_)openMenu_->close();
     }
     return QWidget::eventFilter(watched,event);
 }

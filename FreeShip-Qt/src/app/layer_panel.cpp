@@ -11,10 +11,18 @@
 #include <QLabel>
 #include <QLineEdit>
 #include <QListWidget>
+#include <QKeyEvent>
 #include <QPushButton>
 #include <QScrollArea>
 #include <QVBoxLayout>
-#include <QToolBar>
+#include <QApplication>
+#include <QMouseEvent>
+#include <QPainter>
+#include <QScrollBar>
+#include <QStyledItemDelegate>
+#include <QStyleOptionToolButton>
+#include <QTimer>
+#include <QToolButton>
 #include <QSpinBox>
 #include <QSplitter>
 #include <QJsonArray>
@@ -37,7 +45,198 @@ QDialog* createLayerPropertiesDialog(QWidget* parent,LayerPanel*& panel){
     return dialog;
 }
 
+QString layerDisplayName(const fs::Layer& layer){
+    return layer.defaultNameNumber?uiText(QStringLiteral("图层"))+QLatin1Char(' ')+QString::number(*layer.defaultNameNumber):layer.name;
+}
+
 namespace {
+constexpr int LayerButtonWidth=28;
+constexpr int LayerColorRole=Qt::UserRole+1;
+class LayerVisibilityButton final : public QToolButton {
+public:
+    LayerVisibilityButton(){setFocusPolicy(Qt::TabFocus);setAttribute(Qt::WA_Hover);}
+protected:
+    void paintEvent(QPaintEvent*)override{
+        // The eye alone carries the state. Native and stylesheet button panels
+        // would paint a checked or disabled rectangle over the list row.
+        QStyleOptionToolButton option;initStyleOption(&option);
+        const auto mode=!isEnabled()?QIcon::Disabled:isDown()?QIcon::Selected:underMouse()?QIcon::Active:QIcon::Normal;
+        QPainter painter(this);
+        icon().paint(&painter,QStyle::alignedRect(layoutDirection(),Qt::AlignCenter,iconSize(),rect()),
+                     Qt::AlignCenter,mode,isChecked()?QIcon::On:QIcon::Off);
+        if(isEnabled()&&hasFocus()&&option.state.testFlag(QStyle::State_KeyboardFocusChange)){
+            painter.setPen(QColor("#315f56"));
+            painter.drawLine(rect().center().x()-5,height()-3,rect().center().x()+5,height()-3);
+        }
+    }
+};
+class LayerNameEdit final : public QLineEdit {
+public:
+    using QLineEdit::QLineEdit;
+    std::function<void()> cancel, submit;
+protected:
+    void keyPressEvent(QKeyEvent* event) override {
+        if(event->key()==Qt::Key_Escape){event->accept();cancel();return;}
+        if(event->key()==Qt::Key_Return||event->key()==Qt::Key_Enter){event->accept();submit();return;}
+        QLineEdit::keyPressEvent(event);
+    }
+    void focusOutEvent(QFocusEvent* event)override{
+        QLineEdit::focusOutEvent(event);
+        if(event->reason()==Qt::MouseFocusReason||event->reason()==Qt::TabFocusReason||event->reason()==Qt::BacktabFocusReason)cancel();
+    }
+};
+class LayerRowDelegate final : public QStyledItemDelegate {
+public:
+    using QStyledItemDelegate::QStyledItemDelegate;
+    static QRect nameRect(const QRect& rect){return rect.adjusted(LayerButtonWidth+20,0,-LayerButtonWidth,0);}
+    void paint(QPainter* painter,const QStyleOptionViewItem& option,const QModelIndex& index)const override{
+        if(!index.data(Qt::UserRole).toULongLong())return;
+        auto content=option;
+        initStyleOption(&content,index);
+        const auto* style=option.widget?option.widget->style():QApplication::style();
+        const auto label=nameRect(option.rect);
+        const auto text=content.fontMetrics.elidedText(content.text,Qt::ElideRight,qMax(0,label.width()));
+        content.text.clear();content.icon=QIcon();
+        content.state&=~QStyle::State_Editing;
+        style->drawControl(QStyle::CE_ItemViewItem,&content,painter,option.widget);
+        painter->save();painter->setFont(content.font);
+        painter->fillRect(QRect(option.rect.left()+LayerButtonWidth,option.rect.center().y()-6,14,14),index.data(LayerColorRole).value<QColor>());
+        const auto group=content.state.testFlag(QStyle::State_Enabled)?QPalette::Active:QPalette::Disabled;
+        painter->setPen(content.palette.color(group,QPalette::Text));
+        painter->drawText(label,Qt::AlignVCenter|Qt::AlignLeft,text);
+        painter->restore();
+    }
+};
+
+class LayerList final : public QListWidget {
+public:
+    explicit LayerList(QWidget* parent=nullptr):QListWidget(parent),delegate_(new LayerRowDelegate(this)){
+        setItemDelegate(delegate_);
+        setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
+        setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+        scroll_.setInterval(30);
+        connect(&scroll_,&QTimer::timeout,this,[this]{
+            auto* bar=verticalScrollBar();
+            constexpr int margin=24;
+            const int y=pointer_.y();
+            if(y<margin)bar->setValue(bar->value()-10);
+            else if(y>=viewport()->height()-margin)bar->setValue(bar->value()+10);
+            viewport()->update();
+        });
+    }
+    std::function<bool()> canReorder;
+    std::function<void(fs::EntityId,int)> onReorder;
+    std::function<void(fs::EntityId,const QString&)> onRename;
+    std::function<void()> onNameEditingFinished;
+    void editName(QListWidgetItem* item){
+        stopNameEditing();
+        editingId_=item->data(Qt::UserRole).toULongLong();
+        scrollToItem(item);
+        name_=new LayerNameEdit(viewport());
+        name_->setObjectName("layer_inline_name");
+        name_->setMaxLength(std::numeric_limits<int>::max());
+        bindUiText(name_,"accessibleName","名称");
+        originalName_=item->text();name_->setText(originalName_);
+        name_->cancel=[this]{stopNameEditing(name_&&name_->hasFocus());};
+        name_->submit=[this]{
+            if(!name_)return;
+            const auto text=name_->text();
+            if(text==originalName_){stopNameEditing(true);return;}
+            if(onRename)onRename(editingId_,text);
+        };
+        positionName();name_->show();name_->setFocus(Qt::OtherFocusReason);name_->selectAll();
+    }
+    void refreshName(){
+        if(!name_||!currentItem()||currentItem()->data(Qt::UserRole).toULongLong()!=editingId_)return;
+        const bool unchanged=name_->text()==originalName_;
+        originalName_=currentItem()->text();
+        if(unchanged&&name_->text()!=originalName_){name_->setText(originalName_);name_->selectAll();}
+    }
+    void stopNameEditing(bool refocus=false){
+        if(!name_)return;
+        auto* editor=name_;name_=nullptr;editingId_=0;editor->hide();editor->setObjectName(QString());editor->deleteLater();
+        if(refocus)setFocus(Qt::OtherFocusReason);
+        if(onNameEditingFinished)onNameEditingFinished();
+    }
+    void stopReorder(){
+        scroll_.stop();source_=0;
+        if(dragging_){dragging_=false;viewport()->unsetCursor();viewport()->update();}
+    }
+protected:
+    void resizeEvent(QResizeEvent* e)override{QListWidget::resizeEvent(e);positionName();}
+    void scrollContentsBy(int dx,int dy)override{QListWidget::scrollContentsBy(dx,dy);positionName();}
+    void mousePressEvent(QMouseEvent* e)override{
+        const auto point=e->position().toPoint();
+        stopReorder();
+        if(e->button()==Qt::LeftButton)if(auto* rowItem=itemAt(point)){
+            source_=rowItem->data(Qt::UserRole).toULongLong();sourceRow_=row(rowItem);start_=point;
+        }
+        QListWidget::mousePressEvent(e);
+    }
+    void mouseMoveEvent(QMouseEvent* e)override{
+        if(source_&&e->buttons().testFlag(Qt::LeftButton)){
+            pointer_=e->position().toPoint();
+            if(canReorder&&!canReorder()){stopReorder();QListWidget::mouseMoveEvent(e);return;}
+            if(!dragging_&&(pointer_-start_).manhattanLength()>=QApplication::startDragDistance()){
+                dragging_=true;viewport()->setCursor(Qt::ClosedHandCursor);scroll_.start();
+            }
+            if(dragging_){viewport()->update();e->accept();return;}
+        }
+        QListWidget::mouseMoveEvent(e);
+    }
+    void mouseReleaseEvent(QMouseEvent* e)override{
+        const auto id=source_;const bool dragging=dragging_;
+        const int slot=dragging?insertionSlot(e->position().toPoint()):-1;
+        const int destination=slot>sourceRow_?slot-1:slot;
+        const bool changed=destination>=0&&destination!=sourceRow_;
+        stopReorder();
+        if(dragging&&e->button()==Qt::LeftButton){
+            // Reset the view's press state without treating the drop row as a click.
+            QMouseEvent outside(QEvent::MouseButtonRelease,QPointF(-1,-1),e->globalPosition(),e->button(),e->buttons(),e->modifiers());
+            QListWidget::mouseReleaseEvent(&outside);
+            if(changed&&onReorder)onReorder(id,destination);
+            e->accept();return;
+        }
+        QListWidget::mouseReleaseEvent(e);
+    }
+    void paintEvent(QPaintEvent* e)override{
+        QListWidget::paintEvent(e);
+        if(!dragging_)return;
+        const int slot=insertionSlot(pointer_);
+        if(slot<0||slot==sourceRow_||slot==sourceRow_+1)return;
+        QPainter painter(viewport());painter.setPen(QPen(palette().color(QPalette::Highlight),2));
+        const int y=qMax(1,visualItemRect(item(slot)).top());
+        painter.drawLine(1,y,viewport()->width()-2,y);
+    }
+    void keyPressEvent(QKeyEvent* e)override{
+        if(e->key()==Qt::Key_Escape&&source_){stopReorder();e->accept();return;}
+        QListWidget::keyPressEvent(e);
+    }
+private:
+    int insertionSlot(const QPoint& point)const{
+        if(count()<2||!viewport()->rect().contains(point))return -1;
+        if(auto* hit=itemAt(point)){
+            const auto index=row(hit);
+            if(index==count()-1)return index; // The add button is always the final row.
+            return index+(point.y()>visualItemRect(hit).center().y()?1:0);
+        }
+        return count()-1;
+    }
+    void positionName(){
+        if(name_&&currentItem()&&currentItem()->data(Qt::UserRole).toULongLong()==editingId_)
+            name_->setGeometry(LayerRowDelegate::nameRect(visualItemRect(currentItem())));
+    }
+    LayerRowDelegate* delegate_;
+    LayerNameEdit* name_=nullptr;
+    fs::EntityId editingId_=0;
+    QString originalName_;
+    QTimer scroll_;
+    fs::EntityId source_=0;
+    int sourceRow_=0;
+    bool dragging_=false;
+    QPoint start_,pointer_;
+};
+
 constexpr double DensityFactor = 1000.0 * 0.3048 * 0.3048 * 0.3048 / 0.45359237;
 QColor displayColor(quint32 color) { return QColor(color & 255, (color >> 8) & 255, (color >> 16) & 255); }
 quint32 storedColor(QColor color) { return quint32(color.red()) | quint32(color.green()) << 8 | quint32(color.blue()) << 16; }
@@ -57,7 +256,7 @@ public:
     std::function<void()> onChanged;
     explicit ColorEditor(QWidget* parent = nullptr) : QPushButton(parent) {
         connect(this, &QPushButton::clicked, this, [this] {
-            const auto color = QColorDialog::getColor(displayColor(property("colorValue").toUInt()), this, uiText("选择图层颜色"));
+            const auto color = QColorDialog::getColor(displayColor(property("colorValue").toUInt()), this, uiText("选择图层颜色"), QColorDialog::DontUseNativeDialog);
             if (color.isValid()) setProperty("colorValue", storedColor(color));
         });
     }
@@ -75,7 +274,7 @@ protected:
     }
 };
 QJsonObject layerValues(const fs::Layer& layer) {
-    return {{"name", layer.name}, {"color", double(layer.color)}, {"visible", layer.visible},
+    return {{"color", double(layer.color)},
         {"symmetric", layer.symmetric}, {"developable", layer.developable},
         {"use_in_hydrostatics", layer.useInHydrostatics}, {"use_for_intersections", layer.useForIntersections},
         {"show_in_linesplan", layer.showInLinesplan}, {"thickness", layer.thickness}, {"material_density", layer.materialDensity},{"alpha_blend",layer.alphaBlend}};
@@ -85,21 +284,43 @@ QJsonObject layerValues(const fs::Layer& layer) {
 struct LayerPanel::State {
     struct Number { NumberEditor* widget = nullptr; double original = 0, draft = 0; bool edited = false; };
     std::shared_ptr<const fs::ModelSnapshot> snapshot;
+    enum Kind { Insert, Remove, Replace };
+    struct Change {
+        fs::Layer layer; int index; Kind kind; fs::Layer previous{};
+        Change inverse()const{return kind==Replace?Change{previous,index,Replace,layer}:Change{layer,index,kind==Insert?Remove:Insert};}
+    };
+    int committedHigh=0, projectedHigh=0, projectedNumber=-1;
+    QVector<fs::Layer> rows;
+    QVector<Change> before,after,expected;
+    bool listAllowed=false;
+    const fs::Layer* layer(fs::EntityId id)const{for(const auto& l:rows)if(l.id==id)return &l;return nullptr;}
+    void projectRow(const Change& change){
+        if(change.kind==Remove)rows.removeAt(change.index);
+        else if(change.kind==Insert)rows.insert(change.index,change.layer);
+        else rows[change.index]=change.layer;
+        expected.append(change);
+    }
+    void record(const Change& op){
+        // Keep a run of trash actions scoped to those deletions, as in the section editor.
+        if(op.kind==Remove&&!before.isEmpty()&&before.last().kind!=Remove)before.clear();
+        before.append(op);after.clear();projectRow(op);
+    }
     QHash<QString, QWidget*> editors;
     QHash<QString, Number> numbers;
     QHash<fs::EntityId, QJsonObject> drafts;
     QJsonObject original;
-    QString displayedName;
-    QListWidget* list = nullptr;
-    QToolBar* toolbar=nullptr;
+    LayerList* list = nullptr;
+    QToolButton* add=nullptr;
+    QHash<fs::EntityId,QToolButton*> remove, visibility;
+    QSet<fs::EntityId> occupied;
+    fs::EntityId focusName=0;
     QSpinBox* transparency=nullptr;
     QCheckBox* controlNet=nullptr;
     QSet<fs::EntityId> hiddenControl;
     QLabel* measurements=nullptr;
-    fs::EntityId measuredLayer=0;double measuredArea=0;fs::Vec3 measuredCenter{};
+    QHash<fs::EntityId,QPair<double,fs::Vec3>> measurementsByLayer;
     bool alphaEdited=false;
     QWidget* properties = nullptr;
-    QLineEdit* name = nullptr;
     ColorEditor* color = nullptr;
     QCheckBox *hydro = nullptr, *symmetric = nullptr;
     QPushButton* apply = nullptr;
@@ -113,10 +334,11 @@ LayerPanel::LayerPanel(QWidget* parent) : QWidget(parent), state_(std::make_uniq
     auto& s = *state_;
     auto* layout = new QVBoxLayout(this);
     layout->setContentsMargins(8, 8, 8, 8);
-    s.toolbar=new QToolBar;layout->addWidget(s.toolbar);
     s.empty = new StudioMessage(StudioMessageRole::Explanation,uiText("未打开船模"));
     s.empty->setWordWrap(true); layout->addWidget(s.empty);
-    s.list = new QListWidget;
+    s.list = new LayerList;
+    s.list->canReorder=[this]{return state_->editingEnabled;};
+    s.list->onReorder=[this](fs::EntityId id,int index){if(state_->editingEnabled&&onMoveLayer)onMoveLayer(id,index);};
     s.list->setObjectName("layer_list");s.list->setMinimumWidth(180);
     auto* split=new QSplitter;split->addWidget(s.list);layout->addWidget(split,1);
     auto* scroll = new QScrollArea;
@@ -129,7 +351,6 @@ LayerPanel::LayerPanel(QWidget* parent) : QWidget(parent), state_(std::make_uniq
     auto bind = [&s](const QString& field, QWidget* editor) {
         editor->setProperty("modelField", field); editor->setObjectName("layer_" + field); s.editors.insert(field, editor);
     };
-    s.name = new QLineEdit; s.name->setMaxLength(std::numeric_limits<int>::max()); bind("name", s.name); form->addRow(uiText("名称"), s.name);
     s.encoding = new QLabel; s.encoding->setWordWrap(true); s.encoding->setStyleSheet("color: #586472;"); form->addRow(s.encoding);
     s.color = new ColorEditor; bind("color", s.color); form->addRow(uiText("颜色"), s.color);
     s.transparency=new QSpinBox;s.transparency->setRange(0,100);s.transparency->setSuffix(" %");bind("alpha_blend",s.transparency);
@@ -144,7 +365,6 @@ LayerPanel::LayerPanel(QWidget* parent) : QWidget(parent), state_(std::make_uniq
         connect(box, &QCheckBox::toggled, this, [this] { if (!state_->loading) updateEnabledState(); });
         return box;
     };
-    addCheck("visible", uiText("显示图层"));
     s.symmetric = addCheck("symmetric", uiText("关于中纵剖面对称"));
     addCheck("developable", uiText("可展开曲面"));
     s.hydro = addCheck("use_in_hydrostatics", uiText("参与静水力计算"));
@@ -162,7 +382,6 @@ LayerPanel::LayerPanel(QWidget* parent) : QWidget(parent), state_(std::make_uniq
             state_->numbers[field].edited = true; state_->numbers[field].draft = value; updateEnabledState();
         });
     }
-    connect(s.name, &QLineEdit::textChanged, this, [this] { if (!state_->loading) updateEnabledState(); });
     s.color->onChanged = [this] { if (!state_->loading) updateEnabledState(); };
     connect(s.symmetric, &QCheckBox::toggled, this, [this] {
         if (state_->loading) return;
@@ -180,23 +399,49 @@ LayerPanel::LayerPanel(QWidget* parent) : QWidget(parent), state_(std::make_uniq
     connect(s.list, &QListWidget::currentItemChanged, this, [this](QListWidgetItem* current) {
         auto& state = *state_;
         if (state.loading) return;
+        state.list->stopNameEditing();
         if (state.selected) state.drafts.insert(state.selected, changes());
         state.selected = current ? current->data(Qt::UserRole).toULongLong() : 0;
         loadSelected();
         if(onSelectionChanged)onSelectionChanged();
     });
-    connect(s.list,&QListWidget::itemChanged,this,[this](QListWidgetItem* item){auto& s=*state_;if(s.loading)return;const auto id=item->data(Qt::UserRole).toULongLong();
-        auto draft=id==s.selected?changes():s.drafts.value(id);draft["visible"]=item->checkState()==Qt::Checked;s.drafts[id]=draft;if(id==s.selected)loadSelected();});
+    connect(s.list,&QListWidget::itemDoubleClicked,this,[this](QListWidgetItem* item){
+        if(state_->editingEnabled||state_->listAllowed)if(const auto id=item->data(Qt::UserRole).toULongLong())editLayerName(id);
+    });
+    s.list->onRename=[this](fs::EntityId id,const QString& text){
+        auto& s=*state_;
+        if(!(s.editingEnabled||s.listAllowed)||s.pending||!s.layer(id))return;
+        const char* warning=text.contains(QChar(0))?"图层名称中不能包含空字符。":text.toUtf8().size()>65536?"图层名称过长。":nullptr;
+        if(warning){s.error->setText(uiText(warning));s.error->show();return;}
+        s.list->stopNameEditing(true);
+        previewValue(id,{{"name",text}});
+    };
     s.measurements=new QLabel;s.measurements->setProperty("studio_content_role","result_data");s.measurements->setWordWrap(true);form->addRow(s.measurements);
     s.error = new StudioMessage(StudioMessageRole::Warning);s.error->setObjectName("LayerWarning");layout->addWidget(s.error);
+    s.list->onNameEditingFinished=[this]{state_->error->hide();};
+    bindUiRefresh(this,[this]{
+        auto& s=*state_;
+        s.encoding->setText(s.snapshot ? uiText("文件文字编码：") + s.snapshot->textEncoding : QString());
+        if(s.snapshot){
+            const QSignalBlocker block(s.list);
+            for(int i=0;i<s.rows.size();++i)s.list->item(i)->setText(layerDisplayName(s.rows[i]));
+            s.list->refreshName();
+        }
+        updateMeasurements();
+        if(s.error->isVisible())s.error->setText(validationError());
+    });
     s.apply = new QPushButton(uiText("应用")); s.apply->setObjectName("layer_apply");s.apply->setProperty("layer_action","apply"); layout->addWidget(s.apply);
     connect(s.apply, &QPushButton::clicked, this, &LayerPanel::applyChanges);
     s.loading = false; updateEnabledState();
 }
 
 LayerPanel::~LayerPanel() = default;
-void LayerPanel::setManagementActions(const QList<QAction*>& actions){state_->toolbar->clear();state_->toolbar->addActions(actions);}
-void LayerPanel::discardDrafts(){const auto selected=state_->selected;state_->drafts.clear();state_->selected=0;state_->pending=0;setSnapshot(state_->snapshot);setSelectedLayerId(selected);}
+void LayerPanel::editLayerName(fs::EntityId id){
+    setSelectedLayerId(id);
+    state_->focusName=id;
+    updateEnabledState();
+}
+void LayerPanel::discardDrafts(){state_->focusName=0;const auto selected=state_->selected;state_->drafts.clear();state_->selected=0;state_->pending=0;setSnapshot(state_->snapshot);setSelectedLayerId(selected);}
 QWidget* LayerPanel::fieldEditor(const QString& field) const { return state_->editors.value(field, nullptr); }
 fs::EntityId LayerPanel::selectedLayerId() const { return state_->selected; }
 
@@ -207,7 +452,7 @@ void LayerPanel::setSelectedLayerId(fs::EntityId id) {
     }
 }
 
-void LayerPanel::setSnapshot(std::shared_ptr<const fs::ModelSnapshot> snapshot) {
+void LayerPanel::setSnapshot(std::shared_ptr<const fs::ModelSnapshot> snapshot,int historyStates,int highWater) {
     auto& s = *state_;
     const bool sameDocument = s.snapshot && snapshot && s.snapshot->documentId == snapshot->documentId;
     if (sameDocument && s.selected) s.drafts.insert(s.selected, changes());
@@ -222,45 +467,192 @@ void LayerPanel::setSnapshot(std::shared_ptr<const fs::ModelSnapshot> snapshot) 
             if (it->contains("material_density")) it->insert("material_density", (*it)["material_density"].toDouble() * (imperial ? DensityFactor : 1 / DensityFactor));
         }
     }
-    if(s.snapshot!=snapshot)s.measuredLayer=0;
-    s.snapshot = std::move(snapshot);
-    s.loading = true; s.list->clear();
+    if(snapshot!=s.snapshot){
+        s.committedHigh=highWater;
+        bool matched=false;
+        if(sameDocument&&!s.expected.isEmpty()&&snapshot->revision==s.snapshot->revision+1){
+            const auto& op=s.expected.front();const auto& old=s.snapshot->layers;const auto& now=snapshot->layers;
+            const bool removing=op.kind==State::Remove, replacing=op.kind==State::Replace;
+            const auto& target=removing?old:now;
+            matched=op.index>=0&&op.index<target.size()&&target[op.index].id==op.layer.id
+                &&now.size()==old.size()+(replacing?0:removing?-1:1);
+            for(int i=0;matched&&i<qMin(now.size(),old.size());++i)
+                matched=replacing?now[i].id==old[i].id:removing?now[i].id==old[i+(i>=op.index)].id:old[i].id==now[i+(i>=op.index)].id;
+            if(matched&&!removing){const auto& actual=now[op.index];
+                matched=actual.visible==op.layer.visible&&(op.layer.defaultNameNumber?actual.defaultNameNumber.has_value():op.layer.name.isEmpty()?actual.defaultNameNumber.has_value():actual.name==op.layer.name);
+            }
+        }
+        if(matched){s.expected.removeFirst();s.snapshot=snapshot;
+            if(!s.expected.isEmpty())return;
+            if(historyStates>0&&s.before.size()>historyStates-1-s.after.size())s.before.remove(0,s.before.size()-qMax<qsizetype>(0,historyStates-1-s.after.size()));
+            s.projectedHigh=highWater;s.projectedNumber=snapshot->lastLayerNumber;
+            s.rows=snapshot->layers;
+            for(int i=0;i<s.rows.size();++i)if(s.list->item(i)->text()!=layerDisplayName(s.rows[i]))s.list->item(i)->setText(layerDisplayName(s.rows[i]));
+            s.list->refreshName();updateEnabledState();return;
+        }
+        if(!s.expected.isEmpty()&&onMismatch)onMismatch();
+        s.before.clear();s.after.clear();s.expected.clear();s.measurementsByLayer.clear();
+        s.snapshot=std::move(snapshot);s.occupied.clear();
+        if(s.snapshot)for(const auto& face:s.snapshot->faces)s.occupied.insert(face.layer);
+        s.projectedHigh=highWater;s.projectedNumber=s.snapshot?s.snapshot->lastLayerNumber:-1;
+        s.rows=s.snapshot?s.snapshot->layers:QVector<fs::Layer>{};
+    }
+    rebuildRows();
+}
+
+bool LayerPanel::canDelete(fs::EntityId id)const{
+    const auto& s=*state_;return (s.editingEnabled||s.listAllowed)&&!s.pending&&s.rows.size()>1&&s.layer(id)&&!s.occupied.contains(id);
+}
+void LayerPanel::previewCreate(){
+    auto& s=*state_;
+    if(!(s.editingEnabled||s.listAllowed)||s.pending||!onListCommand||!s.snapshot||!s.projectedHigh||s.projectedHigh>=2000000||s.projectedNumber==std::numeric_limits<int>::max())return;
+    fs::Layer layer;layer.id=s.projectedHigh+1;layer.defaultNameNumber=s.projectedNumber+1;layer.color=s.snapshot->newLayerColor;
+    if(!onListCommand("manage_layers",{{"operation","create"},{"changes",QJsonObject{}},{"requested_new_id",double(layer.id)}}))return;
+    ++s.projectedHigh;++s.projectedNumber;
+    if(s.selected)s.drafts.insert(s.selected,changes());
+    const auto index=int(s.rows.size());s.record({layer,index,State::Insert});refreshRow(index,false);editLayerName(layer.id);
+}
+void LayerPanel::updateValueRow(int index){
+    auto& s=*state_;const auto& layer=s.rows[index];auto* eye=s.visibility.value(layer.id);
+    eye->setChecked(layer.visible);eye->setProperty("layer_visible",layer.visible);eye->setIcon(studioIcon(layer.visible?"LayerVisible":"LayerHidden"));
+    s.list->item(index)->setText(layerDisplayName(layer));s.list->refreshName();
+}
+void LayerPanel::previewValue(fs::EntityId id,const QJsonObject& value){
+    auto& s=*state_;const auto* current=s.layer(id);if(!current)return;
+    const int index=int(current-s.rows.constData());auto next=*current;
+    if(value.contains("visible"))next.visible=value["visible"].toBool();
+    else{next.name=value["name"].toString();next.defaultNameNumber.reset();}
+    if(onListCommand&&onListCommand("update_layer",{{"layer_id",double(id)},{"changes",value}}))s.record({next,index,State::Replace,*current});
+    updateValueRow(index);
+    if(value.contains("visible")&&onVisibilityPreview)onVisibilityPreview();
+}
+void LayerPanel::previewDelete(fs::EntityId id){
+    auto& s=*state_;if(!canDelete(id)||!onListCommand)return;
+    int index=int(s.layer(id)-s.rows.constData());State::Change op{s.rows.at(index),index,State::Remove};
+    if(!onListCommand("manage_layers",{{"operation","delete"},{"layer_id",double(id)}}))return;
+    if(s.selected)s.drafts.insert(s.selected,changes());
+    s.record(op);refreshRow(index,true);
+}
+bool LayerPanel::previewHistory(bool redo){
+    auto& s=*state_;if(s.before.isEmpty()&&s.after.isEmpty()&&s.expected.isEmpty())return false;
+    auto& from=redo?s.after:s.before;auto& to=redo?s.before:s.after;
+    if(from.isEmpty()||!onListCommand||!onListCommand(redo?"redo":"undo",{}))return true;
+    if(s.selected)s.drafts.insert(s.selected,changes());
+    const auto original=from.takeLast();to.append(original);const auto op=redo?original:original.inverse();
+    s.projectRow(op);if(op.kind==State::Replace)updateValueRow(op.index);else refreshRow(op.index,op.kind==State::Remove);
+    if(op.kind==State::Replace&&op.previous.visible!=op.layer.visible&&onVisibilityPreview)onVisibilityPreview();
+    return true;
+}
+void LayerPanel::discardPredictions(){
+    auto& s=*state_;if(s.expected.isEmpty())return;
+    s.expected.clear();s.before.clear();s.after.clear();s.projectedHigh=s.committedHigh;s.projectedNumber=s.snapshot->lastLayerNumber;s.rows=s.snapshot->layers;rebuildRows();
+    if(onVisibilityPreview)onVisibilityPreview();
+}
+QSet<fs::EntityId> LayerPanel::projectedVisibilityChanges() const {
+    const auto& s=*state_;QSet<fs::EntityId> result;
+    // Only occupied layers can change the existing hull drawing. Collapse pending
+    // toggles by parity, relative to the most recently acknowledged snapshot.
+    for(const auto& op:s.expected)if(op.kind==State::Replace&&op.layer.visible!=op.previous.visible&&s.occupied.contains(op.layer.id)){
+        if(!result.remove(op.layer.id))result.insert(op.layer.id);
+    }
+    return result;
+}
+namespace {
+    auto rowContainer=[](QListWidgetItem* item){
+        auto* row=new QHBoxLayout(new QWidget);
+        row->setContentsMargins(0,0,2,0);row->setSpacing(0);
+        item->setSizeHint(QSize(0,24));
+        return row;
+    };
+    auto rowButton=[](QHBoxLayout* row,const QString& icon,const char* label,QToolButton* button=nullptr){
+        if(!button)button=new QToolButton;
+        button->setAutoRaise(true);button->setFixedSize(24,24);button->setIconSize(QSize(17,17));
+        button->setIcon(studioIcon(icon));
+        bindUiText(button,"toolTip",label);bindUiText(button,"accessibleName",label);
+        row->addWidget(button);
+        return button;
+    };
+}
+void LayerPanel::insertRow(int index,const fs::Layer& layer){
+    auto& s=*state_;
+    auto* item = new QListWidgetItem(layerDisplayName(layer));
+    s.list->insertItem(index,item);
+    item->setData(Qt::UserRole, QVariant::fromValue(layer.id));
+    item->setData(LayerColorRole,displayColor(layer.color));
+    auto* row=rowContainer(item);
+    auto* visibility=rowButton(row,layer.visible?"LayerVisible":"LayerHidden","显示图层",new LayerVisibilityButton);
+    visibility->setCheckable(true);visibility->setChecked(layer.visible);
+    visibility->setProperty("layer_action","visibility");visibility->setProperty("layer_id",QVariant::fromValue(layer.id));
+    s.visibility.insert(layer.id,visibility);
+    visibility->setProperty("layer_visible",layer.visible);
+    connect(visibility,&QToolButton::clicked,this,[this,id=layer.id](bool next){
+        previewValue(id,{{"visible",next}});
+    });
+    row->addStretch();
+    auto* remove=rowButton(row,"DeleteOne","删除空图层");
+    remove->setProperty("layer_action","delete");remove->setProperty("layer_id",QVariant::fromValue(layer.id));
+    s.list->setItemWidget(item,row->parentWidget());
+    s.remove.insert(layer.id,remove);
+    connect(remove,&QToolButton::clicked,this,[this,id=layer.id]{if(onDeleteLayer)onDeleteLayer(id);});
+}
+void LayerPanel::refreshRow(int index,bool remove){
+    auto& s=*state_;s.loading=true;s.list->stopReorder();s.list->stopNameEditing();
+    if(remove){
+        auto* item=s.list->item(index);const auto id=item->data(Qt::UserRole).toULongLong();
+        s.visibility.remove(id);s.remove.remove(id);delete s.list->takeItem(index);
+    }else insertRow(index,s.rows.at(index));
+    if(!s.layer(s.selected))s.list->setCurrentRow(qMin(index,int(s.rows.size())-1));
+    s.selected=s.list->currentItem()?s.list->currentItem()->data(Qt::UserRole).toULongLong():0;
+    s.loading=false;loadSelected();
+}
+void LayerPanel::rebuildRows(){
+    auto& s=*state_;
+    auto* focus=QApplication::focusWidget();
+    const bool restoreListFocus=focus&&(focus==s.list||s.list->isAncestorOf(focus));
+    s.loading = true;s.list->stopReorder();s.list->stopNameEditing();s.add=nullptr;s.remove.clear();s.visibility.clear();s.list->clear();
     int selectedRow = -1;
     if (s.snapshot) {
-        for (const auto& layer : s.snapshot->layers) {
-            auto* item = new QListWidgetItem(layer.name, s.list);
-            item->setData(Qt::UserRole, QVariant::fromValue(layer.id));
-            item->setFlags(item->flags()|Qt::ItemIsUserCheckable);item->setCheckState(s.drafts.value(layer.id).value("visible").toBool(layer.visible)?Qt::Checked:Qt::Unchecked);
-            QPixmap swatch(14, 14); swatch.fill(displayColor(layer.color)); item->setIcon(QIcon(swatch));
-            if (layer.id == s.selected) selectedRow = s.list->count() - 1;
+        for (const auto& layer : s.rows) {
+            const int index=s.list->count();insertRow(index,layer);
+            if(layer.id==s.selected)selectedRow=index;
         }
+        auto* footer=new QListWidgetItem(s.list);footer->setFlags(Qt::ItemIsEnabled);
+        auto* row=rowContainer(footer);s.add=rowButton(row,"AddOne","新建图层");row->addStretch();s.list->setItemWidget(footer,row->parentWidget());s.add->setProperty("layer_action","create");
+        connect(s.add,&QToolButton::clicked,this,[this]{if(onCreateLayer)onCreateLayer();});
     }
-    if (selectedRow < 0 && s.list->count()) selectedRow = 0;
+    if (selectedRow < 0 && s.snapshot && !s.rows.isEmpty()) selectedRow = 0;
     s.list->setCurrentRow(selectedRow);
     s.selected = selectedRow < 0 ? 0 : s.list->item(selectedRow)->data(Qt::UserRole).toULongLong();
     s.loading = false; loadSelected();
+    if(restoreListFocus&&s.list->isEnabled())s.list->setFocus(Qt::OtherFocusReason);
 }
 
-void LayerPanel::setEditingEnabled(bool enabled) {
+void LayerPanel::setEditingEnabled(bool enabled,bool allowList) {
+    state_->listAllowed=allowList;
     state_->editingEnabled = enabled;
     // A failed request has no new snapshot; its draft stays available to fix.
-    if (enabled) state_->pending = 0;
+    if(enabled){
+        state_->pending=0;
+        // A failed request keeps the old snapshot and the old visibility.
+        for(auto* button:state_->visibility){
+            const bool committed=button->property("layer_visible").toBool();
+            if(button->isChecked()!=committed){button->setChecked(committed);button->setIcon(studioIcon(committed?"LayerVisible":"LayerHidden"));}
+        }
+    }else if(!allowList)state_->list->stopNameEditing();
     updateEnabledState();
 }
 
 void LayerPanel::loadSelected() {
     auto& s = *state_;
-    const auto* layer = s.snapshot ? s.snapshot->layer(s.selected) : nullptr;
+    const auto* layer = s.snapshot ? s.layer(s.selected) : nullptr;
     s.loading = true; s.original = layer ? layerValues(*layer) : QJsonObject{};
     const auto draft = s.drafts.value(s.selected);
     auto value = [&s, &draft](const QString& key) { return draft.contains(key) ? draft[key] : s.original[key]; };
-    s.name->setText(s.original["name"].toString()); s.displayedName = s.name->text();
-    if (draft.contains("name")) s.name->setText(draft["name"].toString());
     s.color->setProperty("colorValue", quint32(value("color").toDouble()));
     s.alphaEdited=draft.contains("alpha_blend");s.transparency->setValue(qRound((255-value("alpha_blend").toInt(255))*100./255));
     s.controlNet->setChecked(!s.hiddenControl.contains(s.selected));
     s.symmetricExplicit = draft.contains("symmetric");
-    for (const auto key : {"visible", "symmetric", "developable", "use_in_hydrostatics", "use_for_intersections", "show_in_linesplan"})
+    for (const auto key : {"symmetric", "developable", "use_in_hydrostatics", "use_for_intersections", "show_in_linesplan"})
         static_cast<QCheckBox*>(s.editors[key])->setChecked(value(key).toBool());
     if (layer && !s.symmetricExplicit && !layer->useInHydrostatics && s.hydro->isChecked()) s.symmetric->setChecked(true);
     const bool imperial = s.snapshot && s.snapshot->units == "imperial";
@@ -278,13 +670,12 @@ void LayerPanel::loadSelected() {
 
 QJsonObject LayerPanel::changes() const {
     const auto& s = *state_;
-    if (!s.snapshot || !s.snapshot->layer(s.selected)) return {};
+    if (!s.snapshot || !s.layer(s.selected)) return {};
     QJsonObject result;
-    if (s.name->text() != s.displayedName) result.insert("name", s.name->text());
     const quint32 color = s.color->property("colorValue").toUInt();
     if (color != quint32(s.original["color"].toDouble())) result.insert("color", double(color));
     if(s.alphaEdited){int alpha=qRound(255*(100-s.transparency->value())/100.);if(alpha!=s.original.value("alpha_blend").toInt(255))result["alpha_blend"]=alpha;}
-    for (const auto field : {"visible", "developable", "use_in_hydrostatics", "use_for_intersections", "show_in_linesplan"}) {
+    for (const auto field : {"developable", "use_in_hydrostatics", "use_for_intersections", "show_in_linesplan"}) {
         const bool value = static_cast<QCheckBox*>(s.editors[field])->isChecked();
         if (value != s.original[field].toBool()) result.insert(field, value);
     }
@@ -299,11 +690,7 @@ QJsonObject LayerPanel::changes() const {
 
 QString LayerPanel::validationError() const {
     const auto& s = *state_;
-    if (!s.snapshot || !s.snapshot->layer(s.selected)) return uiText("请先选择图层。");
-    if (s.name->text() != s.displayedName) {
-        if (s.name->text().contains(QChar(0))) return uiText("图层名称中不能包含空字符。");
-        if (s.name->text().toUtf8().size() > 65536) return uiText("图层名称过长。");
-    }
+    if (!s.snapshot || !s.layer(s.selected)) return uiText("请先选择图层。");
     if (s.color->property("colorValue").toULongLong() > 0xffffff) return uiText("颜色值无效。");
     for (auto it = s.numbers.cbegin(); it != s.numbers.cend(); ++it) {
         const double value = it->edited ? it->draft : it->original;
@@ -315,28 +702,36 @@ QString LayerPanel::validationError() const {
 void LayerPanel::updateEnabledState() {
     auto& s = *state_;
     if (!s.apply) return;
-    const bool selected = s.snapshot && s.snapshot->layer(s.selected);
-    s.empty->setVisible(!selected); s.list->setVisible(s.snapshot && !s.snapshot->layers.isEmpty());
-    s.properties->setEnabled(selected && s.editingEnabled && !s.pending);
-    s.list->setEnabled(s.editingEnabled && !s.pending);
+    const bool selected = s.snapshot && s.layer(s.selected);
+    s.empty->setVisible(!selected); s.list->setVisible(s.snapshot && !s.rows.isEmpty());
+    s.properties->setEnabled(selected && (s.editingEnabled||s.listAllowed) && !s.pending);
+    const bool editable=s.editingEnabled&&!s.pending;
+    s.list->setEnabled(editable||s.listAllowed);
+    if(s.add)s.add->setEnabled((editable||s.listAllowed)&&s.projectedHigh>0&&s.projectedHigh<2000000&&s.projectedNumber<std::numeric_limits<int>::max()&&bool(onCreateLayer));
+    for(auto it=s.remove.cbegin();it!=s.remove.cend();++it)
+        it.value()->setEnabled((editable||s.listAllowed)&&onDeleteLayer&&s.remove.size()>1&&!s.occupied.contains(it.key()));
+    for(auto* button:s.visibility)button->setEnabled((editable||s.listAllowed)&&bool(onListCommand));
+    if((editable||s.listAllowed)&&s.focusName){
+        if(s.selected==s.focusName&&s.list->currentItem()&&isVisible())s.list->editName(s.list->currentItem());
+        s.focusName=0;
+    }
     s.apply->setEnabled(selected && s.editingEnabled && !s.pending && !changes().isEmpty());
-    if(selected&&s.list->currentItem()){QSignalBlocker block(s.list);s.list->currentItem()->setCheckState(static_cast<QCheckBox*>(s.editors["visible"])->isChecked()?Qt::Checked:Qt::Unchecked);}
     updateMeasurements();
 }
 
 void LayerPanel::updateMeasurements(){
     auto& s=*state_;if(!s.measurements)return;
-    const auto* layer=s.snapshot?s.snapshot->layer(s.selected):nullptr;
+    const auto* layer=s.snapshot?s.layer(s.selected):nullptr;
     if(!layer){s.measurements->clear();return;}
-    double area=s.measuredArea;fs::Vec3 center=s.measuredCenter;
-    if(s.measuredLayer!=s.selected){area=0;center={};
-    for(const auto& t:s.snapshot->triangles)if(t.layer==s.selected){const auto& a=t.vertices[0];const auto& b=t.vertices[1];const auto& c=t.vertices[2];
+    const auto found=s.measurementsByLayer.constFind(s.selected);double area=0;fs::Vec3 center{};
+    if(found!=s.measurementsByLayer.cend()){area=found->first;center=found->second;}else{
+    if(s.occupied.contains(s.selected))for(const auto& t:s.snapshot->triangles)if(t.layer==s.selected){const auto& a=t.vertices[0];const auto& b=t.vertices[1];const auto& c=t.vertices[2];
         const fs::Vec3 u{b.x-a.x,b.y-a.y,b.z-a.z},v{c.x-a.x,c.y-a.y,c.z-a.z};
         const double n=std::hypot(u.y*v.z-u.z*v.y,u.z*v.x-u.x*v.z,u.x*v.y-u.y*v.x)*.5;
         area+=n;center.x+=n*(a.x+b.x+c.x)/3;center.y+=n*(a.y+b.y+c.y)/3;center.z+=n*(a.z+b.z+c.z)/3;
     }
     if(area>0){center.x/=area;center.y/=area;center.z/=area;}
-    s.measuredLayer=s.selected;s.measuredArea=area;s.measuredCenter=center;}
+    s.measurementsByLayer.insert(s.selected,{area,center});}
     const auto edits=changes();auto val=[&](const QString& k){return edits.contains(k)?edits[k]:s.original[k];};
     if(s.symmetric->isChecked()){area*=2;center.y=0;}
     const bool imperial=s.snapshot->units=="imperial";const double weight=area*val("thickness").toDouble()*val("material_density").toDouble()/(imperial?12*2240.:1000.);

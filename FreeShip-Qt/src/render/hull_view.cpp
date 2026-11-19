@@ -8,6 +8,9 @@
 #include "curvature_comb.h"
 #include "auxiliary_geometry.h"
 #include <QPainterPathStroker>
+#include <QThreadPool>
+#include <QThread>
+#include <future>
 #include "hull_gpu.h"
 #include "view_overlay.h"
 #include <QTimer>
@@ -41,6 +44,27 @@
 #include <tuple>
 
 namespace {
+// Screen display only. Bound each replaced span's deviation from its chord.
+// Chunking also caps worst-case work on noisy/self-intersecting paths.
+QPolygonF screenStroke(const QPolygonF& points,double tolerance){
+    if(points.size()<4)return points;
+    QPolygonF result;result.append(points.first());
+    const auto reduce=[&](auto&& self,int first,int last)->void{
+        const auto a=points[first],delta=points[last]-a;
+        const double length2=QPointF::dotProduct(delta,delta);
+        int split=-1;double worst=tolerance*tolerance;
+        for(int i=first+1;i<last;++i){
+            const auto v=points[i]-a;
+            const auto t=length2>0?std::clamp(QPointF::dotProduct(v,delta)/length2,0.,1.):0.;
+            const auto diff=v-delta*t;const auto e=QPointF::dotProduct(diff,diff);
+            if(e>worst){worst=e;split=i;}
+        }
+        if(split!=-1){self(self,first,split);self(self,split,last);}else result.append(points[last]);
+    };
+    for(int start=0;start<points.size()-1;start+=96)reduce(reduce,start,std::min(start+96,int(points.size()-1)));
+    return result;
+}
+QPointF pixelPhase(QPointF origin){return {origin.x()-std::floor(origin.x()),origin.y()-std::floor(origin.y())};}
 bool hullMotionEnabled(){
     if(qApp){const auto setting=qApp->property("studio_motion_enabled");if(setting.isValid())return setting.toBool();}
 #ifdef Q_OS_WIN
@@ -78,7 +102,7 @@ fs::Vec3 weights(fs::Vec3 p,const std::array<fs::Vec3,3>& vertices){
 }
 
 struct DisplayPoint { fs::EntityId id; fs::Vec3 position; bool locked,batchMovable; QString name; int vertexType; bool leak; };
-struct DisplayEdge { fs::EntityId a, b; bool crease, mirror; fs::EntityId id; };
+struct DisplayEdge { fs::EntityId a, b; bool crease, mirror; fs::EntityId id; qsizetype ia,ib; };
 struct DisplayFace {fs::EntityId id;QVector<int> points;};
 struct DisplayCurve {fs::EntityId id;bool flow;QColor color;QVector<fs::presentation::Cubic> cubics;fs::Vec3 source;bool hasSource=false;bool marker=false,visible=true;};
 struct DisplayData {
@@ -114,19 +138,23 @@ void prepareAnalysis(const DisplayData& data,const fs::ModelSnapshot& snapshot){
     data.shading=std::move(shades);data.analysis=std::move(analysis);
 }
 
-std::shared_ptr<const DisplayData> displayData(std::shared_ptr<const fs::ModelSnapshot> owner,bool bothSides,bool splitBody,const QSet<fs::EntityId>& hidden) {
+std::shared_ptr<const DisplayData> displayData(std::shared_ptr<const fs::ModelSnapshot> owner,bool bothSides,bool splitBody,const QSet<fs::EntityId>& hidden,
+        const QSet<fs::EntityId>& flipped,const DisplayData* previous) {
     const auto &snapshot=*owner;
     // Four cameras share geometry. Only live displays retain their source;
     // this weak index does not keep unused revisions alive.
-    static std::map<std::tuple<const fs::ModelSnapshot*,bool,bool,std::vector<fs::EntityId>>, std::weak_ptr<const DisplayData>> cache;
+    static std::map<std::tuple<const fs::ModelSnapshot*,bool,bool,std::vector<fs::EntityId>,std::vector<fs::EntityId>>, std::weak_ptr<const DisplayData>> cache;
     for (auto it=cache.begin(); it!=cache.end();) {
         if (it->second.expired()) it=cache.erase(it); else ++it;
     }
     std::vector<fs::EntityId> hiddenIds(hidden.begin(),hidden.end());std::sort(hiddenIds.begin(),hiddenIds.end());
-    auto key=std::make_tuple(&snapshot,bothSides,splitBody,hiddenIds);auto found=cache.find(key);
+    std::vector<fs::EntityId> flips(flipped.begin(),flipped.end());std::sort(flips.begin(),flips.end());
+    auto key=std::make_tuple(&snapshot,bothSides,splitBody,hiddenIds,flips);auto found=cache.find(key);
     if (found!=cache.end()) if (auto existing=found->second.lock()) return existing;
     auto result=std::make_shared<DisplayData>();
     result->owner=std::move(owner);
+    if(previous)result->curves=previous->curves; // unchanged spline data, implicitly shared
+    else {
     for(bool flow:{false,true})for(const auto& curve:(flow?snapshot.flowlines:snapshot.controlCurves)){
         auto cubics=fs::presentation::splineCubics(curve.spline);
         if(splitBody)cubics=fs::presentation::splitBodyCubics(cubics,fs::presentation::splitLocation(snapshot));
@@ -138,6 +166,7 @@ std::shared_ptr<const DisplayData> displayData(std::shared_ptr<const fs::ModelSn
         auto cubics=fs::presentation::splineCubics(marker.spline);
         if(splitBody)cubics=fs::presentation::splitBodyCubics(cubics,fs::presentation::splitLocation(snapshot));
         result->curves.append({fs::EntityId(marker.index+1),false,sourceColor(marker.color),std::move(cubics),{},false,true,marker.visible});
+    }
     }
     auto& mesh=result->mesh;
     mesh.minimum={std::numeric_limits<double>::max(),std::numeric_limits<double>::max(),
@@ -151,6 +180,7 @@ std::shared_ptr<const DisplayData> displayData(std::shared_ptr<const fs::ModelSn
     };
     QHash<fs::EntityId,const fs::Layer*> layers;
     for (const auto& layer:snapshot.layers) layers.insert(layer.id,&layer);
+    const auto visibleLayer=[&](const fs::Layer* layer){return layer&&(layer->visible!=flipped.contains(layer->id));};
     auto appendTriangle=[&](std::array<fs::Vec3,3> vertices,QColor color,int source,bool reflected) {
         auto normal=cross(subtract(vertices[1],vertices[0]),subtract(vertices[2],vertices[0]));
         const double norm=std::sqrt(dot(normal,normal));
@@ -164,7 +194,7 @@ std::shared_ptr<const DisplayData> displayData(std::shared_ptr<const fs::ModelSn
     mesh.triangles.reserve(snapshot.triangles.size()*2);
     for (int source=0;source<snapshot.triangles.size();++source) {const auto& triangle=snapshot.triangles[source];
         const auto* layer=layers.value(triangle.layer,nullptr);
-        if (!layer || !layer->visible) continue;
+        if (!visibleLayer(layer)) continue;
         QColor color=sourceColor(layer->color);color.setAlpha(layer->alphaBlend);result->translucent|=layer->alphaBlend!=255;
         if(splitBody){
             const auto polygons=fs::presentation::bodyPolygons({triangle.vertices[0],triangle.vertices[1],triangle.vertices[2]},fs::presentation::splitLocation(snapshot));
@@ -186,13 +216,13 @@ std::shared_ptr<const DisplayData> displayData(std::shared_ptr<const fs::ModelSn
         const auto* layer=layers.value(face.layer,nullptr);
         for (auto point:face.points) {
             owned.insert(point);
-            if (layer && layer->visible && !hidden.contains(layer->id)) visible.insert(point);
+            if (visibleLayer(layer) && !hidden.contains(layer->id)) visible.insert(point);
         }
         if (!face.points.isEmpty()) {
             for (qsizetype i=0;i<face.points.size();++i) {
                 const auto key=edgeKey(face.points[i],face.points[(i+1)%face.points.size()]);
                 ownedEdges.insert(key);
-                if (layer && layer->visible && !hidden.contains(layer->id)) {
+                if (visibleLayer(layer) && !hidden.contains(layer->id)) {
                     visibleEdges.insert(key);
                     if (layer->symmetric) symmetricEdges.insert(key);
                 }
@@ -209,14 +239,14 @@ std::shared_ptr<const DisplayData> displayData(std::shared_ptr<const fs::ModelSn
         if (!result->pointIndices.contains(edge.a) || !result->pointIndices.contains(edge.b)) continue;
         if (ownedEdges.contains(edgeKey(edge.a,edge.b)) && !visibleEdges.contains(edgeKey(edge.a,edge.b))) continue;
         const bool mirror=bothSides&&symmetricEdges.contains(edgeKey(edge.a,edge.b));
-        result->edges.append({edge.a,edge.b,edge.crease,mirror,edge.id});
+        result->edges.append({edge.a,edge.b,edge.crease,mirror,edge.id,result->pointIndices.value(edge.a),result->pointIndices.value(edge.b)});
         if (mirror) {
             include(mirrored(result->points[result->pointIndices.value(edge.a)].position));
             include(mirrored(result->points[result->pointIndices.value(edge.b)].position));
         }
     }
     for(const auto& face:snapshot.faces) {
-        const auto* layer=layers.value(face.layer,nullptr);if(!layer || !layer->visible || hidden.contains(layer->id))continue;
+        const auto* layer=layers.value(face.layer,nullptr);if(!visibleLayer(layer) || hidden.contains(layer->id))continue;
         DisplayFace item{face.id,{}};
         for(auto id:face.points)item.points.append(result->pointIndices.value(id));
         result->faces.append(std::move(item));
@@ -246,7 +276,8 @@ struct HullView::State {
     QSet<fs::EntityId> entities;
     bool studio=false,fillVisible=true,controlNetVisible=true;
     mutable bool paintedHull=false;
-    QSet<fs::EntityId> hiddenControlLayers;
+    QSet<fs::EntityId> hiddenControlLayers,visibilityChanges;
+    std::shared_ptr<const DisplayData> previousVisibilityDisplay;
     QJsonObject preferenceColors;
     QColor preferred(const QString& key,QColor fallback)const{
         return preferenceColors.contains(key)?QColor::fromRgb(preferenceColors[key].toInt()):fallback;
@@ -265,6 +296,13 @@ struct HullView::State {
         bool grid=false,fill=false;
     };
     mutable SectionLayer entranceSections;
+    struct ProjectedSection {QPolygonF line, mirror; bool initialized=false;};
+    mutable std::weak_ptr<const fs::ModelSnapshot> sectionSource;
+    mutable HullProjection sectionProjection=HullProjection::Profile;
+    mutable fs::Vec3 sectionCenter{};
+    mutable double sectionExtent=0,sectionYaw=0,sectionPitch=0,sectionCap=0;
+    mutable int sectionFocal=0;
+    mutable QHash<quintptr,ProjectedSection> sectionLines;
     mutable fs::presentation::RevealGraph graph;
     mutable fs::presentation::LabelLayout labels;
     QElapsedTimer clock;QTimer timer;
@@ -298,6 +336,64 @@ struct HullView::State {
     mutable qreal fillDpr=0;
     mutable QImage fillImage;
     QPointF offset;
+    // Resize is delivered to the four widgets before their paints. Paint independent
+    // section layers concurrently, in the exact new camera, not a stretched old image.
+    struct ResizeLayer {
+        std::shared_future<QImage> image;
+        quint64 revision=0;
+        QSize size; qreal dpr=0; QPointF phase;
+        bool grid=false,fill=false;
+        std::array<bool,4> visible{};
+        std::weak_ptr<const fs::ModelSnapshot> source;
+    } resizeLayer;
+    bool layerMatches(QSize size,qreal dpr) const {
+        return resizeLayer.image.valid() && resizeLayer.revision==cameraRevision &&
+            resizeLayer.source.lock()==snapshot && resizeLayer.size==size && resizeLayer.dpr==dpr &&
+            resizeLayer.visible==sectionVisible && resizeLayer.grid==gridVisible && resizeLayer.fill==fillVisible &&
+            highlightedSections.isEmpty() && !entrance.active();
+    }
+    void scheduleSections(QSize size,qreal dpr,QPointF phase){
+        resizeLayer={};
+        const QSize pixels(qCeil(size.width()*dpr+phase.x()),qCeil(size.height()*dpr+phase.y()));
+        if(!snapshot||snapshot->sections.size()<8||pixels.isEmpty()||qint64(pixels.width())*pixels.height()>4*1024*1024||
+           entrance.active()||!highlightedSections.isEmpty()||sectionSource.lock()!=snapshot||sectionProjection!=projection||
+           !samePosition(sectionCenter,cameraCenter)||sectionExtent!=cameraExtent||sectionYaw!=yaw||sectionPitch!=pitch||
+           sectionFocal!=focalLength||scale*dpr>sectionCap||scale*dpr*4<sectionCap)return;
+        struct Stroke {QColor color;QPolygonF path;};
+        QVector<Stroke> paths;
+        for(const auto& section:snapshot->sections){
+            if(!sectionVisible[section.kind-1])continue;
+            if(snapshot->showCurvature&&section.showCurvature&&!fillVisible)return;
+            const bool dotted=(section.kind==1&&(projection==HullProjection::Profile||projection==HullProjection::Plan))||
+                (section.kind==2&&(projection==HullProjection::Body||projection==HullProjection::Plan))||
+                (section.kind==3&&(projection==HullProjection::Profile||projection==HullProjection::Body));
+            if(dotted){if(gridVisible&&snapshot->overlay.present)continue;return;}
+            const auto color=sourceColor(section.color);
+            for(const auto& path:section.paths){
+                const auto found=sectionLines.constFind(reinterpret_cast<quintptr>(&path));
+                if(found==sectionLines.cend()||!found->initialized)return;
+                if(!found->line.isEmpty())paths.append({color,found->line});
+                if(!found->mirror.isEmpty())paths.append({color,found->mirror});
+            }
+        }
+        if(paths.isEmpty())return;
+        const QTransform transform(scale,0,0,scale,offset.x(),offset.y());
+        // Workers own their paint device and implicitly shared immutable polygons;
+        // never capture a widget or model pointer. A saturated pool falls back inline.
+        auto task=std::make_shared<std::packaged_task<QImage()>>([pixels,dpr,phase,transform,paths=std::move(paths)]{
+            QImage image(pixels,QImage::Format_ARGB32_Premultiplied);
+            if(image.isNull())return image;
+            image.setDevicePixelRatio(dpr);image.fill(Qt::transparent);
+            QPainter painter(&image);painter.setRenderHint(QPainter::Antialiasing);painter.translate(phase/dpr);
+            for(const auto& stroke:paths){painter.setPen(QPen(stroke.color,1));painter.drawPolyline(transform.map(stroke.path));}
+            painter.end();return image;
+        });
+        auto future=task->get_future().share();
+        struct SectionPool : QThreadPool {SectionPool(){setMaxThreadCount(std::clamp(QThread::idealThreadCount()-1,1,4));}};
+        static SectionPool pool;
+        if(pool.tryStart([task]{(*task)();}))
+            resizeLayer={std::move(future),cameraRevision,size,dpr,phase,gridVisible,fillVisible,sectionVisible,snapshot};
+    }
     struct CameraPose {double scale=1,extent=1;QPointF offset;fs::Vec3 center;};
     struct CameraVelocity {double logScale=0,extent=0;QPointF offset;fs::Vec3 center;};
     struct CameraMotion {bool active=false;CameraPose from,to;qint64 start=0;int duration=120;CameraVelocity fromVelocity,velocity;} cameraMotion;
@@ -356,8 +452,11 @@ struct HullView::State {
     QString blockedReason;
     bool moved=false,lastRightDragged=false;
     bool splitBody()const{return snapshot&&!snapshot->bothSides&&projection==HullProjection::Body;}
-    void rebuildDisplay(){
-        display=snapshot?displayData(committedSnapshot,snapshot->bothSides,splitBody(),hiddenControlLayers):nullptr;
+    void rebuildDisplay(bool visibilityOnly=false){
+        // Keep just the preceding visibility combination for an immediate toggle back.
+        const auto next=snapshot?displayData(committedSnapshot,snapshot->bothSides,splitBody(),hiddenControlLayers,
+            visibilityChanges,visibilityOnly?display.get():nullptr):nullptr;
+        previousVisibilityDisplay=visibilityOnly?display:nullptr;display=next;
     }
     fs::Vec3 controlPosition(fs::Vec3 p)const{return splitBody()?fs::presentation::bodyPoint(p,fs::presentation::splitLocation(*snapshot)):p;}
     QVector<fs::presentation::Segment> controlSegments(fs::Vec3 a,fs::Vec3 b)const{
@@ -601,8 +700,10 @@ HullView::HullView(QWidget* parent) : QWidget(parent),state_(std::make_unique<St
 HullView::~HullView() = default;
 
 void HullView::setSnapshot(std::shared_ptr<const fs::ModelSnapshot> snapshot,
-                           std::shared_ptr<const fs::ModelSnapshot> presentation,bool drawingUnchanged) {
-    if (snapshot==state_->committedSnapshot) return;
+                           std::shared_ptr<const fs::ModelSnapshot> presentation,bool drawingUnchanged,const QSet<fs::EntityId>& visibilityChanges) {
+    if (snapshot==state_->committedSnapshot){setLayerVisibilityPreview(visibilityChanges);return;}
+    const bool maskChanged=state_->visibilityChanges!=visibilityChanges;
+    state_->visibilityChanges=visibilityChanges;
     const bool sameDocument=snapshot && state_->committedSnapshot && snapshot->documentId==state_->committedSnapshot->documentId;
     const bool sameUnits=snapshot && state_->committedSnapshot && snapshot->units==state_->committedSnapshot->units;
     if(!sameDocument){state_->cameraMotion.active=false;state_->hovered=0;state_->hoverMotion.clear();state_->emphasized.clear();state_->announcedSelection.clear();state_->interactionDriver->stop();}
@@ -610,7 +711,7 @@ void HullView::setSnapshot(std::shared_ptr<const fs::ModelSnapshot> snapshot,
         const bool completePreview=state_->committedSnapshot->isCachedPreview()&&!snapshot->isCachedPreview();
         state_->committedSnapshot=std::move(snapshot);
         state_->snapshot=presentation?std::move(presentation):state_->committedSnapshot;
-        if(completePreview){state_->rebuildDisplay();++state_->cameraRevision;}
+        if(completePreview||maskChanged){state_->rebuildDisplay();++state_->cameraRevision;}
         update();return;
     }
     cancelGesture();
@@ -732,6 +833,14 @@ QJsonObject HullView::viewSettingsEvidence()const{
         {"shade_mode",int(state_->shadeMode)},{"analysis_built",state_->display&&bool(state_->display->analysis)}};
 }
 void HullView::setControlNetVisible(bool enabled){state_->controlNetVisible=enabled;update();}
+void HullView::setLayerVisibilityPreview(const QSet<fs::EntityId>& changes){
+    if(changes==state_->visibilityChanges)return;
+    state_->visibilityChanges=changes;state_->rebuildDisplay(true);
+    state_->pruneSelection();setSelectedEntities(state_->entities);
+    // The camera and projected reference curves did not move. Only the surface
+    // fill and the label obstacles depend on the newly visible geometry.
+    state_->fillImage={};state_->labels.clear();finishPresentation();
+}
 void HullView::setHiddenControlLayers(const QSet<fs::EntityId>& ids){
     if(state_->hiddenControlLayers==ids)return;state_->hiddenControlLayers=ids;
     state_->rebuildDisplay();
@@ -1106,7 +1215,14 @@ QImage HullView::thumbnailImage(qreal dpr)const{
     result.setDevicePixelRatio(dpr);result.fill(state_->preferred("viewportcolor",QColor(232,239,236)));
     QPainter painter(&result);painter.drawImage(QPoint(0,0),state_->softwareImage(size(),dpr));return result;
 }
-void HullView::draw(QPainter& painter,qreal dpr,bool final,bool forceSoftware) const {
+int HullView::verifyResizeSectionPixels() const {
+    const auto dpr=devicePixelRatioF();
+    if(!state_->layerMatches(size(),dpr))return -1;
+    QImage tmp(QSize(qCeil(width()*dpr),qCeil(height()*dpr)),QImage::Format_ARGB32_Premultiplied);
+    tmp.setDevicePixelRatio(dpr);QPainter painter(&tmp);painter.translate(state_->resizeLayer.phase/dpr);int result=-1;
+    draw(painter,dpr,false,false,&result);return result;
+}
+void HullView::draw(QPainter& painter,qreal dpr,bool final,bool forceSoftware,int* verifySections) const {
     auto titleFont=QApplication::font();titleFont.setPointSizeF(std::max(11.,titleFont.pointSizeF()));
     titleFont.setWeight(QFont::Normal);titleFont.setStyleStrategy(QFont::StyleStrategy(QFont::PreferAntialias|QFont::PreferQuality));
     const int titleHeight=std::max(32,QFontMetrics(titleFont).height()+12);
@@ -1189,7 +1305,39 @@ void HullView::draw(QPainter& painter,qreal dpr,bool final,bool forceSoftware) c
                 if(dotted&&state_->gridVisible&&snapshot->overlay.present&&!comb)continue;
                 painter.setPen(QPen(selected?QColor(160,67,34):dotted?QColor(150,160,157):sourceColor(section.color),selected?2:1,dotted?Qt::DotLine:Qt::SolidLine));
                 for(int index=0;index<section.paths.size();++index){
-                    const auto& path=section.paths[index];auto sides=sectionSides(*snapshot,int(state_->projection),section.kind,path);
+                    const auto& path=section.paths[index];
+                    if(!final&&!comb&&!dotted&&!selected&&!state_->entrance.active()){
+                        // Never use a clipped screenshot: cache the full path in projected units,
+                        // including geometry beyond the widget. Preserve dash and comb geometry.
+                        const double pixelScale=state_->scale*dpr;
+                        if(state_->sectionSource.lock()!=snapshot||state_->sectionProjection!=state_->projection||
+                           !samePosition(state_->sectionCenter,state_->cameraCenter)||state_->sectionExtent!=state_->cameraExtent||
+                           state_->sectionYaw!=state_->yaw||state_->sectionPitch!=state_->pitch||state_->sectionFocal!=state_->focalLength||
+                           pixelScale>state_->sectionCap||pixelScale*4<state_->sectionCap){
+                            state_->sectionLines.clear();state_->sectionSource=snapshot;state_->sectionProjection=state_->projection;
+                            state_->sectionCenter=state_->cameraCenter;state_->sectionExtent=state_->cameraExtent;
+                            state_->sectionYaw=state_->yaw;state_->sectionPitch=state_->pitch;state_->sectionFocal=state_->focalLength;
+                            state_->sectionCap=pixelScale*2;
+                        }
+                        auto& cached=state_->sectionLines[reinterpret_cast<quintptr>(&path)];
+                        if(!cached.initialized){
+                            const auto sides=sectionSides(*snapshot,int(state_->projection),section.kind,path);
+                            const auto build=[&](bool mirror){
+                                QPolygonF projected;projected.reserve(path.size());
+                                for(const auto& p:path)projected.append((project(mirror?mirrored(p):p)-state_->offset)/state_->scale);
+                                return screenStroke(projected,.15/state_->sectionCap);
+                            };
+                            if(sides.first)cached.line=build(false);
+                            if(sides.second)cached.mirror=build(true);
+                            cached.initialized=true;
+                        }
+                        const auto scale=state_->scale;const auto origin=state_->offset;
+                        const QTransform transform(scale,0,0,scale,origin.x(),origin.y());
+                        if(!cached.line.isEmpty())painter.drawPolyline(transform.map(cached.line));
+                        if(!cached.mirror.isEmpty())painter.drawPolyline(transform.map(cached.mirror));
+                        continue;
+                    }
+                    auto sides=sectionSides(*snapshot,int(state_->projection),section.kind,path);
                     const QVector<CombPoint>* samples=nullptr;
                     if(comb&&index<section.splines.size()){
                         const quint64 key=(quint64(section.kind*10000+section.index)<<32)|quint32(index);
@@ -1234,6 +1382,16 @@ void HullView::draw(QPainter& painter,qreal dpr,bool final,bool forceSoftware) c
                 layer.grid=state_->gridVisible;layer.fill=state_->fillVisible;
             }
             if(layer.pixels.isNull())drawSections(painter);else painter.drawPixmap(QPoint(),layer.pixels);
+        }else if(!final&&!preview&&state_->layerMatches(size(),dpr)&&
+                 pixelPhase(painter.deviceTransform().map(QPointF{}))==state_->resizeLayer.phase){
+            const auto& image=state_->resizeLayer.image.get();
+            if(verifySections&&!image.isNull()){
+                QImage reference(image.size(),image.format());reference.setDevicePixelRatio(dpr);reference.fill(Qt::transparent);
+                QPainter referencePainter(&reference);referencePainter.setRenderHints(painter.renderHints());
+                referencePainter.translate(state_->resizeLayer.phase/dpr);drawSections(referencePainter);referencePainter.end();*verifySections=(reference==image);
+            }
+            // Blit on an integer physical pixel even on fractional Windows scaling.
+            if(image.isNull())drawSections(painter);else painter.drawImage(-state_->resizeLayer.phase/dpr,image);
         }else{
             if(!final)layer.pixels={};
             drawSections(painter);
@@ -1277,18 +1435,29 @@ void HullView::draw(QPainter& painter,qreal dpr,bool final,bool forceSoftware) c
             }
             painter.restore();
         }
+        // The annotation collision pass uses the same unmirrored screen edges and
+        // points as the control net. Collect them once, in original model order.
+        QVector<QLineF> labelEdges;
+        QVector<QPointF> labelPoints;
+        const bool collectObstacles=state_->controlNetVisible&&!preview&&snapshot&&snapshot->overlay.present&&
+            (final||state_->entrance.textOpacity(false)>0);
+        if(collectObstacles)labelEdges.reserve(data->edges.size());
         if(state_->controlNetVisible) {
         QVector<QLineF> edges,creases,mirrors;
+        labelPoints.reserve(data->points.size());
+        for(const auto& point:data->points)labelPoints.append(project(state_->controlPosition(state_->displayedPosition(point))));
         edges.reserve(data->edges.size());creases.reserve(data->edges.size()/3);
         const QRectF clip=QRectF(rect()).adjusted(-8,-8,8,8);
         for (const auto& edge:data->edges) {
-            auto a=state_->displayedPosition(data->points[data->pointIndices.value(edge.a)]);
-            auto b=state_->displayedPosition(data->points[data->pointIndices.value(edge.b)]);
+            auto a=state_->displayedPosition(data->points[edge.ia]);
+            auto b=state_->displayedPosition(data->points[edge.ib]);
             if(preview){auto span=std::max(1e-6,snapshot->maximum.x-snapshot->minimum.x);auto t=std::clamp(state_->entrance.previewFraction()*1.6-((a.x+b.x)*.5-snapshot->minimum.x)/span*.6,0.,1.);t=1-(1-t)*(1-t);if(t<=0)continue;b={a.x+(b.x-a.x)*t,a.y+(b.y-a.y)*t,a.z+(b.z-a.z)*t};}
-            for(const auto& span:state_->controlSegments(a,b)){
-                const QLineF line(project(span[0]),project(span[1]));const QRectF bounds(line.p1(),line.p2());
-                if(clip.intersects(bounds.normalized().adjusted(-1,-1,1,1)))(edge.crease?creases:edges).append(line);
-            }
+            const auto appendLine=[&](QLineF line){
+                if(collectObstacles)labelEdges.append(line);
+                if(clip.intersects(QRectF(line.p1(),line.p2()).normalized().adjusted(-1,-1,1,1)))(edge.crease?creases:edges).append(line);
+            };
+            if(!preview&&!state_->splitBody())appendLine({labelPoints[edge.ia],labelPoints[edge.ib]});
+            else for(const auto& span:state_->controlSegments(a,b))appendLine({project(span[0]),project(span[1])});
             if (edge.mirror && (a.y!=0 || b.y!=0)) {
                 const QLineF mirror(project(mirrored(a)),project(mirrored(b)));
                 if (clip.intersects(QRectF(mirror.p1(),mirror.p2()).normalized().adjusted(-1,-1,1,1)))
@@ -1306,7 +1475,7 @@ void HullView::draw(QPainter& painter,qreal dpr,bool final,bool forceSoftware) c
         QVector<QRectF> locked;
         points.reserve(data->points.size());
         for (const auto& point:data->points) {
-            const auto pixel=project(state_->controlPosition(state_->displayedPosition(point)));
+            const auto pixel=labelPoints[&point-data->points.constData()];
             if (!clip.contains(pixel)) continue;
             if(!final&&!state_->entrance.pointVisible(pixel.x()))continue;
             if(state_->studio&&snapshot->overlay.present){
@@ -1343,11 +1512,18 @@ void HullView::draw(QPainter& painter,qreal dpr,bool final,bool forceSoftware) c
             LabelLayout exportLayout;auto& layout=final?exportLayout:state_->labels;
             layout.begin(QRectF(rect()).adjusted(3,state_->studio?titleHeight+4:3,-3,-3),state_->frameTime,!final&&state_->animations);
             const bool showText=final||state_->entrance.textOpacity(false)>0;
-            if(showText&&state_->controlNetVisible)for(const auto& p:data->points){auto at=project(state_->controlPosition(state_->displayedPosition(p)));int r=snapshot->overlay.pointSize+3;layout.reserve(QRectF(at-QPointF(r,r),QSizeF(2*r+1,2*r+1)));}
-            if(showText&&state_->controlNetVisible)for(const auto& edge:data->edges)for(const auto& span:state_->controlSegments(state_->displayedPosition(data->points[data->pointIndices.value(edge.a)]),state_->displayedPosition(data->points[data->pointIndices.value(edge.b)])))layout.segment({project(span[0]),project(span[1])});
+            bool obstaclesReady=false;
+            const auto prepareObstacles=[&]{
+                if(obstaclesReady)return;
+                obstaclesReady=true;
+                const int r=snapshot->overlay.pointSize+3;
+                for(auto at:std::as_const(labelPoints))layout.reserve(QRectF(at-QPointF(r,r),QSizeF(2*r+1,2*r+1)));
+                for(const auto& edge:std::as_const(labelEdges))layout.segment(edge);
+            };
             painter.setFont(annotationFont);QFontMetricsF metrics(annotationFont);QJsonArray evidence;
             auto annotation=[&](const Annotation& a){
                 if(!showText)return;
+                prepareObstacles();
                 auto size=notation::size(a.text,annotationFont);auto placed=layout.place(a.key,a.text,a.anchor,a.preferred,size,a.kind);
                 if(!placed.visible)return;
                 const bool numeric=!a.text.isEmpty()&&(a.text[0].isDigit()||a.text[0]=='-'||a.text[0]=='+');
@@ -1373,8 +1549,8 @@ void HullView::draw(QPainter& painter,qreal dpr,bool final,bool forceSoftware) c
                 // Selected points claim coincident labels first, without copying
                 // and sorting the control net on every animation frame.
                 if(showText)for(bool selected:{true,false})for(const auto& p:data->points){
-                    if(state_->selection.contains(p.id)!=selected)continue;
-                    auto at=project(state_->controlPosition(state_->displayedPosition(p)));if(!rect().contains(at.toPoint())||(!final&&!state_->entrance.pointVisible(at.x())))continue;
+                    if((p.name.isEmpty()&&!state_->coordinateAxis)||state_->selection.contains(p.id)!=selected)continue;
+                    auto at=labelPoints[&p-data->points.constData()];if(!rect().contains(at.toPoint())||(!final&&!state_->entrance.pointVisible(at.x())))continue;
                     QString text=p.name;if(state_->coordinateAxis){const auto v=state_->displayedPosition(p);text=QString::number(state_->coordinateAxis==1?v.x:state_->coordinateAxis==2?v.y:v.z,'f',3);if(!layout.claim(at,text))continue;}
                     if(text.isEmpty())continue;
                     annotation({"point:"+QString::number(p.id),text,at,at+QPointF(snapshot->overlay.pointSize+4,3),selected?QColor(160,67,34):QColor(49,93,85),LabelKind::Point,false});
@@ -1465,6 +1641,10 @@ void HullView::resizeEvent(QResizeEvent* event) {
         state_->offset+=QPointF((event->size().width()-event->oldSize().width())/2.0,
                                (event->size().height()-event->oldSize().height())/2.0);
     ++state_->cameraRevision;
+    if(isVisible()){
+        const auto dpr=devicePixelRatioF();
+        state_->scheduleSections(size(),dpr,pixelPhase(QPointF(mapTo(window(),QPoint()))*dpr));
+    }
     QWidget::resizeEvent(event);
 }
 void HullView::cancelGesture() {

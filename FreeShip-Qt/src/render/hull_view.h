@@ -25,7 +25,9 @@ public:
     explicit HullView(QWidget* parent = nullptr);
     ~HullView() override;
     void setSnapshot(std::shared_ptr<const fs::ModelSnapshot> snapshot,
-                     std::shared_ptr<const fs::ModelSnapshot> presentation = {},bool drawingUnchanged=false);
+                     std::shared_ptr<const fs::ModelSnapshot> presentation = {},bool drawingUnchanged=false,
+                     const QSet<fs::EntityId>& visibilityChanges={});
+    void setLayerVisibilityPreview(const QSet<fs::EntityId>& changes);
     void setDisplayPreview(std::shared_ptr<const fs::ModelSnapshot> presentation);
     std::shared_ptr<const fs::ModelSnapshot> snapshot() const;
     void setProjection(HullProjection projection);
@@ -71,6 +73,7 @@ public:
     bool presentationActive()const;
     // Deterministic renderer probe; ordinary image export always renders the final state.
     QImage presentationImageAt(qint64 milliseconds);
+    int verifyResizeSectionPixels() const; // -1: ordinary path; 0/1: unequal/equal layer
     QJsonObject overlayEvidence()const;
     QJsonObject interactionMotionEvidence()const;
     void setEditingEnabled(bool enabled);
@@ -141,7 +144,7 @@ private:
     struct State;
     std::unique_ptr<State> state_;
     QString projectionSourceKey() const;
-    void draw(QPainter&, qreal devicePixelRatio,bool final=true,bool forceSoftware=false) const;
+    void draw(QPainter&, qreal devicePixelRatio,bool final=true,bool forceSoftware=false,int* verifySections=nullptr) const;
     void fitToViewport(bool resizing);
     void cancelGesture();
     void notifySelectionChanged();

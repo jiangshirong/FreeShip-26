@@ -167,7 +167,7 @@ def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('action',choices=['plan','apply','verify'])
     parser.add_argument('--manifest',type=Path,required=True)
-    parser.add_argument('--proof',type=Path,default=QT.parent/'TranslationContext_Qt_20261113_resolved/legacy_resource_reachability.json')
+    parser.add_argument('--proof',type=Path,default=QT.parent/'翻译工作档案'/'TranslationContext_Qt_20261113_resolved/legacy_resource_reachability.json')
     parser.add_argument('--baseline-source',type=Path,help='Verified immutable original source; allows a cumulative plan after reviewed method removals')
     args=parser.parse_args()
     if args.action=='plan':
