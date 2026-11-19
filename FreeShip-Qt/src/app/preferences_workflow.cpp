@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 // Hidden observation adapter for the production preferences action and dialog.
 #include "main_window.h"
+#include <QTextEdit>
 #include <QSplitter>
 #include "preferences_dialog.h"
 #include "exchange_dialog.h"
@@ -240,11 +241,12 @@ void MainWindow::preferencesStep(const QString& operation){
             item["operation"]=operation;item["active"]=preferences_;item["persisted"]=QJsonDocument::fromJson(bytes(preferencesStore_->filename())).object();
             QApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
             item["workspace_before"]=preferencesRequest_["workspace_before"];item["workspace_after"]=workspace();
-            if(statusNotice_){
-                item["feedback"]=QJsonObject{{"visible",statusNotice_->isVisible()},{"text",statusNotice_->text()},
-                    {"parent_is_splitter",bool(qobject_cast<QSplitter*>(statusNotice_->parentWidget()))},
-                    {"inside_canvas",statusNotice_->parentWidget()->rect().contains(statusNotice_->geometry())},
-                    {"height",statusNotice_->height()},{"canvas_height",statusNotice_->parentWidget()->height()}};
+            if(auto* notice=findChild<QWidget*>("ShellStatusNotice")){
+                const auto* text=notice->findChild<QTextEdit*>("ShellStatusNoticeText");
+                item["feedback"]=QJsonObject{{"visible",notice->isVisible()},{"text",text?text->toPlainText():QString{}},
+                    {"parent_is_splitter",bool(qobject_cast<QSplitter*>(notice->parentWidget()))},
+                    {"inside_canvas",notice->parentWidget()->contentsRect().contains(notice->geometry())},
+                    {"height",notice->height()},{"canvas_height",notice->parentWidget()->height()}};
                 if(operation=="feedback_visible")grab().save(workflowOutput_+"/preferences-feedback.png");
             }
             item["ui_language"]=uiLanguage();item["preferences_caption"]=preferencesAction_->text();

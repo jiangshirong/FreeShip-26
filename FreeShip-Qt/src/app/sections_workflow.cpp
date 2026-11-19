@@ -6,11 +6,13 @@
 #include <QAction>
 #include <QApplication>
 #include <QComboBox>
+#include <QCryptographicHash>
 #include <QDialogButtonBox>
 #include <QDoubleSpinBox>
 #include <QFile>
 #include <QDir>
 #include <QLineEdit>
+#include <QListWidget>
 #include <QKeyEvent>
 #include <QItemSelectionModel>
 #include <QLabel>
@@ -24,6 +26,7 @@
 #include <QTimer>
 #include <algorithm>
 #include <stdexcept>
+#include <type_traits>
 namespace {
 QByteArray bytes(const QString& path){QFile f(path);if(!f.open(QIODevice::ReadOnly))throw std::runtime_error("Missing section evidence");return f.readAll();}
 // Feed ordinary key events through Qt's shortcut routing in the isolated editor.
@@ -52,7 +55,7 @@ void MainWindow::sectionsStep(const QString& method){
             if(!found)throw std::runtime_error("Missing section action");
             return found;
         };
-        auto dialogAction=[this](QAction* a,bool accept,QJsonObject values=QJsonObject{}){
+        auto dialogAction=[this](auto* a,bool accept,QJsonObject values=QJsonObject{}){
             if(!a->isEnabled())throw std::runtime_error("Disabled production action");
             bool handled=false;QString error;QTimer timer;timer.setSingleShot(true);
             connect(&timer,&QTimer::timeout,this,[&]{
@@ -73,10 +76,13 @@ void MainWindow::sectionsStep(const QString& method){
                 }
                 if(!button){error="Missing button role";dialog->reject();return;}handled=true;button->click();
             });
-            timer.start(0);a->trigger();if(!handled||!error.isEmpty())throw std::runtime_error(error.isEmpty()?"Dialog was not handled":error.toStdString());
+            timer.start(0);if constexpr(std::is_same_v<QAction,std::remove_pointer_t<decltype(a)>>)a->trigger();else a->click();if(!handled||!error.isEmpty())throw std::runtime_error(error.isEmpty()?"Dialog was not handled":error.toStdString());
         };
         auto table=[this]{return sections_->findChild<QTableWidget*>("SectionDefinitions");};
         const auto outside=double(float(editingOriginal_?editingOriginal_->maximum.x+10:model->maximum.x+10));
+        auto frames=[&]{QJsonArray hashes;for(auto* v:views_){const auto im=v->grab().toImage().convertToFormat(QImage::Format_RGB32);
+            if(im.isNull())throw std::runtime_error("No hull frame");
+            hashes.append(QString::fromLatin1(QCryptographicHash::hash(QByteArrayView(reinterpret_cast<const char*>(im.constBits()),im.sizeInBytes()),QCryptographicHash::Sha256).toHex()));}return hashes;};
         switch(workflowStage_++){
         case 0:{
             if(method!="load")throw std::runtime_error("Expected load");
@@ -169,7 +175,9 @@ void MainWindow::sectionsStep(const QString& method){
             if(!localUndo)throw std::runtime_error("Dialog undo binding unavailable");
             localUndo->setEnabled(false);historyKey(sections_,table(),'Z');
             workflowCase("main-window-shortcut-does-not-reach-section-dialog",!session_.busy()&&session_.model()==model);
-            localUndo->setEnabled(undo_->isEnabled());historyKey(sections_,table(),'Z');
+            localUndo->setEnabled(undo_->isEnabled());QElapsedTimer latency;latency.start();historyKey(sections_,table(),'Z');
+            workflowTimings_["committed_undo_feedback_ms"]=latency.nsecsElapsed()/1e6;
+            workflowCase("committed-undo-restores-row-before-publication",table()->rowCount()==1+std::count_if(model->sections.begin(),model->sections.end(),[](const auto& s){return s.kind==1;})&&table()->isEnabled());
             workflowCase("section-dialog-ctrl-z-key-event-dispatched",session_.busy());
             if(!session_.busy())throw std::runtime_error("Ctrl+Z did not dispatch undo from section dialog");
             break;
@@ -199,18 +207,52 @@ void MainWindow::sectionsStep(const QString& method){
         }
         case 6:
             workflowCase("diagonal_added",model->sections.size()==editingOriginal_->sections.size()+3);sections_->reject();
-            dialogAction(newLayer_,false,{{"name","Cancelled"}});workflowCase("layer_cancel_preserves_model",session_.model()==model&&!session_.busy());
-            dialogAction(newLayer_,true,{{"name","Section workflow"}});break;
+            openLayers();
+            for(auto* button:layers_->findChildren<QToolButton*>())if(button->property("layer_action")=="create"&&button->isEnabled()){
+                QElapsedTimer lag;lag.start();button->click();workflowTimings_["layer_create_feedback_ms"]=lag.nsecsElapsed()/1e6;
+                const auto id=layers_->selectedLayerId();auto* list=layers_->findChild<QListWidget*>("layer_list");
+                workflowCase("create-inserts-editable-row-before-commit",session_.busy()&&!model->layer(id)&&list->count()==model->layers.size()+2&&layers_->findChild<QLineEdit*>("layer_inline_name")&&button->isEnabled());
+                auto* row=list->itemWidget(list->currentItem());auto* eye=row->findChild<QToolButton*>();
+                if(!eye||!eye->isEnabled()||eye->property("layer_action")!="visibility")throw std::runtime_error("Projected layer has no interactive eye");
+                lag.restart();eye->click();workflowTimings_["layer_eye_feedback_ms"]=lag.nsecsElapsed()/1e6;
+                workflowCase("new-layer-eye-and-properties-live-before-create-commit",!eye->isChecked()&&layers_->fieldEditor("thickness")->isEnabled()&&session_.busy());
+                eye->click();button->click();const auto second=layers_->selectedLayerId();auto* secondRow=list->itemWidget(list->currentItem());
+                for(auto* trash:secondRow->findChildren<QToolButton*>())if(trash->property("layer_action")=="delete"){trash->click();break;}
+                workflowCase("second-create-and-delete-before-first-commit",second!=id&&session_.busy()&&button->isEnabled()&&list->count()==model->layers.size()+2);
+                layers_->setSelectedLayerId(id);workflowArtifacts_["burst_deleted_id"]=double(second);workflowArtifacts_["burst_layer_id"]=double(id);workflowArtifacts_["burst_revision"]=double(model->revision+5);return;
+            }
+            throw std::runtime_error("Layer add button unavailable");
         case 7:
             captureWorkflow("layer");workflowCase("new_layer_added",model->layers.size()==editingOriginal_->layers.size()+1);
             editingLayer_=model->layers.back().id;
+            workflowCase("five-queued-layer-edits-committed-in-order",model->revision==quint64(workflowArtifacts_["burst_revision"].toDouble())&&editingLayer_==fs::EntityId(workflowArtifacts_["burst_layer_id"].toDouble())&&model->layers.back().visible);
             workflowCase("new_layer_selected_for_property_editing",layers_->selectedLayerId()==editingLayer_);
-            dialogAction(deleteLayer_,false);workflowCase("layer_delete_cancel_preserves_model",session_.model()==model&&!session_.busy());
-            dialogAction(deleteLayer_,true);break;
+            for(auto* button:layers_->findChildren<QToolButton*>())if(button->property("layer_action")=="delete"&&button->property("layer_id").toULongLong()==editingLayer_&&button->isEnabled()){
+                auto* list=layers_->findChild<QListWidget*>("layer_list");
+                auto present=[&]{for(int i=0;i<list->count();++i)if(list->item(i)->data(Qt::UserRole).toULongLong()==editingLayer_)return true;return false;};
+                QElapsedTimer lag;lag.start();button->click();
+                workflowTimings_["layer_direct_delete_ms"]=lag.nsecsElapsed()/1e6;
+                workflowCase("layer-row-gone-before-commit",list->isEnabled()&&!present()&&session_.busy());
+                lag.restart();historyKey(layerDialog_,list,Qt::Key_Z);workflowTimings_["layer_ctrl_z_row_ms"]=lag.nsecsElapsed()/1e6;
+                workflowCase("layer-undo-before-commit",present()&&list->isEnabled()&&session_.busy());
+                historyKey(layerDialog_,list,Qt::Key_Z); // Also undo the earlier deletion of the second new layer.
+                auto listed=[&](qulonglong id){for(int i=0;i<list->count();++i)if(list->item(i)->data(Qt::UserRole).toULongLong()==id)return true;return false;};
+                const auto second=qulonglong(workflowArtifacts_["burst_deleted_id"].toDouble());
+                workflowCase("undo-restores-both-deleted-identities",present()&&listed(second));
+                historyKey(layerDialog_,list,Qt::Key_Z); // At the boundary: preserve both redo entries.
+                historyKey(layerDialog_,list,Qt::Key_Z,Qt::ControlModifier|Qt::ShiftModifier);
+                workflowCase("redo-first-deletion-targets-second-created-layer",present()&&!listed(second));
+                historyKey(layerDialog_,list,Qt::Key_Z,Qt::ControlModifier|Qt::ShiftModifier);
+                workflowCase("layer-redo-before-commit",!present()&&list->isEnabled());return;
+            }
+            throw std::runtime_error("Layer trash button unavailable");
         case 8:
-            workflowCase("empty_layer_deleted",model->layer(editingLayer_)==nullptr);undo_->trigger();break;
+            workflowCase("empty_layer_deleted",model->layer(editingLayer_)==nullptr);
+            sectionsAction_->trigger();historyKey(sections_,table(),'Z');
+            workflowCase("empty-section-history-preserves-earlier-layer-edit",session_.canUndo()&&!session_.busy()&&session_.model()==model);
+            sections_->reject();if(!session_.busy())undo_->trigger();break;
         case 9:
-            workflowCase("undo_restores_layer_identity",model->layer(editingLayer_)&&model->layer(editingLayer_)->name=="Section workflow");
+            workflowCase("undo_restores_layer_identity",model->layer(editingLayer_)&&model->layer(editingLayer_)->defaultNameNumber.has_value());
             setSelectionKind(HullEntity::Face);selectEntities(HullEntity::Face,{model->faces.front().id});dialogAction(assignLayer_,true,{{"layer",double(editingLayer_)}});break;
         case 10:
             workflowCase("existing_face_moves_to_new_layer",model->faces.front().layer==editingLayer_);
@@ -256,14 +298,39 @@ void MainWindow::sectionsStep(const QString& method){
             // as deletion: no backend completion or wait is allowed in between.
             sectionsAction_->trigger();sections_->findChild<QTabWidget*>()->setCurrentIndex(0);
             workflowOriginalDigest_=bytes(session_.scenePath());
-            auto* remove=table()->cellWidget(0,0)->findChild<QToolButton*>();remove->click();
+            auto rows=[&]{QStringList result;for(int i=0;i<table()->rowCount();++i)result<<table()->item(i,1)->text()+":"+QString::number(table()->item(i,2)->checkState());return result;};
+            const auto original=rows();QElapsedTimer latency;latency.start();
+            auto* remove=table()->cellWidget(0,0)->findChild<QToolButton*>();remove->click();workflowTimings_["row_delete_feedback_ms"]=latency.nsecsElapsed()/1e6;
+            const auto deleted=rows();workflowCase("clicked-row-removed-immediately",deleted==original.mid(1));latency.restart();
             workflowCase("immediate-delete-is-still-computing",session_.editingSections());
             historyKey(sections_,table(),'Z');
+            workflowTimings_["queued_undo_feedback_ms"]=latency.nsecsElapsed()/1e6;
+            workflowCase("queued-undo-immediately-restores-editable-rows",rows()==original&&table()->isEnabled()&&action("add")->isEnabled());
+            historyKey(sections_,table(),Qt::Key_Z,Qt::ControlModifier|Qt::ShiftModifier);
+            workflowCase("queued-redo-removes-correct-row",rows()==deleted&&table()->isEnabled());
+            if(table()->rowCount()){table()->cellWidget(0,0)->findChild<QToolButton*>()->click();workflowCase("delete-after-queued-redo-uses-current-index",rows()==deleted.mid(1));historyKey(sections_,table(),'Z');}
+            historyKey(sections_,table(),'Z');workflowCase("multiple-queued-undos-restore-all-rows",rows()==original&&table()->isEnabled());
+            const int pending=sections_->property("section_pending_count").toInt();latency.restart();
+            for(int extra=0;extra<5;++extra)historyKey(sections_,table(),'Z');
+            workflowTimings_["five_extra_undo_feedback_ms"]=latency.nsecsElapsed()/1e6;
+            workflowCase("excess-undo-while-busy-keeps-list-editable",session_.canQueueSectionEdits()&&table()->isEnabled()&&action("add")->isEnabled()&&rows()==original&&pending==sections_->property("section_pending_count").toInt());
             workflowCase("immediate-delete-undo-queued",session_.sectionHistoryPending());
             if(!session_.sectionHistoryPending())throw std::runtime_error("Immediate Ctrl+Z was dropped while delete was pending");
             break;
         }
         case 13:{
+            // Exercise the editor's preview depth separately from FBM worker latency.
+            SectionDialog probe(this);probe.setSnapshot(model);probe.setEditingEnabled(true);
+            int moves=0;probe.onEdit=[](const QString&,int,QJsonObject){return true;};
+            probe.onPreviewHistory=[&](bool){++moves;return true;};
+            auto* grid=probe.findChild<QTableWidget*>("SectionDefinitions");
+            if(!grid->rowCount())throw std::runtime_error("Depth probe needs a section");
+            const auto initial=grid->item(0,2)->checkState();
+            for(int i=0;i<40;++i){auto* cell=grid->item(0,2);cell->setCheckState(cell->checkState()==Qt::Checked?Qt::Unchecked:Qt::Checked);}
+            for(int i=0;i<43;++i)probe.previewHistory(false);
+            workflowCase("long-section-history-stops-at-real-boundary",moves==40&&grid->item(0,2)->checkState()==initial);
+            historyKey(sections_,table(),'Z');
+            workflowCase("excess-undo-after-drain-preserves-redo",!session_.busy()&&session_.canRedo()&&table()->isEnabled()&&action("add")->isEnabled()&&session_.model()==model);
             workflowCase("immediate-delete-undo-restores-exact-scene",bytes(session_.scenePath())==workflowOriginalDigest_);
             workflowCase("immediate-delete-undo-refreshes-list",table()->rowCount()==std::count_if(model->sections.begin(),model->sections.end(),[](const auto& s){return s.kind==1;}));
             workflowOriginalDigest_=bytes(session_.scenePath());
@@ -274,7 +341,28 @@ void MainWindow::sectionsStep(const QString& method){
         }
         case 14:
             workflowCase("immediate-clear-undo-restores-exact-scene",bytes(session_.scenePath())==workflowOriginalDigest_);
-            workflowCase("history-queue-drains",!session_.sectionHistoryPending()&&!session_.busy());sections_->reject();finishWorkflow();break;
+            workflowCase("history-queue-drains",!session_.sectionHistoryPending()&&!session_.busy());sections_->reject();openLayers();
+            {
+                // Pick the largest initially visible layer, not the empty row used by list tests.
+                QHash<fs::EntityId,int> counts;for(const auto& f:model->faces)++counts[f.layer];
+                int largest=0;for(const auto& l:model->layers)if(l.visible&&counts.value(l.id)>largest){largest=counts.value(l.id);editingLayer_=l.id;}
+                if(!largest)throw std::runtime_error("No visible occupied layer");
+                for(auto* v:views_){v->setAnimationsEnabled(false);v->setControlNetVisible(true);v->setFillVisible(v->projection()==HullProjection::Perspective);v->fit();
+                    v->setGridVisible(false);v->setHydroVisible(false);for(int k=1;k<=4;++k)v->setSectionVisible(k,false);}
+                workflowArtifacts_["visible_frames"]=frames();
+                QToolButton* eye=nullptr;for(auto* b:layers_->findChildren<QToolButton*>())if(b->property("layer_action")=="visibility"&&b->property("layer_id").toULongLong()==editingLayer_)eye=b;
+                if(!eye)throw std::runtime_error("Occupied layer eye missing");
+                QElapsedTimer timer;timer.start();eye->click();workflowTimings_["occupied_hide_click_ms"]=timer.nsecsElapsed()/1e6;
+                const auto hidden=frames();workflowTimings_["occupied_hide_four_frames_ms"]=timer.nsecsElapsed()/1e6;
+                workflowArtifacts_["hidden_frames"]=hidden;for(int i=0;i<4;++i)workflowCase("occupied-hide-paints-before-commit-"+QString::number(i),session_.busy()&&hidden[i]!=workflowArtifacts_["visible_frames"].toArray()[i]);
+            }break;
+        case 15:{
+            workflowCase("hidden-preview-matches-committed-frames",!model->layer(editingLayer_)->visible&&frames()==workflowArtifacts_["hidden_frames"].toArray());
+            QElapsedTimer lag;lag.start();historyKey(layerDialog_,layers_->findChild<QListWidget*>("layer_list"),Qt::Key_Z);
+            workflowTimings_["occupied_show_undo_ms"]=lag.nsecsElapsed()/1e6;
+            const auto shown=frames();workflowTimings_["occupied_show_four_frames_ms"]=lag.nsecsElapsed()/1e6;
+            workflowCase("undo-shows-four-original-frames-before-commit",session_.busy()&&shown==workflowArtifacts_["visible_frames"].toArray());break;}
+        case 16:workflowCase("visible-preview-matches-committed-frames",model->layer(editingLayer_)->visible&&frames()==workflowArtifacts_["visible_frames"].toArray());finishWorkflow();break;
         default:throw std::runtime_error("Unexpected section workflow stage");
         }
     }catch(const std::exception& error){finishWorkflow(QString::fromUtf8(error.what()));}

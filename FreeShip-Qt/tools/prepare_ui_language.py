@@ -4,6 +4,7 @@ No machine translation. Ambiguous reverse mappings are omitted. Use --wrap only
 for the reviewed UI source files; --catalog regenerates packs and missing lists.
 """
 import argparse,ast,hashlib,json,re
+import os
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 LEX=re.compile(r'R"(?P<delim>\w*)\(.*?\)(?P=delim)"|//[^\n]*|/\*.*?\*/|"(?:\\.|[^"\\])*"|\'(?:\\.|[^\'\\])*\'',re.S)
@@ -54,7 +55,7 @@ def main():
                 path.write_text(new,'utf-8');changed[str(path.relative_to(ROOT))]=count
         print(json.dumps({'wrapped':changed},ensure_ascii=False))
     if a.catalog:
-        locale=ROOT.parent/'FreeShip-Plus-Lazarus/Locale';cn=po(locale/'FreeShip.cn.po');index={}
+        locale=Path(os.environ.get('FREESHIP_LEGACY_SOURCE') or ROOT.parent/'FreeShip-Plus-Lazarus')/'Locale';cn=po(locale/'FreeShip.cn.po');index={}
         for key,value in cn.items():index.setdefault(norm(value),set()).add(key)
         # Explicit aliases to existing source IDs; no new target-language prose.
         aliases={'首选项':'Preferences','界面语言 / Language':'Language','启用双语言切换 (Ctrl+Alt+L)':'Enable (Ctrl+Alt+L)',

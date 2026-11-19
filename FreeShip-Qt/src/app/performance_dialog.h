@@ -33,7 +33,9 @@ protected:
     void changeEvent(QEvent*) override;
     bool eventFilter(QObject*,QEvent*) override;
 private:
-    void calculate();void setParameters(const QJsonObject& schema);void renderSeries();void refreshChoices();void refreshAccelerationStopControls();void openDatabaseViewer();void arrangeAdditional();void refreshWindLabels();
+    void calculate();void setParameters(const QJsonObject& schema);void renderSeries();void refreshChoices();void refreshAccelerationStopControls();void openDatabaseViewer();void arrangeAdditional();void refreshWindLabels();void refreshParameterLanguage();
+    void refreshResultLanguage();
+    QString completionMessage_;
     void applyResult(const QJsonObject&,bool,std::shared_ptr<CalculationChartState>);
     QThreadPool resultPool_;quint64 resultGeneration_=0;bool preparingResult_=false;QVector<bool> sharedCurveAxes_;
     bool refreshInputValidity();

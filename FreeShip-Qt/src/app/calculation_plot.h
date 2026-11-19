@@ -15,7 +15,7 @@ struct CalculationCurve {
     QRectF bounds;qsizetype finitePoints=0,segments=0;
 };
 struct CalculationChartData {
-    QString method;QVector<CalculationCurve> curves;bool legendRight=false;double preparationMs=0,decodeMs=0;
+    QString method,captionLanguage;QVector<CalculationCurve> curves;bool legendRight=false;double preparationMs=0,decodeMs=0;
     QString numericFingerprint()const;
     static std::shared_ptr<CalculationChartData> read(const QString&,const QJsonObject&,bool decode=true);
     void decodeNumeric(const QJsonObject&);
@@ -37,6 +37,7 @@ public:
     static void prepareRenderer(); // Nonblocking shader/context preparation while entering a calculation.
     static void shutdownRenderer(); // Also usable by hosts which do not enter QApplication::exec().
     void setState(std::shared_ptr<CalculationChartState> state);
+    void refreshLanguage(const QJsonArray& series);
     void setSelected(int index);
     void synchronize();
     QJsonObject evidence()const;

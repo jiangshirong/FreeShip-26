@@ -54,7 +54,7 @@ private:
     }
 };
 
-inline QWidget* caption(QWidget* label,QWidget* field,const QString& key){
+inline QWidget* caption(QWidget* label,QWidget* field,const QString& key,bool expandLabel=false){
     auto* row=new QWidget;
     auto* layout=new QHBoxLayout(row);
     layout->setContentsMargins(0,0,0,0);
@@ -62,9 +62,9 @@ inline QWidget* caption(QWidget* label,QWidget* field,const QString& key){
     auto* marker=new StatusMarker(row);
     marker->setProperty("calculation_input_status",key);
     marker->setFixedSize(22,22);
-    layout->addWidget(label);
+    layout->addWidget(label,expandLabel?1:0);
     layout->addWidget(marker,0,Qt::AlignVCenter);
-    layout->addStretch();
+    if(!expandLabel)layout->addStretch();
     field->setProperty("calculation_input_marker",QVariant::fromValue(static_cast<QObject*>(marker)));
     return row;
 }

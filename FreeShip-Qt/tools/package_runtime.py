@@ -71,7 +71,15 @@ def select(name,local_solvers):
     if parts[0]=='languages':
         return len(parts)==2 and re.fullmatch(r'[a-z]{2}\.json',parts[1]) is not None
     if parts[0] in ('docs','third_party','licenses'):return True
-    if parts[0]=='bridge':return parts[1] in RESOURCES or len(parts)==2 and parts[1] in PROVENANCE
+    if parts[0]=='bridge':
+        if len(parts)==2:return parts[1] in PROVENANCE
+        # Qt loads modern catalogs from /languages; the drawing-label reader
+        # still needs the Chinese PO. Old theme INIs supply inherited colors,
+        # while the Qt toolbar loads its icons exclusively from StudioLight.
+        if parts[1] in RESOURCES and re.match(r'^(copying|licen[cs]e|notice|copyright|readme)([.-]|$)',parts[-1],re.I):return True
+        if parts[1]=='Languages':return False
+        if parts[1]=='locale':return parts[2:]==('FreeShip.cn.po',)
+        if parts[1]=='Themes':return parts[2:4] not in (('Default','icons'),('Original','icons'))
     return False
 
 def package(source,output,local_solvers=False,calculation_tools=None):

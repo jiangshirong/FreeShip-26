@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/jiangshirong/FreeShip-26/releases/latest"><img src="https://img.shields.io/badge/%D0%A1%D0%BA%D0%B0%D1%87%D0%B0%D1%82%D1%8C-Windows%20x64-176c5c?style=for-the-badge" alt="Скачать для Windows x64"></a>
+  <a href="https://github.com/jiangshirong/FreeShip-26/releases/latest/download/FreeShip-26-Windows-x64-Setup.exe"><img src="https://img.shields.io/badge/%D0%A1%D0%BA%D0%B0%D1%87%D0%B0%D1%82%D1%8C-Windows%20x64-176c5c?style=for-the-badge" alt="Скачать для Windows x64"></a>
   <a href="COPYING"><img src="https://img.shields.io/badge/%D0%9B%D0%B8%D1%86%D0%B5%D0%BD%D0%B7%D0%B8%D1%8F-GPLv3%2B-183b36?style=for-the-badge" alt="Лицензия GPLv3+"></a>
   <img src="https://img.shields.io/badge/Qt%206%20%C2%B7%20C%2B%2B-183b36?style=for-the-badge" alt="Qt 6 и C++">
 </p>
@@ -110,7 +110,7 @@ FreeShip 26 — программа с открытым исходным кодо
   <img src="docs/assets/readme/ru/section-start.svg" width="100%" alt="03 Быстрый старт. Установите программу, откройте модель и начните работу.">
 </p>
 
-**1 · Установите программу** &nbsp; Скачайте установщик для Windows 10/11 x64 со страницы [Releases](https://github.com/jiangshirong/FreeShip-26/releases/latest) и запустите его. После установки обновления можно проверять в самой программе. Адаптация для Linux продолжается.
+**1 · Установите программу** &nbsp; Скачайте установщик для Windows 10/11 x64 со страницы [Releases](https://github.com/jiangshirong/FreeShip-26/releases) и запустите его. После установки обновления можно проверять в самой программе. Адаптация для Linux продолжается.
 
 **2 · Откройте модель судна** &nbsp; Через **Файл → Открыть** можно загрузить модели FBM и FTM. Модели FTM сохраняются в FBM. Если своей модели пока нет, откройте одну из [демонстрационных моделей](https://github.com/markmal/freeship-plus-in-lazarus/tree/master/Ships) FREE!ship Plus. На снимках этой страницы использована `FREE!ship demo 3+deck.fbm`. Новый корпус по главным размерениям можно создать через **Файл → Новая форма корпуса**.
 
@@ -153,5 +153,7 @@ FreeShip 26 — программа с открытым исходным кодо
 FreeShip 26 опирается на работу авторов FREE!ship (Martijn van Engeland), FREE!ship Plus (Timoshenko V.F.) и FREE!ship Plus in Lazarus (Mark Malakanov). При реализации некоторых геометрических операций использован [ShipCAD](https://github.com/gpgreen/ShipCAD) Грега Грина. Сведения об авторах и лицензионные уведомления сохранены. Происхождение отдельных модулей указано в [NOTICE.md](NOTICE.md).
 
 Проект распространяется на условиях [Стандартной общественной лицензии GNU версии 3 или более поздней](COPYING) (GPLv3+). Внешние расчётные программы hship, CALCPROP, RVRSSHIP, ADD_MASS и другие включены в установщик в том виде, в каком они поставлялись с базовым проектом. Для этих программ действуют отдельные условия распространения. ADD_MASS предназначена только для учебного и некоммерческого использования. Подробнее см. [документацию по внешним расчётным программам](docs/CALCULATION-TOOLS.md).
+
+ИИ-помощники, участвовавшие в разработке: [Claude Code](https://github.com/anthropics/claude-code) и [Codex](https://github.com/openai/codex).
 
 <p align="right"><a href="#top">К началу ↑</a></p>

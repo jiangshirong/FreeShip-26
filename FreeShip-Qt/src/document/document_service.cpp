@@ -356,6 +356,7 @@ class Service {
         if(history_.empty())return;
         response["document_id"]=document_;response["revision"]=double(revision_);response["modified"]=current().token!=cleanToken_;
         response["can_undo"]=index_>0;response["can_redo"]=index_+1<history_.size();response["history_states"]=double(history_.size());
+        response["layer_id_high_water"]=highWater_["layers"];
         response["history_bytes"]=double(memory());response["history_limit_bytes"]=double(limit_);
         const auto info=current().saved->inspect();
         response["preview_enabled"]=info["preview"].toObject()["enabled"].toBool()&&info["opaque_tail_bytes"].toInteger()==0;
@@ -686,13 +687,14 @@ public:
                     for(const auto& value:fields)if(!values.contains(value.toObject()["key"].toString()))bad("Complete calculation snapshot is missing a parameter");
                 }
                 if(project)minimumVersion=fs::document::projectMinimumVersion(*base.engine,base.bindings,request);
+                base.bindings["high_water"]=highWater_;
                 if(definitions)minimumVersion=fs::document::definitionMinimumVersion(*base.engine,base.bindings,request);
                 if(auxiliary)minimumVersion=fs::document::auxiliaryMinimumVersion(*base.engine,base.bindings,request);
                 if(background)minimumVersion=fs::document::backgroundMinimumVersion(*base.engine,base.bindings,request);
                 if(base.engine->version()<minimumVersion){
                     base.engine=std::make_shared<Fbm>(fs::document::promoteDocument(*base.engine,minimumVersion,base.bindings));
                 }
-                base.bindings["high_water"]=highWater_;QElapsedTimer editTimer;editTimer.start();
+                QElapsedTimer editTimer;editTimer.start();
                 const bool transform=fs::document::nativeTransformCommand(request);
                 const bool lackenby=fs::document::nativeLackenbyCommand(request);
                 const bool attributes=fs::document::nativeAttributeCommand(request);

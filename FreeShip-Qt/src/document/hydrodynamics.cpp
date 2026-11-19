@@ -256,7 +256,7 @@ void Calculation::wind(const QString &work){
         if(ls.size()<54)bad("Ishercof 输出不足 19 个角度。");report=ls.join('\n');
         for(int i=0;i<19;++i){auto row=numbers(ls[35+i],7);if(row[0]!=i*10)bad("Ishercof 输出角度不完整。");angle.push_back(row[0]);cx.push_back(row[1]);cy.push_back(row[3]);cm.push_back(row[5]);}
     }else{
-        // Type 13 uses 0.91, matching executable source (its comment says .091).
+        // Type 13 keeps the value assigned by the Plus solver. See docs/migration/INERTIA-WIND-REVIEW.md.
         static const float coeff[4][9]={{.42,.05,.0097,.042,1.18,-.13,-.104,.0894,.00845},{.91,.047,-.0144,.0063,1.08,.14,.025,.1,.0158},{.13,.025,.0204,.028,1.053,.023,0,.0646,-.00686},{.38,.014,.0878,.0554,1.767,.0167,0,.081,.0115}};
         auto c=coeff[int(d(9))-12];for(int i=0;i<37;++i){float a=i*5,y=float(a/180*3.1415926);angle.push_back(a);cx.push_back(float(c[0]*std::cos(double(y))+c[1]*std::sin(double(y))+c[2]*std::sin(2.*y)+c[3]*std::sin(4.*y)));cy.push_back(float(c[4]*std::sin(double(y))+c[5]*std::sin(3.*y)));cm.push_back(float(c[6]*std::sin(double(y))+c[7]*std::sin(2.*y)+c[8]*std::sin(4.*y)));}
         report=report_language::text("角度 / Cx / Cy / Cmz","wind.results")+'\n';

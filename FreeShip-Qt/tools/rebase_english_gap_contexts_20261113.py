@@ -33,7 +33,7 @@ def export_generated_captions(out, decisions, frozen):
 def main():
     p=argparse.ArgumentParser(description=__doc__);p.add_argument('--output',type=Path,required=True);a=p.parse_args()
     project=tool.QT;record=tool.load(project/'docs/migration/ENGLISH-GAPS-FROZEN-SOURCE-20261113.json')
-    frozen=Path(record['source']);previous=project.parent/'TranslationContext_Qt_20261113_verified';out=a.output.resolve()
+    frozen=Path(record['source']);previous=project.parent/'翻译工作档案'/'TranslationContext_Qt_20261113_verified';out=a.output.resolve()
     decisions=tool.load(project/'docs/migration/ENGLISH-GAPS-DECISIONS-20261113.json')
     for relative,expected in record['source_sha256'].items():
         if tool.digest((frozen/relative).read_bytes())!=expected:raise ValueError('Fixed source changed')

@@ -118,24 +118,28 @@ private:
     }
 };
 }
+namespace {
+void localizeCurve(CalculationCurve& c,const QJsonObject& s,const QString& method,int index){
+    c.name=uiMetadataText(s,"name").trimmed();
+    c.xTitle=uiMetadataText(s,"x_title");c.yTitle=uiMetadataText(s,"y_title");c.axis=c.yTitle;
+    if(method=="propeller1"&&c.source=="Series3")c.axis=c.yTitle=uiText("螺旋桨直径 (m)");
+    if(method=="wind")c.axis=uiText("Cx；Cy；10 × Cmz（无量纲）");
+    if(method=="propeller4"||method=="propeller5")c.axis=uiText("KT；10 × KQ；η₀（无量纲）");
+    if(method=="acceleration"&&index==2){c.name=uiText("桨转速");c.axis=c.yTitle="r/min";}
+}
+}
 std::shared_ptr<CalculationChartData> CalculationChartData::read(const QString& method,const QJsonObject& result,bool decodePoints){
-    QElapsedTimer timer;timer.start();auto data=std::make_shared<CalculationChartData>();data->method=method;
+    QElapsedTimer timer;timer.start();auto data=std::make_shared<CalculationChartData>();data->method=method;data->captionLanguage=uiLanguage();
     static const auto styles=QJsonDocument::fromJson(CalculationChartStyles).object();const auto style=styles[method].toObject();
     data->legendRight=style["legend_right"].toBool();const auto definitions=style["series"].toArray();int index=0;
     for(auto value:result["series"].toArray()){
-        const auto s=value.toObject();CalculationCurve c;c.source=s["source"].toString();c.name=uiMetadataText(s,"name").trimmed();
-        c.xTitle=uiMetadataText(s,"x_title");c.yTitle=uiMetadataText(s,"y_title");c.axis=c.yTitle;
-        if(method=="propeller1"&&c.source=="Series3")c.axis=c.yTitle=uiText("螺旋桨直径 (m)");
-        if(method=="wind")c.axis=uiText("Cx；Cy；10 × Cmz（无量纲）");
-        if(method=="propeller4"||method=="propeller5")c.axis=uiText("KT；10 × KQ；η₀（无量纲）");
+        const auto s=value.toObject();CalculationCurve c;c.source=s["source"].toString();
+        localizeCurve(c,s,method,index);
         QJsonObject definition;
         for(auto d:definitions)if(d.toObject()["source"].toString()==c.source&&!c.source.isEmpty())definition=d.toObject();
         if(c.source.isEmpty()&&index<definitions.size())definition=definitions[index].toObject();
         c.color=QColor(definition["color"].toString("#000000"));c.width=std::max(1,definition["width"].toInt(1));
-        if(method=="acceleration"){
-            if(index==2){c.name=uiText("桨转速");c.axis=c.yTitle="r/min";}
-            if(index==4)c.color=QColor("#7648a8");
-        }
+        if(method=="acceleration"&&index==4)c.color=QColor("#7648a8");
         const auto pen=definition["style"].toString();c.style=pen=="psDash"?Qt::DashLine:pen=="psDot"?Qt::DotLine:pen=="psDashDot"?Qt::DashDotLine:Qt::SolidLine;c.markers=definition["points"].toBool();
         data->curves.append(std::move(c));++index;
     }
@@ -370,6 +374,22 @@ void CalculationPlot::setState(std::shared_ptr<CalculationChartState> state){
         connect(button,&QToolButton::toggled,this,[this,i](bool value){if(!state_)return;state_->visible[i]=value;synchronize();if(onDisplayChanged)onDisplayChanged();});
     }
     legend_->setWidget(body);legendLayout_=grid;legendColumns_=0;arrangeLegend();synchronize();
+}
+void CalculationPlot::refreshLanguage(const QJsonArray& series){
+    if(!state_||!state_->data||series.size()!=buttons_.size())return;
+    // Use the existing curve points and visibility; translating a caption
+    // must not decode a large time history or reset the legend selection.
+    auto data=std::make_shared<CalculationChartData>(*state_->data);data->captionLanguage=uiLanguage();
+    QMap<QString,int> duplicates,ordinals;
+    for(int i=0;i<series.size();++i){
+        auto& curve=data->curves[i];localizeCurve(curve,series[i].toObject(),data->method,i);++duplicates[curve.name];
+    }
+    for(int i=0;i<buttons_.size();++i){
+        const auto& c=data->curves.at(i);
+        buttons_[i]->setText(duplicates[c.name]>1?c.name+" · "+QString::number(++ordinals[c.name]):c.name);
+        buttons_[i]->setToolTip(c.name+"\n"+c.xTitle+" / "+c.yTitle);
+    }
+    state_->data=std::move(data);arrangeLegend();canvas_->invalidate();
 }
 void CalculationPlot::synchronize(){
     for(int i=0;i<buttons_.size();++i){QSignalBlocker guard(buttons_[i]);buttons_[i]->setChecked(state_&&state_->visible.value(i));buttons_[i]->setEnabled(bool(state_));}

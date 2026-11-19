@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/jiangshirong/FreeShip-26/releases/latest"><img src="https://img.shields.io/badge/Download-Windows%20x64-176c5c?style=for-the-badge" alt="Download for Windows x64"></a>
+  <a href="https://github.com/jiangshirong/FreeShip-26/releases/latest/download/FreeShip-26-Windows-x64-Setup.exe"><img src="https://img.shields.io/badge/Download-Windows%20x64-176c5c?style=for-the-badge" alt="Download for Windows x64"></a>
   <a href="COPYING"><img src="https://img.shields.io/badge/License-GPLv3%2B-183b36?style=for-the-badge" alt="License GPLv3+"></a>
   <img src="https://img.shields.io/badge/Qt%206%20%C2%B7%20C%2B%2B-183b36?style=for-the-badge" alt="Qt 6 and C++">
 </p>
@@ -110,7 +110,7 @@ For example, a **10 × 6 m** waterplane with a **6 × 2 m** moonpool should have
   <img src="docs/assets/readme/en/section-start.svg" width="100%" alt="03 Quick start. Install FreeShip, open a hull and start editing.">
 </p>
 
-**1 · Install FreeShip** &nbsp; Download and run the Windows 10/11 x64 installer from [Releases](https://github.com/jiangshirong/FreeShip-26/releases/latest). Once installed, the app can check for updates. The Linux port is in progress.
+**1 · Install FreeShip** &nbsp; Download and run the Windows 10/11 x64 installer from [Releases](https://github.com/jiangshirong/FreeShip-26/releases). Once installed, the app can check for updates. The Linux port is in progress.
 
 **2 · Open a hull** &nbsp; In the **File** menu, use **Open** to read FBM and FTM models. FTM models are saved as FBM. You can open a [sample hull](https://github.com/markmal/freeship-plus-in-lazarus/tree/master/Ships) from FREE!ship Plus, such as `FREE!ship demo 3+deck.fbm` used in the screenshots, or create a hull from its principal dimensions via **File → New Hull Form**.
 
@@ -153,5 +153,7 @@ For example, a **10 × 6 m** waterplane with a **6 × 2 m** moonpool should have
 FreeShip 26 builds on FREE!ship by Martijn van Engeland, FREE!ship Plus by Timoshenko V.F. and FREE!ship Plus in Lazarus by Mark Malakanov. Some geometry code draws on Greg Green’s [ShipCAD](https://github.com/gpgreen/ShipCAD). The original credits and license notices are preserved. See [NOTICE.md](NOTICE.md) for the provenance of each module.
 
 The project is released under the [GNU General Public License, version 3 or later](COPYING) (GPLv3+). The installer ships upstream external tools such as hship, CALCPROP, RVRSSHIP and ADD_MASS as supplied. These tools are separate from the project’s GPL source code. ADD_MASS is limited to educational and non-commercial use. See [external calculation tools](docs/CALCULATION-TOOLS.md).
+
+AI development contributors: [Claude Code](https://github.com/anthropics/claude-code) and [Codex](https://github.com/openai/codex).
 
 <p align="right"><a href="#top">Back to top ↑</a></p>

@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/jiangshirong/FreeShip-26/releases/latest"><img src="https://img.shields.io/badge/%E4%B8%8B%E8%BD%BD-Windows%20x64-176c5c?style=for-the-badge" alt="下载 Windows x64 版"></a>
+  <a href="https://github.com/jiangshirong/FreeShip-26/releases/latest/download/FreeShip-26-Windows-x64-Setup.exe"><img src="https://img.shields.io/badge/%E4%B8%8B%E8%BD%BD-Windows%20x64-176c5c?style=for-the-badge" alt="下载 Windows x64 版"></a>
   <a href="COPYING"><img src="https://img.shields.io/badge/%E8%AE%B8%E5%8F%AF%E8%AF%81-GPLv3%2B-183b36?style=for-the-badge" alt="许可证：GPLv3+"></a>
   <img src="https://img.shields.io/badge/Qt%206%20%C2%B7%20C%2B%2B-183b36?style=for-the-badge" alt="Qt 6 与 C++">
 </p>
@@ -110,7 +110,7 @@ FreeShip 26 是一款开源的船体设计软件。你用一张轻量的控制�
   <img src="docs/assets/readme/zh-CN/section-start.svg" width="100%" alt="03 快速开始：安装，打开一艘船，开始编辑">
 </p>
 
-**1 · 安装** &nbsp; 从 [Releases](https://github.com/jiangshirong/FreeShip-26/releases/latest) 下载 Windows 10/11 x64 安装包运行即可，安装后可以在软件内检查更新。Linux 版正在适配。
+**1 · 安装** &nbsp; 从 [Releases](https://github.com/jiangshirong/FreeShip-26/releases) 下载 Windows 10/11 x64 安装包运行即可，安装后可以在软件内检查更新。Linux 版正在适配。
 
 **2 · 打开一艘船** &nbsp; “文件 → 打开”可以读取 FBM 和 FTM 船模；FTM 会另存为 FBM。没有现成船模时，可以使用 FREE!ship Plus 随附的 [样例船](https://github.com/markmal/freeship-plus-in-lazarus/tree/master/Ships)（本页截图用的是 `FREE!ship demo 3+deck.fbm`），或用“文件 → 新建船型”按主尺度生成一个新船体。
 
@@ -153,5 +153,7 @@ FreeShip 26 是一款开源的船体设计软件。你用一张轻量的控制�
 FreeShip 26 建立在 FREE!ship（Martijn van Engeland）、FREE!ship Plus（Timoshenko V.F.）和 FREE!ship Plus in Lazarus（Mark Malakanov）的工作之上，部分几何代码参考了 Greg Green 的 [ShipCAD](https://github.com/gpgreen/ShipCAD)。原作者的署名和许可证声明全部保留，各模块的来源见 [NOTICE.md](NOTICE.md)。
 
 本项目以 [GNU 通用公共许可证第 3 版或更高版本](COPYING)（GPLv3+）发布。安装包附带的 hship、CALCPROP、RVRSSHIP、ADD_MASS 等外部计算程序来自上游，按原样分发，不属于 GPL 源码；其中 ADD_MASS 仅限教育和非商业用途。详见 [外部计算工具](docs/CALCULATION-TOOLS.md)。
+
+AI 开发贡献者：[Claude Code](https://github.com/anthropics/claude-code)、[Codex](https://github.com/openai/codex)。
 
 <p align="right"><a href="#top">回到顶部 ↑</a></p>

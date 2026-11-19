@@ -2,6 +2,12 @@
 #include "app/studio_ui.h"
 #include "app/calculation_input_status.h"
 #include "app/tutorial_dialog.h"
+#include "app/section_dialog.h"
+#include <QKeyEvent>
+#include <QMouseEvent>
+#include <QTabBar>
+#include <QTabWidget>
+#include <QTableWidget>
 #include <QApplication>
 #include <QDialog>
 #include <QFile>
@@ -88,6 +94,42 @@ int main(int argc,char** argv){
       QToolTip::isVisible()&&QToolTip::text()==marker->toolTip()&&!QToolTip::text().contains("0.43–0.84"));
   QEvent leave(QEvent::Leave);
   QApplication::sendEvent(marker,&leave);
+ }
+ {
+  QWidget owner;owner.show();
+  SectionDialog dialog(&owner);
+  auto* bar=dialog.findChild<QTabWidget*>()->tabBar();
+  auto* table=dialog.findChild<QTableWidget*>("SectionDefinitions");
+  const auto focus=[&](QWidget* w, Qt::FocusReason reason){
+   QApplication::setActiveWindow(&dialog);w->setFocus(reason);app.processEvents();
+  };
+  const auto tabImage=[&]{return bar->grab(bar->tabRect(bar->currentIndex())).toImage();};
+  dialog.show();app.processEvents();
+  const auto point=bar->tabRect(1).center();const auto global=bar->mapToGlobal(point);
+  QMouseEvent press(QEvent::MouseButtonPress,point,global,Qt::LeftButton,Qt::LeftButton,Qt::NoModifier);
+  QMouseEvent release(QEvent::MouseButtonRelease,point,global,Qt::LeftButton,Qt::NoButton,Qt::NoModifier);
+  focus(bar,Qt::MouseFocusReason);
+  QApplication::sendEvent(bar,&press);QApplication::sendEvent(bar,&release);app.processEvents();
+  check("section-mouse-can-select-tab",dialog.kind()==2&&bar->hasFocus());
+  const auto mouseFocus=tabImage();
+  focus(table,Qt::OtherFocusReason);
+  const auto withoutFocus=tabImage();
+  check("section-tab-mouse-focus-no-outline",!bar->hasFocus()&&mouseFocus==withoutFocus);
+  // Force the same cue state Qt enables after keyboard navigation, even
+  // when the isolated desktop's Windows cue preferences normally hide it.
+  dialog.setAttribute(Qt::WA_KeyboardFocusChange,true);
+  focus(bar,Qt::TabFocusReason);
+  const auto keyboardFocus=tabImage();
+  keyboardFocus.save(out+"/section-tab-focused.png");withoutFocus.save(out+"/section-tab-unfocused.png");
+  check("section-tab-keyboard-focus-no-outline",bar->hasFocus()&&keyboardFocus==withoutFocus);
+  QKeyEvent right(QEvent::KeyPress,Qt::Key_Right,Qt::NoModifier);
+  QApplication::sendEvent(bar,&right);app.processEvents();
+  check("section-keyboard-can-select-tab",dialog.kind()==3&&bar->hasFocus());
+  dialog.close();dialog.show();app.processEvents();
+  focus(table,Qt::OtherFocusReason);const auto reopenedWithoutFocus=tabImage();
+  dialog.setAttribute(Qt::WA_KeyboardFocusChange,true);
+  focus(bar,Qt::TabFocusReason);
+  check("section-tab-reopen-focus-no-outline",bar->hasFocus()&&tabImage()==reopenedWithoutFocus);
  }
  QWidget owner;owner.resize(1200,800);owner.show();
  showTutorialGuide(&owner);

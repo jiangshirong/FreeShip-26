@@ -15,6 +15,7 @@ class QPushButton;
 class QScrollArea;
 class QToolBar;
 class QTimer;
+void applyStudioToolTipPolicy();
 void applyStudioTheme();
 bool confirmStudioAction(QWidget* parent,const QString& title,const QString& question);
 void applyStudioScrollbars(QAbstractScrollArea* area);
@@ -59,6 +60,7 @@ protected:
 private:
     void layoutButtons();
     void watchMenuButton(QToolButton* button);
+    void setHoveredMenuButton(QToolButton* button);
     void queueHoverMenu(QToolButton* button);
     void showHoverMenu();
     void openButtonMenu(QToolButton* button);
@@ -69,7 +71,7 @@ private:
     QTimer* closeMenuTimer_;
     QPoint lastMenuPointer_;
     bool hasMenuPointer_=false,keepMenuRelease_=false;
-    QPointer<QToolButton> pendingMenuButton_,openMenuButton_;
+    QPointer<QToolButton> pendingMenuButton_,openMenuButton_,hoveredMenuButton_;
     QPointer<QMenu> openMenu_;
     int iconSize_=20;
     int startupLayoutWidth_=0;

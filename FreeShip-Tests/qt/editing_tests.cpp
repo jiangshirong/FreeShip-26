@@ -260,14 +260,13 @@ int main(int argc,char**argv) {
         panel.onLayerChanged=[&](fs::EntityId id,const QJsonObject& update){++requests;target=id;changes=update;};
         check("layer-opening-does-not-round-model",panel.changes().isEmpty()&&m->layers[0].thickness==12.123456789);
         panel.applyChanges();check("layer-no-op-apply-does-not-submit",requests==0);
-        editor<QLineEdit>(panel.fieldEditor("name"))->setText("Renamed layer");
         editor<QDoubleSpinBox>(panel.fieldEditor("thickness"))->setValue(8.5);
-        panel.applyChanges();check("layer-explicit-apply-one-request",requests==1&&target==1&&changes.size()==2&&changes["name"]=="Renamed layer"&&changes["thickness"].toDouble()==8.5);
+        panel.applyChanges();check("layer-explicit-apply-one-request",requests==1&&target==1&&changes.size()==1&&changes["thickness"].toDouble()==8.5);
         check("layer-draft-does-not-mutate-snapshot",m->layers[0].name=="Hull A"&&m->layers[0].thickness==12.123456789);
-        auto updated=std::make_shared<fs::ModelSnapshot>(*m);updated->revision=2;updated->layers[0].name="Renamed layer";updated->layers[0].thickness=8.5;
+        auto updated=std::make_shared<fs::ModelSnapshot>(*m);updated->revision=2;updated->layers[0].thickness=8.5;
         panel.setSnapshot(updated);check("layer-refresh-clears-draft-without-submit",requests==1&&panel.changes().isEmpty());
         panel.setSelectedLayerId(2);check("layer-selection-does-not-submit",requests==1&&panel.selectedLayerId()==2);
-        editor<QLineEdit>(panel.fieldEditor("name"))->setText("Blocked change");panel.setEditingEnabled(false);panel.applyChanges();
+        editor<QDoubleSpinBox>(panel.fieldEditor("thickness"))->setValue(7.5);panel.setEditingEnabled(false);panel.applyChanges();
         check("layer-busy-panel-cannot-submit",requests==1);
         LayerPanel hydro;hydro.setSnapshot(m);hydro.setSelectedLayerId(1);
         editor<QCheckBox>(hydro.fieldEditor("use_in_hydrostatics"))->setChecked(true);

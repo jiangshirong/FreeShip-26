@@ -54,12 +54,14 @@ public:
         :QWidget(tabs),tabs_(tabs),page_(page),pageLayout_(pageLayout),notice_(notice){
         setObjectName("AuxiliaryReportBar");auto* layout=new QVBoxLayout(this);layout->setContentsMargins(12,0,0,0);
         layout->addWidget(notice_);notice_->setMinimumWidth(0);
-        notice_->setSizePolicy(QSizePolicy::Ignored,QSizePolicy::Preferred);
-        tabs_->installEventFilter(this);notice_->installEventFilter(this);
+        auto policy=notice_->sizePolicy();policy.setHorizontalPolicy(QSizePolicy::Ignored);notice_->setSizePolicy(policy);
+        auto barPolicy=sizePolicy();barPolicy.setHeightForWidth(true);setSizePolicy(barPolicy);
+        tabs_->installEventFilter(this);notice_->installEventFilter(this);installEventFilter(this);
         connect(tabs_,&QTabWidget::currentChanged,this,[this]{queue();});hide();queue();
     }
 protected:
-    QSize sizeHint()const override{return {preferredWidth_,notice_->heightForWidth(std::max(1,preferredWidth_-12))};}
+    int heightForWidth(int width)const override{return std::max(notice_->minimumHeight(),notice_->heightForWidth(std::max(1,width-12)));}
+    QSize sizeHint()const override{return {preferredWidth_,heightForWidth(preferredWidth_)};}
     QSize minimumSizeHint()const override{return {0,notice_->fontMetrics().height()+20};}
     bool eventFilter(QObject*,QEvent* event)override{
         if(event->type()==QEvent::Resize||event->type()==QEvent::LayoutRequest||event->type()==QEvent::Show||event->type()==QEvent::Hide)queue();
@@ -70,16 +72,21 @@ private:
     void arrange(){
         if(tabs_->currentWidget()!=page_||notice_->text().isEmpty()){hide();return;}
         const int room=tabs_->width()-tabs_->tabBar()->sizeHint().width()-16;
-        const bool inHeader=room>=270;
         const auto oldHint=sizeHint();const bool wasVisible=isVisible();
+        const int headerWidth=std::min(560,room);
+        const int singleLineHeight=std::max(40,notice_->fontMetrics().height()+22);
+        const bool inHeader=room>=270&&heightForWidth(headerWidth)<=std::max(singleLineHeight,tabs_->tabBar()->sizeHint().height());
         if(inHeader){
-            pageLayout_->removeWidget(this);preferredWidth_=std::min(560,room);setMinimumWidth(0);setMaximumWidth(preferredWidth_);
+            pageLayout_->removeWidget(this);preferredWidth_=headerWidth;setMinimumWidth(0);setMaximumWidth(preferredWidth_);
             if(tabs_->cornerWidget(Qt::TopRightCorner)!=this)tabs_->setCornerWidget(this,Qt::TopRightCorner);
         }else{
             if(tabs_->cornerWidget(Qt::TopRightCorner)==this)tabs_->setCornerWidget(nullptr,Qt::TopRightCorner);
             setMinimumWidth(0);setMaximumWidth(QWIDGETSIZE_MAX);
             if(pageLayout_->indexOf(this)<0)pageLayout_->insertWidget(0,this);
         }
+        const auto margins=pageLayout_->contentsMargins();
+        const int available=inHeader?headerWidth:page_->contentsRect().width()-margins.left()-margins.right();
+        setMinimumHeight(heightForWidth(available));
         setProperty("studio_warning_layout",inHeader?"tab-row":"wrapped");show();
         if(oldHint!=sizeHint()||!wasVisible)updateGeometry();
     }
@@ -272,7 +279,8 @@ HydroDialog::HydroDialog(ModelSession& session,const QString& mode,const QJsonOb
     :QDialog(parent),session_(session),mode_(mode){
     setStudioWindowIcon(this,"Hydrostatics");
     setAttribute(Qt::WA_DontShowOnScreen,hidden);setProperty("hydro_dialog",mode);resize(1180,760);
-    setWindowTitle(mode=="single"?uiText("设计静水力"):mode=="table"?uiText("静水力吃水表"):uiText("稳性曲线与平衡"));
+    const QString titleSource=mode=="single"?"设计静水力":mode=="table"?"静水力吃水表":"稳性曲线与平衡";
+    setProperty("calculation_title_source",titleSource);setWindowTitle(uiText(titleSource));
     auto* layout=new QVBoxLayout(this);auto* splitter=new QSplitter;layout->addWidget(splitter,1);
     auto* parameters=new QWidget;auto* left=new QVBoxLayout(parameters);auto* form=new QFormLayout;left->addLayout(form);
     form->setVerticalSpacing(14);form->setHorizontalSpacing(16);form->setFieldGrowthPolicy(QFormLayout::AllNonFixedFieldsGrow);
@@ -393,7 +401,8 @@ HydroDialog::HydroDialog(ModelSession& session,const QString& mode,const QJsonOb
     auto* footer=new QHBoxLayout;layout->addLayout(footer);
     for(const auto& format:{QString("csv"),QString("txt"),QString("json"),QString("pdf")}){
         auto* b=new QPushButton;
-        setStudioFormatButton(b,format,uiText("导出 ")+format.toUpper());
+        const auto refreshFormat=[b,format]{setStudioFormatButton(b,format,uiText("导出 ")+format.toUpper());};
+        refreshFormat();bindUiRefresh(b,refreshFormat);
         b->setProperty("hydro_export",format);exports_.append(b);footer->addWidget(b);
         connect(b,&QPushButton::clicked,this,[this,format]{const auto path=QFileDialog::getSaveFileName(this,uiText("保存计算报告"),preferenceFileLocation("export"),format.toUpper()+" (*."+format+")");if(path.isEmpty())return;
             const auto error=exportReport(path,format);

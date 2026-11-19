@@ -172,26 +172,26 @@ void MainWindow::modelingDialog(const QString& op,const QJsonObject& initial){
     auto integer=[&](QString key,QString label,int value,int low,int high){auto* w=new QSpinBox;w->setRange(low,high);w->setValue(initial.value(key).toInt(value));w->setProperty("field",key);fields[key]=w;form->addRow(label,w);};
     auto text=[&](QString key,QString label,QString value){auto* w=new QLineEdit(initial.value(key).toString(value));w->setMaxLength(4096);w->setProperty("field",key);fields[key]=w;form->addRow(label,w);};
     auto check=[&](QString key,QString label,bool value){auto* w=new QCheckBox(label);w->setChecked(initial.value(key).toBool(value));w->setProperty("field",key);fields[key]=w;form->addRow(w);};
-    auto combo=[&](QString key,QString label,QStringList choices,int selected=0){auto* w=new QComboBox;w->addItems(choices);w->setCurrentIndex(selected);w->setProperty("field",key);fields[key]=w;form->addRow(label,w);return w;};
-    auto layer=[&](QString key,QString label){auto* w=combo(key,label,{});for(const auto& l:m->layers)w->addItem(l.name,double(l.id));int i=w->findData(double(layers_->selectedLayerId()));if(i>=0)w->setCurrentIndex(i);};
+    auto combo=[&](QString key,QString label,QStringList choices,int selected=0){auto* w=new QComboBox;addUiItems(w,choices);w->setCurrentIndex(selected);w->setProperty("field",key);fields[key]=w;form->addRow(label,w);return w;};
+    auto layer=[&](QString key,QString label){auto* w=combo(key,label,{});for(const auto& l:m->layers)w->addItem(layerDisplayName(l),double(l.id));int i=w->findData(double(layers_->selectedLayerId()));if(i>=0)w->setCurrentIndex(i);};
     auto vector=[&](QString key,QString label,fs::Vec3 v={}){num(key+"_x",label+" X",v.x);num(key+"_y",label+" Y",v.y);num(key+"_z",label+" Z",v.z);};
     QJsonObject request;QListWidget* layerList=nullptr;
     if(op=="new"){
         num("length",uiText("船长"),20,0.001);num("beam",uiText("船宽"),5,0.001);num("draft",uiText("设计吃水"),2,0.001);
-        integer("columns",uiText("纵向控制点数"),7,2,100);integer("rows",uiText("横向控制点数"),5,2,100);combo("units",uiText("单位"),{uiText("米"),uiText("英尺")});
+        integer("columns",uiText("纵向控制点数"),7,2,100);integer("rows",uiText("横向控制点数"),5,2,100);combo("units",uiText("单位"),{"米","英尺"});
     }else if(op=="grid_panel"){
         vector("origin",uiText("起点"));num("size_a",uiText("第一方向尺寸"),1,0.000001);num("size_b",uiText("第二方向尺寸"),1,0.000001);
-        integer("columns",uiText("第一方向点数"),4,2,100);integer("rows",uiText("第二方向点数"),4,2,100);combo("plane",uiText("平面"),{uiText("水平面 XY"),uiText("纵向面 XZ"),uiText("横向面 YZ")});layer("layer_id",uiText("图层"));
+        integer("columns",uiText("第一方向点数"),4,2,100);integer("rows",uiText("第二方向点数"),4,2,100);combo("plane",uiText("平面"),{"水平面 XY","纵向面 XZ","横向面 YZ"});layer("layer_id",uiText("图层"));
     }else if(op=="cylinder"){
         vector("origin",uiText("轴起点"));vector("end",uiText("轴终点"),{0,1,0});num("radius",uiText("半径"),1,0.000001);integer("segments",uiText("圆周控制点数"),12,4,128);
         check("close_start",uiText("封闭起端"),false);check("close_end",uiText("封闭末端"),false);layer("layer_id",uiText("图层"));
     }else if(op=="insert_plane"){
-        combo("axis",uiText("平面"),{uiText("横剖面 X"),uiText("纵剖面 Y"),uiText("水平面 Z")});num("distance",uiText("坐标"),0);check("create_curve",uiText("生成控制曲线"),true);
+        combo("axis",uiText("平面"),{"横剖面 X","纵剖面 Y","水平面 Z"});num("distance",uiText("坐标"),0);check("create_curve",uiText("生成控制曲线"),true);
     }else if(op=="intersect_layers"){
         layer("layer_id",uiText("插入控制点的图层"));layer("other_layer_id",uiText("用于求交的图层"));
     }else if(op=="point_properties"){
         if(selection_.size()!=1)return;const auto* p=m->point(*selection_.begin());request["ids"]=array(selection_);
-        text("name",uiText("名称"),p->name);combo("vertex_type",uiText("点类型"),{uiText("普通点"),uiText("折痕点"),uiText("尖点"),uiText("角点")},p->vertexType);
+        text("name",uiText("名称"),p->name);combo("vertex_type",uiText("点类型"),{"普通点","折痕点","尖点","角点"},p->vertexType);
         if(p->anchor||p->lineA)note(p->anchor?uiText("该点有锚点约束。"):uiText("该点有直线约束。"));
     }else if(op=="rename_control"){
         request["ids"]=array(entitySelection_);QString name;for(const auto& c:m->controlCurves)if(entitySelection_.contains(c.id))name=c.name;text("name",uiText("名称"),name);
@@ -209,7 +209,7 @@ void MainWindow::modelingDialog(const QString& op,const QJsonObject& initial){
         note(QString(uiText("当前排水量 %1，浮心纵坐标 %2，棱形系数 %3。")).arg(initial["displacement"].toDouble()).arg(initial["lcb"].toDouble()).arg(initial["cp"].toDouble()));
         num("displacement",m->units=="metric"?uiText("目标排水量 (t)"):uiText("目标排水量 (long ton)"),initial["displacement"].toDouble(),0.000001);
         num("lcb",uiText("目标浮心纵坐标"),initial["lcb"].toDouble());integer("iterations",uiText("最大迭代次数"),30,1,100);
-        layerList=new QListWidget;layerList->setProperty("field","layer_ids");for(const auto& l:m->layers){auto* item=new QListWidgetItem(l.name,layerList);item->setData(Qt::UserRole,double(l.id));item->setCheckState(l.visible?Qt::Checked:Qt::Unchecked);}form->addRow(uiText("参与变换的图层"),layerList);
+        layerList=new QListWidget;layerList->setProperty("field","layer_ids");for(const auto& l:m->layers){auto* item=new QListWidgetItem(layerDisplayName(l),layerList);item->setData(Qt::UserRole,double(l.id));item->setCheckState(l.visible?Qt::Checked:Qt::Unchecked);}form->addRow(uiText("参与变换的图层"),layerList);
     }else if(op=="remove_unused")note(uiText("删除所有不属于任何面的控制点，包括独立控制线上的点。"));
     else if(op=="delete_negative")note(uiText("删除全部顶点位于 Y ≤ 0 一侧的面，包括中心面，以及负舷未被面使用的点。跨过中心面的面保持完整。"));
     else if(op=="delete_markers")note(uiText("删除模型中的全部参考曲线。"));

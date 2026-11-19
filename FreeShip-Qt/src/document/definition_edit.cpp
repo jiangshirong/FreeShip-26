@@ -169,18 +169,28 @@ LayerPlan planLayers(const Fbm &source,const QJsonObject &bindings,const QJsonOb
     } else if (request["operation"]=="create") {
         if (plan.high>=2000000 || plan.last==std::numeric_limits<int>::max()) bad("Layer ID budget exhausted");
         Layer l;l.fields=defaultFields();l.stable=++plan.high;
+        if(request.contains("requested_new_id")&&integer(request["requested_new_id"],1,2000000)!=l.stable)bad("New layer identity changed before creation");
         l.name=encodeFbmText({},bindings["fbm_encoding"].toString());
         patchInt(l.fields,0,++plan.last);
         patchInt(l.fields,4,integer(bindings["default_layer_color"],std::numeric_limits<int>::min(),std::numeric_limits<int>::max()));
         patchLayer(l,changes(),bindings);plan.minimum=std::max(plan.minimum,layerVersion(l));
         plan.active=int(plan.layers.size());plan.layers.push_back(l);plan.changed=true;
     } else if (request["operation"]=="move") {
-        const int from=findLayer(),direction=integer(request["direction"],-1,1);
-        if(direction==0)bad("Layer move requires a direction");
-        const int to=from+direction;
-        if(to>=0 && to<int(plan.layers.size())){
-            std::swap(plan.layers[size_t(from)],plan.layers[size_t(to)]);
-            if(plan.active==from)plan.active=to;else if(plan.active==to)plan.active=from;
+        const int from=findLayer(),count=int(plan.layers.size());
+        int to;
+        if(request.contains("index"))to=integer(request["index"],0,count-1);
+        else {
+            const int direction=integer(request["direction"],-1,1);
+            if(direction==0)bad("Layer move requires a direction");
+            to=from+direction;
+        }
+        if(to>=0 && to<count && to!=from){
+            const int activeId=plan.active>=0&&plan.active<count?plan.layers[size_t(plan.active)].stable:0;
+            auto begin=plan.layers.begin();
+            if(from<to)std::rotate(begin+from,begin+from+1,begin+to+1);
+            else std::rotate(begin+to,begin+from,begin+from+1);
+            const auto active=std::find_if(begin,plan.layers.end(),[activeId](const Layer& l){return l.stable==activeId;});
+            plan.active=active==plan.layers.end()?-1:int(active-begin);
             plan.changed=true;
         }
     } else if (request["operation"]=="delete") erase(findLayer());
@@ -205,6 +215,12 @@ TopologyEdit writeLayers(const Fbm &source,LayerPlan plan) {
         if (l.original>=0) remap[size_t(l.original)]=int(i);
     }
     putInt(bytes,plan.active);
+    // Appending an empty layer, changing visibility, and removing trailing empty
+    // layers leave every surviving face index unchanged. Only rewrite face
+    // records when an existing layer actually moves to a different index.
+    std::map<QString,QByteArray> blocks{{"layers",bytes}};
+    bool moved=false;for(size_t i=0;i<remap.size();++i)if(remap[i]>=0&&remap[i]!=int(i)){moved=true;break;}
+    if(moved){
     Reader faces{source.blockBytes("control_faces")};const int count=faces.int32();
     for (int i=0;i<count;++i) {
         const int n=faces.int32();faces.take(qsizetype(n)*4);const auto at=faces.at;const int old=faces.int32();
@@ -212,10 +228,12 @@ TopologyEdit writeLayers(const Fbm &source,LayerPlan plan) {
         if (old>=0 && old!=remap[size_t(index)]) patchInt(faces.data,at,remap[size_t(index)]);
         faces.take(1);
     }
-    faces.end();plan.bindings["layers"]=ids;plan.bindings["layer_faces"]=orders;
+    faces.end();blocks.emplace("control_faces",std::move(faces.data));
+    }
+    plan.bindings["layers"]=ids;plan.bindings["layer_faces"]=orders;
     plan.bindings["last_used_layer_id"]=plan.last;auto high=plan.bindings["high_water"].toObject();
     high["layers"]=plan.high;plan.bindings["high_water"]=high;
-    return {source.withBlocks({{"layers",bytes},{"control_faces",faces.data}},true),plan.bindings,true};
+    return {source.withBlocks(blocks,true),plan.bindings,true};
 }
 
 constexpr std::array<const char *,4> SectionBlocks{"stations","buttocks","waterlines","diagonals"};

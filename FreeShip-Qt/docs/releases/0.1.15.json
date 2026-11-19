@@ -1,0 +1,114 @@
+{
+  "zh": {
+    "bug_fixes": [
+      "修复在“剖面线”窗口多按一次 Ctrl+Z 后，按钮长时间变灰、甚至误撤销其他模型编辑的问题。现在撤销到最后一条剖面线操作就会停止。",
+      "修复模型编辑尚未完成时，点击关闭无法立即确认退出的问题。确认后主窗口立即收起，不再弹出额外的退出进度窗；若保存失败，会恢复编辑窗口并保留修改。",
+      "修复四视图和静水力附加表中的长提示被截断的问题，较长的文件路径也能完整查看。"
+    ],
+    "improvements": [
+      "拖动四视图中央分隔点，或隐藏横剖面、纵剖面视图时，画面切换更流畅。",
+      "删除、撤销和重做剖面线时，列表立即更新，连续操作无需逐次等待船体视图重绘。",
+      "新建图层、切换图层可见性时，列表和四视图响应更快。“删除空图层”可直接执行，无需再次确认。",
+      "Windows 直装包缩小约 23%，安装只需下载一个 .exe 文件。"
+    ],
+    "features": [
+      "支持在“图层属性”列表中双击图层名称，直接重命名。"
+    ]
+  },
+  "en": {
+    "bug_fixes": [
+      "In the Intersections window, pressing Ctrl+Z after the last intersection edit no longer leaves buttons disabled or undoes unrelated model edits.",
+      "You can now confirm exit while a model edit is still being processed. The main window closes immediately without a second progress dialog. If saving fails, the editor reopens with your changes intact.",
+      "Long messages and file paths are no longer cut off in the four views or the supplementary hydrostatics tables."
+    ],
+    "improvements": [
+      "Dragging the center divider or hiding the body plan or profile view is smoother.",
+      "The intersection list updates immediately after deletion, undo or redo. You can keep editing without waiting for the hull views to redraw.",
+      "Creating layers and toggling their visibility updates the list and views faster. Removing empty layers no longer requires a second confirmation.",
+      "The Windows installer is about 23% smaller. A single .exe is all you need to install it."
+    ],
+    "features": [
+      "Double-click a layer name in Layer Properties to rename it in place."
+    ]
+  },
+  "de": {
+    "bug_fixes": [
+      "Im Fenster für Schnittlinien lässt sich mit Strg+Z nur bis zur letzten Schnittlinienänderung zurückgehen. Ein weiterer Tastendruck deaktiviert die Schaltflächen nicht mehr und nimmt keine anderen Modelländerungen zurück.",
+      "Das Beenden lässt sich jetzt auch während einer laufenden Modelländerung bestätigen. Das Hauptfenster schließt sich sofort, ohne zusätzliches Fortschrittsfenster. Schlägt das Speichern fehl, öffnet sich der Editor mit allen Änderungen erneut.",
+      "Lange Meldungen und Dateipfade in der Vierfachansicht und den hydrostatischen Zusatztabellen werden nicht mehr abgeschnitten."
+    ],
+    "improvements": [
+      "Das Verschieben des zentralen Teilers und das Ausblenden des Spantenrisses oder der Seitenansicht laufen flüssiger.",
+      "Nach Löschen, Rückgängig oder Wiederholen wird die Schnittlinienliste sofort aktualisiert. Weitere Eingaben sind schon möglich, bevor die Rumpfansichten neu gezeichnet sind.",
+      "Beim Anlegen und Ein- oder Ausblenden von Ebenen reagieren Liste und Ansichten schneller. Leere Ebenen lassen sich ohne zusätzliche Bestätigung löschen.",
+      "Das Windows-Installationspaket ist etwa 23 % kleiner. Für die Installation genügt eine .exe-Datei."
+    ],
+    "features": [
+      "Ebenen lassen sich in den Ebeneneigenschaften per Doppelklick auf den Namen direkt umbenennen."
+    ]
+  },
+  "es": {
+    "bug_fixes": [
+      "En la ventana de intersecciones, pulsar Ctrl+Z después de deshacer la última edición de una línea ya no desactiva los botones ni deshace cambios ajenos a esas líneas.",
+      "Ahora se puede confirmar la salida mientras se procesa un cambio en el modelo. La ventana principal se cierra de inmediato, sin otro cuadro de progreso. Si falla el guardado, el editor vuelve a abrirse con los cambios intactos.",
+      "Los mensajes largos y las rutas de archivo ya no se cortan en las cuatro vistas ni en las tablas hidrostáticas complementarias."
+    ],
+    "improvements": [
+      "El movimiento es más fluido al arrastrar el divisor central o al ocultar la vista de secciones transversales o la de perfil.",
+      "La lista de intersecciones se actualiza en cuanto se elimina, deshace o rehace una línea. Puede seguir editando sin esperar al redibujado del casco.",
+      "La lista y las vistas responden más rápido al crear capas o cambiar su visibilidad. Eliminar capas vacías ya no requiere una segunda confirmación.",
+      "El instalador de Windows es aproximadamente un 23 % más pequeño. Solo hay que descargar un archivo .exe."
+    ],
+    "features": [
+      "Haga doble clic en el nombre de una capa en Propiedades de capa para cambiarlo directamente en la lista."
+    ]
+  },
+  "fr": {
+    "bug_fixes": [
+      "Dans la fenêtre des intersections, un Ctrl+Z supplémentaire après la dernière annulation ne grise plus les boutons et n’annule plus d’autres modifications du modèle.",
+      "Vous pouvez confirmer la fermeture pendant le traitement d’une modification. La fenêtre principale se ferme aussitôt, sans seconde fenêtre de progression. En cas d’échec de l’enregistrement, l’éditeur se rouvre avec vos modifications intactes.",
+      "Les messages longs et les chemins de fichiers ne sont plus tronqués dans les quatre vues ni dans les tableaux hydrostatiques complémentaires."
+    ],
+    "improvements": [
+      "Le déplacement du séparateur central et le masquage de la vue des couples ou de la vue de profil sont plus fluides.",
+      "La liste des intersections se met à jour dès la suppression, l’annulation ou le rétablissement d’une ligne, sans attendre le nouveau tracé de la coque pour poursuivre.",
+      "La liste et les vues réagissent plus vite à la création d’un calque et au changement de visibilité. La suppression des calques vides ne demande plus de seconde confirmation.",
+      "Le programme d’installation Windows est environ 23 % plus petit. Un seul fichier .exe suffit à l’installation."
+    ],
+    "features": [
+      "Dans les propriétés des calques, double-cliquez sur le nom d’un calque pour le renommer directement dans la liste."
+    ]
+  },
+  "ja": {
+    "bug_fixes": [
+      "交線のウィンドウで交線の編集をすべて取り消した後、さらに Ctrl+Z を押しても、ボタンが無効になったり、無関係なモデル編集が取り消されたりしなくなりました。",
+      "モデルの変更を処理中でも終了を確認できます。確定後はメインウィンドウがすぐに閉じ、終了の進行状況を示す別ウィンドウは表示されません。保存に失敗した場合は変更を保持したまま編集画面に戻ります。",
+      "4 分割ビューと静水力計算の補足表で、長いメッセージやファイルパスが途中で切れずに表示されます。"
+    ],
+    "improvements": [
+      "4 分割ビュー中央の仕切りをドラッグしたときや、正面線図・側面図を非表示にしたときの動きが滑らかになりました。",
+      "交線の削除、取り消し、やり直しがすぐに一覧に反映され、船体の再描画を待たずに次の操作に進めます。",
+      "レイヤーの作成や表示切り替えに一覧と各ビューが素早く反応します。空のレイヤーは追加の確認なしで削除できます。",
+      "Windows インストーラーのサイズを約 23% 削減しました。インストールに必要なのは .exe ファイル 1 つです。"
+    ],
+    "features": [
+      "レイヤーのプロパティ一覧で名前をダブルクリックすると、その場で変更できます。"
+    ]
+  },
+  "ru": {
+    "bug_fixes": [
+      "В окне линий пересечения лишнее нажатие Ctrl+Z после отмены последней правки больше не блокирует кнопки и не отменяет посторонние изменения модели.",
+      "Теперь выход можно подтвердить, даже пока обрабатывается правка модели. Главное окно сразу закрывается без дополнительного индикатора. Если сохранить файл не удастся, редактор откроется снова со всеми изменениями.",
+      "Длинные сообщения и пути к файлам больше не обрезаются в четырёх видах и дополнительных гидростатических таблицах."
+    ],
+    "improvements": [
+      "Перетаскивание центрального разделителя и скрытие проекций «Корпус» или «Бок» стали плавнее.",
+      "Список линий пересечения обновляется сразу после удаления, отмены или повтора. Следующую правку можно внести, не дожидаясь перерисовки корпуса.",
+      "Список слоёв и виды быстрее реагируют на создание слоя и переключение его видимости. Пустые слои удаляются без повторного подтверждения.",
+      "Установщик Windows стал примерно на 23 % меньше. Для установки достаточно одного файла .exe."
+    ],
+    "features": [
+      "В свойствах слоёв дважды щёлкните по имени слоя, чтобы переименовать его прямо в списке."
+    ]
+  }
+}

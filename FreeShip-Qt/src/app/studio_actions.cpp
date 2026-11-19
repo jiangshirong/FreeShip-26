@@ -75,7 +75,7 @@ fs::EntityId chooseLayer(const fs::ModelSnapshot& model,QWidget* parent,const QS
     QDialog dialog(parent);setStudioWindowIcon(&dialog,"Layers");dialog.setWindowTitle(title);
     dialog.setAttribute(Qt::WA_DontShowOnScreen,hidden);
     auto* layout=new QVBoxLayout(&dialog);auto* field=new QComboBox;
-    for(const auto& layer:model.layers)field->addItem(layer.name,QVariant::fromValue(layer.id));
+    for(const auto& layer:model.layers)field->addItem(layerDisplayName(layer),QVariant::fromValue(layer.id));
     layout->addWidget(field);auto* buttons=new QDialogButtonBox(QDialogButtonBox::Ok|QDialogButtonBox::Cancel);
     QObject::connect(buttons,&QDialogButtonBox::accepted,&dialog,&QDialog::accept);
     QObject::connect(buttons,&QDialogButtonBox::rejected,&dialog,&QDialog::reject);layout->addWidget(buttons);
@@ -159,7 +159,7 @@ void MainWindow::buildStudioShell() {
         auto* a=new QAction(studioIcon(icon),text,this);a->setObjectName("Studio"+icon);
         if(!operation.isEmpty())a->setProperty("operation",operation);
         static const QSet<QString> windows{"add_point","add_face","assign_layer","delete","layer_properties",
-            "create_layer","delete_layer","delete_empty_layers","translate","scale","rotate","extrude","mirror",
+            "translate","scale","rotate","extrude","mirror",
             "model_check","develop_plates","sections","lines_window","shortcut_guide","tutorial"};
         if(windows.contains(operation)||operation.startsWith("hydro_")||operation.startsWith("performance_"))
             a->setProperty("studio_opens_dialog",true);
@@ -225,15 +225,6 @@ void MainWindow::buildStudioShell() {
     layerProperties_=action(uiText("图层属性"),"Layers","layer_properties");layerMenu->addAction(layerProperties_);
     layerProperties_->setProperty("studio_opens_dialog",true);
     connect(layerProperties_,&QAction::triggered,this,&MainWindow::openLayers);
-    newLayer_=action(uiText("新建图层…"),"NewLayer","create_layer");
-    deleteLayer_=action(uiText("删除所选空图层…"),"DeleteSelected","delete_layer");
-    emptyLayers_=action(uiText("清理空图层…"),"DeleteEmptyLayers","delete_empty_layers");
-    connect(newLayer_,&QAction::triggered,this,&MainWindow::createLayer);
-    connect(deleteLayer_,&QAction::triggered,this,[this]{deleteLayer(false);});
-    connect(emptyLayers_,&QAction::triggered,this,[this]{deleteLayer(true);});
-    layerUp_=action(uiText("上移"),"MoveUp","layer_up");layerDown_=action(uiText("下移"),"MoveDown","layer_down");
-    for(auto* a:{layerUp_,layerDown_})connect(a,&QAction::triggered,this,[this,a]{session_.manageLayers("move",{{"layer_id",double(layers_->selectedLayerId())},{"direction",a==layerUp_?-1:1}});});
-    layers_->setManagementActions({newLayer_,deleteLayer_,emptyLayers_,layerUp_,layerDown_});
     auto* sides=action(uiText("双舷显示"),"BothSides","both_sides");bindDisplayToggle(sides);visibilityMenu->addAction(sides);
     auto* curvature=action(uiText("曲率梳"),"Curvature","show_curvature");bindDisplayToggle(curvature);
     auto* normals=action(uiText("法向"),"Normals","show_normals");bindDisplayToggle(normals);
@@ -365,6 +356,8 @@ void MainWindow::editSections(){
         sections_=new SectionDialog(this);sections_->setAttribute(Qt::WA_DontShowOnScreen,workflow_);
         bindHistoryShortcut(sections_,undo_,QKeySequence(Qt::CTRL | Qt::Key_Z));
         bindHistoryShortcut(sections_,redo_,QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_Z));
+        sections_->onPreviewHistory=[this](bool redo){return session_.sectionPreviewHistory(redo);};
+        sections_->onPredictionMismatch=[this]{session_.dropQueuedSectionCommands();};
         sections_->onEdit=[this](const QString& operation,int kind,QJsonObject fields){return session_.editSections(operation,kind,std::move(fields));};
         sections_->onSelection=[this](int kind,QSet<int> ids){for(auto* view:views_)view->highlightSections(kind,ids);};
         connect(sections_,&QDialog::finished,this,[this]{for(auto* view:views_)view->highlightSections(0,{});});
@@ -372,35 +365,16 @@ void MainWindow::editSections(){
     sections_->setSnapshot(session_.model());sections_->setEditingEnabled(!session_.busy()||session_.canQueueSectionEdits());sections_->show();sections_->raise();
 }
 void MainWindow::openLayers(){
-    if(!session_.ready()||session_.busy())return;
+    if(!session_.ready())return;
     layerDialog_->setAttribute(Qt::WA_DontShowOnScreen,workflow_);layerDialog_->show();layerDialog_->raise();layerDialog_->activateWindow();
 }
 void MainWindow::createLayer(){
-    if(!session_.ready()||session_.busy())return;
-    QDialog dialog(this);setStudioWindowIcon(&dialog,"NewLayer");dialog.setWindowTitle(uiText("新建图层"));dialog.setAttribute(Qt::WA_DontShowOnScreen,workflow_);
-    auto* layout=new QVBoxLayout(&dialog);auto* form=new QFormLayout;auto* name=new QLineEdit("Layer "+QString::number(session_.model()->layers.size()+1));
-    name->selectAll();form->addRow(uiText("名称"),name);layout->addLayout(form);
-    auto* buttons=new QDialogButtonBox(QDialogButtonBox::Ok|QDialogButtonBox::Cancel);layout->addWidget(buttons);
-    buttons->button(QDialogButtonBox::Ok)->setText(uiText("确定"));buttons->button(QDialogButtonBox::Cancel)->setText(uiText("取消"));
-    connect(buttons,&QDialogButtonBox::accepted,&dialog,&QDialog::accept);connect(buttons,&QDialogButtonBox::rejected,&dialog,&QDialog::reject);
-    if(dialog.exec()==QDialog::Accepted){
-        openLayers();
-        for(const auto& layer:session_.model()->layers)pendingNewLayerAfter_=std::max(pendingNewLayerAfter_,layer.id);
-        if(!session_.manageLayers("create",{{"changes",QJsonObject{{"name",name->text()}}}}))pendingNewLayerAfter_=0;
-    }
+    if(session_.ready())layers_->previewCreate();
 }
-void MainWindow::deleteLayer(bool allEmpty){
-    if(!session_.ready()||session_.busy())return;
-    auto id=layers_->selectedLayerId();if(!allEmpty&&!id)return;
-    if(!allEmpty&&std::any_of(session_.model()->faces.begin(),session_.model()->faces.end(),[id](const auto& face){return face.layer==id;})){
-        showError(uiText("这个图层中还有面，请先将面移至其他图层。"));return;
-    }
-    QDialog dialog(this);setStudioWindowIcon(&dialog,"DeleteEmptyLayers");dialog.setWindowTitle(uiText("删除空图层"));dialog.setAttribute(Qt::WA_DontShowOnScreen,workflow_);
-    auto* layout=new QVBoxLayout(&dialog);layout->addWidget(new StudioMessage(StudioMessageRole::Warning,allEmpty?uiText("清理全部空图层？至少保留一个图层。"):uiText("删除所选空图层？")));
-    auto* buttons=new QDialogButtonBox(QDialogButtonBox::Yes|QDialogButtonBox::No);buttons->button(QDialogButtonBox::No)->setDefault(true);buttons->button(QDialogButtonBox::Yes)->setAutoDefault(false);layout->addWidget(buttons);
-    buttons->button(QDialogButtonBox::Yes)->setText(uiText("确认"));buttons->button(QDialogButtonBox::No)->setText(uiText("取消"));
-    connect(buttons,&QDialogButtonBox::accepted,&dialog,&QDialog::accept);connect(buttons,&QDialogButtonBox::rejected,&dialog,&QDialog::reject);
-    if(dialog.exec()==QDialog::Accepted)session_.manageLayers(allEmpty?"delete_empty":"delete",{{"layer_id",double(id)}});
+void MainWindow::deleteLayer(fs::EntityId id){
+    if(!session_.ready()||!layers_->canDelete(id))return;
+    layers_->setSelectedLayerId(id);
+    layers_->previewDelete(id);
 }
 void MainWindow::setSelectionKind(HullEntity kind) {
     endFlowline();endPointPlacement();

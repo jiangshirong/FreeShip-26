@@ -252,7 +252,8 @@ PreferencesDialog::PreferencesDialog(QJsonObject values,QWidget* parent,const QS
         auto* row=new QHBoxLayout;
         auto* edit=new QLineEdit(draft_.value("directories").toObject()[key].toString());
         const auto fallback=key=="temporary"?QDir::tempPath():key=="solver"?solverDefault:defaultFileDirectory();
-        edit->setPlaceholderText(fallback.isEmpty()?uiText("未配置目录"):QDir::toNativeSeparators(fallback));
+        if(fallback.isEmpty())bindUiText(edit,"placeholderText","未配置目录");
+        else edit->setPlaceholderText(QDir::toNativeSeparators(fallback));
         const auto refreshTip=[edit,fallback]{edit->setToolTip(edit->text().isEmpty()?QDir::toNativeSeparators(fallback):edit->text());};
         refreshTip();connect(edit,&QLineEdit::textChanged,this,refreshTip);
         edit->setProperty("preference_field","directories."+key);
@@ -309,7 +310,7 @@ void PreferencesDialog::buildGraphics(){
     const auto effective=effectivePreferences(draft_),graphic=effective.value("graphic").toObject();
     const int current=tabs_->currentIndex();if(graphics_){tabs_->removeTab(tabs_->indexOf(graphics_));graphics_->setParent(nullptr);graphics_->deleteLater();}
     auto* scroll=new QScrollArea;scroll->setFrameShape(QFrame::NoFrame);scroll->setWidgetResizable(true);graphics_=scroll;auto* panel=new QWidget;auto* form=new QFormLayout(panel);form->setSpacing(10);form->setRowWrapPolicy(QFormLayout::WrapLongRows);scroll->setWidget(panel);
-    auto* theme=new QComboBox;theme->addItem(draft_.value("graphic").toObject().isEmpty()?uiText("当前配色"):uiText("自定义配色"),QString{});
+    auto* theme=new QComboBox;addUiItem(theme,draft_.value("graphic").toObject().isEmpty()?"当前配色":"自定义配色",QString{});
     QStringList names;const auto root=QCoreApplication::applicationDirPath()+"/bridge/";
     for(const auto& sub:{"Themes",".coordinate-settings/Themes"})for(const auto& n:QDir(root+sub).entryList(QDir::Dirs|QDir::NoDotAndDotDot))if(QFileInfo::exists(root+sub+'/'+n+"/theme.ini")&&!names.contains(n))names.append(n);
     for(const auto& n:names)theme->addItem(n,n);
@@ -323,7 +324,7 @@ void PreferencesDialog::buildGraphics(){
     for(const auto& pair:{std::pair{"viewportcolor",uiText("视图背景")},{"edgecolor",uiText("控制网边线")},{"creaseedgecolor",uiText("折角边线")},{"regularpointcolor",uiText("普通控制点")},{"creasepointcolor",uiText("折角控制点")},{"cornerpointcolor",uiText("角点")},{"dartpointcolor",uiText("尖点")},{"leakpointcolor",uiText("泄漏点")},{"selectcolor",uiText("选中控制点")},{"normalcolor",uiText("面法线")},{"stationcolor",uiText("横剖线")},{"buttockcolor",uiText("纵剖线")},{"waterlinecolor",uiText("水线")},{"diagonalcolor",uiText("斜剖线")},{"gridcolor",uiText("网格")},{"gridfontcolor",uiText("网格文字")},{"markercolor",uiText("参考曲线")},{"curvatureplotcolor",uiText("曲率图")},{"controlcurvecolor",uiText("控制曲线")},{"hydrostaticsfontcolor",uiText("静水力标注")},{"layercolor",uiText("新建图层默认颜色")},{"underwatercolor",uiText("新船模水下部分")}}){
         const QString key=pair.first;auto* button=new QPushButton;button->setAutoDefault(false);button->setProperty("preference_field","graphic."+key);
         const auto color=QColor::fromRgb(colors[key].toInt());auto paint=[button](QColor c){QPixmap p(32,18);p.fill(c);button->setIcon(QIcon(p));button->setText(c.name().toUpper());button->setProperty("color",c);};paint(color);form->addRow(pair.second,button);
-        connect(button,&QPushButton::clicked,this,[this,guard=QPointer<QPushButton>(button),key,paint]{if(!guard)return;auto c=QColorDialog::getColor(guard->property("color").value<QColor>(),this,uiText("选择颜色"));if(!guard||!c.isValid())return;auto g=draft_.value("graphic").toObject();g[key]=c.red()|(c.green()<<8)|(c.blue()<<16);draft_["graphic"]=g;paint(c);});
+        connect(button,&QPushButton::clicked,this,[this,guard=QPointer<QPushButton>(button),key,paint]{if(!guard)return;auto c=QColorDialog::getColor(guard->property("color").value<QColor>(),this,uiText("选择颜色"), QColorDialog::DontUseNativeDialog);if(!guard||!c.isValid())return;auto g=draft_.value("graphic").toObject();g[key]=c.red()|(c.green()<<8)|(c.blue()<<16);draft_["graphic"]=g;paint(c);});
     }
     spin("underwatercoloralpha",uiText("新船模水下不透明度 (0–255)"),graphic.value("underwatercoloralpha").toInt(),0,255,true);
     auto* reset=new QPushButton(uiText("恢复默认绘图设置"));reset->setAutoDefault(false);reset->setProperty("preference_action","reset_graphics");form->addRow(reset);

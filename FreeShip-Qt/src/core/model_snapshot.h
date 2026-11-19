@@ -5,6 +5,7 @@
 #include <QtGlobal>
 #include <array>
 #include <memory>
+#include <optional>
 #include "background_image.h"
 #include "snapshot_metadata.h"
 
@@ -21,6 +22,7 @@ struct Layer {
     bool developable=false,useInHydrostatics=true,showInLinesplan=true,useForIntersections=true;
     double thickness=0,materialDensity=0;
     int alphaBlend=255;
+    std::optional<int> defaultNameNumber;
 };
 struct HullTriangle {EntityId layer=0;std::array<Vec3,3> vertices;};
 // Indexed subdivision polygons, distinct even when positions coincide.
@@ -62,6 +64,7 @@ struct OverlayData {
 // entities; triangle vertices are derived display geometry, never edit targets.
 class ModelSnapshot {
 public:
+    int lastLayerNumber=-1,newLayerColor=0;
     QString documentId,name,units;
     QString designer,comment,createdBy;
     bool particularsSet=false;

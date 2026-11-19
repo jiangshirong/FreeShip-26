@@ -556,8 +556,8 @@ bool ModelSession::updateLayer(fs::EntityId id, const QJsonObject& changes) {
 }
 bool ModelSession::undo() {
     if(editingSections()){
-        if(sectionQueue_.size()>=512)return false;
-        sectionQueue_.append(QJsonObject{{"_queued_history","undo"}});notifyState();return true;
+        if(editorQueue_.size()>=512)return false;
+        editorQueue_.append(QJsonObject{{"_queued_history","undo"}});notifyState();return true;
     }
     return canUndo() && currentRequest("undo");
 }
@@ -567,18 +567,37 @@ bool ModelSession::editTopology(const QString& operation, QJsonObject fields) {
 }
 bool ModelSession::redo() {
     if(editingSections()){
-        if(sectionQueue_.size()>=512)return false;
-        sectionQueue_.append(QJsonObject{{"_queued_history","redo"}});notifyState();return true;
+        if(editorQueue_.size()>=512)return false;
+        editorQueue_.append(QJsonObject{{"_queued_history","redo"}});notifyState();return true;
     }
     return canRedo() && currentRequest("redo");
+}
+bool ModelSession::sectionPreviewHistory(bool redo) {
+    const QString op=redo?"redo":"undo";
+    if(busy_){
+        if(!canQueueSectionEdits()||editorQueue_.size()>=512)return false;
+        editorQueue_.append(QJsonObject{{"_queued_history",op},{"_section_preview",true}});return true;
+    }
+    return (redo?canRedo():canUndo())&&currentRequest(op,{{"_section_preview",true}});
+}
+bool ModelSession::layerListCommand(const QString& method,QJsonObject fields){
+    fields["_layer_preview"]=true;
+    if(method!="manage_layers"&&method!="update_layer"&&method!="undo"&&method!="redo")return false;
+    if(busy_){
+        if(!editingLayerList()||editorQueue_.size()>=512)return false;
+        fields[method=="undo"||method=="redo"?"_queued_history":"_queued_method"]=method;
+        editorQueue_.append(fields);return true;
+    }
+    if((method=="undo"&&!canUndo())||(method=="redo"&&!canRedo()))return false;
+    return currentRequest(method,fields);
 }
 bool ModelSession::editSections(const QString& operation,int kind,QJsonObject fields) {
     fields.insert("operation",operation);fields.insert("kind",kind);
     if(editingSections()){
         // Once history is queued, the optimistic list no longer describes the
         // eventual revision. Do not accept new index-based edits against it.
-        if(sectionHistoryPending()||sectionQueue_.size()>=512)return false;
-        sectionQueue_.append(fields);return true;
+        if(!canQueueSectionEdits()||editorQueue_.size()>=512)return false;
+        editorQueue_.append(fields);return true;
     }
     return currentRequest("sections",fields);
 }
@@ -692,6 +711,8 @@ bool ModelSession::request(const QString& method, QJsonObject fields) {
     if (busy_) return false;
     try {
         method_ = method;
+        layerPreviewActive_=fields.take("_layer_preview").toBool();
+        sectionPreviewActive_=fields.take("_section_preview").toBool();
         if(method=="performance")calculationMethod_=fields["calculator"].toString();
         if(calculationSession_&&(method=="performance"||method=="hydrostatics")&&calculationSnapshotCurrent()){
             const auto calculator=method=="performance"?calculationMethod_:QString("hydro_")+fields["mode"].toString();
@@ -792,6 +813,8 @@ void ModelSession::readState(const QJsonObject& response) {
         revision(response) != model_->revision) error("计算组件与界面的模型版本不一致。");
     for (const QString key : {"can_undo", "can_redo", "modified"})
         if (!response.value(key).isBool()) error("计算组件返回了不完整的操作状态。");
+    layerIdHighWater_=response.value("layer_id_high_water").toInt();
+    historyStates_ = response.value("history_states").toInt(-1);
     canUndo_ = response.value("can_undo").toBool();
     canRedo_ = response.value("can_redo").toBool();
     modified_ = response.value("modified").toBool();
@@ -1075,7 +1098,7 @@ void ModelSession::receive(const QJsonObject& response) {
         finish("save");
         return;
     }
-    if(method_=="load"||method_=="snapshot"){
+    if(method_=="manage_layers"||method_=="update_layer"||method_=="load"||method_=="snapshot"||method_=="sections"||method_=="undo"||method_=="redo"){
         QJsonObject paths;for(const char* key:{"model","scene","dxf","sections","surface","native_report"})
             if(!response["drawing_deferred"].toBool()||(QByteArray(key)!="scene"&&QByteArray(key)!="dxf"))paths[key]=artifact(response,key);
         const auto document=pendingDocument_,method=method_;const auto request=pendingId_,generation=++parseGeneration_;
@@ -1139,10 +1162,15 @@ void ModelSession::finish(const QString& operation) {
     calculationScheduler_->release(this);
     if(recordingCalculation_)completeCalculationRecord(true);
     discardOldArtifacts();
-    if(completed=="sections"||completed=="undo"||completed=="redo")while(!sectionQueue_.isEmpty()){
-        const auto next=sectionQueue_.takeFirst();const auto history=next["_queued_history"].toString();
-        if(history.isEmpty()){currentRequest("sections",next);return;}
-        if((history=="undo"&&canUndo())||(history=="redo"&&canRedo())){currentRequest(history);return;}
+    while(!editorQueue_.isEmpty()){
+        auto next=editorQueue_.takeFirst();const auto method=next.take("_queued_method").toString("sections");
+        const auto history=next.take("_queued_history").toString();
+        if(!history.isEmpty()&&!(history=="undo"?canUndo():canRedo())){
+            if(next["_section_preview"].toBool()||next["_layer_preview"].toBool()){fail("No "+history+" state available");return;}
+            continue;
+        }
+        if(!currentRequest(history.isEmpty()?method:history,next))fail("Queued edit could not be submitted");
+        return;
     }
     notifyState();
     if (onCompleted) onCompleted(completed);
@@ -1194,7 +1222,7 @@ void ModelSession::completeCalculationRecord(bool recorded,const QString& issue)
 void ModelSession::fail(const QString& message, bool lostBackend) {
     ++parseGeneration_;parsing_=false;
     if(firstFrame_){firstFrame_.reset();if(onFirstFrame)onFirstFrame({});}
-    sectionQueue_.clear();
+    editorQueue_.clear();
     pendingSavedCalculators_.clear();
     QString detail = uiText(message);
     if(!pendingPerformance_.isEmpty()||!pendingHydro_.isEmpty()){

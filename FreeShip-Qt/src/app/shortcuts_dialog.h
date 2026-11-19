@@ -182,6 +182,7 @@ inline bool showShortcutGuide(QWidget* owner,QShortcut* languageShortcut=nullptr
     add(View,uiText("平移视图"),uiText("右键拖动"),uiText("当前视图或型线图窗口"),ShortcutGesture::Pan,ShortcutViewScope::CurrentOrLines);
     add(View,uiText("旋转视角"),uiText("空白处左键拖动"),uiText("透视图"),ShortcutGesture::Rotate,ShortcutViewScope::Perspective);
     add(View,uiText("缩放视图"),uiText("鼠标滚轮"),uiText("当前视图或型线图窗口"),ShortcutGesture::Wheel,ShortcutViewScope::CurrentOrLines);
+    add(View,uiText("缩放表格"),uiText("Ctrl + 鼠标滚轮"),uiText("计算结果表格"),ShortcutGesture::Wheel);
     add(View,uiText("缩放至全图"),uiText("空白处双击左键"),uiText("当前视图"),ShortcutGesture::DoubleClick,ShortcutViewScope::Current);
     add(Window,uiText("关闭当前窗口"),"Esc",uiText("支持 Esc 关闭的窗口"));
     for(const auto& item:QList<QPair<QString,QKeySequence::StandardKey>>{

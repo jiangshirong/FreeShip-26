@@ -39,7 +39,8 @@ bool chineFormat(const QString& f){return f=="chines"||f=="carene"||f=="hull";}
 
 ExchangeDialog::ExchangeDialog(ModelSession& session,bool importing,QString format,QWidget* parent)
     :QDialog(parent),session_(session),importing_(importing),format_(std::move(format)){
-    setWindowTitle((importing?uiText("导入 "):uiText("导出 "))+fs::cad::title(format_));resize(620,460);
+    const auto refreshTitle=[this]{setWindowTitle((importing_?uiText("导入 "):uiText("导出 "))+uiText(fs::cad::title(format_)));};
+    refreshTitle();bindUiRefresh(this,refreshTitle);resize(620,460);
     setWindowIcon(studioFormatWindowIcon(fs::cad::extension(format_),importing));setProperty("studio_window_icon","format:"+fs::cad::extension(format_).toUpper());
     confirmOverwrite=[this](const QString& path){return confirmStudioAction(this,uiText("替换文件"),uiText("文件已存在，是否替换？\n")+path);};
     auto* layout=new QVBoxLayout(this);layout->setContentsMargins(22,18,22,18);layout->setSpacing(12);
@@ -49,7 +50,7 @@ ExchangeDialog::ExchangeDialog(ModelSession& session,bool importing,QString form
     connect(browse,&QPushButton::clicked,this,[this]{
         if(busy())return;
         const auto ext=fs::cad::extension(format_);
-        const auto filter=fs::cad::title(format_)+" (*."+ext+(format_=="iges"?" *.iges":"")+")";
+        const auto filter=uiText(fs::cad::title(format_))+" (*."+ext+(format_=="iges"?" *.iges":"")+")";
         const auto start=path_->text().isEmpty()?preferenceFileLocation(importing_?"import":"export"):path_->text();
         auto path=importing_?QFileDialog::getOpenFileName(this,windowTitle(),start,filter):
             QFileDialog::getSaveFileName(this,windowTitle(),start,filter,nullptr,QFileDialog::DontConfirmOverwrite);
@@ -57,10 +58,10 @@ ExchangeDialog::ExchangeDialog(ModelSession& session,bool importing,QString form
         if(!importing_&&QFileInfo(path).suffix().isEmpty())path+='.'+ext;
         path_->setText(path);
     });
-    units_=new QComboBox;units_->setProperty("exchange_field","units");for(auto pair:{std::pair{uiText("米 (m)"),"m"},{uiText("毫米 (mm)"),"mm"},{uiText("厘米 (cm)"),"cm"},{uiText("英尺 (ft)"),"ft"},{uiText("英寸 (in)"),"in"}})units_->addItem(pair.first,pair.second);
+    units_=new QComboBox;units_->setProperty("exchange_field","units");for(auto pair:{std::pair{"米 (m)","m"},{"毫米 (mm)","mm"},{"厘米 (cm)","cm"},{"英尺 (ft)","ft"},{"英寸 (in)","in"}})addUiItem(units_,pair.first,pair.second);
     if(!importing&&session.model()&&session.model()->units=="imperial")units_->setCurrentIndex(3);
     form->addRow(uiText("文件中的长度单位"),units_);
-    if(format_=="part"){encoding_=new QComboBox;encoding_->setProperty("exchange_field","text_encoding");for(auto pair:{std::pair{"UTF-8","utf8"},{uiText("西欧 Windows-1252"),"cp1252"},{uiText("俄语 Windows-1251"),"cp1251"},{uiText("简体中文 GBK"),"cp936"}})encoding_->addItem(pair.first,pair.second);if(importing_){auto current=session.model()?session.model()->textEncoding:QString("cp1252");int i=encoding_->findData(current);if(i>=0)encoding_->setCurrentIndex(i);}form->addRow(uiText("部件文字编码（与来源/接收软件一致）"),encoding_);}
+    if(format_=="part"){encoding_=new QComboBox;encoding_->setProperty("exchange_field","text_encoding");for(auto pair:{std::pair{"UTF-8","utf8"},{"西欧 Windows-1252","cp1252"},{"俄语 Windows-1251","cp1251"},{"简体中文 GBK","cp936"}})addUiItem(encoding_,pair.first,pair.second);if(importing_){auto current=session.model()?session.model()->textEncoding:QString("cp1252");int i=encoding_->findData(current);if(i>=0)encoding_->setCurrentIndex(i);}form->addRow(uiText("部件文字编码（与来源/接收软件一致）"),encoding_);}
     auto check=[&](QString caption,QString key){auto* c=new QCheckBox(caption);c->setProperty("exchange_field",key);form->addRow(c);return c;};
     axes_=check(uiText("按旧版 FreeShip OBJ 的轴顺序 (Y, Z, X)"),"legacy_axes");
     control_=check(importing?uiText("作为控制网导入，允许细分平滑"):uiText("导出控制网"),"control_net");
@@ -70,32 +71,34 @@ ExchangeDialog::ExchangeDialog(ModelSession& session,bool importing,QString form
     axes_->setVisible(format_=="obj");control_->setVisible(format_=="obj");hidden_->setVisible(!importing&&format_!="fef");binary_->setVisible(!importing&&format_=="stl");symmetric_->setVisible(format_!="fef");units_->setEnabled(format_!="fef");
     if(format_=="coordinates"){control_->setVisible(true);control_->setText(uiText("导出原控制点（不补镜像，不按图层显隐筛选）"));connect(control_,&QCheckBox::toggled,this,[this](bool b){hidden_->setEnabled(!b);symmetric_->setEnabled(!b);});}
     if(format_=="offset_table"||format_=="offsets"||format_=="dxf3d"){hidden_->hide();symmetric_->hide();}
-    if(format_=="ghs"){hidden_->hide();symmetric_->hide();units_->clear();units_->addItem(uiText("米 (m)"),"m");units_->addItem(uiText("英尺 (ft)"),"ft");if(session.model()&&session.model()->units=="imperial")units_->setCurrentIndex(1);}
+    if(format_=="ghs"){hidden_->hide();symmetric_->hide();units_->clear();addUiItem(units_,"米 (m)","m");addUiItem(units_,"英尺 (ft)","ft");if(session.model()&&session.model()->units=="imperial")units_->setCurrentIndex(1);}
     if(metricFormat(format_)){
-        hidden_->hide();symmetric_->hide();units_->clear();units_->addItem(uiText("米 (m)"),"m");
+        hidden_->hide();symmetric_->hide();units_->clear();addUiItem(units_,"米 (m)","m");
         const auto model=session.model();const double scale=model&&model->units=="imperial"?.3048:1.;
         const double length=model?model->length*scale:0;
-        auto number=[&](const QString& label,const QString& key,double value){
+        auto number=[&](const QString& source,const QString& key,double value){
             auto* edit=new QLineEdit(QString::number(value,'g',17));edit->setProperty("exchange_number",key);
-            references_.insert(key,edit);form->addRow(label+" (m)",edit);
+            references_.insert(key,edit);auto* caption=new QLabel;caption->setBuddy(edit);form->addRow(caption,edit);
+            const auto refresh=[caption,source]{caption->setText(uiText(source)+" (m)");};
+            refresh();bindUiRefresh(caption,refresh);
         };
         if(format_=="michlet"||format_=="addmass"){
             QFormLayout* fields=form;QTabWidget* tabs=nullptr;
             auto tab=[&](const QString& title){auto* page=new QWidget;fields=new QFormLayout(page);fields->setContentsMargins(14,16,14,16);fields->setVerticalSpacing(12);tabs->addTab(page,title);};
             tabs=new QTabWidget;tabs->setProperty("exchange_tabs",true);form->addRow(tabs);tab(uiText("船体几何"));
             auto parameter=[&](QString label,QString key,double value){auto* edit=new QLineEdit(QString::number(value,'g',12));edit->setProperty("exchange_number",key);references_.insert(key,edit);fields->addRow(label,edit);};
-            auto automatic=[&](QString label,QString key){parameter(label,key,0);auto* edit=references_[key];edit->clear();edit->setProperty("exchange_optional",true);edit->setPlaceholderText(uiText("自动：按实际水下船长"));};
+            auto automatic=[&](QString label,QString key){parameter(label,key,0);auto* edit=references_[key];edit->clear();edit->setProperty("exchange_optional",true);bindUiText(edit,"placeholderText","自动：按实际水下船长");};
             auto choice=[&](QString label,QString key){auto* box=new QComboBox;box->setProperty("exchange_parameter",key);referenceChoices_[key]=box;fields->addRow(label,box);return box;};
             parameter(uiText("横剖站数（奇数）"),"stations",format_=="michlet"?31:21);parameter(uiText("水线数（奇数）"),"waterlines",format_=="michlet"?21:11);
             parameter(uiText("吃水 (m)"),"draft",model?model->draft*scale:0);
             if(format_=="michlet"){
-                auto* mode=choice(uiText("船体布置"),"hull_mode");mode->addItem(uiText("单体船"),"monohull");mode->addItem(uiText("单体船，输出为双体船"),"duplicate");mode->addItem(uiText("已建好的双体船"),"catamaran");
+                auto* mode=choice(uiText("船体布置"),"hull_mode");addUiItem(mode,"单体船","monohull");addUiItem(mode,"单体船，输出为双体船","duplicate");addUiItem(mode,"已建好的双体船","catamaran");
                 parameter(uiText("片体中心面间距 (m)"),"separation",0);references_["separation"]->setToolTip(uiText("单体复制：设置两片体的间距。已有双体：必须等于模型中两片体中心面的实际间距。"));
                 connect(mode,&QComboBox::currentIndexChanged,this,[this]{refreshState();});
                 tab(uiText("环境与计算"));parameter(uiText("水深 (m)"),"depth",10000);parameter(uiText("重力加速度 (m/s²)"),"gravity",9.80665);
                 parameter(uiText("起始速度 (m/s)"),"start_speed",1);parameter(uiText("结束速度 (m/s)"),"end_speed",5);parameter(uiText("速度数量"),"speeds",50);parameter(uiText("运动黏度 (10⁻⁶ m²/s)"),"viscosity",1.18831);
-                auto* friction=choice(uiText("摩擦方法"),"friction");friction->addItem(uiText("无"),0);friction->addItem("ITTC 1957",1);friction->addItem("Grigson",2);friction->setCurrentIndex(1);
-                auto* factor=choice(uiText("形状因子方法"),"form_factor");factor->addItem(uiText("无"),0);factor->addItem("Dual",3);
+                auto* friction=choice(uiText("摩擦方法"),"friction");addUiItem(friction,"无",0);friction->addItem("ITTC 1957",1);friction->addItem("Grigson",2);friction->setCurrentIndex(1);
+                auto* factor=choice(uiText("形状因子方法"),"form_factor");addUiItem(factor,"无",0);factor->addItem("Dual",3);
                 tab(uiText("波形区域"));automatic(uiText("扇形起始半径 R0 (m)"),"r0");automatic(uiText("扇形结束半径 R1 (m)"),"r1");parameter(uiText("扇形半角 β (°)"),"beta",22.5);parameter(uiText("径向采样数"),"nr",100);parameter(uiText("角向采样数"),"nbeta",100);
                 automatic(uiText("矩形 X0 (m)"),"wave_x0");automatic(uiText("矩形 X1 (m)"),"wave_x1");automatic(uiText("矩形 Y0 (m)"),"wave_y0");automatic(uiText("矩形 Y1 (m)"),"wave_y1");parameter(uiText("X 采样数"),"wave_nx",100);parameter(uiText("Y 采样数"),"wave_ny",100);
                 tabs->setCurrentIndex(0);
@@ -107,19 +110,19 @@ ExchangeDialog::ExchangeDialog(ModelSession& session,bool importing,QString form
                 for(auto* choice:referenceChoices_)connect(choice,qOverload<int>(&QComboBox::currentIndexChanged),preview_,[this]{preview_->invalidate();});}
             resize(680,format_=="michlet"?760:820);
         }else if(format_=="pam"){
-            number(uiText("中船纵向位置"),"midship",length/2);
-            number(uiText("设计水线 Z"),"waterline",model?model->waterlineZ*scale:0);
+            number("中船纵向位置","midship",length/2);
+            number("设计水线 Z","waterline",model?model->waterlineZ*scale:0);
         }else{
-            number(uiText("艉垂线 AP · 模型 X"),"ap",0);number(uiText("艏垂线 FP · 模型 X"),"fp",length);
+            number("艉垂线 AP · 模型 X","ap",0);number("艏垂线 FP · 模型 X","fp",length);
             if(format_=="arch_hll"){
-                number(uiText("艉吃水标志 · 模型 X"),"aft_mark",0);number(uiText("中吃水标志 · 模型 X"),"mid_mark",length/2);number(uiText("艏吃水标志 · 模型 X"),"fwd_mark",length);
+                number("艉吃水标志 · 模型 X","aft_mark",0);number("中吃水标志 · 模型 X","mid_mark",length/2);number("艏吃水标志 · 模型 X","fwd_mark",length);
             }
         }
     }
-    if((format_=="fef"||format_=="part")&&importing_){units_->clear();units_->addItem(uiText("使用文件内记录的单位"));}
+    if((format_=="fef"||format_=="part")&&importing_){units_->clear();addUiItem(units_,"使用文件内记录的单位");}
     if(format_=="polycad"||format_=="surface"||chineFormat(format_))symmetric_->setChecked(true);
     if(chineFormat(format_))symmetric_->hide();
-    if(importing&&format_!="fef"&&format_!="part"&&format_!="waves"&&fileUnits(format_)){units_->clear();units_->addItem(format_=="hull"?uiText("英寸（转换为英尺，使用英制工程）"):uiText("使用文件首行：0 为米，1 为英尺"));}
+    if(importing&&format_!="fef"&&format_!="part"&&format_!="waves"&&fileUnits(format_)){units_->clear();addUiItem(units_,format_=="hull"?"英寸（转换为英尺，使用英制工程）":"使用文件首行：0 为米，1 为英尺");}
     if(importing&&(format_=="chines"||format_=="carene"||format_=="surface")){
         columns_=new QSpinBox;columns_->setProperty("exchange_count","columns");columns_->setRange(format_=="surface"?0:2,100);columns_->setValue(format_=="surface"?0:8);
         if(format_=="surface")columns_->setSpecialValueText(uiText("按原曲线数量（至少 3 列）"));
@@ -139,10 +142,13 @@ ExchangeDialog::ExchangeDialog(ModelSession& session,bool importing,QString form
     if(format_=="iges")details_->setText(uiText("输出 NURBS 曲面片，不是缝合实体。名称仅支持 ASCII。"));
     if(format_=="dxf3d")details_->setText(uiText("输出原侧三维剖面线和控制曲线，不含曲面，不补镜像。"));
     if(format_=="ghs")details_->setText(uiText("仅支持对称单体船，不含舱室。使用全部静水力图层；敞开甲板需选择封顶。"));
-    if(format_=="arch_hll"||format_=="arch_app")details_->setText(uiText("仅支持对称船体，使用全部静水力图层。")+(format_=="arch_app"?QString(uiText("\nAPP 不支持中文等非 ASCII 文字，将替换为 ?。")):QString{}));
+    if(format_=="arch_hll"||format_=="arch_app"){
+        const auto refreshNotice=[this]{details_->setText(uiText("仅支持对称船体，使用全部静水力图层。")+(format_=="arch_app"?QString(uiText("\nAPP 不支持中文等非 ASCII 文字，将替换为 ?。")):QString{}));};
+        refreshNotice();bindUiRefresh(details_,refreshNotice);
+    }
     
     if(format_=="part"){symmetric_->hide();units_->setEnabled(false);details_->setText(importing_?uiText(""):uiText("导出所选面；未选面时按图层显隐选项导出。不含背景图、工程参数和跨部件约束。"));}
-    if(format_=="waves"){symmetric_->hide();units_->clear();units_->addItem(uiText("米 (m)"),"m");details_->setText(uiText("原点取 Michlet 第一船体中心。波高以设计水线为零，X 方向反转；波形不参与静水力。"));}
+    if(format_=="waves"){symmetric_->hide();units_->clear();addUiItem(units_,"米 (m)","m");details_->setText(uiText("原点取 Michlet 第一船体中心。波高以设计水线为零，X 方向反转；波形不参与静水力。"));}
     if(format_=="vrml"){control_->show();details_->setText(uiText("材质、纹理和动画不导入。"));}
     if(format_=="addmass")details_->setText(uiText("输入 Y≥0 的对称半船。"));
     if(format_=="michlet")details_->setText(uiText("单体输入 Y≥0 半船；双体输入 Y>0 的完整片体，由图层镜像生成另一片体。"));
@@ -152,7 +158,10 @@ ExchangeDialog::ExchangeDialog(ModelSession& session,bool importing,QString form
     details_->setVisible(!details_->text().isEmpty());
     layout->addWidget(details_);status_=new StudioMessage(StudioMessageRole::Feedback);status_->setProperty("exchange_status",true);layout->addWidget(status_);layout->addStretch();
     auto* buttons=new QDialogButtonBox;run_=buttons->addButton(importing?uiText("导入"):uiText("导出"),QDialogButtonBox::ActionRole);run_->setProperty("exchange_action",importing?"import":"export");
-    if(!importing)setStudioFormatButton(run_,fs::cad::extension(format_),uiText("导出 ")+fs::cad::title(format_));
+    if(!importing){
+        const auto refreshFormat=[this]{setStudioFormatButton(run_,fs::cad::extension(format_),uiText("导出 ")+uiText(fs::cad::title(format_)));};
+        refreshFormat();bindUiRefresh(run_,refreshFormat);
+    }
     connect(run_,&QPushButton::clicked,this,&ExchangeDialog::submit);layout->addWidget(buttons);
     refreshState();
     exportTimeout_.setSingleShot(true);exportTimeout_.setInterval(90000);

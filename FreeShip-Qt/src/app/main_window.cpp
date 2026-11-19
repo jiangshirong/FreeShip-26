@@ -34,6 +34,7 @@
 #include <QMessageBox>
 #include <QPushButton>
 #include <QSaveFile>
+#include <QScrollBar>
 #include <QShortcut>
 #include <QSignalBlocker>
 #include <QScopedValueRollback>
@@ -43,6 +44,9 @@
 #include <QStatusBar>
 #include <QTabWidget>
 #include <QTabBar>
+#include <QTextDocument>
+#include <QTextEdit>
+#include <QtMath>
 #include <QTimer>
 #include <QToolBar>
 #include <QToolButton>
@@ -69,6 +73,115 @@ protected:
     }
 };
 }
+
+// Canvas notices use the same layout for every message role. The height
+// animation used by layout-managed StudioMessage labels must not constrain
+// an independently positioned overlay.
+class CanvasNotice final : public QWidget {
+public:
+    explicit CanvasNotice(QWidget* host, bool startup = false)
+        : QWidget(host), body_(new QTextEdit(this)), close_(new QToolButton(this)) {
+        setObjectName(startup ? "StartupRestoreNotice" : "ShellStatusNotice");
+        setProperty("studio_overlay",true);
+        body_->setObjectName(objectName()+"Text");
+        auto face=body_->font();
+        face.setPointSizeF(qMax(9.5,face.pointSizeF()));
+        body_->setFont(face);
+        body_->setReadOnly(true);
+        body_->setFocusPolicy(Qt::NoFocus);
+        body_->setFrameShape(QFrame::NoFrame);
+        body_->setWordWrapMode(QTextOption::WrapAtWordBoundaryOrAnywhere);
+        body_->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+        body_->document()->setDocumentMargin(0);
+        close_->setObjectName(objectName()+"Close");
+        close_->setText(QStringLiteral("×"));
+        close_->setCursor(Qt::PointingHandCursor);
+        timer_.setSingleShot(true);
+        connect(&timer_,&QTimer::timeout,this,&CanvasNotice::dismiss);
+        connect(close_,&QToolButton::clicked,this,&CanvasNotice::dismiss);
+        host->installEventFilter(this);
+    }
+    void present(const QString& message, StudioMessageRole role) {
+        timer_.stop();
+        if(message.isEmpty()){dismiss();return;}
+        role_=role;
+        const auto style=studioMessageStyle(role_);
+        setProperty("studio_message_role",style.name);
+        body_->setStyleSheet(QString("QTextEdit { color:%1; background:transparent; border:0; padding:0; }")
+            .arg(style.foreground.name()));
+        close_->setStyleSheet(QString("QToolButton { color:%1; background:transparent; border:0; border-radius:4px; font-size:18px; padding:0; }"
+                                     "QToolButton:hover,QToolButton:focus { background:%2; }")
+            .arg(style.foreground.name(),style.border.name()));
+        close_->setAccessibleName(uiText("关闭"));
+        body_->setPlainText(message);
+        show();
+        fitToCanvas();
+        body_->verticalScrollBar()->setValue(0);
+        raise();
+        if(!underMouse())timer_.start(interval());
+    }
+    void dismiss() { timer_.stop(); hide(); }
+protected:
+    bool eventFilter(QObject* object,QEvent* event) override {
+        if(object==parentWidget()&&(event->type()==QEvent::Resize||event->type()==QEvent::Show)&&!isHidden())
+            fitToCanvas();
+        return QWidget::eventFilter(object,event);
+    }
+    void changeEvent(QEvent* event) override {
+        QWidget::changeEvent(event);
+        if(event->type()==QEvent::FontChange&&!isHidden())fitToCanvas();
+    }
+    void enterEvent(QEnterEvent* event) override { timer_.stop(); QWidget::enterEvent(event); }
+    void leaveEvent(QEvent* event) override { if(isVisible())timer_.start(interval()); QWidget::leaveEvent(event); }
+    void paintEvent(QPaintEvent*) override {
+        const auto style=studioMessageStyle(role_);
+        QPainter painter(this);
+        painter.setRenderHint(QPainter::Antialiasing);
+        painter.setPen(style.border);
+        painter.setBrush(style.background);
+        painter.drawRoundedRect(QRectF(rect()).adjusted(.5,.5,-.5,-.5),6,6);
+        painter.translate(12,12);
+        paintStudioMessageMark(painter,role_);
+    }
+private:
+    int interval() const {
+        if(interactive_)return 12000;
+        return role_==StudioMessageRole::Explanation?7000:1200;
+    }
+    void fitToCanvas() {
+        const auto area=parentWidget()->contentsRect();
+        const int width=qBound(1,area.width()-32,480);
+        const int heightLimit=qMax(1,area.height()-32);
+        auto* scroll=body_->verticalScrollBar();
+        const int scrollPosition=scroll->value();
+        body_->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+        const auto textWidth=[width](bool controls){return qMax(1,width-38-(controls?36:12));};
+        const auto preferredHeight=[&](bool controls){
+            // Measure the displayed document itself at the intended width;
+            // a separately constructed document can use different font metrics.
+            body_->setGeometry(38,11,textWidth(controls),qMax(1,heightLimit-22));
+            return qMax(40,qCeil(body_->document()->size().height())+22);
+        };
+        const bool wasInteractive=interactive_;
+        interactive_=role_==StudioMessageRole::Warning;
+        int preferred=preferredHeight(interactive_);
+        if(!interactive_&&preferred>heightLimit){interactive_=true;preferred=preferredHeight(true);}
+        const int height=qMin(heightLimit,preferred);
+        setGeometry(area.x()+qMax(0,area.width()-width-16),area.y()+qMax(0,area.height()-height-16),width,height);
+        setAttribute(Qt::WA_TransparentForMouseEvents,!interactive_);
+        body_->setGeometry(38,11,textWidth(interactive_),qMax(1,height-22));
+        body_->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+        scroll->setValue(scrollPosition);
+        if(interactive_!=wasInteractive&&timer_.isActive())timer_.start(interval());
+        close_->setGeometry(width-30,8,22,24);
+        close_->setVisible(interactive_);
+    }
+    QTextEdit* body_;
+    QToolButton* close_;
+    QTimer timer_;
+    StudioMessageRole role_=StudioMessageRole::Explanation;
+    bool interactive_=false;
+};
 
 MainWindow::MainWindow(QWidget* parent,bool rememberFiles) : QMainWindow(parent), session_(this) {
     session_.setProperty("defer_startup_drawing",rememberFiles);
@@ -112,7 +225,8 @@ MainWindow::MainWindow(QWidget* parent,bool rememberFiles) : QMainWindow(parent)
         menu->menuAction()->setProperty("file_operation",importing?"import_model":"export_model");
         QStringList formats{"obj","stl","fef"};if(importing)formats<<"polycad"<<"hull"<<"carene"<<"chines"<<"surface"<<"vrml"<<"part"<<"waves";else formats<<"iges"<<"dxf3d"<<"dxfmesh"<<"offsets"<<"coordinates"<<"ghs"<<"arch_hll"<<"arch_app"<<"pam"<<"part"<<"michlet"<<"addmass"<<"offset_table"<<"dxfcrease";
         for(const QString& format:formats){
-            auto* a=menu->addAction(fs::cad::title(format)+"…",this,[this,importing,format]{openExchange(importing,format);});
+            auto* a=menu->addAction(uiText(fs::cad::title(format))+"…",this,[this,importing,format]{openExchange(importing,format);});
+            bindUiRefresh(a,[a,format]{a->setText(uiText(fs::cad::title(format))+"…");});
             setStudioFormatMenuAction(menu,a,fs::cad::extension(format),importing);
             a->setProperty("operation",(importing?"import_":"export_")+format);a->setProperty("importing",importing);exchangeActions_.append(a);
         }
@@ -123,8 +237,8 @@ MainWindow::MainWindow(QWidget* parent,bool rememberFiles) : QMainWindow(parent)
     connect(quit, &QShortcut::activated, this, &QWidget::close);
     undo_ = new QAction(uiText("撤销"), this);
     redo_ = new QAction(uiText("重做"), this);
-    connect(undo_, &QAction::triggered, this, [this] { session_.undo(); });
-    connect(redo_, &QAction::triggered, this, [this] { session_.redo(); });
+    connect(undo_, &QAction::triggered, this, [this] { if(layerDialog_&&QApplication::activeWindow()==layerDialog_&&layers_->previewHistory(false))return; if(sections_&&sections_->isVisible()&&QApplication::activeWindow()!=layerDialog_)sections_->previewHistory(false);else session_.undo(); });
+    connect(redo_, &QAction::triggered, this, [this] { if(layerDialog_&&QApplication::activeWindow()==layerDialog_&&layers_->previewHistory(true))return; if(sections_&&sections_->isVisible()&&QApplication::activeWindow()!=layerDialog_)sections_->previewHistory(true);else session_.redo(); });
     bindHistoryShortcut(this, undo_, QKeySequence(Qt::CTRL | Qt::Key_Z));
     bindHistoryShortcut(this, redo_, QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_Z));
     project_ = new QAction(studioIcon("ProjectSettings"), uiText("工程设置"), this);
@@ -231,9 +345,19 @@ MainWindow::MainWindow(QWidget* parent,bool rememberFiles) : QMainWindow(parent)
     auto* side = new QTabWidget;inspector_=side;side->setMinimumWidth(270);side->setMaximumWidth(390);data_motion::installProperties(inspector_);
     side->addTab(inspector, uiText("控制点"));
     layerDialog_=createLayerPropertiesDialog(this,layers_);
+    bindHistoryShortcut(layerDialog_, undo_, QKeySequence(Qt::CTRL | Qt::Key_Z));
+    bindHistoryShortcut(layerDialog_, redo_, QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_Z));
     connect(layerDialog_,&QDialog::finished,this,[this]{if(!session_.busy())layers_->discardDrafts();});
     layers_->onLayerChanged = [this](fs::EntityId id, const QJsonObject& changes) { session_.updateLayer(id, changes); };
-    layers_->onSelectionChanged=[this]{updateState();};
+    layers_->onCreateLayer=[this]{createLayer();};
+    layers_->onListCommand=[this](const QString& method,QJsonObject fields){return session_.layerListCommand(method,fields);};
+    layers_->onVisibilityPreview=[this]{
+        const auto changes=layers_->projectedVisibilityChanges();
+        for(auto* view:views_)view->setLayerVisibilityPreview(changes);
+    };
+    layers_->onMismatch=[this]{session_.dropQueuedLayerCommands();};
+    layers_->onDeleteLayer=[this](fs::EntityId id){deleteLayer(id);};
+    layers_->onMoveLayer=[this](fs::EntityId id,int index){session_.manageLayers("move",{{"layer_id",double(id)},{"index",index}});};
     layers_->onControlNetChanged=[this](fs::EntityId id,bool show){
         if(show)hiddenControlLayers_.remove(id);else hiddenControlLayers_.insert(id);
         for(auto* view:views_)view->setHiddenControlLayers(hiddenControlLayers_);
@@ -245,9 +369,15 @@ MainWindow::MainWindow(QWidget* parent,bool rememberFiles) : QMainWindow(parent)
     session_.onFirstFrame=[this](std::shared_ptr<const fs::ModelSnapshot> model){
         for(auto* view:views_)view->setSnapshot(model);
     };
-    session_.onUpdated = [this] { updateModel(); };
-    session_.onStateChanged = [this] { updateState(); };
-    session_.onError = [this](const QString& message) { pendingNewPointAfter_=0;pendingPointIds_.clear();pendingPointView_.clear();if(sections_)sections_->discardPending();showError(message,true); };
+    session_.onUpdated = [this] {
+        if(suspendedExitUi_)deferredExitRefresh_=true;else updateModel();
+    };
+    session_.onStateChanged = [this] {
+        if(!suspendedExitUi_)updateState();
+        if(!session_.busy()&&(documentExit_==DocumentExit::Save||documentExit_==DocumentExit::Discard))
+            QTimer::singleShot(0,this,&MainWindow::continueDocumentExit);
+    };
+    session_.onError = [this](const QString& message) { cancelDocumentExit();pendingNewPointAfter_=0;pendingPointIds_.clear();pendingPointView_.clear();if(layers_)layers_->discardPredictions();if(sections_)sections_->discardPending();showError(message,true); };
     session_.onCompleted = [this](const QString& method) { operationCompleted(method); };
     session_.onFileCommitted=[this](const QString& path){if(!workflow_)rememberFile(path);};
     session_.makeSavePreview=[this](std::shared_ptr<const fs::ModelSnapshot> model){return modelPreview(std::move(model),preferenceAppearance(preferences_));};
@@ -282,6 +412,7 @@ MainWindow::MainWindow(QWidget* parent,bool rememberFiles) : QMainWindow(parent)
         if(performanceWorkflow_)QTimer::singleShot(0,this,[this]{performanceStep("closed");});
     };
     updateState(); updateCoordinates();
+    bindUiRefresh(this,[this]{refreshCalculationIdentity();updateCalculationBalls();});
     if(rememberFiles)loadPreferences(PreferencesStore::defaultFilename());
 }
 
@@ -309,7 +440,9 @@ void MainWindow::updateModel() {
     if(pointPopup_&&pointPopup_->isVisible()&&(pointPopupDocument_!=model->documentId||pointPopupRevision_!=model->revision||!model->point(pointPopup_->pointId())))pointPopup_->hide();
     if (fresh) {selection_.clear();hiddenControlLayers_.clear();endFlowline();endPointPlacement();clearDisplayChanges();}
     const auto presentation=displayModel();
-    for (auto* view : views_) view->setSnapshot(model,presentation,session_.drawingUnchanged());
+    layers_->setSnapshot(model,session_.historyStates(),session_.layerIdHighWater());
+    const auto changes=layers_->projectedVisibilityChanges();
+    for (auto* view : views_) view->setSnapshot(model,presentation,session_.drawingUnchanged(),changes);
     if (!fresh) selection_ = views_.front()->selectedPoints();
     fs::EntityId createdPoint=0;
     if(pendingNewPointAfter_){
@@ -319,12 +452,7 @@ void MainWindow::updateModel() {
     }
     lines_->setScene(session_.scene(), fresh || shownUnits_ != model->units);
     shownDocument_ = model->documentId; shownUnits_ = model->units;
-    layers_->setSnapshot(model);
-    if(pendingNewLayerAfter_){
-        for(const auto& layer:model->layers)if(layer.id>pendingNewLayerAfter_)layers_->setSelectedLayerId(layer.id);
-        pendingNewLayerAfter_=0;
-    }
-    if(sections_)sections_->setSnapshot(model);
+    if(sections_)sections_->setSnapshot(model,session_.historyStates());
     selectPoints(selection_);
     if(createdPoint&&pendingPointView_){showPointPopup(pendingPointView_,createdPoint);pendingPointView_.clear();}
     if(selectionKind_!=HullEntity::Point)selectEntities(selectionKind_,fresh?QSet<fs::EntityId>{}:entitySelection_);
@@ -351,23 +479,15 @@ void MainWindow::updateState() {
     for(auto* action:hydroActions_)action->setEnabled(session_.ready());
     const bool ready = session_.ready(), idle = !session_.busy(); open_->setEnabled(idle);
     if(placePoint_)placePoint_->setEnabled(ready&&idle);
-    if(layerProperties_)layerProperties_->setEnabled(ready&&idle);
-    if(layerUp_&&layerDown_){int at=-1;if(ready)for(int i=0;i<session_.model()->layers.size();++i)if(session_.model()->layers[i].id==layers_->selectedLayerId())at=i;
-        layerUp_->setEnabled(ready&&idle&&at>0);layerDown_->setEnabled(ready&&idle&&at>=0&&at+1<session_.model()->layers.size());}
-    for (auto* view : views_) view->setEditingEnabled(ready && idle);
-    save_->setEnabled(ready && idle); saveAs_->setEnabled(ready && idle);
-    project_->setEnabled(ready); layers_->setEditingEnabled(ready && idle);
+    // The dialog can show the last committed snapshot while an edit is pending.
+    // Mutation controls are enabled independently after publication.
+    if(layerProperties_)layerProperties_->setEnabled(ready);
+    project_->setEnabled(ready); layers_->setEditingEnabled(ready && idle,ready&&session_.editingLayerList());
     if(activeProject_&&activeProject_->property("project_waiting").toBool()&&ready&&idle){
         activeProject_->refreshSnapshot(*session_.model());activeProject_->setEditingEnabled(true);
     }
     if(sections_)sections_->setEditingEnabled(ready&&(idle||session_.canQueueSectionEdits()));
     if(sectionsAction_)sectionsAction_->setEnabled(ready);
-    if(newLayer_)newLayer_->setEnabled(ready&&idle);
-    QSet<fs::EntityId> occupiedLayers;
-    if(ready)for(const auto& face:session_.model()->faces)occupiedLayers.insert(face.layer);
-    const bool removableLayer=ready&&idle&&session_.model()->layers.size()>1;
-    if(deleteLayer_)deleteLayer_->setEnabled(removableLayer&&layers_->selectedLayerId()&&!occupiedLayers.contains(layers_->selectedLayerId()));
-    if(emptyLayers_)emptyLayers_->setEnabled(removableLayer&&std::any_of(session_.model()->layers.cbegin(),session_.model()->layers.cend(),[&](const auto& layer){return !occupiedLayers.contains(layer.id);}));
     updateDisplayControls();
     if(addCurve_)addCurve_->setEnabled(ready&&idle&&selectionKind_==HullEntity::Edge&&!entitySelection_.isEmpty());
     if(addFlow_)addFlow_->setEnabled(ready&&idle);
@@ -375,8 +495,8 @@ void MainWindow::updateState() {
     updateModelingActions();
     if(transformable)for(auto id:transformed){auto* p=session_.model()->point(id);if(!p||p->locked||!p->batchMovable){transformable=false;break;}}
     for(int i=0;i<5;++i)if(auto* action=advancedActions_[i])action->setEnabled(transformable&&(i<3||(i==3&&selectionKind_==HullEntity::Edge)||(i==4&&selectionKind_==HullEntity::Face)));
-    undo_->setEnabled((idle&&session_.canUndo())||session_.editingSections());
-    redo_->setEnabled((idle&&session_.canRedo())||session_.editingSections());
+    undo_->setEnabled((idle&&session_.canUndo())||session_.editingSections()||session_.editingLayerList());
+    redo_->setEnabled((idle&&session_.canRedo())||session_.editingSections()||session_.editingLayerList());
     if(linesAction_)linesAction_->setEnabled(bool(session_.model()));
     linesPng_->setEnabled(ready&&idle); dxf_->setEnabled(ready && idle);
     bool editable = ready && idle && !selection_.isEmpty();
@@ -414,27 +534,21 @@ QWidget* MainWindow::workspaceOverlayHost()const{
     // children belong to the existing canvas page, never the outer splitter.
     return tabs_?(tabs_->currentWidget()?tabs_->currentWidget():tabs_):nullptr;
 }
-void MainWindow::showStatusMessage(const QString& message,StudioMessageRole role){
+void MainWindow::showStartupRestoreWarning(const QString& message){
     statusBar()->showMessage(message);
     auto* host=workspaceOverlayHost();if(!host)return;
-    if(!statusNotice_){
-        statusNotice_=new StudioMessage(role,{},host);statusNotice_->setObjectName("ShellStatusNotice");statusNotice_->setProperty("studio_overlay",true);
-        statusNotice_->setAttribute(Qt::WA_TransparentForMouseEvents);
-        statusNoticeTimer_=new QTimer(this);statusNoticeTimer_->setSingleShot(true);
-        connect(statusNoticeTimer_,&QTimer::timeout,statusNotice_,&QWidget::hide);
-    }
-    if(statusNotice_->parentWidget()!=host)statusNotice_->setParent(host);
-    statusNotice_->setMessage(message,role);positionStatusNotice();statusNotice_->raise();
-    if(role==StudioMessageRole::Warning)statusNoticeTimer_->stop();
-    else statusNoticeTimer_->start(role==StudioMessageRole::Explanation?7000:1200);
+    if(statusNotice_)statusNotice_->dismiss();
+    if(!startupRestoreNotice_)startupRestoreNotice_=new CanvasNotice(host,true);
+    startupRestoreNotice_->present(message,StudioMessageRole::Warning);
 }
-void MainWindow::positionStatusNotice(){
-    if(!statusNotice_||!statusNotice_->parentWidget())return;
-    const auto area=statusNotice_->parentWidget()->rect();const int width=std::max(1,std::min(480,area.width()-32));
-    const int height=std::max(statusNotice_->minimumSizeHint().height(),statusNotice_->heightForWidth(width));
-    statusNotice_->setGeometry(std::max(0,area.width()-width-16),std::max(0,area.height()-height-16),width,height);
+void MainWindow::showStatusMessage(const QString& message,StudioMessageRole role){
+    statusBar()->showMessage(message);
+    if(startupRestoreNotice_)startupRestoreNotice_->dismiss();
+    auto* host=workspaceOverlayHost();if(!host)return;
+    if(!statusNotice_)statusNotice_=new CanvasNotice(host);
+    statusNotice_->present(message,role);
 }
-void MainWindow::resizeEvent(QResizeEvent* event){QMainWindow::resizeEvent(event);QTimer::singleShot(0,this,[this]{positionStatusNotice();updateStabilityBall();});}
+void MainWindow::resizeEvent(QResizeEvent* event){QMainWindow::resizeEvent(event);QTimer::singleShot(0,this,[this]{updateStabilityBall();});}
 void MainWindow::selectPoints(QSet<fs::EntityId> ids) {
     // Group handles and the group dialog select members together. Selecting an
     // individual point must still allow editing its own coordinates/properties.
@@ -499,10 +613,8 @@ void MainWindow::applyCoordinates() {
     if (coordinatesChanged_[2]) position.z = coordinates_[2]->value();
     session_.movePoint(selected_, position);
 }
-void MainWindow::withSavedChanges(std::function<void()> next) {
-    if (session_.busy()) return;
-    if (!session_.modified()&&calculationDrafts().isEmpty()) { next(); return; }
-    QMessageBox question(QMessageBox::Question,uiText("保存修改"),uiText("当前船模有未保存的修改，要先保存吗？"),
+int MainWindow::askSaveChanges(bool exitingBusy) {
+    QMessageBox question(QMessageBox::Question,uiText("保存修改"),exitingBusy ? uiText("退出前要保存船模吗？") : uiText("当前船模有未保存的修改，要先保存吗？"),
         QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel,this);
     question.setOption(QMessageBox::Option::DontUseNativeDialog);
     question.setAttribute(Qt::WA_DontShowOnScreen,testAttribute(Qt::WA_DontShowOnScreen));
@@ -511,7 +623,13 @@ void MainWindow::withSavedChanges(std::function<void()> next) {
     question.button(QMessageBox::Save)->setText(uiText("保存"));
     question.button(QMessageBox::Discard)->setText(uiText("不保存"));
     question.button(QMessageBox::Cancel)->setText(uiText("取消"));
-    const auto result=question.exec();
+    if(documentExit_==DocumentExit::Choosing)exitQuestion_=&question;
+    return question.exec();
+}
+void MainWindow::withSavedChanges(std::function<void()> next) {
+    if (session_.busy()) return;
+    if (!session_.modified()&&calculationDrafts().isEmpty()) { next(); return; }
+    const auto result=askSaveChanges();
     if (result == QMessageBox::Discard) { afterSave_ = {}; next(); }
     else if (result == QMessageBox::Save) { afterSave_ = std::move(next); saveModel(); }
     else afterSave_ = {};
@@ -588,12 +706,11 @@ void MainWindow::showError(const QString& sourceMessage,bool sessionError) {
     if(hydroDialog_&&hydroDialog_!=stabilityDialog_&&!hydroDialog_->property("calculation_task_key").isValid()){hydroDialog_->showFailure(message);return;}
     if(performanceDialog_&&!performanceDialog_->property("calculation_task_key").isValid()){performanceDialog_->showFailure(message);return;}
     if(platesDialog_&&!platesDialog_->property("calculation_task_key").isValid()){platesDialog_->showFailure(message);return;}
-    pendingNewLayerAfter_=0;
     pendingNewPointAfter_=0;
     if(!restoringFile_.isEmpty()){
         if(fileHistory_)fileHistory_->stopRestore(restoringFile_);
         restoringFile_.clear();afterSave_={};refreshRecentFiles();
-        showStatusMessage(uiText("上次的船模未能打开，请从“打开模型”重新选择。")+message,StudioMessageRole::Warning);
+        showStartupRestoreWarning(QString::fromUtf8(uiText("上次的船模未能打开，请从“打开模型”重新选择。"))+"\n"+message);
         if(startupProbe_)startupStep("error",message);
         return;
     }
@@ -613,11 +730,11 @@ void MainWindow::operationCompleted(const QString& method) {
     if(method=="discard_recovery"&&closingAfterRecoveryDiscard_){
         // Discard removes the recovery checkpoint, not the document's dirty flag.
         // Carry the user's close decision through the second close event.
-        closingAfterRecoveryDiscard_=false;closeApproved_=true;
-        QTimer::singleShot(0,this,[this]{close();qApp->quit();});return;
+        closingAfterRecoveryDiscard_=false;finishDocumentExit();return;
     }
     if(method=="configure_preferences"&&preferencesPending_){preferencesFinished();return;}
     if((method=="import_model"||method=="append_model")&&exchangeDialog_)exchangeDialog_->imported();
+    if((method=="load"||method=="recover")&&startupRestoreNotice_)startupRestoreNotice_->dismiss();
     restoringFile_.clear();
     updateState();
     if(method=="save"){
@@ -638,6 +755,12 @@ void MainWindow::operationCompleted(const QString& method) {
     else if(method=="load"&&session_.modified()&&session_.sourcePath().isEmpty())showStatusMessage(uiText("船模已恢复，请另存为文件。"),StudioMessageRole::Explanation);
     // Real save continuations also apply to isolated production probes. Do not
     // let workflow routing swallow "save, then close" after the file is written.
+    if(method=="save"&&documentExit_==DocumentExit::Saving){
+        // mark_saved has verified the destination and removed this document's checkpoint.
+        if(session_.recoveryError().isEmpty()){finishDocumentExit();return;}
+        documentExit_=DocumentExit::Discard; // Retry only a reported checkpoint cleanup failure.
+        QTimer::singleShot(0,this,&MainWindow::continueDocumentExit);return;
+    }
     if(method=="save"&&afterSave_){
         auto next=std::move(afterSave_);afterSave_={};QTimer::singleShot(0,this,std::move(next));return;
     }
@@ -714,7 +837,7 @@ void MainWindow::openCalculation(const QString& kind,const QString& method){
     task->session=new ModelSession(this);task->session->setProperty("calculation_task_key",key);
     calculationWindows_.insert(key,task);
     auto bindDialog=[this,task](QDialog* dialog){
-        task->dialog=dialog;task->title=dialog->windowTitle();task->initializing=false;
+        task->dialog=dialog;task->title=dialog->property("calculation_title_source").toString();task->initializing=false;
         const auto model=task->session->model();
         task->inputDocument=model->documentId;task->inputUnits=model->units;task->savedInputs=calculationInputs(*task);
         dialog->setProperty("calculation_task_key",task->key);
@@ -816,7 +939,7 @@ void MainWindow::refreshCalculationIdentity(){
         task->dialog->setProperty("calculation_snapshot_current",current);
         const auto name=oldResult?task->resultName:model?model->name:QString{};
         const auto revision=oldResult?task->resultRevision:model?model->revision:0;
-        task->dialog->setWindowTitle(task->title+(!current?QString(" — %1 · %2 %3").arg(name.isEmpty()?uiText("未命名船模"):name,uiText("版本")).arg(revision):QString{}));
+        task->dialog->setWindowTitle(uiText(task->title)+(!current?QString(" — %1 · %2 %3").arg(name.isEmpty()?uiText("未命名船模"):name,uiText("版本")).arg(revision):QString{}));
     }
 }
 void MainWindow::updateCalculationBalls(const QString& animateKey){
@@ -836,7 +959,7 @@ void MainWindow::updateCalculationBalls(const QString& animateKey){
             if(task->key=="hydro:cross")stabilityBall_=task->ball;
         }
         const int position=task->session->calculationQueuePosition();
-        const auto label=task->title+(queued?QString(" — %1 · %2").arg(uiText("排队中")).arg(position):QString{});
+        const auto label=uiText(task->title)+(queued?QString(" — %1 · %2").arg(uiText("排队中")).arg(position):QString{});
         task->ball->setToolTip(label);task->ball->setAccessibleName(label);
         task->ball->setState(running,task->unread,task->failed,queued,position);
         const int firstY=std::clamp(height()/2,80,std::max(80,height()-58));
@@ -857,7 +980,7 @@ void MainWindow::stopCalculationsAndClose(){
     for(const auto& task:calculationWindows_)if(task->session){
         task->session->cancelHydrostatics();task->session->cancelPerformance();task->session->cancelPlates();
     }
-    setEnabled(false);showStatusMessage(uiText("正在取消计算…"),StudioMessageRole::Feedback);
+    suspendExitUi();
     auto* poll=new QTimer(this);poll->setInterval(25);
     auto elapsed=std::make_shared<QElapsedTimer>();elapsed->start();
     connect(poll,&QTimer::timeout,this,[this,poll,elapsed]{
@@ -869,8 +992,9 @@ void MainWindow::stopCalculationsAndClose(){
         if(busy||session_.busy()||session_.recordingCalculationParameters())return;
         poll->stop();poll->deleteLater();
         for(const auto& task:calculationWindows_)task->initializing=false;
-        calculationExitPending_=false;session_.pauseCalculationQueue(false);setEnabled(true);
-        statusBar()->clearMessage();close();
+        calculationExitPending_=false;session_.pauseCalculationQueue(false);
+        if(!session_.modified()&&calculationDrafts().isEmpty()){finishDocumentExit();return;}
+        resumeExitUi();close();
     });poll->start();
 }
 void MainWindow::changeEvent(QEvent* event) {
@@ -878,9 +1002,51 @@ void MainWindow::changeEvent(QEvent* event) {
     if(event->type()==QEvent::LanguageChange&&lines_)
         lines_->setReferenceCaptions(uiText("基线 %1"),uiText("中心线"));
 }
+void MainWindow::suspendExitUi(){
+    if(suspendedExitUi_)return;
+    suspendedExitUi_=true;
+    previousQuitOnLast_=qApp->quitOnLastWindowClosed();qApp->setQuitOnLastWindowClosed(false);
+    // Hiding is reversible; closing a tool dialog may commit/cancel its editors.
+    if(isVisible())exitWindows_.append(this);
+    for(auto* w:QApplication::topLevelWidgets()){
+        if(w==this||!w->isVisible()||!qobject_cast<QDialog*>(w))continue;
+        for(auto* owner=w->parentWidget();owner;owner=owner->parentWidget())
+            if(owner==this){exitWindows_.append(w);break;}
+    }
+    for(auto i=exitWindows_.crbegin();i!=exitWindows_.crend();++i)if(*i)(*i)->hide();
+}
+void MainWindow::resumeExitUi(){
+    if(!suspendedExitUi_)return;
+    suspendedExitUi_=false;
+    if(deferredExitRefresh_&&session_.model()){deferredExitRefresh_=false;updateModel();}
+    updateState();
+    for(const auto& w:exitWindows_)if(w)w->show();
+    exitWindows_.clear();qApp->setQuitOnLastWindowClosed(previousQuitOnLast_);
+}
+void MainWindow::finishDocumentExit(){
+    closeApproved_=true;
+    QTimer::singleShot(0,this,[this]{close();qApp->quit();});
+}
+void MainWindow::cancelDocumentExit(){
+    if(documentExit_==DocumentExit::None)return;
+    documentExit_=DocumentExit::None;
+    if(exitQuestion_)exitQuestion_->reject();
+    resumeExitUi();
+}
+void MainWindow::continueDocumentExit(){
+    if(closingAfterRecoveryDiscard_||closeApproved_||session_.busy()||(documentExit_!=DocumentExit::Save&&documentExit_!=DocumentExit::Discard))return;
+    if(documentExit_==DocumentExit::Save&&(session_.modified()||!calculationDrafts().isEmpty())){
+        documentExit_=DocumentExit::Saving;
+        saveModel();
+        if(documentExit_==DocumentExit::Saving&&!session_.busy())cancelDocumentExit(); // Save As cancelled.
+        return;
+    }
+    closingAfterRecoveryDiscard_=true;
+    if(!session_.discardRecovery()){closingAfterRecoveryDiscard_=false;cancelDocumentExit();}
+}
 void MainWindow::closeEvent(QCloseEvent* event) {
     if(closeApproved_){linesDialog_->close();event->accept();return;}
-    if(calculationExitPending_||calculationClosePrompt_){event->ignore();return;}
+    if(calculationExitPending_||calculationClosePrompt_||documentExit_!=DocumentExit::None||closingAfterRecoveryDiscard_){event->ignore();return;}
     if(calculationsBusy()||session_.recordingCalculationParameters()){
         event->ignore();QScopedValueRollback<bool> prompting(calculationClosePrompt_,true);
         QMessageBox question(QMessageBox::Question,uiText("退出软件"),
@@ -892,12 +1058,21 @@ void MainWindow::closeEvent(QCloseEvent* event) {
         if(question.exec()==QMessageBox::Yes)stopCalculationsAndClose();
         return;
     }
-    if (session_.busy()) { event->ignore(); showStatusMessage(uiText("请等当前模型操作完成后再关闭。"),StudioMessageRole::Warning); }
-    else if (session_.modified()) {
-        event->ignore(); withSavedChanges([this] {
-            closingAfterRecoveryDiscard_=true;
-            if(!session_.discardRecovery())closingAfterRecoveryDiscard_=false;
-        });
+    if(session_.busy()||session_.modified()||!calculationDrafts().isEmpty()){
+        event->ignore();
+        documentExit_=DocumentExit::Choosing;
+        const auto choice=askSaveChanges(session_.busy());
+        if(documentExit_!=DocumentExit::Choosing)return; // An operation failed during the dialog.
+        if(choice!=QMessageBox::Save&&choice!=QMessageBox::Discard){cancelDocumentExit();return;}
+        afterSave_={};
+        documentExit_=choice==QMessageBox::Save?DocumentExit::Save:DocumentExit::Discard;
+        suspendExitUi();
+        if(documentExit_==DocumentExit::Discard){
+            // Only drop edits that have not been sent. A request in flight (including
+            // an atomic save) finishes normally before the recovery lease is cleared.
+            session_.dropQueuedLayerCommands();session_.dropQueuedSectionCommands();queuedDisplay_={};
+        }
+        QTimer::singleShot(0,this,&MainWindow::continueDocumentExit);
     } else {linesDialog_->close();event->accept();}
 }
 void MainWindow::workflowCase(const QString& name, bool pass, const QString& message) {

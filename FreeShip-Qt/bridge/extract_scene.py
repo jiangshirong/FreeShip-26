@@ -6,12 +6,13 @@ adapter; standalone CLI keeps the original routine as the comparison oracle.
 Raster, cache, UI and collision-layout operations are removed explicitly.
 The generated Pascal is checked in beside this recipe for normal compilation.
 """
+import os
 from pathlib import Path
 import hashlib,json,re,tempfile,shutil
 import build_bridge
 
 ROOT=Path(__file__).resolve().parent
-SOURCE=ROOT.parent.parent/'FreeShip-Plus-Lazarus'
+SOURCE=Path(os.environ.get('FREESHIP_LEGACY_SOURCE') or ROOT.parent.parent/'FreeShip-Plus-Lazarus')
 
 def cut(s,a,b):return s[s.index(a):s.index(b,s.index(a))]
 def remove(s,a,b):return s[:s.index(a)]+s[s.index(b,s.index(a)):]

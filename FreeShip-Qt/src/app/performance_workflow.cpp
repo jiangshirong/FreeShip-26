@@ -22,12 +22,14 @@
 #include <QElapsedTimer>
 #include <QLayout>
 #include <QInputDialog>
+#include <QKeyEvent>
 #include <QApplication>
 #include <QTableView>
 #include <QHeaderView>
 #include <QWheelEvent>
 #include <QScrollArea>
 #include <QScrollBar>
+#include <QStyle>
 #include <QLabel>
 #include <QGroupBox>
 #include <QTextEdit>
@@ -93,7 +95,11 @@ QJsonArray observeCalculationLayout(PerformanceDialog* dialog,const QString& out
                         combo->setMinimumWidth(minimum);combo->setMaximumWidth(maximum);settle();
                     }
                 }
-                for(auto* label:dialog->findChildren<QLabel*>())if(label->buddy()==w){item["label_fits"]=label->height()>=label->heightForWidth(label->width());item["label_text"]=label->text();break;}
+                for(auto* label:dialog->findChildren<QLabel*>())if(label->buddy()==w){
+                    item["label_fits"]=label->height()>=label->heightForWidth(label->width());item["label_text"]=label->text();
+                    item["label_width"]=label->width();item["label_height_for_width"]=label->heightForWidth(label->width());
+                    item["label_unwrapped_height"]=label->heightForWidth(16384);break;
+                }
             }
             fields.append(item);
         }
@@ -118,7 +124,19 @@ QJsonArray observeCalculationLayout(PerformanceDialog* dialog,const QString& out
                 if(auto* scroll=qobject_cast<QScrollArea*>(parent)){
                     scroll->ensureWidgetVisible(button,0,0);settle();break;
                 }
-            const QRect rect(button->mapTo(dialog,QPoint{}),button->size());actions.append(QJsonObject{{"action",button->property("performance_action").toString()},{"text",button->text()},{"contained",dialog->rect().contains(rect)}});
+            const QRect rect(button->mapTo(dialog,QPoint{}),button->size());
+            QJsonObject action{{"action",button->property("performance_action").toString()},{"text",button->text()},{"contained",dialog->rect().contains(rect)}};
+            if(action["action"]=="water_temperature"){
+                const auto key=dialog->inputs()["calculator"]=="maneuver"?"Edit11":"WaterViscosity";
+                for(auto* field:dialog->findChildren<QWidget*>())if(field->property("performance_field")==key){
+                    const QRect editor(field->mapTo(dialog,QPoint{}),field->size());
+                    action["button_x"]=rect.x();action["button_width"]=rect.width();action["editor_x"]=editor.x();
+                    action["same_row"]=rect.top()<=editor.bottom()&&editor.top()<=rect.bottom();
+                    break;
+                }
+                action["tooltip_wake_delay_ms"]=button->style()->styleHint(QStyle::SH_ToolTip_WakeUpDelay,nullptr,button);
+            }
+            actions.append(action);
         }
         observations.append(QJsonObject{{"font",pointSize},{"compact",compact},{"requested_size",QJsonArray{requested.width(),requested.height()}},{"actual_size",QJsonArray{dialog->width(),dialog->height()}},{"fields",fields},{"pages",pages},{"actions",actions},{"groups",groupTitles},{"inputs_unchanged",dialog->inputs()==originalInputs}});
     }
@@ -132,6 +150,7 @@ void MainWindow::verifyPerformance(const QString& request,const QString& output)
     // Documentation screenshots observe settled pages, not the outgoing
     // animation layer. This switch belongs only to this isolated QA workflow.
     if(performanceRequest_["observe_method_help"].toBool())qApp->setProperty("studio_motion_enabled",false);
+    if(performanceRequest_.contains("quick_language_settings"))loadPreferences(performanceRequest_["quick_language_settings"].toString());
     if(performanceRequest_.contains("language")){
         const auto error=setUiLanguage(performanceRequest_["language"].toString());
         if(!error.isEmpty()){finishWorkflow(error);return;}
@@ -213,7 +232,17 @@ void MainWindow::performanceStep(const QString& operation){
         auto button=[this](QString op){QList<QPushButton*> found;for(auto* b:performanceDialog_->findChildren<QPushButton*>())if(b->property("performance_action")==op)found.append(b);return found.size()==1?found.first():nullptr;};
         auto unavailable=[this,timer](QString reason){workflowCases_.append(QJsonObject{{"name","performance_entry"},{"status","not_run"},{"message",reason}});timer->stop();timer->deleteLater();performanceDialog_->reject();};
         if(*stage==8){auto* preview=performanceDialog_->gridPreview();if(preview->pending())return;
-            workflowCase("input-grid-preview",preview->current(),preview->evidence()["error"].toString());workflowArtifacts_["input_grid_preview"]=preview->evidence();workflowArtifacts_["preview_done"]=true;
+            const bool expectError=performanceRequest_["expect_preview_error"].toBool();
+            const auto evidence=preview->evidence();
+            workflowCase("input-grid-preview",expectError?!preview->current()&&!evidence["error"].toString().isEmpty():preview->current(),evidence["error"].toString());
+            workflowArtifacts_["input_grid_preview"]=evidence;workflowArtifacts_["preview_done"]=true;
+            if(const auto alternate=performanceRequest_["preview_switch_language"].toString();!alternate.isEmpty()){
+                const auto initial=uiLanguage();
+                workflowCase("preview-language-switch",setUiLanguage(alternate).isEmpty());
+                workflowArtifacts_["input_grid_preview_switched"]=preview->evidence();
+                workflowCase("preview-language-restore",setUiLanguage(initial).isEmpty());
+                workflowArtifacts_["input_grid_preview_restored"]=preview->evidence();
+            }
             workflowCase("preview-image",preview->grab().save(workflowOutput_+"/views/input-grid.png"));*stage=6;return;}
         if(*stage==4){
             workflowCase("parameter-file-roundtrip",performanceDialog_->inputs()["values"]==workflowArtifacts_["preset_values"]);
@@ -222,6 +251,41 @@ void MainWindow::performanceStep(const QString& operation){
         }
         if(*stage==0){
             workflowArtifacts_["initial_inputs"]=performanceDialog_->inputs()["values"];
+            if(performanceRequest_["observe_quick_language"].toBool()){
+                auto* dialog=performanceDialog_;
+                const auto observe=[dialog]{
+                    QJsonObject labels,choices,feedback;
+                    for(auto* label:dialog->findChildren<QLabel*>()){
+                        const auto key=label->property("performance_label").toString();
+                        if(key.isEmpty())continue;
+                        QTextDocument text;text.setHtml(label->text());
+                        labels[key]=text.toPlainText().remove(QChar::ObjectReplacementCharacter).trimmed();
+                    }
+                    for(auto* widget:dialog->findChildren<QWidget*>()){
+                        const auto key=widget->property("performance_field").toString();
+                        if(key.isEmpty())continue;
+                        if(!widget->toolTip().isEmpty())feedback[key]=widget->toolTip();
+                        if(auto* combo=qobject_cast<QComboBox*>(widget)){
+                            QJsonArray entries;
+                            for(int i=0;i<combo->count();++i)entries.append(combo->itemText(i));
+                            choices[key]=entries;
+                        }
+                    }
+                    return QJsonObject{{"language",uiLanguage()},{"labels",labels},{"choices",choices},{"feedback",feedback},
+                        {"values",dialog->inputs()["values"]},{"title",dialog->windowTitle()}};
+                };
+                QApplication::setActiveWindow(dialog);
+                auto* focused=dialog->focusWidget();if(!focused)focused=dialog;
+                const auto chord=[focused]{
+                    QKeyEvent press(QEvent::KeyPress,Qt::Key_L,Qt::ControlModifier|Qt::ShiftModifier,"l");
+                    QApplication::sendEvent(focused,&press);
+                    QKeyEvent release(QEvent::KeyRelease,Qt::Key_L,Qt::NoModifier);
+                    QApplication::sendEvent(focused,&release);
+                };
+                const auto before=observe();chord();const auto after=observe();chord();const auto restored=observe();
+                workflowArtifacts_["calculation_quick_language"]=QJsonArray{before,after,restored};
+                timer->stop();timer->deleteLater();dialog->reject();return;
+            }
             if(performanceRequest_["observe_input_feedback"].toBool()){
                 bool genericHint=false;
                 for(auto* label:performanceDialog_->findChildren<QLabel*>())
@@ -473,6 +537,47 @@ void MainWindow::performanceStep(const QString& operation){
             }
         }
         const auto error=performanceDialog_->property("performance_error").toString();workflowArtifacts_["error"]=error;
+        if(performanceRequest_["observe_result_language"].toBool()&&error.isEmpty()&&!performanceDialog_->result().isEmpty()){
+            auto* dialog=performanceDialog_;
+            QComboBox* series=nullptr;
+            for(auto* combo:dialog->findChildren<QComboBox*>())if(combo->property("performance_series").toBool()){series=combo;break;}
+            auto* table=dialog->findChild<QTableView*>();CalculationPlot* plot=nullptr;
+            for(auto* widget:dialog->findChildren<QWidget*>())if(auto* candidate=dynamic_cast<CalculationPlot*>(widget)){plot=candidate;break;}
+            auto* report=dialog->findChild<QTextBrowser*>("PerformanceReport");
+            auto* status=dialog->findChild<QLabel*>("PerformanceStatus");
+            if(series&&series->count()>1)series->setCurrentIndex(1);
+            for(auto* button:dialog->findChildren<QToolButton*>())if(button->property("chart_curve")==QVariant(0)){button->setChecked(false);break;}
+            if(table&&table->model()->rowCount())table->setCurrentIndex(table->model()->index(std::min(1,table->model()->rowCount()-1),0));
+            const auto initialResult=dialog->result();
+            const auto observe=[&]{
+                QJsonArray headings,names,chartCaptions,visible;
+                if(table)for(int col=0;col<table->model()->columnCount();++col)headings.append(table->model()->headerData(col,Qt::Horizontal).toString());
+                if(series)for(int i=0;i<series->count();++i)names.append(series->itemText(i));
+                const auto chart=plot?plot->evidence():QJsonObject{};
+                for(const auto& value:chart["curves"].toArray()){
+                    const auto curve=value.toObject();chartCaptions.append(QJsonArray{curve["name"],curve["axis"]});visible.append(curve["visible"]);
+                }
+                return QJsonObject{{"language",uiLanguage()},{"title",dialog->windowTitle()},{"table_headers",headings},{"dataset_names",names},
+                    {"chart_captions",chartCaptions},{"report",report?report->toPlainText():QString{}},{"status",status?status->text():QString{}},
+                    {"series_index",series?series->currentIndex():-1},{"table_row",table?table->currentIndex().row():-1},
+                    {"curves_visible",visible},{"chart_data",chart["numeric_sha256"]},{"inputs",dialog->inputs()["values"]}};
+            };
+            QApplication::setActiveWindow(dialog);
+            const auto chord=[dialog]{
+                auto* target=dialog->focusWidget();if(!target)target=dialog;
+                QKeyEvent press(QEvent::KeyPress,Qt::Key_L,Qt::ControlModifier|Qt::ShiftModifier,"l");QApplication::sendEvent(target,&press);
+                QKeyEvent release(QEvent::KeyRelease,Qt::Key_L,Qt::NoModifier);QApplication::sendEvent(target,&release);
+            };
+            const auto before=observe();chord();const auto after=observe();chord();const auto restored=observe();
+            workflowArtifacts_["calculation_result_language"]=QJsonArray{before,after,restored};
+            workflowCase("language-keeps-complete-calculation",dialog->result()==initialResult);
+            timer->stop();timer->deleteLater();dialog->reject();return;
+        }
+
+        if(performanceRequest_["expect_preview_error"].toBool()){
+            if(auto* label=performanceDialog_->findChild<QLabel*>("PerformanceStatus"))
+                workflowArtifacts_["calculation_feedback"]=QJsonObject{{"text",label->text()},{"visible",label->isVisible()}};
+        }
         if(performanceRequest_["cancel"].toBool()||performanceRequest_["expect_error"].toBool())workflowCase("failure-reported",!error.isEmpty());
         else{
             workflowCase("calculation-delivered",!performanceDialog_->result().isEmpty()&&error.isEmpty(),error);

@@ -11,7 +11,9 @@
 #include <QUuid>
 #include <QDataStream>
 #include <QBuffer>
+#include <climits>
 #include <cmath>
+#include <limits>
 #include <stdexcept>
 
 namespace fs {
@@ -221,6 +223,8 @@ ModelSnapshot ModelSnapshot::fromBytes(const QByteArray& data) {
         for (const auto& id : ids) face.points.append(integer(id, "face point ID"));
         result.faces.append(std::move(face));
     }
+    result.lastLayerNumber=root.value("last_layer_number").toInt(-1);
+    result.newLayerColor=root.value("new_layer_color").toInt();
     const auto layerArray = array(root["layers"], "layers", 100000);
     result.layers.reserve(layerArray.size());
     for (const auto& item : layerArray) {
@@ -235,6 +239,11 @@ ModelSnapshot ModelSnapshot::fromBytes(const QByteArray& data) {
         if (l.contains("thickness")) layer.thickness = number(l["thickness"], "layer.thickness");
         if (l.contains("material_density")) layer.materialDensity = number(l["material_density"], "layer.material_density");
         if (l.contains("alpha_blend")) layer.alphaBlend=int(integer(l["alpha_blend"],"layer.alpha_blend",0,255));
+        if (l.contains("default_name_number")) {
+            const auto n=l["default_name_number"].toDouble(std::numeric_limits<double>::quiet_NaN());
+            if(!std::isfinite(n)||n<INT_MIN||n>INT_MAX||std::trunc(n)!=n)invalid("Invalid generated layer name number");
+            layer.defaultNameNumber=int(n);
+        }
         result.layers.append(layer);
     }
     if(root.contains("layer_order")){

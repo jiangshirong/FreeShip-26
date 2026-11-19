@@ -1,4 +1,5 @@
 #include "app/main_window.h"
+#include "app/studio_ui.h"
 #include "app/ui_language.h"
 #include "app/preferences_dialog.h"
 #include "app/preferences_store.h"
@@ -46,6 +47,7 @@ class NumericWheelFilter final : public QObject {
 
 int main(int argc, char** argv) {
     QApplication app(argc, argv);
+    applyStudioToolTipPolicy();
     NumericWheelFilter numericWheelFilter;
     app.installEventFilter(&numericWheelFilter);
     QCoreApplication::setApplicationName("FreeShip_26 Qt"); // Stable settings identity.
