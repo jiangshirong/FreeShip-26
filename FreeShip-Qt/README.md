@@ -154,6 +154,4 @@ FreeShip 26 builds on FREE!ship by Martijn van Engeland, FREE!ship Plus by Timos
 
 The project is released under the [GNU General Public License, version 3 or later](COPYING) (GPLv3+). The installer ships upstream external tools such as hship, CALCPROP, RVRSSHIP and ADD_MASS as supplied. These tools are separate from the project’s GPL source code. ADD_MASS is limited to educational and non-commercial use. See [external calculation tools](docs/CALCULATION-TOOLS.md).
 
-AI development contributors: [Claude Code](https://github.com/anthropics/claude-code) and [Codex](https://github.com/openai/codex).
-
 <p align="right"><a href="#top">Back to top ↑</a></p>

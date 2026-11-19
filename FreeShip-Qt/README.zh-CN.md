@@ -154,6 +154,4 @@ FreeShip 26 建立在 FREE!ship（Martijn van Engeland）、FREE!ship Plus（Tim
 
 本项目以 [GNU 通用公共许可证第 3 版或更高版本](COPYING)（GPLv3+）发布。安装包附带的 hship、CALCPROP、RVRSSHIP、ADD_MASS 等外部计算程序来自上游，按原样分发，不属于 GPL 源码；其中 ADD_MASS 仅限教育和非商业用途。详见 [外部计算工具](docs/CALCULATION-TOOLS.md)。
 
-AI 开发贡献者：[Claude Code](https://github.com/anthropics/claude-code)、[Codex](https://github.com/openai/codex)。
-
 <p align="right"><a href="#top">回到顶部 ↑</a></p>
