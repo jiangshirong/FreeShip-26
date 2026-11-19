@@ -4,6 +4,8 @@
 #include "performance_dialog.h"
 #include "studio_ui.h"
 #include "ui_language.h"
+#include <QApplication>
+#include <QKeyEvent>
 #include <QMessageBox>
 #include <QShortcut>
 #include <QStatusBar>
@@ -28,6 +30,22 @@ void MainWindow::updatePreferenceAppearance(){
     activatePreferences(preferences_);const auto colors=preferenceAppearance(preferences_);
     for(auto* view:views_)view->setGraphicPreferences(colors);
     if(studioBar_)studioBar_->setIconSize(preferences_.value("tool_icon_size").toInt(20));
+}
+bool MainWindow::eventFilter(QObject* watched,QEvent* event){
+    // Qt can block a shortcut owned by the main window while a modal child is active.
+    // Handle the same binding at the focused widget, without intercepting other keys.
+    if(languageShortcut_&&languageShortcut_->isEnabled()&&
+       (event->type()==QEvent::ShortcutOverride||event->type()==QEvent::KeyPress)){
+        const auto* key=static_cast<QKeyEvent*>(event);
+        if(QKeySequence(key->keyCombination())==languageShortcut_->key()){
+            for(auto* owner=watched;owner;owner=owner->parent())if(owner==this){
+                event->accept();
+                if(event->type()==QEvent::KeyPress&&!key->isAutoRepeat())switchUiLanguage();
+                return true;
+            }
+        }
+    }
+    return QMainWindow::eventFilter(watched,event);
 }
 void MainWindow::switchUiLanguage(){
     if(!preferencesStore_||preferencesPending_)return;

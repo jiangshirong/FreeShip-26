@@ -894,6 +894,8 @@ QString PerformanceDialog::reportText(bool html)const{
             if(value.isDouble())results.rows.append({uiText(label),reportValue(value),notation::unit(unit)});
         }
         text+=report::render(results,html);
+        if(scalars["target_reached"].toBool()&&scalars["target_speed_kn"].isDouble())
+            text+=report::metadata(QString(uiText("已达到目标航速：%1 kn")).arg(scalars["target_speed_kn"].toDouble(),0,'f',3),html);
     }
     else if(method_=="maneuver")text+=report::maneuverResult(result_["text"].toString(),html);
     else if(datasets.isEmpty())text+=legacyResult(result_["text"].toString(),html,result_["warnings"].toArray());

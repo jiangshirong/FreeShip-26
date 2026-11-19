@@ -440,7 +440,7 @@ struct HullView::State {
     }
     bool fitted=true;
     double yaw=-30*Pi/180,pitch=25*Pi/180;
-    enum class Gesture { None, Pan, Rotate, Move, Box, BlockedMove, Background } gesture=Gesture::None;
+    enum class Gesture { None, Pan, PendingRotate, Rotate, Move, Box, BlockedMove, Background } gesture=Gesture::None;
     BackgroundMode backgroundMode=BackgroundMode::None;
     fs::BackgroundImage backgroundStart,backgroundPreview;
     bool backgroundPreviewing=false;int backgroundSide=0;
@@ -1693,89 +1693,85 @@ void HullView::mousePressEvent(QMouseEvent* event) {
         if(state_->backgroundSide>=0){state_->backgroundStart=*b;state_->backgroundPreview=*b;state_->backgroundPreviewing=true;state_->gesture=State::Gesture::Background;setCursor(Qt::SizeAllCursor);}
         event->accept();return;
     }
-    if(event->button()==Qt::LeftButton && state_->kind!=HullEntity::Point) {
-        const auto id=entityAt(event->position());
-        if(!id&&state_->projection==HullProjection::Perspective&&event->modifiers()==Qt::NoModifier){
-            state_->gesture=State::Gesture::Rotate;
-            setCursor(Qt::SizeAllCursor);
-            event->accept();
-            return;
-        }
-        const bool additive=event->modifiers().testFlag(Qt::ControlModifier);
-        auto ids=additive?state_->entities:QSet<fs::EntityId>{};
-        if(id){if(ids.contains(id))ids.remove(id);else ids.insert(id);}
-        setSelectedEntities(ids);
-        if(onEntitySelectionChanged)onEntitySelectionChanged(state_->kind,state_->entities);
-        event->accept();return;
-    }
     if (event->button()==Qt::RightButton) {
         state_->lastRightDragged=false;
         state_->gesture=State::Gesture::Pan;setCursor(Qt::ClosedHandCursor);
     } else {
-        auto id=state_->hit(event->position());
-        const bool additive=event->modifiers().testFlag(Qt::ControlModifier);
-        QVector<fs::EntityId> groupPick;fs::Vec3 groupCenter{};
-        if(!id&&state_->snapshot&&state_->display&&state_->controlNetVisible&&!state_->fillVisible){
-            for(const auto& g:state_->snapshot->pointGroups){
-                if(g.points.isEmpty()||g.name.isEmpty())continue;fs::Vec3 center{};bool visible=true;
-                for(auto p:g.points){auto at=state_->display->pointIndices.constFind(p);if(at==state_->display->pointIndices.cend()){visible=false;break;}
-                    auto pos=state_->displayedPosition(state_->display->points[*at]);center.x+=pos.x;center.y+=pos.y;center.z+=pos.z;}
-                if(!visible)continue;center.x/=g.points.size();center.y/=g.points.size();center.z/=g.points.size();
-                if(QLineF(project(state_->controlPosition(center)),event->position()).length()<=7){groupPick=g.points;groupCenter=center;id=g.points.first();break;}
-            }
-        }
-        if (state_->projection==HullProjection::Perspective && !id && event->modifiers()==Qt::NoModifier) {
-            state_->gesture=State::Gesture::Rotate;setCursor(Qt::SizeAllCursor);
-        } else if (!id) {
-            state_->gesture=State::Gesture::Box;
-            state_->boxBase=additive?state_->selection:QSet<fs::EntityId>{};
-            state_->boxPreview=state_->boxBase;
-            setCursor(Qt::CrossCursor);
-        } else {
-            if(!groupPick.isEmpty()){
-                QSet<fs::EntityId> members(groupPick.begin(),groupPick.end());
-                if(!additive)state_->selection=members;
-                else if((members-state_->selection).isEmpty())state_->selection.subtract(members);
-                else state_->selection.unite(members);
-            }else if (additive) {
-                if (state_->selection.contains(id)) state_->selection.remove(id);
-                else state_->selection.insert(id);
-            } else if (!state_->selection.contains(id)) state_->selection={id};
-            if (state_->selection.contains(id)) state_->selected=id;
-            state_->pruneSelection();
-            notifySelectionChanged();
-            // Modifier clicks toggle membership; they do not also start a move.
-            if (!additive && state_->editingEnabled && state_->selection.contains(id) &&
-                state_->display && state_->projection!=HullProjection::Perspective) {
-                auto ids=state_->selection.values();
-                std::sort(ids.begin(),ids.end());
-                for (auto selected:ids) {
-                    const auto found=state_->display->pointIndices.constFind(selected);
-                    if (found==state_->display->pointIndices.cend()) {
-                        state_->blockedReason=QStringLiteral("所选点包含不可见点，不能整体移动。");break;
-                    }
-                    const auto& point=state_->display->points[found.value()];
-                    if (point.locked) {
-                        state_->blockedReason=QStringLiteral("所选点包含锁定点，不能整体移动。");break;
-                    }
-                    if (ids.size()>1 && !point.batchMovable) {
-                        state_->blockedReason=QStringLiteral("所选点包含约束点，不能整体移动，请逐点编辑。");break;
-                    }
-                    state_->dragStarts.append({point.id,point.position});
-                }
-                if (state_->blockedReason.isEmpty()) {
-                    const auto* anchor=state_->snapshot->point(id);
-                    state_->dragBodySign=state_->splitBody()&&anchor&&anchor->position.x<=fs::presentation::splitLocation(*state_->snapshot)?-1:1;
-                    if(!groupPick.isEmpty())state_->dragBodySign=state_->splitBody()&&groupCenter.x<=fs::presentation::splitLocation(*state_->snapshot)?-1:1;
-                    state_->gesture=State::Gesture::Move;setCursor(Qt::CrossCursor);
-                } else {
-                    state_->dragStarts.clear();state_->gesture=State::Gesture::BlockedMove;
-                }
-            }
-            update();
-        }
+        const bool control=event->modifiers().testFlag(Qt::ControlModifier);
+        if(control&&state_->projection==HullProjection::Perspective)
+            state_->gesture=State::Gesture::PendingRotate;
+        else selectWithLeftButton(event->position(),control);
     }
     event->accept();
+}
+void HullView::selectWithLeftButton(QPointF position,bool additive) {
+    if(state_->kind!=HullEntity::Point) {
+        const auto id=entityAt(position);
+        auto ids=additive?state_->entities:QSet<fs::EntityId>{};
+        if(id){if(ids.contains(id))ids.remove(id);else ids.insert(id);}
+        setSelectedEntities(ids);
+        if(onEntitySelectionChanged)onEntitySelectionChanged(state_->kind,state_->entities);
+        return;
+    }
+    auto id=state_->hit(position);
+    QVector<fs::EntityId> groupPick;fs::Vec3 groupCenter{};
+    if(!id&&state_->snapshot&&state_->display&&state_->controlNetVisible&&!state_->fillVisible){
+        for(const auto& g:state_->snapshot->pointGroups){
+            if(g.points.isEmpty()||g.name.isEmpty())continue;fs::Vec3 center{};bool visible=true;
+            for(auto p:g.points){auto at=state_->display->pointIndices.constFind(p);if(at==state_->display->pointIndices.cend()){visible=false;break;}
+                auto pos=state_->displayedPosition(state_->display->points[*at]);center.x+=pos.x;center.y+=pos.y;center.z+=pos.z;}
+            if(!visible)continue;center.x/=g.points.size();center.y/=g.points.size();center.z/=g.points.size();
+            if(QLineF(project(state_->controlPosition(center)),position).length()<=7){groupPick=g.points;groupCenter=center;id=g.points.first();break;}
+        }
+    }
+    if (!id) {
+        state_->gesture=State::Gesture::Box;
+        state_->boxBase=additive?state_->selection:QSet<fs::EntityId>{};
+        state_->boxPreview=state_->boxBase;
+        setCursor(Qt::CrossCursor);
+    } else {
+        if(!groupPick.isEmpty()){
+            QSet<fs::EntityId> members(groupPick.begin(),groupPick.end());
+            if(!additive)state_->selection=members;
+            else if((members-state_->selection).isEmpty())state_->selection.subtract(members);
+            else state_->selection.unite(members);
+        }else if (additive) {
+            if (state_->selection.contains(id)) state_->selection.remove(id);
+            else state_->selection.insert(id);
+        } else if (!state_->selection.contains(id)) state_->selection={id};
+        if (state_->selection.contains(id)) state_->selected=id;
+        state_->pruneSelection();
+        notifySelectionChanged();
+        // Modifier clicks toggle membership; they do not also start a move.
+        if (!additive && state_->editingEnabled && state_->selection.contains(id) &&
+            state_->display && state_->projection!=HullProjection::Perspective) {
+            auto ids=state_->selection.values();
+            std::sort(ids.begin(),ids.end());
+            for (auto selected:ids) {
+                const auto found=state_->display->pointIndices.constFind(selected);
+                if (found==state_->display->pointIndices.cend()) {
+                    state_->blockedReason=QStringLiteral("所选点包含不可见点，不能整体移动。");break;
+                }
+                const auto& point=state_->display->points[found.value()];
+                if (point.locked) {
+                    state_->blockedReason=QStringLiteral("所选点包含锁定点，不能整体移动。");break;
+                }
+                if (ids.size()>1 && !point.batchMovable) {
+                    state_->blockedReason=QStringLiteral("所选点包含约束点，不能整体移动，请逐点编辑。");break;
+                }
+                state_->dragStarts.append({point.id,point.position});
+            }
+            if (state_->blockedReason.isEmpty()) {
+                const auto* anchor=state_->snapshot->point(id);
+                state_->dragBodySign=state_->splitBody()&&anchor&&anchor->position.x<=fs::presentation::splitLocation(*state_->snapshot)?-1:1;
+                if(!groupPick.isEmpty())state_->dragBodySign=state_->splitBody()&&groupCenter.x<=fs::presentation::splitLocation(*state_->snapshot)?-1:1;
+                state_->gesture=State::Gesture::Move;setCursor(Qt::CrossCursor);
+            } else {
+                state_->dragStarts.clear();state_->gesture=State::Gesture::BlockedMove;
+            }
+        }
+        update();
+    }
 }
 void HullView::mouseMoveEvent(QMouseEvent* event) {
     const auto delta=event->position()-state_->last;
@@ -1787,10 +1783,20 @@ void HullView::mouseMoveEvent(QMouseEvent* event) {
         }break;
     }
     case State::Gesture::Pan:state_->moved|=(event->position()-state_->press).manhattanLength()>=3;panBy(delta);break;
-    case State::Gesture::Rotate:
-        state_->yaw+=delta.x()*0.008;
-        state_->pitch=qBound(-Pi*0.48,state_->pitch+delta.y()*0.008,Pi*0.48);
+    case State::Gesture::PendingRotate:
+    case State::Gesture::Rotate: {
+        auto rotationDelta=delta;
+        if(state_->gesture==State::Gesture::PendingRotate){
+            // Distinguish Ctrl-click selection from a drag without selecting
+            // the object underneath the start of a camera gesture.
+            rotationDelta=event->position()-state_->press;
+            if(rotationDelta.manhattanLength()<3)break;
+            state_->gesture=State::Gesture::Rotate;setCursor(Qt::SizeAllCursor);
+        }
+        state_->yaw+=rotationDelta.x()*0.008;
+        state_->pitch=qBound(-Pi*0.48,state_->pitch+rotationDelta.y()*0.008,Pi*0.48);
         state_->fitted=false;++state_->cameraRevision;update();break;
+    }
     case State::Gesture::Move: {
         const auto total=event->position()-state_->press;
         // A selection click does not create an undo step due to small hand jitter.
@@ -1836,6 +1842,8 @@ void HullView::mouseReleaseEvent(QMouseEvent* event) {
     }
     // Qt can compress move messages; use the actual release position as well.
     if (state_->gesture!=State::Gesture::None && event->position()!=state_->last) mouseMoveEvent(event);
+    if(event->button()==Qt::LeftButton&&state_->gesture==State::Gesture::PendingRotate)
+        selectWithLeftButton(state_->press,true);
     QVector<fs::PointMove> moves;
     QJsonObject backgroundChanges;
     if(state_->gesture==State::Gesture::Background&&state_->moved&&state_->editingEnabled){
@@ -1875,6 +1883,8 @@ void HullView::mouseReleaseEvent(QMouseEvent* event) {
 }
 void HullView::mouseDoubleClickEvent(QMouseEvent* event) {
     if(state_->backgroundMode!=BackgroundMode::None||state_->flowPlacement||state_->pointPlacement){event->accept();return;}
+    if(event->button()==Qt::LeftButton&&state_->projection==HullProjection::Perspective&&
+        event->modifiers().testFlag(Qt::ControlModifier)){mousePressEvent(event);return;}
     if (event->button()==Qt::LeftButton && !state_->hit(event->position())) {cancelGesture();fit();event->accept();}
     else QWidget::mouseDoubleClickEvent(event);
 }

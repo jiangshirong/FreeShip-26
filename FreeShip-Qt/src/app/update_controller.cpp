@@ -133,7 +133,7 @@ public:
 
     explicit StudioUpdateDialog(QWidget* owner):QDialog(owner){
         setObjectName("FreeShipUpdate");
-        setWindowTitle(uiText("更新"));
+        bindUiText(this,"windowTitle","更新");
         setStudioWindowIcon(this,"ImportFile");
         setAttribute(Qt::WA_DontShowOnScreen,owner->testAttribute(Qt::WA_DontShowOnScreen));
         setMinimumSize(690,355);
@@ -163,7 +163,9 @@ public:
         auto* current=new QHBoxLayout(installedGroup);
         current->setContentsMargins(0,0,0,0);
         current->setSpacing(6);
-        current->addWidget(new QLabel(uiText("当前版本"),installedGroup));
+        auto* currentLabel=new QLabel(installedGroup);
+        bindUiText(currentLabel,"text","当前版本");
+        current->addWidget(currentLabel);
         installed=textLabel(installedGroup,"UpdateInstalledVersion");
         installed->setWordWrap(false);
         current->addWidget(installed);
@@ -172,7 +174,7 @@ public:
         left->addLayout(header);
         notes=new QTextBrowser(this);
         notes->setObjectName("UpdateReleaseNotes");
-        notes->setAccessibleName(uiText("更新内容"));
+        bindUiText(notes,"accessibleName","更新内容");
         notes->setOpenLinks(false);
         notes->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
         notes->setWordWrapMode(QTextOption::WrapAtWordBoundaryOrAnywhere);
@@ -189,12 +191,14 @@ public:
         percent=textLabel(card,"UpdateDownloadPercent");emphasize(percent,5);
         statusRow->addWidget(status,1);statusRow->addWidget(percent);
         cardLayout->addLayout(statusRow);
-        bar=new QProgressBar(card);bar->setObjectName("UpdateDownloadBar");bar->setAccessibleName(uiText("更新下载进度"));
+        bar=new QProgressBar(card);bar->setObjectName("UpdateDownloadBar");
+        bindUiText(bar,"accessibleName","更新下载进度");
         bar->setFixedHeight(8);bar->setTextVisible(false);
         cardLayout->addWidget(bar);
         const auto stat=[&](const char* heading,const char* name){
             auto* row=new QHBoxLayout;
-            auto* label=new QLabel(uiText(heading),card);
+            auto* label=new QLabel(card);
+            bindUiText(label,"text",QString::fromUtf8(heading));
             auto* value=textLabel(card,name);value->setAlignment(Qt::AlignRight|Qt::AlignVCenter);
             row->addWidget(label);row->addWidget(value,1);
             cardLayout->addLayout(row);
@@ -219,7 +223,7 @@ struct StudioUpdateController::Impl {
     QPointer<QProcess> process;
     QList<QPointer<QPushButton>> entryButtons;
     std::function<void(std::function<void()>)> save;
-    QString state,helper,report,version,installedVersion,error,lastMode,progressStage,notesHtml;
+    QString state,helper,report,version,installedVersion,errorSource,lastMode,progressStage,notesHtml;
     QJsonObject releaseNotes;
     bool workflow=false;
     qint64 total=-1,downloaded=0,speed=0;
@@ -245,7 +249,7 @@ struct StudioUpdateController::Impl {
         else if(state=="downloading")label=verifying?uiText("正在校验并准备安装包…"):
             progressStage=="preparing"?uiText("正在计算所需下载量…"):uiText("正在下载更新…");
         else if(state=="not_configured")label=uiText("更新服务不可用");
-        window->status->setText(error.isEmpty()?label:error);
+        window->status->setText(errorSource.isEmpty()?label:uiText(errorSource));
         const int value=state=="ready"?100:total>0?int(downloaded*100/total):0;
         window->bar->setRange(0,(state=="downloading"&&total<0)||verifying?0:100);
         window->bar->setValue(value);
@@ -308,7 +312,7 @@ struct StudioUpdateController::Impl {
     void run(const QString& mode){
         if(process)return;
         lastMode=mode;self->setProperty("update_requested_mode",mode);
-        error.clear();
+        errorSource.clear();
         if(mode=="--download"){state="downloading";speed=0;progressStage="preparing";}
         if(workflow){sync();return;}
         if(!QFile::exists(helper)){state="not_configured";sync();return;}
@@ -318,7 +322,7 @@ struct StudioUpdateController::Impl {
         if(mode=="--download"){
             const QString name="Local\\FreeShip26-Pause-"+QUuid::createUuid().toString(QUuid::WithoutBraces);
             pauseEvent=CreateEventW(nullptr,TRUE,FALSE,reinterpret_cast<LPCWSTR>(name.utf16()));
-            if(!pauseEvent){self->receiveReport({{"status","error"},{"error",uiText("无法启动更新程序")}});return;}
+            if(!pauseEvent){self->receiveReport({{"status","error"},{"error",QStringLiteral("无法启动更新程序")}});return;}
             args<<"--pause-event"<<name;
         }
 #endif
@@ -342,7 +346,7 @@ struct StudioUpdateController::Impl {
             file.close();QFile::remove(report);
             if(result.isEmpty())result={{"status",state=="pausing"?"paused":"error"},
                 {"error_code",running->property("update_check_timed_out").toBool()?"check_timeout":""},
-                {"error",uiText("检查更新失败，请重试")}};
+                {"error",QStringLiteral("检查更新失败，请重试")}};
             process=nullptr;running->deleteLater();self->receiveReport(result);
         };
         QObject::connect(running,qOverload<int,QProcess::ExitStatus>(&QProcess::finished),self,[done](int,QProcess::ExitStatus){done();});
@@ -363,7 +367,7 @@ struct StudioUpdateController::Impl {
             if(!alive||!owner)return;
 #ifdef Q_OS_WIN
             QDir().mkpath(work());const auto runner=work()+"/updater-"+QUuid::createUuid().toString(QUuid::WithoutBraces)+".exe";
-            if(!QFile::copy(helper,runner)){error=uiText("无法准备更新程序");showWindow();return;}
+            if(!QFile::copy(helper,runner)){errorSource=QStringLiteral("无法准备更新程序");showWindow();return;}
 #else
             // Run in place: it needs the bundled Qt libraries; dpkg may replace the files it has open.
             const auto runner=helper;
@@ -371,7 +375,7 @@ struct StudioUpdateController::Impl {
             if(window)window->hide();
             if(!owner->close()){if(runner!=helper)QFile::remove(runner);showWindow();return;}
             if(!QProcess::startDetached(runner,{"--install","--parent",QString::number(QCoreApplication::applicationPid()),"--report",work()+"/install-result.json"})){
-                owner->show();if(runner!=helper)QFile::remove(runner);error=uiText("无法启动更新程序");showWindow();
+                owner->show();if(runner!=helper)QFile::remove(runner);errorSource=QStringLiteral("无法启动更新程序");showWindow();
             }
         });
     }
@@ -385,6 +389,9 @@ StudioUpdateController::StudioUpdateController(QWidget* owner,QAction* about,boo
         impl_->installedVersion=data["release_version"].toString();
     }
     impl_->helper=fs::platform::siblingExecutable("FreeShipUpdater");impl_->sync();
+    // The signed report already contains all available locales. Re-render it
+    // and the dynamic transfer labels without touching the running updater.
+    bindUiRefresh(this,[this]{if(impl_->window)impl_->sync();});
 }
 StudioUpdateController::~StudioUpdateController(){
     if(auto* child=impl_->process.data()){
@@ -441,7 +448,7 @@ void StudioUpdateController::receiveReport(const QJsonObject& result){
     if(changed||received=="available"||received=="current"||received=="not_configured"||result.contains("release_notes"))
         impl_->releaseNotes=result.value("release_notes").toObject();
     impl_->version=version;impl_->installedVersion=result.value("current_version").toString(impl_->installedVersion);
-    impl_->error=result.value("error_code")=="check_timeout"?QString(uiText("检查更新超时，请重试。")):uiText(result.value("error").toString());
+    impl_->errorSource=result.value("error_code")=="check_timeout"?QStringLiteral("检查更新超时，请重试。"):result.value("error").toString();
     if(changed||received=="current"||received=="not_configured"){impl_->total=-1;impl_->downloaded=0;}
     if(const auto total=result.value("transfer_total_bytes").toInteger(-1), retained=result.value("downloaded_bytes").toInteger(-1);
        total>=0&&total<=(1LL<<40)&&retained>=0&&retained<=total){
@@ -465,7 +472,7 @@ void StudioUpdateController::schedule(){
         QFile last(impl_->work()+"/install-result.json");if(last.open(QIODevice::ReadOnly)){
             const auto result=QJsonDocument::fromJson(last.readAll()).object();last.close();
             if(result.value("status").toString()=="install_failed"||result.value("status").toString()=="error"){
-                impl_->state="ready";impl_->error=uiText(result.value("error").toString("更新安装失败"));impl_->sync();
+                impl_->state="ready";impl_->errorSource=result.value("error").toString("更新安装失败");impl_->sync();
             }
             QFile::remove(impl_->work()+"/previous-install-result.json");last.rename(impl_->work()+"/previous-install-result.json");
         }
@@ -476,6 +483,7 @@ void StudioUpdateController::schedule(){
     connect(repeat,&QTimer::timeout,this,[this]{if(QSettings().value("updates/automatic",true).toBool())impl_->run("--check");});repeat->start();
 }
 void installStudioUpdates(QWidget* owner,QAction* about,bool workflow,const std::function<void(std::function<void()>)>& save){
+    about->setProperty("studio_update_badge",true);
     auto* controller=new StudioUpdateController(owner,about,workflow,save);
 #if defined(Q_OS_WIN)||defined(Q_OS_LINUX)
     controller->schedule();

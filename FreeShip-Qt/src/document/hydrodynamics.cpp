@@ -360,10 +360,10 @@ void Calculation::acceleration(const QString &work){
     const QString names[]={"距离","航速","桨转速 × 0.1","推力","转矩"},units[]={"n mile","kn","0.1 × r/min","kN","kN·m"};for(int i=0;i<5;++i)curve(names[i],"时间 (s)",units[i],points[i]);
     scalars={{"time_s",final[0]},{"distance_m",final[1]},{"speed_m_s",final[2]},{"shaft_rpm",std::abs(final[3])}};
     if(targetEnabled){scalars["target_speed_kn"]=targetKn;scalars["target_reached"]=reached;scalars["solver_stopped_at_target"]=solverStoppedAtTarget;scalars["endpoint_interpolated"]=true;}
-    report=QString("任务 %1\n时间 (s)：%2\n距离 (m)：%3\n末速 (m/s)：%4\n末转速 (r/min)：%5\n").arg(int(d(18))).arg(final[0]).arg(final[1]).arg(final[2]).arg(std::abs(final[3]));
-    if(targetEnabled)report+=QString("已达到目标航速：%1 kn\n").arg(targetKn,0,'f',3);
+    report=report_language::text("任务 %1\n时间 (s)：%2\n距离 (m)：%3\n末速 (m/s)：%4\n末转速 (r/min)：%5\n",{}).arg(int(d(18))).arg(final[0]).arg(final[1]).arg(final[2]).arg(std::abs(final[3]));
+    if(targetEnabled)report+=report_language::text("已达到目标航速：%1 kn",{}).arg(targetKn,0,'f',3)+'\n';
     scalars["engine_inertia_kg_m2"]=double(d(17));
-    report+=QString("主机等效惯性矩 (kg·m²，单根桨轴基准)：%1\n求解器另加桨参数相关惯性项。原输入数值保持不变。\n").arg(d(17));
+    report+=report_language::text("主机等效惯性矩 (kg·m²，单根桨轴基准)：%1\n求解器另加桨参数相关惯性项。原输入数值保持不变。\n",{}).arg(d(17));
 }
 }
 bool nativeHydrodynamics(const QString &m){return tables()["schema"].toObject().contains(m);}

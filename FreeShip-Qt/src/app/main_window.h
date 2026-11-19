@@ -68,6 +68,7 @@ public:
     void verifyViewport(const QString& model,const QString& output);
     void verifyShading(const QString& path,const QString& output);
 protected:
+    bool eventFilter(QObject*,QEvent*) override;
     void changeEvent(QEvent*) override;
     void closeEvent(QCloseEvent*) override;
     void resizeEvent(QResizeEvent*) override;

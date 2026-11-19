@@ -27,65 +27,83 @@ namespace studio_motion {
 namespace {
 double clamp(double x){return std::max(0.,std::min(1.,x));}
 constexpr int VerticalButtonHorizontalPadding=8,VerticalButtonVerticalPadding=5,VerticalButtonIconGap=6;
+constexpr int BadgeDiameter=9,BadgeRightInset=5,BadgeVerticalInset=4;
 
-struct VerticalLabel {
+bool isVertical(const QToolButton& button){return button.property("studio_vertical_toolbar_label").toBool();}
+int verticalBadgeReserve(const QToolButton& button){
+    // Keep space for the update dot even when idle, so its arrival never moves the label.
+    return button.defaultAction()&&button.defaultAction()->property("studio_update_badge").toBool()?
+        BadgeDiameter+BadgeVerticalInset:0;
+}
+
+struct VerticalGlyph {
     QString text;
-    QStringList upright;
-    QSize size;
-    int step;
+    QRectF bounds;
+    bool rotated=false;
+    qreal nudge=0;
+};
+struct VerticalLabel {
+    QList<VerticalGlyph> glyphs;
+    QSizeF size;
+    qreal step=0;
 };
 
-VerticalLabel verticalLabel(const QString& text,const QFontMetrics& metrics){
-    VerticalLabel result{text,{},QSize(metrics.height(),0),metrics.height()};
+VerticalLabel verticalLabel(const QString& text,const QFontMetricsF& metrics){
     const auto codePoints=text.toUcs4();
     const bool eastAsian=std::any_of(codePoints.begin(),codePoints.end(),[](char32_t codePoint){
         const auto script=QChar::script(codePoint);
         return script==QChar::Script_Han||script==QChar::Script_Hiragana||script==QChar::Script_Katakana||script==QChar::Script_Hangul;
     });
+    const auto bounds=[&](const QString& line){
+        return metrics.boundingRect(line).united(QRectF(0,-metrics.ascent(),metrics.horizontalAdvance(line),metrics.height()));
+    };
+    VerticalLabel result;
     if(!eastAsian){
-        result.size.setHeight(metrics.horizontalAdvance(text));
+        // Shape an entire word together, preserving bearings at both ends.
+        const auto line=bounds(text);
+        result.glyphs.append({text,line,true});
+        result.size={line.height(),line.width()};
+        result.step=line.width();
         return result;
     }
     QTextBoundaryFinder characters(QTextBoundaryFinder::Grapheme,text);
     qsizetype start=0;
+    qreal width=metrics.height();
+    result.step=metrics.height();
     for(qsizetype end=characters.toNextBoundary();end>=0;end=characters.toNextBoundary()){
-        result.upright.append(text.mid(start,end-start));
+        const auto character=text.mid(start,end-start);
+        const bool rotated=character==QStringLiteral("ー");
+        const auto line=bounds(character);
+        const qreal nudge=QStringView(u"ぁぃぅぇぉっゃゅょゎァィゥェォッャュョヮヵヶ").contains(character)?metrics.height()*.1:0;
+        result.glyphs.append({character,line,rotated,nudge});
+        width=std::max(width,(rotated?line.height():line.width())+2*nudge);
+        result.step=std::max(result.step,(rotated?line.width():line.height())+2*nudge);
         start=end;
     }
-    result.size.setHeight(result.upright.size()*result.step);
+    result.size={width,result.glyphs.size()*result.step};
     return result;
 }
 
-void paintVerticalLabel(QPainter& painter,const QStyleOptionToolButton& option){
-    const auto label=verticalLabel(option.text,option.fontMetrics);
+void paintVerticalLabel(QPainter& painter,const QStyleOptionToolButton& option,int badgeReserve){
+    const auto label=verticalLabel(option.text,QFontMetricsF(painter.font(),painter.device()));
     const bool enabled=option.state.testFlag(QStyle::State_Enabled);
     const auto iconMode=!enabled?QIcon::Disabled:option.state.testFlag(QStyle::State_MouseOver)?QIcon::Active:QIcon::Normal;
     const auto iconState=option.state.testFlag(QStyle::State_On)?QIcon::On:QIcon::Off;
-    const int contentWidth=option.iconSize.width()+VerticalButtonIconGap+label.size.width();
-    const QRect content=QStyle::alignedRect(Qt::LeftToRight,Qt::AlignCenter,{contentWidth,option.rect.height()},option.rect);
-    const QRect iconRect(content.x(),content.center().y()-option.iconSize.height()/2,option.iconSize.width(),option.iconSize.height());
+    const qreal contentWidth=option.iconSize.width()+VerticalButtonIconGap+label.size.width();
+    const QRectF content=QRectF(option.rect).adjusted(0,0,0,-badgeReserve);
+    const int x=qRound(content.center().x()-contentWidth/2);
+    const QRect iconRect(x,qRound(content.center().y()-option.iconSize.height()/2.0),option.iconSize.width(),option.iconSize.height());
     option.icon.paint(&painter,iconRect,Qt::AlignCenter,iconMode,iconState);
     painter.setPen(option.palette.color(enabled?QPalette::Active:QPalette::Disabled,QPalette::ButtonText));
-    const QRect labelRect(iconRect.right()+1+VerticalButtonIconGap,content.y()+(content.height()-label.size.height())/2,
-                         label.size.width(),label.size.height());
-    if(label.upright.isEmpty()){
-        // Keep words shaped normally in alphabetic scripts and turn the line top to bottom.
-        painter.translate(labelRect.x()+labelRect.width(),labelRect.y());painter.rotate(90);
-        painter.drawText(QRect(0,0,labelRect.height(),labelRect.width()),Qt::AlignCenter,label.text);
-        return;
-    }
-    QRect cell(labelRect.x(),labelRect.y(),labelRect.width(),label.step);
-    for(const auto& character:label.upright){
-        if(character==QStringLiteral("ー")){
-            painter.save();painter.translate(cell.center());painter.rotate(90);
-            painter.drawText(QRect(-cell.height()/2,-cell.width()/2,cell.height(),cell.width()),Qt::AlignCenter,character);
-            painter.restore();
-        }else{
-            const bool smallKana=QStringView(u"ぁぃぅぇぉっゃゅょゎァィゥェォッャュョヮヵヶ").contains(character);
-            const int offset=smallKana?label.step/10:0;
-            painter.drawText(cell.translated(offset,-offset),Qt::AlignCenter,character);
-        }
-        cell.translate(0,label.step);
+    QPointF center(x+option.iconSize.width()+VerticalButtonIconGap+label.size.width()/2,
+                   content.center().y()-(label.size.height()-label.step)/2);
+    for(const auto& glyph:label.glyphs){
+        painter.save();
+        painter.translate(center+QPointF(glyph.nudge,-glyph.nudge));
+        if(glyph.rotated)painter.rotate(90);
+        painter.drawText(-glyph.bounds.center(),glyph.text);
+        painter.restore();
+        center.ry()+=label.step;
     }
 }
 // QAbstractAnimation uses Qt's shared animation driver. Retargets preserve the
@@ -163,8 +181,11 @@ protected:
         // cover the interpolated surface with the stylesheet's final checked
         // fill, making an active animation appear to jump instantly.
         QStyleOptionToolButton option;initStyleOption(&option);QPainter label(this);
-        if(property("studio_vertical_toolbar_label").toBool())paintVerticalLabel(label,option);
+        label.setFont(font());
+        label.save();
+        if(isVertical(*this))paintVerticalLabel(label,option,verticalBadgeReserve(*this));
         else style()->drawControl(QStyle::CE_ToolButtonLabel,&option,&label,this);
+        label.restore();
         if(hasUpdate()){
             const auto opacity=badge_.state()==QAbstractAnimation::Running?
                 .72+.28*std::cos(6.283185307179586*badge_.currentValue().toDouble()):1.;
@@ -176,7 +197,10 @@ protected:
     }
 private:
     bool hasUpdate()const{return defaultAction()&&defaultAction()->property("update_available").toBool();}
-    QRectF badgeRect()const{return QRectF(width()-14,4,9,9);}
+    QRectF badgeRect()const{
+        const int y=isVertical(*this)?height()-BadgeVerticalInset-BadgeDiameter:BadgeVerticalInset;
+        return QRectF(width()-BadgeRightInset-BadgeDiameter,y,BadgeDiameter,BadgeDiameter);
+    }
     void syncBadge(){
         const bool animate=isVisible()&&hasUpdate()&&enabled();
         if(animate&&badge_.state()!=QAbstractAnimation::Running)badge_.start();
@@ -453,10 +477,10 @@ void setMenuButtonHovered(QToolButton* button,bool hovered){
     if(auto* motion=dynamic_cast<MotionButton*>(button))motion->setHovered(hovered);
 }
 QSize verticalToolButtonSize(const QToolButton& button){
-    const auto label=verticalLabel(button.text(),button.fontMetrics());
+    const auto label=verticalLabel(button.text(),QFontMetricsF(button.font(),&button));
     const auto icon=button.iconSize();
-    return {icon.width()+VerticalButtonIconGap+label.size.width()+2*VerticalButtonHorizontalPadding,
-            std::max(icon.height(),label.size.height())+2*VerticalButtonVerticalPadding};
+    return {icon.width()+VerticalButtonIconGap+int(std::ceil(label.size.width()))+2*VerticalButtonHorizontalPadding,
+            int(std::ceil(std::max(qreal(icon.height()),label.size.height())))+2*VerticalButtonVerticalPadding+verticalBadgeReserve(button)};
 }
 void installMenu(QMenu* menu){
     if(!menu||menuMotions().contains(menu))return;

@@ -53,6 +53,28 @@ inline QVector<StudioKeyPart> studioKeyParts(const QString& text,const QFont& fo
         }
     }return parts;
 }
+inline void studioPaintKeyPart(QPainter& painter,const StudioKeyPart& part,const QRectF& rect){
+    if(part.key){
+        painter.setBrush(QColor("#b5cbbf"));painter.setPen(Qt::NoPen);painter.drawRoundedRect(rect,5,5);
+        painter.setBrush(QColor("#ffffff"));painter.setPen(QPen(QColor("#cadbd0"),1));painter.drawRoundedRect(rect.adjusted(.5,.5,-.5,-2.5),5,5);
+    }
+    painter.setPen(QColor(part.key?"#254e42":"#688378"));
+    painter.drawText(rect.adjusted(part.key?8:0,part.key?2:0,part.key?-8:0,part.key?-4:0),Qt::AlignCenter|Qt::TextWordWrap,part.text);
+}
+class StudioKeycap final:public QWidget{
+public:
+    explicit StudioKeycap(const QString& key,QWidget* parent=nullptr):QWidget(parent),key_(key){
+        setObjectName("StudioKeycap");setAccessibleName(key);setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
+    }
+    QSize sizeHint()const override{return studioKeyParts(key_,font(),1000).first().rect.size().toSize();}
+protected:
+    void paintEvent(QPaintEvent*)override{
+        QPainter painter(this);painter.setRenderHint(QPainter::Antialiasing);painter.setFont(font());
+        studioPaintKeyPart(painter,{key_,{},true},QRectF(rect()).adjusted(0,0,-.5,-.5));
+    }
+private:
+    QString key_;
+};
 class StudioKeycapDelegate final:public QStyledItemDelegate{
 public:
     explicit StudioKeycapDelegate(QTableWidget* table):QStyledItemDelegate(table),table_(table){}
@@ -62,12 +84,7 @@ public:
         painter->save();painter->setRenderHint(QPainter::Antialiasing);painter->setFont(option.font);
         for(const auto& part:studioKeyParts(index.data().toString(),option.font,option.rect.width())){
             const auto rect=part.rect.translated(option.rect.topLeft());
-            if(part.key){
-                painter->setBrush(QColor("#b5cbbf"));painter->setPen(Qt::NoPen);painter->drawRoundedRect(rect,5,5);
-                painter->setBrush(QColor("#ffffff"));painter->setPen(QPen(QColor("#cadbd0"),1));painter->drawRoundedRect(rect.adjusted(.5,.5,-.5,-2.5),5,5);
-            }
-            painter->setPen(QColor(part.key?"#254e42":"#688378"));
-            painter->drawText(rect.adjusted(part.key?8:0,part.key?2:0,part.key?-8:0,part.key?-4:0),Qt::AlignCenter|Qt::TextWordWrap,part.text);
+            studioPaintKeyPart(*painter,part,rect);
         }painter->restore();
     }
     QSize sizeHint(const QStyleOptionViewItem& option,const QModelIndex& index)const override{

@@ -14,7 +14,7 @@
 #include <array>
 #include <functional>
 
-enum class ShortcutGesture { None, Click, DoubleClick, Pan, Rotate, Wheel };
+enum class ShortcutGesture { None, DoubleClick, Pan, Rotate, Box, Wheel };
 enum class ShortcutViewScope { None, All, Current, CurrentOrLines, Perspective };
 
 inline QWidget* shortcutViewScopeIcons(ShortcutViewScope scope,const QString& description,QWidget* owner){
@@ -66,8 +66,9 @@ public:
         : gesture_(gesture){
         setAccessibleName(label);
         setObjectName("ShortcutGesturePreview");
-        setFixedSize(100,43);
+        setFixedSize(sizeHint());
     }
+    QSize sizeHint()const override{return {gesture_==ShortcutGesture::Wheel?62:84,43};}
     void setElapsed(qint64 ms){
         phase_=(ms%1800)/1800.;
         update();
@@ -77,22 +78,24 @@ protected:
         QPainter painter(this);
         painter.setRenderHint(QPainter::Antialiasing);
         const QColor ink("#315b55"), accent("#007e74"), fill("#cae8da");
-        const bool dragging=gesture_==ShortcutGesture::Pan||gesture_==ShortcutGesture::Rotate;
+        if(gesture_==ShortcutGesture::Wheel){paintWheel(painter,ink,accent,fill);return;}
+        const bool dragging=gesture_==ShortcutGesture::Pan||gesture_==ShortcutGesture::Rotate||gesture_==ShortcutGesture::Box;
         const bool right=gesture_==ShortcutGesture::Pan;
-        const bool wheel=gesture_==ShortcutGesture::Wheel;
         const qreal progress=qBound(0.,(phase_-.15)/.58,1.);
         const bool active=dragging?(phase_>=.15&&phase_<.74):
             (phase_>.2&&phase_<.30)||(gesture_==ShortcutGesture::DoubleClick&&phase_>.39&&phase_<.49);
-        const qreal x=dragging?22+51*progress:32;
+        const qreal x=dragging?4+51*progress:4;
         const qreal y=gesture_==ShortcutGesture::Rotate?8+6*std::sin(progress*3.14159):8;
         if(dragging){
             painter.setPen(QPen(QColor("#9dbdb1"),1,Qt::DashLine));
-            painter.drawLine(QPointF(25,37),QPointF(88,37));
+            if(gesture_==ShortcutGesture::Box){
+                painter.setBrush(QColor(0,126,116,28));painter.drawRect(QRectF(12,14,51*progress,24*progress));
+            }else painter.drawLine(QPointF(12,37),QPointF(66,37));
         }
         painter.setPen(QPen(ink,1.5));
         painter.setBrush(Qt::white);
         painter.drawRoundedRect(QRectF(x,y,18,26),8,8);
-        if(active&&!wheel){
+        if(active){
             QPainterPath button;
             const qreal edge=right?x+18:x, middle=x+9;
             button.moveTo(middle,y+1);
@@ -102,23 +105,33 @@ protected:
         }
         painter.drawLine(QPointF(x+1,y+10),QPointF(x+17,y+10));
         painter.drawLine(QPointF(x+9,y+1),QPointF(x+9,y+10));
-        if(wheel){
-            painter.setPen(QPen(accent,2,Qt::SolidLine,Qt::RoundCap));
-            const qreal offset=3*std::sin(phase_*6.28318);
-            painter.drawLine(QPointF(x+9,y+4+offset),QPointF(x+9,y+8+offset));
-            painter.drawLine(QPointF(69,11),QPointF(69,31));
-            for(int direction:{-1,1}){
-                const qreal tip=21+direction*10;
-                painter.drawLine(QPointF(69,tip),QPointF(65,tip-direction*4));
-                painter.drawLine(QPointF(69,tip),QPointF(73,tip-direction*4));
-            }
-        }else if(active&&!dragging){
+        if(active&&!dragging){
             painter.setPen(QPen(accent,1.5));
             painter.setBrush(Qt::NoBrush);
             painter.drawEllipse(QPointF(x+4,y+4),8,8);
         }
     }
 private:
+    void paintWheel(QPainter& p,const QColor& ink,const QColor& accent,const QColor& fill)const{
+        p.setPen(QPen(ink,1.6));p.setBrush(Qt::white);p.drawRoundedRect(QRectF(3,3,26,36),11,11);
+        p.drawLine(QPointF(4,17),QPointF(28,17));
+        p.setPen(QPen(accent,1.2));p.setBrush(fill);
+        const QRectF wheel(12.5,6,7,13);
+        p.drawRoundedRect(wheel,3,3);
+        const int direction=phase_<.5?-1:1;
+        const qreal cycle=std::fmod(phase_*2,1.);
+        const qreal travel=qBound(0.,(cycle-.08)/.76,1.);
+        p.save();QPainterPath clip;clip.addRoundedRect(wheel.adjusted(1,1,-1,-1),2,2);p.setClipPath(clip);
+        p.setPen(QPen(accent,1));
+        const qreal offset=direction*travel*15;
+        for(int i=-4;i<=8;++i)p.drawLine(QPointF(13,7+3*i+offset),QPointF(19,7+3*i+offset));
+        p.restore();
+        const qreal tip=21+direction*(5+5*travel);
+        p.setPen(QPen(accent,2,Qt::SolidLine,Qt::RoundCap));
+        p.drawLine(QPointF(46,tip-direction*14),QPointF(46,tip));
+        p.drawLine(QPointF(41,tip-direction*5),QPointF(46,tip));
+        p.drawLine(QPointF(51,tip-direction*5),QPointF(46,tip));
+    }
     ShortcutGesture gesture_;
     qreal phase_=0;
 };
@@ -131,28 +144,24 @@ inline bool showShortcutGuide(QWidget* owner,QShortcut* languageShortcut=nullptr
     layout->addWidget(studioReadHeading(uiText("快捷方式"),"Shortcuts",&dialog));
     auto* table=new StudioShortcutTable(0,3);table->setObjectName("ShortcutGuideTable");
     table->setItemDelegate(new StudioWidgetCellDelegate(table));
-    table->setHorizontalHeaderLabels({uiText("操作"),uiText("快捷方式","column"),uiText("作用对象")});
-    auto* header=table->horizontalHeader();
-    header->setDefaultAlignment(Qt::AlignLeft|Qt::AlignVCenter);
-    header->setStyleSheet(QString("QHeaderView::section{background:#e4eee7;color:#254c42;border:0;"
-        "font-size:%1pt;font-weight:600;padding:10px 11px}").arg(qMax(12.,table->font().pointSizeF()+2)));
+    table->horizontalHeader()->hide();
     table->setEditTriggers(QAbstractItemView::NoEditTriggers);table->setSelectionMode(QAbstractItemView::NoSelection);
     table->setAlternatingRowColors(false);table->setShowGrid(false);table->verticalHeader()->hide();
     table->horizontalHeader()->setSectionResizeMode(0,QHeaderView::Fixed);table->horizontalHeader()->setSectionResizeMode(1,QHeaderView::Fixed);
     table->horizontalHeader()->setSectionResizeMode(2,QHeaderView::Stretch);table->setItemDelegateForColumn(1,new StudioKeycapDelegate(table));
     table->setWordWrap(true);table->setTextElideMode(Qt::ElideNone);applyStudioScrollbars(table);layout->addWidget(table);
-    enum Group { Model, Selection, View, Window, Text, Groups };
-    struct Entry { QString description,key,scope; ShortcutGesture gesture; ShortcutViewScope viewScope; };
+    enum Group { Model, View, Window, Groups };
+    struct Entry { QString description,key,scope; ShortcutGesture gesture; ShortcutViewScope viewScope; bool ctrl; };
     std::array<QList<Entry>,Groups> entries;
     const auto add=[&](Group group,const QString& description,const QString& key,const QString& scope,
-                       ShortcutGesture gesture=ShortcutGesture::None,ShortcutViewScope viewScope=ShortcutViewScope::None){
+                       ShortcutGesture gesture=ShortcutGesture::None,ShortcutViewScope viewScope=ShortcutViewScope::None,bool ctrl=false){
         if(key.isEmpty()||description.isEmpty())return;
         for(auto& entry:entries[group]){
-            if(entry.description!=description||entry.scope!=scope||entry.gesture!=gesture||entry.viewScope!=viewScope)continue;
+            if(entry.description!=description||entry.scope!=scope||entry.gesture!=gesture||entry.viewScope!=viewScope||entry.ctrl!=ctrl)continue;
             if(!entry.key.split(" / ").contains(key))entry.key+=" / "+key;
             return;
         }
-        entries[group].append({description,key,scope,gesture,viewScope});
+        entries[group].append({description,key,scope,gesture,viewScope,ctrl});
     };
     const auto target=[](const QObject* command){
         const auto source=command->property("shortcut_target").toString();
@@ -160,10 +169,13 @@ inline bool showShortcutGuide(QWidget* owner,QShortcut* languageShortcut=nullptr
     };
     for(const auto* action:owner->findChildren<QAction*>()){
         if(action->property("coordinate_axis").isValid())continue;
-        const auto group=action->property("shortcut_target")=="所选对象"?Selection:Model;
-        for(const auto& key:action->shortcuts())add(group,studioMenuCaption(action->text().remove('&')),key.toString(QKeySequence::NativeText),target(action));
+        const auto fileOperation=action->property("file_operation").toString();
+        if(fileOperation=="save"||action->property("operation")=="delete")continue;
+        const auto caption=fileOperation=="open"?QString(uiText("选择模型打开")):studioMenuCaption(action->text().remove('&'));
+        for(const auto& key:action->shortcuts())add(Model,caption,key.toString(QKeySequence::NativeText),target(action));
     }
     for(const auto* shortcut:owner->findChildren<QShortcut*>()){
+        if(shortcut==languageShortcut||shortcut->property("shortcut_source")=="切换语言 / Language")continue;
         auto* action=qobject_cast<QAction*>(shortcut->property("shortcut_action").value<QObject*>());
         const auto source=shortcut->property("shortcut_source").toString();
         const int axis=shortcut->property("coordinate_shortcut_axis").toInt();
@@ -174,23 +186,22 @@ inline bool showShortcutGuide(QWidget* owner,QShortcut* languageShortcut=nullptr
         if(axis>=1&&axis<=3)description=QString(uiText("显示或隐藏 %1 坐标")).arg(QString("XYZ").at(axis-1));
         if(axis){group=View;viewScope=ShortcutViewScope::Current;}
         if(source=="缩放至全图"){group=View;viewScope=ShortcutViewScope::All;}
-        if(source=="退出程序"||source=="切换语言 / Language")group=Window;
+        if(source=="退出程序")group=Window;
         for(const auto& key:shortcut->keys())add(group,description,key.toString(QKeySequence::NativeText),scope,ShortcutGesture::None,viewScope);
     }
-    add(Selection,uiText("取消当前操作或清空选择"),"Esc",uiText("当前视图"));
-    add(Selection,uiText("增选或取消单个对象"),uiText("Ctrl + 左键"),uiText("船模中的对象"),ShortcutGesture::Click);
     add(View,uiText("平移视图"),uiText("右键拖动"),uiText("当前视图或型线图窗口"),ShortcutGesture::Pan,ShortcutViewScope::CurrentOrLines);
-    add(View,uiText("旋转视角"),uiText("空白处左键拖动"),uiText("透视图"),ShortcutGesture::Rotate,ShortcutViewScope::Perspective);
+    add(View,uiText("框选控制点"),uiText("空白处左键拖动"),uiText("当前视图"),ShortcutGesture::Box,ShortcutViewScope::Current);
+    add(View,uiText("旋转视角"),uiText("Ctrl + 左键拖动"),uiText("透视图"),ShortcutGesture::Rotate,ShortcutViewScope::Perspective,true);
     add(View,uiText("缩放视图"),uiText("鼠标滚轮"),uiText("当前视图或型线图窗口"),ShortcutGesture::Wheel,ShortcutViewScope::CurrentOrLines);
-    add(View,uiText("缩放表格"),uiText("Ctrl + 鼠标滚轮"),uiText("计算结果表格"),ShortcutGesture::Wheel);
+    add(View,uiText("缩放表格"),uiText("Ctrl + 鼠标滚轮"),uiText("计算结果表格"),ShortcutGesture::Wheel,ShortcutViewScope::None,true);
     add(View,uiText("缩放至全图"),uiText("空白处双击左键"),uiText("当前视图"),ShortcutGesture::DoubleClick,ShortcutViewScope::Current);
+    if(languageShortcut)
+        for(const auto& key:languageShortcut->keys())
+            add(Window,uiText("切换语言"),key.toString(QKeySequence::NativeText),target(languageShortcut));
     add(Window,uiText("关闭当前窗口"),"Esc",uiText("支持 Esc 关闭的窗口"));
-    for(const auto& item:QList<QPair<QString,QKeySequence::StandardKey>>{
-        {uiText("复制"),QKeySequence::Copy},{uiText("剪切"),QKeySequence::Cut},
-        {uiText("粘贴"),QKeySequence::Paste},{uiText("全选文字"),QKeySequence::SelectAll}})
-        add(Text,item.first,QKeySequence(item.second).toString(QKeySequence::NativeText),uiText("输入框内的文字"));
+    add(Window,uiText("最大化或还原窗口"),uiText("双击标题栏"),uiText("可最大化的窗口"));
 
-    const std::array<QString,Groups> headings{uiText("船模与文件"),uiText("选择与编辑"),uiText("视图操作"),uiText("窗口与语言"),uiText("文字编辑")};
+    const std::array<QString,Groups> headings{uiText("船模文件"),uiText("视图"),uiText("窗口")};
     QList<QPair<int,ShortcutGesturePreview*>> previews;
     for(int group=0;group<Groups;++group){
         if(entries[group].isEmpty())continue;
@@ -214,15 +225,31 @@ inline bool showShortcutGuide(QWidget* owner,QShortcut* languageShortcut=nullptr
             for(int col=0;col<3;++col)table->setItem(row,col,new QTableWidgetItem(cells[col]));
             if(entry.viewScope!=ShortcutViewScope::None)
                 table->setCellWidget(row,2,shortcutViewScopeIcons(entry.viewScope,entry.scope,&dialog));
-            if(entry.gesture==ShortcutGesture::None)continue;
+            if(entry.gesture==ShortcutGesture::None){
+                if(group==Window&&entry.key==uiText("双击标题栏")){
+                    auto* label=new QLabel(entry.key);
+                    label->setContentsMargins(12,0,8,0);label->setWordWrap(true);
+                    table->setCellWidget(row,1,label);
+                    table->setItemDelegateForRow(row,new StudioWidgetCellDelegate(table));
+                }
+                continue;
+            }
             auto* gestureCell=new QWidget;
             auto* gestureLayout=new QHBoxLayout(gestureCell);
-            gestureLayout->setContentsMargins(8,0,8,0);
+            gestureLayout->setContentsMargins(12,0,8,0);
+            gestureLayout->setSpacing(6);
+            if(entry.ctrl){
+                gestureLayout->addWidget(new StudioKeycap("Ctrl",gestureCell));
+                auto* plus=new QLabel("+",gestureCell);
+                plus->setStyleSheet("color:#688378");gestureLayout->addWidget(plus);
+            }
             auto* preview=new ShortcutGesturePreview(entry.gesture,entry.key);
-            gestureLayout->addWidget(preview);
-            auto* label=new QLabel(entry.key);
-            label->setWordWrap(true);
-            gestureLayout->addWidget(label,1);
+            gestureLayout->addWidget(preview,0,Qt::AlignVCenter);
+            gestureCell->setMinimumHeight(preview->height());
+            if(entry.gesture!=ShortcutGesture::Wheel){
+                auto* label=new QLabel(entry.ctrl?uiText("左键拖动"):entry.key,gestureCell);
+                label->setWordWrap(true);gestureLayout->addWidget(label,1);
+            }else gestureLayout->addStretch();
             table->setCellWidget(row,1,gestureCell);
             table->setItemDelegateForRow(row,new StudioWidgetCellDelegate(table));
             previews.append({row,preview});

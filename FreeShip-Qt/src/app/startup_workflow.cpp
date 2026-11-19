@@ -632,6 +632,27 @@ void MainWindow::startupStep(const QString& completedOperation,const QString& er
                         row["one_character_width"]=button->iconSize().width()+button->fontMetrics().height()+22;
                         row["label_layout"]=button->property("studio_vertical_toolbar_label").toBool()?"vertical_right":
                             button->toolButtonStyle()==Qt::ToolButtonTextUnderIcon?"under_icon":"other";
+                        if(auto* action=button->defaultAction(); action&&action->property("operation")=="about"){
+                            const auto previous=action->property("update_available");
+                            action->setProperty("update_available",false);
+                            const auto idle=button->grab().toImage();
+                            action->setProperty("update_available",true);
+                            const auto notified=button->grab().toImage();
+                            action->setProperty("update_available",previous);
+                            button->update();
+                            QRect changed;
+                            if(idle.size()==notified.size())for(int y=0;y<idle.height();++y)for(int x=0;x<idle.width();++x){
+                                const auto before=idle.pixel(x,y),after=notified.pixel(x,y);
+                                if(std::max({std::abs(qRed(before)-qRed(after)),std::abs(qGreen(before)-qGreen(after)),
+                                             std::abs(qBlue(before)-qBlue(after))})>8)changed|=QRect(x,y,1,1);
+                            }
+                            const qreal scale=notified.devicePixelRatio();
+                            row["badge_pixels"]=observeRect(QRectF(QPointF(changed.topLeft())/scale,QSizeF(changed.size())/scale).toAlignedRect());
+                            if(width==680||width==2400){
+                                const auto path=workflowOutput_+"/views/update-dot-"+language+"-"+QString::number(width)+".png";
+                                if(notified.save(path))row["badge_image"]=path;
+                            }
+                        }
                         buttons.append(row);
                     }
                     const auto observePanels=[&](const QMap<int,QWidget*>& panels,QWidget* surface,const QImage& pixels){
@@ -773,20 +794,52 @@ void MainWindow::startupStep(const QString& completedOperation,const QString& er
             for(size_t i=0;i<views_.size();++i)allFit&=views_[i]->project(reference)==fitted[i];
             workflowCase("shortcut.f-fits-all-four-views",allFit);
 
-            const QPointF from(14,perspective->height()-25),to=from+QPointF(60,-20);
-            const auto drag=[&](Qt::KeyboardModifiers modifiers){
+            const auto drag=[](HullView* view,QPointF from,QPointF to,Qt::KeyboardModifiers modifiers,bool sendMove=true){
                 QMouseEvent press(QEvent::MouseButtonPress,from,from,Qt::LeftButton,Qt::LeftButton,modifiers);
                 QMouseEvent move(QEvent::MouseMove,to,to,Qt::NoButton,Qt::LeftButton,modifiers);
                 QMouseEvent release(QEvent::MouseButtonRelease,to,to,Qt::LeftButton,Qt::NoButton,modifiers);
-                QApplication::sendEvent(perspective,&press);
-                QApplication::sendEvent(perspective,&move);
-                QApplication::sendEvent(perspective,&release);
+                QApplication::sendEvent(view,&press);
+                if(sendMove)QApplication::sendEvent(view,&move);
+                QApplication::sendEvent(view,&release);
             };
+            setSelectionKind(HullEntity::Point);
+            for(auto* view:{views_[0],perspective}){
+                view->setControlNetVisible(true);view->setFillVisible(false);view->fit();
+                // Start at a blank margin and enclose visible points. Compare
+                // a projected mark as well as selection to distinguish orbit.
+                QPointF from(1,1),to(view->width()-2,view->height()-2);
+                const auto before=view->project(reference);
+                workflowCase(view==perspective?"shortcut.perspective-drag-starts-on-blank":"shortcut.orthographic-drag-starts-on-blank",!view->entityAt(from));
+                drag(view,from,to,Qt::NoModifier);
+                workflowCase(view==perspective?"shortcut.perspective-left-box-selects":"shortcut.orthographic-left-box-selects",
+                    view->project(reference)==before&&!view->selectedPoints().isEmpty());
+            }
+            const QPointF from(1,1),to=from+QPointF(60,20);
             const auto beforeDrag=perspective->project(reference);
-            drag(Qt::AltModifier);
+            drag(perspective,from,to,Qt::AltModifier);
             workflowCase("shortcut.alt-left-does-not-rotate",perspective->project(reference)==beforeDrag);
-            drag(Qt::NoModifier);
-            workflowCase("shortcut.empty-left-drag-still-rotates",perspective->project(reference)!=beforeDrag);
+            drag(perspective,from,QPointF(perspective->width()-2,perspective->height()-2),Qt::NoModifier);
+            const auto selected=perspective->selectedPoints();
+            QPointF picked;fs::EntityId hit=0;
+            for(const auto& pt:session_.model()->points){
+                const auto pos=perspective->project(pt.position);
+                const auto id=perspective->entityAt(pos);
+                if(selected.contains(id)){picked=pos;hit=id;break;}
+            }
+            workflowCase("shortcut.perspective-click-fixture",hit!=0);
+            if(hit){
+                const auto beforeClick=perspective->project(reference);
+                drag(perspective,picked,picked+QPointF(1,0),Qt::ControlModifier);
+                auto without=selected;without.remove(hit);
+                workflowCase("shortcut.ctrl-left-click-still-toggles-point",perspective->selectedPoints()==without&&perspective->project(reference)==beforeClick);
+                drag(perspective,picked,picked+QPointF(32,14),Qt::ControlModifier,false);
+                workflowCase("shortcut.ctrl-left-drag-over-point-orbits-without-selecting",perspective->selectedPoints()==without&&perspective->project(reference)!=beforeClick);
+            }
+            const auto beforeBlankOrbit=perspective->project(reference);
+            const auto beforeBlankSelection=perspective->selectedPoints();
+            drag(perspective,from,to,Qt::ControlModifier);
+            workflowCase("shortcut.ctrl-left-drag-in-blank-orbits-without-selecting",
+                perspective->project(reference)!=beforeBlankOrbit&&perspective->selectedPoints()==beforeBlankSelection);
             const auto axesMatch=[&](std::array<int,4> expected){
                 for(size_t index=0;index<views_.size();++index)
                     if(views_[index]->coordinateAxis()!=expected[index])return false;
@@ -808,19 +861,27 @@ void MainWindow::startupStep(const QString& completedOperation,const QString& er
         }
         else if(kind=="shortcuts_check"){
             qApp->setQuitOnLastWindowClosed(false);
-            QTimer::singleShot(0,this,[this]{
+            const auto requestedLanguage=command["language"].toString();
+            const auto previousLanguage=uiLanguage();
+            if(!requestedLanguage.isEmpty())setUiLanguage(requestedLanguage);
+            const auto suffix=requestedLanguage.isEmpty()?QString{}:"-"+requestedLanguage;
+            QTimer::singleShot(0,this,[this,suffix]{
                 auto* dialog=qobject_cast<QDialog*>(QApplication::activeModalWidget());
                 auto* table=dialog?dialog->findChild<QTableWidget*>("ShortcutGuideTable"):nullptr;
                 if(!table){finishWorkflow("Shortcut guide missing");return;}
-                QJsonArray rows,groups;QJsonObject scopes;int previewCount=0,viewGroup=-1;
+                QJsonArray rows,groups,ctrlGestures;QJsonObject scopes;int previewCount=0,viewGroup=-1;
                 for(int row=0;row<table->rowCount();++row){
                     if(table->item(row,0)->data(Qt::UserRole)=="group"){
-                        if(table->item(row,0)->text()==uiText("视图操作"))viewGroup=row;
+                        if(table->item(row,0)->text()==uiText("视图"))viewGroup=row;
                         groups.append(table->item(row,0)->text());
                         continue;
                     }
                     QJsonArray cells;
-                    if(table->cellWidget(row,1))++previewCount;
+                    if(auto* cell=table->cellWidget(row,1)){
+                        if(cell->findChild<QWidget*>("ShortcutGesturePreview"))++previewCount;
+                        if(auto* key=cell->findChild<QWidget*>("StudioKeycap");key&&key->accessibleName()=="Ctrl")
+                            ctrlGestures.append(table->item(row,0)->text());
+                    }
                     if(auto* scope=table->cellWidget(row,2)){
                         QJsonArray icons;
                         for(auto* icon:scope->findChildren<QLabel*>("ShortcutViewIcon"))
@@ -828,11 +889,12 @@ void MainWindow::startupStep(const QString& completedOperation,const QString& er
                         scopes[table->item(row,1)->text()]=icons;
                     }
                     for(int col=0;col<table->columnCount();++col)cells.append(table->item(row,col)->text());rows.append(cells);}
-                workflowArtifacts_["shortcut_rows"]=rows;
-                workflowArtifacts_["shortcut_groups"]=groups;
-                workflowArtifacts_["shortcut_gesture_previews"]=previewCount;
-                workflowArtifacts_["shortcut_scope_icons"]=scopes;
-                workflowCase("shortcut-header-left-aligned",table->horizontalHeader()->defaultAlignment().testFlag(Qt::AlignLeft));
+                workflowArtifacts_["shortcut_rows"+suffix]=rows;
+                workflowArtifacts_["shortcut_groups"+suffix]=groups;
+                workflowArtifacts_["shortcut_gesture_previews"+suffix]=previewCount;
+                workflowArtifacts_["shortcut_scope_icons"+suffix]=scopes;
+                workflowArtifacts_["shortcut_ctrl_gestures"+suffix]=ctrlGestures;
+                workflowCase("shortcut-header-hidden"+suffix,table->horizontalHeader()->isHidden());
                 QDir().mkpath(workflowOutput_+"/views");
                 const auto wait=[](int ms){
                     QEventLoop loop;
@@ -840,15 +902,17 @@ void MainWindow::startupStep(const QString& completedOperation,const QString& er
                     loop.exec();
                 };
                 wait(220);
-                workflowCase("shortcut-guide-picture",dialog->grab().save(workflowOutput_+"/views/shortcuts.png"));
+                workflowCase("shortcut-guide-picture",dialog->grab().save(workflowOutput_+"/views/shortcuts"+suffix+".png"));
                 if(viewGroup>=0){
                     table->scrollToItem(table->item(viewGroup,0),QAbstractItemView::PositionAtTop);
                     wait(80);
                     const auto first=table->viewport()->grab().toImage();
                     wait(255);
                     workflowCase("shortcut-gesture-frames-change",first!=table->viewport()->grab().toImage());
-                    workflowCase("shortcut-gesture-picture",dialog->grab().save(workflowOutput_+"/views/shortcuts-gestures.png"));
+                    workflowCase("shortcut-gesture-picture",dialog->grab().save(workflowOutput_+"/views/shortcuts-gestures"+suffix+".png"));
                 }
+                if(!suffix.isEmpty()){dialog->reject();return;}
+                workflowCase("shortcut.save-and-delete-bindings-retained",save_->shortcuts().contains(QKeySequence("Ctrl+S"))&&delete_->shortcut()==QKeySequence(Qt::Key_Delete));
                 workflowArtifacts_["save_copy_text"]=saveAs_->text();
                 workflowArtifacts_["save_copy_key"]=saveAs_->shortcut().toString(QKeySequence::PortableText);
                 menuWidget()->resize(1920,menuWidget()->height());
@@ -870,6 +934,7 @@ void MainWindow::startupStep(const QString& completedOperation,const QString& er
             QList<QAction*> found;for(auto* a:findChildren<QAction*>())if(a->property("operation")=="shortcut_guide")found.append(a);
             if(found.size()!=1){finishWorkflow("Shortcut guide action missing or ambiguous");return;}
             found[0]->trigger();
+            if(!requestedLanguage.isEmpty()){setUiLanguage(previousLanguage);startupStep("idle");return;}
             for(auto* menu:findChildren<QMenu*>())if(menu->actions().contains(saveAs_)){
                 menu->ensurePolished();menu->resize(menu->sizeHint());
                 workflowCase("file-menu-picture",menu->grab().save(workflowOutput_+"/views/file-menu.png"));

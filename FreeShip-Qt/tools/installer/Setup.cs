@@ -70,7 +70,7 @@ static class Setup {
     }
     static void Save(string path,object value) { Atomic(path,Encoding.UTF8.GetBytes(Json.Serialize(value))); }
     static byte[] Resource(string name) { using(var s=Assembly.GetExecutingAssembly().GetManifestResourceStream(name)) { if(s==null)return null;using(var m=new MemoryStream()) {s.CopyTo(m);return m.ToArray();} } }
-    static void Check(uint code) { if(code!=0)throw new IOException("Windows Installer API: "+code); }
+    static void Check(uint code) { if(code!=0)throw new IOException(T("Windows Installer API 错误：")+code); }
     static string Property(uint db,string name) {
         uint view=0,record=0;
         try {Check(MsiDatabaseOpenViewW(db,"SELECT `Value` FROM `Property` WHERE `Property`='"+name+"'",out view));Check(MsiViewExecute(view,0));Check(MsiViewFetch(view,out record));uint n=4096;var text=new StringBuilder((int)n);Check(MsiRecordGetStringW(record,1,text,ref n));return text.ToString();}
@@ -230,7 +230,14 @@ static class Setup {
                     // Optional user actions run after commit; their failure must never roll back a verified MSI.
                     try {
                         if(Uninstall){DesktopLink(false);if(ResetRequested)ResetPersonalFiles();}
-                        else {if(migrateProfile)ImportLegacyPreferences();if(CreateShortcut)DesktopLink(true);}
+                        else {
+                            if(migrateProfile)ImportLegacyPreferences();
+                            if(tx.before==null) {
+                                try { SaveInitialLanguage(); }
+                                catch(Exception ex) { Report["installer_language_error"]=ex.Message; }
+                            }
+                            if(CreateShortcut)DesktopLink(true);
+                        }
                     } catch(Exception ex){Report["post_install_error"]=ex.Message;return 1;}
                     return 0;
                 } catch(Exception ex) {
@@ -249,7 +256,15 @@ static class Setup {
         return Test?Path.Combine(Cache,legacy?"legacy-test-profile":"installed-test-profile"):
             Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),legacy?"FreeShip26":"FreeShip26Installed","FreeShip_26 Qt");
     }
+    const string InstallerLanguageFile="installer-language.json";
     static readonly string[] PersonalFiles={"preferences.json","recent-files.json"};
+    static void SaveInitialLanguage() {
+        var profile=DataRoot(false);
+        var preferences=Path.Combine(profile,"preferences.json");
+        NoLinks(preferences);
+        // Seed the chooser, without accepting it on behalf of the user.
+        if(!File.Exists(preferences))Save(Path.Combine(profile,InstallerLanguageFile),new {language=InstallerLanguage.Id});
+    }
     static void ImportLegacyPreferences() {
         // Only on upgrade from a registered legacy build. Never move or erase the development profile.
         foreach(var n in PersonalFiles) {
@@ -258,7 +273,7 @@ static class Setup {
         }
     }
     static void ResetPersonalFiles() {
-        foreach(var n in PersonalFiles){var f=Path.Combine(DataRoot(false),n);NoLinks(f);if(File.Exists(f))File.Delete(f);}
+        foreach(var n in PersonalFiles.Concat(new[]{InstallerLanguageFile})){var f=Path.Combine(DataRoot(false),n);NoLinks(f);if(File.Exists(f))File.Delete(f);}
     }
     static void DesktopLink(bool create) {
         var directory=Test?Path.Combine(Cache,"test-desktop"):Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
@@ -278,6 +293,12 @@ static class Setup {
         if(ReportPath!=null)Save(ReportPath,Report);
         try {Save(Path.Combine(Cache,"last-result.json"),Report);}catch(IOException) {}
         return code;
+    }
+    static void CaptureReview(Form form,string filename) {
+        using(var bitmap=new System.Drawing.Bitmap(form.Width,form.Height)) {
+            form.DrawToBitmap(bitmap,new System.Drawing.Rectangle(0,0,form.Width,form.Height));
+            bitmap.Save(Path.Combine(Path.GetDirectoryName(ReportPath),filename),System.Drawing.Imaging.ImageFormat.Png);
+        }
     }
     [STAThread] static int Main(string[] args) {
         try {
@@ -306,12 +327,11 @@ static class Setup {
             if(Quiet)return Run();
             Application.EnableVisualStyles();Application.SetCompatibleTextRenderingDefault(false);
             int result=1602;bool running=false,finished=false;
-            using(var form=new Form {Text=Identity.Name+T(" 安装"),Width=560,Height=345,StartPosition=FormStartPosition.CenterScreen,FormBorderStyle=FormBorderStyle.FixedDialog,MaximizeBox=false}) {
-                var label=new Label {Left=24,Top=24,Width=490,Height=50,Text=Uninstall?T("卸载程序并保留船模和偏好设置。"):T("安装或更新 FreeShip 26。升级失败时将自动恢复此前版本。")};
-                var path=new TextBox {Left=24,Top=80,Width=490,Text=Target??(File.Exists(StatePath)?Read<Installed>(StatePath).directory:Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),"Programs",Bundle==null?"FreeShip26Qt":Bundle.folder))};
-                path.ReadOnly=Uninstall||File.Exists(StatePath);
-                var browse=new Button {Left=414,Top=77,Width=100,Height=26,Visible=!path.ReadOnly};
-                if(!path.ReadOnly)path.Width=browse.Left-path.Left-8;
+            bool locked=Uninstall||File.Exists(StatePath);
+            string destination=Target??(File.Exists(StatePath)?Read<Installed>(StatePath).directory:Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),"Programs",Bundle==null?"FreeShip26Qt":Bundle.folder));
+            using(var form=new InstallerView(Uninstall,locked,destination)) {
+                var path=form.Destination;var browse=form.Browse;var language=form.Language;
+                var shortcut=form.Shortcut;var launch=form.Launch;var reset=form.Reset;var start=form.ActionButton;
                 browse.Click+=delegate {
                     using(var picker=new FolderBrowserDialog {Description=T("选择安装文件夹"),ShowNewFolderButton=true}) {
                         // An initial destination need not exist yet. Open at its nearest existing parent.
@@ -323,32 +343,31 @@ static class Setup {
                         if(picker.ShowDialog(form)==DialogResult.OK)path.Text=picker.SelectedPath;
                     }
                 };
-                var languageLabel=new Label {Left=24,Top=125,Width=90,Height=24};
-                var language=new ComboBox {Left=120,Top=122,Width=180,DropDownStyle=ComboBoxStyle.DropDownList};
                 foreach(var option in InstallerLanguage.Options) {language.Items.Add(option);if(option.Id==InstallerLanguage.Id)language.SelectedItem=option;}
-                var shortcut=new CheckBox {Left=24,Top=153,Width=490,Checked=true,Visible=!Uninstall};
-                var launch=new CheckBox {Left=24,Top=180,Width=490,Checked=true,Visible=!Uninstall};
-                var reset=new CheckBox {Left=24,Top=153,Width=490,Checked=false,Visible=Uninstall};
-                var progress=new ProgressBar {Left=24,Top=211,Width=490,Visible=false,Style=ProgressBarStyle.Marquee};
-                var start=new Button {Left=320,Top=252,Width=90,Text=Uninstall?T("卸载"):T("开始")};var close=new Button {Left=424,Top=252,Width=90,Text=T("取消")};
                 Action applyLanguage=delegate {
-                    form.Text=Identity.Name+T(" 安装");languageLabel.Text=T("语言");browse.Text=T("浏览…");
-                    shortcut.Text=T("创建桌面快捷方式");launch.Text=T("安装完成后打开 FreeShip 26");reset.Text=T("删除个人设置和最近文件记录（保留船模）");
-                    label.Text=finished?(result==0?(Report.ContainsKey("status")&&(string)Report["status"]=="recovered_interrupted"?T("上次安装被中断，已恢复此前版本。"):Uninstall?T("卸载完成，用户文件和设置已保留。"):T("操作完成。")):Report.ContainsKey("recovered")?T("本次安装未完成，已恢复此前安装状态。"):T("操作未完成，请查看安装日志：")+Path.Combine(Cache,"last-result.json")):
-                        Uninstall?T("卸载程序并保留船模和偏好设置。"):T("安装或更新 FreeShip 26。升级失败时将自动恢复此前版本。");
-                    start.Text=Uninstall?T("卸载"):T("开始");if(!close.IsDisposed)close.Text=T("取消");
+                    form.Relabel(Identity.Name+(Uninstall?T(" 卸载"):T(" 安装")),
+                        Uninstall?T("卸载"):T("安装设置"),
+                        T("安装语言"),
+                        T("安装位置"), T("浏览…"),
+                        T("创建桌面快捷方式"),T("安装完成后打开 FreeShip 26"),T("删除个人设置和最近文件记录（保留船模）"),
+                        Uninstall?T("卸载"):T("安装"));
+                    if(finished)form.ShowFeedback(result==0?(Report.ContainsKey("status")&&(string)Report["status"]=="recovered_interrupted"?T("上次安装被中断，已恢复此前版本。"):Uninstall?T("卸载完成，用户文件和设置已保留。"):T("操作完成。")):
+                        Report.ContainsKey("recovered")?T("本次安装未完成，已恢复此前安装状态。"):T("操作未完成，请查看安装日志：")+Path.Combine(Cache,"last-result.json"),result!=0);
+                    else form.ShowFeedback(Uninstall?T("卸载程序并保留船模和偏好设置。"):"",false);
                 };
-                language.SelectedIndexChanged+=delegate {InstallerLanguage.Select(((InstallerLanguage.Option)language.SelectedItem).Id);applyLanguage();};
+                language.SelectedIndexChanged+=delegate {if(language.SelectedItem!=null){InstallerLanguage.Select(((InstallerLanguage.Option)language.SelectedItem).Id);applyLanguage();}};
                 applyLanguage();
-                form.Controls.AddRange(new Control[]{label,path,browse,shortcut,launch,reset,languageLabel,language,progress,start,close});close.Click+=delegate {form.Close();};
                 form.FormClosing+=delegate(object sender,FormClosingEventArgs e) {if(running)e.Cancel=true;};
-                Status=delegate(string text) {form.BeginInvoke((Action)delegate {label.Text=text;});};
+                Status=delegate(string text) {form.BeginInvoke((Action)delegate {if(running)form.ShowFeedback(text,false);});};
                 start.Click+=delegate {
-                    try {Target=Path.GetFullPath(path.Text);}catch(Exception ex) {label.Text=T("目录无效：")+ex.Message;return;}
-                    ResetRequested=Uninstall&&reset.Checked;CreateShortcut=!Uninstall&&shortcut.Checked;shortcut.Enabled=launch.Enabled=reset.Enabled=false;
-                    running=true;start.Enabled=false;close.Enabled=false;path.Enabled=false;browse.Enabled=false;language.Enabled=false;progress.Visible=true;
+                    try {Target=Path.GetFullPath(path.Text);}catch(Exception ex) {form.ShowFeedback(T("目录无效：")+ex.Message,true);return;}
+                    ResetRequested=Uninstall&&reset.Checked;CreateShortcut=!Uninstall&&shortcut.Checked;
+                    running=true;form.SetRunning(true);form.ShowFeedback("",false);
                     var worker=new BackgroundWorker();worker.DoWork+=delegate {result=Run();};worker.RunWorkerCompleted+=delegate(object sender,RunWorkerCompletedEventArgs e) {
-                        running=false;finished=true;progress.Visible=false;applyLanguage();
+                        running=false;finished=true;form.SetRunning(false);
+                        start.Enabled=false;
+                        if(e.Error!=null) {result=1603;form.ShowFeedback(e.Error.GetBaseException().Message,true);return;}
+                        applyLanguage();
                         if(result==0){
                             if(!Uninstall&&launch.Checked&&Convert.ToString(Report["status"])=="installed"){
                                 try {Process.Start(new ProcessStartInfo(Path.Combine(Target,"FreeShipQt.exe")){WorkingDirectory=Target,UseShellExecute=false});}
@@ -356,8 +375,7 @@ static class Setup {
                             }
                             form.Close();return;
                         }
-                        if(Report.ContainsKey("post_install_error"))label.Text=Convert.ToString(Report["post_install_error"]);
-                        close.Enabled=true;
+                        if(Report.ContainsKey("post_install_error"))form.ShowFeedback(Convert.ToString(Report["post_install_error"]),true);
                     };worker.RunWorkerAsync();
                 };
                 if(observeLanguageUi) {
@@ -365,10 +383,15 @@ static class Setup {
                     var states=new List<object>();form.Show();Application.DoEvents();
                     foreach(var option in InstallerLanguage.Options) {
                         language.SelectedItem=option;Application.DoEvents();
-                        var intro=label.Text;finished=true;result=0;applyLanguage();var completed=label.Text;finished=false;applyLanguage();
-                        states.Add(new {id=InstallerLanguage.Id,title=form.Text,intro=intro,completed=completed,start=start.Text,cancel=close.Text,language=languageLabel.Text,target=path.Text,visible=form.Visible,
+                        var intro=form.FeedbackText;finished=true;result=0;applyLanguage();var completed=form.FeedbackText;finished=false;applyLanguage();
+                        form.SetRunning(true);form.ShowFeedback(T("正在安装程序……"),false);Application.DoEvents();
+                        bool progressState=form.ShowsProgress&&!start.Visible&&!language.Enabled&&!path.Enabled;
+                        if(option.Id=="zh")CaptureReview(form,"installer-zh-progress.png");
+                        form.SetRunning(false);applyLanguage();Application.DoEvents();
+                        states.Add(new {id=InstallerLanguage.Id,title=form.Text,heading=form.SectionCaption,intro=intro,completed=completed,start=start.Text,
+                            language=language.AccessibleName,location=path.AccessibleName,target=path.Text,visible=form.Visible,progress_state=progressState,ready_state=!form.ShowsProgress&&start.Visible&&language.Enabled,
                             status_install=T("正在安装程序……"),status_recover=T("恢复：还原旧版本"),failure=T("操作未完成，请查看安装日志：")+"C:\\测试模型\\日志.json"});
-                        using(var bitmap=new System.Drawing.Bitmap(form.Width,form.Height)) {form.DrawToBitmap(bitmap,new System.Drawing.Rectangle(0,0,form.Width,form.Height));bitmap.Save(Path.Combine(Path.GetDirectoryName(ReportPath),"installer-"+option.Id+".png"));}
+                        CaptureReview(form,"installer-"+option.Id+".png");
                     }
                     Save(ReportPath,new {ui_states=states,operations=Operations,test_identity=Test});form.Close();return 0;
                 }

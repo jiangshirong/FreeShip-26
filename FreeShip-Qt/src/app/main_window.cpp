@@ -253,14 +253,15 @@ MainWindow::MainWindow(QWidget* parent,bool rememberFiles) : QMainWindow(parent)
     preferencesAction_->setProperty("studio_opens_dialog",true);
     preferencesAction_->setProperty("operation", "preferences");
     connect(preferencesAction_, &QAction::triggered, this, &MainWindow::editPreferences);
-    languageShortcut_=new QShortcut(qApp);
+    languageShortcut_=new QShortcut(this);
     languageShortcut_->setKey(QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_L));
     languageShortcut_->setContext(Qt::ApplicationShortcut);
     languageShortcut_->setAutoRepeat(false);
     languageShortcut_->setEnabled(false);
-    languageShortcut_->setProperty("shortcut_source","切换语言 / Language");
+    languageShortcut_->setProperty("shortcut_source","切换语言");
     languageShortcut_->setProperty("shortcut_target","界面语言");
     connect(languageShortcut_,&QShortcut::activated,this,&MainWindow::switchUiLanguage);
+    qApp->installEventFilter(this);
     tabs_ = new QTabWidget; tabs_->setDocumentMode(true);
     tabs_->tabBar()->hide();
     auto* hulls = new QWidget; auto* grid = new QGridLayout(hulls);
@@ -417,6 +418,7 @@ MainWindow::MainWindow(QWidget* parent,bool rememberFiles) : QMainWindow(parent)
 }
 
 MainWindow::~MainWindow() {
+    qApp->removeEventFilter(this);
     for(const auto& task:calculationWindows_){
         if(task->session){task->session->onCompleted={};task->session->onStateChanged={};task->session->onError={};
             task->session->onHydroDefaults={};task->session->onHydrostatics={};task->session->onHydroProgress={};task->session->onPerformance={};task->session->onPlates={};}

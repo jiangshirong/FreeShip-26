@@ -110,8 +110,11 @@ bool chooseInitialLanguages(QWidget* parent,QJsonObject* values){
         box->setCurrentIndex(index>=0?index:0);
         return box;
     };
-    auto* first=makeBox("en");
-    auto* second=makeBox("ru");
+    auto* first=makeBox(uiLanguage());
+    const auto primary=first->currentData().toString();
+    auto* second=makeBox(primary=="ru"?"en":"ru");
+    if(second->currentData().toString()==primary && second->count()>1)
+        second->setCurrentIndex((second->currentIndex()+1)%second->count());
     auto* hint=new LanguageHintButton(
         uiText("对于那些经常在多语言环境中使用该软件的人，设定第二语言是个不错的选择"),
         &dialog);

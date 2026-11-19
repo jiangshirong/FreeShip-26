@@ -1,0 +1,114 @@
+{
+  "zh": {
+    "features": [
+      "首次启动沿用安装语言。 全新安装后，程序会把安装时选择的语言作为首次启动的默认界面语言。升级时保留已有的语言偏好。",
+      "四视图支持从空白处框选控制点。 在控制点选择模式下，按住鼠标左键从空白处拖动即可框选。透视图中，按住 Ctrl 拖动左键可旋转视图，按住 Ctrl 单击仍可加选或取消选择。"
+    ],
+    "improvements": [
+      "重新设计 Windows 安装和卸载窗口。 安装语言、安装位置、桌面快捷方式等选项集中显示；切换语言后，窗口标题、按钮和操作提示会随之更新。",
+      "更新快捷方式指南。 按船模文件、视图和窗口整理常用操作，并用图示说明鼠标手势。",
+      "改进计算报告的提示。 加速与制动计算实际达到目标航速时，报告会单独显示达到的航速。计算方法保持不变。"
+    ],
+    "bug_fixes": [
+      "修复部分对话框打开时 Ctrl+Shift+L 无法切换语言的问题。更新窗口已打开时，更新说明、状态和进度提示也会随界面语言刷新。",
+      "补齐简体中文、英语、俄语、日语、德语、法语和西班牙语中缺失的界面与报告文字，涉及打开船模、退出保存确认、螺旋桨计算说明和导出选项等位置。",
+      "修复卸载窗口标题误显示为“安装”的问题。"
+    ]
+  },
+  "en": {
+    "features": [
+      "Use the installer language on first launch. After a fresh installation, the language selected during setup becomes the default interface language on first launch. Upgrades keep any saved language preference.",
+      "Box-select control points from an empty area in any of the four views. In control-point selection mode, drag with the left mouse button from an empty area. In the perspective view, hold Ctrl and drag with the left button to orbit the model. Ctrl-click still adds or removes points from the selection."
+    ],
+    "improvements": [
+      "Redesigned the Windows installer and uninstaller. Setup options such as the language, installation folder, and desktop shortcut appear together. Changing the language updates the window title, buttons, and prompts.",
+      "Updated the shortcut guide. Common actions are grouped by model files, views, and windows. Illustrations show the mouse gestures.",
+      "Clearer calculation reports. When the acceleration and braking calculation reaches the target speed, the report shows the speed reached on a separate line. The calculation method is unchanged."
+    ],
+    "bug_fixes": [
+      "Fixed an issue that kept Ctrl+Shift+L from switching the language while certain dialogs were open. If the update window is already open, its release notes, status, and progress messages also follow the interface language.",
+      "Filled in missing interface and report text in Simplified Chinese, English, Russian, Japanese, German, French, and Spanish, including text for opening models, save prompts on exit, propeller calculation notes, and export options.",
+      "Fixed the uninstaller window title incorrectly saying “Setup”."
+    ]
+  },
+  "ru": {
+    "features": [
+      "Язык установки используется при первом запуске. После новой установки язык, выбранный в установщике, становится языком интерфейса при первом запуске. При обновлении сохраняется прежняя языковая настройка.",
+      "Контрольные точки можно выделять рамкой в любом из четырёх видов. В режиме выбора контрольных точек начните перетаскивание левой кнопкой мыши с пустого места. В перспективном виде перетаскивание с зажатой клавишей Ctrl вращает вид вокруг модели, а щелчок с Ctrl по-прежнему добавляет точку к выделению или исключает её."
+    ],
+    "improvements": [
+      "Обновлены окна установки и удаления в Windows. Язык установки, папка назначения, ярлык на рабочем столе и другие параметры собраны в одном месте. При смене языка меняются заголовок окна, кнопки и подсказки.",
+      "Обновлён справочник по сочетаниям клавиш. Основные действия сгруппированы по файлам моделей, видам и окнам. Действия мышью показаны на иллюстрациях.",
+      "Уточнён отчёт о расчёте. Если при расчёте разгона и торможения достигнута заданная скорость хода, отчёт указывает её отдельной строкой. Метод расчёта не изменился."
+    ],
+    "bug_fixes": [
+      "Исправлена ошибка, из-за которой Ctrl+Shift+L не переключало язык в некоторых открытых диалогах. В уже открытом окне обновления описание изменений, состояние и сообщения о ходе операции также отображаются на новом языке.",
+      "Добавлены недостающие надписи и тексты отчётов на упрощённом китайском, английском, русском, японском, немецком, французском и испанском, в том числе при открытии модели, запросе сохранения перед выходом, в пояснениях к расчёту гребных винтов и в параметрах экспорта.",
+      "Исправлен заголовок окна удаления, в котором ошибочно было указано «Установка»."
+    ]
+  },
+  "ja": {
+    "features": [
+      "初回起動時にインストール時の言語を使用。 新規インストール後の初回起動では、インストーラーで選んだ言語が既定の表示言語になります。アップグレード時は保存済みの言語設定を引き継ぎます。",
+      "4 分割ビューのどのビューでも、空白部分から制御点を範囲選択。 制御点の選択モードで空白部分からマウスの左ボタンでドラッグすると、矩形で選択できます。透視ビューでは Ctrl を押しながら左ドラッグするとモデルの周囲を回転でき、Ctrl を押しながらクリックすると従来どおり選択の追加や解除ができます。"
+    ],
+    "improvements": [
+      "Windows のインストール・アンインストール画面を刷新。 インストール時の言語、インストール先、デスクトップのショートカットなどの設定をまとめました。言語を切り替えると、タイトル、ボタン、案内も切り替わります。",
+      "ショートカットガイドを更新。 よく使う操作を船体モデルのファイル、ビュー、ウィンドウに分け、マウス操作を図で説明しました。",
+      "計算レポートの表示を改善。 加速・制動計算で目標船速に到達した場合は、到達した船速を別の行に表示します。計算方法は従来どおりです。"
+    ],
+    "bug_fixes": [
+      "一部のダイアログを開いていると Ctrl+Shift+L で言語を切り替えられない問題を修正しました。更新ウィンドウを開いたままでも、更新内容、状態、進捗メッセージが表示言語に合わせて切り替わります。",
+      "簡体字中国語、英語、ロシア語、日本語、ドイツ語、フランス語、スペイン語で不足していた画面やレポートの文言を補いました。船体モデルを開く操作、終了時の保存確認、プロペラ計算の説明、エクスポートオプションなどが対象です。",
+      "アンインストール画面のタイトルに誤って「インストール」と表示される問題を修正しました。"
+    ]
+  },
+  "de": {
+    "features": [
+      "Beim ersten Start gilt die Installationssprache. Nach einer Neuinstallation verwendet FreeShip beim ersten Start die im Installationsprogramm gewählte Sprache. Bei einem Upgrade bleibt die gespeicherte Spracheinstellung erhalten.",
+      "Kontrollpunkte in allen vier Ansichten per Auswahlrahmen markieren. Im Auswahlmodus für Kontrollpunkte ziehen Sie mit gedrückter linker Maustaste von einer freien Stelle aus einen Rahmen auf. In der Perspektivansicht drehen Sie die Ansicht um das Modell, indem Sie bei gedrückter Strg-Taste mit der linken Maustaste ziehen. Mit Strg und einem Klick lassen sich weiterhin Punkte zur Auswahl hinzufügen oder daraus entfernen."
+    ],
+    "improvements": [
+      "Fenster für Installation und Deinstallation unter Windows neu gestaltet. Installationssprache, Zielordner, Desktopverknüpfung und weitere Optionen stehen zusammen. Beim Sprachwechsel ändern sich auch Fenstertitel, Schaltflächen und Hinweise.",
+      "Übersicht der Tastenkürzel überarbeitet. Häufig verwendete Aktionen sind nach Modelldateien, Ansichten und Fenstern gruppiert. Abbildungen erläutern die Mausgesten.",
+      "Berechnungsbericht ergänzt. Wenn die Berechnung für Beschleunigung und Abbremsen die Zielgeschwindigkeit erreicht, zeigt der Bericht die erreichte Geschwindigkeit in einer eigenen Zeile. Die Berechnungsmethode bleibt unverändert."
+    ],
+    "bug_fixes": [
+      "Ein Fehler wurde behoben, durch den sich die Sprache in einigen geöffneten Dialogen nicht mit Strg+Umschalt+L wechseln ließ. Auch in einem bereits geöffneten Updatefenster wechseln Versionshinweise, Status und Fortschrittsmeldungen jetzt mit der Oberflächensprache.",
+      "Fehlende Texte für Oberfläche und Berichte wurden in vereinfachtem Chinesisch, Englisch, Russisch, Japanisch, Deutsch, Französisch und Spanisch ergänzt. Dazu gehören Texte zum Öffnen von Modellen, die Speicherabfrage beim Beenden, Hinweise zur Propellerberechnung und Exportoptionen.",
+      "Der Titel des Deinstallationsfensters lautete fälschlich „Installation“. Das wurde korrigiert."
+    ]
+  },
+  "fr": {
+    "features": [
+      "La langue d’installation est utilisée au premier lancement. Après une nouvelle installation, la langue sélectionnée dans le programme d’installation devient celle de l’interface au premier lancement. Une mise à niveau conserve la langue déjà enregistrée.",
+      "Sélectionnez des points de contrôle par rectangle dans chacune des quatre vues. En mode de sélection des points de contrôle, faites glisser le pointeur avec le bouton gauche depuis une zone vide. Dans la vue en perspective, maintenez Ctrl et faites glisser avec le bouton gauche pour tourner autour du modèle ; Ctrl + clic permet toujours d’ajouter ou de retirer un point de la sélection."
+    ],
+    "improvements": [
+      "Refonte des fenêtres d’installation et de désinstallation sous Windows. La langue, le dossier d’installation, le raccourci sur le bureau et les autres options sont regroupés. Le titre, les boutons et les indications suivent la langue choisie.",
+      "Mise à jour du guide des raccourcis. Les opérations courantes sont regroupées par fichiers de modèles, vues et fenêtres. Des illustrations expliquent les gestes à la souris.",
+      "Précision ajoutée au rapport de calcul. Lorsque le calcul d’accélération et de freinage atteint la vitesse cible, le rapport indique la vitesse atteinte sur une ligne dédiée. La méthode de calcul reste inchangée."
+    ],
+    "bug_fixes": [
+      "Correction d’un problème qui empêchait Ctrl+Maj+L de changer la langue dans certaines boîtes de dialogue ouvertes. Si la fenêtre de mise à jour est déjà ouverte, les notes de version, l’état et les messages de progression suivent aussi la langue de l’interface.",
+      "Ajout des textes d’interface et de rapport manquants en chinois simplifié, anglais, russe, japonais, allemand, français et espagnol, notamment pour l’ouverture d’un modèle, la confirmation d’enregistrement avant de quitter, les explications du calcul d’hélice et les options d’exportation.",
+      "Correction du titre de la fenêtre de désinstallation, qui indiquait à tort « Installation »."
+    ]
+  },
+  "es": {
+    "features": [
+      "El primer inicio usa el idioma de instalación. Tras una instalación nueva, el idioma elegido en el instalador se usa de forma predeterminada la primera vez que se abre el programa. Las actualizaciones conservan la preferencia de idioma guardada.",
+      "Selección de puntos de control mediante un recuadro en cualquiera de las cuatro vistas. En el modo de selección de puntos de control, arrastra con el botón izquierdo desde una zona vacía. En la vista en perspectiva, mantén pulsada Ctrl y arrastra con el botón izquierdo para girar alrededor del modelo. Ctrl + clic sigue permitiendo añadir puntos a la selección o quitarlos."
+    ],
+    "improvements": [
+      "Se rediseñaron las ventanas de instalación y desinstalación de Windows. El idioma de instalación, la carpeta de destino, el acceso directo del escritorio y las demás opciones aparecen juntos. El título, los botones y los avisos se actualizan al cambiar de idioma.",
+      "Se actualizó la guía de atajos. Las acciones habituales se agrupan por archivos de modelo, vistas y ventanas. Las ilustraciones explican los gestos del ratón.",
+      "Se aclaró el informe de cálculo. Si el cálculo de aceleración y frenado alcanza la velocidad objetivo, el informe muestra la velocidad alcanzada en una línea aparte. El método de cálculo no cambia."
+    ],
+    "bug_fixes": [
+      "Se corrigió un problema que impedía cambiar de idioma con Ctrl+Mayús+L si estaban abiertos ciertos cuadros de diálogo. Si la ventana de actualizaciones ya está abierta, las notas de la versión, el estado y los mensajes de progreso también adoptan el idioma de la interfaz.",
+      "Se añadieron los textos que faltaban en la interfaz y los informes en chino simplificado, inglés, ruso, japonés, alemán, francés y español. Entre ellos se incluyen los textos para abrir modelos, confirmar si se guardan al salir, explicar el cálculo de hélices y mostrar las opciones de exportación.",
+      "Se corrigió el título de la ventana de desinstalación, que mostraba «Instalación» por error."
+    ]
+  }
+}

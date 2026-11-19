@@ -143,10 +143,14 @@ def compile_setup(output,info,fault=''):
     if fault and (not info.get('test_id') or fault!='after-msi'):raise ValueError('Fault injection requires a private test identity')
     output=Path(output);source=Path(__file__).parent/'installer/Setup.cs'
     language_source=source.with_name('InstallerLanguage.cs')
+    view_source=source.with_name('InstallerView.cs')
+    brand=source.parents[2]/'src/app/assets/brand'
+    brand_icon=brand/'freeship26.ico'
+    brand_image=brand/'freeship26.png'
     # Only complete, context-specific installer catalogs are offered. English
     # is embedded in maintenance as well, so recovery needs no installed files.
     literals=[]
-    for text in (source.read_text('utf8'),language_source.read_text('utf8')):
+    for text in (path.read_text('utf8') for path in (source,language_source,view_source)):
         literals.extend(json.loads(m[1]) for m in re.finditer(r'\b(?:T|Text)\(\s*("(?:\\.|[^"\\])*")\s*\)',text))
     required=set(literals)
     catalogs=[dict(id='zh',name='简体中文',messages={})]
@@ -159,21 +163,26 @@ def compile_setup(output,info,fault=''):
         if catalog['id'] in seen_catalog_ids:raise ValueError('Duplicate installer language: '+catalog['id'])
         seen_catalog_ids.add(catalog['id'])
         selected={key:messages.get('installer\x04'+key,'') for key in required}
-        if all(selected.values()):catalogs.append(dict(id=catalog['id'],name=catalog['name'],messages=selected))
-    if not any(c['id']=='en' for c in catalogs):raise ValueError('Reviewed English installer captions are incomplete')
+        missing=sorted(key for key,value in selected.items() if not isinstance(value,str) or not value.strip())
+        if missing:raise ValueError(f"Incomplete installer captions for {catalog['id']}: {', '.join(missing)}")
+        catalogs.append(dict(id=catalog['id'],name=catalog['name'],messages=selected))
+    missing_languages={'zh','en','ru','ja','de','fr','es'}-{c['id'] for c in catalogs}
+    if missing_languages:raise ValueError('Missing installer languages: '+', '.join(sorted(missing_languages)))
     language_resource=output/'installer-languages.json'
     language_resource.write_text(json.dumps(dict(version=1,languages=catalogs),ensure_ascii=False),'utf8')
     csc=Path(os.environ['WINDIR'])/'Microsoft.NET/Framework64/v4.0.30319/csc.exe'
     if not csc.is_file():raise ValueError('The Windows .NET Framework C# compiler is required')
     ids='static class Identity { public const string Family='+json.dumps(info['upgrade_code'])+'; public const string TestId='+json.dumps(info.get('test_id') or '')+'; public const string Name='+json.dumps(info['name'])+'; public const string Fault='+json.dumps(fault)+'; }'
     (output/'Identity.cs').write_text(ids,'utf8')
-    (output/'setup.manifest').write_text('<?xml version="1.0" encoding="utf-8"?><assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0"><trustInfo xmlns="urn:schemas-microsoft-com:asm.v3"><security><requestedPrivileges><requestedExecutionLevel level="asInvoker" uiAccess="false"/></requestedPrivileges></security></trustInfo></assembly>','utf8')
+    (output/'setup.manifest').write_text('<?xml version="1.0" encoding="utf-8"?><assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0"><trustInfo xmlns="urn:schemas-microsoft-com:asm.v3"><security><requestedPrivileges><requestedExecutionLevel level="asInvoker" uiAccess="false"/></requestedPrivileges></security></trustInfo><application xmlns="urn:schemas-microsoft-com:asm.v3"><windowsSettings><dpiAware xmlns="http://schemas.microsoft.com/SMI/2005/WindowsSettings">true</dpiAware></windowsSettings></application></assembly>','utf8')
     bundle={k:info[k] for k in ('product_code','upgrade_code','version','name','folder','registry','test_id','msi_sha256','payload_sha256')}
     common=[str(csc),'/nologo','/target:winexe','/platform:x64','/optimize+',
         '/r:System.Windows.Forms.dll','/r:System.Drawing.dll','/r:System.Web.Extensions.dll',
         '/resource:'+str(language_resource)+',installer-languages.json',
-        '/win32manifest:'+str(output/'setup.manifest')]
-    sources=[str(source),str(language_source),str(output/'Identity.cs')]
+        '/resource:'+str(brand_image)+',installer-brand.png',
+        '/resource:'+str(brand_icon)+',installer-brand.ico',
+        '/win32icon:'+str(brand_icon), '/win32manifest:'+str(output/'setup.manifest')]
+    sources=[str(source),str(language_source),str(view_source),str(output/'Identity.cs')]
     engine=output/'maintenance.exe';setup=output/'FreeShip 26 Setup.exe'
     for name,command in [('maintenance',common+['/out:'+str(engine)]+sources),('setup',common+['/out:'+str(setup),
         '/resource:'+str(output/'setup-bundle.json')+',manifest.json','/resource:'+info['msi']+',payload.msi','/resource:'+str(engine)+',maintenance.exe']+sources)]:
@@ -184,7 +193,7 @@ def compile_setup(output,info,fault=''):
         (output/(name+'-compile.log')).write_bytes(result.stdout+result.stderr)
         if result.returncode:raise RuntimeError('Setup compilation failed: '+str(output/(name+'-compile.log')))
     info.update(setup=str(setup),setup_sha256=package.digest(setup),
-        setup_source_sha256=package.digest(source),installer_language_source_sha256=package.digest(language_source),installer_languages_sha256=package.digest(language_resource),installer_languages=[c['id'] for c in catalogs],maintenance_sha256=package.digest(engine),
+        setup_source_sha256=package.digest(source),installer_view_source_sha256=package.digest(view_source), installer_brand_sha256={p.name:package.digest(p) for p in (brand_icon,brand_image)},installer_language_source_sha256=package.digest(language_source),installer_languages_sha256=package.digest(language_resource),installer_languages=[c['id'] for c in catalogs],maintenance_sha256=package.digest(engine),
         installer_profile='verified-msi-recovery',delivery_status='local-development',
         boundary='Setup EXE automatically restores verified prior MSI after failure. Raw MSI is internal. Unsigned; desktop and public release acceptance remain separate.')
     return info

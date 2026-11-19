@@ -692,17 +692,17 @@ QJsonObject Calculation::run(){
     const auto helpNote=r(task==1?"rs_propeller_task1_note":task<=3?"rs_propeller_task2_note":task==4?"rs_propeller_task4_note":"rs_propeller_task5_note");
     const auto helpCredit="\r\n\r\nCopyright (c) "+QString(task<=3?"2007":task==4?"2008":"2008-2013")+", Timoshenko V.F.\r\n";
     QString help=helpNote+helpCredit;
-    if(nativeB())help="B 系列采用 1975 年完整多项式，基准雷诺数 2×10^6。适用范围：2–7 片桨叶，桨盘面比 0.30–1.05，螺距比 0.50–1.40，J=0–1.5。\r\n可选择基准模式或论文 Table 6 雷诺数修正（2×10^6–2×10^9）。输入为 0.75R 处的雷诺数，整条曲线保持该值；例如输入 20 表示 2×10^7。基准模式不使用修正式；指定模式在下限处保留论文拟合残差。\r\n未施加粗糙度、空泡、桨厚变化或船后修正。";
+    if(nativeB())help=report_language::text("B 系列采用 1975 年完整多项式，基准雷诺数 2×10^6。适用范围：2–7 片桨叶，桨盘面比 0.30–1.05，螺距比 0.50–1.40，J=0–1.5。\r\n可选择基准模式或论文 Table 6 雷诺数修正（2×10^6–2×10^9）。输入为 0.75R 处的雷诺数，整条曲线保持该值；例如输入 20 表示 2×10^7。基准模式不使用修正式；指定模式在下限处保留论文拟合残差。\r\n未施加粗糙度、空泡、桨厚变化或船后修正。",{});
     publishCache();QJsonObject answer{{"calculator",schema["calculator"]},{"parameters",parameters()},{"series",curves},{"text",report.join("\r\n")+"\r\n"},{"help",help},{"warnings",warnings},{"units",0},{"requested",request},{"elapsed_ms",double(timer.elapsed())},{"engine",nativeB()?"C++ Wageningen B-series":"C++ propulsion workflow; original external solver"}};
     if(nativeB())answer["b_series"]=nativeResult;
     if(nativeDesign()){
         answer["engine"]="C++ B-series preliminary design";answer["propeller_design"]=nativeResult;
-        answer["help"]="在给定直径、转速和螺距范围内进行 B 系列初选。各航速独立选桨，曲线表示设计包络。载荷和主机功率为全部螺旋桨的合计值。未指定直径限制时最多搜索到 25 m，请核对安装空间。匹配只在表列航速范围内进行。";
+        answer["help"]=report_language::text("在给定直径、转速和螺距范围内进行 B 系列初选。各航速独立选桨，曲线表示设计包络。载荷和主机功率为全部螺旋桨的合计值。未指定直径限制时最多搜索到 25 m，请核对安装空间。匹配只在表列航速范围内进行。",{});
     }
     if(nativePassport()){
         answer["engine"]="C++ B-series propulsion passport";
         answer["propulsion_passport"]=nativeResult;
-        answer["help"]="图谱 1–4 使用 B 系列多项式，基准 Re=2×10^6，要求 i2 = 1。推力、转矩和主机功率均为全部螺旋桨的合计值。伴流比 w、推力减额 t 和相对旋转效率 ηR 采用输入值，ηR 为等推力下敞水转矩与船后转矩之比。Va=(1-w)Vs，Te=(1-t)Nρn²D⁴KT，Pe=2πNρn³D⁵KQ/(ηRηsηg)。参考 J 的 0.70–1.30 倍和额定转速的 0.55–1.15 倍组成 25 个工况。超出推进区的载荷仅作参考。";
+        answer["help"]=report_language::text("图谱 1–4 使用 B 系列多项式，基准 Re=2×10^6，要求 i2 = 1。推力、转矩和主机功率均为全部螺旋桨的合计值。伴流比 w、推力减额 t 和相对旋转效率 ηR 采用输入值，ηR 为等推力下敞水转矩与船后转矩之比。Va=(1-w)Vs，Te=(1-t)Nρn²D⁴KT，Pe=2πNρn³D⁵KQ/(ηRηsηg)。参考 J 的 0.70–1.30 倍和额定转速的 0.55–1.15 倍组成 25 个工况。超出推进区的载荷仅作参考。",{});
     }
     if(task==3)answer["engine_curve"]=engineCurve;
     answer["external_tools"]=externalTools;

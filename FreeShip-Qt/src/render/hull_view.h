@@ -147,6 +147,7 @@ private:
     void draw(QPainter&, qreal devicePixelRatio,bool final=true,bool forceSoftware=false,int* verifySections=nullptr) const;
     void fitToViewport(bool resizing);
     void cancelGesture();
+    void selectWithLeftButton(QPointF position,bool additive);
     void notifySelectionChanged();
     void chooseCoordinateAxis(int axis);
     void updateInteractionHover(fs::EntityId id);

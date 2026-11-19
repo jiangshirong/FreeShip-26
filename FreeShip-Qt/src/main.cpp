@@ -17,6 +17,14 @@
 #include <QWheelEvent>
 
 namespace {
+QString installerLanguageHint(const QString& settingsFile) {
+    QFile hint(QFileInfo(settingsFile).dir().filePath("installer-language.json"));
+    if(!hint.open(QIODevice::ReadOnly))return {};
+    const auto data=hint.read(1025);
+    if(data.size()>1024)return {};
+    return QJsonDocument::fromJson(data).object().value("language").toString();
+}
+
 class NumericWheelFilter final : public QObject {
     bool eventFilter(QObject* receiver,QEvent* event) override {
         if(event->type()!=QEvent::Wheel)return false;
@@ -84,9 +92,14 @@ int main(int argc, char** argv) {
     }
     const bool firstRun=(!verification||firstLaunchProbe)&&!QFileInfo::exists(settingsFile);
     try{
-        const auto id=firstRun?QString("en"):windowStartup&&arguments.size()==4?arguments[2]:
-            settingsFile.isEmpty()?QString("zh"):PreferencesStore(settingsFile).read().value("ui_language").toString("zh");
-        languageIssue=setUiLanguage(id);
+        if(firstRun){
+            const auto hint=installerLanguageHint(settingsFile);
+            if(hint.isEmpty()||!setUiLanguage(hint).isEmpty())languageIssue=setUiLanguage("en");
+        }else{
+            const auto id=windowStartup&&arguments.size()==4?arguments[2]:
+                settingsFile.isEmpty()?QString("zh"):PreferencesStore(settingsFile).read().value("ui_language").toString("zh");
+            languageIssue=setUiLanguage(id);
+        }
         if(!languageIssue.isEmpty()){
             // Missing packs cannot prevent startup or silently overwrite the user's choice.
             if(!setUiLanguage("en").isEmpty())setUiLanguage("zh");

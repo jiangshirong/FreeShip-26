@@ -32,6 +32,7 @@
 #include <QScrollBar>
 #include <QSpinBox>
 #include <QTabWidget>
+#include <QHeaderView>
 #include <QTableWidget>
 #include <QTimer>
 #include <QToolButton>
@@ -315,7 +316,8 @@ void MainWindow::preferencesStep(const QString& operation){
                         auto* translated=QApplication::activeModalWidget();
                         auto* table=translated?translated->findChild<QTableWidget*>("ShortcutGuideTable"):nullptr;
                         workflowCase("language.guide-reopened-with-translated-table",table&&
-                            table->horizontalHeaderItem(0)->text()==uiText("操作"));
+                            table->horizontalHeader()->isHidden()&&table->item(0,0)&&
+                            table->item(0,0)->text()==uiText("船模文件"));
                         if(translated)translated->close();
                     });
                 });
