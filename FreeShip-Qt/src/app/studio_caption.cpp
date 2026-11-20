@@ -40,6 +40,34 @@ bool managedWindow(QWidget* window){
         &&!window->property("studio_caption_double_click_disabled").toBool();
 }
 
+#ifdef Q_OS_LINUX
+// Keep resize hit targets confined to the main window's outer rim.
+class ResizeGrip final : public QWidget {
+public:
+    ResizeGrip(QWidget* w, Qt::Edges edges, Qt::CursorShape cursor):QWidget(w),edges_(edges){
+        setCursor(cursor); setFocusPolicy(Qt::NoFocus); w->installEventFilter(this);
+    }
+protected:
+    bool eventFilter(QObject* obj,QEvent* ev) override {
+        if(ev->type()==QEvent::Resize || ev->type()==QEvent::Show || ev->type()==QEvent::WindowStateChange){
+            auto* w=parentWidget(); constexpr int rim=5;
+            const bool l=edges_.testFlag(Qt::LeftEdge),r=edges_.testFlag(Qt::RightEdge);
+            const bool t=edges_.testFlag(Qt::TopEdge),b=edges_.testFlag(Qt::BottomEdge);
+            setGeometry(l?0:r?w->width()-rim:rim,t?0:b?w->height()-rim:rim,
+                        l||r?rim:qMax(0,w->width()-2*rim),t||b?rim:qMax(0,w->height()-2*rim));
+            setVisible(!w->isMaximized()&&!w->isFullScreen()); raise();
+        }
+        return QWidget::eventFilter(obj,ev);
+    }
+    void mousePressEvent(QMouseEvent* e) override {
+        if(e->button()==Qt::LeftButton && window()->windowHandle() && window()->windowHandle()->startSystemResize(edges_)) e->accept();
+        else QWidget::mousePressEvent(e);
+    }
+private:
+    Qt::Edges edges_;
+};
+#endif
+
 class CaptionButton final : public QToolButton {
 public:
     CaptionButton(bool close,QWidget* parent):QToolButton(parent),close_(close){
@@ -81,8 +109,23 @@ public:
 protected:
     void resizeEvent(QResizeEvent* event)override{QWidget::resizeEvent(event);QTimer::singleShot(0,this,[this]{refresh();});}
     void mousePressEvent(QMouseEvent* event)override{
+#ifdef Q_OS_LINUX
+        if(event->button()==Qt::LeftButton){pressPosition_=event->globalPosition().toPoint();dragPending_=true;}
+#else
         if(event->button()==Qt::LeftButton&&window_->windowHandle())window_->windowHandle()->startSystemMove();
+#endif
     }
+#ifdef Q_OS_LINUX
+    QPoint pressPosition_;
+    bool dragPending_=false;
+    void mouseMoveEvent(QMouseEvent* e) override {
+        if(dragPending_ && (e->buttons()&Qt::LeftButton) && (e->globalPosition().toPoint()-pressPosition_).manhattanLength()>=QApplication::startDragDistance()){
+            dragPending_=false;
+            if(auto* handle=window_->windowHandle())handle->startSystemMove();
+        }
+    }
+    void mouseReleaseEvent(QMouseEvent*) override {dragPending_=false;}
+#endif
     void mouseDoubleClickEvent(QMouseEvent* event)override{
         if(event->button()==Qt::LeftButton)toggleWindow(window_);
     }
@@ -177,6 +220,14 @@ void enableStudioMinimizeCaption(QWidget* window){
     window->setProperty("studio_caption_minimize",true);
     auto flags=window->windowFlags();flags&=~Qt::FramelessWindowHint;
     flags|=Qt::CustomizeWindowHint|Qt::WindowTitleHint|Qt::WindowSystemMenuHint|Qt::WindowCloseButtonHint|Qt::WindowMinMaxButtonsHint;
+#ifdef Q_OS_LINUX
+    flags=(flags & Qt::WindowType_Mask) | Qt::FramelessWindowHint;
+    using namespace Qt;
+    new ResizeGrip(window,LeftEdge,SizeHorCursor); new ResizeGrip(window,RightEdge,SizeHorCursor);
+    new ResizeGrip(window,TopEdge,SizeVerCursor); new ResizeGrip(window,BottomEdge,SizeVerCursor);
+    new ResizeGrip(window,TopEdge|LeftEdge,SizeFDiagCursor); new ResizeGrip(window,BottomEdge|RightEdge,SizeFDiagCursor);
+    new ResizeGrip(window,TopEdge|RightEdge,SizeBDiagCursor); new ResizeGrip(window,BottomEdge|LeftEdge,SizeBDiagCursor);
+#endif
     window->setWindowFlags(flags);
 }
 QWidget* createStudioCaption(QWidget* window,QWidget* tabs){return new StudioCaption(window,tabs);}

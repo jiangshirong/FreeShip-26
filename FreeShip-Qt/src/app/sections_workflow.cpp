@@ -135,14 +135,20 @@ void MainWindow::sectionsStep(const QString& method){
             int index=-1;for(const auto& s:model->sections)if(s.kind==1&&float(s.distance)==float(outside))index=s.index;
             auto* t=table();int row=-1;for(int i=0;i<t->rowCount();++i)if(t->item(i,0)->data(Qt::UserRole).toInt()==index)row=i;
             if(row<0)throw std::runtime_error("Added section missing from table");
-            workflowCase("display_distance_roundtrips_single",float(t->item(row,1)->text().toDouble())==float(outside));
+            const auto* distance=t->item(row,1);
+            const auto display=distance->text();
+            workflowCase("section-editor-preserves-exact-distance",
+                         float(distance->data(Qt::EditRole).toDouble())==float(outside));
+            workflowCase("display-distance-rounded-within-four-decimals",
+                         std::abs(display.toDouble()-double(float(outside)))<=0.000050001
+                         &&display.section('e',0,0).section('.',1).size()<=4,display);
             t->selectRow(row);workflowCase("selection_uses_revision_local_index",sections_->selectedIndices().size()==1);
             t->item(row,1)->setText(QString::number(outside+0.25,'g',12));break;
         }
         case 2:{
             captureWorkflow("edited");workflowCase("distance_editor_updates_definition",std::any_of(model->sections.begin(),model->sections.end(),[&](const auto& s){return s.kind==1&&s.distance==float(outside+0.25);}));
             workflowCase("new_revision_clears_section_selection",sections_->selectedIndices().isEmpty());
-            auto* t=table();for(int row=0;row<t->rowCount();++row)if(float(t->item(row,1)->text().toDouble())==float(outside+0.25))t->selectRow(row);
+            auto* t=table();for(int row=0;row<t->rowCount();++row)if(float(t->item(row,1)->data(Qt::EditRole).toDouble())==float(outside+0.25))t->selectRow(row);
             dialogAction(action("clear"),false);workflowCase("clear_cancel_preserves_revision",session_.model()==model&&!session_.busy());
             // The cell's own undo must win over document undo while editing.
             auto* item=t->item(0,1);t->setCurrentItem(item);t->editItem(item);
@@ -154,7 +160,7 @@ void MainWindow::sectionsStep(const QString& method){
             // Cancel rather than commit the temporary editor.
             QKeyEvent escape(QEvent::KeyPress,Qt::Key_Escape,Qt::NoModifier);QApplication::sendEvent(editor,&escape);
             QToolButton* remove=nullptr;
-            for(int row=0;row<table()->rowCount();++row)if(float(table()->item(row,1)->text().toDouble())==float(outside+0.25))
+            for(int row=0;row<table()->rowCount();++row)if(float(table()->item(row,1)->data(Qt::EditRole).toDouble())==float(outside+0.25))
                 remove=table()->cellWidget(row,0)->findChild<QToolButton*>();
             if(!remove||!remove->isEnabled())throw std::runtime_error("Row delete button unavailable");
             table()->clearSelection();if(table()->rowCount()>1)table()->selectRow(0);

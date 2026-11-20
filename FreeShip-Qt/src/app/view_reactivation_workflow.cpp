@@ -71,11 +71,15 @@ void MainWindow::auditViewGridResize(bool frameTiming){
         double(cell.width())/std::max(1,canvas->width()-viewGrid_->spacing()),
         double(cell.height())/std::max(1,canvas->height()-viewGrid_->spacing()));};
     const auto sample=[&](QString phase){
-        QJsonArray frames;bool aligned=true;QRect occupied;
-        for(auto* frame:viewFrames_)if(frame->isVisible()){
+        const auto screenshot=grab();
+        QJsonArray frames,titles;bool aligned=true;QRect occupied;
+        for(int i=0;i<int(viewFrames_.size());++i)if(auto* frame=viewFrames_[i];frame->isVisible()){
             const auto index=viewGrid_->indexOf(frame);int row,col,rs,cs;viewGrid_->getItemPosition(index,&row,&col,&rs,&cs);
             const auto r=frame->geometry();aligned&=r==viewGrid_->cellRect(row,col);occupied=occupied.united(r);
             frames.append(QJsonArray{r.x(),r.y(),r.width(),r.height()});
+            auto* view=views_[i];const auto painted=view->overlayEvidence();
+            titles.append(QJsonObject{{"projection",int(view->projection())},
+                {"text",painted["projection_title_text"]},{"rect",painted["projection_title_rect"]}});
         }
         const auto at=ratio();workflowCase("view-resize."+phase+".fills-canvas",aligned&&occupied==canvas->contentsRect()&&viewGrid_->isEnabled());
         if(frames.size()==4){
@@ -108,8 +112,8 @@ void MainWindow::auditViewGridResize(bool frameTiming){
             const bool expectedCount=visibleHandles==3||(phase=="first-show"&&visibleHandles==0);
             workflowCase("view-resize."+phase+".handles-aligned",handlesAligned&&expectedCount);
         }
-        samples.append(QJsonObject{{"phase",phase},{"frames",frames},{"left",at.x()},{"top",at.y()}});
-        grab().save(workflowOutput_+"/views/resize-"+phase+".png");
+        samples.append(QJsonObject{{"phase",phase},{"frames",frames},{"titles",titles},{"left",at.x()},{"top",at.y()}});
+        screenshot.save(workflowOutput_+"/views/resize-"+phase+".png");
     };
     const auto divider=[&](const QString& axis)->QWidget*{
         QList<QWidget*> found;for(auto* widget:canvas->findChildren<QWidget*>(QString{},Qt::FindDirectChildrenOnly))

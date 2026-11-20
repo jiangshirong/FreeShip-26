@@ -1,6 +1,7 @@
 #include "app/ui_language.h"
 #include "preferences_store.h"
 #include "plates_dialog.h"
+#include "table_number.h"
 #include "text_style.h"
 #include "model_session.h"
 #include "studio_ui.h"
@@ -251,8 +252,8 @@ void PlatesDialog::select(int row){
     const QStringList labels{uiText("最小边长误差"),uiText("最大边长误差"),uiText("面积差（有符号）"),uiText("面积差绝对值之和"),uiText("原表面积"),uiText("无量纲误差")};
     for(int row=0;row<keys.size();++row){
         const double value=m[keys[row]].toDouble()*(row>=2&&row<=4?multiplier:1);
-        const QStringList cells{labels[row],QString::number(value,'g',8),row<2?unit:row<5?unit+QString(QChar(0x00b2)):QString{}};
-        for(int col=0;col<3;++col){auto* item=new QTableWidgetItem(cells[col]);item->setTextAlignment(col==1?Qt::AlignRight|Qt::AlignVCenter:Qt::AlignLeft|Qt::AlignVCenter);metrics_->setItem(row,col,item);}
+        const QStringList cells{labels[row],tableNumber::display(value),row<2?unit:row<5?unit+QString(QChar(0x00b2)):QString{}};
+        for(int col=0;col<3;++col){auto* item=new QTableWidgetItem(cells[col]);item->setTextAlignment(col==1?Qt::AlignRight|Qt::AlignVCenter:Qt::AlignLeft|Qt::AlignVCenter);if(col==1)item->setToolTip(QString::number(value,'g',17));metrics_->setItem(row,col,item);}
         metrics_->setRowHeight(row,44);
     }
     metrics_->setFixedHeight(6*44+metrics_->horizontalHeader()->height()+4);metrics_->show();

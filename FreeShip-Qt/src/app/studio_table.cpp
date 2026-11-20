@@ -130,8 +130,10 @@ private:
             for(int column=0;column<widths_.size();++column){
                 if(table_->isColumnHidden(column))continue;
                 const auto size=notation::size(model_->headerData(column,Qt::Horizontal).toString(),headerFont());
-                widths_[column]=std::ceil(size.width())+14;headingTextHeight_=std::max(double(size.height()),headingTextHeight_);
+                widths_[column]=std::max(int(std::ceil(size.width()))+14+headerControlWidth(column),headerWidthHint(column));
+                headingTextHeight_=std::max(double(size.height()),headingTextHeight_);
             }
+            fitHeadingGroup();
             measureRow_=0;table_->setProperty("studio_table_measure_pending",true);
             applyScale(std::clamp(scale_,LowestScale,HighestScale),QPointF{},true);
             measureChunk(++measureGeneration_);return;
@@ -144,19 +146,42 @@ private:
             if(table_->isColumnHidden(column))continue;
             const auto caption=model_->headerData(column,Qt::Horizontal).toString();
             const auto headingSize=notation::size(caption,headerFont());
-            double width=headingSize.width();
+            double width=headingSize.width()+headerControlWidth(column);
             headingTextHeight_=std::max(double(headingSize.height()),headingTextHeight_);
             for(int row=0;row<model_->rowCount();++row){
                 if(table_->isRowHidden(row)||table_->columnSpan(row,column)>1)continue;
                 const auto index=model_->index(row,column);
                 const auto ownFont=index.data(Qt::FontRole);
-                width=std::max(width,textWidth(index.data().toString(),ownFont.isValid()?qvariant_cast<QFont>(ownFont).resolve(font_):font_));
+                width=std::max(width,textWidth(index.data().toString(),ownFont.isValid()?qvariant_cast<QFont>(ownFont).resolve(font_):font_)
+                                     +cellControlWidth(column));
             }
             // Six logical pixels on each side plus the grid stroke. No fixed
             // minimum such as 112 px and no stretching into unused canvas.
-            widths_[column]=std::ceil(width)+14;
+            widths_[column]=std::max(int(std::ceil(width))+14,headerWidthHint(column));
         }
+        fitHeadingGroup();
         applyScale(std::clamp(scale_,LowestScale,HighestScale),QPointF{},true);
+    }
+    void fitHeadingGroup(){
+        const auto* header=table_->horizontalHeader();
+        const auto title=header->property("studio_header_group_title").toString();
+        if(title.isEmpty())return;
+        const int first=header->property("studio_header_group_first").toInt();
+        const int last=std::min(int(widths_.size()),first+header->property("studio_header_group_count").toInt());
+        if(first<0||first>=last)return;
+        double available=0;
+        for(int col=first;col<last;++col)available+=widths_[col];
+        const double extra=(textWidth(title,headerFont())+14-available)/(last-first);
+        if(extra>0)for(int col=first;col<last;++col)widths_[col]+=extra;
+    }
+    int headerControlWidth(int column)const{
+        return column==0?table_->horizontalHeader()->property("studio_first_header_control_width").toInt():0;
+    }
+    int cellControlWidth(int column)const{
+        return column==0?table_->property("studio_first_column_control_width").toInt():0;
+    }
+    int headerWidthHint(int column)const{
+        return model_->headerData(column,Qt::Horizontal,Qt::SizeHintRole).toSize().width();
     }
     void measureChunk(quint64 generation){
         if(generation!=measureGeneration_||!model_)return;
@@ -167,7 +192,8 @@ private:
             if(!table_->isRowHidden(row))for(int column=0;column<widths_.size();++column){
                 if(table_->isColumnHidden(column)||table_->columnSpan(row,column)>1)continue;
                 const auto index=model_->index(row,column);const auto font=index.data(Qt::FontRole);
-                const auto width=std::ceil(textWidth(index.data().toString(),font.isValid()?qvariant_cast<QFont>(font).resolve(font_):font_))+14;
+                const auto width=std::ceil(textWidth(index.data().toString(),font.isValid()?qvariant_cast<QFont>(font).resolve(font_):font_))
+                                 +14+cellControlWidth(column);
                 if(width>widths_[column]){widths_[column]=width;changed=true;}
             }
             if(budget.elapsed()>=4)break;
@@ -180,7 +206,10 @@ private:
     }
     double contentWidth()const{double width=0;for(const auto value:widths_)width+=value;return width;}
     int headerHeight(double scale)const{
-        return qCeil(std::max(headingTextHeight_*scale,QFontMetricsF(scaled(headerFont(),scale)).height())+std::max(4.,12*scale));
+        const double fontHeight=QFontMetricsF(scaled(headerFont(),scale)).height();
+        const double padding=std::max(4.,12*scale);
+        const bool grouped=!table_->horizontalHeader()->property("studio_header_group_title").toString().isEmpty();
+        return qCeil(std::max(headingTextHeight_*scale,fontHeight)+padding+(grouped?fontHeight+padding:0));
     }
     int rowHeaderWidth(double scale)const{
         const auto font=scaled(font_,scale);

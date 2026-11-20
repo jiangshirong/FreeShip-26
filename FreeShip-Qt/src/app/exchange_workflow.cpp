@@ -2,7 +2,13 @@
 #include "main_window.h"
 #include "ui_language.h"
 #include "exchange_dialog.h"
+#include "exchange_save_probe.h"
+#include <QApplication>
 #include "grid_preview_panel.h"
+#include "print_hull_panel.h"
+#include <QDoubleSpinBox>
+#include <QListWidget>
+#include <QSlider>
 #include <QAction>
 #include <QCheckBox>
 #include <QComboBox>
@@ -28,8 +34,10 @@ void MainWindow::openExchange(bool importing,const QString& format){
     if(exchangeWorkflow_){
         const auto command=exchangeRequest_["commands"].toArray()[exchangeIndex_].toObject();const auto key=command["name"].toString();bool expectFailure=command["expect_failure"].toBool();
         const bool declined=command.contains("confirm_zero_faces")&&!command["confirm_zero_faces"].toBool();
-        if(command["cancel"].toBool()||declined)workflowCase(key+".cancelled",!dialog.succeeded()&&dialog.failure().isEmpty(),dialog.failure());
+        const bool keptFile=command.contains("confirm_overwrite")&&!command["confirm_overwrite"].toBool();
+        if(command["cancel"].toBool()||command["cancel_save"].toBool()||declined||keptFile)workflowCase(key+".cancelled",!dialog.succeeded()&&dialog.failure().isEmpty(),dialog.failure());
         else workflowCase(key+".completed",expectFailure?!dialog.failure().isEmpty():dialog.succeeded(),dialog.failure());
+        if(dialog.printHull())workflowArtifacts_[key+"_shell_final"]=dialog.printHull()->evidence();
         if(session_.ready())captureWorkflow(key);
         workflowArtifacts_[key+"_error"]=dialog.failure();
         if(importing&&!expectFailure&&!declined&&format!="part"&&format!="waves")workflowCase(key+".new-unsaved-document",session_.modified()&&!session_.canUndo()&&session_.sourcePath().isEmpty());
@@ -37,6 +45,7 @@ void MainWindow::openExchange(bool importing,const QString& format){
     }
 }
 void MainWindow::verifyExchange(const QString& request,const QString& output){
+    QApplication::setAttribute(Qt::AA_DontUseNativeDialogs,true);
     workflow_=true;exchangeWorkflow_=true;workflowOutput_=QFileInfo(output).absoluteFilePath();workflowTimer_.start();
     QFile f(request);if(!f.open(QIODevice::ReadOnly)){finishWorkflow("Cannot read exchange request");return;}
     exchangeRequest_=QJsonDocument::fromJson(f.readAll()).object();QDir().mkpath(workflowOutput_+"/views");
@@ -69,8 +78,19 @@ void MainWindow::exchangeStep(const QString& method){
             workflowCase(key+".responsive-during-export",true);timer->stop();timer->deleteLater();exchangeDialog_->reject();return;
         }
         if(exchangeDialog_->busy())return;
+        auto* d=exchangeDialog_;
+        if(*submitted && c["accept_stem_repair"].toBool() && d->printHull() && !d->failure().isEmpty()){
+            for(auto* box:d->printHull()->findChildren<QCheckBox*>()){
+                if(box->property("exchange_field")=="close_stem_seam" && box->isVisible() && !box->isChecked()){
+                    workflowArtifacts_[key+"_before_stitch"]=d->printHull()->evidence();
+                    box->click();
+                    *submitted=false;
+                    break;
+                }
+            }
+        }
         if(*submitted){timer->stop();timer->deleteLater();exchangeDialog_->reject();return;}
-        auto* d=exchangeDialog_;const auto options=c["options"].toObject();
+        const auto options=c["options"].toObject();
         if(*previewStage==1||*previewStage==2){auto* preview=d->gridPreview();if(preview->pending())return;
             if(*previewStage==1&&c["preview_changes"].isObject()){
                 workflowArtifacts_[key+"_preview_before"]=preview->evidence();workflowCase(key+".first-preview-current",preview->current());
@@ -82,12 +102,25 @@ void MainWindow::exchangeStep(const QString& method){
         }
         if(*previewStage==0){
         connect(d,&QDialog::finished,timer,[timer]{timer->stop();timer->deleteLater();});
-        for(auto*w:d->findChildren<QLineEdit*>())if(w->property("exchange_field")=="path")w->setText(c["path"].toString());
+        bool hasPath=false;
+        for(auto*w:d->findChildren<QLineEdit*>())if(w->property("exchange_field")=="path"){hasPath=true;w->setText(c["path"].toString());}
+        workflowCase(key+".path-field-only-on-import",hasPath==(c["method"]=="import"));
         for(auto*w:d->findChildren<QLineEdit*>()){auto key=w->property("exchange_number").toString();auto refs=options["references"].toObject();if(refs.contains(key))w->setText(refs[key].isString()?refs[key].toString():QString::number(refs[key].toDouble(),'g',17));}
         for(auto*w:d->findChildren<QCheckBox*>()){auto field=w->property("exchange_field").toString();if(options.contains(field))w->setChecked(options[field].toBool());}
         for(auto*w:d->findChildren<QComboBox*>()){auto field=w->property("exchange_field").toString();if(options.contains(field))w->setCurrentIndex(w->findData(options[field].toString()));}
         for(auto*w:d->findChildren<QComboBox*>()){auto key=w->property("exchange_parameter").toString();auto refs=options["references"].toObject();if(refs.contains(key))w->setCurrentIndex(w->findData(refs[key].toVariant()));}
         for(auto*w:d->findChildren<QSpinBox*>()){auto field=w->property("exchange_count").toString();if(options.contains(field))w->setValue(options[field].toInt());}
+        if(options["print_shell"].toBool() && d->printHull()){
+            for(auto*w:d->findChildren<QDoubleSpinBox*>()){auto field=w->property("print_value").toString();if(options.contains(field))w->setValue(options[field].toDouble());}
+            for(auto*w:d->findChildren<QListWidget*>())if(w->property("print_layers").toBool()&&options.contains("layers")){
+                const auto ids=options["layers"].toArray();for(int i=0;i<w->count();++i){auto* item=w->item(i);
+                    item->setCheckState(ids.contains(item->data(Qt::UserRole).toInt())?Qt::Checked:Qt::Unchecked);}
+            }
+            workflowCase(key+".no-auto-generation",!d->printHull()->pending() && d->printHull()->evidence()["builds"].toInt()==0);
+            workflowCase(key+".no-section-preview-controls",d->printHull()->findChildren<QSlider*>().isEmpty()
+                         && d->printHull()->findChildren<QPushButton*>().isEmpty());
+            *previewStage=3;
+        }
         }
         if(c["preview"].toBool()&&*previewStage==0){auto* preview=d->gridPreview();if(!preview){workflowCases_.append(QJsonObject{{"name",key+".preview-entry"},{"status","not_run"}});timer->stop();timer->deleteLater();d->reject();return;}
             for(auto* tabs:d->findChildren<QTabWidget*>())if(tabs->indexOf(preview)>=0)tabs->setCurrentWidget(preview);
@@ -113,6 +146,8 @@ void MainWindow::exchangeStep(const QString& method){
                 }
             });confirmation->start();
         }
+        if(c["method"]=="export")answerExchangeSaveDialog(d,c["path"].toString(),c["cancel_save"].toBool(),
+            [this,key](const QString& suggested){workflowArtifacts_[key+"_suggested_file"]=suggested;});
         buttons[0]->click();
         if(c["late_cancel"].toBool()) {
             // Diagnostic only: delay UI dispatch until the production worker

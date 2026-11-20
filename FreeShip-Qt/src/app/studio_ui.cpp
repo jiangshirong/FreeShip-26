@@ -378,6 +378,10 @@ void prepareStudioWindow(QWidget* widget){
     // minimize/maximize are supported BEFORE the initial show/maximize call.
     if(widget->property("studio_caption_minimize").toBool())flags|=Qt::WindowMinMaxButtonsHint;
     else flags&=~Qt::WindowMinMaxButtonsHint;
+#ifdef Q_OS_LINUX
+    // X11 treats explicit title/system menu hints as decoration requests.
+    if(widget->property("studio_caption_minimize").toBool())flags=(flags & Qt::WindowType_Mask) | Qt::FramelessWindowHint;
+#endif
     if(flags!=widget->windowFlags()&&!widget->isVisible())widget->setWindowFlags(flags);
     relaxWindowLimits(widget);
     if(qobject_cast<QDialog*>(widget))layout_motion::installFeatureWindow(widget);
@@ -421,7 +425,7 @@ public:
         return QProxyStyle::pixelMetric(metric,option,widget);
     }
     int styleHint(StyleHint hint,const QStyleOption* option=nullptr,const QWidget* widget=nullptr,QStyleHintReturn* result=nullptr)const override{
-        if(hint==SH_ToolTip_WakeUpDelay)return 0;
+        if(hint==SH_ToolTip_WakeUpDelay||hint==SH_TabBar_AllowWheelScrolling)return 0;
         if(qobject_cast<const QMenu*>(widget)){
             if(hint==SH_Menu_SubMenuPopupDelay)return 0;
             if(hint==SH_Menu_MouseTracking)return 1;
@@ -430,6 +434,7 @@ public:
     }
 
     void drawPrimitive(PrimitiveElement element,const QStyleOption* option,QPainter* painter,const QWidget* widget)const override{
+        if(element==PE_FrameFocusRect||element==PE_FrameDefaultButton)return;
         QProxyStyle::drawPrimitive(element,option,painter,widget);
         if(element!=PE_PanelMenu||!qobject_cast<const QMenu*>(widget))return;
         const QColor background(widget->property("studio_menu_background").toString());
@@ -545,9 +550,17 @@ public:
     }
     void drawControl(ControlElement element, const QStyleOption* option, QPainter* painter,
                      const QWidget* widget) const override {
+        if(element==CE_PushButton||element==CE_PushButtonBevel||element==CE_CheckBox||element==CE_RadioButton)
+            if(const auto* button=qstyleoption_cast<const QStyleOptionButton*>(option)){
+                // Native Windows styles can embed focus and default frames in their control painting.
+                auto base=*button;base.state&=~State_HasFocus;
+                base.features&=~QStyleOptionButton::DefaultButton;
+                QProxyStyle::drawControl(element,&base,painter,widget);
+                return;
+            }
         if(element==CE_TabBarTab)
             if(const auto* tab=qstyleoption_cast<const QStyleOptionTab*>(option)){
-                // Handle native tabs; the stylesheet handles its own outline below.
+                // Native tabs can embed the focus frame in the tab control.
                 auto base=*tab;base.state&=~State_HasFocus;
                 QProxyStyle::drawControl(element,&base,painter,widget);
                 return;
@@ -713,10 +726,20 @@ void applyStudioTheme() {
     palette.setColor(QPalette::HighlightedText,Qt::white);
     QApplication::setPalette(palette);
     qApp->setStyleSheet(qApp->styleSheet()+QStringLiteral(
+        // Stylesheet-painted controls also share the focus-frame policy.
+        "QWidget {outline:none;}"
+        "QComboBox QAbstractItemView {selection-background-color:#dcebe3;selection-color:#1e3532;}"
+        "QPushButton[studio_format_button=true] {background:#edf3ef;border:1px solid #d5e2db;"
+        "border-radius:5px;padding:3px 7px;}"
+        "QPushButton[studio_format_button=true]:enabled:hover,"
+        "QPushButton[studio_format_button=true]:enabled:focus {background:#e0ede5;}"
+        "QPushButton[studio_format_button=true]:pressed,"
+        "QPushButton[studio_format_button=true]:open {background:#d5e7dd;}"
+        "QPushButton[studio_format_button=true]:disabled {background:#f1f5f2;}"
+        "QPushButton[studio_format_button=true]::menu-indicator {subcontrol-origin:padding;"
+        "subcontrol-position:right center;right:5px;}"
         "QTabWidget::pane {border:0;background:transparent;}"
         "QTabWidget::tab-bar {left:0px;}"
-        // Qt paints PE_FrameFocusRect using the bar's rule, not the tab subcontrol.
-        "QTabBar {outline:none;}"
         "QTabBar::tab {background:transparent;color:#526f66;border:0;border-bottom:2px solid transparent;"
         "padding:9px 16px;margin:0 4px 8px 0;min-height:20px;}"
         "QTabBar::tab:hover {background:#edf3ef;color:#245b51;}"
@@ -793,6 +816,7 @@ void setStudioWindowIcon(QWidget* window,const QString& key){
 void setStudioFormatButton(QAbstractButton* button, const QString& format, const QString& description) {
     const auto icon = studioFormatIcon(format);
     if (icon.isNull()) return;
+    button->setProperty("studio_format_button",true);
     button->setText({});
     button->setIcon(icon);
     button->setIconSize(FormatIconSize);

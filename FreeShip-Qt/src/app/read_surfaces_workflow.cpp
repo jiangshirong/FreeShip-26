@@ -11,7 +11,7 @@
 
 namespace {
 QJsonObject observeReadCellFocus(QTableWidget* table,const QString& directory,const QString& stem){
-    QJsonArray columns;QStyledItemDelegate native;
+    QJsonArray columns;QStyledItemDelegate standard;
     for(int column=0;column<table->columnCount();++column){
         const auto index=table->model()->index(0,column);
         QStyleOptionViewItem option;option.initFrom(table);option.widget=table;option.font=table->font();option.palette=table->palette();
@@ -25,9 +25,9 @@ QJsonObject observeReadCellFocus(QTableWidget* table,const QString& directory,co
         auto* delegate=table->itemDelegateForIndex(index);
         const auto plain=draw(delegate,false),focused=draw(delegate,true);
         focused.save(directory+"/"+stem+"-focused-"+QString::number(column)+".png");
-        const auto nativePlain=draw(&native,false),nativeFocused=draw(&native,true);
-        nativeFocused.save(directory+"/"+stem+"-native-focus-"+QString::number(column)+".png");
-        columns.append(QJsonObject{{"column",column},{"focus_changes_cell_pixels",plain!=focused},{"native_focus_changes_pixels",nativePlain!=nativeFocused}});
+        const auto standardPlain=draw(&standard,false),standardFocused=draw(&standard,true);
+        standardFocused.save(directory+"/"+stem+"-standard-focus-"+QString::number(column)+".png");
+        columns.append(QJsonObject{{"column",column},{"focus_changes_cell_pixels",plain!=focused},{"standard_focus_changes_pixels",standardPlain!=standardFocused}});
     }
     const auto current=table->currentIndex();table->setCurrentCell(0,0);
     QKeyEvent down(QEvent::KeyPress,Qt::Key_Down,Qt::NoModifier);QCoreApplication::sendEvent(table,&down);
@@ -50,7 +50,10 @@ void MainWindow::auditReadSurfaces(bool copyOnly){
                 row["cell_focus"]=observeReadCellFocus(table,workflowOutput_+"/views",kind+"-"+language+(compact?"-compact":""));
             if(auto* table=dialog->findChild<QTableWidget*>("ShortcutGuideTable")){
                 row["keycap_delegate"]=dynamic_cast<StudioKeycapDelegate*>(table->itemDelegateForColumn(1))!=nullptr;QJsonArray wraps;bool inside=true;
-                for(int at=0;at<table->rowCount();++at){const auto key=table->item(at,1)->text();auto parts=studioKeyParts(key,table->font(),table->columnWidth(1));QJsonArray tokens;
+                for(int at=0;at<table->rowCount();++at){
+                    const auto* item=table->item(at,1);
+                    if(!item)continue; // Group headers span the table and have no key cell.
+                    const auto key=item->text();auto parts=studioKeyParts(key,table->font(),table->columnWidth(1));QJsonArray tokens;
                     for(const auto& part:parts){inside=inside&&QRectF(0,0,table->columnWidth(1),table->rowHeight(at)).contains(part.rect);if(part.key)tokens.append(part.text);}
                     wraps.append(QJsonObject{{"source",key},{"tokens",tokens},{"row_height",table->rowHeight(at)}});
                 }row["keycaps_fit_cells"]=inside;row["keys"]=wraps;

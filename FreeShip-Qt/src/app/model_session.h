@@ -98,6 +98,7 @@ public:
     QJsonObject hydroProgress()const{return hydroProgress_;}
     bool ready() const { return healthy_ && bool(model_); }
     bool drawingUnchanged() const {return drawingUnchanged_;}
+    bool publishingPointEdit() const {return method_=="move_point"||method_=="move_points"||method_=="undo"||method_=="redo";}
     bool modified() const { return modified_; }
     bool canUndo() const { return ready() && canUndo_; }
     int layerIdHighWater() const { return layerIdHighWater_; }

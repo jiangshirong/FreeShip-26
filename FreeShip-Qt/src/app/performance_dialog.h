@@ -50,7 +50,8 @@ private:
     QPushButton* sampleButton_=nullptr;
     QVector<QPushButton*> exports_;QTableView* table_;report::Browser* text_;QTabWidget* tabs_;
     QWidget* plot_;QComboBox *series_;QScrollArea* parameters_;
-    QTabWidget* pages_=nullptr;QScrollArea* additional_=nullptr;report::Browser* help_=nullptr;
+    QWidget *parameterPage_=nullptr,*resultPage_=nullptr;
+    QScrollArea* additional_=nullptr;report::Browser* help_=nullptr;
     QVector<QWidget*> additionalGroups_;QGridLayout* additionalLayout_=nullptr;
     QVBoxLayout* additionalColumnLayouts_[2]{};
     int additionalColumns_=0;quint64 parameterGeneration_=0;

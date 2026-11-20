@@ -9,6 +9,7 @@
 #include "core/cad_export.h"
 #include "studio_ui.h"
 #include "grid_preview_panel.h"
+#include "print_hull_panel.h"
 #include <QCheckBox>
 #include <QComboBox>
 #include <QDialogButtonBox>
@@ -68,20 +69,20 @@ ExchangeDialog::ExchangeDialog(ModelSession& session,bool importing,QString form
     setWindowIcon(studioFormatWindowIcon(fs::cad::extension(format_),importing));setProperty("studio_window_icon","format:"+fs::cad::extension(format_).toUpper());
     confirmOverwrite=[this](const QString& path){return confirmStudioAction(this,uiText("替换文件"),uiText("文件已存在，是否替换？\n")+path);};
     auto* layout=new QVBoxLayout(this);layout->setContentsMargins(22,18,22,18);layout->setSpacing(12);
-    auto* form=new QFormLayout;auto* fileRow=new QHBoxLayout;path_=new QLineEdit;path_->setProperty("exchange_field","path");
-    auto* browse=studioFolderButton(uiText("浏览…"));
-    fileRow->addWidget(path_,1);fileRow->addWidget(browse);form->addRow(uiText("文件"),fileRow);
-    connect(browse,&QPushButton::clicked,this,[this]{
-        if(busy())return;
-        const auto ext=fs::cad::extension(format_);
-        const auto filter=uiText(fs::cad::title(format_))+" (*."+ext+(format_=="iges"?" *.iges":"")+")";
-        const auto start=path_->text().isEmpty()?preferenceFileLocation(importing_?"import":"export"):path_->text();
-        auto path=importing_?QFileDialog::getOpenFileName(this,windowTitle(),start,filter):
-            QFileDialog::getSaveFileName(this,windowTitle(),start,filter,nullptr,QFileDialog::DontConfirmOverwrite);
-        if(path.isEmpty())return;
-        if(!importing_&&QFileInfo(path).suffix().isEmpty())path+='.'+ext;
-        path_->setText(path);
-    });
+    auto* form=new QFormLayout;
+    if(importing_){
+        auto* fileRow=new QHBoxLayout;importPath_=new QLineEdit;importPath_->setProperty("exchange_field","path");
+        auto* browse=studioFolderButton(uiText("浏览…"));
+        fileRow->addWidget(importPath_,1);fileRow->addWidget(browse);form->addRow(uiText("文件"),fileRow);
+        connect(browse,&QPushButton::clicked,this,[this]{
+            if(busy())return;
+            const auto ext=fs::cad::extension(format_);
+            const auto filter=uiText(fs::cad::title(format_))+" (*."+ext+(format_=="iges"?" *.iges":"")+")";
+            const auto start=importPath_->text().isEmpty()?preferenceFileLocation("import"):importPath_->text();
+            const auto path=QFileDialog::getOpenFileName(this,windowTitle(),start,filter);
+            if(!path.isEmpty())importPath_->setText(path);
+        });
+    }
     units_=new QComboBox;units_->setProperty("exchange_field","units");for(auto pair:{std::pair{"米 (m)","m"},{"毫米 (mm)","mm"},{"厘米 (cm)","cm"},{"英尺 (ft)","ft"},{"英寸 (in)","in"}})addUiItem(units_,pair.first,pair.second);
     if(!importing&&session.model()&&session.model()->units=="imperial")units_->setCurrentIndex(3);
     form->addRow(uiText("文件中的长度单位"),units_);
@@ -158,7 +159,19 @@ ExchangeDialog::ExchangeDialog(ModelSession& session,bool importing,QString form
         auto model=session.model();double scale=model&&model->units=="imperial"?.3048:1.;
         for(auto key:{QString("origin_x"),QString("origin_y")}){auto* edit=new QLineEdit(QString::number(key=="origin_x"&&model?.5*model->length*scale:0,'g',17));edit->setProperty("exchange_number",key);references_[key]=edit;form->addRow(key=="origin_x"?uiText("波形原点 · 模型 X (m)"):uiText("波形原点 · 模型 Y (m)"),edit);}
     }
-    layout->addLayout(form);details_=new StudioMessage(StudioMessageRole::Explanation);
+    layout->addLayout(form);
+    if(!importing_&&format_=="stl"){
+        printMode_=check(uiText("3D 打印船壳（敞口）"),"print_shell");
+        printHull_=new PrintHullPanel(session_,this);layout->addWidget(printHull_);
+        printHull_->changed=[this]{refreshState();};
+        connect(printMode_,&QCheckBox::toggled,this,[this](bool on){
+            if(on){ordinaryUnits_=units_->currentIndex();units_->setCurrentIndex(units_->findData("mm"));}
+            else units_->setCurrentIndex(ordinaryUnits_);
+            symmetric_->setVisible(!on);hidden_->setVisible(!on);binary_->setVisible(!on);
+            printHull_->setActive(on);refreshState();adjustSize();
+        });
+    }
+    details_=new StudioMessage(StudioMessageRole::Explanation);
     if(!importing_&&format_=="fef")details_->setText(uiText("FEF 不保存剖面线、参考曲线、背景图和约束。"));
     if(format_=="polycad")details_->setText(uiText("曲面将拟合为细分控制网，不能无损还原原 B 样条曲面。"));
     if(chineFormat(format_))details_->setText(uiText("输入 Y≥0 的半船；折角线按龙骨至舷缘排列，方向均为艏至艉。"));
@@ -194,18 +207,26 @@ ExchangeDialog::ExchangeDialog(ModelSession& session,bool importing,QString form
     connect(&exportProcess_,&QProcess::errorOccurred,this,[this](QProcess::ProcessError e){if(e==QProcess::FailedToStart){exportTimeout_.stop();exporting_=false;showFailure(uiText("无法启动几何导出组件。"));}});
 }
 ExchangeDialog::~ExchangeDialog(){exportTimeout_.stop();cancelled_=true;exportProcess_.disconnect(this);if(exportProcess_.state()!=QProcess::NotRunning){exportProcess_.kill();exportProcess_.waitForFinished(2000);}}
-bool ExchangeDialog::busy()const{return session_.busy()||exporting_;}
+bool ExchangeDialog::busy()const{return session_.busy()||exporting_||(printHull_&&printHull_->pending());}
 void ExchangeDialog::refreshState(){
-    const bool idle=!busy();run_->setEnabled(idle&&(importing_||session_.ready()));path_->setReadOnly(!idle);
+    const bool idle=!busy();run_->setEnabled(idle&&(importing_||session_.ready()));
+    if(importPath_)importPath_->setReadOnly(!idle);
     units_->setEnabled(idle&&!fileUnits(format_)&&!metricFormat(format_));for(auto* box:{axes_,control_,symmetric_,hidden_,binary_,closeDeck_})box->setEnabled(idle);
     if(columns_)columns_->setEnabled(idle);if(rows_)rows_->setEnabled(idle);if(intermediate_)intermediate_->setEnabled(idle);
     for(auto* edit:references_)edit->setReadOnly(!idle);
     for(auto* box:referenceChoices_)box->setEnabled(idle);
     if(referenceChoices_.contains("hull_mode"))references_["separation"]->setEnabled(idle&&referenceChoices_["hull_mode"]->currentData().toString()!="monohull");
     if(format_=="coordinates"&&control_->isChecked()){symmetric_->setEnabled(false);hidden_->setEnabled(false);}
+    if(printMode_){
+        printMode_->setEnabled(idle);printHull_->setEnabled(idle);
+        if(printMode_->isChecked()){printHull_->syncSource();units_->setEnabled(false);run_->setEnabled(idle&&session_.ready());}
+    }
 }
 void ExchangeDialog::reject(){if(exporting_){cancelled_=true;exportProcess_.kill();status_->setMessage(uiText("正在取消导出…"),StudioMessageRole::Feedback,true);}else if(!session_.busy())QDialog::reject();else if(format_=="iges"){session_.cancelCad();status_->setMessage(uiText("正在取消曲面生成…"),StudioMessageRole::Feedback,true);}}
-QString ExchangeDialog::failure()const{return status_->property("error").toString();}
+QString ExchangeDialog::failure()const{
+    const auto error=status_->property("error").toString();
+    return error.isEmpty()&&printMode_&&printMode_->isChecked()?printHull_->failure():error;
+}
 void ExchangeDialog::showFailure(const QString& error){const auto message=localizedExchangeError(error);status_->setProperty("error",message);status_->setMessage(message,StudioMessageRole::Warning);refreshState();}
 void ExchangeDialog::imported(){succeeded_=true;accept();}
 void ExchangeDialog::receiveCad(const QJsonObject& data){
@@ -213,24 +234,55 @@ void ExchangeDialog::receiveCad(const QJsonObject& data){
     try{fs::cad::write(pendingCadPath_,"iges",*session_.model(),pendingCadOptions_,data);succeeded_=true;status_->setMessage(uiText("已导出：")+pendingCadPath_,StudioMessageRole::Feedback);pendingCadPath_.clear();}
     catch(const std::exception& e){pendingCadPath_.clear();showFailure(QString::fromUtf8(e.what()));}
 }
+QString ExchangeDialog::chooseExportPath(){
+    const auto ext=fs::cad::extension(format_);
+    const QFileInfo source(session_.sourcePath());
+    const QString base=source.fileName().isEmpty()?uiText("未命名"):source.completeBaseName();
+    const QString suggested=preferenceFileLocation("export",source.fileName().isEmpty()?base+"."+ext:source.dir().filePath(base+"."+ext));
+    QFileDialog picker(this,windowTitle());
+    picker.setOption(QFileDialog::DontConfirmOverwrite); // Confirm once, after validating the destination.
+    if(testAttribute(Qt::WA_DontShowOnScreen))picker.setOption(QFileDialog::DontUseNativeDialog);
+    picker.setAcceptMode(QFileDialog::AcceptSave);picker.setFileMode(QFileDialog::AnyFile);
+    picker.setNameFilter(uiText(fs::cad::title(format_))+" (*."+ext+(format_=="iges"?" *.iges":"")+")");
+    picker.setDefaultSuffix(ext);
+    picker.setDirectory(QFileInfo(suggested).absolutePath());picker.selectFile(QFileInfo(suggested).fileName());
+    return picker.exec()==QDialog::Accepted?picker.selectedFiles().value(0):QString{};
+}
 void ExchangeDialog::submit(){
     if(busy())return;
     status_->setProperty("error",QString{});status_->clear();succeeded_=false;
     try{
-        auto path=path_->text().trimmed();if(path.isEmpty())throw std::runtime_error(uiText("请先选择文件。"));
+        const auto source=session_.model();
+        QString path;
+        if(importing_){
+            path=importPath_->text().trimmed();
+            if(path.isEmpty())throw std::runtime_error(uiText("请先选择文件。"));
+        }else{
+            if(!session_.ready())return;
+            path=chooseExportPath();
+            if(path.isEmpty())return;
+            if(source!=session_.model()||!session_.ready())throw std::runtime_error(uiText("模型版本已改变，请重新导出。"));
+        }
         fs::exchange::Options o;o.units=units_->currentData().toString();o.legacyAxes=format_=="obj"&&axes_->isChecked();o.controlNet=(format_=="obj"||format_=="coordinates"||format_=="vrml")&&control_->isChecked();o.symmetric=symmetric_->isChecked();o.fullHull=symmetric_->isChecked();o.includeHidden=hidden_->isChecked();o.binaryStl=binary_->isChecked();
         o.faceIds=faceIds;o.textEncoding=encoding_?encoding_->currentData().toString():QString("cp1252");
         if(columns_)o.columns=columns_->value();if(rows_)o.rows=rows_->value();if(intermediate_)o.intermediateBulkheads=intermediate_->isChecked();
         if(importing_){const bool append=format_=="part"||format_=="waves";if(append&&!session_.ready())throw std::runtime_error(uiText("请先打开或新建工程，再追加部件或波形。"));auto d=fs::exchange::read(path,format_,o);if(d.discardedZeroAreaFaces&&!confirmStudioAction(this,uiText("导入 VRML"),QString(uiText("文件含 %1 个零面积面。忽略这些面并导入其余模型？")).arg(d.discardedZeroAreaFaces)))return;auto data=d.bridgeData();if(format_=="waves"){auto refs=referenceValues();data["wave_patch"]=true;data["wave_origin_m"]=QJsonObject{{"x",refs["origin_x"]},{"y",refs["origin_y"]}};}auto submit=[guard=QPointer<ExchangeDialog>(this),data,append]{if(!guard||!guard->isVisible())return;guard->status_->setMessage(uiText("正在生成模型…"),StudioMessageRole::Feedback,true);guard->session_.importModel(data,append);guard->refreshState();};if(beforeImport&&!append)beforeImport(submit);else submit();}
         else{
             if(!session_.ready())return;
-            if(QFileInfo(path).suffix().isEmpty()){path+='.'+fs::cad::extension(format_);path_->setText(path);}
+            if(QFileInfo(path).suffix().isEmpty())path+='.'+fs::cad::extension(format_);
             if(!fs::cad::acceptsExtension(format_,QFileInfo(path).suffix()))throw std::runtime_error(uiText("文件扩展名与所选导出格式不一致。"));
             if(!session_.sourcePath().isEmpty()&&QFileInfo(path).absoluteFilePath().compare(QFileInfo(session_.sourcePath()).absoluteFilePath(),Qt::CaseInsensitive)==0)throw std::runtime_error(uiText("请另选导出路径，避免覆盖当前 FBM 工程。"));
             if(QFileInfo::exists(path)&&(!confirmOverwrite||!confirmOverwrite(path)))return;
             if(sectionFormat(format_)){startSections(path);return;}
             if(format_=="iges"){pendingCadPath_=path;pendingCadOptions_=o;status_->setMessage(uiText("正在生成曲面…"),StudioMessageRole::Feedback,true);session_.cadPatches();return;}
-            if(fs::cad::supports(format_))fs::cad::write(path,format_,*session_.model(),o);
+            if(printMode_&&printMode_->isChecked()){
+                printHull_->prepare([this,path]{
+                    try{printHull_->save(path);succeeded_=true;status_->setMessage(uiText("已导出：")+path,StudioMessageRole::Feedback);}
+                    catch(const std::exception& e){showFailure(QString::fromUtf8(e.what()));}
+                });
+                return;
+            }
+            else if(fs::cad::supports(format_))fs::cad::write(path,format_,*session_.model(),o);
             else fs::exchange::write(path,format_,*session_.model(),o);
             succeeded_=true;status_->setMessage(uiText("已导出：")+path,StudioMessageRole::Feedback);
         }

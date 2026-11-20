@@ -419,8 +419,9 @@ void MainWindow::preferencesStep(const QString& operation){
                     workflowCase("preferences.folder-icons",folders.size()==6&&std::all_of(folders.begin(),folders.end(),isFolderButton));
                     for(bool importing:{true,false}){
                         ExchangeDialog exchange(session_,importing,"obj",this);
-                        workflowCase(importing?"exchange.import-folder-icon":"exchange.export-folder-icon",
-                            isFolderButton(exchange.findChild<QPushButton*>("StudioFolderButton")));
+                        auto* folder=exchange.findChild<QPushButton*>("StudioFolderButton");
+                        workflowCase(importing?"exchange.import-folder-icon":"exchange.export-no-folder-field",
+                            importing?isFolderButton(folder):folder==nullptr);
                     }
                     QScrollArea scroll;
                     auto* content=new QWidget;

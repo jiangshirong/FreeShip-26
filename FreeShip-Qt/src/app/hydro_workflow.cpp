@@ -1,6 +1,11 @@
+#include "core/loading_cases.h"
 // Hidden production action observer; no native desktop automation.
 #include "main_window.h"
 #include "hydro_dialog.h"
+#include "hydro_number_list.h"
+#include "calculation_plot.h"
+#include <QAbstractAnimation>
+#include <QToolTip>
 #include "exchange_dialog.h"
 #include "performance_dialog.h"
 #include "plates_dialog.h"
@@ -11,9 +16,12 @@
 #include <QAction>
 #include <QApplication>
 #include <QCheckBox>
+#include <QComboBox>
+#include <QStackedWidget>
 #include <QCryptographicHash>
 #include <QDoubleSpinBox>
 #include <QLineEdit>
+#include <QListWidget>
 #include <QLabel>
 #include <QMenu>
 #include <QPushButton>
@@ -34,6 +42,7 @@
 #include <QFileInfo>
 #include <QFontInfo>
 #include <QFontMetricsF>
+#include <QScrollArea>
 #include <QWheelEvent>
 #include <QMouseEvent>
 #include "math_notation.h"
@@ -43,10 +52,22 @@
 #include <QJsonDocument>
 #include <QTimer>
 #include <QSignalBlocker>
+#include <QMessageBox>
+#include <QKeyEvent>
 #include <QEventLoop>
 #include <stdexcept>
 
 namespace {
+void draftKey(QWidget* window,QWidget* focus,int key,Qt::KeyboardModifiers modifiers){
+    QApplication::setActiveWindow(window);focus->setFocus();
+    const QPointer<QWidget> receiver(focus);
+    QKeyEvent press(QEvent::KeyPress,key,modifiers);
+    QApplication::sendEvent(focus,&press);
+    for(int releaseKey:{key,int(Qt::Key_Control),int(Qt::Key_Shift)}){
+        QKeyEvent release(QEvent::KeyRelease,releaseKey,Qt::NoModifier);
+        QApplication::sendEvent(receiver?receiver.data():window,&release);
+    }
+}
 QJsonObject tableRange(const QJsonObject& inputs){
     QJsonObject fields;
     for(auto key:{"start","end","step","trim"})fields[key]=inputs[key];
@@ -144,7 +165,7 @@ void MainWindow::hydroStep(const QString& operation){
                     auto key=w->property("field").toString();if(!values.contains(key))continue;
                     if(auto* n=qobject_cast<QDoubleSpinBox*>(w))n->setValue(values[key].toDouble());
                     else if(auto* n=qobject_cast<QCheckBox*>(w))n->setChecked(values[key].toBool());
-                    else if(auto* n=qobject_cast<QLineEdit*>(w)){QStringList parts;for(auto v:values[key].toArray())parts<<QString::number(v.toDouble(),'g',17);n->setText(parts.join(","));}
+                    else if(auto* n=dynamic_cast<HydroNumberList*>(w))n->setValues(values[key]);
                 }
                 if(!button("calculate")){timer->stop();finishWorkflow("Calculate callback missing");return;}
                 state->stage=1;button("calculate")->click();return;
@@ -271,12 +292,450 @@ void MainWindow::hydroStep(const QString& operation){
             captureMessages("running");
             if(hydroRequest_["cancel"].toBool()){auto* stop=findButton("cancel");if(stop&&stop->isEnabled())stop->click();else workflowCase("cancel-action",false);}
         };
+        auto* parameterTabs=hydroDialog_->findChild<QTabWidget*>();
+        const auto pageByKey=[&](const QString& page)->QWidget*{
+            if(!parameterTabs)return nullptr;
+            for(int i=0;i<parameterTabs->count();++i)
+                if(parameterTabs->widget(i)->property("calculation_page").toString()==page)return parameterTabs->widget(i);
+            return nullptr;
+        };
+        const auto pageFor=[&](bool named){return pageByKey(named?"loading_parameters":"general");};
+        const QStringList outputPages={"results","curve","report","auxiliary","comparison"};
+        const auto selectPage=[&](QWidget* page){
+            if(!page||parameterTabs->currentWidget()==page)return;
+            auto* bar=parameterTabs->tabBar();
+            const int index=parameterTabs->indexOf(page);
+            if(index>=2)if(auto* animation=bar->findChild<QAbstractAnimation*>("HydroLoadingTabMotion"))
+                if(animation->state()==QAbstractAnimation::Running)animation->setCurrentTime(animation->duration());
+            const auto point=bar->tabRect(index).center();
+            QMouseEvent press(QEvent::MouseButtonPress,point,bar->mapToGlobal(point),Qt::LeftButton,Qt::LeftButton,Qt::NoModifier);
+            QMouseEvent release(QEvent::MouseButtonRelease,point,bar->mapToGlobal(point),Qt::LeftButton,Qt::NoButton,Qt::NoModifier);
+            QApplication::sendEvent(bar,&press);QApplication::sendEvent(bar,&release);
+            settleLayout();
+        };
+        const auto selectNamed=[&](bool named){selectPage(pageFor(named));};
+        const auto criteriaPanel=[&]{return hydroDialog_->findChild<QWidget*>("HydroCriteriaPanel");};
+        const auto criteriaBesideInputs=[&](bool named){
+            auto* page=pageFor(named);
+            auto* editor=criteriaPanel();
+            QWidget* input=nullptr;
+            if(page)for(auto* child:page->findChildren<QWidget*>())
+                if(child->property("field")=="trim"){input=child;break;}
+            return page&&editor&&input&&input->property("field")=="trim"&&page->isAncestorOf(editor)&&
+                editor->isVisibleTo(hydroDialog_)&&
+                editor->mapTo(page,QPoint{}).x()>input->mapTo(page,input->rect().topRight()).x();
+        };
+        const auto editorPage=[&](const char* key){
+            selectNamed(true);
+            auto* page=pageByKey(key);
+            selectPage(page);
+            return page;
+        };
+        const auto removeInNameCell=[](QAbstractItemView* grid,int row)->QToolButton*{
+            const auto cell=grid->visualRect(grid->model()->index(row,0));
+            for(auto* button:grid->viewport()->findChildren<QToolButton*>("LoadBookRemoveRow")){
+                if(button->isVisibleTo(grid)&&cell.contains(button->geometry())&&
+                    grid->viewport()->childAt(button->geometry().center())==button)return button;
+            }
+            return nullptr;
+        };
         if(*stage==0){
             workflowArtifacts_["initial_inputs"]=hydroDialog_->savedInputs();
+            workflowCase("hydro-empty-output-tabs-disabled",parameterTabs&&
+                std::none_of(outputPages.cbegin(),outputPages.cend(),[&](const auto& key){
+                    auto* page=pageByKey(key);
+                    return page&&parameterTabs->isTabEnabled(parameterTabs->indexOf(page));
+                }));
+            if(hydroRequest_["exercise_manual_criterion"].toBool()){
+                selectNamed(false);
+                auto* page=criteriaPanel();
+                auto* grid=page?page->findChild<QTableWidget*>("load_criteria"):nullptr;
+                auto* add=page?page->findChild<QToolButton*>("load_add_criteria"):nullptr;
+                if(!grid||!add||grid->rowCount()!=0||!criteriaBesideInputs(false)){
+                    unavailable("Missing standalone criterion editor");return;
+                }
+                workflowCase("criterion-panel-has-no-apply-button",!page->findChild<QPushButton*>("LoadBookApply"));
+                add->click();
+                const auto enter=[&](const QString& text){
+                    for(auto* editor:grid->findChildren<QLineEdit*>())if(editor->isVisibleTo(grid)){
+                        editor->setText(text);
+                        QKeyEvent key(QEvent::KeyPress,Qt::Key_Return,Qt::NoModifier);
+                        QApplication::sendEvent(editor,&key);
+                        settleLayout();
+                        return true;
+                    }
+                    return false;
+                };
+                workflowCase("blank-criterion-row-is-ignored",grid->rowCount()==1&&
+                    grid->item(0,0)->text().isEmpty()&&grid->item(0,1)->text().isEmpty()&&
+                    !hydroDialog_->savedInputs().contains("gz_criteria"));
+                const bool angleEntered=enter("10");
+                auto* criteriaWarning=page->findChild<QLabel*>("HydroCriteriaWarning");
+                auto* calculate=findButton("calculate");
+                workflowCase("partial-criterion-shows-reason-and-blocks-calculation",angleEntered&&criteriaWarning&&calculate&&
+                    criteriaWarning->text()==uiText("请填写横倾角和最低复原力臂。")&&!calculate->isEnabled());
+                grid->setCurrentCell(0,1);grid->editItem(grid->item(0,1));
+                const bool armEntered=enter("0.2");
+                const auto saved=hydroDialog_->savedInputs();
+                workflowCase("criterion-applies-without-any-loads",armEntered&&!saved.contains("loading_book")
+                    &&!saved["use_loading_book"].toBool()&&saved["gz_criteria"]==QJsonArray{QJsonArray{10,.2}});
+                auto* remove=removeInNameCell(grid,0);
+                if(remove)remove->click();
+                const bool cleared=remove&&!hydroDialog_->savedInputs().contains("gz_criteria");
+                draftKey(hydroDialog_,grid,Qt::Key_Z,Qt::ControlModifier);
+                workflowCase("last-criterion-removal-and-undo-update-active-criteria",cleared&&
+                    hydroDialog_->savedInputs()["gz_criteria"]==saved["gz_criteria"]);
+                selectNamed(true);
+                if(auto* motion=parameterTabs->tabBar()->findChild<QAbstractAnimation*>("HydroLoadingTabMotion"))
+                    if(motion->state()==QAbstractAnimation::Running)motion->setCurrentTime(motion->duration());
+                auto* notice=hydroDialog_->findChild<QLabel*>("HydroLoadingNotice");
+                auto* run=findButton("calculate");
+                for(auto* motion:notice?notice->findChildren<QAbstractAnimation*>():QList<QAbstractAnimation*>{})
+                    if(motion->state()==QAbstractAnimation::Running)motion->setCurrentTime(motion->duration());
+                settleLayout();
+                workflowCase("criteria-moves-to-named-parameters-without-losing-entry",criteriaBesideInputs(true)&&
+                    criteriaPanel()==page&&grid->rowCount()==1&&grid->item(0,1)->data(Qt::EditRole).toDouble()==.2);
+                workflowCase("missing-load-cases-warning-below-controls",notice&&run&&notice->isVisibleTo(hydroDialog_)&&
+                    notice->text()==uiText("请先编辑装载工况。")&&!run->isEnabled()&&
+                    notice->mapTo(hydroDialog_,QPoint{}).y()>run->mapTo(hydroDialog_,run->rect().bottomLeft()).y()&&
+                    notice->mapTo(hydroDialog_,QPoint{}).y()>page->mapTo(hydroDialog_,page->rect().bottomLeft()).y());
+                hydroDialog_->grab().save(workflowOutput_+"/views/loading-no-cases.png");
+                selectNamed(false);
+            }
+            if(hydroRequest_["exercise_developer_template"].toBool()){
+                auto* page=editorPage("loading_cases");
+                if(!page){unavailable("Missing loading editor");return;}
+                const auto initial=hydroDialog_->savedInputs();
+                auto* d=hydroDialog_;
+                auto* button=page->findChild<QPushButton*>("LoadBookTestTemplate");
+                auto* grid=page->findChild<QListWidget*>("load_cases");
+                if(!button||!grid){unavailable("Missing template controls");return;}
+                auto toggle=[d]{QKeyEvent key(QEvent::KeyPress,Qt::Key_F12,Qt::ControlModifier|Qt::AltModifier|Qt::ShiftModifier);QApplication::sendEvent(d,&key);};
+                workflowCase("developer-disabled-by-default",!button->isVisible());
+                toggle();workflowCase("developer-template-visible",button->isVisible());button->click();
+                if(grid->count()<1){unavailable("Template created no rows");return;}
+                grid->item(0)->setText("keep my edit");
+                const auto edited=hydroDialog_->savedInputs();
+                bool prompted=false;
+                QTimer::singleShot(0,d,[&]{if(auto* m=qobject_cast<QMessageBox*>(QApplication::activeModalWidget())){prompted=true;m->button(QMessageBox::No)->click();}});
+                button->click();
+                workflowCase("decline-replacement-preserves-draft",prompted&&grid->item(0)->text()=="keep my edit");
+                workflowCase("template-edits-save-immediately",edited!=initial&&hydroDialog_->savedInputs()==edited);
+                QTimer::singleShot(0,d,[]{if(auto* m=qobject_cast<QMessageBox*>(QApplication::activeModalWidget()))m->button(QMessageBox::Yes)->click();});
+                button->click();
+                workflowCase("confirmed-replacement-reloads-template",grid->item(0)->text()!="keep my edit");
+                toggle();workflowCase("developer-tools-hide-again",!button->isVisible());
+                selectNamed(true);
+                if(hydroDialog_->savedInputs()["loading_book"].toObject().isEmpty()){unavailable("Template not applied");return;}
+            }
+            if(hydroRequest_["observe_loading_ledger"].toBool()){
+                auto* page=editorPage("loading_cases");
+                if(!page){unavailable("Missing loading ledger");return;}
+                auto* cases=page->findChild<QListWidget*>("load_cases");
+                auto* items=page->findChild<QTableWidget*>("load_case_items");
+                auto* summary=page->findChild<QWidget*>("load_summary");
+                QJsonArray observed;
+                if(cases&&items&&summary)for(int i=0;i<cases->count();++i){
+                    cases->setCurrentRow(i);
+                    if(i==1&&items->rowCount()){
+                        auto* weight=items->item(0,fs::loading::Mass);
+                        weight->setData(Qt::EditRole,QString::number(weight->data(Qt::EditRole).toDouble()+10,'g',17));
+                    }
+                    observed.append(QJsonObject{{"items",items->rowCount()},{"mass",summary->property("mass").toDouble()}});
+                }
+                workflowArtifacts_["ledger_cases"]=observed;
+                auto* canvas=page->findChild<QScrollArea*>("LoadWeightCanvas");
+                auto* fixed=page->findChild<QTableWidget*>("load_shared_items");
+                if(canvas&&fixed&&items){
+                    settleLayout();
+                    const auto before=items->visualRect(items->model()->index(0,0)).center();
+                    const auto global=items->viewport()->mapToGlobal(before);
+                    QWheelEvent wheel(before,global,{},QPoint(0,-120),Qt::NoButton,Qt::NoModifier,Qt::NoScrollPhase,false);
+                    QApplication::sendEvent(items->viewport(),&wheel);
+                    auto* outer=canvas->verticalScrollBar();
+                    const bool wheelScrolled=outer->value()>0;
+                    const auto last=items->visualRect(items->model()->index(items->rowCount()-1,0));
+                    const auto sharedRow=fixed->visualRect(fixed->model()->index(fixed->rowCount()-1,0));
+                    const bool allRowsFit=items->viewport()->rect().contains(last);
+                    const bool ordered=canvas->isAncestorOf(items)&&canvas->isAncestorOf(fixed)&&
+                        items->mapTo(canvas->widget(),items->rect().bottomLeft()).y()<fixed->mapTo(canvas->widget(),QPoint{}).y();
+                    outer->setValue(outer->maximum());settleLayout();
+                    const bool sharedReached=canvas->viewport()->rect().contains(
+                        fixed->viewport()->mapTo(canvas->viewport(),sharedRow.center()));
+                    workflowArtifacts_["weight_canvas_scroll"]=QJsonObject{{"detail_rows",items->rowCount()},
+                        {"outer_range",outer->maximum()},{"wheel_scrolled",wheelScrolled},{"all_detail_rows_fit",allRowsFit},
+                        {"shared_reached",sharedReached},{"detail_inner_range",items->verticalScrollBar()->maximum()},
+                        {"shared_inner_range",fixed->verticalScrollBar()->maximum()}};
+                    workflowCase("long-case-scrolls-whole-weight-canvas",items->rowCount()>40&&outer->maximum()>0&&wheelScrolled&&
+                        allRowsFit&&ordered&&sharedReached&&items->verticalScrollBar()->maximum()==0&&fixed->verticalScrollBar()->maximum()==0);
+                    hydroDialog_->grab().save(workflowOutput_+"/views/loading-workspace-bottom.png");
+                    outer->setValue(0);settleLayout();
+                }else workflowCase("long-case-scrolls-whole-weight-canvas",false);
+                if(summary){
+                    auto* title=summary->findChild<QLabel*>("load_summary_gravity_label");
+                    auto* frame=summary->findChild<QFrame*>("load_summary_coordinates");
+                    auto* metres=summary->findChild<QLabel*>("load_summary_gravity_unit");
+                    QLabel* tonnes=nullptr;
+                    for(auto* label:summary->findChildren<QLabel*>())
+                        if(label->property("loadSummaryRole")=="unit"&&label->text()=="t")tonnes=label;
+                    const int gap=title&&tonnes
+                        ?title->mapTo(summary,QPoint{}).x()-tonnes->mapTo(summary,tonnes->rect().topRight()).x():-1;
+                    workflowCase("d-summary-keeps-one-compact-coordinate-group",summary->isVisible()&&frame&&frame->isVisible()&&
+                        metres&&metres->text()=="m"&&!frame->isAncestorOf(metres)&&gap>0&&gap<=36);
+                }
+                hydroDialog_->grab().save(workflowOutput_+"/views/loading-workspace.png");
+                selectNamed(true);
+            }
+            if(hydroRequest_["exercise_loading_editor"].toBool()){
+                auto* casePage=editorPage("loading_cases");
+                if(!casePage){unavailable("Missing loading editor");return;}
+                workflowCase("weight-panel-has-no-apply-button",!casePage->findChild<QPushButton*>("LoadBookApply"));
+                using namespace fs::loading;
+                auto* dlg=hydroDialog_;
+                auto* cases=casePage->findChild<QListWidget*>("load_cases");
+                auto* right=casePage->findChild<QScrollArea*>("LoadWeightCanvas");
+                auto* left=casePage->findChild<QScrollArea*>("LoadCaseCanvas");
+                auto* shared=casePage->findChild<QTableWidget*>("load_shared_items");
+                auto* grid=casePage->findChild<QTableWidget*>("load_case_items");
+                auto* summary=casePage->findChild<QWidget*>("load_summary");
+                auto* warning=casePage->findChild<QLabel*>("LoadBookWarning");
+                auto* addCase=casePage->findChild<QToolButton*>("load_add_cases");
+                auto* addItem=casePage->findChild<QToolButton*>("load_add_case_items");
+                if(!cases||cases->count()!=3||!left||!right||!grid||!shared||!summary||!warning||!addCase||!addItem){
+                    unavailable("Missing unified weight editor");return;
+                }
+                dlg->resize(1440,dlg->height());settleLayout();
+                const auto mass=[&]{return summary->property("mass").toDouble();};
+                const auto centre=[&](QWidget* w){return w->mapTo(casePage,w->rect().center());};
+                workflowCase("case-add-below-list-and-shared-weights-below-case-weights",
+                    left->isAncestorOf(cases)&&left->isAncestorOf(addCase)&&centre(cases).y()<centre(addCase).y()&&
+                    right->isAncestorOf(grid)&&right->isAncestorOf(shared)&&
+                    grid->mapTo(casePage,grid->rect().bottomLeft()).y()<shared->mapTo(casePage,QPoint{}).y());
+                QJsonArray samples;
+                for(int col=Mass;col<=Z;++col){
+                    const auto* item=shared->item(1,col);
+                    samples.append(QJsonObject{{"display",item->text()},{"edit",item->data(Qt::EditRole).toString()}});
+                }
+                workflowArtifacts_["loading_book_number_display"]=samples;
+                workflowCase("legacy-cargo-and-tank-in-same-table",mass()==210&&grid->rowCount()==2&&
+                    grid->item(0,Name)->text()==uiText("货物")&&grid->item(1,Name)->text()=="Ballast"&&
+                    grid->item(1,Fill)->data(Qt::EditRole).toDouble()==0);
+                dlg->grab().save(workflowOutput_+"/views/loading-book-precision.png");
+
+                const auto click=[](QWidget* widget,QPoint point){
+                    QMouseEvent press(QEvent::MouseButtonPress,point,widget->mapToGlobal(point),Qt::LeftButton,Qt::LeftButton,Qt::NoModifier);
+                    QMouseEvent release(QEvent::MouseButtonRelease,point,widget->mapToGlobal(point),Qt::LeftButton,Qt::NoButton,Qt::NoModifier);
+                    QApplication::sendEvent(widget,&press);QApplication::sendEvent(widget,&release);
+                };
+                const auto key=[](QWidget* widget,int value){
+                    QKeyEvent event(QEvent::KeyPress,value,Qt::NoModifier);QApplication::sendEvent(widget,&event);
+                };
+                const auto cellValue=[](QTableWidget* table,int row,int col){
+                    return table->item(row,col)->data(Qt::EditRole).toString();
+                };
+                const auto editCell=[](QTableWidget* table,int row,int column,const QString& value){
+                    table->item(row,column)->setData(Qt::EditRole,value);
+                };
+                const auto removeAndUndo=[&](QTableWidget* table,int row){
+                    auto* remove=removeInNameCell(table,row);
+                    if(!remove)return false;
+                    const int count=table->rowCount();
+                    remove->click();
+                    const bool deleted=table->rowCount()==count-1;
+                    draftKey(dlg,table,Qt::Key_Z,Qt::ControlModifier);
+                    return deleted&&table->rowCount()==count;
+                };
+                click(cases->viewport(),cases->visualItemRect(cases->item(2)).center());
+                workflowCase("single-click-switches-load-case-without-editing",
+                    cases->currentRow()==2&&mass()==220&&!cases->findChild<QLineEdit*>());
+                key(cases,Qt::Key_F2);
+                auto* nameEditor=cases->findChild<QLineEdit*>();
+                if(nameEditor){nameEditor->setText("Renamed case");key(nameEditor,Qt::Key_Return);settleLayout();}
+                const bool renamed=cases->item(2)->text()=="Renamed case";
+                draftKey(dlg,cases,Qt::Key_Z,Qt::ControlModifier);
+                workflowCase("explicit-case-rename-can-be-undone",renamed&&cases->item(2)->text()=="Full");
+
+                addCase->click();
+                auto* newName=cases->findChild<QLineEdit*>();
+                const bool added=newName&&cases->count()==4&&cases->currentRow()==3&&centre(cases).y()<centre(addCase).y();
+                if(newName){newName->setText("Warning test");key(newName,Qt::Key_Return);settleLayout();}
+                editCell(shared,0,Mass,"0");settleLayout();
+                for(auto* motion:warning->findChildren<QAbstractAnimation*>())
+                    if(motion->state()==QAbstractAnimation::Running&&motion->loopCount()==1)
+                        motion->setCurrentTime(motion->duration());
+                settleLayout();
+                const auto warningImage=warning->grab().toImage();
+                const auto warningBg=QColor(warning->property("studio_message_background").toString());
+                workflowCase("weight-warning-below-the-table",warning->isVisible()&&!warningImage.isNull()&&
+                    warningImage.pixelColor(warningImage.width()-15,warningImage.height()/2)==warningBg&&
+                    warning->text()==uiText("工况总重量必须在有效排水量范围内。")&&
+                    warning->property("studio_message_role")=="warning"&&
+                    centre(warning).y()>centre(right).y()&&!summary->isVisible()&&warning->parentWidget()==summary->parentWidget());
+                dlg->grab().save(workflowOutput_+"/views/loading-book-warning.png");
+                draftKey(dlg,shared,Qt::Key_Z,Qt::ControlModifier);
+                draftKey(dlg,cases,Qt::Key_Z,Qt::ControlModifier); // Name.
+                draftKey(dlg,cases,Qt::Key_Z,Qt::ControlModifier); // New case.
+                workflowCase("adding-case-opens-name-editor-beneath-last-row",added&&cases->count()==3);
+
+                cases->setCurrentRow(0);
+                editCell(shared,0,Mass,"205");
+                const bool first=mass()==215;
+                cases->setCurrentRow(2);
+                workflowCase("shared-weight-change-counted-in-each-case",first&&mass()==225);
+                editCell(shared,0,Mass,"200");
+                cases->setCurrentRow(1);settleLayout();
+                const auto beforeFill=dlg->savedInputs().value("loading_book");
+                const auto fillIndex=grid->model()->index(0,Fill);
+                click(grid->viewport(),grid->visualRect(fillIndex).center());
+                auto* fillEditor=grid->findChild<QLineEdit*>();
+                if(fillEditor){fillEditor->setText("25");key(fillEditor,Qt::Key_Return);settleLayout();}
+                workflowCase("live-tank-displacement",fillEditor&&mass()==205);
+                const auto afterFill=dlg->savedInputs()["loading_book"].toObject();
+                const auto savedFill=afterFill["cases"].toArray().at(1).toArray().at(1).toArray().at(0).toObject().value("fill");
+                workflowCase("edit-loading-fraction",afterFill["version"]==4&&savedFill==25);
+                if(hydroRequest_["exercise_delete_undo"].toBool()){
+                    draftKey(dlg,grid,Qt::Key_Z,Qt::ControlModifier);
+                    const bool undone=dlg->savedInputs()["loading_book"]==beforeFill;
+                    draftKey(dlg,grid,Qt::Key_Z,Qt::ControlModifier|Qt::ShiftModifier);
+                    workflowArtifacts_["loading_live_edit_undo"]=undone&&dlg->savedInputs()["loading_book"]==afterFill;
+                }
+                QJsonArray metrics;
+                bool unitsVisible=true;
+                for(auto* label:summary->findChildren<QLabel*>()){
+                    const auto role=label->property("loadSummaryRole").toString();
+                    if(role=="number")metrics.append(label->text());
+                    if(role=="number"||role=="unit")
+                        unitsVisible=unitsVisible&&label->isVisibleTo(summary)&&label->width()>=label->sizeHint().width();
+                }
+                auto* coordinates=summary->findChild<QFrame*>("load_summary_coordinates");
+                auto* gravityUnit=summary->findChild<QLabel*>("load_summary_gravity_unit");
+                int unitCount=0;
+                for(auto* label:summary->findChildren<QLabel*>())
+                    if(label->property("loadSummaryRole")=="unit")++unitCount;
+                workflowCase("load-summary-groups-displacement-and-three-centre-coordinates",
+                    coordinates&&gravityUnit&&!coordinates->isAncestorOf(gravityUnit)&&gravityUnit->text()=="m"&&
+                    unitCount==2&&unitsVisible&&metrics==QJsonArray{"205","10","0","1.9573"});
+                addItem->click();settleLayout();
+                const int row=grid->rowCount()-1;
+                auto* edit=grid->findChild<QLineEdit*>();
+                if(edit){edit->setText("Cargo check");key(edit,Qt::Key_Return);settleLayout();}
+                editCell(grid,row,X,"91.25");
+                const auto combo=[&](int r){return qobject_cast<QComboBox*>(grid->cellWidget(r,Kind));};
+                bool kinds=combo(row)&&combo(row)->count()==5&&combo(row)->currentData()=="fixed";
+                bool converted=kinds;
+                for(int i=1;i<=4&&converted;++i){
+                    auto* box=combo(row);
+                    box->showPopup();settleLayout();
+                    auto* list=box->view();
+                    const auto index=list->model()->index(i,0);
+                    click(list->viewport(),list->visualRect(index).center());
+                    settleLayout();
+                    auto* selected=combo(row);
+                    const auto* kindName=tankTables()[i-1].key;
+                    converted=selected&&selected->currentData()==kindName&&
+                        !grid->item(row,Mass)->flags().testFlag(Qt::ItemIsEditable)&&
+                        !grid->isColumnHidden(Fill)&&grid->item(row,Fill)->flags().testFlag(Qt::ItemIsEditable)&&
+                        grid->item(row,Name)->text()=="Cargo check"&&cellValue(grid,row,X)=="91.25";
+                    for(auto field:tankDimensions()[i-1])
+                        converted=converted&&!grid->isColumnHidden(field)&&grid->item(row,field)->flags().testFlag(Qt::ItemIsEditable);
+                }
+                workflowCase("each-of-five-weight-types-can-be-selected-in-one-table",kinds&&converted);
+                for(int i=0;i<4;++i)draftKey(dlg,grid,Qt::Key_Z,Qt::ControlModifier);
+                workflowCase("undo-restores-fixed-type-and-values",combo(row)&&combo(row)->currentData()=="fixed"&&cellValue(grid,row,X)=="91.25");
+
+                if(hydroRequest_["exercise_delete_undo"].toBool()){
+                    const bool fixedUndo=removeAndUndo(shared,1)&&cellValue(shared,1,X)==samples[1].toObject()["edit"].toString();
+                    const bool tankUndo=removeAndUndo(grid,0)&&cellValue(grid,0,Fill)=="25";
+                    cases->setCurrentRow(2);
+                    auto* remove=removeInNameCell(cases,1);
+                    if(remove)remove->click();
+                    const bool deleted=remove&&cases->count()==2&&cases->currentRow()==1&&mass()==220;
+                    draftKey(dlg,cases,Qt::Key_Z,Qt::ControlModifier);
+                    const bool restored=cases->count()==3&&cases->currentRow()==2&&mass()==220;
+                    cases->setCurrentRow(1);
+                    const bool caseUndo=deleted&&restored&&mass()==205&&grid->item(1,Name)->text()=="Cargo check";
+                    const bool itemUndo=removeAndUndo(grid,1)&&cellValue(grid,1,X)=="91.25";
+                    workflowArtifacts_["loading_delete_undo"]=QJsonObject{{"fixed",fixedUndo},{"tank_and_fills",tankUndo},
+                        {"case_and_weights",caseUndo},{"case_weight",itemUndo}};
+                }
+                if(hydroRequest_["exercise_delete_undo"].toBool()){
+                    const auto before=dlg->savedInputs()["loading_book"].toObject();
+                    int removed=0;
+                    for(int i=cases->count()-1;i>=0;--i){
+                        auto* remove=removeInNameCell(cases,i);
+                        if(!remove)break;
+                        remove->click();
+                        ++removed;
+                    }
+                    const auto empty=dlg->savedInputs()["loading_book"].toObject();
+                    workflowCase("removing-final-case-keeps-shared-weights",
+                        cases->count()==0&&empty["cases"].toArray().isEmpty()&&
+                        empty["shared_items"]==before["shared_items"]);
+                    for(int i=0;i<removed;++i)draftKey(dlg,cases,Qt::Key_Z,Qt::ControlModifier);
+                    workflowCase("undo-restores-removed-cases",dlg->savedInputs()["loading_book"]==before);
+                }
+            }
+            if(hydroRequest_["exercise_delete_undo"].toBool()){
+                const auto before=hydroDialog_->savedInputs()["loading_book"].toObject();
+                selectNamed(true);
+                auto* criteriaPage=criteriaPanel();
+                if(!criteriaPage||!criteriaBesideInputs(true)){unavailable("Missing criteria editor");return;}
+                auto* table=criteriaPage->findChild<QTableWidget*>("load_criteria");
+                auto* remove=table?removeInNameCell(table,0):nullptr;
+                if(!table||!remove||table->rowCount()!=1){unavailable("Missing criterion row");return;}
+                table->setCurrentCell(0,0);remove->click();
+                const bool deleted=table->rowCount()==0&&
+                    hydroDialog_->savedInputs()["loading_book"].toObject()["criteria"].toArray().isEmpty();
+                draftKey(hydroDialog_,table,Qt::Key_Z,Qt::ControlModifier);
+                const bool undone=table->rowCount()==1&&table->item(0,0)->text()=="10";
+                draftKey(hydroDialog_,table,Qt::Key_Z,Qt::ControlModifier|Qt::ShiftModifier);
+                const bool redone=table->rowCount()==0;
+                draftKey(hydroDialog_,table,Qt::Key_Z,Qt::ControlModifier);
+                auto observed=workflowArtifacts_["loading_delete_undo"].toObject();
+                observed["criterion"]=deleted&&undone&&redone&&table->rowCount()==1;
+                workflowArtifacts_["loading_delete_undo"]=observed;
+                if(table->rowCount()!=1){unavailable("Criterion could not be restored");return;}
+                table->item(0,1)->setData(Qt::EditRole,"0.35");
+
+                auto expected=before;expected["criteria"]=QJsonArray{QJsonArray{10,0.35}};
+                workflowCase("criteria-edit-preserves-loads",hydroDialog_->savedInputs()["loading_book"]==expected);
+                draftKey(hydroDialog_,table,Qt::Key_Z,Qt::ControlModifier);
+                workflowCase("criterion-undo-restores-active-value",hydroDialog_->savedInputs()["loading_book"]==before);
+                selectNamed(true);
+            }
+            if(hydroRequest_["edit_unified_workbook"].toBool()){
+                auto* page=editorPage("loading_cases");
+                auto* list=page?page->findChild<QListWidget*>("load_cases"):nullptr;
+                if(!list||!list->count()){unavailable("Missing unified loading list");return;}
+                const auto name=list->item(0)->text();
+                list->item(0)->setText(name+" (edit)");
+                list->item(0)->setText(name);
+                workflowCase("legacy-tank-edit-saves-in-unified-format",
+                    hydroDialog_->savedInputs()["loading_book"].toObject()["version"]==4);
+                selectNamed(true);
+            }
             if(hydroRequest_["switch_language_after_open"].isString()){
                 const auto error=setUiLanguage(hydroRequest_["switch_language_after_open"].toString());
                 if(!error.isEmpty()){unavailable("Hydro language switch failed: "+error);return;}
                 workflowArtifacts_["language_switched_after_open"]=uiLanguage();
+                QJsonArray titles;
+                for(auto name:{"LoadCaseCanvas","LoadWeightCanvas"}){
+                    if(auto* scroll=hydroDialog_->findChild<QScrollArea*>(name))
+                        for(const auto* label:scroll->widget()->findChildren<QLabel*>(QString{},Qt::FindDirectChildrenOnly))
+                            titles.append(label->text());
+                }
+                workflowArtifacts_["loading_weight_scope_titles"]=titles;
+                if(hydroRequest_["exercise_loading_editor"].toBool()){
+                    auto* casePage=editorPage("loading_cases");
+                    auto* gravityTitle=casePage->findChild<QLabel*>("load_summary_gravity_label");
+                    workflowCase("load-summary-heading-follows-language",gravityTitle&&gravityTitle->text()==uiText("总重心"));
+                    for(auto* motion:parameterTabs->tabBar()->findChildren<QAbstractAnimation*>())
+                        if(motion->state()==QAbstractAnimation::Running&&motion->loopCount()==1)
+                            motion->setCurrentTime(motion->duration());
+                    settleLayout();
+                    hydroDialog_->grab().save(workflowOutput_+"/views/unified-weight-items.png");
+                    selectNamed(true);
+                }
                 if(hydroRequest_["observe_language"].toBool()){
                     QJsonObject labels;
                     for(const auto* label:hydroDialog_->findChildren<QLabel*>()){
@@ -298,17 +757,292 @@ void MainWindow::hydroStep(const QString& operation){
             const QFontInfo font(hydroDialog_->font());
             workflowArtifacts_["dialog_font"]=QJsonObject{{"requested",hydroDialog_->font().family()},{"resolved",font.family()},{"style",font.styleName()},{"exact_match",font.exactMatch()},{"point_size",font.pointSizeF()}};
             QJsonArray discovered;const auto values=hydroRequest_["inputs"].toObject();QSet<QString> used;
-            for(auto* widget:hydroDialog_->findChildren<QWidget*>()){
+            if(pageFor(true)){
+                discovered.append("use_loading_book");
+                if(values.contains("use_loading_book")){selectNamed(values["use_loading_book"].toBool());used.insert("use_loading_book");}
+            }
+            auto* inputPage=pageFor(hydroDialog_->savedInputs()["use_loading_book"].toBool());
+            for(auto* widget:(inputPage?inputPage:hydroDialog_)->findChildren<QWidget*>()){
                 const auto key=widget->property("field").toString();if(key.isEmpty())continue;discovered.append(key);if(!values.contains(key))continue;used.insert(key);
                 if(auto* n=qobject_cast<QDoubleSpinBox*>(widget))n->setValue(values[key].toDouble());
                 else if(auto* n=qobject_cast<QCheckBox*>(widget))n->setChecked(values[key].toBool());
-                else if(auto* n=qobject_cast<QLineEdit*>(widget)){
-                    QStringList parts;for(auto v:values[key].toArray())parts<<QString::number(v.toDouble(),'g',17);
-                    n->setText(values[key].isString()?values[key].toString():parts.join(","));
-                }
+                else if(auto* n=dynamic_cast<HydroNumberList*>(widget))n->setValues(values[key]);
             }
             workflowArtifacts_["discovered_fields"]=discovered;
             for(auto it=values.begin();it!=values.end();++it)if(it.key()!="mode"&&!used.contains(it.key())){unavailable("Hydro input not discovered: "+it.key());return;}
+            if(hydroRequest_["exercise_stability_inputs"].toBool()){
+                QMap<QString,QWidget*> controls;
+                if(!pageFor(false)||!pageFor(true)){unavailable("Stability parameter tabs unavailable");return;}
+                for(auto* widget:pageFor(false)->findChildren<QWidget*>()){
+                    const auto field=widget->property("field").toString();if(!field.isEmpty())controls[field]=widget;
+                }
+                auto* summary=hydroDialog_->findChild<QTableWidget*>("HydroLoadingValues");
+                auto* casePage=pageByKey("loading_cases");
+                auto* angles=dynamic_cast<HydroNumberList*>(controls.value("angles"));
+                auto* displacements=dynamic_cast<HydroNumberList*>(controls.value("displacements"));
+                HydroNumberList* loadingAngles=nullptr;
+                for(auto* w:pageFor(true)->findChildren<QWidget*>())
+                    if(w->property("field")==QString("angles")){loadingAngles=dynamic_cast<HydroNumberList*>(w);break;}
+                if(!loadingAngles||!summary||!casePage||!angles||!displacements){unavailable("Stability input controls unavailable");return;}
+                const auto visible=[&](QWidget* w){return w&&w->isVisibleTo(hydroDialog_);};
+                const auto observe=[&]{
+                    QJsonObject state,positions;QJsonArray headers,rows,shownAngles,shownDisplacements;
+                    for(auto key:{"displacements","lcg","tcg","vcg","angles"}){
+                        const bool named=parameterTabs->currentWidget()==pageFor(true);
+                        auto* w=QString(key)=="angles"&&named?loadingAngles:controls.value(key);QLabel* label=nullptr;
+                        for(auto* candidate:pageFor(QString(key)=="angles"&&named)->findChildren<QLabel*>())
+                            if(candidate->property("hydro_field_label")==QString(key)){label=candidate;break;}
+                        state[key]=QJsonObject{{"field_visible",visible(w)},{"label_visible",visible(label)}};
+                        if(visible(w))positions[key]=w->mapTo(hydroDialog_,QPoint{}).y();
+                    }
+                    for(int col=0;col<summary->columnCount();++col)headers.append(summary->horizontalHeaderItem(col)->text());
+                    for(int row=0;row<summary->rowCount();++row){
+                        QJsonArray values;bool editable=false;
+                        for(int col=0;col<summary->columnCount();++col){auto* item=summary->item(row,col);values.append(QJsonValue::fromVariant(item->data(Qt::UserRole)));editable|=item->flags().testFlag(Qt::ItemIsEditable);}
+                        rows.append(QJsonObject{{"values",values},{"editable",editable}});
+                    }
+                    auto* visibleAngles=parameterTabs->currentWidget()==pageFor(true)?loadingAngles:angles;
+                    for(auto* block:visibleAngles->findChildren<QToolButton*>())
+                        if(block->property("hydro_value_index").isValid()&&visible(block))shownAngles.append(block->text());
+                    for(auto* block:displacements->findChildren<QToolButton*>())
+                        if(block->property("hydro_value_index").isValid()&&visible(block))shownDisplacements.append(block->text());
+                    return QJsonObject{{"controls",state},{"input_positions",positions},{"summary_visible",visible(summary)},
+                        {"summary_title",summary->accessibleName()},{"headers",headers},{"rows",rows},
+                        {"edit_load_cases",parameterTabs->tabText(parameterTabs->indexOf(casePage))},
+                        {"edit_load_cases_visible",parameterTabs->isTabVisible(parameterTabs->indexOf(casePage))},
+                        {"angle_blocks",shownAngles},{"displacement_blocks",shownDisplacements},
+                        {"calc_enabled",findButton("calculate")->isEnabled()},
+                        {"inputs",hydroDialog_->savedInputs()}};
+                };
+                const auto originalLoadingAngles=loadingAngles->values();
+                loadingAngles->setValues(QJsonArray{-2,0,8});
+                auto* bar=parameterTabs->tabBar();
+                auto* motion=bar->findChild<QAbstractAnimation*>("HydroLoadingTabMotion");
+                const auto finishMotion=[motion]{
+                    if(motion&&motion->state()==QAbstractAnimation::Running)motion->setCurrentTime(motion->duration());
+                };
+                selectNamed(false);finishMotion();settleLayout();
+                const auto compactAnchor=bar->tabRect(1);
+                selectNamed(true);
+                const bool expanded=motion&&motion->state()==QAbstractAnimation::Running;
+                bool anchored=false;
+                if(expanded){
+                    motion->setCurrentTime(motion->duration()/2);
+                    const auto partial=bar->grab().toImage();
+                    hydroDialog_->grab().save(workflowOutput_+"/views/loading-tabs-emerging.png");
+                    finishMotion();
+                    const auto settled=bar->grab();
+                    const auto reportRect=bar->tabRect(parameterTabs->indexOf(pageByKey("report")));
+                    const auto scaledRect=QTransform::fromScale(settled.devicePixelRatio(),settled.devicePixelRatio()).mapRect(reportRect);
+                    anchored=bar->tabRect(1)==compactAnchor&&partial.copy(scaledRect)!=settled.toImage().copy(scaledRect);
+                }
+                workflowCase("loading-tabs-emerge-from-stationary-parameter-tab",anchored);
+                workflowArtifacts_["stability_named_inputs"]=observe();
+                const auto namedRequest=hydroDialog_->inputs();
+                selectPage(pageByKey("results"));
+                workflowCase("disabled-result-tab-keeps-loading-parameters",
+                    parameterTabs->currentWidget()==pageFor(true)&&hydroDialog_->inputs()==namedRequest);
+                selectNamed(true);
+                hydroDialog_->grab().save(workflowOutput_+"/views/loading-inputs.png");
+                selectNamed(false);
+                const bool collapsed=motion&&motion->state()==QAbstractAnimation::Running;
+                if(collapsed){
+                    motion->setCurrentTime(motion->duration()/2);
+                    hydroDialog_->grab().save(workflowOutput_+"/views/loading-tabs-retracting.png");
+                    finishMotion();
+                }
+                const int editorIndex=parameterTabs->indexOf(pageByKey("loading_cases"));
+                const bool hidden=!parameterTabs->isTabVisible(editorIndex);
+                workflowCase("shared-criteria-embedded-beside-manual-inputs",criteriaBesideInputs(false)&&
+                    !hydroDialog_->inputs()["use_loading_book"].toBool());
+                selectNamed(true);
+                const bool shown=parameterTabs->isTabVisible(editorIndex)&&parameterTabs->indexOf(pageByKey("results"))==3;
+                workflowCase("shared-criteria-embedded-beside-loading-inputs",criteriaBesideInputs(true));
+                auto* criteriaTitle=criteriaPanel()->findChild<QLabel*>("HydroCriteriaTitle");
+                workflowArtifacts_["loading_tab_titles"]=QJsonArray{parameterTabs->tabText(editorIndex)};
+                workflowArtifacts_["criteria_panel_title"]=criteriaTitle?criteriaTitle->text():QString{};
+                if(motion&&motion->state()==QAbstractAnimation::Running)motion->setCurrentTime(motion->duration());
+                hydroDialog_->grab().save(workflowOutput_+"/views/loading-tabs-expanded.png");
+                selectNamed(false);
+                if(motion&&motion->state()==QAbstractAnimation::Running)motion->setCurrentTime(motion->duration());
+                workflowCase("loading-editor-tabs-animate-in-and-out",expanded&&collapsed&&shown&&hidden);
+                workflowArtifacts_["stability_manual_inputs"]=observe();
+                const auto directRequest=hydroDialog_->inputs();
+                workflowCase("stability-parameter-tabs-are-exclusive",
+                    parameterTabs->indexOf(pageFor(false))==0&&parameterTabs->indexOf(pageFor(true))==1&&
+                    parameterTabs->tabText(1)==uiText("参数表（装载工况）")&&
+                    namedRequest["use_loading_book"].toBool()&&!namedRequest.contains("displacements")&&
+                    namedRequest["angles"]==QJsonArray{-2,0,8}&&namedRequest["loading_book"].isObject()&&
+                    !directRequest["use_loading_book"].toBool()&&!directRequest.contains("loading_book")&&
+                    directRequest["angles"]==angles->values()&&directRequest["angles"]!=namedRequest["angles"]);
+                loadingAngles->setValues(originalLoadingAngles);
+                hydroDialog_->grab().save(workflowOutput_+"/views/manual-inputs.png");
+                const auto action=[&](const QString& name)->QWidget*{
+                    for(auto* w:angles->findChildren<QWidget*>())if(w->property("hydro_list_action")==name)return w;
+                    return nullptr;
+                };
+                const auto grouped=[](HydroNumberList* list){
+                    const auto action=[list](const QString& name)->QWidget*{
+                        for(auto* w:list->findChildren<QWidget*>())
+                            if(w->property("hydro_list_action")==name)return w;
+                        return nullptr;
+                    };
+                    auto* add=action("add");auto* range=action("range");auto* drop=action("drop");
+                    QLabel* label=nullptr;
+                    for(auto* candidate:list->findChildren<QLabel*>())
+                        if(candidate->property("hydro_field_label").isValid()){label=candidate;break;}
+                    if(!label||!add||!range||!drop)return false;
+                    const auto x=[list](QWidget* w){return w->mapTo(list,QPoint{}).x();};
+                    return x(add)>x(label)&&x(add)-x(label)-label->width()<45&&
+                           x(range)-x(add)-add->width()<12&&x(drop)-x(range)-range->width()<18&&
+                           drop->y()<=add->y()+add->height();
+                };
+                workflowCase("number-actions-next-to-parameter-caption",grouped(angles)&&grouped(displacements));
+                const auto blockAt=[&](int index)->QToolButton*{
+                    for(auto* b:angles->findChildren<QToolButton*>())
+                        if(visible(b)&&b->property("hydro_value_index").isValid()&&b->property("hydro_value_index").toInt()==index)return b;
+                    return nullptr;
+                };
+                auto* add=qobject_cast<QToolButton*>(action("add"));
+                auto* drop=action("drop");
+                QLineEdit* editor=nullptr;
+                for(auto* line:angles->findChildren<QLineEdit*>())
+                    if(line->property("hydro_list_value").toBool())editor=line;
+                if(!add||!drop||!editor){unavailable("Stability value actions unavailable");return;}
+                add->click();settleLayout();
+                workflowArtifacts_["stability_empty_row"]=observe();
+                QKeyEvent enter(QEvent::KeyPress,Qt::Key_Return,Qt::NoModifier);
+                QKeyEvent escape(QEvent::KeyPress,Qt::Key_Escape,Qt::NoModifier);
+                QApplication::sendEvent(editor,&enter);
+                workflowCase("blank-add-stays-uncommitted",editor->isVisible()&&angles->values()==QJsonArray{-5,.1,5});
+                editor->setText("15");
+                QApplication::sendEvent(editor,&enter);settleLayout();
+                workflowArtifacts_["stability_row_added"]=observe();
+                hydroDialog_->grab().save(workflowOutput_+"/views/stability-value-blocks.png");
+                auto* last=blockAt(3);
+                if(!last){unavailable("New stability value unavailable");return;}
+                bool ghostMatches=false;
+                const auto drag=[&](QToolButton* block,const QPoint& destination){
+                    const auto start=block->mapToGlobal(block->rect().center());
+                    const auto send=[&](QEvent::Type type,QPoint global,Qt::MouseButton button,Qt::MouseButtons buttons){
+                        QMouseEvent event(type,block->mapFromGlobal(global),global,button,buttons,Qt::NoModifier);
+                        QApplication::sendEvent(block,&event);
+                    };
+                    send(QEvent::MouseButtonPress,start,Qt::LeftButton,Qt::LeftButton);
+                    send(QEvent::MouseMove,destination,Qt::NoButton,Qt::LeftButton);
+                    const auto* ghost=angles->findChild<QLabel*>("HydroValueGhost");
+                    ghostMatches=ghost&&ghost->isVisible()&&ghost->size()==block->size()&&
+                        ghost->mapToGlobal(block->rect().center())==destination;
+                    const bool highlighted=drop->property("dragOver").toBool();
+                    send(QEvent::MouseButtonRelease,destination,Qt::LeftButton,Qt::NoButton);
+                    settleLayout();
+                    return highlighted;
+                };
+                const bool cancelHighlighted=drag(last,angles->mapToGlobal(QPoint(-20,0)));
+                workflowArtifacts_["stability_drag_cancel"]=observe();
+                const bool highlighted=drag(last,drop->mapToGlobal(drop->rect().center()));
+                workflowArtifacts_["stability_drop_highlight"]=QJsonObject{
+                    {"outside",cancelHighlighted},{"inside",highlighted},{"after",drop->property("dragOver").toBool()},
+                    {"ghost_matches",ghostMatches}};
+                workflowArtifacts_["stability_row_removed"]=observe();
+                if(hydroRequest_["exercise_delete_undo"].toBool()){
+                    draftKey(hydroDialog_,add,Qt::Key_Z,Qt::ControlModifier);settleLayout();
+                    const auto afterUndo=angles->values();
+                    draftKey(hydroDialog_,add,Qt::Key_Z,Qt::ControlModifier|Qt::ShiftModifier);settleLayout();
+                    const auto afterRedo=angles->values();
+                    bool keyboardUndo=false;
+                    if(auto* first=blockAt(0)){
+                        draftKey(hydroDialog_,first,Qt::Key_Delete,Qt::NoModifier);settleLayout();
+                        const auto deleted=angles->values();
+                        draftKey(hydroDialog_,add,Qt::Key_Z,Qt::ControlModifier);settleLayout();
+                        keyboardUndo=deleted==QJsonArray{.1,5}&&angles->values()==afterRedo;
+                    }
+                    workflowArtifacts_["stability_delete_undo"]=QJsonObject{{"undo",afterUndo},{"redo",afterRedo},
+                        {"keyboard",keyboardUndo}};
+                }
+                if(auto* first=blockAt(0)){
+                    first->click();editor->setText("-6");QApplication::sendEvent(editor,&enter);settleLayout();
+                    workflowArtifacts_["stability_edited_block"]=observe();
+                    if(auto* edited=blockAt(0)){edited->click();editor->setText("-5");QApplication::sendEvent(editor,&enter);}
+                }
+                const auto originalAngles=angles->values();
+                auto* batch=qobject_cast<QToolButton*>(action("range"));
+                auto* start=qobject_cast<QLineEdit*>(action("range_start"));
+                auto* end=qobject_cast<QLineEdit*>(action("range_end"));
+                auto* count=qobject_cast<QSpinBox*>(action("range_count"));
+                auto* step=qobject_cast<QLabel*>(action("range_step"));
+                auto* apply=qobject_cast<QToolButton*>(action("range_apply"));
+                auto* cancelRange=qobject_cast<QToolButton*>(action("range_cancel"));
+                if(!batch||!start||!end||!count||!step||!apply||!cancelRange){unavailable("Stability range editor unavailable");return;}
+                batch->click();start->setText("10");end->setText("-5");
+                const bool reversedBlocked=!apply->isEnabled();
+                start->setText("-5");end->setText("10");count->setValue(4);settleLayout();
+                const auto interval=step->text();
+                hydroDialog_->grab().save(workflowOutput_+"/views/stability-value-interval.png");
+                apply->click();settleLayout();
+                const auto merged=angles->values();
+                batch->click();end->setText("25");cancelRange->click();settleLayout();
+                workflowArtifacts_["stability_batch"]=QJsonObject{
+                    {"reversed_blocked",reversedBlocked},{"interval",interval},
+                    {"values",merged},{"after_cancel",angles->values()}};
+                QJsonArray range;
+                for(int angle=0;angle<=60;angle+=5)range.append(angle);
+                angles->setValues(range);settleLayout();
+                QSet<int> rows;
+                int left=angles->width(),right=0;
+                bool fits=true,compact=true;
+                const int dropBottom=drop->mapTo(angles,QPoint{}).y()+drop->height();
+                for(int i=0;i<range.size();++i){
+                    auto* block=blockAt(i);
+                    if(!block){fits=false;continue;}
+                    const auto pos=block->mapTo(angles,QPoint{});
+                    rows.insert(pos.y());
+                    left=qMin(left,pos.x());right=qMax(right,pos.x()+block->width());
+                    const int textWidth=block->fontMetrics().horizontalAdvance(block->text());
+                    compact&=block->width()>=textWidth+12&&block->width()<=qMax(24,textWidth+14);
+                    fits&=pos.y()>=dropBottom&&pos.y()+block->height()<=angles->height();
+                }
+                workflowArtifacts_["stability_full_grid"]=QJsonObject{
+                    {"state",observe()},{"rows",rows.size()},
+                    {"fits_below_header",fits},{"more_button",action("more")!=nullptr},
+                    {"left",left},{"right",right},{"width",angles->width()},{"compact",compact},
+                    {"inner_scroll",angles->findChild<QScrollArea*>()!=nullptr||
+                                    displacements->findChild<QScrollArea*>()!=nullptr}};
+                angles->setValues(QJsonArray{-0.90005,0.90005,99.876,123});settleLayout();
+                QJsonArray precisions;
+                for(int i=0;i<4;++i)if(auto* block=dynamic_cast<HydroValueBlock*>(blockAt(i))){
+                    const auto preview=block->previewText();
+                    precisions.append(QJsonObject{{"preview",preview},{"full",block->toolTip()},
+                        {"width",block->width()},{"text_width",block->fontMetrics().horizontalAdvance(preview)}});
+                }
+                workflowArtifacts_["stability_chip_precision"]=QJsonObject{{"blocks",precisions},{"values",angles->values()}};
+                hydroDialog_->grab().save(workflowOutput_+"/views/stability-value-precision.png");
+                if(auto* first=blockAt(0)){
+                    const auto original=angles->values();
+                    const auto committedBefore=hydroDialog_->savedInputs();
+                    const auto priorRect=first->geometry();
+                    first->click();settleLayout();
+                    const auto full=first->toolTip();
+                    workflowCase("stability-value-edits-in-place-at-full-width",
+                        editor->isVisible()&&editor->text()==full&&editor->geometry().contains(priorRect)&&
+                        editor->width()>=editor->fontMetrics().horizontalAdvance(full)+12&&
+                        editor->width()>priorRect.width()&&!action("commit")&&!action("cancel"));
+                    hydroDialog_->grab().save(workflowOutput_+"/views/stability-value-inline-edit.png");
+                    editor->setText("-0.1234567890123456");
+                    workflowCase("stability-uncommitted-value-excluded-from-save",hydroDialog_->savedInputs()==committedBefore);
+                    QApplication::sendEvent(editor,&escape);settleLayout();
+                    workflowCase("stability-escape-discards-edit",!editor->isVisible()&&angles->values()==original);
+                    first->click();
+                    editor->setText("-0.1234567890123456");
+                    displacements->setFocus();settleLayout();
+                    workflowCase("stability-focus-loss-discards-edit",
+                        displacements->focusProxy()->hasFocus()&&!editor->isVisible()&&angles->values()==original);
+                }
+                angles->setValues(originalAngles);settleLayout();
+                selectNamed(!hydroRequest_["solve_manual_stability"].toBool());
+                if(hydroRequest_["solve_manual_stability"].toBool())loadingAngles->setValues(QJsonArray{-2,0,8});
+                workflowArtifacts_["stability_returned_inputs"]=observe();
+            }
             if(hydroRequest_["observe_input_feedback"].toBool()){
                 QJsonObject descriptions;
                 for(const auto* label:hydroDialog_->findChildren<QLabel*>()){
@@ -321,6 +1055,14 @@ void MainWindow::hydroStep(const QString& operation){
             }
             if(!hydroDialog_->grab().save(workflowOutput_+"/views/parameters.png")){timer->stop();hydroDialog_->reject();finishWorkflow("Cannot save parameters image");return;}
             captureMessages("parameters");
+            if(hydroRequest_["observe_calculation_tabs"].toBool()){
+                if(auto* tabs=hydroDialog_->findChild<QTabWidget*>()){
+                    QJsonArray pages;
+                    for(int i=0;i<tabs->count();++i)if(tabs->isTabVisible(i))pages.append(tabs->tabText(i));
+                    workflowArtifacts_["calculation_tabs"]=QJsonObject{{"pages",pages},
+                        {"selected",tabs->tabText(tabs->currentIndex())},{"nested",!tabs->findChildren<QTabWidget*>().isEmpty()}};
+                }
+            }
             workflowArtifacts_["effective_inputs"]=hydroDialog_->savedInputs();
             if(hydroRequest_["save_input_draft"].toBool()){
                 const bool attached=hydroDialog_->actions().contains(save_)&&save_->shortcuts().contains(QKeySequence("Ctrl+S"));
@@ -355,10 +1097,122 @@ void MainWindow::hydroStep(const QString& operation){
         workflowArtifacts_["table_range_recorded"]=hydroDialog_->result()["parameters_recorded"].toBool();
         workflowArtifacts_["model_dirty_after_calculation"]=session_.modified();
         settleLayout();captureMessages("result");
+        if(parameterTabs&&!hydroDialog_->result().isEmpty()){
+            QJsonObject states;
+            for(const auto& key:outputPages)if(auto* page=pageByKey(key)){
+                const int index=parameterTabs->indexOf(page);
+                if(parameterTabs->isTabVisible(index))states[key]=parameterTabs->isTabEnabled(index);
+            }
+            workflowArtifacts_["hydro_output_tabs_after_result"]=states;
+            workflowCase("hydro-report-opens-after-result",states["report"].toBool());
+            auto* bar=parameterTabs->tabBar();
+            const int selected=bar->currentIndex();
+            const auto point=bar->tabRect(selected).center();
+            const auto global=bar->mapToGlobal(point);
+            bool fixed=selected>=0&&bar->count()>1;
+            for(const auto delta:{-120,120}){
+                QWheelEvent wheel(point,global,{},QPoint(0,delta),Qt::NoButton,Qt::NoModifier,Qt::NoScrollPhase,false);
+                QApplication::sendEvent(bar,&wheel);
+                fixed=fixed&&bar->currentIndex()==selected;
+            }
+            workflowCase("hydro-tab-wheel-keeps-active-page",fixed);
+            if(bar->currentIndex()!=selected)bar->setCurrentIndex(selected);
+        }
         if(auto* page=hydroDialog_->findChild<QWidget*>("HydroCurvePage")){
             for(auto* tabs:hydroDialog_->findChildren<QTabWidget*>()){
                 const int index=tabs->indexOf(page);
                 if(index>=0)workflowArtifacts_["curves_tab_visible"]=tabs->isTabVisible(index);
+            }
+        }
+        const auto inspectResultStatus=[&](QTableWidget* table){
+            QJsonArray icons;QString reason,instantTip;int failed=-1;
+            for(int row=0;row<table->rowCount();++row){
+                const auto* cell=table->item(row,0);
+                if(!cell)continue;
+                const bool ok=cell->data(Qt::UserRole).toBool();
+                icons.append(QJsonObject{{"success",ok},{"icon",!cell->icon().isNull()},
+                    {"text",cell->text()},{"reason",cell->toolTip()}});
+                if(failed<0&&!ok){failed=row;reason=cell->toolTip();}
+            }
+            if(failed>=0){
+                table->scrollToItem(table->item(failed,0));settleLayout();
+                const auto point=table->visualItemRect(table->item(failed,0)).center();
+                QMouseEvent move(QEvent::MouseMove,point,table->viewport()->mapToGlobal(point),Qt::NoButton,Qt::NoButton,Qt::NoModifier);
+                QApplication::sendEvent(table->viewport(),&move);
+                if(QToolTip::isVisible())instantTip=QToolTip::text();
+                QEvent leave(QEvent::Leave);QApplication::sendEvent(table->viewport(),&leave);
+            }
+            const auto* heading=table->horizontalHeaderItem(0);
+            return QJsonObject{{"heading",heading?heading->text():QString{}},
+                {"icons",icons},{"reason",reason},{"hover",instantTip}};
+        };
+        if(hydroRequest_["observe_stability_presentation"].toBool()){
+            auto* chart=dynamic_cast<CalculationPlot*>(hydroDialog_->findChild<QWidget*>("HydroStabilityChart"));
+            auto* comparison=hydroDialog_->findChild<QTableWidget*>("LoadingComparison");
+            auto* page=hydroDialog_->findChild<QWidget*>("HydroCurvePage");
+            auto* tabs=hydroDialog_->findChild<QTabWidget*>();
+            QTableWidget* result=nullptr;
+            for(auto* table:hydroDialog_->findChildren<QTableWidget*>())
+                if(table->property("hydro_result_table").toBool()){result=table;break;}
+            if(chart&&comparison&&page&&result){
+                tabs->setCurrentWidget(page);settleLayout();
+                auto* canvas=chart->findChild<QWidget*>("CalculationCanvas");
+                QMap<int,QToolButton*> controls;
+                for(auto* button:chart->findChildren<QToolButton*>())if(button->property("chart_curve").isValid())
+                    controls.insert(button->property("chart_curve").toInt(),button);
+                const auto overlay=[&]{if(canvas)canvas->grab();return chart->evidence();};
+                const auto all=overlay();
+                QJsonArray legendButtons;
+                for(auto* button:controls){
+                    const auto pos=button->mapTo(chart,QPoint{});
+                    legendButtons.append(QJsonObject{{"text",button->text()},{"tooltip",button->toolTip()},
+                        {"x",pos.x()},{"y",pos.y()},{"width",button->width()}});
+                }
+                auto* first=controls.value(0);
+                const auto original=hydroDialog_->result();
+                if(first)first->click();
+                const auto hidden=overlay();
+                if(first)first->click();
+                const auto restored=overlay();
+                hydroDialog_->grab().save(workflowOutput_+"/views/stability-clickable-legend.png");
+
+                tabs->setCurrentWidget(comparison);settleLayout();
+                QJsonArray columnSizes,rowSizes;
+                const auto labelSize=[](const QString& s,const QFont& font){
+                    return std::max(double(QFontMetricsF(font).horizontalAdvance(s)),double(notation::size(s,font).width()));
+                };
+                for(int col=0;col<comparison->columnCount();++col){
+                    const auto caption=comparison->horizontalHeaderItem(col)->text();
+                    double needed=labelSize(caption,comparison->horizontalHeader()->font());
+                    for(int i=0;i<comparison->rowCount();++i)
+                        needed=std::max(needed,labelSize(comparison->item(i,col)->text(),comparison->font()));
+                    columnSizes.append(QJsonObject{{"label",caption},{"size",comparison->columnWidth(col)},{"content",needed}});
+                }
+                for(int row=0;row<comparison->rowCount();++row){
+                    const auto label=comparison->verticalHeaderItem(row)->text();
+                    rowSizes.append(QJsonObject{{"label",label},{"size",comparison->verticalHeader()->width()},
+                        {"content",labelSize(label,comparison->verticalHeader()->font())}});
+                }
+                hydroDialog_->grab().save(workflowOutput_+"/views/stability-comparison-columns.png");
+
+                const auto inspectStatus=[&]{
+                    tabs->setCurrentWidget(result);settleLayout();
+                    return inspectResultStatus(result);
+                };
+                const auto status=inspectStatus();
+                hydroDialog_->grab().save(workflowOutput_+"/views/stability-status-first-column.png");
+                tabs->setCurrentWidget(page);settleLayout();
+                const bool legendAbove=first&&canvas&&first->mapTo(chart,QPoint{}).y()<canvas->mapTo(chart,QPoint{}).y();
+                if(first)first->click();
+                setUiLanguage("en");settleLayout();
+                tabs->setCurrentWidget(page);settleLayout();
+                const auto switched=overlay();
+                const auto statusEn=inspectStatus();
+                workflowArtifacts_["stability_presentation"]=QJsonObject{
+                    {"legend_above",legendAbove},{"legend_buttons",legendButtons},
+                    {"all",all},{"hidden",hidden},{"restored",restored},{"language_switched",switched},
+                    {"result_unchanged",original==hydroDialog_->result()},
+                    {"columns",columnSizes},{"row_headers",rowSizes},{"status",status},{"status_en",statusEn}};
             }
         }
         if(hydroRequest_["observe_tab_clicks"].toBool()){
@@ -376,7 +1230,9 @@ void MainWindow::hydroStep(const QString& operation){
                 auto* bar=tabs->tabBar();
                 const auto toolbarPosition=studioBar_->pos();
                 QJsonArray clicks;
-                for(auto* page:{curves,static_cast<QWidget*>(report),tabs->widget(0)}){
+                for(int i=0;i<tabs->count();++i){
+                    if(!tabs->isTabVisible(i))continue;
+                    auto* page=tabs->widget(i);
                     const int index=tabs->indexOf(page);
                     const QPoint center=bar->tabRect(index).center();
                     // Align the visible tab with a menu button in the disabled owner,
@@ -412,6 +1268,8 @@ void MainWindow::hydroStep(const QString& operation){
             // the actual visible result page, not stale hidden-view geometry.
             for(auto* tabs:hydroDialog_->findChildren<QTabWidget*>())if(tabs->indexOf(table)>=0)tabs->setCurrentWidget(table);
             settleLayout();table->ensurePolished();
+            if(hydroRequest_["observe_draft_status"].toBool())
+                workflowArtifacts_["draft_status"]=inspectResultStatus(table);
             // Observe the actual calculated result widget independently of CSV/report layout.
             QJsonArray headers,rows,widths;
             for(int c=0;c<table->columnCount();++c){headers.append(table->horizontalHeaderItem(c)?table->horizontalHeaderItem(c)->text():QString{});widths.append(table->columnWidth(c));}

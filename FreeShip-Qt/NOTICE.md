@@ -349,3 +349,9 @@ The published nonzero regression residual at Re=2e6 is retained in this mode;
 the separate reference mode remains uncorrected. No third-party program code
 or paper scans are included. Source and interpretation are recorded in the
 fixture README; the ITTC OCR transcription was not used as a coefficient table.
+
+The optional hollow-hull STL export uses Manifold v3.5.5, copyright The
+Manifold Authors, under Apache License 2.0. The source comes from
+https://github.com/elalish/manifold/tree/32271a1a999ce721ffaf5ab10e9746ceeb696547 .
+The license, file hashes and source revision are in third_party/manifold
+and are embedded in FreeShipQt under :/licenses/manifold/.

@@ -3,8 +3,11 @@
 #include <QDialog>
 #include <QMap>
 #include <QJsonArray>
+#include <memory>
+struct CalculationChartState;
 class QLabel;class QPushButton;class QTableWidget;class QTableView;class QTabWidget;
 namespace report {class Browser;}
+namespace loadingEditor {class Workspace;}
 class StudioMessage;
 class QStackedWidget;class QButtonGroup;
 class HydroDialog final:public QDialog {
@@ -26,9 +29,20 @@ public:
 protected:
     void changeEvent(QEvent*) override;
 private:
+    QJsonObject loadingBook_;loadingEditor::Workspace* loadingEditor_=nullptr;QTableWidget* comparison_=nullptr;
+    bool useLoadingBook_=false;
+    QMap<QString,QWidget*> loadingFields_;
+    QMap<QString,QLabel*> loadingFieldLabels_;
+    QWidget* loadingSummary_=nullptr;QLabel* loadingSummaryTitle_=nullptr;QTableWidget* loadingValues_=nullptr;
+    StudioMessage* loadingNotice_=nullptr;
+    QString loadingError_;
+    void refreshLoadingSummary();
+    void translateLoadingInputs();
     void calculate(const QString& report={});
     bool refreshInputValidity();
     void render();
+    void refreshOutputTabs();
+    void renderCurve(const QJsonArray& rows,const QString& lengthUnit,const QString& massUnit);
     void renderSingleResult(const QJsonObject& row);
     void renderAuxiliaryPage();
     int currentAuxiliaryIndex()const;
@@ -37,10 +51,11 @@ private:
     QString draftReport(bool html)const;
     ModelSession& session_;QString mode_;bool closing_=false;
     QMap<QString,QWidget*> fields_;QMap<QString,QLabel*> fieldLabels_;QJsonObject result_;
-    StudioMessage* status_;QLabel* legend_;QPushButton *run_,*cancel_;
+    StudioMessage* status_;QPushButton *run_,*cancel_;
     QVector<QPushButton*> exports_;QTableWidget* table_;report::Browser* text_;QTabWidget* tabs_;QWidget* plot_=nullptr;
+    std::shared_ptr<CalculationChartState> stabilityChart_;
     QVector<QPair<QString,QString>> columns_;
-    QWidget* auxiliaryPage_=nullptr;
+    QWidget *parameterPage_=nullptr,*loadingPage_=nullptr,*auxiliaryPage_=nullptr;
     QStackedWidget* auxiliaryStack_=nullptr;
     QButtonGroup* auxiliaryChoices_=nullptr;
     QMap<QString,QJsonObject> auxiliaryResults_;

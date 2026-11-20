@@ -1,6 +1,7 @@
 // Isolated production callbacks. No global input or personal files.
 #include "main_window.h"
 #include "exchange_dialog.h"
+#include "exchange_save_probe.h"
 #include "plates_dialog.h"
 #include "preferences_dialog.h"
 #include <QApplication>
@@ -114,7 +115,7 @@ void MainWindow::auditObjectLifetime(){
                 dialog.reset();const auto target=workflowOutput_+"/cancelled-export.csv";
                 QFile previous(target);if(!previous.open(QIODevice::WriteOnly))throw std::runtime_error("Cannot create protected export target");previous.write("previous");previous.close();
                 auto exporting=std::make_unique<ExchangeDialog>(isolated,false,"offset_table",this);exporting->setAttribute(Qt::WA_DontShowOnScreen);exporting->show();exporting->confirmOverwrite=[](const QString&){return true;};
-                for(auto* field:exporting->findChildren<QLineEdit*>())if(field->property("exchange_field")=="path")field->setText(target);
+                answerExchangeSaveDialog(exporting.get(),target);
                 for(auto* button:exporting->findChildren<QPushButton*>())if(button->property("exchange_action")=="export")button->click();
                 workflowCase("destroy-export-has-pending-worker",exporting->busy()&&!isolated.busy());
                 exporting.reset();QApplication::processEvents();previous.open(QIODevice::ReadOnly);

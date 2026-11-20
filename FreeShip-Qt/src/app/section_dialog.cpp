@@ -2,6 +2,7 @@
 #include "section_dialog.h"
 #include "studio_ui.h"
 #include "data_motion.h"
+#include "numeric_table_item.h"
 #include <QAction>
 #include <QDialogButtonBox>
 #include <QDoubleSpinBox>
@@ -60,6 +61,9 @@ SectionDialog::SectionDialog(QWidget* parent):QDialog(parent) {
     connect(addOne_,&QAction::triggered,this,[this]{add(false);});connect(addRange_,&QAction::triggered,this,[this]{add(true);});
     connect(clear_,&QAction::triggered,this,&SectionDialog::clearCurrent);
     tabs_=new QTabWidget;for(const auto* name:{uiText("横剖线"),uiText("纵剖线"),uiText("水线"),uiText("斜剖线")})tabs_->addTab(new QWidget,QString::fromUtf8(name));
+    templates_=new QPushButton(studioIcon("Print"),uiText("导出横剖面图…"));
+    templates_->setProperty("section_operation","templates");tabs_->setCornerWidget(templates_);
+    connect(templates_,&QPushButton::clicked,this,[this]{if(onTemplates)onTemplates(selectedIndices());});
     // A fixed pixel cap clips the tab labels when the dialog font grows.
     tabs_->setSizePolicy(QSizePolicy::Preferred,QSizePolicy::Fixed);layout->addWidget(tabs_);
     table_=new QTableWidget(0,3);table_->setObjectName("SectionDefinitions");
@@ -84,7 +88,7 @@ SectionDialog::SectionDialog(QWidget* parent):QDialog(parent) {
         if(filling_||!enabled_||!model_||!onEdit)return;
         if(column==2){submit("update",kind(),{{"index",table_->item(row,0)->data(Qt::UserRole).toInt()},{"show_curvature",table_->item(row,2)->checkState()==Qt::Checked}});return;}
         if(column!=1)return;
-        bool ok=false;auto distance=table_->item(row,1)->text().toDouble(&ok);
+        bool ok=false;auto distance=table_->item(row,1)->data(Qt::EditRole).toString().toDouble(&ok);
         if(!ok||!std::isfinite(distance)||std::abs(distance)>1e9){refill();showError(uiText("请输入有效距离。"));return;}
         auto index=table_->item(row,0)->data(Qt::UserRole).toInt();
         for(const auto& s:draft_)if(s.kind==kind()&&s.index==index&&float(distance)==float(s.distance)){refill();return;}
@@ -166,7 +170,11 @@ void SectionDialog::submit(const QString& operation,int sectionKind,QJsonObject 
     setProperty("section_pending_count",pending_);refill();
 }
 void SectionDialog::setEditingEnabled(bool enabled){enabled_=enabled;table_->setEnabled(enabled);tabs_->setEnabled(enabled);updateActions();}
-void SectionDialog::updateActions(){addOne_->setEnabled(enabled_);addRange_->setEnabled(enabled_);clear_->setEnabled(enabled_&&table_->rowCount()>0);}
+void SectionDialog::updateActions(){
+    addOne_->setEnabled(enabled_);addRange_->setEnabled(enabled_);clear_->setEnabled(enabled_&&table_->rowCount()>0);
+    templates_->setVisible(kind()==1);
+    templates_->setEnabled(enabled_ && !pending_ && model_ && table_->rowCount()>0);
+}
 void SectionDialog::selectionChanged(){updateActions();if(onSelection)onSelection(kind(),pending_?QSet<int>{}:selectedIndices());}
 void SectionDialog::showError(const QString& message){error_->setText(message);error_->setVisible(!message.isEmpty());}
 void SectionDialog::refreshHeaders(){
@@ -204,7 +212,7 @@ void SectionDialog::refill(){
             const int index=remove->property("section_index").toInt();
             if(enabled_&&model_&&kind()==sectionKind&&onEdit)submit("delete",sectionKind,{{"indices",QJsonArray{index}}});
         });
-        table_->setItem(row,1,new QTableWidgetItem(QString::number(s.distance,'g',9)));
+        table_->setItem(row,1,new NumericTableItem(s.distance));
         auto* curvature=new QTableWidgetItem;curvature->setCheckState(s.showCurvature?Qt::Checked:Qt::Unchecked);
         curvature->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled|Qt::ItemIsUserCheckable);curvature->setData(Qt::UserRole,QString("show_curvature"));curvature->setToolTip(uiText("显示这条剖面线的曲率梳"));table_->setItem(row,2,curvature);
     }
@@ -216,7 +224,7 @@ void SectionDialog::refill(){
         b->setToolTip(QString(uiText("删除第 %1 条剖面线")).arg(index+1));b->setAccessibleName(b->toolTip());
     }
     // Normalize the active editor's text even if the parsed value did not change.
-    for(int row=0;row<next.size();++row){auto* item=table_->item(row,1);auto value=QString::number(next[row].distance,'g',9);if(item->text()!=value)item->setText(value);}
+    for(int row=0;row<next.size();++row){auto* item=table_->item(row,1);auto value=QString::number(next[row].distance,'g',17);if(item->data(Qt::EditRole).toString()!=value)item->setData(Qt::EditRole,value);}
     renderedKind_=kind();rendered_=std::move(next);
     filling_=false;selectionChanged();
     if(removed||inserted||!sameKind)data_motion::finishRowUpdate(table_,QString::number(kind()),rowIdentities);

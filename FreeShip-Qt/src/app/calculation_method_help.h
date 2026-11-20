@@ -2,6 +2,7 @@
 #pragma once
 #include "ui_language.h"
 #include "report_layout.h"
+#include "table_number.h"
 #include <QFile>
 #include <QJsonDocument>
 
@@ -54,7 +55,10 @@ inline QString limitContent(const QJsonArray& items,bool html){
         if(!table.headers.isEmpty()&&table.headers.last()==uiText("单位"))table.leftColumns.append(int(table.headers.size()-1));
         for(const auto& entry:data["rows"].toArray()){
             QStringList row;
-            for(const auto& cell:entry.toArray())row.append(localized(cell));
+            for(const auto& cell:entry.toArray()){
+                const auto text=cell.isDouble()?tableNumber::display(cell.toDouble()):localized(cell);
+                row.append(table.leftColumns.contains(int(row.size()))?text:tableNumber::scalar(text));
+            }
             table.rows.append(row);
         }
         output+=report::render(table,html);

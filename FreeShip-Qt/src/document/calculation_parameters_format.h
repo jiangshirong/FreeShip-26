@@ -31,6 +31,13 @@ inline QJsonObject validate(const QByteArray& bytes){
         throw std::invalid_argument("Invalid calculation-parameter extension");
     const auto calculators=root["calculators"].toObject();if(calculators.size()>64)throw std::invalid_argument("Too many calculation input sets");
     if(root.contains("principal_dimensions"))fs::validatePrincipalDimensions(root["principal_dimensions"]);
+    if(root.contains("stability_loading_parameters")){
+        const auto loading=root["stability_loading_parameters"].toObject();
+        if(loading.size()!=3||!loading["free_trim"].isBool()||!loading["trim"].isDouble()||
+            !validValue("hydro_cross","trim",loading["trim"])||!loading["angles"].isArray()||
+            !validValue("hydro_cross","angles",loading["angles"]))
+            throw std::invalid_argument("Invalid load case parameters");
+    }
     for(auto it=calculators.begin();it!=calculators.end();++it){
         const auto set=it.value().toObject();const auto values=set["values"].toObject();
         if(it.key().isEmpty()||it.key().size()>80||!it.value().isObject()||

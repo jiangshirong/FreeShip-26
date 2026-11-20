@@ -106,11 +106,11 @@ QJsonArray observeCalculationLayout(PerformanceDialog* dialog,const QString& out
         for(auto* group:dialog->findChildren<QGroupBox*>())groupTitles.append(group->title());
         for(auto* tabs:dialog->findChildren<QTabWidget*>())if(tabs->property("calculation_pages").toBool()){
             for(int i=0;i<tabs->count();++i){const auto page=tabs->widget(i)->property("calculation_page").toString();
-                int charts=0;
+                int charts=tabs->widget(i)->property("performance_chart").toBool()?1:0;
                 for(auto* widget:tabs->widget(i)->findChildren<QWidget*>())
                     if(widget->property("performance_chart").toBool())++charts;
-                pages.append(QJsonObject{{"page",page},{"visible",tabs->isTabVisible(i)},{"charts",charts}});
-                if(!tabs->isTabVisible(i))continue;
+                pages.append(QJsonObject{{"page",page},{"visible",tabs->isTabVisible(i)},{"enabled",tabs->isTabEnabled(i)},{"charts",charts}});
+                if(!tabs->isTabVisible(i)||!tabs->isTabEnabled(i))continue;
                 tabs->setCurrentIndex(i);settle();
                 if(images&&pointSize==14){for(auto* scroll:tabs->widget(i)->findChildren<QScrollArea*>())scroll->verticalScrollBar()->setValue(0);
                     if(auto* scroll=qobject_cast<QScrollArea*>(tabs->widget(i)))scroll->verticalScrollBar()->setValue(0);
@@ -467,6 +467,14 @@ void MainWindow::performanceStep(const QString& operation){
             }
             if(performanceRequest_.contains("start_page"))for(auto* tabs:performanceDialog_->findChildren<QTabWidget*>())if(tabs->property("calculation_pages").toBool())
                 for(int i=0;i<tabs->count();++i)if(tabs->widget(i)->property("calculation_page").toString()==performanceRequest_["start_page"].toString()&&tabs->isTabVisible(i))tabs->setCurrentIndex(i);
+            if(performanceRequest_["observe_calculation_tabs"].toBool()){
+                if(auto* tabs=performanceDialog_->findChild<QTabWidget*>("PerformancePages")){
+                    QJsonArray pages;
+                    for(int i=0;i<tabs->count();++i)if(tabs->isTabVisible(i))pages.append(tabs->tabText(i));
+                    workflowArtifacts_["calculation_tabs"]=QJsonObject{{"pages",pages},
+                        {"selected",tabs->tabText(tabs->currentIndex())},{"nested",!tabs->findChildren<QTabWidget*>().isEmpty()}};
+                }
+            }
             workflowCase("parameters-image",performanceDialog_->grab().save(workflowOutput_+"/views/parameters.png"));
             if(performanceRequest_["save_input_draft"].toBool()){
                 const bool attached=performanceDialog_->actions().contains(save_)&&
@@ -515,6 +523,13 @@ void MainWindow::performanceStep(const QString& operation){
             timer->stop();timer->deleteLater();performanceDialog_->reject();return;
         }
         if(!performanceDialog_->property("performance_finished").toBool())return;
+        if(!performanceDialog_->result().isEmpty())
+            if(auto* tabs=performanceDialog_->findChild<QTabWidget*>("PerformancePages")){
+                QJsonObject states;
+                for(int i=0;i<tabs->count();++i)
+                    if(tabs->isTabVisible(i))states[tabs->widget(i)->property("calculation_page").toString()]=tabs->isTabEnabled(i);
+                workflowArtifacts_["performance_output_tabs_after_result"]=states;
+            }
         if(performanceRequest_["measure_responsiveness"].toBool()){
             if(!workflowArtifacts_["response_settle_started"].toBool()){
                 workflowArtifacts_["response_settle_started"]=true;
@@ -606,7 +621,11 @@ void MainWindow::performanceStep(const QString& operation){
                 }
                 workflowCase("separate-help-available",helpFound);
             }
-            if(performanceRequest_.contains("start_page"))for(auto* tabs:performanceDialog_->findChildren<QTabWidget*>())if(tabs->property("calculation_pages").toBool())workflowCase("calculation-retains-page",tabs->currentWidget()->property("calculation_page").toString()==performanceRequest_["start_page"].toString());
+            if(performanceRequest_.contains("start_page"))for(auto* tabs:performanceDialog_->findChildren<QTabWidget*>())if(tabs->property("calculation_pages").toBool()){
+                const auto start=performanceRequest_["start_page"].toString();
+                const auto expected=start=="general"?(performanceRequest_["inputs"].toObject()["calculator"]=="maneuver"?"report":"results"):start;
+                workflowCase("calculation-page-after-result",tabs->currentWidget()->property("calculation_page").toString()==expected);
+            }
             QComboBox *dataSeries=nullptr;
             for(auto* combo:performanceDialog_->findChildren<QComboBox*>()){
                 if(combo->property("performance_series").toBool())dataSeries=combo;
@@ -782,17 +801,35 @@ void MainWindow::performanceStep(const QString& operation){
             }
             *stage=9;
             for(auto* tabs:performanceDialog_->findChildren<QTabWidget*>())for(int i=0;i<tabs->count();++i)if(tabs->isTabVisible(i)){
-                revealParameter(performanceDialog_,tabs->widget(i));const auto name=tabs->property("calculation_pages").toBool()?"page-"+tabs->widget(i)->property("calculation_page").toString():"results-"+QString::number(i);
+                auto* page=tabs->widget(i);
+                revealParameter(performanceDialog_,page);
+                const auto key=page->property("calculation_page").toString();
+                const QString name=key=="results"?"results-0":key=="curve"?"results-1":key=="report"?"results-2":
+                    key=="preview"?"results-3":"page-"+key;
                 QApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
                 if(name=="results-0"&&performanceRequest_["verify_presentation"].toBool()){
                     for(auto* view:tabs->widget(i)->findChildren<QTableView*>())if(view->property("performance_table").toBool()){
+                        QElapsedTimer measurement;measurement.start();
+                        while(view->property("studio_table_measure_pending").toBool()&&measurement.elapsed()<5000)
+                            QApplication::processEvents(QEventLoop::ExcludeUserInputEvents,10);
                         const auto* model=view->model();
                         const QFontMetricsF metrics(view->font());
-                        bool fits=view->font().pointSizeF()>=13;
+                        bool fits=view->font().pointSizeF()>=13&&!view->property("studio_table_measure_pending").toBool();
+                        bool compact=true;QString clipped;
+                        static const QRegularExpression scalar(QStringLiteral(R"(^[+-]?\d+(?:\.(\d+))?(?:e[+-]?\d+)?$)"),QRegularExpression::CaseInsensitiveOption);
                         for(int row=0;row<model->rowCount();++row)
-                            for(int col=0;col<model->columnCount();++col)
-                                fits &= view->columnWidth(col)>=metrics.horizontalAdvance(model->data(model->index(row,col)).toString())+8;
-                        workflowCase("result-table-readable-without-truncated-numbers",fits);
+                            for(int col=0;col<model->columnCount();++col){
+                                const auto shown=model->data(model->index(row,col)).toString();
+                                const auto expected=metrics.horizontalAdvance(shown)+8;
+                                if(view->columnWidth(col)<expected){
+                                    fits=false;
+                                    if(clipped.isEmpty())clipped=QString("%1 (%2 / %3 px)").arg(shown).arg(view->columnWidth(col)).arg(expected);
+                                }
+                                const auto digits=scalar.match(shown).captured(1);
+                                compact&=digits.size()<=4&&(digits.isEmpty()||!digits.endsWith('0'));
+                            }
+                        workflowCase("result-table-readable-without-truncated-numbers",fits,clipped);
+                        workflowCase("result-table-up-to-four-decimals",compact);
                     }
                 }
                 workflowCase("result-image-"+name,performanceDialog_->grab().save(workflowOutput_+"/views/"+name+".png"));}

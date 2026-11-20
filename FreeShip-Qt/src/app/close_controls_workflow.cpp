@@ -8,6 +8,7 @@
 #include "hydro_dialog.h"
 #include "plates_dialog.h"
 #include "section_dialog.h"
+#include "station_template_dialog.h"
 #include "project_dialog.h"
 #include "preferences_dialog.h"
 #include "recovery_dialog.h"
@@ -24,6 +25,7 @@
 #include <QTableView>
 #include <QAction>
 #include <QApplication>
+#include <QKeyEvent>
 #include <QDialogButtonBox>
 #include <QDir>
 #include <QDoubleSpinBox>
@@ -54,6 +56,29 @@ void MainWindow::auditCloseControls(){
         // The native chrome probe deliberately leaves its owned window hidden.
         // Re-show on the private QA desktop before observing actual visibility.
         dialog->show();QApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+        if(scope=="export-stl"){
+            QCheckBox* shell=nullptr;
+            for(auto* box:dialog->findChildren<QCheckBox*>())
+                if(box->property("exchange_field")=="print_shell"&&box->isVisibleTo(dialog))shell=box;
+            if(shell){
+                QApplication::setActiveWindow(dialog);
+                shell->clearFocus();
+                const auto idle=shell->grab().toImage();
+                shell->setFocus(Qt::TabFocusReason);
+                const auto focused=shell->grab().toImage();
+                workflowCase("stl-checkbox-focus-draws-no-frame",shell->hasFocus()&&!idle.isNull()&&focused==idle);
+                dialog->grab().save(workflowOutput_+"/views/stl-keyboard-focus.png");
+                const bool initial=shell->isChecked();
+                const auto space=[shell]{
+                    QKeyEvent press(QEvent::KeyPress,Qt::Key_Space,Qt::NoModifier);
+                    QKeyEvent release(QEvent::KeyRelease,Qt::Key_Space,Qt::NoModifier);
+                    QApplication::sendEvent(shell,&press);QApplication::sendEvent(shell,&release);
+                };
+                space();const bool toggled=shell->isChecked()!=initial;
+                space();
+                workflowCase("stl-checkbox-focus-retains-keyboard-toggle",toggled&&shell->isChecked()==initial);
+            }else workflowCase("stl-checkbox-focus-draws-no-frame",false,"STL shell checkbox unavailable");
+        }
         if(scope.startsWith("calculation-")||scope.startsWith("hydro-")){
             const bool hydro=scope.startsWith("hydro-");
             QMap<QString,QWidget*> fields;
@@ -117,6 +142,17 @@ void MainWindow::auditCloseControls(){
                         blocked=marker&&!marker->property("performance_field_valid").toBool()&&run&&!run->isEnabled();
                         number->setValue(saved);
                     }
+                }else if(scope=="hydro-cross"&&field){
+                    auto* first=field->findChild<QAbstractButton*>("HydroValueBlock");
+                    if(first)first->click();
+                    for(auto* row:field->findChildren<QLineEdit*>()){
+                        if(!row->property("hydro_list_value").toBool()||!row->isVisibleTo(field))continue;
+                        row->clear();
+                        blocked=marker&&!marker->property("performance_field_valid").toBool()&&run&&!run->isEnabled();
+                        QKeyEvent escape(QEvent::KeyPress,Qt::Key_Escape,Qt::NoModifier);
+                        QApplication::sendEvent(row,&escape);
+                        break;
+                    }
                 }else if(auto* edit=qobject_cast<QLineEdit*>(field)){
                     const auto saved=edit->text();edit->setText("10, 0");
                     blocked=marker&&!marker->property("performance_field_valid").toBool()&&run&&!run->isEnabled();
@@ -126,7 +162,11 @@ void MainWindow::auditCloseControls(){
             }
         }
         if(auto* hydro=dynamic_cast<HydroDialog*>(dialog);hydro&&hydro->findChild<QWidget*>("AuxiliaryReportBar")){
-            const auto oldSize=hydro->size();hydro->selectAuxiliary(0);
+            const auto oldSize=hydro->size();
+            // This layout probe needs a populated auxiliary page to open it.
+            const QJsonArray files{QJsonObject{{"name","Bonjean.txt"},{"text",""}}};
+            hydro->receive(QJsonObject{{"mode","auxiliary"},{"units","metric"},{"auxiliary",QJsonObject{{"files",files}}}});
+            workflowCase("auxiliary-layout-opens-with-result",hydro->selectAuxiliary(0));
             auto* notice=dynamic_cast<StudioMessage*>(hydro->findChild<QLabel*>("AuxiliaryReportNotice"));
             auto* bar=hydro->findChild<QWidget*>("AuxiliaryReportBar");
             const auto oldText=notice->text();
@@ -324,6 +364,8 @@ void MainWindow::auditCloseControls(){
         {PlatesDialog dialog(session_,true,this);observe(&dialog,"plates");}
         {ProjectDialog dialog(*original,this);observe(&dialog,"project");}
         {SectionDialog dialog(this);dialog.setSnapshot(original);observe(&dialog,"sections");}
+        {StationTemplateDialog dialog(original,QFileInfo(session_.modelPath()).dir().filePath("native-input.json"),
+                                      workflowOutput_+"/stations",{},this);observe(&dialog,"station-templates");}
         {PreferencesDialog dialog({},this);observe(&dialog,"preferences");}
         {RecoveryDialog dialog(workflowOutput_+"/empty-recovery",this);observe(&dialog,"recovery");}
         for(auto* action:findChildren<QAction*>())if(action->property("operation").toString()=="check_updates"){

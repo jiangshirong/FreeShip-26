@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 #pragma once
 #include "report_layout.h"
+#include "table_number.h"
 #include "ui_language.h"
 #include <QHash>
 #include <QRegularExpression>
@@ -95,7 +96,7 @@ inline QString maneuverResult(const QString& source,bool html) {
             if(value==values.cend())continue;
             QString label=uiText(field.label);
             if(*field.symbol)label+=" $"+QString::fromLatin1(field.symbol)+"$";
-            table.rows.append({label,*value,notation::unit(QString::fromUtf8(field.unit))});
+            table.rows.append({label,tableNumber::scalar(*value),notation::unit(QString::fromUtf8(field.unit))});
         }
         if(i==3&&!stability.isEmpty())table.rows.append({uiText("开环航向稳定性"),stability,{}});
         result+=render(table,html);

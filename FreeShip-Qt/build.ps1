@@ -111,6 +111,11 @@ try {
         $mathLicense=Join-Path $DeployDir 'licenses/JKQTMathText'
         New-Item -ItemType Directory -Path $mathLicense -Force | Out-Null
         Copy-Item -LiteralPath (Join-Path $qtSourceRoot 'third_party/jkqtmathtext/LICENSE'), (Join-Path $qtSourceRoot 'third_party/jkqtmathtext/UPSTREAM.json'), (Join-Path $qtSourceRoot 'third_party/jkqtmathtext/PATCHES.md') -Destination $mathLicense
+        $manifoldLicense=Join-Path $DeployDir 'licenses/Manifold'
+        New-Item -ItemType Directory -Path $manifoldLicense -Force | Out-Null
+        foreach($notice in 'LICENSE','DEPENDENCY-NOTICES.txt','origin.json'){
+            Copy-Item -LiteralPath (Join-Path $qtSourceRoot "third_party/manifold/$notice") -Destination $manifoldLicense
+        }
         & "$qtPrefix\bin\windeployqt.exe" --release --no-translations --no-opengl-sw --compiler-runtime "$DeployDir\FreeShipQt.exe"
         if ($LASTEXITCODE) { throw 'Qt runtime deployment failed' }
         Copy-Item -LiteralPath "$qtPrefix\plugins\platforms\qoffscreen.dll" -Destination "$DeployDir\platforms"

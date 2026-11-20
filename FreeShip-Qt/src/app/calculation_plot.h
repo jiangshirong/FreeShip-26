@@ -7,12 +7,13 @@
 #include <QColor>
 #include <functional>
 #include <memory>
-class QToolButton;class QScrollArea;class QGridLayout;class QBoxLayout;
+class QToolButton;class QScrollArea;class QBoxLayout;
 struct CalculationCurve {
     QString source,name,xTitle,yTitle,axis;
     QColor color;Qt::PenStyle style=Qt::SolidLine;double width=1;bool markers=false;
     QVector<QPointF> points; // Order, duplicate X values and gaps are preserved.
     QRectF bounds;qsizetype finitePoints=0,segments=0;
+    QString legendSuffix;
 };
 struct CalculationChartData {
     QString method,captionLanguage;QVector<CalculationCurve> curves;bool legendRight=false;double preparationMs=0,decodeMs=0;
@@ -49,6 +50,7 @@ private:
     void arrangeLegend();
     std::shared_ptr<CalculationChartState> state_;
     CalculationCanvas* canvas_;QScrollArea* legend_;
-    QGridLayout* legendLayout_=nullptr;QBoxLayout* content_;
-    QVector<QToolButton*> buttons_;int legendColumns_=0;bool right_=false;
+    QBoxLayout* legendLayout_=nullptr;QBoxLayout* content_;
+    QVector<QToolButton*> buttons_;
+    QVector<int> legendRowStarts_;
 };

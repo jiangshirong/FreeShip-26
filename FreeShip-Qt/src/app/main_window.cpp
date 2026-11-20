@@ -17,6 +17,7 @@
 #include "exchange_dialog.h"
 #include "core/cad_export.h"
 #include "render/model_preview.h"
+#include "render/curve_edit_motion.h"
 #include <QAction>
 #include <QApplication>
 #include <QCloseEvent>
@@ -281,7 +282,16 @@ MainWindow::MainWindow(QWidget* parent,bool rememberFiles) : QMainWindow(parent)
         view->setStudioAppearance(true);view->setFillVisible(false);
         layout->addWidget(view, 1); grid->addWidget(frame, int(i / 2), int(i % 2));
         view->onSelectionChanged = [this](QSet<fs::EntityId> ids) { selectPoints(std::move(ids)); };
-        view->onPointsMoved = [this](QVector<fs::PointMove> moves) { session_.movePoints(moves); };
+        view->onPointsMoved = [this](QVector<fs::PointMove> moves) {
+            if(session_.busy()||!session_.ready())return;
+            // Keep the released control net on screen while the worker rebuilds the hull.
+            for(const auto& move:moves)releasedCurvePositions_.insert(move.id,move.position);
+            for(auto* canvas:views_)canvas->setPendingPointMoves(moves);
+            if(!session_.movePoints(moves)){
+                releasedCurvePositions_.clear();
+                for(auto* canvas:views_)canvas->setPendingPointMoves({});
+            }
+        };
         view->onEditRejected = [this](const QString& message) { showStatusMessage(message,StudioMessageRole::Warning); };
         view->onEntitySelectionChanged=[this](HullEntity kind,QSet<fs::EntityId> ids){selectEntities(kind,std::move(ids));};
         view->onBackgroundAction=[this,view](const QString& operation,QPointF position){backgroundAction(view,operation,position);};
@@ -384,7 +394,12 @@ MainWindow::MainWindow(QWidget* parent,bool rememberFiles) : QMainWindow(parent)
         if(!session_.busy()&&(documentExit_==DocumentExit::Save||documentExit_==DocumentExit::Discard))
             QTimer::singleShot(0,this,&MainWindow::continueDocumentExit);
     };
-    session_.onError = [this](const QString& message) { cancelDocumentExit();pendingNewPointAfter_=0;pendingPointIds_.clear();pendingPointView_.clear();if(layers_)layers_->discardPredictions();if(sections_)sections_->discardPending();showError(message,true); };
+    session_.onError = [this](const QString& message) {
+        releasedCurvePositions_.clear();
+        for(auto* view:views_)view->setPendingPointMoves({});
+        cancelDocumentExit();pendingNewPointAfter_=0;pendingPointIds_.clear();pendingPointView_.clear();
+        if(layers_)layers_->discardPredictions();if(sections_)sections_->discardPending();showError(message,true);
+    };
     session_.onCompleted = [this](const QString& method) { operationCompleted(method); };
     session_.onFileCommitted=[this](const QString& path){if(!workflow_)rememberFile(path);};
     session_.makeSavePreview=[this](std::shared_ptr<const fs::ModelSnapshot> model){return modelPreview(std::move(model),preferenceAppearance(preferences_));};
@@ -450,7 +465,18 @@ void MainWindow::updateModel() {
     const auto presentation=displayModel();
     layers_->setSnapshot(model,session_.historyStates(),session_.layerIdHighWater());
     const auto changes=layers_->projectedVisibilityChanges();
-    for (auto* view : views_) view->setSnapshot(model,presentation,session_.drawingUnchanged(),changes);
+    const auto previous=views_.front()->snapshot();
+    const bool pointEdit=previous&&session_.publishingPointEdit()&&fs::curveEdit::onlyPointPositionsChanged(*previous,*model);
+    bool startCurveMotion=false;
+    if(pointEdit&&std::any_of(views_.begin(),views_.end(),[](const HullView* view){return view->curveEditMotionEnabled();})){
+        curveEditMotion_=fs::curveEdit::Motion::between(*previous,*model,releasedCurvePositions_,curveEditMotion_);
+        startCurveMotion=bool(curveEditMotion_);
+    }else if(fresh||!session_.drawingUnchanged())curveEditMotion_.reset();
+    releasedCurvePositions_.clear();
+    for(auto* view:views_){
+        view->setSnapshot(model,presentation,session_.drawingUnchanged(),changes);
+        view->setCurveEditMotion(curveEditMotion_);
+    }
     if (!fresh) selection_ = views_.front()->selectedPoints();
     fs::EntityId createdPoint=0;
     if(pendingNewPointAfter_){
@@ -465,6 +491,7 @@ void MainWindow::updateModel() {
     if(createdPoint&&pendingPointView_){showPointPopup(pendingPointView_,createdPoint);pendingPointView_.clear();}
     if(selectionKind_!=HullEntity::Point)selectEntities(selectionKind_,fresh?QSet<fs::EntityId>{}:entitySelection_);
     if(preferencesPending_){for(size_t i=0;i<3;++i){QSignalBlocker block(coordinates_[i]);coordinates_[i]->setValue(draft[i]);}coordinatesChanged_=changed;}
+    if(startCurveMotion)curveEditMotion_->start();
 }
 void MainWindow::updateState() {
     save_->setProperty("studio_opens_dialog",session_.sourcePath().isEmpty());
@@ -740,6 +767,11 @@ void MainWindow::showError(const QString& sourceMessage,bool sessionError) {
     }
 }
 void MainWindow::operationCompleted(const QString& method) {
+    if(method=="move_point"||method=="move_points")
+    {
+        releasedCurvePositions_.clear();
+        for(auto* view:views_)view->setPendingPointMoves({});
+    }
     if(method=="display"){
         submittedDisplay_={};
         submitDisplayChanges();

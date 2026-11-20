@@ -4,6 +4,7 @@
 #include "layer_panel.h"
 #include "studio_ui.h"
 #include "ui_language.h"
+#include "render/curve_edit_motion.h"
 #include <QLineEdit>
 #include <QListWidget>
 #include <QToolButton>
@@ -11,14 +12,17 @@
 #include <QAction>
 #include <QApplication>
 #include <QCheckBox>
+#include <QComboBox>
 #include <QContextMenuEvent>
 #include <QDialog>
 #include <QDialogButtonBox>
 #include <QDoubleSpinBox>
+#include <QElapsedTimer>
 #include <QEventLoop>
 #include <QFileDialog>
 #include <QKeyEvent>
 #include <QImage>
+#include <QLineF>
 #include <QMenu>
 #include <QMouseEvent>
 #include <QPushButton>
@@ -29,6 +33,32 @@
 #include <stdexcept>
 #include <algorithm>
 #include <cmath>
+
+namespace {
+QJsonObject popupRowEvidence(QAbstractItemView* view,const QModelIndex& index){
+    const auto image=view->viewport()->grab(view->visualRect(index)).toImage();
+    if(image.width()<16||image.height()<6)return {};
+    const auto background=image.pixelColor(image.width()*3/4,image.height()/2);
+    const auto luminance=[](const QColor& color){
+        const auto channel=[](double v){return v<=.04045?v/12.92:std::pow((v+.055)/1.055,2.4);};
+        return .2126*channel(color.redF())+.7152*channel(color.greenF())+.0722*channel(color.blueF());
+    };
+    const double base=luminance(background);
+    int legiblePixels=0;
+    QColor foreground=background;
+    double best=1;
+    for(int y=2;y<image.height()-2;++y)for(int x=3;x<image.width()/2;++x){
+        const auto color=image.pixelColor(x,y);
+        const double ink=luminance(color);
+        const double contrast=(std::max(base,ink)+.05)/(std::min(base,ink)+.05);
+        if(contrast>=4.5)++legiblePixels;
+        if(contrast>best){best=contrast;foreground=color;}
+    }
+    return {{"background",background.name()},{"foreground",foreground.name()},
+            {"contrast",best},{"legible_pixels",legiblePixels}};
+}
+}
+
 void MainWindow::verifyModelUi(const QString& model,const QString& output){
     modelUiWorkflow_=true;QApplication::setQuitOnLastWindowClosed(false);
     // An inline overlay is visible only when its canvas ancestors are shown.
@@ -48,6 +78,11 @@ void MainWindow::modelUiStep(){
             workflowCases_.append(QJsonObject{{"name","unavailable_"+operation},{"status","not_run"}});finishWorkflow();return nullptr;
         };
         auto* m=session_.model().get();
+        const auto dragPixel=[](HullView* view,QPointF at){
+            const auto img=view->grab().toImage();
+            const auto pixel=(at*img.devicePixelRatio()).toPoint();
+            return img.rect().contains(pixel)?img.pixelColor(pixel).name():QString{};
+        };
         const auto workspace=[this]{QJsonArray result;for(auto* frame:viewFrames_){const auto r=frame->geometry();result.append(QJsonArray{r.x(),r.y(),r.width(),r.height()});}return result;};
         auto layerButton=[this](const char* action,fs::EntityId id){
             auto* list=layers_->findChild<QListWidget*>("layer_list");
@@ -117,6 +152,36 @@ void MainWindow::modelUiStep(){
         }
         switch(stage){
         case 0:{
+            QTimer::singleShot(0,this,[this]{
+                auto* dialog=qobject_cast<QDialog*>(QApplication::activeModalWidget());
+                if(!dialog)return;
+                QComboBox* units=nullptr;
+                for(auto* combo:dialog->findChildren<QComboBox*>())
+                    if(combo->property("field")=="units"){units=combo;break;}
+                if(!units){workflowCase("unit-popup-hover-readable",false);dialog->reject();return;}
+                units->showPopup();
+                auto* view=units->view();
+                QJsonArray hover;
+                bool readable=view->isVisible()&&units->count()==2;
+                for(int row:{1,0}){
+                    const auto index=units->model()->index(row,units->modelColumn(),units->rootModelIndex());
+                    const auto at=view->visualRect(index).center();
+                    QMouseEvent move(QEvent::MouseMove,at,view->viewport()->mapToGlobal(at),Qt::NoButton,Qt::NoButton,Qt::NoModifier);
+                    QApplication::sendEvent(view->viewport(),&move);
+                    const bool highlighted=view->currentIndex()==index;
+                    auto evidence=popupRowEvidence(view,index);
+                    evidence["item"]=units->itemText(row);
+                    evidence["highlighted"]=highlighted;
+                    hover.append(evidence);
+                    readable&=highlighted&&evidence["legible_pixels"].toInt()>4;
+                }
+                workflowArtifacts_["unit_popup_hover"]=hover;
+                view->window()->grab().save(workflowOutput_+"/views/unit-popup-hover.png");
+                workflowCase("unit-popup-hover-readable",readable);
+                units->hidePopup();
+                dialog->reject();
+            });
+            modelingDialog("new");
             editingOriginal_=session_.model();captureWorkflow("original");if(auto* a=action("layer_properties"))a->trigger();else return;
             if(!layerDialog_||!layers_){workflowCases_.append(QJsonObject{{"name","layer_dialog_missing"},{"status","not_run"}});finishWorkflow();return;}
             QApplication::processEvents();layerDialog_->grab().save(workflowOutput_+"/layer-dialog.png");
@@ -333,6 +398,66 @@ void MainWindow::modelUiStep(){
         case 13:captureWorkflow("undo-point");session_.redo();return;
         case 14:{
             captureWorkflow("redo-point");auto* view=views_[0];view->setAnimationsEnabled(false);
+            const auto id=fs::EntityId(workflowArtifacts_["placed_point_id"].toDouble());
+            if(!m->point(id))throw std::runtime_error("Missing control point for release-frame check");
+            view->finishPresentation();
+            selectPoints({id});
+            const auto start=view->projectControlPoint(id);
+            const auto preview=start+QPointF(-25,-18);
+            const auto end=start+QPointF(-32,-22);
+            const auto ink=dragPixel(view,start);
+            const auto originalModel=view->snapshot();
+            const auto mouse=[view](QEvent::Type type,QPointF point,Qt::MouseButton button,Qt::MouseButtons down){
+                QMouseEvent event(type,point,view->mapToGlobal(point),button,down,Qt::NoModifier);
+                QApplication::sendEvent(view,&event);
+            };
+            mouse(QEvent::MouseButtonPress,start,Qt::LeftButton,Qt::LeftButton);
+            mouse(QEvent::MouseMove,preview,Qt::NoButton,Qt::LeftButton);
+            workflowCase("point-drag-painted-at-pointer",!ink.isEmpty()&&dragPixel(view,preview)==ink&&dragPixel(view,start)!=ink);
+            mouse(QEvent::MouseButtonRelease,end,Qt::LeftButton,Qt::NoButton);
+            const auto atRelease=dragPixel(view,end),oldAtRelease=dragPixel(view,start);
+            workflowCase("point-release-keeps-final-pixels-while-model-is-pending",
+                session_.busy()&&view->snapshot()==originalModel&&atRelease==ink&&oldAtRelease!=ink);
+            workflowArtifacts_["point_release"]=QJsonObject{{"x",end.x()},{"y",end.y()},{"ink",ink}};
+            return;
+        }
+        case 15:{
+            auto* view=views_[0];
+            const auto id=fs::EntityId(workflowArtifacts_["placed_point_id"].toDouble());
+            const auto release=workflowArtifacts_["point_release"].toObject();
+            const QPointF end(release["x"].toDouble(),release["y"].toDouble());
+            workflowCase("point-commit-matches-release-frame",
+                QLineF(view->projectControlPoint(id),end).length()<.05&&dragPixel(view,end)==release["ink"].toString());
+            session_.undo();return;
+        }
+        case 16:{
+            auto* view=views_[0];
+            const auto id=fs::EntityId(workflowArtifacts_["placed_point_id"].toDouble());
+            const auto release=workflowArtifacts_["point_release"].toObject();
+            const QPointF end(release["x"].toDouble(),release["y"].toDouble());
+            selectPoints({id});
+            const auto ink=release["ink"].toString();
+            workflowCase("point-undo-clears-release-preview",
+                m->point(id)&&QLineF(view->projectControlPoint(id),end).length()>20&&
+                dragPixel(view,view->projectControlPoint(id))==ink&&dragPixel(view,end)!=ink);
+            auto* perspective=views_[3];
+            const auto orbit=[perspective](QPointF delta){
+                const QPointF start=perspective->rect().center();
+                const auto send=[perspective](QEvent::Type type,QPointF at,Qt::MouseButton button,Qt::MouseButtons down){
+                    QMouseEvent event(type,at,perspective->mapToGlobal(at),button,down,Qt::ControlModifier);
+                    QApplication::sendEvent(perspective,&event);
+                };
+                send(QEvent::MouseButtonPress,start,Qt::LeftButton,Qt::LeftButton);
+                send(QEvent::MouseMove,start+delta,Qt::NoButton,Qt::LeftButton);
+                send(QEvent::MouseButtonRelease,start+delta,Qt::LeftButton,Qt::NoButton);
+                return perspective->interactionMotionEvidence();
+            };
+            const auto initial=perspective->interactionMotionEvidence();
+            const auto right=orbit({24,0}),down=orbit({0,20});
+            workflowCase("perspective-ctrl-drag-reverses-horizontal-orbit",
+                right["camera_yaw"].toDouble()<initial["camera_yaw"].toDouble()&&right["camera_pitch"]==initial["camera_pitch"]);
+            workflowCase("perspective-ctrl-drag-down-increases-pitch",
+                down["camera_pitch"].toDouble()>right["camera_pitch"].toDouble()&&down["camera_yaw"]==right["camera_yaw"]);
             QContextMenuEvent menuEvent(QContextMenuEvent::Mouse,{50,50},{50,50});QApplication::sendEvent(view,&menuEvent);
             QJsonArray menuItems;QList<QAction*> saves;for(auto* a:view->findChildren<QAction*>())if(a->property("view_operation").isValid()){menuItems.append(QJsonObject{{"operation",a->property("view_operation").toString()},{"text",a->text()},{"enabled",a->isEnabled()}});if(a->property("view_operation")=="save_image")saves.append(a);}
             workflowArtifacts_["view_menu"]=menuItems;for(auto* menu:view->findChildren<QMenu*>())if(menu->isVisible())menu->grab().save(workflowOutput_+"/view-menu.png");
@@ -348,9 +473,172 @@ void MainWindow::modelUiStep(){
                 QTimer::singleShot(50,this,[this,path,before,view]{
                     workflowCase("context-export-is-exact-current-view",QImage(path)==before);
                     for(auto* menu:view->findChildren<QMenu*>())menu->hide();
-                    workflowCases_.append(QJsonObject{{"name","desktop-input-native-dialog-print-visual-acceptance"},{"status","not_run"}});finishWorkflow();
+                    workflowStage_=200;modelUiStep();
                 });
             });return;
+        }
+        case 200:{
+            using namespace fs::curveEdit;
+            fs::ModelSnapshot before,after;
+            fs::Section oldSection;
+            oldSection.kind=3;oldSection.index=2;oldSection.paths={{{0,0,1},{5,1,1},{10,0,1}}};
+            before.sections={oldSection};
+            auto split=oldSection;split.paths={{{0,0,1},{4,1,1}},{{6,1,1},{10,0,1}}};after.sections={split};
+            auto motion=Motion::between(before,after,{},{});
+            if(!motion)throw std::runtime_error("Missing section split transition");
+            const Key key{3,2};
+            const auto splitAt=motion->frameAt(Motion::DurationMs/2).at(key);
+            workflowCase("curve-motion-split-fades-without-linking-branches",
+                splitAt.size()==3&&splitAt[0].path.size()==3&&splitAt[0].opacity<1&&
+                splitAt[1].path.back().x==4&&splitAt[2].path.front().x==6&&
+                splitAt[1].opacity>0&&splitAt[1].opacity<1);
+            auto shifted=oldSection;
+            shifted.paths={{{10,1,1},{7,2,1},{2,2,1},{0,1,1}}};
+            after.sections={shifted};
+            motion=Motion::between(before,after,{},{});
+            if(!motion)throw std::runtime_error("Missing resampled section transition");
+            const auto intermediate=motion->frameAt(Motion::DurationMs/2).at(key);
+            const auto end=motion->frameAt(Motion::DurationMs).at(key);
+            workflowCase("curve-motion-matches-resampled-path-and-direction",
+                intermediate.size()==1&&intermediate.front().opacity==1&&
+                intermediate.front().path.front().x==10&&intermediate.front().path.front().y>0&&
+                intermediate.front().path.front().y<1&&end.front().path.front().y==1&&
+                end.front().path.back().x==0&&end.front().path.back().y==1);
+
+            QSet<fs::EntityId> occupied;
+            for(const auto& curve:m->controlCurves)for(const auto id:curve.controls)occupied.insert(id);
+            for(const auto& edge:m->edges){
+                const auto* point=m->point(edge.a);
+                if(!point||point->locked||!point->batchMovable||occupied.contains(edge.a)||occupied.contains(edge.b)||
+                    point->position.y<.2)continue;
+                workflowArtifacts_["curve_motion_point"]=double(point->id);
+                if(session_.editAuxiliary("create_control",{{"ids",QJsonArray{double(edge.id)}}}))return;
+                break;
+            }
+            throw std::runtime_error("Cannot create control curve for edit motion workflow");
+        }
+        case 201:{
+            const double height=m->minimum.z+(m->maximum.z-m->minimum.z)*.37;
+            if(!session_.editSections("add",3,{{"positions",QJsonArray{height}}}))
+                throw std::runtime_error("Cannot add waterline for edit motion workflow");
+            return;
+        }
+        case 202:{
+            using namespace fs::curveEdit;
+            const auto id=fs::EntityId(workflowArtifacts_["curve_motion_point"].toDouble());
+            const auto* point=m->point(id);
+            if(!point)throw std::runtime_error("Missing motion control point");
+            const auto curve=std::find_if(m->controlCurves.begin(),m->controlCurves.end(),
+                [id](const auto& curve){return curve.controls.contains(id);});
+            if(curve==m->controlCurves.end())throw std::runtime_error("Missing motion control curve");
+            workflowArtifacts_["curve_motion_id"]=double(curve->id);
+            const auto original=point->position;
+            auto target=original;target.y+=.5;
+            const auto base=fs::presentation::splineCubics(curve->spline);
+            const auto moved=preview(*curve,*m,PointPositions{{id,target}},base);
+            const bool first=curve->controls.front()==id;
+            workflowArtifacts_["curve_motion_first_endpoint"]=first;
+            const auto beforeEnd=first?base.front().front():base.back().back();
+            const auto liveEnd=first?moved.front().front():moved.back().back();
+            workflowCase("curve-motion-live-preview-follows-connected-control",
+                std::abs(liveEnd.y-beforeEnd.y-.5)<1e-6&&liveEnd.x==beforeEnd.x&&liveEnd.z==beforeEnd.z);
+            for(auto* view:views_)view->setAnimationsEnabled(true);
+            qApp->setProperty("studio_motion_enabled",true);
+            if(!session_.movePoint(id,target))throw std::runtime_error("Cannot move section control point");
+            return;
+        }
+        case 203:{
+            using namespace fs::curveEdit;
+            const Key key{0,fs::EntityId(workflowArtifacts_["curve_motion_id"].toDouble())};
+            const auto motion=curveEditMotion_;
+            workflowCase("curve-motion-publishes-real-control-and-waterline-edit",
+                motion&&motion->contains(key)&&std::any_of(motion->frameAt(Motion::DurationMs/2).begin(),motion->frameAt(Motion::DurationMs/2).end(),
+                    [](const auto& item){return item.first.kind==3;}));
+            if(!motion||!motion->contains(key)){finishWorkflow("Missing curve motion on model publication");return;}
+            const auto first=motion->frameAt(0).at(key);
+            const auto middle=motion->frameAt(Motion::DurationMs/2).at(key);
+            const auto last=motion->frameAt(Motion::DurationMs).at(key);
+            const bool firstEndpoint=workflowArtifacts_["curve_motion_first_endpoint"].toBool();
+            const auto endpoint=[firstEndpoint](const auto& paths){
+                const auto& cubics=paths.front().cubics;
+                return (firstEndpoint?cubics.front().front():cubics.back().back()).y;
+            };
+            const auto a=endpoint(first),b=endpoint(middle),c=endpoint(last);
+            const auto curve=std::find_if(m->controlCurves.begin(),m->controlCurves.end(),[key](const auto& entry){return entry.id==key.id;});
+            const auto cubics=fs::presentation::splineCubics(curve->spline);
+            const auto exact=(firstEndpoint?cubics.front().front():cubics.back().back()).y;
+            workflowCase("curve-motion-intermediate-and-exact-final-positions",
+                first.size()==1&&middle.size()==1&&last.size()==1&&
+                ((a<b&&b<c)||(a>b&&b>c))&&std::abs(c-exact)<1e-9);
+            workflowArtifacts_["curve_motion_before"]=a;
+            session_.undo();return;
+        }
+        case 204:{
+            using namespace fs::curveEdit;
+            const Key key{0,fs::EntityId(workflowArtifacts_["curve_motion_id"].toDouble())};
+            const auto motion=curveEditMotion_;
+            bool restored=false;
+            if(motion&&motion->contains(key)){
+                const auto& cubics=motion->frameAt(Motion::DurationMs).at(key).front().cubics;
+                const bool first=workflowArtifacts_["curve_motion_first_endpoint"].toBool();
+                restored=std::abs((first?cubics.front().front():cubics.back().back()).y-
+                    workflowArtifacts_["curve_motion_before"].toDouble())<1e-9;
+            }
+            workflowCase("curve-motion-undo-reaches-original-geometry",restored);
+            workflowCases_.append(QJsonObject{{"name","desktop-input-native-dialog-print-visual-acceptance"},{"status","not_run"}});
+            auto before=std::make_shared<fs::ModelSnapshot>(*m),after=std::make_shared<fs::ModelSnapshot>(*m);
+            before->sections.clear();after->sections.clear();
+            const auto low=m->minimum,high=m->maximum;
+            const auto mix=[](double a,double b,double t){return a+(b-a)*t;};
+            for(int kind=1;kind<=3;++kind)for(int row=0;row<30;++row){
+                fs::Section from,to;
+                from.kind=kind;from.index=row;from.color=kind==1?0x805f32:kind==2?0x575faf:0x454f29;
+                const double f=(row+1)/31.;
+                QVector<fs::Vec3> oldPath,newPath;
+                for(int i=0;i<=512;++i){
+                    const double t=i/512.,rise=std::sin(t*3.141592653589793);
+                    fs::Vec3 p,q;
+                    const double wav=.05*std::sin(t*15.)+rise*.17;
+                    if(kind==1){p={mix(low.x,high.x,f),mix(low.y,high.y,.20+wav),mix(low.z,high.z,t)};q=p;q.y+=(high.y-low.y)*rise*.12;}
+                    else if(kind==2){p={mix(low.x,high.x,t),mix(low.y,high.y,f),mix(low.z,high.z,.30+wav)};q=p;q.z+=(high.z-low.z)*rise*.12;}
+                    else {p={mix(low.x,high.x,t),mix(low.y,high.y,.30+wav),mix(low.z,high.z,f)};q=p;q.y+=(high.y-low.y)*rise*.12;}
+                    oldPath.append(p);newPath.append(q);
+                }
+                to=from;from.paths={oldPath};to.paths={newPath};before->sections.append(from);after->sections.append(to);
+            }
+            resize(1440,900);
+            for(auto* view:views_){view->setSnapshot(after);view->fit();view->finishPresentation();view->setCurveEditMotion({});}
+            QTimer::singleShot(120,this,[this,before,after]{
+                QElapsedTimer plan;plan.start();
+                const auto motion=fs::curveEdit::Motion::between(*before,*after,{},{});
+                const auto ready=plan.nsecsElapsed()/1.e6;
+                if(!motion){finishWorkflow("Missing dense curve performance fixture");return;}
+                auto clock=std::make_shared<QElapsedTimer>();
+                auto frames=std::make_shared<std::array<QJsonArray,4>>();
+                for(size_t i=0;i<views_.size();++i){
+                    auto* view=views_[i];
+                    view->onHullFrame=[view,frames,clock,i]{
+                        const double elapsed=clock->nsecsElapsed()/1.e6;
+                        if(elapsed<fs::curveEdit::Motion::DurationMs)
+                            (*frames)[i].append(QJsonArray{elapsed,view->lastPaintMs});
+                    };
+                    view->setCurveEditMotion(motion);
+                }
+                clock->start();motion->start();
+                QTimer::singleShot(fs::curveEdit::Motion::DurationMs+60,this,[this,frames,ready]{
+                    QJsonArray views;
+                    for(size_t i=0;i<views_.size();++i){
+                        auto* view=views_[i];view->onHullFrame={};
+                        views.append(QJsonObject{{"projection",int(view->projection())},{"frames",(*frames)[i]},
+                            {"width",view->width()},{"height",view->height()}});
+                    }
+                    workflowArtifacts_["curve_motion_paint_benchmark"]=QJsonObject{
+                        {"duration_ms",fs::curveEdit::Motion::DurationMs},{"sections",90},{"points_per_section",513},
+                        {"plan_ms",ready},{"views",views}};
+                    finishWorkflow();
+                });
+            });
+            return;
         }
         }
     }catch(const std::exception& e){finishWorkflow(QString::fromUtf8(e.what()));}

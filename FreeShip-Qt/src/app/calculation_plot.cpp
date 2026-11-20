@@ -5,7 +5,7 @@
 #include "math_notation.h"
 #include "calculation_charts.h"
 #include <QBoxLayout>
-#include <QGridLayout>
+#include <QStyle>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QPainter>
@@ -289,7 +289,14 @@ private:
         }
         observation["points"]=double(count);observation["segments"]=double(segments);
         observation["range_ms"]=stageTimer.nsecsElapsed()/1e6;
-        if(!std::isfinite(xmin)){if(state&&state->data&&!state->data->curves.isEmpty()){const QString text=uiText("没有显示的曲线，请在图例中勾选。");const qreal w=qMin(460,width()-24);const qreal h=studioMessageHeight(painter,text,w);paintStudioMessage(painter,QRectF((width()-w)/2,(height()-h)/2,w,h),text,StudioMessageRole::Explanation);}return;}
+        if(!std::isfinite(xmin)){
+            if(state&&state->data&&(!state->data->curves.isEmpty()||state->data->method=="hydro_cross")){
+                const QString text=state->data->curves.isEmpty()?uiText("尚无可绘制的结果"):uiText("没有显示的曲线，请在图例中勾选。");
+                const qreal w=qMin(460,width()-24);const qreal h=studioMessageHeight(painter,text,w);
+                paintStudioMessage(painter,QRectF((width()-w)/2,(height()-h)/2,w,h),text,StudioMessageRole::Explanation);
+            }
+            return;
+        }
         groups.erase(std::remove_if(groups.begin(),groups.end(),[](const Group& g){return !std::isfinite(g.lo);}),groups.end());
         QVector<QVector<int>> panels;for(int i=0;i<groups.size();++i){if(panels.isEmpty()||panels.last().size()==(paired()?2:1)||groups[panels.last()[0]].xTitle!=groups[i].xTitle)panels.append(QVector<int>{});panels.last().append(i);}
         if(fixed&&groups.size()==5)panels={{0,1},{2},{3,4}};
@@ -366,14 +373,18 @@ CalculationPlot::CalculationPlot(QWidget* parent):QWidget(parent){
 void CalculationPlot::prepareRenderer(){if(!qEnvironmentVariableIntValue("FREESHIP_CHART_SOFTWARE"))ChartGpuPainter::instance();}
 void CalculationPlot::shutdownRenderer(){ChartGpuPainter::shutdown();}
 void CalculationPlot::setState(std::shared_ptr<CalculationChartState> state){
-    state_=std::move(state);canvas_->state=state_;canvas_->layers.clear();canvas_->history={};buttons_.clear();legendLayout_=nullptr;auto* body=new QWidget;auto* grid=new QGridLayout(body);grid->setContentsMargins(2,2,2,2);grid->setSpacing(3);
+    state_=std::move(state);canvas_->state=state_;canvas_->layers.clear();canvas_->history={};
+    buttons_.clear();legendRowStarts_.clear();
+    auto* body=new QWidget;
+    auto* rows=new QVBoxLayout(body);rows->setContentsMargins(2,2,2,2);rows->setSpacing(3);
+    rows->setAlignment(Qt::AlignTop);
     QMap<QString,int> duplicates;if(state_&&state_->data)for(const auto& c:state_->data->curves)++duplicates[c.name];
     QMap<QString,int> ordinals;
-    if(state_&&state_->data)for(int i=0;i<state_->data->curves.size();++i){const auto& c=state_->data->curves[i];auto* button=new QToolButton;auto label=c.name;if(duplicates[c.name]>1)label+=" · "+QString::number(++ordinals[c.name]);button->setText(label);button->setToolTip(c.name+"\n"+c.xTitle+" / "+c.yTitle);button->setCheckable(true);button->setProperty("chart_curve",i);button->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);button->setSizePolicy(QSizePolicy::Preferred,QSizePolicy::Fixed);
-        QPixmap icon(28,16);icon.fill(Qt::transparent);QPainter p(&icon);p.setPen(QPen(c.color,std::max(2.,c.width),c.style));p.drawLine(2,8,26,8);button->setIcon(QIcon(icon));buttons_.append(button);grid->addWidget(button,i,0);
+    if(state_&&state_->data)for(int i=0;i<state_->data->curves.size();++i){const auto& c=state_->data->curves[i];auto* button=new QToolButton(body);auto label=c.name;if(duplicates[c.name]>1)label+=" · "+QString::number(++ordinals[c.name]);button->setAccessibleName(label);button->setToolTip(c.name+"\n"+c.xTitle+" / "+c.yTitle);button->setCheckable(true);button->setProperty("chart_curve",i);button->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);button->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
+        QPixmap icon(28,16);icon.fill(Qt::transparent);QPainter p(&icon);p.setPen(QPen(c.color,std::max(2.,c.width),c.style));p.drawLine(2,8,26,8);button->setIcon(QIcon(icon));buttons_.append(button);
         connect(button,&QToolButton::toggled,this,[this,i](bool value){if(!state_)return;state_->visible[i]=value;synchronize();if(onDisplayChanged)onDisplayChanged();});
     }
-    legend_->setWidget(body);legendLayout_=grid;legendColumns_=0;arrangeLegend();synchronize();
+    legend_->setWidget(body);legendLayout_=rows;arrangeLegend();synchronize();
 }
 void CalculationPlot::refreshLanguage(const QJsonArray& series){
     if(!state_||!state_->data||series.size()!=buttons_.size())return;
@@ -386,7 +397,7 @@ void CalculationPlot::refreshLanguage(const QJsonArray& series){
     }
     for(int i=0;i<buttons_.size();++i){
         const auto& c=data->curves.at(i);
-        buttons_[i]->setText(duplicates[c.name]>1?c.name+" · "+QString::number(++ordinals[c.name]):c.name);
+        buttons_[i]->setAccessibleName(duplicates[c.name]>1?c.name+" · "+QString::number(++ordinals[c.name]):c.name);
         buttons_[i]->setToolTip(c.name+"\n"+c.xTitle+" / "+c.yTitle);
     }
     state_->data=std::move(data);arrangeLegend();canvas_->invalidate();
@@ -397,20 +408,53 @@ void CalculationPlot::synchronize(){
 }
 void CalculationPlot::setSelected(int index){if(!state_)return;state_->selected=index;canvas_->invalidate();}
 void CalculationPlot::arrangeLegend(){
-    if(!legendLayout_)return;const bool right=state_&&state_->data&&state_->data->legendRight&&width()>=680;
-    const int available=right?std::max(140,fontMetrics().height()*9):std::max(140,width()-22);int itemWidth=100;
-    for(auto* button:buttons_)itemWidth=std::max(itemWidth,std::min(available,button->sizeHint().width()));
-    const int columns=right?1:std::max(1,available/(itemWidth+3));
-    if(columns!=legendColumns_||right!=right_){for(auto* button:buttons_)legendLayout_->removeWidget(button);for(int c=0;c<legendColumns_;++c)legendLayout_->setColumnStretch(c,0);
-        for(int i=0;i<buttons_.size();++i)legendLayout_->addWidget(buttons_[i],i/columns,i%columns);legendColumns_=columns;right_=right;}
-    const int rows=(buttons_.size()+columns-1)/columns;const int rowHeight=buttons_.isEmpty()?0:buttons_[0]->sizeHint().height()+3;
+    if(!legendLayout_)return;
+    const bool right=state_&&state_->data&&state_->data->legendRight&&width()>=680;
+    const int scrollWidth=legend_->style()->pixelMetric(QStyle::PM_ScrollBarExtent,nullptr,legend_);
+    const int available=right?std::max(140,fontMetrics().height()*9):std::max(1,width()-scrollWidth-4);
+    const int spacing=legendLayout_->spacing();
+    QVector<int> rowStarts;
+    int used=0,rowHeight=0;
+    for(int i=0;i<buttons_.size();++i){
+        auto* button=buttons_[i];
+        const auto& curve=state_->data->curves[i];
+        const auto label=button->accessibleName();
+        const auto fm=button->fontMetrics();
+        const auto suffix=curve.legendSuffix.isEmpty()?QString{}:label.mid(curve.name.size()-curve.legendSuffix.size());
+        const int decoration=std::max(0,button->sizeHint().width()-fm.horizontalAdvance(button->text()));
+        const int availableText=std::max(0,available-decoration);
+        QString display;
+        if(!suffix.isEmpty()&&availableText>fm.horizontalAdvance(suffix+QStringLiteral("…"))){
+            const int nameWidth=std::min(availableText-fm.horizontalAdvance(suffix),26*fm.averageCharWidth());
+            display=fm.elidedText(label.left(label.size()-suffix.size()),Qt::ElideRight,nameWidth)+suffix;
+        }else display=fm.elidedText(label,Qt::ElideRight,availableText);
+        if(button->text()!=display)button->setText(display);
+        const auto size=button->sizeHint();
+        if(i==0||right||used+spacing+size.width()>available){
+            rowStarts.append(i);used=size.width();
+        }else used+=spacing+size.width();
+        rowHeight=std::max(rowHeight,size.height());
+    }
+    if(rowStarts!=legendRowStarts_){
+        while(auto* row=legendLayout_->takeAt(0))delete row;
+        for(int i=0;i<rowStarts.size();++i){
+            auto* row=new QHBoxLayout;
+            row->setSpacing(spacing);
+            const int end=rowStarts.value(i+1,buttons_.size());
+            for(int j=rowStarts[i];j<end;++j)row->addWidget(buttons_[j]);
+            row->addStretch();
+            legendLayout_->addLayout(row);
+        }
+        legendRowStarts_=rowStarts;
+    }
     content_->setDirection(right?QBoxLayout::RightToLeft:QBoxLayout::TopToBottom);
-    legend_->setMinimumWidth(right?available+18:0);legend_->setMaximumWidth(right?available+18:QWIDGETSIZE_MAX);
-    legend_->setMinimumHeight(right?0:std::min(140,rows*rowHeight+6));legend_->setMaximumHeight(right?QWIDGETSIZE_MAX:std::min(140,rows*rowHeight+6));
+    legend_->setMinimumWidth(right?available+scrollWidth+4:0);legend_->setMaximumWidth(right?available+scrollWidth+4:QWIDGETSIZE_MAX);
+    const int height=rowStarts.isEmpty()?0:std::min(140,int(rowStarts.size())*(rowHeight+spacing)-spacing+4);
+    legend_->setMinimumHeight(right?0:height);legend_->setMaximumHeight(right?QWIDGETSIZE_MAX:height);
     legend_->setVisible(!buttons_.isEmpty());
 }
 void CalculationPlot::resizeEvent(QResizeEvent* event){QWidget::resizeEvent(event);arrangeLegend();}
-void CalculationPlot::changeEvent(QEvent* event){QWidget::changeEvent(event);if(event->type()==QEvent::FontChange||event->type()==QEvent::StyleChange){legendColumns_=0;arrangeLegend();}}
+void CalculationPlot::changeEvent(QEvent* event){QWidget::changeEvent(event);if(event->type()==QEvent::FontChange||event->type()==QEvent::StyleChange)arrangeLegend();}
 QJsonObject CalculationPlot::evidence()const{
     auto out=canvas_->observation;out["cache_builds"]=double(canvas_->builds);out["paints"]=double(canvas_->paints);out["selected"]=state_?state_->selected:-1;
     out["readout"]=canvas_->readout;

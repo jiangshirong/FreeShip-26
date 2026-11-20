@@ -1,5 +1,8 @@
 #include "app/main_window.h"
 #include "app/document_workspace.h"
+#include "app/document_launch.h"
+#include "app/developer_mode.h"
+#include <QMessageBox>
 #include "app/studio_ui.h"
 #include "app/ui_language.h"
 #include "app/preferences_dialog.h"
@@ -75,6 +78,14 @@ int main(int argc, char** argv) {
         QCoreApplication::setOrganizationName("FreeShip26Installed");
 #endif
     app.setProperty("freeship_development",developmentInstall||(verification&&verifyDevelopment));
+    DocumentLaunch launches;
+    const bool launchProbe=verification && arguments.value(1)=="--verify-document-windows";
+    if(!verification || launchProbe){
+        const auto result=launches.start(launchProbe?QStringList{}:arguments.mid(1));
+        if(result==DocumentLaunch::Forwarded)return 0;
+        if(result==DocumentLaunch::Failed){QMessageBox::warning(nullptr,app.applicationDisplayName(),launches.error);return 1;}
+    }
+    DeveloperMode::toggle();
     QString languageIssue;
     // Resolve captions before constructing widgets. Probes never read user settings.
     QString settingsFile;
@@ -126,7 +137,17 @@ int main(int argc, char** argv) {
     MainWindow& window=workspace ? *workspace->addDocument() : *probe;
     if(!languageIssue.isEmpty())window.statusBar()->showMessage(languageIssue);
     if(verification&&!workspace&&arguments[1]!="--verify-window-startup")window.setWindowState(Qt::WindowMaximized);
+    const auto enableExternalOpen=[&]{
+        launches.ready([&](const QStringList& paths){
+            auto* doc=workspace->active();
+            if(!doc)return;
+            if(workspace->isMinimized())workspace->setWindowState(workspace->windowState() & ~Qt::WindowMinimized);
+            workspace->raise();workspace->activateWindow();
+            for(const auto& path:paths)doc->openDocument(path);
+        });
+    };
     if(arguments.size()==4 && arguments[1]=="--verify-document-windows"){
+        enableExternalOpen();
         QTimer::singleShot(0,&window,[&]{window.verifyDocumentWindows(arguments[2],arguments[3]);});
     } else if (windowStartup) {
         verifyStudioWindowStartup(&window,arguments.last());
@@ -171,7 +192,7 @@ int main(int argc, char** argv) {
     } else {
         showStudioMainWindow(window.window());
         if(!firstLaunchProbe)
-            QTimer::singleShot(0,&window,[&]{window.startSession(arguments.value(1));for(int i=2;i<arguments.size();++i)window.openDocument(arguments[i]);});
+            QTimer::singleShot(0,&window,[&]{window.startSession(arguments.value(1));for(int i=2;i<arguments.size();++i)window.openDocument(arguments[i]);if(!verification)enableExternalOpen();});
     }
     return app.exec();
 }

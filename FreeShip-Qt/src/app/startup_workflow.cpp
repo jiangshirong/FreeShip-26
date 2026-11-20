@@ -6,6 +6,7 @@
 #include "project_dialog.h"
 #include "exchange_dialog.h"
 #include "section_dialog.h"
+#include "station_template_workflow.h"
 #include "preferences_dialog.h"
 #include "layer_panel.h"
 #include "light_dialog.h"
@@ -54,10 +55,12 @@
 #include <QTabBar>
 #include <QKeyEvent>
 #include <QMouseEvent>
+#include <QWheelEvent>
 #include <QFileDialog>
 #include <QScreen>
 #include <QEventLoop>
 #include <QElapsedTimer>
+#include <QProcess>
 
 namespace {
 // Installed only by the queued-edit close probe, immediately before its decision.
@@ -104,6 +107,15 @@ void MainWindow::verifyDocumentWindows(const QString& request,const QString& out
         if(!enter.isAccepted())return false;
         QDropEvent drop(QPointF(1,1),Qt::CopyAction,&mime,Qt::LeftButton,Qt::NoModifier);QApplication::sendEvent(host,&drop);return drop.isAccepted();};
     auto wait=[](auto predicate){QElapsedTimer timer;timer.start();while(!predicate()&&timer.elapsed()<20000){QCoreApplication::processEvents(QEventLoop::AllEvents,30);QThread::msleep(5);}return predicate();};
+    auto explorerLaunch=[&](const QString& path){
+        QProcess child;child.setWorkingDirectory(QFileInfo(path).absolutePath());
+        child.start(QCoreApplication::applicationFilePath(),{QFileInfo(path).fileName()});
+        if(!child.waitForStarted(5000))return false;
+        const bool finished=wait([&]{return child.state()==QProcess::NotRunning;});
+        if(!finished){child.kill();child.waitForFinished();return false;}
+        return child.exitStatus()==QProcess::NormalExit&&child.exitCode()==0;
+    };
+    const auto externalPath=p["external"].toString();
     workflowCase("irrelevant-and-remote-drops-ignored",!drop({QUrl("https://example.invalid/ship.fbm"),QUrl::fromLocalFile(request)}));
     workflowCase("multi-file-drop-accepted",drop({QUrl::fromLocalFile(a),QUrl::fromLocalFile(b),QUrl::fromLocalFile(a)}));
     workflowCase("new-document-tabs-use-source-names-immediately",tabs->count()==2&&tabs->tabText(0)==QFileInfo(a).fileName()&&tabs->tabText(1)==QFileInfo(b).fileName());
@@ -112,11 +124,25 @@ void MainWindow::verifyDocumentWindows(const QString& request,const QString& out
     workflowCase("independent-documents-and-deduplicated-load",documentWindows().size()==2&&windowForFile(a)==this&&session_.model()->documentId!=other->session_.model()->documentId);
     const auto id=other->session_.model()->documentId;const auto rev=other->session_.model()->revision;
     const bool edited=session_.updateLayer(session_.model()->layers.front().id,{{"name","QA temporary name"}})&&wait([&]{return !session_.busy();});
+    const bool externalLaunched=explorerLaunch(externalPath);
+    QPointer<MainWindow> external=windowForFile(externalPath);
+    const bool loadedExternal=externalLaunched&&external&&wait([&]{return external->session_.ready()&&!external->session_.busy();});
+    workflowCase("explorer-second-process-opens-new-tab",loadedExternal&&host->active()==external&&tabs->count()==3&&session_.modified());
+    host->showMinimized();
+    const bool repeat=explorerLaunch(b);
+    workflowCase("explorer-repeat-focuses-existing-tab",repeat&&host->active()==other&&!host->isMinimized()&&tabs->count()==3&&session_.modified());
+    if(external)external->close();
     openDocument(b);
     workflowCase("switch-preserves-edit-and-isolates-undo",edited&&session_.modified()&&session_.canUndo()&&!other->session_.modified()&&!other->session_.canUndo()&&other->session_.model()->revision==rev&&documentWindows().size()==2);
     workflowCase("one-frame-two-tabs",!isWindow()&&!other->isWindow()&&window()==host&&other->window()==host&&host->active()==other&&tabs->count()==2&&other->isVisible()&&!isVisible());
     workflowCase("caption-filenames-and-full-path-tooltips",host->windowTitle()=="FreeShip 26"&&tabs->tabText(0)==QFileInfo(a).fileName()+" *"&&tabs->tabText(1)==QFileInfo(b).fileName()&&QFileInfo(tabs->tabToolTip(0))==QFileInfo(a)&&QFileInfo(tabs->tabToolTip(1))==QFileInfo(b));
     tabs->setCurrentIndex(0);workflowCase("select-tab-restores-editor",host->active()==this&&isVisible()&&!other->isVisible());
+    const auto tabPoint=tabs->tabRect(0).center();
+    QWheelEvent tabWheel(tabPoint,tabs->mapToGlobal(tabPoint),{},QPoint(0,-120),
+                         Qt::NoButton,Qt::NoModifier,Qt::NoScrollPhase,false);
+    QApplication::sendEvent(tabs,&tabWheel);
+    workflowCase("document-tab-wheel-keeps-active-model",tabs->currentIndex()==0&&host->active()==this);
+    tabs->setCurrentIndex(0);
     bool cancelSeen=false;
     QTimer::singleShot(0,this,[&]{if(auto* box=qobject_cast<QMessageBox*>(QApplication::activeModalWidget())){cancelSeen=true;box->button(QMessageBox::Cancel)->click();}});
     const bool closed=host->close();
@@ -296,7 +322,15 @@ void MainWindow::startupStep(const QString& completedOperation,const QString& er
             });
             found[0]->click();
         });
-        if(kind=="close_controls_check"){
+        if(kind=="station_templates"){
+            try {
+                editSections();
+                if(!sections_) throw std::runtime_error("Section editor unavailable");
+                auto result=observeStationExport(*sections_,workflowOutput_,command);
+                workflowArtifacts_[command["label"].toString()]=result;
+            }catch(const std::exception& e){finishWorkflow(QString::fromUtf8(e.what()));return;}
+        }
+        else if(kind=="close_controls_check"){
             const auto language=command["review_language"].toString();
             if(!language.isEmpty()){
                 const auto error=setUiLanguage(language);

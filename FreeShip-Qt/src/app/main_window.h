@@ -287,6 +287,8 @@ private:
     QDialog* linesDialog_=nullptr;
     QAction* linesAction_=nullptr;
     std::array<HullView*, 4> views_{};
+    std::shared_ptr<fs::curveEdit::Motion> curveEditMotion_;
+    QHash<fs::EntityId,fs::Vec3> releasedCurvePositions_;
     std::array<QWidget*,4> viewFrames_{};
     std::array<QAction*,4> viewActions_{};
     QList<QAction*> displayToggles_;

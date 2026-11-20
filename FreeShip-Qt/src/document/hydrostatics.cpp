@@ -3,6 +3,7 @@
 // and FreeSubdivisionLayer. The bounded equilibrium solver follows the 2026
 // HydrostaticsEngine adapter, not the original unchecked Balance routine.
 #include "hydrostatics.h"
+#include "core/loading_cases.h"
 #include "geometry_input.h"
 #include "fbm_text.h"
 #include "native/sections.h"
@@ -27,6 +28,8 @@ using namespace native_geometry;
 constexpr double Pi=3.1415926535897932384626433832795;
 double radians(double degrees) { return degrees*(Pi/180); }
 [[noreturn]] void bad(const char *message) { throw std::runtime_error(message); }
+struct FloatLimit:std::runtime_error { using std::runtime_error::runtime_error; };
+struct MassConvergence:std::runtime_error { using std::runtime_error::runtime_error; };
 struct Cancelled:std::runtime_error { using std::runtime_error::runtime_error; };
 struct Job {
     QString cancelFile;
@@ -273,14 +276,14 @@ struct Hydrostatics::Impl {
         Vec3 c{length,float(std::cos(radians(-heel))),float(keel+(draft+.5f*trim)-std::sin(radians(-heel)))};
         return Plane::fromPoints(a,b,c);
     }
-    Volume volume(const Plane &plane,float heel,float trim,bool detailed,Job &job,bool waterlineOnly=false) {
+    Volume volume(const Plane &plane,float heel,float trim,bool detailed,Job &job,bool waterlineOnly=false,const Rotation* attitude=nullptr) {
         job.check();++job.evaluations;
         prepare(job);
         for(const auto &v:vertices)if(v.leak && plane.evaluate(v.point)<-1e-7)bad("水线以下有漏点。");
         const auto &n=plane.coefficients();const double norm=double(n[0])*n[0]+double(n[1])*n[1]+double(n[2])*n[2];
         if(norm<=0)bad("水线平面无效。");
         const double offset=-double(n[3])/norm;const CutPoint origin{offset*n[0],offset*n[1],offset*n[2]};
-        Rotation rotate(heel,trim,settings.geometry.length,keel);
+        const Rotation rotate=attitude?*attitude:Rotation(heel,trim,settings.geometry.length,keel);
         Volume out;out.draft=1000;bool submerged=false,firstSub=true,firstWl=true;
         // The equilibrium residual must not be dominated by Single rounding
         // over thousands of triangles. Round only the published result, never
@@ -900,28 +903,38 @@ struct Hydrostatics::Impl {
         }
         return result;
     }
-    QJsonObject balance(double mass,double heel,double trim,bool freeTrim,Vec3 cg,Job &job) {
+    QJsonObject balance(double mass,double heel,double trim,bool freeTrim,Vec3 cg,Job &job,const loading::Case* condition=nullptr) {
         Vec3 normal{},g{};Volume v;double residual=0,offset=0;
         float finalTrim=0;const auto length=settings.geometry.length;
         double massTolerance=std::max(mass*2e-6,1e-6),lengthTolerance=std::max(length*2e-6,1e-6);
-        auto solve=[&](double value) {
-            job.check();finalTrim=float(value);const float hValue=float(heel);
-            const float trimAngle=float(std::atan((-finalTrim*std::cos(radians(hValue)))/length)*180/Pi);
-            double h=radians(-double(hValue)),t=radians(-double(trimAngle));
+        const double heelCos=std::cos(radians(float(heel)));
+        const bool onBeam=std::abs(heelCos)<1e-10;
+        double pitch=0;
+        // Legacy trim is a difference in centreline drafts. During the second
+        // search use L*tan(pitch) instead: this coordinate is finite at 90°.
+        auto solve=[&](double value,bool direct) {
+            job.check();const float hValue=float(heel);
+            const float parameter=float(value);
+            finalTrim=direct?(onBeam?0.f:float(value/heelCos)):parameter;
+            const float trimAngle=float(std::atan(-(direct?parameter:parameter*heelCos)/length)*180/Pi);
+            pitch=-trimAngle;
+            double h=radians(-double(hValue)),t=radians(pitch);
+            Rotation attitude(hValue,0,length,keel);
+            attitude.ct=float(std::cos(t));attitude.st=float(std::sin(t));
             normal={float(-std::sin(t)),float(std::sin(h)*std::cos(t)),float(std::cos(h)*std::cos(t))};
             double lo,hi,leak;projectedBounds(normal,lo,hi,leak,job);
             if(leak<hi)hi=leak-std::max(1e-6,(hi-lo)*1e-7);
-            if(hi<=lo)bad("该横倾角下，船体在形成有效排水量之前已进水。");
+            if(hi<=lo)throw FloatLimit("该横倾角下，船体在形成有效排水量之前已进水。");
             auto evaluate=[&](double d) {
                 job.check();
-                const std::array<float,6> key{normal.x,normal.y,normal.z,float(-d),hValue,finalTrim};
+                const std::array<float,6> key{normal.x,normal.y,normal.z,float(-d),hValue,trimAngle};
                 auto found=balanceVolumes.find(key);
                 if(found!=balanceVolumes.end()){++job.cacheHits;return found->second;}
-                auto result=volume(Plane(key[0],key[1],key[2],key[3]),hValue,finalTrim,false,job);
+                auto result=volume(Plane(key[0],key[1],key[2],key[3]),hValue,0,false,job,false,&attitude);
                 if(balanceVolumes.size()>=8192)balanceVolumes.clear();
                 balanceVolumes.emplace(key,result);return result;
             };
-            v=evaluate(hi);if(v.mass<mass-massTolerance)bad("目标排水量超过当前横倾下的完整浮力范围。");
+            v=evaluate(hi);if(v.mass<mass-massTolerance)throw FloatLimit("目标排水量超过当前横倾下的完整浮力范围。");
             double bestError=1e300,bestOffset=hi;
             for(int i=0;i<64;++i) {
                 double mid=.5*(lo+hi);v=evaluate(mid);double error=v.mass-mass;
@@ -930,33 +943,71 @@ struct Hydrostatics::Impl {
                 if(error<0)lo=mid;else hi=mid;
             }
             offset=bestOffset;v=evaluate(offset);
-            if(std::abs(v.mass-mass)>massTolerance)bad("排水量求解未收敛，未返回近似成功值。");
+            if(std::abs(v.mass-mass)>massTolerance)throw MassConvergence("排水量求解未收敛，未返回近似成功值。");
+            if(condition){const auto p=condition->gravity({normal.x,normal.y,normal.z});double u=settings.geometry.imperial?.3048:1.;cg={float(p.x/u),float(p.y/u),float(p.z/u)};}
             g={float(cg.x*std::cos(t)+(cg.y*std::sin(h)+(cg.z-keel)*std::cos(h))*std::sin(t)),
                float(cg.y*std::cos(h)-(cg.z-keel)*std::sin(h)),
                float(-cg.x*std::sin(t)+(cg.y*std::sin(h)+(cg.z-keel)*std::cos(h))*std::cos(t))};
             residual=v.buoyancy.x-g.x;
         };
-        bool valid=false;
-        try {solve(trim);valid=true;} catch(const Cancelled &) {throw;} catch(const std::exception &) {if(!freeTrim)throw;}
-        if(freeTrim && (!valid || std::abs(residual)>lengthTolerance)) {
-            double left=0,right=0,rl=0;int found=0;
-            for(int i=0;i<=40;++i) {
-                right=length*(-.5+double(i)/40);
-                try {solve(right);} catch(const Cancelled &) {throw;} catch(const std::exception &) {found=0;continue;}
-                if(std::abs(residual)<=lengthTolerance || (found==1 && rl*residual<0)) {found=2;break;}
-                left=right;rl=residual;found=1;
+        bool anyFloat=false, massFailure=false;
+        auto sample=[&](double x,bool direct){
+            try {solve(x,direct);anyFloat=true;return residual;}
+            catch(const FloatLimit&){if(!freeTrim)throw;}
+            catch(const MassConvergence&){if(!freeTrim)throw;massFailure=true;}
+            return std::numeric_limits<double>::quiet_NaN();
+        };
+        auto close=[&](double r){return std::abs(r)<=lengthTolerance;};
+        auto bracket=[&](double lo,double a,double hi,double b,bool direct){
+            if(!(a*b<0))return false;
+            for(int i=0;i<48;++i){
+                const double mid=(lo+hi)*.5,r=sample(mid,direct);
+                if(close(r))return true;
+                if(!std::isfinite(r))return false; // Never bridge a non-floating interval.
+                if(a*r>0){lo=mid;a=r;}else hi=mid;
             }
-            if(found!=2)bad("未找到纵倾平衡，请检查重心和排水量。");
-            if(std::abs(residual)>lengthTolerance)for(int i=0;i<48;++i) {
-                double mid=.5*(left+right);solve(mid);if(std::abs(residual)<=lengthTolerance)break;
-                if(residual*rl>0) {left=mid;rl=residual;} else right=mid;
+            return false;
+        };
+        bool found=close(sample(trim,false));
+        if(freeTrim&&!found){
+            // Preserve the established search for ordinary, well-conditioned cases.
+            if(std::abs(heelCos)>.05){
+                double prev=0,a=std::numeric_limits<double>::quiet_NaN();
+                for(int i=0;i<=40&&!found;++i){double x=length*(-.5+double(i)/40),b=sample(x,false);
+                    found=close(b)||bracket(prev,a,x,b,false);prev=x;a=b;}
             }
-            if(std::abs(residual)>lengthTolerance)bad("纵倾平衡未收敛。");
+            if(!found){
+                // Centred finer grid in physical pitch. At a floating/non-floating
+                // boundary halve the interval towards the limit: the equilibrium
+                // may lie between the last feasible sample and that boundary.
+                double prev=0,a=std::numeric_limits<double>::quiet_NaN();
+                for(int i=0;i<=80&&!found;++i){
+                    double x=length*(-.5+double(i)/80),b=sample(x,true);
+                    found=close(b)||bracket(prev,a,x,b,true);
+                    if(!found&&i&&std::isfinite(a)!=std::isfinite(b)){
+                        double good=std::isfinite(a)?prev:x,rg=std::isfinite(a)?a:b;
+                        double badEnd=std::isfinite(a)?x:prev;
+                        for(int step=0;step<14&&!found;++step){
+                            double mid=.5*(good+badEnd),rm=sample(mid,true);
+                            if(!std::isfinite(rm)){badEnd=mid;continue;}
+                            found=close(rm)||bracket(good,rg,mid,rm,true);good=mid;rg=rm;
+                        }
+                    }
+                    prev=x;a=b;
+                }
+            }
+            if(!found){
+                if(massFailure)bad("不可能在收敛到目标排水量的同时保持纵倾平衡");
+                if(!anyFloat)bad("没有纵倾姿态的浮力可以承载目标排水量。");
+                bad("已达到目标排水量，但在搜索范围内未找到纵向力矩平衡。");
+            }
         }
-        return {{"status","ok"},{"target_displacement",mass},{"heel",heel},{"trim",finalTrim},{"displacement",v.mass},{"volume",v.value},
+        QJsonObject row{{"status","ok"},{"target_displacement",mass},{"heel",heel},{"trim",onBeam?QJsonValue(QJsonValue::Null):QJsonValue(finalTrim)},{"displacement",v.mass},{"volume",v.value},
             {"mass_residual",double(v.mass)-mass},{"longitudinal_residual",residual},{"mass_tolerance",massTolerance},{"length_tolerance",lengthTolerance},
             {"absolute_draft",v.draft},{"keel_z",keel},{"kn",v.buoyancy.y},{"gz",double(v.buoyancy.y)-g.y},{"buoyancy",json(v.buoyancy)},
             {"gravity_projected",json(g)},{"plane",QJsonArray{normal.x,normal.y,normal.z,-offset}},{"evaluations",job.evaluations}};
+        if(onBeam)row["pitch_deg"]=pitch;
+        return row;
     }
 };
 
@@ -1061,26 +1112,41 @@ QJsonObject Hydrostatics::calculate(const QJsonObject &request,const QString &ca
     if(auxiliaryOnly&&auxiliaryReport!="bonjean"&&auxiliaryReport!="sac"&&auxiliaryReport!="weights"&&auxiliaryReport!="sections"&&auxiliaryReport!="sterns")bad("未知静水力附加表。");
     if(!auxiliaryOnly&&s.length<=0)bad("请先设置有效船长。");
     double trim=auxiliaryOnly?0:number(request,"trim",-s.length,s.length),heel=0;
-    std::vector<double> drafts,angles,masses;Vec3 cg{};bool freeTrim=false;
+    std::vector<double> drafts,angles,masses;Vec3 cg{};bool freeTrim=false;std::vector<loading::Case> conditions;
+    const auto book=request["loading_book"].toObject();const bool named=mode=="cross"&&request["use_loading_book"].toBool();
+    const auto criteriaValue=named?book.value("criteria"):request.value("gz_criteria");
+    const auto criteria=criteriaValue.toArray();
+    const double lengthUnit=s.imperial?.3048:1.,massUnit=s.imperial?1.0160469088:1.;
     if(mode=="single") {drafts={number(request,"draft",0,1e6)};heel=number(request,"heel",-85,85);}
     else if(mode=="table") {
         double start=number(request,"start",0,1e6),end=number(request,"end",start,1e6),step=number(request,"step",1e-6,1e6);
         if((end-start)/step>199+1e-8)bad("吃水表最多包含 200 行。");
         int count=int(std::floor((end-start)/step+1e-8))+1;for(int i=0;i<count;++i)drafts.push_back(start+i*step);
     } else if(mode=="cross") {
-        angles=numbers(request,"angles",-180,180,181);masses=numbers(request,"displacements",1e-6,1e9,100);
+        angles=numbers(request,"angles",-180,180,181);
+        if(named){conditions=loading::parse(book);for(auto& c:conditions)masses.push_back(c.mass/massUnit);
+            angles.push_back(0);
+        }else{
+            masses=numbers(request,"displacements",1e-6,1e9,100);
+            if(!criteriaValue.isUndefined()&&!criteriaValue.isArray())bad("无效的 GZ 衡准。");
+            loading::validateCriteria(criteria);
+        }
+        if(named||!criteria.isEmpty()){
+            for(auto v:criteria)angles.push_back(v.toArray()[0].toDouble());
+            std::sort(angles.begin(),angles.end());angles.erase(std::unique(angles.begin(),angles.end()),angles.end());
+        }
         if(angles.size()*masses.size()>500)bad("稳性表最多包含 500 个工况。");
-        cg={float(number(request,"lcg",-1e9,1e9)),float(number(request,"tcg",-1e9,1e9)),float(number(request,"vcg",-1e9,1e9))};
+        if(!named)cg={float(number(request,"lcg",-1e9,1e9)),float(number(request,"tcg",-1e9,1e9)),float(number(request,"vcg",-1e9,1e9))};
         if(!request["free_trim"].isBool())bad("缺少纵倾模式。");
         freeTrim=request["free_trim"].toBool();
     }
     Job job(cancelFile,mode!="cross");job.check();QJsonObject inputs;
-    for(const char *key:{"mode","report","model_name","draft","heel","trim","start","end","step","angles","displacements","lcg","tcg","vcg","free_trim"})if(request.contains(key))inputs[key]=request[key];
+    for(const char *key:{"mode","report","model_name","draft","heel","trim","start","end","step","angles","displacements","lcg","tcg","vcg","free_trim","use_loading_book","loading_book","gz_criteria"})if(request.contains(key))inputs[key]=request[key];
     QJsonObject out{{"schema",1},{"engine","cpp-hydrostatics"},{"mode",mode},{"keel_z",h.keel},{"units",s.imperial?"imperial":"metric"},
         {"water_density",s.density},{"appendage_coefficient",s.appendage},{"inputs",inputs},{"cancelled",false}};
     QJsonArray rows;double primaryMs=0,auxiliaryMs=0;
     const int total=mode=="cross"?int(angles.size()*masses.size()):int(drafts.size());
-    const QByteArray crossKey=mode=="cross"?QJsonDocument(inputs).toJson(QJsonDocument::Compact):QByteArray{};
+    const QByteArray crossKey=mode=="cross"?QJsonDocument(named?QJsonObject{{"inputs",inputs},{"perpendiculars",h.principalDimensions}}:inputs).toJson(QJsonDocument::Compact):QByteArray{};
     if(progress)progress(0,total);
     if(mode=="cross") {
         const auto cached=h.crossResults.find(crossKey);
@@ -1096,18 +1162,35 @@ QJsonObject Hydrostatics::calculate(const QJsonObject &request,const QString &ca
         }
     }
     try {
-        if(mode=="cross")for(double mass:masses) {
+        if(mode=="cross")for(size_t ci=0;ci<masses.size();++ci) {
+            double mass=masses[ci];const auto* condition=named?&conditions[ci]:nullptr;
             bool previousValid=false;double integral=0,previousAngle=0,previousGz=0;
             for(size_t i=0;i<angles.size();++i) {
                 job.check();QJsonObject row;
                 try {
-                    row=h.balance(mass,angles[i],trim,freeTrim,cg,job);
+                    row=h.balance(mass,angles[i],trim,freeTrim,cg,job,condition);
+                    if(condition){
+                        const auto p=row["plane"].toArray();auto g=condition->gravity({0,0,1});
+                        row["lcg"]=g.x/lengthUnit;row["tcg"]=g.y/lengthUnit;row["vcg"]=g.z/lengthUnit;
+                        row["gg0"]=condition->fsm/condition->mass/lengthUnit;
+                        if(std::abs(p[2].toDouble())>1e-8){for(auto key:{"aft","forward"}){
+                            auto x=h.principalDimensions[QString(key)+"_perpendicular_m"];
+                            if(x.isDouble())row[QString(key)+"_draft"]=(-p[3].toDouble()-p[0].toDouble()*x.toDouble()/lengthUnit)/p[2].toDouble()-h.keel;
+                        }}
+
+                    }
+                    if(condition&&angles[i]==0){previousValid=false;integral=0;}
                     if(previousValid)integral+=.5*(previousGz+row["gz"].toDouble())*radians(angles[i]-previousAngle);
-                    if(i==0)previousValid=angles[i]==0;
+                    if(i==0||(condition&&angles[i]==0))previousValid=angles[i]==0;
                     row["gz_integral"]=previousValid?QJsonValue(integral):QJsonValue(QJsonValue::Null);previousAngle=angles[i];previousGz=row["gz"].toDouble();
                 } catch(const Cancelled &) {throw;} catch(const std::exception &e) {
                     previousValid=false;row={{"status","error"},{"message",QString::fromUtf8(e.what())},{"heel",angles[i]},{"target_displacement",mass}};
                 }
+                if(condition)row["case_name"]=condition->name;
+                for(auto v:criteria){auto c=v.toArray();if(c[0].toDouble()!=angles[i])continue;
+                    const double req=c[1].toDouble()/lengthUnit;row["required_gz"]=req;
+                    if(row["status"]=="ok")row["gz_margin"]=row["gz"].toDouble()-req;}
+
                 rows.append(row);
                 if(progress)progress(int(rows.size()),total);
             }
@@ -1167,7 +1250,14 @@ QJsonObject Hydrostatics::defaults(const QString &encoding) {
     try {
         Job job({});auto plane=h.waterline(s.geometry.draft,0,0);auto p=plane.coefficients();double lo,hi,leak;
         h.projectedBounds({p[0],p[1],p[2]},lo,hi,leak,job);
-        if(-double(p[3])<=leak+1e-7) {auto v=h.volume(plane,0,0,false,job);if(v.mass>0)out["design_displacement"]=v.mass;}
+        if(-double(p[3])<=leak+1e-7){
+            const auto v=h.volume(plane,0,0,false,job);
+            if(v.mass>0){
+                out["design_displacement"]=v.mass;
+                out["design_buoyancy_x"]=v.buoyancy.x;
+                out["design_buoyancy_y"]=v.buoyancy.y;
+            }
+        }
     } catch(const std::exception &) { /* Ranges remain editable for an incomplete hull. */ }
     return out;
 }

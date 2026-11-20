@@ -7,6 +7,9 @@
 #include "point_coordinate_popup.h"
 #include "studio_view_grid.h"
 #include "section_dialog.h"
+#include "station_template_dialog.h"
+#include <QDir>
+#include <QFileInfo>
 #include "history_shortcuts.h"
 #include "layer_panel.h"
 #include <QLineEdit>
@@ -348,7 +351,7 @@ void MainWindow::layoutViews() {
     int count=0;for(int index:{1,0,2,3})if(viewActions_[index]->isChecked())++count;
     int at=0;for(int index:{1,0,2,3}) {
         bool visible=viewActions_[index]->isChecked();viewFrames_[index]->setVisible(visible);
-        if(visible){viewGrid_->addWidget(viewFrames_[index],count==1?0:at/2,count==1?0:at%2);++at;}
+        if(visible){viewGrid_->addWidget(viewFrames_[index],at/2,at%2);++at;}
     }
     studio_view_grid::setVisibleCount(viewGrid_,count);
     });
@@ -363,6 +366,14 @@ void MainWindow::editSections(){
         sections_->onPredictionMismatch=[this]{session_.dropQueuedSectionCommands();};
         sections_->onEdit=[this](const QString& operation,int kind,QJsonObject fields){return session_.editSections(operation,kind,std::move(fields));};
         sections_->onSelection=[this](int kind,QSet<int> ids){for(auto* view:views_)view->highlightSections(kind,ids);};
+        sections_->onTemplates=[this](QSet<int> ids){
+            if(!session_.ready() || session_.busy()) return;
+            const auto source=QFileInfo(session_.sourcePath());
+            auto* dialog=new StationTemplateDialog(session_.model(),QFileInfo(session_.modelPath()).dir().filePath("native-input.json"),
+                    source.dir().filePath(source.completeBaseName()+"-stations"),ids,sections_);
+            dialog->setAttribute(Qt::WA_DeleteOnClose);dialog->setAttribute(Qt::WA_DontShowOnScreen,workflow_);
+            dialog->open();
+        };
         connect(sections_,&QDialog::finished,this,[this]{for(auto* view:views_)view->highlightSections(0,{});});
     }
     sections_->setSnapshot(session_.model());sections_->setEditingEnabled(!session_.busy()||session_.canQueueSectionEdits());sections_->show();sections_->raise();

@@ -6,6 +6,7 @@
 #include "background_geometry.h"
 #include "body_projection.h"
 #include "curvature_comb.h"
+#include "curve_edit_motion.h"
 #include "auxiliary_geometry.h"
 #include <QPainterPathStroker>
 #include <QThreadPool>
@@ -62,6 +63,60 @@ QPolygonF screenStroke(const QPolygonF& points,double tolerance){
         if(split!=-1){self(self,first,split);self(self,split,last);}else result.append(points[last]);
     };
     for(int start=0;start<points.size()-1;start+=96)reduce(reduce,start,std::min(start+96,int(points.size()-1)));
+    return result;
+}
+struct MotionKnot {
+    QPointF numerator;
+    double weight=1;
+    QPointF pixel()const{return numerator/qMax(weight,1e-6);}
+};
+struct MotionVertex {
+    MotionKnot from,to;
+    QPointF pixel(double t)const{
+        return (from.numerator+(to.numerator-from.numerator)*t)/qMax(from.weight+(to.weight-from.weight)*t,1e-6);
+    }
+};
+QVector<MotionVertex> reduceMotionStroke(const QVector<MotionVertex>& vertices,double tolerance,bool perspective){
+    if(vertices.size()<4)return vertices;
+    struct Sample {QPointF from,to;double ratio=1;};
+    QVector<Sample> samples;samples.reserve(vertices.size());
+    for(const auto& vertex:vertices){
+        // Do not reduce projected curves that enter the camera's clipped range.
+        if(vertex.from.weight<=1e-6||vertex.to.weight<=1e-6)return vertices;
+        samples.append({vertex.from.pixel(),vertex.to.pixel(),vertex.to.weight/vertex.from.weight});
+    }
+    const auto squared=[](QPointF p){return QPointF::dotProduct(p,p);};
+    const auto weightDifference=[](double a,double b){
+        return std::min(1.,std::abs(a-b)*.25/(std::min(1.,a)*std::min(1.,b)));
+    };
+    QVector<MotionVertex> result;result.append(vertices.front());
+    const auto append=[&](auto&& self,qsizetype first,qsizetype last)->void{
+        const auto& a=samples[first];const auto& b=samples[last];
+        const auto fromSpan=b.from-a.from,toSpan=b.to-a.to;
+        const double extent=squared(fromSpan)+squared(toSpan);
+        const double leftTravel=perspective?std::sqrt(squared(a.to-a.from)):0.;
+        const double rightTravel=perspective?std::sqrt(squared(b.to-b.from)):0.;
+        double worst=1.;qsizetype split=-1;
+        for(qsizetype i=first+1;i<last;++i){
+            const auto& p=samples[i];
+            const auto from=p.from-a.from,to=p.to-a.to;
+            const auto along=extent>0?std::clamp((QPointF::dotProduct(from,fromSpan)+QPointF::dotProduct(to,toSpan))/extent,0.,1.):0.;
+            // The same chord parameter at both endpoints bounds the entire
+            // affine motion. For perspective add a bound for the difference
+            // between the homogeneous interpolation weights.
+            const double extra=perspective
+                ?(1.-along)*leftTravel*weightDifference(p.ratio,a.ratio)+along*rightTravel*weightDifference(p.ratio,b.ratio)
+                :0.;
+            const double remaining=tolerance-extra;
+            const double error=std::max(squared(from-fromSpan*along),squared(to-toSpan*along));
+            const double score=remaining>0?error/(remaining*remaining):2.+extra/tolerance;
+            if(score>worst){worst=score;split=i;}
+        }
+        if(split>=0){self(self,first,split);self(self,split,last);}
+        else result.append(vertices[last]);
+    };
+    for(qsizetype start=0;start<vertices.size()-1;start+=96)
+        append(append,start,std::min(start+96,vertices.size()-1));
     return result;
 }
 QPointF pixelPhase(QPointF origin){return {origin.x()-std::floor(origin.x()),origin.y()-std::floor(origin.y())};}
@@ -320,6 +375,33 @@ struct HullView::State {
     mutable double curvePathScale=1;
     mutable quint64 curvePathRevision=std::numeric_limits<quint64>::max();
     mutable int curvePathBuilds=0;
+    std::shared_ptr<fs::curveEdit::Motion> curveEditMotion;
+    QMetaObject::Connection curveEditFrameConnection;
+    struct AnimatedSectionStroke {
+        fs::curveEdit::Key key;
+        QColor color;
+        double fromOpacity,toOpacity;
+        QVector<MotionVertex> vertices;
+    };
+    struct AnimatedSectionProjection {
+        quint64 camera=~quint64(0);
+        qreal dpr=0;
+        bool grid=false;
+        std::array<bool,4> visible{};
+        QVector<AnimatedSectionStroke> strokes;
+        QVector<std::pair<fs::curveEdit::Key,const fs::curveEdit::Motion::Track*>> exact;
+    };
+    mutable AnimatedSectionProjection animatedSections;
+    struct AnimatedOverlay {
+        std::weak_ptr<const fs::ModelSnapshot> model;
+        quint64 camera=~quint64(0);
+        bool grid=false,hydro=false;
+        std::array<bool,4> visible{};
+        QFont font;
+        QString language;
+        fs::presentation::ViewOverlay geometry;
+    };
+    mutable AnimatedOverlay animatedOverlay;
     double scale=1;
     fs::Vec3 cameraCenter;
     double cameraExtent=1;
@@ -447,6 +529,7 @@ struct HullView::State {
     QPointF press,last;
     QVector<fs::PointMove> dragStarts;
     fs::Vec3 dragDelta;
+    QHash<fs::EntityId,fs::Vec3> pendingPointPositions;
     double dragBodySign=1;
     QSet<fs::EntityId> boxBase,boxPreview;
     QString blockedReason;
@@ -510,6 +593,58 @@ struct HullView::State {
         return {{offset.x()+scale*dot(relative,right)*inverse,
                  offset.y()-scale*dot(relative,up)*inverse},-z*inverse/2,inverse};
     }
+    void prepareAnimatedSections(const fs::curveEdit::Motion& motion,qreal dpr)const{
+        const bool gridMasksSections=gridVisible&&snapshot->overlay.present;
+        if(animatedSections.camera==cameraRevision&&animatedSections.dpr==dpr&&
+           animatedSections.grid==gridMasksSections&&animatedSections.visible==sectionVisible)return;
+        animatedSections={cameraRevision,dpr,gridMasksSections,sectionVisible,{},{}};
+        const bool perspective=projection==HullProjection::Perspective;
+        fs::Vec3 right,up,depth;basis(right,up,depth);
+        const double inverseDistance=perspective?1./(cameraExtent*cameraDistanceFactor()):0.;
+        const auto knot=[&](fs::Vec3 p,bool mirror){
+            if(mirror)p.y=-p.y;
+            const auto relative=subtract(p,cameraCenter);
+            return MotionKnot{{scale*dot(relative,right),-scale*dot(relative,up)},1.-dot(relative,depth)*inverseDistance};
+        };
+        for(const auto& [key,tracks]:motion.tracks()){
+            if(key.kind<1)continue;
+            if(!sectionVisible[key.kind-1]||(sectionDotted(key.kind)&&gridMasksSections))continue;
+            for(const auto& track:tracks){
+                const auto sides=fs::presentation::sectionSides(*snapshot,int(projection),key.kind,track.from.path);
+                if(track.morph&&sides!=fs::presentation::sectionSides(*snapshot,int(projection),key.kind,track.to.path)){
+                    animatedSections.exact.append({key,&track});continue;
+                }
+                for(bool mirror:{false,true}){
+                    if(mirror?!sides.second:!sides.first)continue;
+                    QVector<MotionVertex> vertices;vertices.reserve(track.from.path.size());
+                    for(qsizetype i=0;i<track.from.path.size();++i){
+                        const auto from=knot(track.from.path[i],mirror);
+                        vertices.append({from,track.morph?knot(track.to.path[i],mirror):from});
+                    }
+                    animatedSections.strokes.append({key,track.from.color,track.from.opacity,track.to.opacity,
+                        reduceMotionStroke(vertices,.20/dpr,perspective)});
+                }
+            }
+        }
+    }
+    bool sectionDotted(int kind)const{
+        return (kind==1&&(projection==HullProjection::Profile||projection==HullProjection::Plan))||
+            (kind==2&&(projection==HullProjection::Body||projection==HullProjection::Plan))||
+            (kind==3&&(projection==HullProjection::Profile||projection==HullProjection::Body));
+    }
+    fs::presentation::ViewOverlay viewOverlay(const QFont& font,bool motion)const{
+        if(!snapshot)return {};
+        const bool hydro=hydroVisible&&!fillVisible;
+        const auto build=[&]{return fs::presentation::makeOverlay(*snapshot,int(projection),gridVisible,hydro,font,
+            [this](auto point){return projectPoint(point).pixel;},sectionVisible);};
+        if(!motion)return build();
+        const auto language=uiLanguage();
+        if(animatedOverlay.model.lock()!=snapshot||animatedOverlay.camera!=cameraRevision||
+           animatedOverlay.grid!=gridVisible||animatedOverlay.hydro!=hydro||animatedOverlay.visible!=sectionVisible||
+           animatedOverlay.font!=font||animatedOverlay.language!=language)
+            animatedOverlay={snapshot,cameraRevision,gridVisible,hydro,sectionVisible,font,language,build()};
+        return animatedOverlay.geometry;
+    }
     QMatrix4x4 camera(QSize size) const {
         fs::Vec3 right,up,depth;
         basis(right,up,depth);
@@ -566,8 +701,28 @@ struct HullView::State {
         }
         return point;
     }
-    fs::Vec3 displayedPosition(const DisplayPoint& point) const {
+    fs::Vec3 displayedPosition(const DisplayPoint& point,bool final=false) const {
+        if(final)return point.position;
+        if(!pendingPointPositions.isEmpty()){
+            const auto pending=pendingPointPositions.constFind(point.id);
+            if(pending!=pendingPointPositions.cend())return pending.value();
+        }
         return gesture==Gesture::Move && moved && selection.contains(point.id)?movedPosition(point.position):point.position;
+    }
+    fs::curveEdit::PointPositions curvePreviewPositions()const{
+        auto points=pendingPointPositions;
+        if(gesture==Gesture::Move&&moved)
+            for(const auto& point:dragStarts)points.insert(point.id,movedPosition(point.position));
+        return points;
+    }
+    QPainterPath projectEditCurve(const QVector<fs::presentation::Cubic>& world)const{
+        using namespace fs::presentation;
+        const auto segments=splitBody()?splitBodyCubics(world,splitLocation(*snapshot)):world;
+        const bool perspective=projection==HullProjection::Perspective;
+        auto path=projectCubics(segments,[this](auto p){return projectPoint(p).pixel;},perspective);
+        if(snapshot->bothSides&&projection!=HullProjection::Profile)
+            path.addPath(projectCubics(segments,[this](auto p){return projectPoint(mirrored(p)).pixel;},perspective));
+        return path;
     }
     void pruneSelection() {
         for (auto it=selection.begin();it!=selection.end();) {
@@ -712,6 +867,7 @@ void HullView::setSnapshot(std::shared_ptr<const fs::ModelSnapshot> snapshot,
         state_->committedSnapshot=std::move(snapshot);
         state_->snapshot=presentation?std::move(presentation):state_->committedSnapshot;
         if(completePreview||maskChanged){state_->rebuildDisplay();++state_->cameraRevision;}
+        state_->pendingPointPositions.clear();
         update();return;
     }
     cancelGesture();
@@ -720,6 +876,7 @@ void HullView::setSnapshot(std::shared_ptr<const fs::ModelSnapshot> snapshot,
     if(!sameDocument){state_->flowPlacement=false;state_->pointPlacement=false;state_->hiddenControlLayers.clear();}
     if(!sameDocument||!background()||!background()->visible)state_->backgroundMode=BackgroundMode::None;
     state_->rebuildDisplay();
+    state_->pendingPointPositions.clear();
     ++state_->cameraRevision;
     if (!sameDocument) {
         state_->selected=0;state_->selection.clear();state_->entities.clear();
@@ -738,6 +895,25 @@ void HullView::setSnapshot(std::shared_ptr<const fs::ModelSnapshot> snapshot,
     update();
 }
 std::shared_ptr<const fs::ModelSnapshot> HullView::snapshot() const { return state_->committedSnapshot; }
+void HullView::setPendingPointMoves(const QVector<fs::PointMove>& moves){
+    if(moves.isEmpty()&&state_->pendingPointPositions.isEmpty())return;
+    state_->pendingPointPositions.clear();
+    state_->pendingPointPositions.reserve(moves.size());
+    for(const auto& move:moves)state_->pendingPointPositions.insert(move.id,move.position);
+    update();
+}
+bool HullView::curveEditMotionEnabled()const{return state_->animations&&hullMotionEnabled();}
+void HullView::setCurveEditMotion(std::shared_ptr<fs::curveEdit::Motion> motion){
+    if(!curveEditMotionEnabled())motion.reset();
+    if(state_->curveEditMotion==motion)return;
+    QObject::disconnect(state_->curveEditFrameConnection);
+    state_->animatedSections={};
+    state_->animatedOverlay={};
+    state_->curveEditMotion=std::move(motion);
+    if(state_->curveEditMotion)
+        state_->curveEditFrameConnection=state_->curveEditMotion->onFrame(this,[this]{if(isVisible())update();});
+    update();
+}
 void HullView::setDisplayPreview(std::shared_ptr<const fs::ModelSnapshot> presentation) {
     if(!state_->committedSnapshot)return;
     if(!presentation)presentation=state_->committedSnapshot;
@@ -803,7 +979,15 @@ void HullView::setSelectedEntities(QSet<fs::EntityId> ids) {
     }
     const auto previous=state_->entities;state_->entities=std::move(valid);emphasizeSelection(previous,state_->entities,state_->kind);update();
 }
-void HullView::setStudioAppearance(bool enabled){state_->studio=enabled;bindUiText(this,"accessibleName",projectionSourceKey());update();}
+void HullView::setStudioAppearance(bool enabled){
+    state_->studio=enabled;
+    if(enabled){
+        for(const auto* key:{"projection_title_text","projection_title_text_width","projection_title_available_width","projection_title_rect"})
+            state_->evidence.remove(key);
+    }
+    bindUiText(this,"accessibleName",projectionSourceKey());
+    update();
+}
 void HullView::setGraphicPreferences(const QJsonObject& colors){state_->preferenceColors=colors;++state_->lightRevision;update();}
 void HullView::setFillVisible(bool enabled){state_->fillVisible=enabled;if(enabled){state_->shadeMode=HullShade::Flat;++state_->lightRevision;}update();}
 bool HullView::setShadeMode(HullShade mode){
@@ -858,7 +1042,7 @@ void HullView::chooseCoordinateAxis(int axis){
     if(axis!=0&&onShowControlNet)onShowControlNet();
     setCoordinateAxis(axis);
 }
-void HullView::setAnimationsEnabled(bool enabled){state_->animations=enabled;if(!enabled){finishPresentation();finishInteractionCamera();state_->hovered=0;state_->hoverMotion.clear();state_->emphasized.clear();state_->interactionDriver->stop();update();}}
+void HullView::setAnimationsEnabled(bool enabled){state_->animations=enabled;if(!enabled){setCurveEditMotion({});finishPresentation();finishInteractionCamera();state_->hovered=0;state_->hoverMotion.clear();state_->emphasized.clear();state_->interactionDriver->stop();update();}}
 void HullView::restartPresentation(){if(!state_->animations)return;state_->labels.clear();state_->entrance.restart();state_->timer.start();update();}
 void HullView::finishPresentation(){state_->entrance.finish();state_->entranceSections.pixels={};state_->timer.stop();update();}
 void HullView::freezePresentation(bool frozen){if(frozen){state_->entrance.pause(state_->clock.elapsed());state_->timer.stop();}else{state_->entrance.resume(state_->clock.elapsed());if(state_->entrance.active())state_->timer.start();update();}}
@@ -872,6 +1056,7 @@ QJsonObject HullView::interactionMotionEvidence()const{
     return {{"hover",hovered},{"selected_ids",selected},{"selected_kind",int(state_->emphasizedKind)},
         {"selection_elapsed_ms",double(interactionTime()-state_->emphasizedAt)},{"camera_active",camera.active},
         {"camera_scale",state_->scale},{"camera_target_scale",camera.active?camera.to.scale:state_->scale},
+        {"camera_yaw",state_->yaw},{"camera_pitch",state_->pitch},
         {"camera_offset_x",state_->offset.x()},{"camera_offset_y",state_->offset.y()},
         {"camera_log_velocity",camera.velocity.logScale},{"camera_initial_log_velocity",camera.fromVelocity.logScale},
         {"driver_running",state_->interactionDriver->state()==QAbstractAnimation::Running},
@@ -1207,7 +1392,14 @@ QPicture HullView::printPicture(qreal rasterRatio)const{
     // Bound only raster layers, never the vector line/text resolution.
     const qreal ratio=std::min({rasterRatio,16384./qMax(1,width()),16384./qMax(1,height()),
         std::sqrt(16e6/(qreal(qMax(1,width()))*qMax(1,height())))});
-    QPicture picture;QPainter painter(&picture);painter.setFont(font());draw(painter,ratio,true,true);painter.end();picture.setBoundingRect(rect());return picture;
+    QPicture picture;QPainter painter(&picture);painter.setFont(font());draw(painter,ratio,true,true);
+    if(state_->studio){
+        // Printed sheets retain their view identification; the editor canvas and PNG do not carry it.
+        auto captionFont=QApplication::font();captionFont.setPointSizeF(std::max(11.,captionFont.pointSizeF()));
+        painter.setFont(captionFont);painter.setPen(QColor(0,61,69));painter.setRenderHint(QPainter::TextAntialiasing,true);
+        painter.drawText(QRect(12,8,std::max(1,width()-24),height()-16),Qt::AlignLeft|Qt::AlignTop|Qt::TextWordWrap,projectionLabel());
+    }
+    painter.end();picture.setBoundingRect(rect());return picture;
 }
 QImage HullView::thumbnailImage(qreal dpr)const{
     if(!std::isfinite(dpr)||dpr<=0||width()*dpr>16384||height()*dpr>16384)return {};
@@ -1223,9 +1415,6 @@ int HullView::verifyResizeSectionPixels() const {
     draw(painter,dpr,false,false,&result);return result;
 }
 void HullView::draw(QPainter& painter,qreal dpr,bool final,bool forceSoftware,int* verifySections) const {
-    auto titleFont=QApplication::font();titleFont.setPointSizeF(std::max(11.,titleFont.pointSizeF()));
-    titleFont.setWeight(QFont::Normal);titleFont.setStyleStrategy(QFont::StyleStrategy(QFont::PreferAntialias|QFont::PreferQuality));
-    const int titleHeight=std::max(32,QFontMetrics(titleFont).height()+12);
     painter.fillRect(rect(),state_->studio?state_->preferred("viewportcolor",QColor(232,239,236)):Background);
     const auto* backgroundData=!final&&state_->backgroundPreviewing?&state_->backgroundPreview:background();
     if(backgroundData&&backgroundData->visible){
@@ -1270,8 +1459,10 @@ void HullView::draw(QPainter& painter,qreal dpr,bool final,bool forceSoftware,in
         using namespace fs::presentation;
         const bool preview=!final&&state_->entrance.preview();
         const auto snapshot=state_->snapshot;
+        const auto* editMotion=!final&&state_->curveEditMotion&&state_->curveEditMotion->active()?state_->curveEditMotion.get():nullptr;
+        const double editProgress=editMotion?editMotion->progress():0.;
         QFont annotationFont=studioTextFont(QFont("Arial",snapshot?snapshot->overlay.fontSize:9));
-        auto overlay=snapshot?makeOverlay(*snapshot,int(state_->projection),state_->gridVisible,state_->hydroVisible&&!state_->fillVisible,annotationFont,[this](fs::Vec3 p){return project(p);},state_->sectionVisible):ViewOverlay{};
+        const auto overlay=state_->viewOverlay(annotationFont,editMotion!=nullptr);
         auto strokes=[&](const QVector<Stroke>& lines){
             QVector<QLineF> batch;
             for(qsizetype start=0;start<lines.size();){
@@ -1294,16 +1485,20 @@ void HullView::draw(QPainter& painter,qreal dpr,bool final,bool forceSoftware,in
                 state_->graph.prepare(clipped,rect().center());strokes(state_->graph.visible(state_->entrance.lineFraction()));
             }
         }
+        const auto sectionDotted=[&](int kind){return state_->sectionDotted(kind);};
+        const auto sectionPen=[&](int kind,fs::EntityId index,bool dotted,QColor color){
+            const bool selected=state_->highlightedKind==kind&&state_->highlightedSections.contains(int(index));
+            return QPen(selected?QColor(160,67,34):dotted?QColor(150,160,157):color,selected?2:1,dotted?Qt::DotLine:Qt::SolidLine);
+        };
         const auto drawSections=[&](QPainter& painter){
             if(!preview&&snapshot)for(const auto& section:snapshot->sections) {
                 if(!state_->sectionVisible[section.kind-1])continue;
+                if(editMotion&&editMotion->contains({section.kind,fs::EntityId(section.index)}))continue;
                 const bool selected=state_->highlightedKind==section.kind&&state_->highlightedSections.contains(section.index);
-                const bool dotted=(section.kind==1&&(state_->projection==HullProjection::Profile||state_->projection==HullProjection::Plan))||
-                    (section.kind==2&&(state_->projection==HullProjection::Body||state_->projection==HullProjection::Plan))||
-                    (section.kind==3&&(state_->projection==HullProjection::Profile||state_->projection==HullProjection::Body));
+                const bool dotted=sectionDotted(section.kind);
                 const bool comb=snapshot->showCurvature&&section.showCurvature&&!state_->fillVisible;
                 if(dotted&&state_->gridVisible&&snapshot->overlay.present&&!comb)continue;
-                painter.setPen(QPen(selected?QColor(160,67,34):dotted?QColor(150,160,157):sourceColor(section.color),selected?2:1,dotted?Qt::DotLine:Qt::SolidLine));
+                painter.setPen(sectionPen(section.kind,section.index,dotted,sourceColor(section.color)));
                 for(int index=0;index<section.paths.size();++index){
                     const auto& path=section.paths[index];
                     if(!final&&!comb&&!dotted&&!selected&&!state_->entrance.active()){
@@ -1361,12 +1556,46 @@ void HullView::draw(QPainter& painter,qreal dpr,bool final,bool forceSoftware,in
                     }
                 }
             }
+            if(preview||!snapshot||!editMotion)return;
+            state_->prepareAnimatedSections(*editMotion,dpr);
+            const auto visible=[&](int kind){
+                return state_->sectionVisible[kind-1]&&!(sectionDotted(kind)&&state_->gridVisible&&snapshot->overlay.present);
+            };
+            painter.save();
+            QPolygonF pixels;
+            for(const auto& stroke:state_->animatedSections.strokes){
+                const auto& key=stroke.key;
+                if(!visible(key.kind))continue;
+                const double opacity=stroke.fromOpacity+(stroke.toOpacity-stroke.fromOpacity)*editProgress;
+                if(opacity<=0)continue;
+                painter.setOpacity(opacity);
+                painter.setPen(sectionPen(key.kind,key.id,sectionDotted(key.kind),stroke.color));
+                pixels.clear();pixels.reserve(stroke.vertices.size());
+                for(const auto& vertex:stroke.vertices)pixels.append(state_->offset+vertex.pixel(editProgress));
+                painter.drawPolyline(pixels);
+            }
+            for(const auto& [key,track]:state_->animatedSections.exact){
+                if(!visible(key.kind))continue;
+                const bool dotted=sectionDotted(key.kind);
+                const auto shape=fs::curveEdit::Motion::sample(*track,editProgress);
+                if(shape.opacity<=0)continue;
+                const auto sides=sectionSides(*snapshot,int(state_->projection),key.kind,shape.path);
+                painter.setOpacity(shape.opacity);
+                painter.setPen(sectionPen(key.kind,key.id,dotted,shape.color));
+                for(bool mirror:{false,true}){
+                    if(mirror?!sides.second:!sides.first)continue;
+                    pixels.clear();pixels.reserve(shape.path.size());
+                    for(auto p:shape.path)pixels.append(project(mirror?mirrored(p):p));
+                    painter.drawPolyline(pixels);
+                }
+            }
+            painter.restore();
         };
         auto& layer=state_->entranceSections;
         const QSize pixels(qCeil(width()*dpr),qCeil(height()*dpr));
         // The wave advances underneath the stationary section lines. Rasterize
         // just those lines at the actual display resolution during the reveal.
-        if(!final&&!preview&&state_->entrance.active()&&snapshot&&!snapshot->sections.isEmpty()&&
+        if(!editMotion&&!final&&!preview&&state_->entrance.active()&&snapshot&&!snapshot->sections.isEmpty()&&
            !pixels.isEmpty()&&qint64(pixels.width())*pixels.height()<=4*1024*1024){
             if(layer.pixels.isNull()||layer.source.lock()!=snapshot||layer.camera!=state_->cameraRevision||
                layer.size!=size()||layer.pixels.devicePixelRatio()!=dpr||layer.visibility!=state_->sectionVisible||
@@ -1382,7 +1611,7 @@ void HullView::draw(QPainter& painter,qreal dpr,bool final,bool forceSoftware,in
                 layer.grid=state_->gridVisible;layer.fill=state_->fillVisible;
             }
             if(layer.pixels.isNull())drawSections(painter);else painter.drawPixmap(QPoint(),layer.pixels);
-        }else if(!final&&!preview&&state_->layerMatches(size(),dpr)&&
+        }else if(!editMotion&&!final&&!preview&&state_->layerMatches(size(),dpr)&&
                  pixelPhase(painter.deviceTransform().map(QPointF{}))==state_->resizeLayer.phase){
             const auto& image=state_->resizeLayer.image.get();
             if(verifySections&&!image.isNull()){
@@ -1397,8 +1626,27 @@ void HullView::draw(QPainter& painter,qreal dpr,bool final,bool forceSoftware,in
             drawSections(painter);
         }
         if(!preview){
+            const auto previewPoints=final?fs::curveEdit::PointPositions{}:state_->curvePreviewPositions();
+            QHash<fs::EntityId,const fs::AuxiliaryCurve*> previewCurves;
+            if(snapshot&&!previewPoints.isEmpty())
+                for(const auto& curve:snapshot->controlCurves)
+                    if(fs::curveEdit::affects(curve,previewPoints))previewCurves.insert(curve.id,&curve);
+            const auto curvePen=[&](fs::EntityId id,bool flow,QColor color){
+                const bool selected=state_->kind==(flow?HullEntity::Flowline:HullEntity::Curve)&&state_->entities.contains(id);
+                QPen pen(selected?QColor(160,67,34):color,selected?2:1);pen.setCosmetic(true);return pen;
+            };
+            const auto flowSource=[&](fs::Vec3 source){
+                painter.setPen(QColor(65,65,65));painter.setBrush(Qt::white);painter.drawEllipse(project(source),3,3);
+                if(snapshot->bothSides&&state_->projection!=HullProjection::Profile)painter.drawEllipse(project(mirrored(source)),3,3);
+            };
             state_->prepareCurvePaths(final);
             for(int i=0;i<data->curves.size();++i){const auto& c=data->curves[i];if(!state_->curveVisible(c))continue;
+                if(!c.marker&&editMotion&&editMotion->contains({c.flow?-1:0,c.id}))continue;
+                if(!c.marker&&!c.flow)if(const auto* curve=previewCurves.value(c.id)){
+                    const auto cubics=fs::curveEdit::preview(*curve,*snapshot,previewPoints,fs::presentation::splineCubics(curve->spline));
+                    painter.setPen(curvePen(c.id,false,c.color));painter.setBrush(Qt::NoBrush);
+                    painter.drawPath(state_->projectEditCurve(cubics));continue;
+                }
                 const bool selected=!c.marker&&state_->kind==(c.flow?HullEntity::Flowline:HullEntity::Curve)&&state_->entities.contains(c.id);
                 painter.save();painter.setTransform(state_->curvePathTransform,true);
                 QPen curvePen(selected?QColor(160,67,34):c.color,selected?2:1);curvePen.setCosmetic(true);
@@ -1415,8 +1663,29 @@ void HullView::draw(QPainter& painter,qreal dpr,bool final,bool forceSoftware,in
                         painter.save();painter.setPen(QPen(sourceColor(snapshot->curvatureColor),1));painter.drawLines(ribs);painter.drawPolyline(tips);painter.restore();
                     }
                 }
-                if(c.hasSource){painter.setPen(QColor(65,65,65));painter.setBrush(Qt::white);painter.drawEllipse(project(c.source),3,3);
-                    if(snapshot->bothSides&&state_->projection!=HullProjection::Profile)painter.drawEllipse(project(mirrored(c.source)),3,3);}
+                if(c.hasSource)flowSource(c.source);
+            }
+            if(snapshot&&editMotion)for(const auto& [key,tracks]:editMotion->tracks()){
+                if(key.kind>0)break;
+                const bool flow=key.kind<0;
+                if(flow?(!snapshot->showFlowlines||state_->fillVisible):!snapshot->showControlCurves)continue;
+                for(const auto& track:tracks){
+                    auto shape=fs::curveEdit::Motion::sample(track,editProgress);
+                    if(shape.opacity<=0)continue;
+                    auto cubics=std::move(shape.cubics);
+                    if(!flow)if(const auto* curve=previewCurves.value(key.id))
+                        cubics=fs::curveEdit::preview(*curve,*snapshot,previewPoints,cubics);
+                    if(cubics.isEmpty())continue;
+                    painter.save();painter.setOpacity(shape.opacity);
+                    painter.setPen(curvePen(key.id,flow,shape.color));painter.setBrush(Qt::NoBrush);
+                    painter.drawPath(state_->projectEditCurve(cubics));
+                    if(flow){
+                        auto source=cubics.front().front();
+                        if(state_->splitBody()&&source.x<fs::presentation::splitLocation(*snapshot))source.y=-source.y;
+                        flowSource(source);
+                    }
+                    painter.restore();
+                }
             }
         }
         if(snapshot&&snapshot->showNormals&&!preview&&state_->kind==HullEntity::Face&&!state_->entities.isEmpty()){
@@ -1445,12 +1714,12 @@ void HullView::draw(QPainter& painter,qreal dpr,bool final,bool forceSoftware,in
         if(state_->controlNetVisible) {
         QVector<QLineF> edges,creases,mirrors;
         labelPoints.reserve(data->points.size());
-        for(const auto& point:data->points)labelPoints.append(project(state_->controlPosition(state_->displayedPosition(point))));
+        for(const auto& point:data->points)labelPoints.append(project(state_->controlPosition(state_->displayedPosition(point,final))));
         edges.reserve(data->edges.size());creases.reserve(data->edges.size()/3);
         const QRectF clip=QRectF(rect()).adjusted(-8,-8,8,8);
         for (const auto& edge:data->edges) {
-            auto a=state_->displayedPosition(data->points[edge.ia]);
-            auto b=state_->displayedPosition(data->points[edge.ib]);
+            auto a=state_->displayedPosition(data->points[edge.ia],final);
+            auto b=state_->displayedPosition(data->points[edge.ib],final);
             if(preview){auto span=std::max(1e-6,snapshot->maximum.x-snapshot->minimum.x);auto t=std::clamp(state_->entrance.previewFraction()*1.6-((a.x+b.x)*.5-snapshot->minimum.x)/span*.6,0.,1.);t=1-(1-t)*(1-t);if(t<=0)continue;b={a.x+(b.x-a.x)*t,a.y+(b.y-a.y)*t,a.z+(b.z-a.z)*t};}
             const auto appendLine=[&](QLineF line){
                 if(collectObstacles)labelEdges.append(line);
@@ -1497,7 +1766,7 @@ void HullView::draw(QPainter& painter,qreal dpr,bool final,bool forceSoftware,in
             const auto found=data->pointIndices.constFind(id);
             if (found==data->pointIndices.cend()) continue;
             const auto& point=data->points[found.value()];
-            const auto pixel=project(state_->controlPosition(state_->displayedPosition(point)));
+            const auto pixel=project(state_->controlPosition(state_->displayedPosition(point,final)));
             if (!clip.contains(pixel)) continue;
             if(!final&&!state_->entrance.pointVisible(pixel.x()))continue;
             if (point.locked) selectedLocked.append(QRectF(pixel-QPointF(4,4),QSizeF(8,8)));
@@ -1510,7 +1779,7 @@ void HullView::draw(QPainter& painter,qreal dpr,bool final,bool forceSoftware,in
         }
         if(!preview&&snapshot&&snapshot->overlay.present){
             LabelLayout exportLayout;auto& layout=final?exportLayout:state_->labels;
-            layout.begin(QRectF(rect()).adjusted(3,state_->studio?titleHeight+4:3,-3,-3),state_->frameTime,!final&&state_->animations);
+            layout.begin(QRectF(rect()).adjusted(3,3,-3,-3),state_->frameTime,!final&&state_->animations);
             const bool showText=final||state_->entrance.textOpacity(false)>0;
             bool obstaclesReady=false;
             const auto prepareObstacles=[&]{
@@ -1540,7 +1809,7 @@ void HullView::draw(QPainter& painter,qreal dpr,bool final,bool forceSoftware,in
                     if(group.points.isEmpty()||group.name.isEmpty())continue;
                     fs::Vec3 center{};int count=0;bool selected=false;
                     for(auto id:group.points){auto at=data->pointIndices.constFind(id);if(at==data->pointIndices.cend())continue;
-                        const auto p=state_->displayedPosition(data->points[*at]);center.x+=p.x;center.y+=p.y;center.z+=p.z;++count;selected|=state_->selection.contains(id);}
+                        const auto p=state_->displayedPosition(data->points[*at],final);center.x+=p.x;center.y+=p.y;center.z+=p.z;++count;selected|=state_->selection.contains(id);}
                     if(!count)continue;center.x/=count;center.y/=count;center.z/=count;
                     const auto at=project(state_->controlPosition(center));const auto color=selected?QColor(160,67,34):QColor(49,93,85);
                     painter.setPen(color);painter.setBrush(Qt::NoBrush);painter.drawEllipse(at,2,2);painter.drawEllipse(at,4,4);
@@ -1551,7 +1820,7 @@ void HullView::draw(QPainter& painter,qreal dpr,bool final,bool forceSoftware,in
                 if(showText)for(bool selected:{true,false})for(const auto& p:data->points){
                     if((p.name.isEmpty()&&!state_->coordinateAxis)||state_->selection.contains(p.id)!=selected)continue;
                     auto at=labelPoints[&p-data->points.constData()];if(!rect().contains(at.toPoint())||(!final&&!state_->entrance.pointVisible(at.x())))continue;
-                    QString text=p.name;if(state_->coordinateAxis){const auto v=state_->displayedPosition(p);text=QString::number(state_->coordinateAxis==1?v.x:state_->coordinateAxis==2?v.y:v.z,'f',3);if(!layout.claim(at,text))continue;}
+                    QString text=p.name;if(state_->coordinateAxis){const auto v=state_->displayedPosition(p,final);text=QString::number(state_->coordinateAxis==1?v.x:state_->coordinateAxis==2?v.y:v.z,'f',3);if(!layout.claim(at,text))continue;}
                     if(text.isEmpty())continue;
                     annotation({"point:"+QString::number(p.id),text,at,at+QPointF(snapshot->overlay.pointSize+4,3),selected?QColor(160,67,34):QColor(49,93,85),LabelKind::Point,false});
                 }
@@ -1599,25 +1868,28 @@ void HullView::draw(QPainter& painter,qreal dpr,bool final,bool forceSoftware,in
     if(!final&&backgroundData&&backgroundData->visible&&state_->backgroundMode==BackgroundMode::Frame){
         painter.setPen(QPen(Qt::yellow,3,Qt::DashLine));painter.setBrush(Qt::NoBrush);painter.drawRect(backgroundData->targetRect(project({}),state_->scale));
     }
-    if(state_->studio)painter.fillRect(QRect(0,0,width(),titleHeight),QColor(224,236,232));
-    painter.setRenderHint(QPainter::TextAntialiasing,true);painter.setFont(titleFont);
-    painter.setPen(state_->studio?QColor(0,61,69):QColor(44,57,68));
-    const auto title=projectionLabel();
-    painter.drawText(QRect(12,0,width()-24,titleHeight),Qt::AlignLeft|Qt::AlignVCenter,title);
-    state_->evidence.insert("projection_title_text",title);
-    state_->evidence.insert("projection_title_text_width",QFontMetricsF(titleFont).horizontalAdvance(title));
-    state_->evidence.insert("projection_title_available_width",width()-24);
-    state_->evidence.insert("projection_title_font",titleFont.family());
-    state_->evidence.insert("projection_title_point_size",titleFont.pointSizeF());
-    state_->evidence.insert("projection_title_height",titleHeight);
-    state_->evidence.insert("projection_title_antialias",painter.testRenderHint(QPainter::TextAntialiasing));
+    if(!state_->studio){
+        auto titleFont=QApplication::font();titleFont.setPointSizeF(std::max(11.,titleFont.pointSizeF()));
+        titleFont.setWeight(QFont::Normal);
+        titleFont.setStyleStrategy(QFont::StyleStrategy(QFont::PreferAntialias|QFont::PreferQuality));
+        const auto title=projectionLabel();
+        const QRect titleRect(12,0,width()-24,std::max(32,QFontMetrics(titleFont).height()+12));
+        painter.save();painter.setRenderHint(QPainter::TextAntialiasing,true);painter.setFont(titleFont);
+        painter.setPen(QColor(44,57,68));
+        painter.drawText(titleRect,Qt::AlignLeft|Qt::AlignVCenter,title);painter.restore();
+        state_->evidence.insert("projection_title_text",title);
+        state_->evidence.insert("projection_title_text_width",QFontMetricsF(titleFont).horizontalAdvance(title));
+        state_->evidence.insert("projection_title_available_width",titleRect.width());
+        state_->evidence.insert("projection_title_rect",QJsonArray{titleRect.x(),titleRect.y(),titleRect.width(),titleRect.height()});
+    }
     if(state_->fillVisible&&state_->shadeMode!=HullShade::Flat&&data&&data->analysis){
         QString text;
         if(state_->shadeMode==HullShade::Gaussian)text=QString(uiText("角亏（°）：%1 至 %2；灰色：边界或无法评估")).arg(data->analysis->minimum,0,'g',4).arg(data->analysis->maximum,0,'g',4);
         else if(state_->shadeMode==HullShade::Developable)text=uiText("绿：角亏接近零；红：非零；灰：无法评估");
         else text=uiText("斑马纹 · 检查曲面法向连续性");
         painter.save();painter.setFont(QApplication::font());const auto box=painter.fontMetrics().boundingRect(QRect(8,0,qMax(1,width()-16),100),Qt::TextWordWrap,text);
-        QRect area(4,height()-box.height()-10,width()-8,box.height()+6);painter.fillRect(area,QColor(246,249,247,235));painter.setPen(QColor(30,53,50));painter.drawText(area.adjusted(4,3,-4,-3),Qt::TextWordWrap,text);painter.restore();
+        QRect area(4,height()-box.height()-10,width()-8,box.height()+6);
+        painter.fillRect(area,QColor(246,249,247,235));painter.setPen(QColor(30,53,50));painter.drawText(area.adjusted(4,3,-4,-3),Qt::TextWordWrap,text);painter.restore();
     }
     painter.setPen(QColor(215,222,228));painter.setBrush(Qt::NoBrush);
     painter.drawRect(rect().adjusted(0,0,-1,-1));
@@ -1628,6 +1900,7 @@ void HullView::paintEvent(QPaintEvent*) {
     state_->paintedHull=false;
     QPainter painter(this);draw(painter,devicePixelRatioF(),false);state_->entrance.endFrame();
     if(!state_->entrance.active())state_->entranceSections.pixels={};
+    if(state_->curveEditMotion&&!state_->curveEditMotion->active())setCurveEditMotion({});
     if((state_->entrance.active()||state_->labels.animating())&&!state_->entrance.frozen()){
         if(!state_->timer.isActive())state_->timer.start();
     }else state_->timer.stop();
@@ -1743,7 +2016,7 @@ void HullView::selectWithLeftButton(QPointF position,bool additive) {
         state_->pruneSelection();
         notifySelectionChanged();
         // Modifier clicks toggle membership; they do not also start a move.
-        if (!additive && state_->editingEnabled && state_->selection.contains(id) &&
+        if (!additive && state_->editingEnabled && state_->pendingPointPositions.isEmpty() && state_->selection.contains(id) &&
             state_->display && state_->projection!=HullProjection::Perspective) {
             auto ids=state_->selection.values();
             std::sort(ids.begin(),ids.end());
@@ -1793,7 +2066,7 @@ void HullView::mouseMoveEvent(QMouseEvent* event) {
             if(rotationDelta.manhattanLength()<3)break;
             state_->gesture=State::Gesture::Rotate;setCursor(Qt::SizeAllCursor);
         }
-        state_->yaw+=rotationDelta.x()*0.008;
+        state_->yaw-=rotationDelta.x()*0.008;
         state_->pitch=qBound(-Pi*0.48,state_->pitch+rotationDelta.y()*0.008,Pi*0.48);
         state_->fitted=false;++state_->cameraRevision;update();break;
     }

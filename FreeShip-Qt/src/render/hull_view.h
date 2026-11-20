@@ -15,6 +15,7 @@
 class QMenu;
 
 enum class HullProjection { Profile, Plan, Body, Perspective };
+namespace fs::curveEdit {class Motion;}
 enum class HullEntity { Point, Edge, Face, Curve, Flowline };
 enum class BackgroundMode { None, Origin, Scale, Frame, TransparentColor };
 
@@ -29,6 +30,9 @@ public:
                      const QSet<fs::EntityId>& visibilityChanges={});
     void setLayerVisibilityPreview(const QSet<fs::EntityId>& changes);
     void setDisplayPreview(std::shared_ptr<const fs::ModelSnapshot> presentation);
+    void setPendingPointMoves(const QVector<fs::PointMove>& moves);
+    bool curveEditMotionEnabled() const;
+    void setCurveEditMotion(std::shared_ptr<fs::curveEdit::Motion> motion);
     std::shared_ptr<const fs::ModelSnapshot> snapshot() const;
     void setProjection(HullProjection projection);
     HullProjection projection() const;

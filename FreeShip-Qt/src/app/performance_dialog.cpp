@@ -4,6 +4,7 @@
 #include "preferences_store.h"
 // SPDX-License-Identifier: GPL-2.0-or-later
 #include "performance_dialog.h"
+#include "table_number.h"
 #include "core/development_calculation_samples.h"
 #include "core/principal_dimensions.h"
 #include "calculation_input_status.h"
@@ -70,7 +71,7 @@ QJsonObject parameterPages(const QString& method){
 QString full(double n){return QString::number(n,'g',17);}
 QString quote(QString s){return '"'+s.replace('"',"\"\"")+'"';}
 QString reportValue(const QJsonValue& value){
-    if(value.isDouble())return QString::number(value.toDouble(),'g',10);
+    if(value.isDouble())return tableNumber::display(value.toDouble());
     if(value.isNull()||value.isUndefined())return QStringLiteral("—");
     return value.toVariant().toString();
 }
@@ -82,12 +83,14 @@ QStringList pipeCells(const QString& line){
     for(auto& cell:cells)cell=cell.trimmed();
     return cells;
 }
+bool legacyNumberToken(const QString& text){
+    static const QRegularExpression number(R"(^[+−-]?(?:\d+(?:[.,]\d*)?|[.,]\d+)(?:[eEdD][+-]?\d+)?$)");
+    return text=="—"||number.match(text).hasMatch();
+}
 QStringList numericCells(const QString& line){
     static const QRegularExpression separator("\\s+");
-    static const QRegularExpression number(R"(^[+-]?(?:\d+(?:[.,]\d*)?|[.,]\d+)(?:[eEdD][+-]?\d+)?$)");
-    auto cells=line.trimmed().split(separator);
-    if(cells.size()<2)return {};
-    for(const auto& cell:cells)if(cell!="—"&&!number.match(cell).hasMatch())return {};
+    const auto cells=line.trimmed().split(separator);
+    if(cells.size()<2||!std::all_of(cells.cbegin(),cells.cend(),legacyNumberToken))return {};
     return cells;
 }
 QString tableCurveHeading(const QJsonObject& curve){
@@ -143,7 +146,7 @@ void separatePipeRowUnits(report::Table& table){
         for(qsizetype column=1;column<row.size();++column){
             const auto item=legacyMeasurement(row[column]);
             if(item.second!=first.second)break;
-            values.append(item.first);
+            values.append(tableNumber::scalar(item.first));
         }
         if(values.size()!=row.size()-1)continue;
         row={row.first()};
@@ -159,7 +162,7 @@ void separatePipeRowUnits(report::Table& table){
 QString legacyResult(const QString& source,bool html,const QJsonArray& warnings){
     const QStringList labels{uiText("结果量"),uiText("数值"),uiText("单位")};
     report::Table fields{{},labels,{}, {0,2}};
-    QString text;QStringList notes,rangeNotices;
+    QString text;QStringList notes,rangeNotices,previousColumns;
     const auto flush=[&]{
         text+=report::render(fields,html);fields.rows.clear();
         text+=report::metadata(notes.join('\n'),html);notes.clear();
@@ -187,6 +190,19 @@ QString legacyResult(const QString& source,bool html,const QJsonArray& warnings)
         }
         if(!rangeNotices.isEmpty())flush();
         const auto headers=pipeCells(line);
+        // Some legacy reports print standalone candidate rows below the
+        // main table, with the same column order and no repeated header.
+        if(headers.size()>1&&std::all_of(headers.cbegin(),headers.cend(),legacyNumberToken)){
+            flush();
+            report::Table table{{},{},{},{}};
+            if(previousColumns.size()==headers.size())table.headers=previousColumns;
+            else for(int column=0;column<headers.size();++column)table.headers.append(QString::number(column+1));
+            auto row=headers;
+            for(auto& cell:row)cell=tableNumber::scalar(cell);
+            table.rows.append(row);
+            text+=report::render(table,html);
+            continue;
+        }
         if(headers.size()>1&&i+1<lines.size()){
             int next=i+1;
             if(divider.match(lines[next]).hasMatch())++next;
@@ -217,11 +233,18 @@ QString legacyResult(const QString& source,bool html,const QJsonArray& warnings)
             }
             if(!table.rows.isEmpty()){
                 separatePipeRowUnits(table);
+                for(auto& row:table.rows)for(int column=0;column<row.size();++column){
+                    if(table.leftColumns.contains(column))continue;
+                    const auto [number,unit]=legacyMeasurement(row[column]);
+                    row[column]=unit.isEmpty()?tableNumber::scalar(row[column]):tableNumber::scalar(number)+" "+unit;
+                }
+                previousColumns=table.headers;
                 flush();text+=report::render(table,html);i=next-1;continue;
             }
         }
-        const auto numbers=numericCells(line);
+        auto numbers=numericCells(line);
         if(!numbers.isEmpty()&&i+1<lines.size()&&numericCells(lines[i+1]).size()==numbers.size()){
+            for(auto& cell:numbers)cell=tableNumber::scalar(cell);
             report::Table table{{},{},{numbers},{}};
             if(!notes.isEmpty()){
                 auto columns=notes.last().split(wideSpace);
@@ -232,7 +255,8 @@ QString legacyResult(const QString& source,bool html,const QJsonArray& warnings)
                 table.headers.append(QString::number(column+1));
             int next=i+1;
             for(;next<lines.size();++next){
-                const auto cells=numericCells(lines[next]);if(cells.size()!=numbers.size())break;
+                auto cells=numericCells(lines[next]);if(cells.size()!=numbers.size())break;
+                for(auto& cell:cells)cell=tableNumber::scalar(cell);
                 table.rows.append(cells);
             }
             flush();text+=report::render(table,html);i=next-1;continue;
@@ -269,21 +293,24 @@ QString legacyResult(const QString& source,bool html,const QJsonArray& warnings)
             // A project name, designer or arbitrary solver payload remains intact.
             static const QRegularExpression annotated(QStringLiteral("^([+-]?[0-9.]+) (- (?:计算|用于选择螺旋桨图谱|按螺旋桨最佳频率曲线))$"));
             if(const auto note=annotated.match(value);note.hasMatch())
-                value=note.captured(1)+" "+uiText(note.captured(2));
+                value=tableNumber::scalar(note.captured(1))+" "+uiText(note.captured(2));
             const auto alternatives=value.split('=');
             if(alternatives.size()>1){
                 QList<QStringList> conversions;
                 for(const auto& alternative:alternatives){
                     const auto [number,unit]=legacyMeasurement(alternative);
                     if(unit.isEmpty()){conversions.clear();break;}
-                    conversions.append({label.first,number,unit});
+                    conversions.append({label.first,tableNumber::scalar(number),unit});
                 }
                 if(!conversions.isEmpty()){parsed.append(conversions);continue;}
             }
             const auto [number,unit]=legacyMeasurement(value);
             if(!unit.isEmpty()){
                 label.second=unit;
-                value=number;
+                value=tableNumber::scalar(number);
+            }else{
+                static const QRegularExpression identifier(QStringLiteral(R"(模型名称|船名|文件|设计者|版本|日期|\b(?:name|file|designer|version|date)\b)"),QRegularExpression::CaseInsensitiveOption);
+                if(!identifier.match(labelSource).hasMatch())value=tableNumber::scalar(value);
             }
             parsed.append({label.first,value,label.second});
         }
@@ -371,7 +398,7 @@ public:
         for(const auto& row:rows)points_.append(row);
         endResetModel();
     }
-    void setTable(const QJsonObject& t){beginResetModel();sharedCurves_.clear();points_=t["values"].toArray();rowHeaders_=t["rows"].toArray();headers_.clear();for(auto v:t["columns"].toArray())headers_<<uiText(v.toVariant().toString());endResetModel();}
+    void setTable(const QJsonObject& t){beginResetModel();sharedCurves_.clear();points_=t["values"].toArray();rowHeaders_=t["rows"].toArray();headers_.clear();for(auto v:t["columns"].toArray())headers_<<(v.isDouble()?tableNumber::display(v.toDouble()):uiText(v.toVariant().toString()));endResetModel();}
     int rowCount(const QModelIndex& parent={})const override{return parent.isValid()?0:int(sharedCurves_.isEmpty()?points_.size():sharedCurves_.first().size());}
     int columnCount(const QModelIndex& parent={})const override{return parent.isValid()?0:headers_.size();}
     QVariant data(const QModelIndex& i,int role)const override{
@@ -382,15 +409,19 @@ public:
             const auto point=sharedCurves_[i.column()==0?0:i.column()-1][i.row()].toArray();
             const auto value=point[i.column()==0?0:1];
             if(value.isNull())return QStringLiteral("—");
-            return QString::number(value.toDouble(),'g',role==Qt::ToolTipRole?17:10);
+            return value.isDouble()?(role==Qt::ToolTipRole?full(value.toDouble()):tableNumber::display(value.toDouble())):value.toVariant();
         }
         const auto row=points_[i.row()].toArray();
         if(i.column()>=row.size())return {};
         const auto value=row[i.column()];
         if(value.isNull())return QStringLiteral("—");
-        return QString::number(value.toDouble(),'g',role==Qt::ToolTipRole?17:10);
+        return value.isDouble()?(role==Qt::ToolTipRole?full(value.toDouble()):tableNumber::display(value.toDouble())):value.toVariant();
     }
-    QVariant headerData(int section,Qt::Orientation orientation,int role)const override{if(role!=Qt::DisplayRole)return {};if(orientation==Qt::Vertical)return section<rowHeaders_.size()?rowHeaders_[section].toVariant():QVariant(section+1);return section<headers_.size()?QVariant(headers_[section]):QVariant{};}
+    QVariant headerData(int section,Qt::Orientation orientation,int role)const override{if(role!=Qt::DisplayRole)return {};if(orientation==Qt::Vertical){
+            if(section>=rowHeaders_.size())return section+1;
+            const auto value=rowHeaders_[section];
+            return value.isDouble()?tableNumber::display(value.toDouble()):value.toVariant();
+        }return section<headers_.size()?QVariant(headers_[section]):QVariant{};}
 };
 }
 QString PerformanceDialog::defaultSolverDirectory(){
@@ -403,8 +434,14 @@ PerformanceDialog::PerformanceDialog(ModelSession& session,const QJsonObject& sc
     if(method_=="acceleration")CalculationPlot::prepareRenderer();
     setAttribute(Qt::WA_DontShowOnScreen,hidden);setProperty("calculation_title_source",schema["title"].toString());setWindowTitle(uiText(schema["title"].toString()));resize(1280,820);setMinimumSize(740,480);
     auto* outer=new QVBoxLayout(this);auto* toolbar=new QHBoxLayout;outer->addLayout(toolbar);toolbar->addStretch();
-    pages_=new QTabWidget;pages_->setObjectName("PerformancePages");pages_->setProperty("calculation_pages",true);outer->addWidget(pages_,1);
-    auto* split=new QSplitter;split->setProperty("calculation_page","general");pages_->addTab(split,uiText("常规"));
+    tabs_=new QTabWidget;tabs_->setObjectName("PerformancePages");tabs_->setProperty("calculation_pages",true);outer->addWidget(tabs_,1);
+    const auto addPage=[this](QWidget* page,const char* key,const char* caption){
+        page->setProperty("calculation_page",key);
+        tabs_->addTab(page,uiText(caption));
+        bindUiRefresh(page,[this,page,caption]{tabs_->setTabText(tabs_->indexOf(page),uiText(caption));});
+    };
+    auto* split=new QSplitter;parameterPage_=split;
+    addPage(split,"general","参数表");
     additional_=new QScrollArea;additional_->setWidgetResizable(true);additional_->setFrameShape(QFrame::NoFrame);
     additional_->setProperty("calculation_parameter_section","additional");
     additional_->viewport()->installEventFilter(this);
@@ -430,12 +467,11 @@ PerformanceDialog::PerformanceDialog(ModelSession& session,const QJsonObject& sc
     }
     auto* presetRow=new QHBoxLayout;auto* presetSave=button(uiText("保存参数…"),"save_parameters");auto* presetLoad=button(uiText("载入参数…"),"load_parameters");
     presetSave->setIcon(studioIcon("SaveAs"));presetLoad->setIcon(studioIcon("OpenFile"));
-    presetRow->addWidget(presetSave);presetRow->addWidget(presetLoad);presetRow->addStretch();outer->addLayout(presetRow);
+    presetRow->addWidget(presetSave);presetRow->addWidget(presetLoad);presetRow->addStretch();form->addLayout(presetRow);
     connect(presetSave,&QPushButton::clicked,this,[this]{const auto path=QFileDialog::getSaveFileName(this,uiText("保存计算参数"),preferenceFileLocation("save"),uiText("计算参数 (*.json)"));if(!path.isEmpty()){auto err=saveParameters(path);status_->setMessage(err.isEmpty()?uiText("参数已保存。"):err,err.isEmpty()?StudioMessageRole::Feedback:StudioMessageRole::Warning);}});
     connect(presetLoad,&QPushButton::clicked,this,[this]{const auto path=QFileDialog::getOpenFileName(this,uiText("载入计算参数"),preferenceFileLocation("open"),uiText("计算参数 (*.json)"));if(!path.isEmpty()){auto err=loadParameters(path);if(!err.isEmpty())showFailure(err);}});
-    auto* results=new QWidget;results->setProperty("calculation_page","results");auto* resultsLayout=new QVBoxLayout(results);resultsLayout->setContentsMargins(0,0,0,0);
-    tabs_=new QTabWidget;resultsLayout->addWidget(tabs_,1);pages_->addTab(results,uiText("结果"));
-    auto* tablePage=new QWidget;auto* tableLayout=new QVBoxLayout(tablePage);tableLayout->setContentsMargins(0,0,0,0);
+    auto* tablePage=new QWidget;resultPage_=tablePage;
+    auto* tableLayout=new QVBoxLayout(tablePage);tableLayout->setContentsMargins(0,0,0,0);
     auto* chooser=new QWidget(tablePage);
     auto* chooserLayout=new QHBoxLayout(chooser);chooserLayout->setContentsMargins(0,0,0,0);
     auto* tableLabel=new QLabel(uiText("查看表格"),chooser);
@@ -444,15 +480,18 @@ PerformanceDialog::PerformanceDialog(ModelSession& session,const QJsonObject& sc
     tableLabel->setBuddy(series_);chooserLayout->addWidget(tableLabel);chooserLayout->addWidget(series_);
     chooserLayout->addStretch();tableLayout->addWidget(chooser);chooser->hide();
     connect(series_,qOverload<int>(&QComboBox::currentIndexChanged),this,[this](int){renderSeries();});
-    table_=new QTableView;table_->setProperty("performance_table",true);table_->setModel(new PerformanceTable(table_));table_->setEditTriggers(QAbstractItemView::NoEditTriggers);table_->setAlternatingRowColors(false);tableLayout->addWidget(table_,1);tabs_->addTab(tablePage,uiText("曲线数据"));
+    table_=new QTableView;table_->setProperty("performance_table",true);table_->setModel(new PerformanceTable(table_));table_->setEditTriggers(QAbstractItemView::NoEditTriggers);table_->setAlternatingRowColors(false);tableLayout->addWidget(table_,1);addPage(tablePage,"results","结果表");
     applyStudioScrollbars(table_);
     const bool addedMassTable=method_=="addmass";
     auto font=table_->font();
     font.setPointSizeF(std::max(13.0,font.pointSizeF()));
     table_->setFont(font);
     configureStudioDataTable(table_,true,-1,addedMassTable);
-    plot_=new CalculationPlot;tabs_->addTab(plot_,uiText("曲线"));text_=new report::Browser;text_->setObjectName("PerformanceReport");tabs_->addTab(text_,uiText("报告"));
-    help_=new report::Browser;help_->setObjectName("PerformanceHelp");help_->setProperty("calculation_page","help");pages_->addTab(help_,uiText("方法说明"));
+    plot_=new CalculationPlot;addPage(plot_,"curve","曲线");
+    text_=new report::Browser;text_->setObjectName("PerformanceReport");addPage(text_,"report","报告");
+    help_=new report::Browser;help_->setObjectName("PerformanceHelp");addPage(help_,"help","方法说明");
+    for(auto* page:{resultPage_,plot_,static_cast<QWidget*>(text_)})
+        tabs_->setTabEnabled(tabs_->indexOf(page),false);
     status_=new StudioMessage(StudioMessageRole::Feedback);status_->enableMathNotation();status_->setObjectName("PerformanceStatus");outer->addWidget(status_);
     int exportPosition=0;toolbar->setSpacing(8);
     for(const auto& entry:QList<QPair<QString,QString>>{{"csv","表格数据"},{"txt","纯文本报告"},{"json","结构化数据"},{"pdf","打印版报告"}}){
@@ -466,9 +505,9 @@ PerformanceDialog::PerformanceDialog(ModelSession& session,const QJsonObject& sc
     connect(run_,&QPushButton::clicked,this,&PerformanceDialog::calculate);
     connect(cancel_,&QPushButton::clicked,this,[this]{if(preparingResult_){++resultGeneration_;preparingResult_=false;showFailure(uiText("计算已取消。"));return;}session_.cancelPerformance();if(session_.busy())status_->setMessage(uiText("正在取消计算…"),StudioMessageRole::Feedback,true);});
     setParameters(schema);
-    if(method_=="maneuver"){tabs_->setTabVisible(0,false);tabs_->setTabVisible(1,false);tabs_->setCurrentWidget(text_);}
-    if(method_=="addmass"){tabs_->setTabText(0,uiText("计算数据"));tabs_->setTabVisible(1,false);}
-    if(method_=="addmass"){preview_=new GridPreviewPanel(session_,"addmass",[this]{auto values=inputs()["values"].toObject();values["object_type"]=values["object_type"].toInt()+1;values["panel_type"]=values["panel_type"].toInt()+1;return values;});tabs_->addTab(preview_,uiText("型值预览"));
+    if(method_=="maneuver")tabs_->setTabVisible(tabs_->indexOf(tablePage),false);
+    if(method_=="maneuver"||method_=="addmass")tabs_->setTabVisible(tabs_->indexOf(plot_),false);
+    if(method_=="addmass"){preview_=new GridPreviewPanel(session_,"addmass",[this]{auto values=inputs()["values"].toObject();values["object_type"]=values["object_type"].toInt()+1;values["panel_type"]=values["panel_type"].toInt()+1;return values;});addPage(preview_,"preview","型值预览");
         for(auto* field:fields_){if(auto* n=qobject_cast<QDoubleSpinBox*>(field))connect(n,qOverload<double>(&QDoubleSpinBox::valueChanged),preview_,[this]{preview_->invalidate();});else if(auto* c=qobject_cast<QComboBox*>(field))connect(c,qOverload<int>(&QComboBox::currentIndexChanged),preview_,[this]{preview_->invalidate();});}}
     refreshState();
 }
@@ -572,7 +611,7 @@ void PerformanceDialog::setParameters(const QJsonObject& schema){
     const auto helpText=methodHelp::document(method_,result_);
     help_->setReport(helpText);
     help_->moveCursor(QTextCursor::Start);help_->verticalScrollBar()->setValue(0);
-    pages_->setTabVisible(pages_->indexOf(help_),!helpText.trimmed().isEmpty());refreshWindLabels();
+    tabs_->setTabVisible(tabs_->indexOf(help_),!helpText.trimmed().isEmpty());refreshWindLabels();
     QTimer::singleShot(0,this,[this,generation,generalScroll,extraScroll]{
         if(generation!=parameterGeneration_)return;
         parameters_->verticalScrollBar()->setValue(generalScroll);additional_->verticalScrollBar()->setValue(extraScroll);
@@ -809,8 +848,19 @@ void PerformanceDialog::applyResult(const QJsonObject& result,bool defaults,std:
         }
         timings["before_table_ms"]=timing.nsecsElapsed()/1e6;renderSeries();timings["after_table_ms"]=timing.nsecsElapsed()/1e6;
         const auto html=reportText(true);text_->setReport(html);
+        const bool hasPlot=std::any_of(state->data->curves.cbegin(),state->data->curves.cend(),
+                                      [](const auto& curve){return curve.finitePoints>0;});
+        const bool hasRows=result.contains("tables")
+            ?std::any_of(datasets.begin(),datasets.end(),[](const auto& table){return !table.toObject()["values"].toArray().isEmpty();})
+            :hasPlot||table_->model()->rowCount()>0;
+        const int resultIndex=tabs_->indexOf(resultPage_);
+        tabs_->setTabEnabled(resultIndex,hasRows);
+        tabs_->setTabEnabled(tabs_->indexOf(plot_),hasPlot);
+        tabs_->setTabEnabled(tabs_->indexOf(text_),!result_.isEmpty());
         completionMessage_=performanceFeedbackText(datasets.size(),method_=="addmass",result["elapsed_ms"].toDouble());
         status_->setMessage(completionMessage_,StudioMessageRole::Feedback);
+        if(tabs_->currentWidget()==parameterPage_)
+            tabs_->setCurrentWidget(hasRows&&tabs_->isTabVisible(resultIndex)?resultPage_:text_);
     }
     if(!result["parameter_record_error"].toString().isEmpty())status_->setMessage(result["parameter_record_error"].toString(),StudioMessageRole::Warning);
     refreshState();timings["total_ms"]=timing.nsecsElapsed()/1e6;setProperty("performance_receive_timings",timings);
