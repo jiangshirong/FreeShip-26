@@ -320,7 +320,9 @@ void MainWindow::buildStudioShell() {
     auto* about=action(uiText("关于"),"Info");
     about->setProperty("studio_opens_dialog",true);
     about->setProperty("operation","about");
-    installStudioUpdates(this,about,workflow_,[this](std::function<void()> action){withSavedChanges(std::move(action));});
+    installStudioUpdates(this,about,workflow_,[this](std::function<void()> action){
+        if(documentWindows().size()>1){showError(uiText("请先关闭其他船模窗口，再安装更新。"));return;}
+        withSavedChanges(std::move(action));});
     connect(about,&QAction::triggered,this,[this]{showFreeShipAbout(this);});
     auto* bar=new StudioBar(this);studioBar_=bar;
     auto* shortcuts=action(uiText("快捷方式"),"Shortcuts","shortcut_guide");
@@ -336,7 +338,8 @@ void MainWindow::buildStudioShell() {
     bar->addGroup({tutorial,shortcuts,about},QColor(241,235,243));
     auto* header=new QWidget(this);auto* headerLayout=new QVBoxLayout(header);
     headerLayout->setContentsMargins(0,0,0,0);headerLayout->setSpacing(0);
-    headerLayout->addWidget(createStudioCaption(this));headerLayout->addWidget(bar);setMenuWidget(header);
+    if(!workspace_)headerLayout->addWidget(createStudioCaption(this));
+    headerLayout->addWidget(bar);setMenuWidget(header);
     addToolBar(Qt::RightToolBarArea,bar->sideBar());
 }
 void MainWindow::layoutViews() {

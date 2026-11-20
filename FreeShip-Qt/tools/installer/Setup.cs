@@ -277,7 +277,7 @@ static class Setup {
     }
     static void DesktopLink(bool create) {
         var directory=Test?Path.Combine(Cache,"test-desktop"):Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory);
-        if(String.IsNullOrEmpty(directory))throw new DirectoryNotFoundException();
+        if(String.IsNullOrEmpty(directory))throw new DirectoryNotFoundException(T("无法找到桌面文件夹。"));
         var dest=Path.Combine(directory,Identity.Name+".lnk");var receipt=Path.Combine(Cache,"desktop-link.sha256");
         NoLinks(dest);NoLinks(receipt);
         bool owned=File.Exists(dest)&&File.Exists(receipt)&&Hash(dest)==File.ReadAllText(receipt);
@@ -294,9 +294,16 @@ static class Setup {
         try {Save(Path.Combine(Cache,"last-result.json"),Report);}catch(IOException) {}
         return code;
     }
+    [DllImport("user32.dll")]
+    static extern bool PrintWindow(IntPtr window,IntPtr target,uint flags);
     static void CaptureReview(Form form,string filename) {
-        using(var bitmap=new System.Drawing.Bitmap(form.Width,form.Height)) {
-            form.DrawToBitmap(bitmap,new System.Drawing.Rectangle(0,0,form.Width,form.Height));
+        form.Refresh();
+        using(var bitmap=new System.Drawing.Bitmap(form.Width,form.Height))
+        using(var graphics=System.Drawing.Graphics.FromImage(bitmap)) {
+            IntPtr target=graphics.GetHdc();
+            try {
+                if(!PrintWindow(form.Handle,target,2))throw new IOException("Could not capture the live installer window");
+            } finally {graphics.ReleaseHdc(target);}
             bitmap.Save(Path.Combine(Path.GetDirectoryName(ReportPath),filename),System.Drawing.Imaging.ImageFormat.Png);
         }
     }
@@ -333,14 +340,11 @@ static class Setup {
                 var path=form.Destination;var browse=form.Browse;var language=form.Language;
                 var shortcut=form.Shortcut;var launch=form.Launch;var reset=form.Reset;var start=form.ActionButton;
                 browse.Click+=delegate {
-                    using(var picker=new FolderBrowserDialog {Description=T("选择安装文件夹"),ShowNewFolderButton=true}) {
-                        // An initial destination need not exist yet. Open at its nearest existing parent.
-                        try {
-                            var dir=new DirectoryInfo(path.Text);
-                            while(dir!=null&&!dir.Exists)dir=dir.Parent;
-                            if(dir!=null)picker.SelectedPath=dir.FullName;
-                        } catch(ArgumentException) {} catch(IOException) {} catch(NotSupportedException) {}
-                        if(picker.ShowDialog(form)==DialogResult.OK)path.Text=picker.SelectedPath;
+                    try {
+                        string selected=InstallerFolderPicker.Browse(form,T("选择安装文件夹"),path.Text);
+                        if(selected!=null)path.Text=selected;
+                    } catch(System.Runtime.InteropServices.COMException ex) {
+                        MessageBox.Show(form,ex.Message,T("选择安装文件夹"),MessageBoxButtons.OK,MessageBoxIcon.Error);
                     }
                 };
                 foreach(var option in InstallerLanguage.Options) {language.Items.Add(option);if(option.Id==InstallerLanguage.Id)language.SelectedItem=option;}
@@ -371,7 +375,7 @@ static class Setup {
                         if(result==0){
                             if(!Uninstall&&launch.Checked&&Convert.ToString(Report["status"])=="installed"){
                                 try {Process.Start(new ProcessStartInfo(Path.Combine(Target,"FreeShipQt.exe")){WorkingDirectory=Target,UseShellExecute=false});}
-                                catch(Exception ex){MessageBox.Show(form,ex.Message,Identity.Name,MessageBoxButtons.OK,MessageBoxIcon.Warning);}
+                                catch(Exception ex){MessageBox.Show(form,T("无法启动 FreeShip 26。")+Environment.NewLine+ex.Message,Identity.Name,MessageBoxButtons.OK,MessageBoxIcon.Warning);}
                             }
                             form.Close();return;
                         }
@@ -386,7 +390,7 @@ static class Setup {
                         var intro=form.FeedbackText;finished=true;result=0;applyLanguage();var completed=form.FeedbackText;finished=false;applyLanguage();
                         form.SetRunning(true);form.ShowFeedback(T("正在安装程序……"),false);Application.DoEvents();
                         bool progressState=form.ShowsProgress&&!start.Visible&&!language.Enabled&&!path.Enabled;
-                        if(option.Id=="zh")CaptureReview(form,"installer-zh-progress.png");
+                        if(option.Id=="zh"||option.Id=="ru")CaptureReview(form,"installer-"+option.Id+"-progress.png");
                         form.SetRunning(false);applyLanguage();Application.DoEvents();
                         states.Add(new {id=InstallerLanguage.Id,title=form.Text,heading=form.SectionCaption,intro=intro,completed=completed,start=start.Text,
                             language=language.AccessibleName,location=path.AccessibleName,target=path.Text,visible=form.Visible,progress_state=progressState,ready_state=!form.ShowsProgress&&start.Visible&&language.Enabled,
@@ -398,6 +402,6 @@ static class Setup {
                 Application.Run(form);
             }
             return result;
-        } catch(Exception ex) {if(!Quiet)MessageBox.Show(ex.Message,T("FreeShip 26 安装"),MessageBoxButtons.OK,MessageBoxIcon.Error);return 1603;}
+        } catch(Exception ex) {if(!Quiet)MessageBox.Show(ex.Message,Uninstall?Identity.Name+T(" 卸载"):T("FreeShip 26 安装"),MessageBoxButtons.OK,MessageBoxIcon.Error);return 1603;}
     }
 }

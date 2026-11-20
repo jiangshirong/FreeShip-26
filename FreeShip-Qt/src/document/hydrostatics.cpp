@@ -154,6 +154,7 @@ struct Hydrostatics::Impl {
     bool asymmetric=false,prepared=false;
     QString encoding;
     QString layerNamePrefix;
+    QJsonObject principalDimensions;
     double buildMs=0;
     std::map<std::array<float,4>,std::vector<CutSegment>> fullCuts;
     size_t fullCutSegments=0;
@@ -170,6 +171,7 @@ struct Hydrostatics::Impl {
         meshSource=meshInputs(source);meshOrder=orderInputs(bindings);
         encoding=bindings.value("fbm_encoding").toString("cp1252");
         layerNamePrefix=bindings.value("layer_name_prefix").toString("Layer");
+        principalDimensions=source.calculationParameters()["principal_dimensions"].toObject();
         // Layer / control-face / child order is part of Single accumulation.
         std::map<qint64,size_t> ids;auto faceIds=bindings["faces"].toArray(),orders=bindings["layer_faces"].toArray();
         for(qsizetype i=0;i<faceIds.size();++i)ids.emplace(faceIds[i].toInteger(),size_t(i));
@@ -355,15 +357,25 @@ struct Hydrostatics::Impl {
     // Orthographic XZ silhouette of the actual clipped hydrostatic surface.
     // Neither a centreplane section nor a sum of face areas handles overlapping
     // hulls and through-holes. Union preserves both without screen rasterization.
-    Area projectedArea(const Plane &water,bool above,Job &job) {
+    Area projectedArea(const Plane &water,bool above,Job &job,const Rotation* rotation=nullptr) {
         using namespace Clipper2Lib;
         const auto key=std::make_pair(water.coefficients(),above);
-        job.check();auto found=projections.find(key);if(found!=projections.end())return found->second;
-        const double span=std::max(double(maximum.x)-minimum.x,double(maximum.z)-minimum.z);
+        job.check();if(!rotation)if(auto found=projections.find(key);found!=projections.end())return found->second;
+        // For a tilted waterline use the longitudinal vertical plane in the
+        // level frame; keep the existing model-side projection for other callers.
+        auto level=[&](CutPoint p){
+            if(!rotation)return p;
+            const auto& r=*rotation;
+            const double z=p.y*r.sh+(p.z-r.keel)*r.ch;
+            return CutPoint{p.x*r.ct+z*r.st,p.y*r.ch-(p.z-r.keel)*r.sh,-p.x*r.st+z*r.ct+r.keel};
+        };
+        double span=std::max(double(maximum.x)-minimum.x,double(maximum.z)-minimum.z);
+        if(rotation)span=2*std::max(span,2*std::max(std::abs(double(minimum.y)),std::abs(double(maximum.y))));
         if(!(span>0))return {};
         // Recenter before quantization. A 1e12 grid is much finer than stored
         // Single geometry, while staying below Clipper's 1e15 accuracy limit.
-        const double ox=(double(minimum.x)+maximum.x)*.5,oz=(double(minimum.z)+maximum.z)*.5,scale=1e12/span;
+        const auto origin=level({(double(minimum.x)+maximum.x)*.5,0,(double(minimum.z)+maximum.z)*.5});
+        const double ox=origin.x,oz=origin.z,scale=1e12/span;
         auto signedDoubleArea=[](const Path64& path) {
             long double sum=0;auto a=path.back();
             for(const auto& b:path){sum+=static_cast<long double>(a.x)*b.y-static_cast<long double>(b.x)*a.y;a=b;}
@@ -396,7 +408,7 @@ struct Hydrostatics::Impl {
                 for(size_t i=2;i<face.points.size();++i) {
                     const std::array<CutPoint,3> triangle{point(0),point(i-1),point(i)};
                     Path64 path;auto a=triangle.back();double da=evaluate(water,a)*(above?-1:1);
-                    auto append=[&](CutPoint p){path.emplace_back(std::llround((p.x-ox)*scale),std::llround((p.z-oz)*scale));};
+                    auto append=[&](CutPoint p){p=level(p);path.emplace_back(std::llround((p.x-ox)*scale),std::llround((p.z-oz)*scale));};
                     for(const auto b:triangle) {
                         const double db=evaluate(water,b)*(above?-1:1);
                         if((da<0 && db>0)||(da>0 && db<0))append(mix(a,b,da/(da-db)));
@@ -423,7 +435,50 @@ struct Hydrostatics::Impl {
         }
         Area result;
         if(area2>0){result.value=float(area2/(2*scale*scale));result.cog={float(ox+mx/(3*area2*scale)),0,float(oz+mz/(3*area2*scale))};}
-        if(projections.size()>=512)projections.clear();projections.emplace(key,result);return result;
+        if(!rotation){if(projections.size()>=512)projections.clear();projections.emplace(key,result);}
+        return result;
+    }
+
+    QJsonObject aboveWaterGeometry(float draft,float heel,float trim,Job& job) {
+        const auto plane=waterline(draft,heel,trim);
+        const auto& n=plane.coefficients();
+        const Rotation rotate(heel,trim,settings.geometry.length,keel);
+        const auto wind=projectedArea(plane,true,job,heel!=0||trim!=0?&rotate:nullptr);
+        if(!(wind.value>0))return {};
+        const double levelWater=double(rotate({0,0,-n[3]/n[2]}).z)+keel;
+        QJsonObject result{{"wind_projection_area",wind.value},{"wind_centroid_x",wind.cog.x},
+            {"wind_centroid_z",wind.cog.z},{"wind_centroid_height",double(wind.cog.z)-levelWater}};
+        if(const auto fp=principalDimensions["forward_perpendicular_m"];fp.isDouble()){
+            const float x=float(fp.toDouble()/(settings.geometry.imperial?0.3048:1.));
+            const float z=-(n[0]*x+n[3])/n[2];
+            result["wind_centroid_distance_from_fp"]=std::abs(double(rotate({x,0,z}).x)-wind.cog.x);
+        }
+        // FBM does not tag deck faces. Use a named deck layer and an actual
+        // shared deck/shell edge; a naked boundary may be an unrelated opening.
+        static const QStringList deckNames{"deck","main deck","weather deck",QStringLiteral("甲板"),QStringLiteral("主甲板")};
+        std::vector<bool> deck(input.layers.size());bool haveDeck=false;
+        for(size_t i=0;i<input.layers.size();++i){
+            deck[i]=deckNames.contains(decodeFbmText(QByteArray::fromStdString(input.layers[i].name),encoding).simplified().toCaseFolded());
+            haveDeck=haveDeck||deck[i];
+        }
+        if(!haveDeck)return result;
+        auto height=[&](Vec3 p){return evaluate(plane,{p.x,p.y,p.z})/std::hypot(double(n[0]),double(n[1]),double(n[2]));};
+        double minHeight=std::numeric_limits<double>::infinity();size_t checked=0;
+        for(const auto& edge:mesh.edges){
+            if(++checked%1024==0)job.check();
+            if(edge.faces.size()!=2)continue;
+            const auto a=mesh.faces[edge.faces[0]].layer,b=mesh.faces[edge.faces[1]].layer;
+            if(deck[a]==deck[b])continue;
+            const auto& shell=input.layers[deck[a]?b:a];
+            if(!shell.useInHydrostatics)continue;
+            const auto p=mesh.points[edge.points[0]].position,q=mesh.points[edge.points[1]].position;
+            if(std::abs(p.y)<1e-7&&std::abs(q.y)<1e-7)continue;
+            minHeight=std::min({minHeight,height(p),height(q)});
+            if(shell.symmetric&&input.layers[deck[a]?a:b].symmetric)
+                minHeight=std::min({minHeight,height({p.x,-p.y,p.z}),height({q.x,-q.y,q.z})});
+        }
+        if(std::isfinite(minHeight))result["deck_edge_min_height"]=minHeight;
+        return result;
     }
 
     std::vector<SectionCurve> curves(const Plane &plane,Job &job) {
@@ -926,6 +981,7 @@ bool Hydrostatics::updateCompatibleSource(const Fbm &source,const QJsonObject &b
         h.presentationResult={};h.singleResults.clear();h.auxiliaryResults.clear();
     }
     if(h.encoding!=bindings.value("fbm_encoding").toString("cp1252"))h.auxiliaryResults.clear();
+    h.principalDimensions=source.calculationParameters()["principal_dimensions"].toObject();
     h.settings=std::move(next);h.encoding=bindings.value("fbm_encoding").toString("cp1252");h.layerNamePrefix=bindings.value("layer_name_prefix").toString("Layer");return true;
 }
 float Hydrostatics::presentationCreaseSplit() {
@@ -1057,7 +1113,20 @@ QJsonObject Hydrostatics::calculate(const QJsonObject &request,const QString &ca
             }
         } else for(double draft:drafts) {
             job.check();
-            try {rows.append(h.single(float(draft),float(heel),float(trim),job));}
+            try {
+                auto row=h.single(float(draft),float(heel),float(trim),job);
+                // Compute this once for the design report, not for draft series,
+                // resistance jobs, or other consumers of the basic hydro row.
+                if(mode=="single"&&request["include_auxiliary"].toBool()&&row["status"]=="ok"){
+                    try {
+                        const auto geometry=h.aboveWaterGeometry(float(draft),float(heel),float(trim),job);
+                        if(!geometry.isEmpty())row["above_water_geometry"]=geometry;
+                    } catch(const Cancelled&){throw;} catch(const std::exception&) {
+                        // Optional geometry cannot invalidate a completed hydro result.
+                    }
+                }
+                rows.append(row);
+            }
             catch(const Cancelled &) {throw;} catch(const std::exception &e) {rows.append(QJsonObject{{"status","error"},{"message",QString::fromUtf8(e.what())},{"draft",draft},{"heel",heel},{"trim",trim}});}
             if(progress)progress(int(rows.size()),total);
         }

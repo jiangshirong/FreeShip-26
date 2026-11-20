@@ -1,5 +1,7 @@
 // Retained hidden-process observation of the production startup/open/save paths.
 #include "main_window.h"
+#include "document_workspace.h"
+#include <QAbstractButton>
 #include "ui_language.h"
 #include "project_dialog.h"
 #include "exchange_dialog.h"
@@ -49,6 +51,7 @@
 #include <QContextMenuEvent>
 #include <QCryptographicHash>
 #include <QTabWidget>
+#include <QTabBar>
 #include <QKeyEvent>
 #include <QMouseEvent>
 #include <QFileDialog>
@@ -77,6 +80,9 @@ private:
 };
 }
 #include <QPointer>
+#include <QDropEvent>
+#include <QMimeData>
+#include <QThread>
 #ifdef Q_OS_WIN
 #ifndef NOMINMAX
 #define NOMINMAX
@@ -86,6 +92,51 @@ private:
 // Only the explicitly requested hidden startup probe can kill its own service.
 // This is an actual QProcess exit, not a simulated successful recovery reply.
 struct BackendExitProbe {static void terminate(ModelSession& s){s.process_.kill();}};
+void MainWindow::verifyDocumentWindows(const QString& request,const QString& output){
+    workflowOutput_=output;workflowTimer_.start();QFile input(request);
+    if(!input.open(QIODevice::ReadOnly)){finishWorkflow("Missing request");return;}
+    const auto p=QJsonDocument::fromJson(input.readAll()).object();const auto a=p["a"].toString(),b=p["b"].toString();
+    if(!workspace_){finishWorkflow("Missing tab workspace");return;}
+    setAttribute(Qt::WA_DeleteOnClose,false); // Keep the observer until its final report is written.
+    auto* host=workspace_;auto* tabs=host->tabBar();host->resize(1000,720);host->show();
+    auto drop=[&](const QList<QUrl>& urls){QMimeData mime;mime.setUrls(urls);
+        QDragEnterEvent enter({1,1},Qt::CopyAction,&mime,Qt::LeftButton,Qt::NoModifier);QApplication::sendEvent(host,&enter);
+        if(!enter.isAccepted())return false;
+        QDropEvent drop(QPointF(1,1),Qt::CopyAction,&mime,Qt::LeftButton,Qt::NoModifier);QApplication::sendEvent(host,&drop);return drop.isAccepted();};
+    auto wait=[](auto predicate){QElapsedTimer timer;timer.start();while(!predicate()&&timer.elapsed()<20000){QCoreApplication::processEvents(QEventLoop::AllEvents,30);QThread::msleep(5);}return predicate();};
+    workflowCase("irrelevant-and-remote-drops-ignored",!drop({QUrl("https://example.invalid/ship.fbm"),QUrl::fromLocalFile(request)}));
+    workflowCase("multi-file-drop-accepted",drop({QUrl::fromLocalFile(a),QUrl::fromLocalFile(b),QUrl::fromLocalFile(a)}));
+    workflowCase("new-document-tabs-use-source-names-immediately",tabs->count()==2&&tabs->tabText(0)==QFileInfo(a).fileName()&&tabs->tabText(1)==QFileInfo(b).fileName());
+    QPointer<MainWindow> other=windowForFile(b);
+    if(!other||other==this||!wait([&]{return session_.ready()&&other->session_.ready()&&!session_.busy()&&!other->session_.busy();})){finishWorkflow("Both dropped models must load");return;}
+    workflowCase("independent-documents-and-deduplicated-load",documentWindows().size()==2&&windowForFile(a)==this&&session_.model()->documentId!=other->session_.model()->documentId);
+    const auto id=other->session_.model()->documentId;const auto rev=other->session_.model()->revision;
+    const bool edited=session_.updateLayer(session_.model()->layers.front().id,{{"name","QA temporary name"}})&&wait([&]{return !session_.busy();});
+    openDocument(b);
+    workflowCase("switch-preserves-edit-and-isolates-undo",edited&&session_.modified()&&session_.canUndo()&&!other->session_.modified()&&!other->session_.canUndo()&&other->session_.model()->revision==rev&&documentWindows().size()==2);
+    workflowCase("one-frame-two-tabs",!isWindow()&&!other->isWindow()&&window()==host&&other->window()==host&&host->active()==other&&tabs->count()==2&&other->isVisible()&&!isVisible());
+    workflowCase("caption-filenames-and-full-path-tooltips",host->windowTitle()=="FreeShip 26"&&tabs->tabText(0)==QFileInfo(a).fileName()+" *"&&tabs->tabText(1)==QFileInfo(b).fileName()&&QFileInfo(tabs->tabToolTip(0))==QFileInfo(a)&&QFileInfo(tabs->tabToolTip(1))==QFileInfo(b));
+    tabs->setCurrentIndex(0);workflowCase("select-tab-restores-editor",host->active()==this&&isVisible()&&!other->isVisible());
+    bool cancelSeen=false;
+    QTimer::singleShot(0,this,[&]{if(auto* box=qobject_cast<QMessageBox*>(QApplication::activeModalWidget())){cancelSeen=true;box->button(QMessageBox::Cancel)->click();}});
+    const bool closed=host->close();
+    workflowCase("cancel-close-keeps-dirty-document",cancelSeen&&!closed&&isVisible()&&session_.modified()&&documentWindows().size()==2);
+    const bool undone=session_.undo()&&wait([&]{return !session_.busy();})&&session_.model()->layers.front().name!="QA temporary name";
+    const bool redone=session_.redo()&&wait([&]{return !session_.busy();})&&session_.model()->layers.front().name=="QA temporary name";
+    workflowCase("undo-redo-affects-only-active-document",undone&&redone&&other->session_.model()->revision==rev&&!other->session_.modified());
+    const auto saved=p["saved"].toString();workflowCase("save-edited-model",session_.save(saved)&&wait([&]{return !session_.busy();})&&!session_.modified()&&QFileInfo(session_.sourcePath())==QFileInfo(saved));
+    workflowCase("save-as-renames-tab",tabs->tabText(0)==QFileInfo(saved).fileName()&&QFileInfo(tabs->tabToolTip(0))==QFileInfo(saved));
+    QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+    if(auto* caption=host->menuWidget()){
+        const auto path=workflowOutput_+"/document-tabs.png";
+        if(caption->grab().save(path))workflowArtifacts_["document_tabs_image"]="document-tabs.png";
+    }
+    const auto closeButton=[&](QTabBar::ButtonPosition side){return qobject_cast<QAbstractButton*>(tabs->tabButton(0,side));};
+    auto* close=closeButton(QTabBar::RightSide);if(!close)close=closeButton(QTabBar::LeftSide);
+    if(close)close->click();
+    workflowCase("closing-first-keeps-second",close&&documentWindows().size()==1&&other->isVisible()&&other->session_.model()->documentId==id&&other->session_.ready());
+    host->close();workflowCase("closed-documents-leave-registry",documentWindows().isEmpty());finishWorkflow();
+}
 void MainWindow::verifyStartup(const QString& request,const QString& output){
     startupProbe_=true;workflowOutput_=QFileInfo(output).absoluteFilePath();workflowTimer_.start();
     QDir().mkpath(workflowOutput_);QFile file(request);

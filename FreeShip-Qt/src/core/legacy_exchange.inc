@@ -44,7 +44,7 @@ void writePart(QIODevice& file,const ModelSnapshot& m,const Options& o){
     if(file.write(data)!=data.size())bad("部件文件写入失败。");
 }
 Document waves(const QByteArray& bytes){
-    auto lines=text(bytes).split('\n');for(auto& s:lines)s=s.trimmed();while(!lines.isEmpty()&&lines.back().isEmpty())lines.removeLast();
+    auto lines=decodeExchangeText(bytes, false).split('\n');for(auto& s:lines)s=s.trimmed();while(!lines.isEmpty()&&lines.back().isEmpty())lines.removeLast();
     if(lines.size()<15)bad("波形文件不完整。");bool sector=lines[0]=="SECTORIAL PATCH";if(!sector&&lines[0]!="RECTANGULAR PATCH")bad("仅支持 Michlet 矩形或扇形波高文件。");
     auto csv=[&](int row){if(row>=lines.size())bad("波形文件已截断。");auto cells=lines[row].split(',');if(cells.back().isEmpty())cells.removeLast();for(auto& c:cells)c=c.trimmed();return cells;};
     auto a=csv(4),b=csv(6);sizeIs(a,3);sizeIs(b,3);number(a[0]);number(a[1]);number(b[0]);number(b[1]);int nx=integer(a[2],2,10000),ny=integer(b[2],2,10000);

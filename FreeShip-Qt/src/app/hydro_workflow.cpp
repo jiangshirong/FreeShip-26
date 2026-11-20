@@ -527,7 +527,7 @@ void MainWindow::hydroStep(const QString& operation){
                     if(entry.isEmpty()){workflowCase("auxiliary-missing-"+QString::number(i),false);continue;}
                     // Exercise the production selector's clicked connection, not only
                     // the private selection helper. Start from a different page.
-                    hydroDialog_->selectAuxiliary((i+1)%4);
+                    hydroDialog_->selectAuxiliary(i==0?1:0);
                     QToolButton* choice=nullptr;
                     for(auto* button:hydroDialog_->findChildren<QToolButton*>())
                         if(button->property("auxiliary_index").isValid()&&button->property("auxiliary_index").toInt()==i)choice=button;

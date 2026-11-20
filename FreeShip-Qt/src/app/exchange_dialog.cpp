@@ -28,9 +28,33 @@
 #include <QDir>
 #include <QSaveFile>
 #include <QSpinBox>
+#include <QRegularExpression>
 #include <QTabWidget>
 #include <cmath>
 namespace {
+QString localizedExchangeError(const QString& source){
+    // Translate only the known diagnostic framing; values and file contents
+    // after a diagnostic prefix belong to the imported/exported data.
+    for(const auto* wrapper:{"模型交接：","曲线导入："}){
+        const auto prefix=QString::fromUtf8(wrapper);
+        if(source.startsWith(prefix)){
+            const auto caption=uiText(prefix);
+            return caption+(caption==prefix?QString{}:QStringLiteral(" "))+localizedExchangeError(source.mid(prefix.size()));
+        }
+    }
+    static const QRegularExpression line(QStringLiteral("^(OBJ|Polycad) 第 ([0-9]+) 行：(.*)$"));
+    if(const auto match=line.match(source);match.hasMatch())
+        return uiText(match.captured(1)+QStringLiteral(" 第 %1 行：%2")).arg(match.captured(2),localizedExchangeError(match.captured(3)));
+    for(const auto* framing:{"无效数字：","数量或单位标识无效：","无效或超出范围的数字：","无效的索引或数量：",
+                              "无效的布尔值：","VRML 缺少 ","VRML 节点暂不支持，未导入部分模型：","VRML 字段重复：","VRML 字段暂不支持："}){
+        const auto prefix=QString::fromUtf8(framing);
+        if(source.startsWith(prefix)){
+            const auto caption=uiText(prefix);
+            return caption+(caption==prefix||caption.endsWith(' ')?QString{}:QStringLiteral(" "))+source.mid(prefix.size());
+        }
+    }
+    return uiText(source);
+}
 bool sectionFormat(const QString& f){return f=="dxfcrease"||f=="offset_table"||f=="michlet"||f=="addmass"||f=="ghs"||f=="arch_hll"||f=="arch_app"||f=="pam";}
 bool metricFormat(const QString& f){return f=="michlet"||f=="addmass"||f=="arch_hll"||f=="arch_app"||f=="pam";}
 bool fileUnits(const QString& f){return f=="part"||f=="waves"||f=="fef"||f=="chines"||f=="surface"||f=="hull";}
@@ -182,7 +206,7 @@ void ExchangeDialog::refreshState(){
 }
 void ExchangeDialog::reject(){if(exporting_){cancelled_=true;exportProcess_.kill();status_->setMessage(uiText("正在取消导出…"),StudioMessageRole::Feedback,true);}else if(!session_.busy())QDialog::reject();else if(format_=="iges"){session_.cancelCad();status_->setMessage(uiText("正在取消曲面生成…"),StudioMessageRole::Feedback,true);}}
 QString ExchangeDialog::failure()const{return status_->property("error").toString();}
-void ExchangeDialog::showFailure(const QString& error){status_->setProperty("error",error);status_->setMessage(error,StudioMessageRole::Warning);refreshState();}
+void ExchangeDialog::showFailure(const QString& error){const auto message=localizedExchangeError(error);status_->setProperty("error",message);status_->setMessage(message,StudioMessageRole::Warning);refreshState();}
 void ExchangeDialog::imported(){succeeded_=true;accept();}
 void ExchangeDialog::receiveCad(const QJsonObject& data){
     if(pendingCadPath_.isEmpty())return;

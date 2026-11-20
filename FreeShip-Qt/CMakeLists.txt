@@ -77,7 +77,7 @@ target_sources(property_ui PRIVATE src/app/preferences_store.cpp src/app/prefere
 target_link_libraries(property_ui PUBLIC fbm_document)
 target_link_libraries(property_ui PUBLIC model_core Qt6::Widgets ui_language)
 target_compile_options(property_ui PRIVATE -Wall -Wextra)
-add_executable(FreeShipQt WIN32 src/main.cpp src/app/model_session.cpp src/app/main_window.cpp src/app/file_history.cpp src/app/startup.cpp src/app/startup_workflow.cpp src/app/display_workflow.cpp src/app/auxiliary_workflow.cpp src/app/advanced_actions.cpp src/app/advanced_workflow.cpp src/app/modeling_actions.cpp src/app/modeling_workflow.cpp src/app/editing_workflow.cpp src/app/studio_actions.cpp src/app/topology_workflow.cpp src/app/sections_workflow.cpp src/app/overlay_workflow.cpp src/app/background_actions.cpp src/app/background_workflow.cpp)
+add_executable(FreeShipQt WIN32 src/main.cpp src/app/model_session.cpp src/app/main_window.cpp src/app/file_history.cpp src/app/startup.cpp src/app/document_workspace.cpp src/app/startup_workflow.cpp src/app/display_workflow.cpp src/app/auxiliary_workflow.cpp src/app/advanced_actions.cpp src/app/advanced_workflow.cpp src/app/modeling_actions.cpp src/app/modeling_workflow.cpp src/app/editing_workflow.cpp src/app/studio_actions.cpp src/app/topology_workflow.cpp src/app/sections_workflow.cpp src/app/overlay_workflow.cpp src/app/background_actions.cpp src/app/background_workflow.cpp)
 target_sources(FreeShipQt PRIVATE src/app/close_controls_workflow.cpp)
 target_sources(FreeShipQt PRIVATE src/app/update_controller.cpp)
 if(WIN32)

@@ -5,7 +5,7 @@
 #include "native/geometry.h"
 #include <QHash>
 #include <QSet>
-#include <QStringDecoder>
+#include "exchange_text.h"
 #include <algorithm>
 #include <cmath>
 #include <map>
@@ -28,8 +28,7 @@ struct Reader {
     QStringList lines;int at=0;
     explicit Reader(const QByteArray& bytes){
         if(bytes.count('\n')>400000)bad("文件行数超过 400000。");
-        QStringDecoder decode(QStringDecoder::Utf8);QString text=decode(bytes);
-        if(decode.hasError()||text.contains(QChar(0)))bad("文件须为 UTF-8，不能含空字符。");
+        const QString text=decodeExchangeText(bytes);
         lines=text.split('\n');for(auto& s:lines){if(s.endsWith('\r'))s.chop(1);if(s.size()>16384)bad("单行记录过长。");}
     }
     QString next(){if(at>=lines.size())bad("文件被截断。");return lines[at++];}

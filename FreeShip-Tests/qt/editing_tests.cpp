@@ -14,6 +14,7 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QLineEdit>
+#include <QLabel>
 #include <QKeyEvent>
 #include <QMouseEvent>
 #include <QPlainTextEdit>
@@ -67,7 +68,16 @@ static void pendingText(QDoubleSpinBox* spin,const QString& text) {
     line->selectAll();QKeyEvent event(QEvent::KeyPress,Qt::Key_unknown,Qt::NoModifier,text);QApplication::sendEvent(line,&event);
 }
 int main(int argc,char**argv) {
-    QApplication app(argc,argv);if(argc!=3)return 3;
+    QApplication app(argc,argv);
+    if(app.arguments().value(1)=="--encoding-labels") {
+        auto m=fixture();m->textEncoding="cp1252";
+        ProjectDialog project(*m);LayerPanel layers;layers.setSnapshot(m);layers.setSelectedLayerId(1);
+        for(auto* widget:{static_cast<QWidget*>(&project),static_cast<QWidget*>(&layers)})
+            for(auto* label:widget->findChildren<QLabel*>())
+                if(label->text().contains(m->textEncoding,Qt::CaseInsensitive))return 1;
+        return 0;
+    }
+    if(argc!=3)return 3;
     const QString input=app.arguments()[1],out=app.arguments()[2];QDir().mkpath(out);
     QJsonArray cases;QJsonObject report;bool failed=false;
     auto check=[&](QString id,bool ok){cases.append(QJsonObject{{"id",id},{"status",ok?"pass":"fail"}});failed|=!ok;};

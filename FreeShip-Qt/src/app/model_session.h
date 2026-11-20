@@ -103,6 +103,7 @@ public:
     int layerIdHighWater() const { return layerIdHighWater_; }
     int historyStates() const { return historyStates_; }
     bool canRedo() const { return ready() && canRedo_; }
+    QString pendingFilePath() const { return !busy_ ? QString{} : method_=="load" ? pendingSource_ : method_=="save" ? pendingSave_ : QString{}; }
     QString sourcePath() const { return sourcePath_; }
     QString lastBackupPath()const{return lastBackupPath_;}
     QString modelPath() const { return modelPath_; }

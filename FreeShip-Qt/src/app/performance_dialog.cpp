@@ -831,7 +831,7 @@ void PerformanceDialog::openDatabaseViewer(){
     process->setStandardOutputFile(QProcess::nullDevice());process->setStandardErrorFile(QProcess::nullDevice());
     connect(process,&QProcess::errorOccurred,this,[this,process,work](QProcess::ProcessError error){if(error!=QProcess::FailedToStart)return;databaseViewer_=nullptr;process->deleteLater();showFailure(uiText("数据库查看器无法启动：")+process->errorString());});
     connect(process,qOverload<int,QProcess::ExitStatus>(&QProcess::finished),this,[this,process,work](int code,QProcess::ExitStatus state){databaseViewer_=nullptr;process->deleteLater();setProperty("database_viewer_exit",code);refreshState();if(state!=QProcess::NormalExit||code!=0)showFailure(uiText("数据库查看器异常退出，原计算结果已保留。"));else{status_->setMessage(uiText("数据库查看器已关闭。"),StudioMessageRole::Feedback);calculate();}});
-    try{fs::platform::prepareLegacySolver(*process,uiText(fs::platform::legacySolverWineMissing));}catch(const std::exception& e){databaseViewer_=nullptr;process->deleteLater();showFailure(QString::fromUtf8(e.what()));return;}
+    try{fs::platform::prepareLegacySolver(*process,uiText(fs::platform::legacySolverWineMissing));}catch(const std::exception& e){databaseViewer_=nullptr;process->deleteLater();showFailure(uiText(QString::fromUtf8(e.what())));return;}
     setProperty("database_viewer_exit",QVariant{});process->start();refreshState();
 }
 void PerformanceDialog::renderSeries(){

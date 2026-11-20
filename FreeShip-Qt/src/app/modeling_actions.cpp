@@ -120,7 +120,7 @@ void MainWindow::updateModelingActions(){
 
 void MainWindow::modelingAction(const QString& op){
     if(session_.busy()||(op!="new"&&!session_.ready()))return;endFlowline();const auto m=session_.model();
-    if(op=="new"){withSavedChanges([this]{modelingDialog("new");});return;}
+    if(op=="new"){modelingDialog("new");return;}
     if(op=="point_groups"){pointGroupsDialog();return;}
     if(op=="lackenby"){session_.inspectModeling();return;}
     if(op=="rotate_midship"){advancedDialog(op);return;}
@@ -230,7 +230,7 @@ void MainWindow::modelingDialog(const QString& op,const QJsonObject& initial){
     }
     if(op=="insert_plane"){QJsonArray a{0,0,0};a[request["axis"].toInt()]=request.take("distance");request["position"]=a;}
     if(layerList){QJsonArray ids;for(int i=0;i<layerList->count();++i)if(layerList->item(i)->checkState()==Qt::Checked)ids.append(layerList->item(i)->data(Qt::UserRole).toDouble());request["ids"]=ids;}
-    if(op=="new")session_.newHull(request);else if(op=="rename_control")session_.editAuxiliary(op,request);else session_.editModeling(op,request);
+    if(op=="new")destinationWindow()->session_.newHull(request);else if(op=="rename_control")session_.editAuxiliary(op,request);else session_.editModeling(op,request);
 }
 
 void MainWindow::pointGroupsDialog(){

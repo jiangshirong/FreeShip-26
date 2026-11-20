@@ -40,12 +40,15 @@ class QShortcut;
 class QDialog;
 class LightDialog;
 
+class DocumentWorkspace;
 class MainWindow final : public QMainWindow {
 public:
     explicit MainWindow(QWidget* parent = nullptr,bool rememberFiles=true);
+    void openDocument(const QString& path);
     ~MainWindow() override;
     void openModel(const QString& path);
     void startSession(const QString& explicitFile={});
+    void verifyDocumentWindows(const QString& request,const QString& output);
     void verifyStartup(const QString& request,const QString& output);
     void auditPrintPreview();
     void auditReadSurfaces(bool copyOnly=false);
@@ -68,11 +71,22 @@ public:
     void verifyViewport(const QString& model,const QString& output);
     void verifyShading(const QString& path,const QString& output);
 protected:
+    void dragEnterEvent(QDragEnterEvent*) override;
+    void dropEvent(QDropEvent*) override;
     bool eventFilter(QObject*,QEvent*) override;
     void changeEvent(QEvent*) override;
     void closeEvent(QCloseEvent*) override;
     void resizeEvent(QResizeEvent*) override;
 private:
+    friend class DocumentWorkspace;
+    DocumentWorkspace* workspace_=nullptr;
+    bool persistentWindow_ = false, documentClosed_ = false;
+    static QList<MainWindow*> documentWindows();
+    MainWindow* windowForFile(const QString&) const;
+    MainWindow* destinationWindow();
+    void activateDocument();
+    void acceptDocumentClose(QCloseEvent*);
+    void installWindowMenu(QMenu*);
     void showStatusMessage(const QString& message);
     void showStatusMessage(const QString& message,StudioMessageRole role);
     void showStartupRestoreWarning(const QString& message);

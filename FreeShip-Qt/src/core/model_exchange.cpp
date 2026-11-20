@@ -10,7 +10,7 @@
 #include <QHash>
 #include <QMap>
 #include <QSet>
-#include <QStringDecoder>
+#include "exchange_text.h"
 #include <QtEndian>
 #include <algorithm>
 #include <cmath>
@@ -30,7 +30,6 @@ int integer(const QString& s,int lo,int hi){bool ok=false;auto n=s.toLongLong(&o
 bool flag(const QString& s){if(s=="1"||s=="-1"||s.compare("true",Qt::CaseInsensitive)==0)return true;if(s=="0"||s.compare("false",Qt::CaseInsensitive)==0)return false;bad("无效的布尔值："+s);}
 QStringList words(QString s){s.replace('\t',' ');return s.simplified().split(' ',Qt::SkipEmptyParts);}
 void sizeIs(const QStringList& row,int n){if(row.size()!=n)bad("记录的字段数不正确。");}
-QString text(const QByteArray& bytes){QStringDecoder decode(QStringDecoder::Utf8);QString s=decode(bytes);if(decode.hasError()||s.contains(QChar(0)))bad("文本须为 UTF-8，且不能含空字符。");return s;}
 double metres(const QString& unit){if(unit=="m")return 1;if(unit=="mm")return .001;if(unit=="cm")return .01;if(unit=="ft")return .3048;if(unit=="in")return .0254;bad("不支持的长度单位。");}
 Vec3 sub(Vec3 a,Vec3 b){return {a.x-b.x,a.y-b.y,a.z-b.z};}
 Vec3 cross(Vec3 a,Vec3 b){return {a.y*b.z-a.z*b.y,a.z*b.x-a.x*b.z,a.x*b.y-a.y*b.x};}
@@ -96,7 +95,7 @@ void finishMesh(Document& d,const Options& o){
 }
 Document obj(const QByteArray& bytes,const Options& o){
     Document d;auto& m=d.model;QString group="OBJ",object;QHash<QString,EntityId> groups;int normals=0,uvs=0;bool appearance=false;QSet<QVector<EntityId>> polygons;
-    const auto lines=text(bytes).split('\n');
+    const auto lines=decodeExchangeText(bytes).split('\n');
     for(int row=0;row<lines.size();++row){QString line=lines[row].section('#',0,0).trimmed();if(line.isEmpty())continue;auto w=words(line);QString k=w.takeFirst();
         try{
             if(k=="v"){if(w.size()!=3&&w.size()!=4)bad("顶点须有三个坐标及可选齐次分量。");double div=w.size()==4?number(w[3]):1;if(div==0)bad("齐次分量不能为零。");addPoint(d,imported({number(w[0])/div,number(w[1])/div,number(w[2])/div},o),o.controlNet?0:3);}
@@ -131,7 +130,7 @@ Document stl(const QByteArray& bytes,const Options& o){
         for(quint32 i=0;i<count;++i){const char* p=bytes.constData()+84+50*i;for(int j=0;j<3;++j)littleFloat(p+4*j);Vec3 v[3];for(int j=0;j<3;++j)v[j]={littleFloat(p+12+j*12),littleFloat(p+16+j*12),littleFloat(p+20+j*12)};facet(v[0],v[1],v[2],1);}
         d.notes<<"二进制 STL 的材质/颜色扩展未导入。";
     }else{
-        auto lines=text(bytes).split('\n');int pos=0;auto next=[&](){while(pos<lines.size()&&lines[pos].trimmed().isEmpty())++pos;if(pos==lines.size())bad("STL 文件不完整。");return words(lines[pos++]);};
+        auto lines=decodeExchangeText(bytes, false).split('\n');int pos=0;auto next=[&](){while(pos<lines.size()&&lines[pos].trimmed().isEmpty())++pos;if(pos==lines.size())bad("STL 文件不完整。");return words(lines[pos++]);};
         bool any=false;while(true){while(pos<lines.size()&&lines[pos].trimmed().isEmpty())++pos;if(pos==lines.size())break;
             auto head=next();if(head.isEmpty()||head[0]!="solid")bad("STL 头或二进制长度不正确。");QString name=head.mid(1).join(' ');EntityId l=1;
             if(!any)d.model.layers[0].name=name.isEmpty()?"STL":name;else{l=d.model.layers.size()+1;d.model.layers.append(layer(name.isEmpty()?"STL":name,l,o.symmetric));}any=true;
@@ -145,7 +144,7 @@ Document stl(const QByteArray& bytes,const Options& o){
     Options flat=o;flat.controlNet=false;finishMesh(d,flat);return d;
 }
 Document fef(const QByteArray& bytes){
-    Document d;auto& m=d.model;auto lines=text(bytes).split('\n');int i=0;
+    Document d;auto& m=d.model;auto lines=decodeExchangeText(bytes).split('\n');int i=0;
     auto next=[&](){if(i>=lines.size())bad("FEF 文件不完整。");QString s=lines[i++];if(s.endsWith('\r'))s.chop(1);return s;};
     auto row=[&](){return words(next());};auto count=[&](int max){auto r=row();sizeIs(r,1);return integer(r[0],0,max);};
     m.name=next();m.designer=next();d.creator=next();m.comment=next();auto settings=row();sizeIs(settings,8);
@@ -162,7 +161,7 @@ Document fef(const QByteArray& bytes){
 // This imports a subdivision control net, not the original NURBS surface.
 Document polycad(const QByteArray& bytes,const Options& options){
     Document d;auto& m=d.model;Options o=options;o.legacyAxes=false;o.controlNet=true;
-    const auto input=text(bytes).split('\n');QString kind,name;int columns=0,rows=0,expected=-1,grids=0,total=0;
+    const auto input=decodeExchangeText(bytes).split('\n');QString kind,name;int columns=0,rows=0,expected=-1,grids=0,total=0;
     bool pendingShape=false;QMap<QString,double> dimensions;
     std::map<std::tuple<double,double,double>,EntityId> vertices;
     const QSet<QString> types{"TBSplineSurface","TBSplineSurfaceList","TYachtLines","TShipLines"};

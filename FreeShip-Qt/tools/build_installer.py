@@ -144,15 +144,16 @@ def compile_setup(output,info,fault=''):
     output=Path(output);source=Path(__file__).parent/'installer/Setup.cs'
     language_source=source.with_name('InstallerLanguage.cs')
     view_source=source.with_name('InstallerView.cs')
+    picker_source=source.with_name('InstallerFolderPicker.cs')
     brand=source.parents[2]/'src/app/assets/brand'
     brand_icon=brand/'freeship26.ico'
     brand_image=brand/'freeship26.png'
     # Only complete, context-specific installer catalogs are offered. English
     # is embedded in maintenance as well, so recovery needs no installed files.
     literals=[]
-    for text in (path.read_text('utf8') for path in (source,language_source,view_source)):
+    for text in (path.read_text('utf8') for path in (source,language_source,view_source,picker_source)):
         literals.extend(json.loads(m[1]) for m in re.finditer(r'\b(?:T|Text)\(\s*("(?:\\.|[^"\\])*")\s*\)',text))
-    required=set(literals)
+    required=sorted(set(literals))
     catalogs=[dict(id='zh',name='简体中文',messages={})]
     seen_catalog_ids={'zh'}
     for path in sorted((source.parents[2]/'src/app/languages').glob('*.json')):
@@ -182,7 +183,7 @@ def compile_setup(output,info,fault=''):
         '/resource:'+str(brand_image)+',installer-brand.png',
         '/resource:'+str(brand_icon)+',installer-brand.ico',
         '/win32icon:'+str(brand_icon), '/win32manifest:'+str(output/'setup.manifest')]
-    sources=[str(source),str(language_source),str(view_source),str(output/'Identity.cs')]
+    sources=[str(source),str(language_source),str(view_source),str(picker_source),str(output/'Identity.cs')]
     engine=output/'maintenance.exe';setup=output/'FreeShip 26 Setup.exe'
     for name,command in [('maintenance',common+['/out:'+str(engine)]+sources),('setup',common+['/out:'+str(setup),
         '/resource:'+str(output/'setup-bundle.json')+',manifest.json','/resource:'+info['msi']+',payload.msi','/resource:'+str(engine)+',maintenance.exe']+sources)]:
@@ -193,7 +194,7 @@ def compile_setup(output,info,fault=''):
         (output/(name+'-compile.log')).write_bytes(result.stdout+result.stderr)
         if result.returncode:raise RuntimeError('Setup compilation failed: '+str(output/(name+'-compile.log')))
     info.update(setup=str(setup),setup_sha256=package.digest(setup),
-        setup_source_sha256=package.digest(source),installer_view_source_sha256=package.digest(view_source), installer_brand_sha256={p.name:package.digest(p) for p in (brand_icon,brand_image)},installer_language_source_sha256=package.digest(language_source),installer_languages_sha256=package.digest(language_resource),installer_languages=[c['id'] for c in catalogs],maintenance_sha256=package.digest(engine),
+        setup_source_sha256=package.digest(source),installer_view_source_sha256=package.digest(view_source), installer_folder_picker_source_sha256=package.digest(picker_source), installer_brand_sha256={p.name:package.digest(p) for p in (brand_icon,brand_image)},installer_language_source_sha256=package.digest(language_source),installer_languages_sha256=package.digest(language_resource),installer_languages=[c['id'] for c in catalogs],maintenance_sha256=package.digest(engine),
         installer_profile='verified-msi-recovery',delivery_status='local-development',
         boundary='Setup EXE automatically restores verified prior MSI after failure. Raw MSI is internal. Unsigned; desktop and public release acceptance remain separate.')
     return info

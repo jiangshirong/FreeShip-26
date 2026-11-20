@@ -1,4 +1,5 @@
 #include "app/main_window.h"
+#include "app/document_workspace.h"
 #include "app/studio_ui.h"
 #include "app/ui_language.h"
 #include "app/preferences_dialog.h"
@@ -115,10 +116,19 @@ int main(int argc, char** argv) {
         const auto selectedLanguage=initialPreferences.value("ui_language").toString("zh");
         if(const auto error=setUiLanguage(selectedLanguage);!error.isEmpty())languageIssue=error;
     }
-    MainWindow window(nullptr,!verification);
+    // Each production window lives exactly as long as its document. A pending
+    // save may temporarily hide every window without ending the event loop.
+    std::unique_ptr<MainWindow> probe;
+    std::unique_ptr<DocumentWorkspace> workspace;
+    if(!verification || arguments.value(1)=="--verify-document-windows"){
+        app.setQuitOnLastWindowClosed(false);workspace=std::make_unique<DocumentWorkspace>(!verification);
+    }else probe=std::make_unique<MainWindow>(nullptr,false);
+    MainWindow& window=workspace ? *workspace->addDocument() : *probe;
     if(!languageIssue.isEmpty())window.statusBar()->showMessage(languageIssue);
-    if(verification&&arguments[1]!="--verify-window-startup")window.setWindowState(Qt::WindowMaximized);
-    if (windowStartup) {
+    if(verification&&!workspace&&arguments[1]!="--verify-window-startup")window.setWindowState(Qt::WindowMaximized);
+    if(arguments.size()==4 && arguments[1]=="--verify-document-windows"){
+        QTimer::singleShot(0,&window,[&]{window.verifyDocumentWindows(arguments[2],arguments[3]);});
+    } else if (windowStartup) {
         verifyStudioWindowStartup(&window,arguments.last());
     } else if (arguments.size() == 4 && arguments[1] == "--verify-workflow") {
         QTimer::singleShot(0, &window, [&] { window.verifyWorkflow(arguments[2], arguments[3]); });
@@ -159,9 +169,9 @@ int main(int argc, char** argv) {
     } else if (arguments.size() == 4 && arguments[1] == "--verify-advanced") {
         QTimer::singleShot(0, &window, [&] { window.verifyAdvanced(arguments[2], arguments[3]); });
     } else {
-        showStudioMainWindow(&window);
+        showStudioMainWindow(window.window());
         if(!firstLaunchProbe)
-            QTimer::singleShot(0,&window,[&]{window.startSession(arguments.size()==2?arguments[1]:QString{});});
+            QTimer::singleShot(0,&window,[&]{window.startSession(arguments.value(1));for(int i=2;i<arguments.size();++i)window.openDocument(arguments[i]);});
     }
     return app.exec();
 }

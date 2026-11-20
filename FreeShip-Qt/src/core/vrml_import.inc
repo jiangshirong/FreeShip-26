@@ -52,7 +52,7 @@ Matrix rotation(const QVector<double>& v,double sign=1){auto a=identity();double
 Matrix vrTransform(const QJsonObject& n){auto t=vrValues(n,"translation",{0,0,0}),c=vrValues(n,"center",{0,0,0}),s=vrValues(n,n.contains("scaleFactor")?"scaleFactor":"scale",{1,1,1});for(auto v:s)if(v==0)bad("VRML 缩放不能为零。");auto r=rotation(vrValues(n,"rotation",{0,0,1,0}));auto sr=vrValues(n,"scaleOrientation",{0,0,1,0});auto sc=identity();sc[0]=s[0];sc[5]=s[1];sc[10]=s[2];
     auto m=multiply(translation(t[0],t[1],t[2]),translation(c[0],c[1],c[2]));for(auto b:{r,rotation(sr),sc,rotation(sr,-1),translation(-c[0],-c[1],-c[2])})m=multiply(m,b);return m;}
 Document vrml(const QByteArray& bytes,const Options& options){
-    auto source=text(bytes);bool v1=source.startsWith("#VRML V1.0 ascii");if(!v1&&!source.startsWith("#VRML V2.0 utf8"))bad("需要 VRML 1.0 ASCII 或 2.0 UTF-8 文件头。");VrmlReader parser(source);QJsonArray roots;while(parser.at<parser.tokens.size())roots.append(parser.node());
+    auto source=decodeExchangeText(bytes, false);bool v1=source.startsWith("#VRML V1.0 ascii");if(!v1&&!source.startsWith("#VRML V2.0 utf8"))bad("需要 VRML 1.0 ASCII 或 2.0 UTF-8 文件头。");VrmlReader parser(source);QJsonArray roots;while(parser.at<parser.tokens.size())roots.append(parser.node());
     QByteArray mesh;QTextStream out(&mesh,QIODevice::WriteOnly);int total=0,shapes=0,visits=0,discarded=0;bool appearance=false;
     struct State{Matrix matrix=identity();QJsonObject coordinates;bool ccw=true;};
     std::function<void(const QJsonObject&,State&,int)> visit=[&](const QJsonObject& n,State& state,int depth){

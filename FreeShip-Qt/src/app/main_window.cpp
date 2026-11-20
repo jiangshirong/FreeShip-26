@@ -1,5 +1,6 @@
 #include "app/ui_language.h"
 #include "main_window.h"
+#include "document_workspace.h"
 #include "section_dialog.h"
 #include "history_shortcuts.h"
 #include "project_dialog.h"
@@ -184,14 +185,18 @@ private:
 };
 
 MainWindow::MainWindow(QWidget* parent,bool rememberFiles) : QMainWindow(parent), session_(this) {
+    workspace_=dynamic_cast<DocumentWorkspace*>(parent);
+    persistentWindow_=rememberFiles;
+    setAcceptDrops(true);
     session_.setProperty("defer_startup_drawing",rememberFiles);
     if(rememberFiles)fileHistory_=std::make_unique<FileHistory>(FileHistory::defaultFilename());
     if(rememberFiles){
         session_.setRecoveryRoot(fs::defaultRecoveryRoot());
         if(!fs::defaultRecoveryRoot().isEmpty())session_.setLinesCacheRoot(QFileInfo(fs::defaultRecoveryRoot()).dir().filePath("linesplan-cache-v1"));
     }
-    applyStudioTheme();
-    enableStudioMinimizeCaption(this);
+    static const bool themeInstalled=[] { applyStudioTheme(); return true; }();
+    Q_UNUSED(themeInstalled);
+    if(!workspace_)enableStudioMinimizeCaption(this);
     setStudioWindowIcon(this,"brand");
     setWindowTitle(uiText("未命名船模")); resize(1440, 960);
     // Keep a hidden diagnostic channel for the existing workflow observers.
@@ -199,8 +204,8 @@ MainWindow::MainWindow(QWidget* parent,bool rememberFiles) : QMainWindow(parent)
     statusBar()->setSizeGripEnabled(false);statusBar()->hide();
     auto* file = primaryMenu_ = new QMenu(this);
     open_ = file->addAction(uiText("打开模型…"), QKeySequence::Open, this, [this] {
-        const auto path = QFileDialog::getOpenFileName(this, uiText("打开船模"), preferenceFileLocation("open",session_.sourcePath()), uiText("FreeShip 船模 (*.fbm *.ftm)"));
-        if (!path.isEmpty()) openModel(path);
+        const auto paths = QFileDialog::getOpenFileNames(this, uiText("打开船模"), preferenceFileLocation("open",session_.sourcePath()), uiText("FreeShip 船模 (*.fbm *.ftm)"));
+        for (const auto& path : paths) openDocument(path);
     });
     save_ = file->addAction(uiText("保存"), QKeySequence::Save, this, [this] { saveModel(); });
     saveAs_ = file->addAction(uiText("另存副本"), QKeySequence::SaveAs, this, [this] { saveModel(true); });
@@ -211,6 +216,7 @@ MainWindow::MainWindow(QWidget* parent,bool rememberFiles) : QMainWindow(parent)
     recentMenu_->setIcon(studioIcon("History"));saveAs_->setIcon(studioIcon("SaveAs"));
     connect(recentMenu_,&QMenu::aboutToShow,this,&MainWindow::refreshRecentFiles);
     refreshRecentFiles();
+    if(!workspace_)installWindowMenu(file);
     auto* recover=file->addAction(uiText("恢复未保存的船模…"),this,[this]{showRecoveries();});
     recover->setProperty("studio_opens_dialog",true);
     recover->setIcon(studioIcon("Restore"));
@@ -234,7 +240,7 @@ MainWindow::MainWindow(QWidget* parent,bool rememberFiles) : QMainWindow(parent)
     auto* quit = new QShortcut(QKeySequence::Quit, this);
     quit->setProperty("shortcut_source","退出程序");
     quit->setProperty("shortcut_target","程序");
-    connect(quit, &QShortcut::activated, this, &QWidget::close);
+    connect(quit,&QShortcut::activated,this,[this]{window()->close();});
     undo_ = new QAction(uiText("撤销"), this);
     redo_ = new QAction(uiText("重做"), this);
     connect(undo_, &QAction::triggered, this, [this] { if(layerDialog_&&QApplication::activeWindow()==layerDialog_&&layers_->previewHistory(false))return; if(sections_&&sections_->isVisible()&&QApplication::activeWindow()!=layerDialog_)sections_->previewHistory(false);else session_.undo(); });
@@ -479,7 +485,7 @@ void MainWindow::updateState() {
     if(hydroDialog_)hydroDialog_->refreshState();
     updateStabilityBall();
     for(auto* action:hydroActions_)action->setEnabled(session_.ready());
-    const bool ready = session_.ready(), idle = !session_.busy(); open_->setEnabled(idle);
+    const bool ready = session_.ready(), idle = !session_.busy(); open_->setEnabled(true);
     if(placePoint_)placePoint_->setEnabled(ready&&idle);
     // The dialog can show the last committed snapshot while an edit is pending.
     // Mutation controls are enabled independently after publication.
@@ -637,7 +643,13 @@ void MainWindow::withSavedChanges(std::function<void()> next) {
     else afterSave_ = {};
 }
 void MainWindow::openModel(const QString& path) {
-    if (!path.isEmpty()) withSavedChanges([this, path] { session_.load(path); });
+    if (!path.isEmpty()) withSavedChanges([this, path] {
+        // Reflect the file selected by the user before the asynchronous load
+        // starts. Otherwise a newly created document briefly keeps the default
+        // "Untitled Model" title even though its source path is already known.
+        setWindowTitle(QDir::toNativeSeparators(path));
+        session_.load(path);
+    });
 }
 void MainWindow::saveModel(bool saveAs) {
     if (!session_.ready() || session_.busy()) {
@@ -657,6 +669,9 @@ void MainWindow::saveModel(bool saveAs) {
             (startupProbe_||testAttribute(Qt::WA_DontShowOnScreen))?QFileDialog::DontUseNativeDialog:QFileDialog::Options{});
         if(path.isEmpty()){afterSave_={};return;}
         if (QFileInfo(path).suffix().isEmpty()) path += ".fbm";
+    }
+    if(auto* other=windowForFile(path);other && other!=this){
+        afterSave_={};showError(uiText("文件已在其他窗口打开：") + path);return;
     }
     pendingCalculationDrafts_=calculationDrafts(true);
     if (!session_.save(path,pendingCalculationDrafts_)){afterSave_={};pendingCalculationDrafts_={};}
@@ -1007,7 +1022,7 @@ void MainWindow::changeEvent(QEvent* event) {
 void MainWindow::suspendExitUi(){
     if(suspendedExitUi_)return;
     suspendedExitUi_=true;
-    previousQuitOnLast_=qApp->quitOnLastWindowClosed();qApp->setQuitOnLastWindowClosed(false);
+    if(!persistentWindow_){previousQuitOnLast_=qApp->quitOnLastWindowClosed();qApp->setQuitOnLastWindowClosed(false);}
     // Hiding is reversible; closing a tool dialog may commit/cancel its editors.
     if(isVisible())exitWindows_.append(this);
     for(auto* w:QApplication::topLevelWidgets()){
@@ -1023,17 +1038,18 @@ void MainWindow::resumeExitUi(){
     if(deferredExitRefresh_&&session_.model()){deferredExitRefresh_=false;updateModel();}
     updateState();
     for(const auto& w:exitWindows_)if(w)w->show();
-    exitWindows_.clear();qApp->setQuitOnLastWindowClosed(previousQuitOnLast_);
+    exitWindows_.clear();if(!persistentWindow_)qApp->setQuitOnLastWindowClosed(previousQuitOnLast_);
 }
 void MainWindow::finishDocumentExit(){
     closeApproved_=true;
-    QTimer::singleShot(0,this,[this]{close();qApp->quit();});
+    QTimer::singleShot(0,this,[this]{close();if(!workspace_ && !persistentWindow_ && documentWindows().isEmpty())qApp->quit();});
 }
 void MainWindow::cancelDocumentExit(){
     if(documentExit_==DocumentExit::None)return;
     documentExit_=DocumentExit::None;
     if(exitQuestion_)exitQuestion_->reject();
     resumeExitUi();
+    if(workspace_)workspace_->cancelled();
 }
 void MainWindow::continueDocumentExit(){
     if(closingAfterRecoveryDiscard_||closeApproved_||session_.busy()||(documentExit_!=DocumentExit::Save&&documentExit_!=DocumentExit::Discard))return;
@@ -1047,7 +1063,7 @@ void MainWindow::continueDocumentExit(){
     if(!session_.discardRecovery()){closingAfterRecoveryDiscard_=false;cancelDocumentExit();}
 }
 void MainWindow::closeEvent(QCloseEvent* event) {
-    if(closeApproved_){linesDialog_->close();event->accept();return;}
+    if(closeApproved_){acceptDocumentClose(event);return;}
     if(calculationExitPending_||calculationClosePrompt_||documentExit_!=DocumentExit::None||closingAfterRecoveryDiscard_){event->ignore();return;}
     if(calculationsBusy()||session_.recordingCalculationParameters()){
         event->ignore();QScopedValueRollback<bool> prompting(calculationClosePrompt_,true);
@@ -1075,7 +1091,7 @@ void MainWindow::closeEvent(QCloseEvent* event) {
             session_.dropQueuedLayerCommands();session_.dropQueuedSectionCommands();queuedDisplay_={};
         }
         QTimer::singleShot(0,this,&MainWindow::continueDocumentExit);
-    } else {linesDialog_->close();event->accept();}
+    } else {acceptDocumentClose(event);}
 }
 void MainWindow::workflowCase(const QString& name, bool pass, const QString& message) {
     workflowCases_.append(QJsonObject{{"name", name}, {"status", pass ? "pass" : "fail"}, {"message", message}});

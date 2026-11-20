@@ -21,11 +21,11 @@ sealed class InstallerView : Form {
     readonly ActivityStrip progress;
     readonly Font bodyFont, headingFont, labelFont;
     readonly Icon brandIcon;
-    readonly bool uninstall;
+    readonly bool destinationLocked;
     const int Right=299, WidthRight=458;
 
     internal InstallerView(bool uninstall, bool locked, string target) {
-        this.uninstall=uninstall;
+        destinationLocked=locked;
         SuspendLayout();
         AutoScaleDimensions=new SizeF(96,96);AutoScaleMode=AutoScaleMode.Dpi;
         bodyFont=new Font("Segoe UI",10f);headingFont=new Font("Segoe UI",19f,FontStyle.Bold);
@@ -79,7 +79,7 @@ sealed class InstallerView : Form {
         Controls.AddRange(new Control[]{heading,languageLabel,Language,pathLabel,pathFrame,Browse,
             Rule(250),Shortcut,Launch,Reset,Rule(354),progress,feedback,ActionButton});
         AcceptButton=ActionButton;
-        Shown+=delegate {Language.ItemHeight=Math.Max(30,Language.Font.Height*2-2);Destination.Select(0,0);Destination.ScrollToCaret();};
+        Shown+=delegate {LayoutBrowse();Language.ItemHeight=Math.Max(30,Language.Font.Height*2-2);Destination.Select(0,0);Destination.ScrollToCaret();};
         ResumeLayout(false);
     }
     static Label Caption(string name,int x,int y,int w,int h,Font font,int tab) {
@@ -103,6 +103,12 @@ sealed class InstallerView : Form {
         path.AddArc(rect.Right-d,rect.Bottom-d,d,d,0,90);path.AddArc(rect.Left,rect.Bottom-d,d,d,90,90);
         path.CloseFigure();return path;
     }
+    // ButtonBase's buffered paint does not always clear the whole surface on
+    // the live Windows desktop. Paint every pixel, including rounded corners.
+    static void PaintBackground(PaintEventArgs e,Control control) {
+        using(var brush=new SolidBrush(control.Parent==null?Surface:control.Parent.BackColor))
+            e.Graphics.FillRectangle(brush,e.ClipRectangle);
+    }
     sealed class StudioButton : Button {
         readonly bool primary;
         bool hover, down;
@@ -112,20 +118,25 @@ sealed class InstallerView : Form {
         protected override void OnMouseDown(MouseEventArgs e) {base.OnMouseDown(e);down=e.Button==MouseButtons.Left;Invalidate();}
         protected override void OnMouseUp(MouseEventArgs e) {base.OnMouseUp(e);down=false;Invalidate();}
         protected override void OnPaint(PaintEventArgs e) {
+            PaintBackground(e,this);
             var g=e.Graphics;g.SmoothingMode=SmoothingMode.AntiAlias;
             Color fill=primary?(down?ColorTranslator.FromHtml("#123E37"):hover?ColorTranslator.FromHtml("#164C43"):Teal)
                 :(down?ColorTranslator.FromHtml("#DFEBE4"):hover?ColorTranslator.FromHtml("#EAF2ED"):Paper);
             using(var shape=Rounded(new RectangleF(.5f,.5f,Width-1,Height-1),Height*.145f))
             using(var brush=new SolidBrush(Enabled?fill:Surface))
             using(var stroke=new Pen(primary&&Enabled?fill:Line)) {g.FillPath(brush,shape);g.DrawPath(stroke,shape);}
-            TextRenderer.DrawText(g,Text,Font,ClientRectangle,!Enabled?Muted:primary?Color.White:Ink,
-                TextFormatFlags.HorizontalCenter|TextFormatFlags.VerticalCenter|TextFormatFlags.SingleLine);
+            using(var layout=new StringFormat {Alignment=StringAlignment.Center,LineAlignment=StringAlignment.Center})
+            using(var ink=new SolidBrush(!Enabled?Muted:primary?Color.White:Ink)) {
+                var text=new RectangleF(2,0,Width-4,Height);
+                g.DrawString(Text,Font,ink,text,layout);
+            }
             if(Focused&&ShowFocusCues)ControlPaint.DrawFocusRectangle(g,Rectangle.Inflate(ClientRectangle,-5,-5),primary?Color.White:Ink,fill);
         }
     }
     sealed class StudioCheck : CheckBox {
         internal StudioCheck() {DoubleBuffered=true;}
         protected override void OnPaint(PaintEventArgs e) {
+            PaintBackground(e,this);
             var g=e.Graphics;g.SmoothingMode=SmoothingMode.AntiAlias;
             float size=Height*.49f, top=(Height-size)/2f;
             Color fill=Checked?(Enabled?Teal:ColorTranslator.FromHtml("#A4C2B5")):Paper;
@@ -137,7 +148,8 @@ sealed class InstallerView : Form {
                 g.DrawLines(mark,new[]{new PointF(size*.19f,top+size*.52f),new PointF(size*.41f,top+size*.73f),new PointF(size*.80f,top+size*.30f)});
             }
             var text=Rectangle.FromLTRB((int)(size*1.62f),0,Width-1,Height);
-            TextRenderer.DrawText(g,Text,Font,text,Enabled?Ink:Muted,TextFormatFlags.Left|TextFormatFlags.VerticalCenter|TextFormatFlags.WordBreak);
+            using(var layout=new StringFormat {Alignment=StringAlignment.Near,LineAlignment=StringAlignment.Center})
+            using(var ink=new SolidBrush(Enabled?Ink:Muted))g.DrawString(Text,Font,ink,text,layout);
             if(Focused&&ShowFocusCues)ControlPaint.DrawFocusRectangle(g,Rectangle.Inflate(text,-1,-4),Ink,Surface);
         }
     }
@@ -160,13 +172,22 @@ sealed class InstallerView : Form {
     internal void Relabel(string title,string section,string lang,string path,string browse,
                            string shortcut,string launch,string reset,string action) {
         Text=title;heading.Text=section;languageLabel.Text=lang;Language.AccessibleName=lang;
-        pathLabel.Text=path;Destination.AccessibleName=path;Browse.Text=browse;
+        pathLabel.Text=path;Destination.AccessibleName=path;Browse.Text=browse;LayoutBrowse();
         Shortcut.Text=shortcut;Launch.Text=launch;Reset.Text=reset;ActionButton.Text=action;
         // Fit long localized action captions without reducing the font.
         int minimum=Math.Max(ActionButton.Height*3,TextRenderer.MeasureText(action,ActionButton.Font).Width+ActionButton.Height*3/5);
         int edge=Browse.Right;
         ActionButton.Width=Math.Min(edge-feedback.Left,minimum);ActionButton.Left=edge-ActionButton.Width;
         feedback.Width=Math.Max(1,ActionButton.Left-feedback.Left-Math.Max(10,ActionButton.Height/3));
+    }
+    void LayoutBrowse() {
+        if(destinationLocked)return;
+        int edge=Browse.Right;
+        int gap=Math.Max(8,Browse.Height/4);
+        int width=TextRenderer.MeasureText(Browse.Text,Browse.Font).Width+2*gap;
+        Browse.Width=Math.Min((edge-pathFrame.Left)/2,Math.Max(Browse.Height*99/37,width));
+        Browse.Left=edge-Browse.Width;
+        pathFrame.Width=Browse.Left-pathFrame.Left-gap;
     }
     internal string SectionCaption { get { return heading.Text; } }
     internal string FeedbackText { get { return feedback.Text; } }

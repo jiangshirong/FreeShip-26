@@ -169,13 +169,6 @@ ProjectDialog::ProjectDialog(const fs::ModelSnapshot& snapshot, QWidget* parent)
     // Qt normalizes line endings and paragraph separators for display. An
     // untouched text control must not rewrite the original file's text.
     s.displayedText.insert("comment", comment->toPlainText());
-    if (!snapshot.textEncoding.isEmpty()) {
-        auto* encoding = new QLabel;
-        const auto refreshEncoding=[encoding,code=snapshot.textEncoding]{encoding->setText(uiText("文件文字编码：") + code);};
-        refreshEncoding();bindUiRefresh(encoding,refreshEncoding);
-        encoding->setWordWrap(true); encoding->setStyleSheet("color: #586472;"); general->addRow(encoding);
-    }
-
     auto* dimensions = page(uiText("主尺度"));
     auto* hydrostatics = page(uiText("静水力"));
     s.unitBox = new QComboBox;

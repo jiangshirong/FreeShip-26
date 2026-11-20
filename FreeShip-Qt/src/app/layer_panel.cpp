@@ -324,7 +324,7 @@ struct LayerPanel::State {
     ColorEditor* color = nullptr;
     QCheckBox *hydro = nullptr, *symmetric = nullptr;
     QPushButton* apply = nullptr;
-    StudioMessage *error = nullptr, *empty = nullptr;QLabel* encoding = nullptr;
+    StudioMessage *error = nullptr, *empty = nullptr;
     fs::EntityId selected = 0, pending = 0;
     quint64 pendingRevision = 0;
     bool loading = true, editingEnabled = true, symmetricExplicit = false;
@@ -351,7 +351,6 @@ LayerPanel::LayerPanel(QWidget* parent) : QWidget(parent), state_(std::make_uniq
     auto bind = [&s](const QString& field, QWidget* editor) {
         editor->setProperty("modelField", field); editor->setObjectName("layer_" + field); s.editors.insert(field, editor);
     };
-    s.encoding = new QLabel; s.encoding->setWordWrap(true); s.encoding->setStyleSheet("color: #586472;"); form->addRow(s.encoding);
     s.color = new ColorEditor; bind("color", s.color); form->addRow(uiText("颜色"), s.color);
     s.transparency=new QSpinBox;s.transparency->setRange(0,100);s.transparency->setSuffix(" %");bind("alpha_blend",s.transparency);
     auto* alphaRow=new QWidget;auto* alphaLayout=new QHBoxLayout(alphaRow);alphaLayout->setContentsMargins(0,0,0,0);
@@ -421,7 +420,6 @@ LayerPanel::LayerPanel(QWidget* parent) : QWidget(parent), state_(std::make_uniq
     s.list->onNameEditingFinished=[this]{state_->error->hide();};
     bindUiRefresh(this,[this]{
         auto& s=*state_;
-        s.encoding->setText(s.snapshot ? uiText("文件文字编码：") + s.snapshot->textEncoding : QString());
         if(s.snapshot){
             const QSignalBlocker block(s.list);
             for(int i=0;i<s.rows.size();++i)s.list->item(i)->setText(layerDisplayName(s.rows[i]));
@@ -663,8 +661,6 @@ void LayerPanel::loadSelected() {
         it->draft = value(it.key()).toDouble(); it->widget->setValue(it->draft);
         it->widget->setSuffix(it.key() == "thickness" ? (imperial ? " in" : " mm") : (imperial ? " lb/ft³" : " t/m³"));
     }
-    s.encoding->setText(s.snapshot ? uiText("文件文字编码：") + s.snapshot->textEncoding : QString());
-    s.encoding->setVisible(s.snapshot && !s.snapshot->textEncoding.isEmpty());
     s.error->hide(); s.loading = false; updateEnabledState();
 }
 

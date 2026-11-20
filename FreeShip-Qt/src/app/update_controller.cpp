@@ -249,7 +249,11 @@ struct StudioUpdateController::Impl {
         else if(state=="downloading")label=verifying?uiText("正在校验并准备安装包…"):
             progressStage=="preparing"?uiText("正在计算所需下载量…"):uiText("正在下载更新…");
         else if(state=="not_configured")label=uiText("更新服务不可用");
-        window->status->setText(errorSource.isEmpty()?label:uiText(errorSource));
+        const QString missingPkexec=QStringLiteral("系统未安装 pkexec，无法请求管理员权限；请手动安装下载的更新包：");
+        if(errorSource.startsWith(missingPkexec))
+            label=uiText(missingPkexec+"%1").arg(errorSource.mid(missingPkexec.size()));
+        else if(!errorSource.isEmpty())label=uiText(errorSource);
+        window->status->setText(label);
         const int value=state=="ready"?100:total>0?int(downloaded*100/total):0;
         window->bar->setRange(0,(state=="downloading"&&total<0)||verifying?0:100);
         window->bar->setValue(value);
@@ -466,9 +470,14 @@ void StudioUpdateController::activate(){
     else if(impl_->state!="pausing")impl_->run("--check");
 }
 void StudioUpdateController::schedule(){
-    QTimer::singleShot(0,this,[this]{if(QSettings().value("updates/automatic",true).toBool())impl_->run("--check");});
+    // Document windows share the update channel and its working directory.
+    static QPointer<StudioUpdateController> scheduled;
+    auto primary=[this]{if(!scheduled)scheduled=this;return scheduled==this;};
+    auto check=[this,primary]{if(primary()&&QSettings().value("updates/automatic",true).toBool())impl_->run("--check");};
+    QTimer::singleShot(0,this,check);
     if(impl_->workflow)return;
-    QTimer::singleShot(1000,this,[this]{
+    QTimer::singleShot(1000,this,[this,primary]{
+        if(!primary())return;
         QFile last(impl_->work()+"/install-result.json");if(last.open(QIODevice::ReadOnly)){
             const auto result=QJsonDocument::fromJson(last.readAll()).object();last.close();
             if(result.value("status").toString()=="install_failed"||result.value("status").toString()=="error"){
@@ -480,7 +489,7 @@ void StudioUpdateController::schedule(){
         for(const auto& name:QDir(impl_->work()).entryList({"updater-*.exe"},QDir::Files))if(owned.match(name).hasMatch())QFile::remove(impl_->work()+"/"+name);
     });
     auto* repeat=new QTimer(this);repeat->setInterval(6*60*60*1000);
-    connect(repeat,&QTimer::timeout,this,[this]{if(QSettings().value("updates/automatic",true).toBool())impl_->run("--check");});repeat->start();
+    connect(repeat,&QTimer::timeout,this,check);repeat->start();
 }
 void installStudioUpdates(QWidget* owner,QAction* about,bool workflow,const std::function<void(std::function<void()>)>& save){
     about->setProperty("studio_update_badge",true);

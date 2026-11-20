@@ -92,7 +92,15 @@ private:
     }
     QTabWidget* tabs_;QWidget* page_;QVBoxLayout* pageLayout_;StudioMessage* notice_;bool queued_=false;int preferredWidth_=360;
 };
-constexpr const char* AuxiliaryFiles[]{"Bonjean.txt","SACs.txt","Weights.txt","Sterns.txt"};
+constexpr const char* AboveWaterFile="AboveWaterGeometry.txt";
+constexpr const char* AuxiliaryFiles[]{"Bonjean.txt","SACs.txt","Weights.txt","Sterns.txt",AboveWaterFile};
+QStringList auxiliaryTitles(){
+    return {"Bonjean",uiText("横剖面面积"),uiText("重量"),uiText("首尾水线位置"),uiText("水线上方几何")};
+}
+QJsonObject aboveWaterGeometry(const QJsonObject& result){
+    const auto rows=result["rows"].toArray();
+    return rows.isEmpty()?QJsonObject{}:rows.first().toObject()["above_water_geometry"].toObject();
+}
 // Keep the three reading columns together even in a maximized window.
 // Unused canvas stays outside the columns; units are not stretched across it.
 class SingleHydroTable final:public QTableWidget {
@@ -174,13 +182,31 @@ QString skippedWaterlineNotice(const QJsonObject& data,const QString& unit){
         uiText("船体最低漏点 Z = %1 %2。已跳过水线 Z = %3 %2。");
     return QString(message).arg(leak,unit,elevations.join(", "));
 }
+report::Table aboveWaterTable(const QJsonObject& geometry,bool metric){
+    const QString unit=metric?"m":"ft";
+    report::Table table{uiText("水线上方几何"),{uiText("参数"),uiText("数值"),uiText("单位")},{},{0,1,2},{56,25,19},520};
+    auto add=[&](const char* key,const QString& label,const QString& units){
+        if(const auto value=geometry[key];value.isDouble())table.rows.append({label,reportNumber(value.toDouble()),units});
+    };
+    add("wind_projection_area",uiText("横向受风投影面积"),unit+"²");
+    add("wind_centroid_height",uiText("投影形心距水线高度"),unit);
+    add("deck_edge_min_height",uiText("甲板边缘距水线的最小高度"),unit);
+    add("wind_centroid_x",uiText("投影形心 X（水线坐标系）"),unit);
+    add("wind_centroid_z",uiText("投影形心 Z（水线坐标系）"),unit);
+    add("wind_centroid_distance_from_fp",uiText("投影形心距艏垂线的纵向距离"),unit);
+    return table;
+}
 class AuxiliaryTable final:public QAbstractTableModel {
 public:
     AuxiliaryTable(const QJsonObject& result,const QString& file,bool metric,const QStringList& layerLabels,QObject* parent)
         :QAbstractTableModel(parent),file_(file),waterlines_(result["waterlines"].toArray()),stations_(result["stations"].toArray()){
         const QString unit=metric?"m":"ft";
         const auto length=" ("+unit+")";
-        if(file_=="Weights.txt"){
+        if(file_==AboveWaterFile){
+            auto table=aboveWaterTable(result,metric);
+            headers_=std::move(table.headers);geometryRows_=std::move(table.rows);
+            rowCount_=int(geometryRows_.size());
+        }else if(file_=="Weights.txt"){
             headers_={uiText("图层"),uiText("面"),uiText("面积")+QString(" (")+unit+"²)",
                 uiText("重量")+QString(metric?" (t)":" (long ton)"),"X"+length,"Y"+length,"Z"+length,"X min"+length,"X max"+length};
             for(const auto& entry:result["layers"].toArray()){
@@ -213,8 +239,9 @@ public:
     QVariant data(const QModelIndex& index,int role)const override{
         if(!index.isValid())return {};
         const int col=index.column();
-        if(role==Qt::TextAlignmentRole)return int(Qt::AlignVCenter|(file_=="Weights.txt"&&col==0?Qt::AlignLeft:Qt::AlignRight));
+        if(role==Qt::TextAlignmentRole)return int(Qt::AlignVCenter|((file_=="Weights.txt"||file_==AboveWaterFile)&&col==0?Qt::AlignLeft:Qt::AlignRight));
         if(role!=Qt::DisplayRole&&role!=Qt::ToolTipRole)return {};
+        if(file_==AboveWaterFile)return geometryRows_.at(index.row()).value(col);
         QJsonValue cell;
         if(file_=="Weights.txt"){
             const auto row=std::upper_bound(layers_.cbegin(),layers_.cend(),index.row(),[](int row,const Layer& layer){return row<layer.start;})-1;
@@ -243,7 +270,7 @@ public:
     }
 private:
     struct Layer{QJsonObject data;QJsonArray faces;int start;};
-    QString file_;QJsonArray waterlines_,stations_;QStringList headers_;QList<Layer> layers_;int rowCount_=0;
+    QString file_;QJsonArray waterlines_,stations_;QStringList headers_;QList<Layer> layers_;QList<QStringList> geometryRows_;int rowCount_=0;
 };
 class HydroPlot final:public QWidget {
 public:
@@ -356,7 +383,7 @@ HydroDialog::HydroDialog(ModelSession& session,const QString& mode,const QJsonOb
         auto* choices=new QHBoxLayout(selector);choices->setContentsMargins(3,3,3,3);choices->setSpacing(3);
         auxiliaryChoices_=new QButtonGroup(this);auxiliaryChoices_->setExclusive(true);
         auxiliaryStack_=new QStackedWidget;auxiliaryStack_->setObjectName("AuxiliaryReportStack");
-        const QStringList titles{"Bonjean",uiText("横剖面面积"),uiText("重量"),uiText("首尾水线位置")};
+        const auto titles=auxiliaryTitles();
         for(int index=0;index<titles.size();++index){
             auto* choice=new QToolButton(selector);choice->setText(titles[index]);choice->setCheckable(true);
             choice->setProperty("auxiliary_index",index);choice->setAccessibleName(titles[index]);
@@ -456,7 +483,7 @@ void HydroDialog::changeEvent(QEvent* event){
         }
     }
     if(auxiliaryChoices_){
-        const QStringList titles{"Bonjean",uiText("横剖面面积"),uiText("重量"),uiText("首尾水线位置")};
+        const auto titles=auxiliaryTitles();
         for(int index=0;index<titles.size();++index)
             if(auto* button=qobject_cast<QToolButton*>(auxiliaryChoices_->button(index)))button->setText(titles[index]);
     }
@@ -826,6 +853,15 @@ void HydroDialog::renderAuxiliaryPage(){
     if(index<0||index>=auxiliaryViews_.size())return;
     auto* table=auxiliaryViews_[index];
     const QString name=AuxiliaryFiles[index];
+    if(name==AboveWaterFile){
+        auxiliaryNotice_->setText({});auxiliaryNotice_->hide();
+        const auto geometry=aboveWaterGeometry(result_);
+        if(geometry.isEmpty()||table->model())return;
+        table->setModel(new AuxiliaryTable(geometry,name,result_["units"]=="metric",{},table));
+        data_motion::finishTableUpdate(table,"auxiliary:"+name);
+        refreshStudioDataTable(table);
+        return;
+    }
     const auto notice=auxiliaryWarnings_.value(name);
     auxiliaryNotice_->setText(notice);auxiliaryNotice_->setVisible(!notice.isEmpty());
     const auto data=auxiliaryResults_.value(name);
@@ -838,6 +874,11 @@ void HydroDialog::renderAuxiliaryPage(){
 QJsonObject HydroDialog::auxiliaryFile(int index)const{
     if(index<0||index>=auxiliaryViews_.size())return {};
     const QString name=AuxiliaryFiles[index];
+    if(name==AboveWaterFile){
+        const auto table=aboveWaterTable(aboveWaterGeometry(result_),result_["units"]=="metric");
+        if(table.rows.isEmpty())return {};
+        return {{"name",name},{"text",report::render(table,false)}};
+    }
     for(const auto& entry:auxiliaryResults_.value(name)["auxiliary"].toObject()["files"].toArray())
         if(entry.toObject()["name"]==name)return entry.toObject();
     return {};

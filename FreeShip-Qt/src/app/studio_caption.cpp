@@ -62,14 +62,15 @@ private:
 
 class StudioCaption final : public QWidget {
 public:
-    explicit StudioCaption(QWidget* window):QWidget(window),window_(window){
+    StudioCaption(QWidget* window,QWidget* tabs):QWidget(window),window_(window){
         setObjectName("StudioWindowCaption");setFixedHeight(36);setAutoFillBackground(true);
         auto colors=palette();colors.setColor(QPalette::Window,QColor("#e0ece7"));setPalette(colors);
         auto* row=new QHBoxLayout(this);row->setContentsMargins(10,0,0,0);row->setSpacing(8);
         icon_=new QLabel(this);icon_->setFixedSize(18,18);icon_->setAttribute(Qt::WA_TransparentForMouseEvents);row->addWidget(icon_);
         title_=new QLabel(this);title_->setMinimumWidth(0);title_->setSizePolicy(QSizePolicy::Ignored,QSizePolicy::Preferred);
         title_->setObjectName("StudioCaptionTitle");title_->setProperty("ui_user_text",true);
-        title_->setAttribute(Qt::WA_TransparentForMouseEvents);row->addWidget(title_,1);
+        title_->setAttribute(Qt::WA_TransparentForMouseEvents);if(tabs){title_->hide();row->addWidget(tabs);row->addStretch(1);row->addSpacing(32);}
+        else row->addWidget(title_,1);
         auto* minimize=new CaptionButton(false,this);auto* close=new CaptionButton(true,this);row->addWidget(minimize);row->addWidget(close);
         connect(minimize,&QToolButton::clicked,window,&QWidget::showMinimized);
         connect(close,&QToolButton::clicked,window,&QWidget::close);
@@ -159,7 +160,8 @@ private:
                 const auto local=caption->mapFrom(window,QPoint(qRound(client.x/ratio),qRound(client.y/ratio)));
                 if(caption->rect().contains(local)){
                     auto* child=caption->childAt(local);
-                    *result=child&&child->property("studio_caption_control").isValid()?HTCLIENT:HTCAPTION;return true;
+                    for(auto* w=child;w&&w!=caption;w=w->parentWidget())if(w->property("studio_caption_control").isValid()||w->objectName()=="DocumentTabs"){*result=HTCLIENT;return true;}
+                    *result=HTCAPTION;return true;
                 }
             }
             *result=HTCLIENT;return true;
@@ -177,7 +179,7 @@ void enableStudioMinimizeCaption(QWidget* window){
     flags|=Qt::CustomizeWindowHint|Qt::WindowTitleHint|Qt::WindowSystemMenuHint|Qt::WindowCloseButtonHint|Qt::WindowMinMaxButtonsHint;
     window->setWindowFlags(flags);
 }
-QWidget* createStudioCaption(QWidget* window){return new StudioCaption(window);}
+QWidget* createStudioCaption(QWidget* window,QWidget* tabs){return new StudioCaption(window,tabs);}
 void showStudioMainWindow(QWidget* window){
     window->ensurePolished();
     auto* bar=dynamic_cast<StudioBar*>(window->findChild<QWidget*>("StudioToolbar"));

@@ -1,5 +1,6 @@
 // GPL-2.0-or-later. Actual application callbacks in hidden Windows widgets.
 #include "main_window.h"
+#include "ui_language.h"
 #include "exchange_dialog.h"
 #include "grid_preview_panel.h"
 #include <QAction>
@@ -39,6 +40,10 @@ void MainWindow::verifyExchange(const QString& request,const QString& output){
     workflow_=true;exchangeWorkflow_=true;workflowOutput_=QFileInfo(output).absoluteFilePath();workflowTimer_.start();
     QFile f(request);if(!f.open(QIODevice::ReadOnly)){finishWorkflow("Cannot read exchange request");return;}
     exchangeRequest_=QJsonDocument::fromJson(f.readAll()).object();QDir().mkpath(workflowOutput_+"/views");
+    if(exchangeRequest_["language"].isString()){
+        const auto error=setUiLanguage(exchangeRequest_["language"].toString());
+        if(!error.isEmpty()){finishWorkflow(error);return;}
+    }
     ensurePolished();if(centralWidget()->layout())centralWidget()->layout()->activate();
     QTimer::singleShot(300000,this,[this]{if(!workflowFinished_)finishWorkflow("Exchange workflow timed out");});
     if(exchangeRequest_["model"].toString().isEmpty())exchangeStep("start");else session_.load(exchangeRequest_["model"].toString());
