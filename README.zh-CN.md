@@ -5,153 +5,184 @@
 </p>
 
 <p align="center">
-  <img src="FreeShip-Qt/docs/assets/readme/zh-CN/hero.svg" width="100%" alt="FreeShip 26：开源船体设计与分析软件。从船体曲面到型线图、静水力、阻力与推进；FREE!ship Plus 的 C++ / Qt 新版。">
+  <img src="FreeShip-Qt/docs/assets/readme/zh-CN/hero.svg" width="100%" alt="FreeShip 26，开源船体设计与分析软件">
+</p>
+
+FreeShip 26 是一款开源的船体设计与分析软件。你可以用控制网编辑船体曲面、检查型线、比较装载工况，再把同一份船模用来出图、展开板材或制作模型。它延续了 FREE!ship Plus 的建模方式，使用 C++ 和 Qt 6，并支持打开已有的 FBM 船模。
+
+<p align="center">
+  <a href="https://github.com/jiangshirong/FreeShip-26/releases/latest/download/FreeShip-26-Windows-x64-Setup.exe"><b>下载 Windows x64</b></a>
+  &nbsp;·&nbsp;
+  <a href="https://github.com/jiangshirong/FreeShip-26/releases/latest/download/FreeShip-26-Linux-x86_64.flatpak"><b>下载 Linux x86_64（Flatpak）</b></a>
+  &nbsp;·&nbsp;
+  <a href="https://github.com/jiangshirong/FreeShip-26/releases/latest">最新发布</a>
 </p>
 
 <p align="center">
-  <a href="https://github.com/jiangshirong/FreeShip-26/releases/latest"><img src="https://img.shields.io/badge/%E4%B8%8B%E8%BD%BD-Windows%20x64-176c5c?style=for-the-badge" alt="下载 Windows x64 版"></a>
-  <a href="COPYING"><img src="https://img.shields.io/badge/%E8%AE%B8%E5%8F%AF%E8%AF%81-GPLv3%2B-183b36?style=for-the-badge" alt="许可证：GPLv3+"></a>
-  <img src="https://img.shields.io/badge/Qt%206%20%C2%B7%20C%2B%2B-183b36?style=for-the-badge" alt="Qt 6 与 C++">
+  <a href="#features">建模与计算</a> &nbsp;·&nbsp;
+  <a href="#output">出图与制作</a> &nbsp;·&nbsp;
+  <a href="#start">安装与上手</a> &nbsp;·&nbsp;
+  <a href="#improvements">相比原版</a> &nbsp;·&nbsp;
+  <a href="#develop">开发与致谢</a>
 </p>
 
 <p align="center">
-  <a href="#features"><b>功能</b></a> &nbsp;·&nbsp;
-  <a href="#improvements"><b>相比原版</b></a> &nbsp;·&nbsp;
-  <a href="#start"><b>快速开始</b></a> &nbsp;·&nbsp;
-  <a href="#develop"><b>开发与参与</b></a> &nbsp;·&nbsp;
-  <a href="#credits"><b>致谢与许可</b></a>
+  <img src="FreeShip-Qt/docs/assets/readme/main-window.png" width="100%" alt="FreeShip 26 主窗口，四个视图显示同一艘样例船">
+  <br><sub>FreeShip 26 的四视图工作区，可同时检查横剖、纵剖、俯视和透视效果。</sub>
 </p>
-
-<p align="center">
-  <img src="FreeShip-Qt/docs/assets/readme/main-window.png" width="100%" alt="FreeShip 26 主窗口（英文界面）：工具栏下方是同一艘样例船的横剖线图、纵剖线图、俯视图和透视图，图上标注了排水量、KM、LCF 等静水力数值。">
-</p>
-
-FreeShip 26 是一款开源的船体设计软件。你用一张轻量的控制网描述船体曲面，在四个视图中编辑；型线图、静水力与稳性、阻力与推进估算、板材展开和 CAD 文件，都从同一份几何直接生成。
-
-它由 [FREE!ship Plus in Lazarus](https://github.com/markmal/freeship-plus-in-lazarus) 迁移而来：界面改用 Qt 6，模型文档、编辑、细分曲面、剖切、型线图和主要计算改由 C++ 实现。
-
-<p align="center"><sub>FREE!ship &nbsp;→&nbsp; FREE!ship Plus &nbsp;→&nbsp; FREE!ship Plus in Lazarus &nbsp;→&nbsp; <b>FreeShip 26</b></sub></p>
 
 <a id="features"></a>
 
+## 建模与计算
+
+### 在四个视图中编辑船体
+
+从主尺度新建船型，或打开已有的 FBM 工程。可以编辑控制点、边和面，使用折痕、镜像、挤出与图层管理，也可以在正交视图中用背景影像描图。通过横剖线、纵剖线、水线、斜剖线和曲率梳检查船形，再由同一份几何生成完整型线图。
+
+一个窗口可以打开多个船模。可以一次选中多个文件，用 `Ctrl+Tab` 或 `Ctrl+Shift+Tab` 切换标签页。标签上的星号表示该模型有未保存的改动。
+
+### 比较装载工况和完整船体稳性
+
+在同一艘船上设置多个装载工况，按工况填写重量和液舱装载率，比较排水量、吃水、纵倾和复原力臂（GZ）曲线。可以指定横倾角和该角度下的最低 GZ，查看计算值与要求值的差。工况可随 FBM 保存，结果可导出为 PDF、CSV、TXT 或 JSON。
+
+### 查看水上、水下几何与估算航行性能
+
+- **静水力**包括设计静水力、吃水表、稳性横截曲线（KN）以及 Bonjean 等附加表。「水线上方几何」表还给出横向受风投影面积、投影形心和形心距水线的高度。有相应几何或输入时，可查看甲板边缘距水线的最小高度及投影形心距艏垂线的纵向距离。
+- **阻力与推进**包括 Delft、KAPER、Holtrop、van Oortmerssen、Hollenbach、Fung–Leibman 等阻力估算方法，以及 B 系列螺旋桨敞水计算、桨型初选和主机匹配。各方法有各自的适用船型和参数范围。
+
+> [!NOTE]
+> 用户填写的最低 GZ 是自定义比较条件。用于工程决策时，请按适用规范、试验或实船数据复核计算结果。
+
+<a id="output"></a>
+
+## 出图与制作
+
+### 出完整型线图
+
+在独立窗口查看纵剖线图、横剖线图和半宽水线图，可导出 PNG 或 DXF。
+
 <p align="center">
-  <img src="FreeShip-Qt/docs/assets/readme/zh-CN/section-features.svg" width="100%" alt="01 功能：从建模到出图，一套几何贯穿始终">
+  <img src="FreeShip-Qt/docs/assets/readme/linesplan.png" width="100%" alt="由样例船生成的完整型线图，含纵剖线、横剖线与半宽水线">
+  <br><sub>由样例船生成的完整型线图。</sub>
+</p>
+
+### 打印横剖面或制作样板
+
+在「剖面线」中选择站位并导出横剖面图。可直接取船体横剖线，也可输入外板厚度，生成向内扣厚的造模样板轮廓。
+
+<p align="center">
+  <a href="FreeShip-Qt/docs/assets/readme/en/station-template.png" title="查看原图"><img src="FreeShip-Qt/docs/assets/readme/en/station-template.png" width="100%" alt="横剖面图导出窗口，左侧勾选三个站位，右侧预览扣除 6 mm 外板厚度的造模样板轮廓"></a>
+  <br><sub>造模样板预览。示例选择了三个站位，并输入 6 mm 外板厚度。</sub>
+</p>
+
+PDF 可按比例整张出图或分成 A4 拼页，也可另行导出二维 DXF。纸样默认按 1∶1 出图，可以指定其他比例。打印时选「实际大小／100%」，用纸样上的 100 mm 校验线检查打印比例。「无需裁剪」拼页需要打印机支持按实际大小无边距打印。
+
+<p align="center">
+  <a href="FreeShip-Qt/docs/assets/readme/en/station-assembly-guide.png" title="查看原图"><img src="FreeShip-Qt/docs/assets/readme/en/station-assembly-guide.png" width="100%" alt="FreeShip 导出的第 8 站 A4 拼接示意，四张纸按 2 行 2 列排列，标有裁剪边和对位十字"></a>
+  <br><sub>FreeShip 导出的 A4 拼接示意。这个站位分成四张纸，按编号、剪裁线和十字标记拼接。</sub>
+</p>
+
+### 制作 3D 打印船壳
+
+在 STL 导出中选择「3D 打印船壳（敞口）」，输入成品船长和壁厚。软件保留外表面、向舱内加厚，并在舷缘连接内外壁。导出的 STL 可交给切片软件检查。
+
+<p align="center">
+  <a href="FreeShip-Qt/docs/assets/readme/en/print-hull-stl.png" title="查看原图"><img src="FreeShip-Qt/docs/assets/readme/en/print-hull-stl.png" width="100%" alt="由 FreeShip 导出的机动艇船壳 STL 的透视渲染，可见敞口、内壁和舷缘"></a>
+  <br><sub>成品船长为 250 mm 的机动艇样例。按 FreeShip 导出的 STL 网格渲染，可看到保留的顶部开口。</sub>
 </p>
 
 <p align="center">
-  <img src="FreeShip-Qt/docs/assets/readme/zh-CN/features.svg" width="100%" alt="八项主要功能：船体建模、形状检查、型线图、静水力与稳性、阻力与推进、板材展开、文件交换、七种界面语言。">
+  <a href="FreeShip-Qt/docs/assets/readme/en/print-hull-cross-section.png" title="查看原图"><img src="FreeShip-Qt/docs/assets/readme/en/print-hull-cross-section.png" width="86%" alt="同一 STL 的横截面，内外轮廓围成薄壁，两个舷缘之间留有开口，横纵坐标均为毫米"></a>
+  <br><sub>同一个 STL 的横截面。内外两条轮廓之间是船壳厚度，两舷之间保持敞口。</sub>
 </p>
 
-<details>
-<summary><b>完整功能清单</b></summary>
+### 展开板材
 
-- **船体建模**：点、边、面编辑；折痕、拆边、挤出、镜像；锚点、直线约束和点组；图层管理；新建船型、网格面板、圆柱；移动、旋转、缩放和 Lackenby 船型变换；背景影像描图
-- **形状检查**：横剖线、纵剖线、水线、斜剖线；曲率梳、法向显示、模型检查和面朝向修复
-- **型线图**：独立窗口查看完整型线图，文字自动避让；导出 PNG 和 DXF
-- **静水力与稳性**：设计静水力、吃水表、稳性曲线（KN、GZ）、Bonjean、横剖面面积和重量；结果可导出 CSV、TXT、JSON、PDF
-- **阻力与推进**：Delft、KAPER、Holtrop、van Oortmerssen、Hollenbach、Fung–Leibman 等方法；B 系列敞水计算、螺旋桨初选与主机匹配
-- **板材展开**：展开可展图层，排列板片，查看边长和面积误差
-- **文件交换**：FBM 读写；FTM 读取；OBJ、STL、FEF、FreeShip 部件、VRML；IGES 曲面、DXF；型值与坐标；GHS、Archimedes、PAM、Michlet 等
-- **界面语言**：简体中文、English、Русский、Deutsch、Français、Español、日本語；设置可保存，支持快捷切换
-
-更多说明见 [迁移功能表](FreeShip-Qt/docs/migration/FEATURES.md) 和 [操作说明](FreeShip-Qt/docs/USAGE.md)。
-
-</details>
+将可展开图层生成板片，移动、旋转或镜像排列，查看边长与面积误差。可导出 DXF、PDF、PNG、TXT 或 JSON。
 
 <p align="center">
-  <img src="FreeShip-Qt/docs/assets/readme/linesplan.png" width="100%" alt="样例船的完整型线图：上方纵剖线图，中间两组横剖线图，下方半宽水线图，带网格与基线、DWL 标注。">
-  <br><sub><b>型线图</b> · 由模型几何直接生成，可导出 PNG 和 DXF</sub>
+  <img src="FreeShip-Qt/docs/assets/readme/plates.png" width="100%" alt="板材展开窗口，左侧可调整板片位置及角度，右侧显示展开后的板片">
+  <br><sub>板材展开窗口。左侧调整板片位置和角度，右侧预览排布。</sub>
 </p>
 
-<p align="center">
-  <img src="FreeShip-Qt/docs/assets/readme/plates.png" width="100%" alt="板材展开窗口（英文界面）：左侧是板片列表、旋转与位置参数和显示选项，右侧是五块展开后的板片。">
-  <br><sub><b>板材展开</b> · 调整板片位置和角度，查看误差，导出 DXF、TXT、JSON、PNG、PDF</sub>
-</p>
-
-<a id="improvements"></a>
-
-<p align="center">
-  <img src="FreeShip-Qt/docs/assets/readme/zh-CN/section-improvements.svg" width="100%" alt="02 相比原版：更快的交互，更安全的文件，更准确的结果">
-</p>
-
-### 交互中不再反复重算整艘船
-
-平移和缩放视图不会重建船体；移动控制点后，只更新受影响的细分区域和剖面；型线图、剖面和曲面结果可以缓存到本地，重启后继续使用。提速没有降低细分层级、曲线采样或导出精度。
-
-<p align="center">
-  <img src="FreeShip-Qt/docs/assets/readme/zh-CN/stats.svg" width="100%" alt="三个交互场景的提速：型线图平移缩放 4.7 倍（44.6 毫秒到 9.4 毫秒）；密集板片拖动 1776 倍（803 毫秒到 0.45 毫秒）；确认工程设置 23 倍（1238 毫秒到 53 毫秒）。">
-</p>
-
-### 文件和未保存的工作更安全
-
-- **保存失败不损坏原文件**：先写临时文件，成功后再替换；失败时原文件和“未保存”状态都保留。
-- **打开失败不清空当前模型**：新文件完整读入并检查通过后，才切换过去。
-- **两个窗口不会互相覆盖**：保存前检查原文件是否已被修改或占用。
-- **可以找回未保存的修改**：已提交的修改写入恢复副本，异常退出后重启可以恢复。
-
-### 修正了上游代码中的问题
-
-迁移时逐项核对了原代码，下面这些问题在 FREE!ship Plus in Lazarus 的 [固定提交 `1de17e99`](https://github.com/markmal/freeship-plus-in-lazarus/tree/1de17e99fb2b1cc559cdf27c5cafb595a627a641) 中可以复现：
-
-| 触发条件 | 原版的后果 | FreeShip 26 |
-| --- | --- | --- |
-| 保存已有项目时写入失败 | 正式文件缺失或不完整 | 原子替换，保留原文件 · [01](FreeShip-Qt/docs/upstream-fixes/catalog.md#u01) |
-| 公制与英制之间切换 | 船体缩放了，剖面却留在旧数值位置 | 剖面和相关参数同步换算 · [06](FreeShip-Qt/docs/upstream-fixes/catalog.md#u06) |
-| 截面带月池或多个分离浮体 | 面积、惯性矩及稳心数值出错 | 按实际船面做有向积分 · [19](FreeShip-Qt/docs/upstream-fixes/catalog.md#u19) |
-| 导出非对称图层为 STL | 文件里多出一份镜像面 | 按图层的对称属性输出 · [13](FreeShip-Qt/docs/upstream-fixes/catalog.md#u13) |
-| 英制船模导出 PAM | 换算方向反了，长度相差约 10.76 倍 | 按英尺到米正确换算 · [21](FreeShip-Qt/docs/upstream-fixes/catalog.md#u21) |
-| 外部计算程序卡住或出错 | 一直等待，或读到上一次的旧结果 | 独立任务目录、超时与退出码检查 · [11](FreeShip-Qt/docs/upstream-fixes/catalog.md#u11) |
-
-以月池为例：10 × 6 m 的水线面扣除 6 × 2 m 的月池，水线面积应为 **48 m²**，横向惯性矩应为 **176 m⁴**；旧算法得到约 36.0 m² 和 360.0 m⁴。完整记录见 [上游问题与修复](FreeShip-Qt/docs/upstream-fixes/README.md)。
+与其他软件交换模型时，可读写 FBM、读取 FTM，导入或导出 OBJ、STL、FEF，也可输出 DXF、IGES 曲面、型值和坐标。完整工程建议保存为 FBM。
 
 <a id="start"></a>
 
+## 安装与上手
+
+| 平台 | 安装方法 |
+| --- | --- |
+| **Windows 10／11 x64** | [下载安装程序](https://github.com/jiangshirong/FreeShip-26/releases/latest/download/FreeShip-26-Windows-x64-Setup.exe)，双击运行。安装器可选择界面语言。 |
+| **Linux x86_64** | [下载 Flatpak](https://github.com/jiangshirong/FreeShip-26/releases/latest/download/FreeShip-26-Linux-x86_64.flatpak)，按 [Linux 安装说明](FreeShip-Qt/docs/linux-install.md) 操作。已在 Ubuntu 24.04 和 Debian 13 上测试，安装包带有运行附带计算工具所用的 Wine。 |
+
+两个平台均支持在软件内检查更新。界面提供简体中文、英语、俄语、日语、德语、法语和西班牙语。
+
+1. 从「文件 → 打开」载入 FBM 或 FTM 船模。可以先试用 [FREE!ship Plus 样例船](https://github.com/markmal/freeship-plus-in-lazarus/tree/master/Ships)，也可以从「文件 → 新建船型」按主尺度生成船体。
+2. 在正交视图中拖动控制点改形。右键拖动平移，滚轮以光标为中心缩放。在透视图中，按住 `Ctrl` 并用左键拖动可旋转视角。
+3. 用工具栏的「型线图」检查船形，或在「计算」菜单中运行静水力、稳性、阻力及推进计算。详见 [操作说明](FreeShip-Qt/docs/USAGE.md)。
+
+<a id="improvements"></a>
+
+## 相比原版
+
+FreeShip 26 延续了 FREE!ship Plus 的控制网建模和 FBM 工程格式。主界面迁移至 Qt 6，模型编辑、细分曲面、剖切、型线图、文件读写和主要计算迁移至 C++。仍有专业方法通过原外部求解器运行。下文的上游问题以 [FREE!ship Plus in Lazarus 固定提交 `1de17e99`](https://github.com/markmal/freeship-plus-in-lazarus/tree/1de17e99fb2b1cc559cdf27c5cafb595a627a641) 为对照。性能数据来自 FreeShip 26 的同机优化前后测试。
+
+### 复杂船模操作的响应更快
+
+平移和缩放只更新视图。改动控制点时，细分曲面和剖面可复用未受影响的部分。只修改备注、报告选项等数据时，软件复用已经验过的几何及型线图。移动展开后的板片也能复用该板片的绘制结果。
+
+| 同机测试场景 | 优化前 | 优化后 |
+| --- | ---: | ---: |
+| 型线图连续平移、缩放，CPU 整帧绘制中位数 | 44.56 ms | 9.44 ms |
+| 密集板片已经生成时，拖动事件与视口绘制中位数 | 802.96 ms | 0.45 ms |
+| 直接确认未修改的工程设置，后台响应与产物写出 | 1,238.3 ms | 53.2 ms |
+
+测试使用各自的固定样例和测量口径。加速来自减少重复生成和绘制，计算精度、曲线采样和导出设置保持原有标准。工程设置的复用条件及完整产物对照见 [性能回归记录](FreeShip-Qt/docs/migration/PUBLICATION-PERFORMANCE-AUDIT.md)。
+
+### 数值、单位和导出几何有具体修正
+
+以带月池的水线面为例。外轮廓为 10 × 6 m，中间开口为 6 × 2 m。按几何解析值，水线面积应为 **48 m²**，横向水线面惯性矩应为 **176 m⁴**。沿用旧算法的对照构建分别得到约 36 m² 和 360 m⁴，修正后与上述解析值一致。这类修正也覆盖多个分离浮体的轮廓。
+
 <p align="center">
-  <img src="FreeShip-Qt/docs/assets/readme/zh-CN/section-start.svg" width="100%" alt="03 快速开始：安装，打开一艘船，开始编辑">
+  <a href="FreeShip-Qt/docs/assets/readme/en/moonpool-waterplane.png" title="查看原图"><img src="FreeShip-Qt/docs/assets/readme/en/moonpool-waterplane.png" width="74%" alt="月池静水力对照算例的水线面，外轮廓为 10 × 6 m，内侧月池为 6 × 2 m"></a>
+  <br><sub>水线面俯视图。计算面积和惯性矩时，从外轮廓中扣除中央月池。</sub>
 </p>
 
-**1 · 安装** &nbsp; 从 [Releases](https://github.com/jiangshirong/FreeShip-26/releases/latest) 下载 Windows 10/11 x64 安装包运行即可，安装后可以在软件内检查更新。Linux 版正在适配。
-
-**2 · 打开一艘船** &nbsp; “文件 → 打开”可以读取 FBM 和 FTM 船模；FTM 会另存为 FBM。没有现成船模时，可以使用 FREE!ship Plus 随附的 [样例船](https://github.com/markmal/freeship-plus-in-lazarus/tree/master/Ships)（本页截图用的是 `FREE!ship demo 3+deck.fbm`），或用“文件 → 新建船型”按主尺度生成一个新船体。
-
-**3 · 开始编辑**
-
-| 操作 | 方法 |
+| 触发条件 | FreeShip 26 的处理 |
 | --- | --- |
-| 选择控制点 | 左键单击；Ctrl 或 Shift 加选，正交视图空白处拖动可框选 |
-| 移动控制点 | 在横剖、纵剖或俯视图中拖动所选点 |
-| 平移 / 缩放 | 右键拖动 / 滚轮（以鼠标位置为中心） |
-| 旋转透视图 | 在透视图空白处左键拖动，或按住 Alt 拖动 |
-| 撤销 / 重做 / 保存 | Ctrl+Z / Ctrl+Y / Ctrl+S |
-| 型线图 | 工具栏“型线图” |
-| 静水力、阻力、推进 | “计算”菜单 |
+| **切换公制与英制** | 横剖线、水线、纵剖线等位置随船体换算。原来的 10 m 站位换算为约 32.81 ft，实际位置保持一致。 |
+| **导出非对称 STL** | 按图层的实际对称设置补面。已建好的全船或非对称部件保留原几何。 |
+| **用英制船模导出 PAM** | 按 1 ft = 0.3048 m 换算输出坐标，纠正旧换算方向。 |
+| **输入 RVRSSHIP 主机惯性矩** | 按核定的 kg·m² 及桨轴基准标注和校验，避免按旧 t·m² 标签录入时产生千倍差异。 |
 
-> [!NOTE]
-> 软件的计算结果不能代替船模试验、实船验证或船级社认可，用于工程决策时请结合各方法的适用范围判断。
+算例、触发条件、源码位置和回归入口见 [上游问题与修复](FreeShip-Qt/docs/upstream-fixes/README.md)。
+
+### 工程文件和计算过程更可控
+
+- **打开和保存**。新文件读入并通过几何检查后才切换。保存先把完整内容写到临时文件，再替换原文件。若目标在打开后被其他会话改动，软件会保留当前工作并提示处理冲突。
+- **异常恢复**。已记录的修改可从恢复副本找回。计算报告按当前模型读取数据，向基线对齐等会改变几何的操作由用户明确执行。
+- **计算任务与报告**。计算可在后台运行、取消并保存报告。调用外部求解器时，每次任务使用独立工作目录，检查退出状态和新生成的结果，避免把上一次的输出当作本次结果。
+
+### 从设计、计算到出图的流程更完整
+
+- **多方案工作**。在同一个窗口切换多艘船模，在同一艘船的 FBM 内保存多套重量和液舱装载率。工况对比、GZ 曲线与自定义最低 GZ 的结果可以一起查阅。
+- **从船模生成可用的制作文件**。横剖面可以按外板厚度向内扣厚，生成造模样板轮廓，并出整图或带拼接指引的 A4 PDF。用于 3D 打印时，可以按成品船长和壁厚输出敞口船壳 STL。
+- **安装、语言和更新**。Windows 安装器支持七语，Qt 版另提供带 Wine 的 Linux Flatpak。界面、主要报告和更新提示都可以随界面语言切换。公开稳定通道已验证 Windows 从旧版下载并重建新版安装包，以及 Linux Flatpak 在 Debian 13 上实际升级。版本变更见 [发布记录](https://github.com/jiangshirong/FreeShip-26/releases)。
 
 <a id="develop"></a>
 
-<p align="center">
-  <img src="FreeShip-Qt/docs/assets/readme/zh-CN/section-develop.svg" width="100%" alt="04 开发与参与：从源码构建，提交问题与改进">
-</p>
+## 开发与致谢
 
-**从源码构建** &nbsp; 需要 CMake 3.24 以上、Qt 6.8.3（MinGW 13.1）和 Python 3；开发包还会编译原 Pascal 源码作为对照程序，因此需要 Lazarus / Free Pascal 工具链。完整命令和测试入口见 [构建、测试与迁移记录](FreeShip-Qt/docs/BUILDING.md)。
+从源码构建可参考 [Windows 构建说明](WINDOWS-BUILD.md) 和 [Linux Flatpak 构建说明](FreeShip-Qt/tools/flatpak/README.md)。欢迎提交可复现的报告、可公开的 FBM 算例和文档改进，详见 [贡献指南](CONTRIBUTING.md)。
 
-**参与** &nbsp; 欢迎提交可复现的问题、可公开的船模算例、构建报告和文档改进，提交前请阅读 [贡献指南](CONTRIBUTING.md)。改动涉及 FBM 文件、船体几何、计算或导出时，请说明行为变化，并附上可复现的样例。
-
-<a id="credits"></a>
+FreeShip 26 建立在 Martijn van Engeland 的 FREE!ship、Timoshenko V.F. 的 FREE!ship Plus 和 Mark Malakanov 的 [FREE!ship Plus in Lazarus](https://github.com/markmal/freeship-plus-in-lazarus) 之上。Tom 绘制了可缩放图标，Sönke J. Peters 改进功能并修复问题，部分几何代码参考了 Greg Green 的 [ShipCAD](https://github.com/gpgreen/ShipCAD)。
 
 <p align="center">
-  <img src="FreeShip-Qt/docs/assets/readme/zh-CN/section-credits.svg" width="100%" alt="05 致谢与许可：二十年来，让这款软件延续下来的人">
+  <a href="FreeShip-Qt/docs/assets/readme/en/about.png" title="查看原图"><img src="FreeShip-Qt/docs/assets/readme/en/about.png" width="100%" alt="FreeShip 26 英文「关于」窗口的贡献表，列出原项目作者和后续的界面、C++ Qt 移植、翻译及 Linux 版开发贡献"></a>
+  <br><sub>软件「关于」窗口中的贡献名单，包含 Linux 版开发致谢。</sub>
 </p>
 
-<p align="center">
-  <img src="FreeShip-Qt/docs/assets/readme/about.png" width="78%" alt="FreeShip 26 的“关于”窗口（英文界面）。前 AI 时代：2005 年 Martijn van Engeland 创建 FREE!ship；2007 年 Timoshenko Victor F 开发 FREE!ship Plus；2015 年 Mark Malakanov 移植到 FPC，Tom 绘制新版可缩放图标，Sönke J. Peters 改进功能并修复问题。后 AI 时代：2026 年 GPT-6.1 Sol 负责界面美化，GPT-6 Astra 迁移到 C++ Qt 并优化底层性能，deepseek-flash 1017 完成第一版翻译，DeepL 与 GPT-6.1 Sol 完成第二版翻译，Qwen-3.8-Max 辅助翻译，蒋世融（Jiang Shirong）为 AI 写明提示词。">
-  <br><sub>软件“关于”窗口里的致谢名单</sub>
-</p>
-
-FreeShip 26 建立在 FREE!ship（Martijn van Engeland）、FREE!ship Plus（Timoshenko V.F.）和 FREE!ship Plus in Lazarus（Mark Malakanov）的工作之上，部分几何代码参考了 Greg Green 的 [ShipCAD](https://github.com/gpgreen/ShipCAD)。原作者的署名和许可证声明全部保留，各模块的来源见 [NOTICE.md](NOTICE.md)。
-
-本项目以 [GNU 通用公共许可证第 3 版或更高版本](COPYING)（GPLv3+）发布。安装包附带的 hship、CALCPROP、RVRSSHIP、ADD_MASS 等外部计算程序来自上游，按原样分发，不属于 GPL 源码；其中 ADD_MASS 仅限教育和非商业用途。详见 [外部计算工具](FreeShip-Qt/docs/CALCULATION-TOOLS.md)。
+项目以 [GPLv3 或更高版本](COPYING) 发布，原作者署名和第三方来源见 [NOTICE](NOTICE.md)。安装包附带的外部计算程序各有分发条件，其中 ADD_MASS 限教育及非商业用途。详见 [外部计算工具](FreeShip-Qt/docs/CALCULATION-TOOLS.md)。
 
 <p align="right"><a href="#top">回到顶部 ↑</a></p>

@@ -10,7 +10,7 @@
 <text x="64" y="280" font-family="'Microsoft YaHei UI','Microsoft YaHei','PingFang SC','Noto Sans CJK SC','Segoe UI',Arial,sans-serif" font-size="27" fill="#183b36">resistance and propulsion</text>
 <text x="64" y="320" font-family="'Microsoft YaHei UI','Microsoft YaHei','PingFang SC','Noto Sans CJK SC','Segoe UI',Arial,sans-serif" font-size="22" fill="#50645f">FREE!ship Plus, rebuilt in C++ and Qt</text>
 <line x1="64" y1="356" x2="300" y2="356" stroke="#176c5c" stroke-width="3"/>
-<text x="64" y="388" font-family="Consolas,'SFMono-Regular',Menlo,monospace" font-size="19" fill="#50645f">C++ · Qt 6 · Windows x64 · GPLv3+</text>
+<text x="64" y="388" font-family="Consolas,'SFMono-Regular',Menlo,monospace" font-size="19" fill="#50645f">C++ · Qt 6 · Windows / Linux · GPLv3+</text>
 </g>
 <g id="project-proof" fill="none">
 <line x1="766.8" y1="318.0" x2="1093.2" y2="318.0" stroke="#cfdcd7" stroke-width="1"/>

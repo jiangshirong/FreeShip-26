@@ -9,7 +9,7 @@
 <text x="64" y="244" font-family="'Microsoft YaHei UI','Microsoft YaHei','PingFang SC','Noto Sans CJK SC','Segoe UI',Arial,sans-serif" font-size="27" fill="#183b36">从船体曲面到型线图、静水力、阻力与推进</text>
 <text x="64" y="284" font-family="'Microsoft YaHei UI','Microsoft YaHei','PingFang SC','Noto Sans CJK SC','Segoe UI',Arial,sans-serif" font-size="22" fill="#50645f">FREE!ship Plus 的 C++ / Qt 新版</text>
 <line x1="64" y1="320" x2="300" y2="320" stroke="#176c5c" stroke-width="3"/>
-<text x="64" y="352" font-family="Consolas,'SFMono-Regular',Menlo,monospace" font-size="19" fill="#50645f">C++ · Qt 6 · Windows x64 · GPLv3+</text>
+<text x="64" y="352" font-family="Consolas,'SFMono-Regular',Menlo,monospace" font-size="19" fill="#50645f">C++ · Qt 6 · Windows / Linux · GPLv3+</text>
 </g>
 <g id="project-proof" fill="none">
 <line x1="766.8" y1="318.0" x2="1093.2" y2="318.0" stroke="#cfdcd7" stroke-width="1"/>
