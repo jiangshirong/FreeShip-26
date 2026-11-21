@@ -4,6 +4,9 @@
   "id": "en",
   "name": "English",
   "messages": {
+    "更新已就绪": "Update ready",
+    "正在更新…": "Updating…",
+    "重新启动": "Restart",
     "A4 拼页": "A4 tiles",
     "无需裁剪": "No trimming",
     "需裁剪": "Trim edges",
@@ -326,6 +329,7 @@
     "迁移到C++ Qt，底层性能优化": "Migration to C++ Qt and core performance optimization",
     "第二版翻译": "Second translation",
     "辅助翻译": "Translation assistance",
+    "开发Linux版": "Linux version development",
     "为AI写明提示词，一行代码没写的人类": "The human who wrote clear prompts for AI and didn't write a single line of code",
     "船体最低漏点 Z = %1 %2。已跳过水线 Z = %3 %2。": "Lowest hull opening Z = %1 %2. Skipped waterlines Z = %3 %2.",
     "所有水线均高于船体最低漏点 Z = %1 %2。水线 Z = %3 %2。": "All waterlines are above the lowest hull opening Z = %1 %2. Waterlines Z = %3 %2.",

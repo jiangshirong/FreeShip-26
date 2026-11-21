@@ -534,6 +534,7 @@ struct HullView::State {
     QSet<fs::EntityId> boxBase,boxPreview;
     QString blockedReason;
     bool moved=false,lastRightDragged=false;
+    bool contextMenuOnRelease=false;
     bool splitBody()const{return snapshot&&!snapshot->bothSides&&projection==HullProjection::Body;}
     void rebuildDisplay(bool visibilityOnly=false){
         // Keep just the preceding visibility combination for an immediate toggle back.
@@ -592,6 +593,27 @@ struct HullView::State {
         const double inverse=1/qMax(w,1e-6);
         return {{offset.x()+scale*dot(relative,right)*inverse,
                  offset.y()-scale*dot(relative,up)*inverse},-z*inverse/2,inverse};
+    }
+    QRectF projectedMeshBounds() const {
+        const auto& mesh=display->mesh;
+        double left=std::numeric_limits<double>::max(),right=-left,top=left,bottom=-left;
+        for(int corner=0;corner<8;++corner){
+            const auto point=projectPoint({corner&1?mesh.maximum.x:mesh.minimum.x,
+                corner&2?mesh.maximum.y:mesh.minimum.y,corner&4?mesh.maximum.z:mesh.minimum.z}).pixel;
+            left=qMin(left,point.x());right=qMax(right,point.x());
+            top=qMin(top,point.y());bottom=qMax(bottom,point.y());
+        }
+        return {QPointF(left,top),QPointF(right,bottom)};
+    }
+    QSizeF fitSpan(const QRectF& bounds) const {
+        const double minimum=display->mesh.extent*.03;
+        return {qMax(bounds.width()/scale,minimum),qMax(bounds.height()/scale,minimum)};
+    }
+    double fitScale(QSize viewport,QSizeF span) const {
+        // Leave room for the dimension strings at both ends of the grid.
+        const int horizontal=studio?std::min(160,viewport.width()/3):56;
+        return qMin(qMax(1,viewport.width()-horizontal)/span.width(),
+                    qMax(1,viewport.height()-(studio?112:72))/span.height());
     }
     void prepareAnimatedSections(const fs::curveEdit::Motion& motion,qreal dpr)const{
         const bool gridMasksSections=gridVisible&&snapshot->overlay.present;
@@ -1089,6 +1111,11 @@ void HullView::populateBackgroundMenu(QMenu* backgroundMenu){
 }
 
 void HullView::contextMenuEvent(QContextMenuEvent* event){
+    // Some platforms request the mouse menu on press, before a drag can start.
+    if(event->reason()==QContextMenuEvent::Mouse && state_->gesture==State::Gesture::Pan){
+        state_->contextMenuOnRelease=true;
+        event->accept();return;
+    }
     if(event->reason()==QContextMenuEvent::Mouse&&state_->lastRightDragged){event->accept();return;}
     finishPresentation();
     auto* menu=new QMenu(this);menu->setAttribute(Qt::WA_DeleteOnClose);
@@ -1319,21 +1346,9 @@ void HullView::fitToViewport(bool resizing) {
     state_->scale=1;state_->offset={};
     const auto& mesh=state_->display->mesh;
     state_->cameraCenter=mesh.center;state_->cameraExtent=mesh.extent;
-    double left=std::numeric_limits<double>::max(),right=-left,top=left,bottom=-left;
-    for (int corner=0;corner<8;++corner) {
-        const auto point=state_->projectPoint({corner&1?mesh.maximum.x:mesh.minimum.x,
-            corner&2?mesh.maximum.y:mesh.minimum.y,corner&4?mesh.maximum.z:mesh.minimum.z}).pixel;
-        left=qMin(left,point.x());right=qMax(right,point.x());
-        top=qMin(top,point.y());bottom=qMax(bottom,point.y());
-    }
-    const double spanX=qMax(right-left,mesh.extent*0.03);
-    const double spanY=qMax(bottom-top,mesh.extent*0.03);
-    // Leave room for the original dimension strings at both ends of the grid.
-    // A tight mesh-only fit otherwise clips DWL/baseline labels on first open.
-    const int horizontal=state_->studio?std::min(160,width()/3):56;
-    state_->scale=qMin(qMax(1,width()-horizontal)/spanX,qMax(1,height()-(state_->studio?112:72))/spanY);
-    state_->offset={width()/2.0-(left+right)*state_->scale/2,
-                    height()/2.0+9-(top+bottom)*state_->scale/2};
+    const auto bounds=state_->projectedMeshBounds();
+    state_->scale=state_->fitScale(size(),state_->fitSpan(bounds));
+    state_->offset=QPointF(width()/2.0,height()/2.0+9)-bounds.center()*state_->scale;
     state_->fitted=true;
     if(animate){
         state_->cameraMotion={true,from,state_->cameraPose(),interactionTime(),240};state_->applyCamera(from);
@@ -1910,10 +1925,27 @@ void HullView::paintEvent(QPaintEvent*) {
 }
 void HullView::resizeEvent(QResizeEvent* event) {
     if (state_->fitted) fitToViewport(true);
-    else if (event->oldSize().isValid())
-        state_->offset+=QPointF((event->size().width()-event->oldSize().width())/2.0,
-                               (event->size().height()-event->oldSize().height())/2.0);
-    ++state_->cameraRevision;
+    else if(event->oldSize().isValid()){
+        state_->labels.viewportResized();
+        double ratio=1.;
+        if(state_->display){
+            const auto span=state_->fitSpan(state_->projectedMeshBounds());
+            ratio=state_->fitScale(event->size(),span)/state_->fitScale(event->oldSize(),span);
+        }
+        const QPointF oldCenter(event->oldSize().width()/2.,event->oldSize().height()/2.);
+        const QPointF newCenter(event->size().width()/2.,event->size().height()/2.);
+        const auto resizePose=[&](State::CameraPose& pose){
+            pose.scale*=ratio;
+            pose.offset=newCenter+(pose.offset-oldCenter)*ratio;
+        };
+        auto pose=state_->cameraPose();
+        resizePose(pose);
+        if(auto& motion=state_->cameraMotion;motion.active){
+            resizePose(motion.from);resizePose(motion.to);
+            motion.fromVelocity.offset*=ratio;motion.velocity.offset*=ratio;
+        }
+        state_->applyCamera(pose);
+    }
     if(isVisible()){
         const auto dpr=devicePixelRatioF();
         state_->scheduleSections(size(),dpr,pixelPhase(QPointF(mapTo(window(),QPoint()))*dpr));
@@ -1968,6 +2000,7 @@ void HullView::mousePressEvent(QMouseEvent* event) {
     }
     if (event->button()==Qt::RightButton) {
         state_->lastRightDragged=false;
+        state_->contextMenuOnRelease=false;
         state_->gesture=State::Gesture::Pan;setCursor(Qt::ClosedHandCursor);
     } else {
         const bool control=event->modifiers().testFlag(Qt::ControlModifier);
@@ -2138,9 +2171,19 @@ void HullView::mouseReleaseEvent(QMouseEvent* event) {
     }
     const bool select=state_->gesture==State::Gesture::Box;
     const auto acceptedBackgroundPreview=state_->backgroundPreview;
-    if(event->button()==Qt::RightButton)state_->lastRightDragged=state_->moved;
+    const bool openClickMenu=event->button()==Qt::RightButton && state_->contextMenuOnRelease &&
+                             state_->gesture==State::Gesture::Pan && !state_->moved;
+    if(event->button()==Qt::RightButton){
+        state_->lastRightDragged=state_->moved;
+        state_->contextMenuOnRelease=false;
+    }
     if (select) {state_->selection=state_->boxPreview;state_->pruneSelection();}
     cancelGesture();
+    if(openClickMenu){
+        QContextMenuEvent menu(QContextMenuEvent::Mouse,event->position().toPoint(),
+                               event->globalPosition().toPoint(),event->modifiers());
+        contextMenuEvent(&menu);
+    }
     if(!backgroundChanges.isEmpty()&&onBackgroundChanged){
         // Keep the released preview until the committed snapshot arrives. A
         // failed request re-enables editing and clears it without changing data.

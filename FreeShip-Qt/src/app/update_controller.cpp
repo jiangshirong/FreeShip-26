@@ -226,6 +226,12 @@ struct StudioUpdateController::Impl {
     QString state,helper,report,version,installedVersion,errorSource,lastMode,progressStage,notesHtml;
     QJsonObject releaseNotes;
     bool workflow=false;
+#ifdef Q_OS_LINUX
+    bool flatpak=false;
+#else
+    static constexpr bool flatpak=false;
+#endif
+    int flatpakPercent=-1;
     qint64 total=-1,downloaded=0,speed=0;
 #ifdef Q_OS_WIN
     HANDLE pauseEvent=nullptr;
@@ -249,6 +255,8 @@ struct StudioUpdateController::Impl {
         else if(state=="downloading")label=verifying?uiText("正在校验并准备安装包…"):
             progressStage=="preparing"?uiText("正在计算所需下载量…"):uiText("正在下载更新…");
         else if(state=="not_configured")label=uiText("更新服务不可用");
+        if(flatpak&&state=="ready")label=uiText("更新已就绪");
+        if(flatpak&&state=="downloading")label=uiText("正在更新…");
         const QString missingPkexec=QStringLiteral("系统未安装 pkexec，无法请求管理员权限；请手动安装下载的更新包：");
         if(errorSource.startsWith(missingPkexec))
             label=uiText(missingPkexec+"%1").arg(errorSource.mid(missingPkexec.size()));
@@ -257,6 +265,10 @@ struct StudioUpdateController::Impl {
         const int value=state=="ready"?100:total>0?int(downloaded*100/total):0;
         window->bar->setRange(0,(state=="downloading"&&total<0)||verifying?0:100);
         window->bar->setValue(value);
+        if(flatpak&&state=="downloading"){
+            window->bar->setRange(0,flatpakPercent<0?0:100);
+            window->bar->setValue(qMax(0,flatpakPercent));
+        }
         window->bar->setVisible(!checkOnly());
         window->percent->setText(!checkOnly()&&total>=0?QString("%1%").arg(value):QString{});
         window->amount->setText(!checkOnly()&&total>=0?downloadSize(downloaded)+" / "+downloadSize(total):"—");
@@ -272,6 +284,11 @@ struct StudioUpdateController::Impl {
         }
         window->action->setText(uiText(action));
         window->action->setEnabled(canCheck()&&!checking&&state!="pausing"&&!verifying&&(!process||state=="downloading"));
+        if(flatpak){
+            if(state=="available"||state=="downloading")window->action->setText(uiText("更新"));
+            if(state=="ready")window->action->setText(uiText("重新启动"));
+            if(state=="downloading")window->action->setEnabled(false);
+        }
     }
     void sync(){
         if(about){
@@ -294,7 +311,7 @@ struct StudioUpdateController::Impl {
         syncProgress();
     }
     void pause(){
-        if(state!="downloading")return;
+        if(flatpak||state!="downloading")return;
         state="pausing";speed=0;sync();
 #ifdef Q_OS_WIN
         if(pauseEvent)SetEvent(pauseEvent);
@@ -317,11 +334,13 @@ struct StudioUpdateController::Impl {
         if(process)return;
         lastMode=mode;self->setProperty("update_requested_mode",mode);
         errorSource.clear();
-        if(mode=="--download"){state="downloading";speed=0;progressStage="preparing";}
+        if(mode=="--download"){state="downloading";speed=0;progressStage="preparing";flatpakPercent=-1;}
         if(workflow){sync();return;}
         if(!QFile::exists(helper)){state="not_configured";sync();return;}
         QDir().mkpath(work());report=work()+"/result-"+QUuid::createUuid().toString(QUuid::WithoutBraces)+".json";
         QStringList args{mode,"--report",report};
+        if(flatpak&&mode=="--download"&&window&&QGuiApplication::platformName()=="xcb")
+            args<<"--parent-window"<<"x11:"+QString::number(window->winId(),16);
 #ifdef Q_OS_WIN
         if(mode=="--download"){
             const QString name="Local\\FreeShip26-Pause-"+QUuid::createUuid().toString(QUuid::WithoutBraces);
@@ -366,6 +385,16 @@ struct StudioUpdateController::Impl {
     void install(){
         lastMode="--install";self->setProperty("update_requested_mode",lastMode);
         if(workflow||!owner||checkOnly())return;
+#ifdef Q_OS_LINUX
+        if(flatpak){
+            // Use the normal workspace exit sequence (including running
+            // calculations, every modified document, and recovery cleanup).
+            auto* workspace=owner->window();
+            workspace->setProperty("fs26_restart_after_close",true);
+            workspace->close();
+            return;
+        }
+#endif
         const QPointer<StudioUpdateController> alive(self);
         save([this,alive]{
             if(!alive||!owner)return;
@@ -391,8 +420,11 @@ StudioUpdateController::StudioUpdateController(QWidget* owner,QAction* about,boo
         const auto data=QJsonDocument::fromJson(manifest.readAll()).object();
         setProperty("update_check_only",data["local_installation_role"].toString().startsWith("development;"));
         impl_->installedVersion=data["release_version"].toString();
+#ifdef Q_OS_LINUX
+        impl_->flatpak=QFile::exists("/.flatpak-info")&&data["flatpak_updates"].toBool();
+#endif
     }
-    impl_->helper=fs::platform::siblingExecutable("FreeShipUpdater");impl_->sync();
+    impl_->helper=fs::platform::siblingExecutable(impl_->flatpak?"FreeShipFlatpakUpdater":"FreeShipUpdater");impl_->sync();
     // The signed report already contains all available locales. Re-render it
     // and the dynamic transfer labels without touching the running updater.
     bindUiRefresh(this,[this]{if(impl_->window)impl_->sync();});
@@ -426,6 +458,7 @@ void StudioUpdateController::attachButton(QPushButton* button){
     new UpdateButtonBadge(button);
     impl_->entryButtons.append(button);
     button->setVisible(impl_->canCheck()&&impl_->hasUpdate());
+    if(impl_->flatpak&&!impl_->workflow&&!impl_->process&&!impl_->hasUpdate())impl_->run("--check");
     connect(button,&QPushButton::clicked,this,[this,button]{
         if(auto* about=qobject_cast<QDialog*>(button->window());about&&about->objectName()=="FreeShipAbout")about->accept();
         QTimer::singleShot(0,this,[this]{impl_->showWindow();});
@@ -433,6 +466,9 @@ void StudioUpdateController::attachButton(QPushButton* button){
 }
 void StudioUpdateController::receiveProgress(const QJsonObject& progress){
     if(impl_->state!="downloading"&&impl_->state!="pausing")return;
+    if(impl_->flatpak&&progress.contains("percent")){
+        impl_->flatpakPercent=qBound(0,progress["percent"].toInt(),100);impl_->syncProgress();return;
+    }
     const auto stage=progress.value("stage").toString();
     if(stage!="downloading"&&stage!="verifying")return;
     const auto total=progress.value("total_bytes").toInteger(-1);

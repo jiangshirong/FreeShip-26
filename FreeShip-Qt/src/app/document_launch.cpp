@@ -11,6 +11,10 @@
 #include <QStandardPaths>
 #include <QThread>
 #include <QTimer>
+#ifdef Q_OS_LINUX
+#include <cerrno>
+#include <sys/file.h>
+#endif
 #ifdef Q_OS_WIN
 #include <windows.h>
 #endif
@@ -36,14 +40,39 @@ constexpr int maxBytes=1024*1024;
 }
 
 DocumentLaunch::Result DocumentLaunch::start(const QStringList& paths){
-    const auto key=sessionKey();
+    auto key=sessionKey();
     QDir dir(QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation));
     if(!dir.mkpath(".")){error=dir.absolutePath();return Failed;}
-    owner_=std::make_unique<QLockFile>(dir.filePath(key+".lock"));
-    owner_->setStaleLockTime(0); // Only reclaim a dead owner, never an old live editor.
+#ifdef Q_OS_LINUX
+    if(QFileInfo::exists("/.flatpak-info")){
+        // /tmp is private to an instance. This Flatpak-provided directory is
+        // shared between launches of this app by the same user.
+        QDir shared(QStandardPaths::writableLocation(QStandardPaths::RuntimeLocation)+"/app/io.github.jiangshirong.FreeShip26");
+        if(!shared.exists()){error=shared.absolutePath();return Failed;}
+        key=shared.filePath(key);
+        sandboxLock_.setFileName(key+".lock");
+        if(!sandboxLock_.open(QIODevice::ReadWrite)){error=sandboxLock_.errorString();return Failed;}
+    }else
+#endif
+    {
+        owner_=std::make_unique<QLockFile>(dir.filePath(key+".lock"));
+        owner_->setStaleLockTime(0);
+    }
+    auto tryOwn=[&]{
+#ifdef Q_OS_LINUX
+        if(sandboxLock_.isOpen()){
+            if(flock(sandboxLock_.handle(),LOCK_EX|LOCK_NB)==0)return true;
+            if(errno!=EWOULDBLOCK&&errno!=EINTR)error=sandboxLock_.fileName();
+            return false;
+        }
+#endif
+        if(owner_->tryLock(0))return true;
+        if(owner_->error()!=QLockFile::LockFailedError)error=dir.absolutePath();
+        return false;
+    };
     QElapsedTimer clock;clock.start();
-    while(!owner_->tryLock(0)){
-        if(owner_->error()!=QLockFile::LockFailedError){error=dir.absolutePath();return Failed;}
+    while(!tryOwn()){
+        if(!error.isEmpty())return Failed;
         QLocalSocket socket;socket.connectToServer(key);
         if(socket.waitForConnected(150)){
 #ifdef Q_OS_WIN

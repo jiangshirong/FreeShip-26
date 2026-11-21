@@ -27,6 +27,7 @@
 #include <QClipboard>
 #include <QDateTime>
 #include <QTimer>
+#include <QScreen>
 #include <QToolButton>
 #include <utility>
 class AboutCreditsTable final:public QTableWidget {
@@ -66,7 +67,11 @@ protected:void resizeEvent(QResizeEvent* event)override{
 private:bool legal_;
 };
 inline void showFreeShipAbout(QWidget* parent){
-    QDialog dialog(parent);dialog.setAttribute(Qt::WA_DontShowOnScreen,parent&&parent->testAttribute(Qt::WA_DontShowOnScreen));setStudioWindowIcon(&dialog,"Info");dialog.setObjectName("FreeShipAbout");dialog.setWindowTitle("FreeShip 26");dialog.resize(1040,900);dialog.setMinimumSize(840,620);
+    QDialog dialog(parent);dialog.setAttribute(Qt::WA_DontShowOnScreen,parent&&parent->testAttribute(Qt::WA_DontShowOnScreen));setStudioWindowIcon(&dialog,"Info");dialog.setObjectName("FreeShipAbout");dialog.setWindowTitle("FreeShip 26");
+    const auto available=(parent?parent->screen():dialog.screen())->availableGeometry().adjusted(12,32,-12,-12);
+    dialog.setMinimumSize(QSize(840,620).boundedTo(available.size()));
+    dialog.resize(QSize(1040,900).boundedTo(available.size()));
+    dialog.move(available.center()-QPoint(dialog.width()/2,dialog.height()/2));
     dialog.setStyleSheet("QDialog{background:#f7f8f4;color:#213b36} QLabel{color:#213b36} QTableWidget{background:white;color:#213b36;border:0;gridline-color:#e1e8e3} QHeaderView::section{background:#ebf0e9;color:#213b36;border:0;padding:12px;font-weight:bold}");
     auto font=QApplication::font();font.setPointSizeF(12);dialog.setFont(font);
     auto* layout=new QVBoxLayout(&dialog);layout->setContentsMargins(0,0,0,0);layout->setSpacing(0);
@@ -80,6 +85,7 @@ inline void showFreeShipAbout(QWidget* parent){
     auto* body=new QWidget;auto* bodyLayout=new QVBoxLayout(body);bodyLayout->setContentsMargins(32,0,32,20);bodyLayout->setSpacing(0);layout->addWidget(body,1);
     const QString authorName=uiText("蒋世融(Jiang Shirong)");
     const QString deepseekName=QStringLiteral("deepseek-flash 1017");
+    const QString linuxCredit=QStringLiteral("Claude Opus 5.5 + GPT-6.2 Astra");
     const auto contribution=[](const QString& name,const char* work){return name+"："+uiText(work);};
     const QList<QStringList> rows{
         {"2005",contribution("Martijn van Engeland","创建 FREE!ship")},
@@ -96,6 +102,7 @@ inline void showFreeShipAbout(QWidget* parent){
         {"",contribution(deepseekName,"第一版翻译")},
         {"",contribution("DeepL + GPT-6.1 Sol","第二版翻译")},
         {"",contribution("Qwen-3.8-Max","辅助翻译")},
+        {"",contribution(linuxCredit,"开发Linux版")},
         {"",QString(uiText("为AI写明提示词，一行代码没写的人类"))+"："+authorName}
     };
     auto* credits=new AboutCreditsTable(rows.size(),4);
@@ -118,13 +125,21 @@ inline void showFreeShipAbout(QWidget* parent){
     applyStudioScrollbars(credits);
     const QHash<QString,QString> vendors{
         {"GPT-6.1 Sol","openai"},{"GPT-6 Astra","openai"},{deepseekName,"deepseek"},
-        {"DeepL + GPT-6.1 Sol","deepl"},{"Qwen-3.8-Max","qwen"}
+        {"Qwen-3.8-Max","qwen"}
+    };
+    struct CreditIdentity {QString vendor,name;};
+    const QHash<QString,QList<CreditIdentity>> jointCredits{
+        {"DeepL + GPT-6.1 Sol",{{"deepl","DeepL"},{"openai","GPT-6.1 Sol"}}},
+        {linuxCredit,{{"claude","Claude Opus 5.5"},{"openai","GPT-6.2 Astra"}}}
     };
     for(int row=0;row<rows.size();++row){
         const bool spacer=rows[row][1].isEmpty();
         auto name=rows[row][1].section(QChar(0xff1a),0,0);
         auto work=rows[row][1].section(QChar(0xff1a),1);
         if(row==rows.size()-1)std::swap(name,work);
+        const auto identities=jointCredits.value(name);
+        const bool joint=!identities.isEmpty();
+        const QString vendor=joint?identities.first().vendor:vendors.value(name);
         const QStringList cells{QString{},rows[row][0],name,work};
         for(int column=0;column<4;++column){
             auto* cell=new QTableWidgetItem(cells[column]);
@@ -133,7 +148,6 @@ inline void showFreeShipAbout(QWidget* parent){
             cell->setForeground(QColor(column==1?"#1e6255":column==2?"#213b36":"#52675f"));
             cell->setTextAlignment(Qt::AlignLeft|Qt::AlignVCenter);
             if(column==2){
-                const auto vendor=vendors.value(name);
                 if(!vendor.isEmpty()){
                     cell->setIcon(studioVendorIcon(vendor));
                     cell->setData(Qt::UserRole,vendor);
@@ -148,7 +162,6 @@ inline void showFreeShipAbout(QWidget* parent){
             // credits alternate logo/name pairs rather than collecting logos.
             auto* identity=new QWidget;identity->setAccessibleName(name);
             auto* line=new QHBoxLayout(identity);line->setContentsMargins(6,3,6,3);line->setSpacing(7);
-            const bool joint=name=="DeepL + GPT-6.1 Sol";
             const auto part=[&](const QString& role,const QString& value,const QIcon& icon=QIcon{}){
                 auto* label=new QLabel;label->setProperty("credit_part",role);label->setProperty("credit_value",value);
                 if(role=="logo"){
@@ -161,11 +174,13 @@ inline void showFreeShipAbout(QWidget* parent){
                 line->addWidget(label,role=="name"&&!joint?1:0,Qt::AlignVCenter);
             };
             if(joint){
-                part("logo","deepl",studioVendorIcon("deepl"));part("name","DeepL");
-                part("join","+");
-                part("logo","openai",studioVendorIcon("openai"));part("name","GPT-6.1 Sol");
+                for(int i=0;i<identities.size();++i){
+                    if(i>0)part("join","+");
+                    const auto& credit=identities.at(i);
+                    part("logo",credit.vendor,studioVendorIcon(credit.vendor));
+                    part("name",credit.name);
+                }
             }else{
-                const auto vendor=vendors.value(name);
                 part("logo",vendor.isEmpty()?QString("human"):vendor,vendor.isEmpty()?studioIcon("Person"):studioVendorIcon(vendor));
                 part("name",name);
             }
@@ -195,7 +210,7 @@ inline void showFreeShipAbout(QWidget* parent){
     auto* footer=new QWidget;footer->setStyleSheet("background:#ebf0e9");auto* buttons=new QHBoxLayout(footer);buttons->setContentsMargins(24,16,24,16);footer->setFixedHeight(72);
     auto* version=new QPushButton(studioIcon("Info"),uiText("版本信息"));version->setObjectName("AboutVersionToggle");auto* legal=new QPushButton(studioIcon("Legal"),uiText("许可证信息"));legal->setObjectName("AboutCopyrightToggle");
     for(auto* b:{version,legal}){
-        b->setMinimumSize(220,40);b->setAutoDefault(false);b->setDefault(false);
+        b->setMinimumSize(qMin(220,qMax(1,(available.width()-80)/3)),40);b->setAutoDefault(false);b->setDefault(false);
         b->setStyleSheet("QPushButton{background:#f7f9f5;color:#244d43;border:1px solid #c4d6ce;border-radius:5px;padding:6px 14px}"
             "QPushButton:hover{background:#edf4ef;border-color:#9cbdb0}"
             "QPushButton:pressed{background:#e1eee6;border-color:#79a895}"
@@ -226,9 +241,16 @@ inline void showFreeShipAbout(QWidget* parent){
                 }
             }
             auto built=m["created_utc"].toString(QStringLiteral(__DATE__ " " __TIME__));const auto time=QDateTime::fromString(built,Qt::ISODateWithMs);if(time.isValid())built=time.toLocalTime().toString("yyyy-MM-dd  HH:mm:ss");
+#if defined(Q_OS_WIN)
+            const auto targetSystem=QStringLiteral("Windows");
+#elif defined(Q_OS_LINUX)
+            const auto targetSystem=QStringLiteral("Linux");
+#else
+            const auto targetSystem=QSysInfo::kernelType();
+#endif
             values={{uiText("产品版本"),"FreeShip 26"},{uiText("程序版本"),m["release_version"].toString(QCoreApplication::applicationVersion().isEmpty()?QString(uiText("未标注")):QCoreApplication::applicationVersion())},
                 {uiText("构建日期"),built},
-                {uiText("编译器版本"),QStringLiteral("C++ " __VERSION__)},{uiText("目标 CPU"),QSysInfo::buildCpuArchitecture()},{uiText("目标操作系统"),"Windows"}};
+                {uiText("编译器版本"),QStringLiteral("C++ " __VERSION__)},{uiText("目标 CPU"),QSysInfo::buildCpuArchitecture()},{uiText("目标操作系统"),targetSystem}};
         }else values={{"Copyright © 2005, by Martijn van Engeland",""},{"Copyright © 2007-2012, by Timoshenko Victor F.","vftim@rambler.ru"},{"Copyright © 2015, by Mark Malakanov","markmal@github.com"},{"Copyright © 2026 "+authorName,"1296811180@qq.com"}};
         auto* table=new AboutInformationTable(values.size(),!isVersion);table->setObjectName("InformationGrid");
         for(int r=0;r<values.size();++r)for(int c=0;c<2;++c){auto* item=new QTableWidgetItem(values[r][c]);item->setTextAlignment(Qt::AlignLeft|Qt::AlignVCenter);

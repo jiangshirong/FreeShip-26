@@ -537,12 +537,26 @@ void MainWindow::hydroStep(const QString& operation){
                     table->item(row,column)->setData(Qt::EditRole,value);
                 };
                 const auto removeAndUndo=[&](QTableWidget* table,int row){
+                    table->scrollTo(table->model()->index(row,0),QAbstractItemView::EnsureVisible);
+                    settleLayout();
                     auto* remove=removeInNameCell(table,row);
-                    if(!remove)return false;
+                    if(!remove){
+                        const auto cell=table->visualRect(table->model()->index(row,0));
+                        QJsonArray buttons;
+                        for(auto* button:table->viewport()->findChildren<QToolButton*>("LoadBookRemoveRow")){
+                            const auto box=button->geometry();
+                            buttons.append(QJsonArray{box.x(),box.y(),box.width(),box.height(),button->isVisibleTo(table)});
+                        }
+                        workflowCase("weight-row-delete-control-visible",false,
+                            QString::fromUtf8(QJsonDocument(QJsonObject{{"table",table->objectName()},
+                                {"cell",QJsonArray{cell.x(),cell.y(),cell.width(),cell.height()}},{"buttons",buttons}}).toJson(QJsonDocument::Compact)));
+                        return false;
+                    }
                     const int count=table->rowCount();
                     remove->click();
                     const bool deleted=table->rowCount()==count-1;
                     draftKey(dlg,table,Qt::Key_Z,Qt::ControlModifier);
+                    settleLayout();
                     return deleted&&table->rowCount()==count;
                 };
                 click(cases->viewport(),cases->visualItemRect(cases->item(2)).center());
@@ -621,9 +635,10 @@ void MainWindow::hydroStep(const QString& operation){
                 if(edit){edit->setText("Cargo check");key(edit,Qt::Key_Return);settleLayout();}
                 editCell(grid,row,X,"91.25");
                 const auto combo=[&](int r){return qobject_cast<QComboBox*>(grid->cellWidget(r,Kind));};
-                bool kinds=combo(row)&&combo(row)->count()==5&&combo(row)->currentData()=="fixed";
+                const bool kinds=combo(row)&&combo(row)->count()==4&&combo(row)->currentData()=="fixed"&&
+                    combo(row)->findData("trapezoids")==-1;
                 bool converted=kinds;
-                for(int i=1;i<=4&&converted;++i){
+                for(int i=1;i<=3&&converted;++i){
                     auto* box=combo(row);
                     box->showPopup();settleLayout();
                     auto* list=box->view();
@@ -639,8 +654,8 @@ void MainWindow::hydroStep(const QString& operation){
                     for(auto field:tankDimensions()[i-1])
                         converted=converted&&!grid->isColumnHidden(field)&&grid->item(row,field)->flags().testFlag(Qt::ItemIsEditable);
                 }
-                workflowCase("each-of-five-weight-types-can-be-selected-in-one-table",kinds&&converted);
-                for(int i=0;i<4;++i)draftKey(dlg,grid,Qt::Key_Z,Qt::ControlModifier);
+                workflowCase("four-weight-types-available-for-new-items",kinds&&converted);
+                for(int i=0;i<3;++i)draftKey(dlg,grid,Qt::Key_Z,Qt::ControlModifier);
                 workflowCase("undo-restores-fixed-type-and-values",combo(row)&&combo(row)->currentData()=="fixed"&&cellValue(grid,row,X)=="91.25");
 
                 if(hydroRequest_["exercise_delete_undo"].toBool()){
@@ -707,6 +722,18 @@ void MainWindow::hydroStep(const QString& operation){
                 auto* page=editorPage("loading_cases");
                 auto* list=page?page->findChild<QListWidget*>("load_cases"):nullptr;
                 if(!list||!list->count()){unavailable("Missing unified loading list");return;}
+                auto* weights=page->findChild<QTableWidget*>("load_case_items");
+                bool legacyTypeRetained=false;
+                for(int row=0;weights&&row<list->count();++row){
+                    list->setCurrentRow(row);
+                    for(int item=0;item<weights->rowCount();++item){
+                        const auto* type=weights->item(item,fs::loading::Kind);
+                        if(type&&type->text()==uiText("梯形液货舱")&&!weights->cellWidget(item,fs::loading::Kind))
+                            legacyTypeRetained=true;
+                    }
+                }
+                workflowCase("saved-trapezoid-keeps-type-without-a-selector",legacyTypeRetained);
+                list->setCurrentRow(0);
                 const auto name=list->item(0)->text();
                 list->item(0)->setText(name+" (edit)");
                 list->item(0)->setText(name);

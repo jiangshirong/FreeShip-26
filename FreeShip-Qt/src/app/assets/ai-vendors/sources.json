@@ -41,5 +41,15 @@
       }
     ],
     "display_color": "#6950ef"
+  },
+  {
+    "file": "claude.png",
+    "organization": "https://www.anthropic.com/",
+    "source": "https://platform.claude.com/docs/en/manage-claude/oauth-apps/branding-samples#download-the-logo",
+    "sha256": "65d0c99ca735ad56a5cac5767e70a9975a5a896b126723c3237b32d82e28adf8",
+    "attribution": "Logo and trademark belong to Anthropic. Used to identify the credited AI service.",
+    "source_file": "claude.svg",
+    "original_sha256": "3575ce1be74c3c4f893fae51bd08139c0812dd55c43ce7bc92793ee6a8dc0f85",
+    "conversion": "Official SVG rasterized at 192 by 192 pixels with QtSvg."
   }
 ]

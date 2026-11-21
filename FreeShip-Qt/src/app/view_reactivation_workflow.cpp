@@ -200,6 +200,48 @@ void MainWindow::auditViewGridResize(bool frameTiming){
     sample("dragged");
     drag("xy",QPoint(qRound(canvas->width()*.56),qRound(canvas->height()*.57)));sample("cross");
     workflowCase("view-resize.cross-changes-both-axes",std::abs(ratio().x()-.56)<.015&&std::abs(ratio().y()-.57)<.015);
+    if(original){
+        const auto center=[](const HullView* view){return QPointF(view->width()/2.,view->height()/2.);};
+        const auto scale=[](const HullView* view){return view->interactionMotionEvidence()["camera_scale"].toDouble();};
+        const QPoint pan(24,-18);
+        std::array<QPointF,4> pannedAnchors,resizedAnchors;
+        std::array<double,4> originalScales,resizedScales;
+        const auto projected=[&](HullView* view){return view->project(original->minimum)-center(view);};
+        bool moved=true;
+        for(auto* view:views_)view->fit();
+        wait(280);
+        for(int i=0;i<4;++i){
+            auto* view=views_[i];
+            const auto before=projected(view);
+            originalScales[i]=scale(view);
+            const QPoint start=view->rect().center();
+            const auto send=[&](QEvent::Type type,QPoint at,Qt::MouseButton button,Qt::MouseButtons buttons){
+                QMouseEvent event(type,at,view->mapToGlobal(at),button,buttons,Qt::NoModifier);
+                QApplication::sendEvent(view,&event);
+            };
+            send(QEvent::MouseButtonPress,start,Qt::RightButton,Qt::RightButton);
+            send(QEvent::MouseMove,start+pan,Qt::NoButton,Qt::RightButton);
+            send(QEvent::MouseButtonRelease,start+pan,Qt::RightButton,Qt::NoButton);
+            pannedAnchors[i]=projected(view);
+            moved&=(pannedAnchors[i]-before-QPointF(pan)).manhattanLength()<.001;
+        }
+        const QPoint restore(qRound(canvas->width()*.56),qRound(canvas->height()*.57));
+        drag("xy",QPoint(qRound(canvas->width()*.44),qRound(canvas->height()*.45)));
+        for(int i=0;i<4;++i){resizedAnchors[i]=projected(views_[i]);resizedScales[i]=scale(views_[i]);}
+        grab().save(workflowOutput_+"/views/resize-after-pan.png");
+        bool shrank=false,correct=true;
+        for(auto* view:views_)view->fit();
+        wait(280);
+        for(int i=0;i<4;++i){
+            auto* view=views_[i];
+            const double factor=scale(view)/originalScales[i];
+            shrank|=factor<.98;
+            correct&=std::abs(resizedScales[i]/scale(view)-1)<1e-8&&
+                (resizedAnchors[i]-pannedAnchors[i]*factor).manhattanLength()<.001;
+        }
+        workflowCase("view-resize.panned-views-scale-around-retained-center",moved&&shrank&&correct);
+        drag("xy",restore);
+    }
     const auto retained=ratio();
     showNormal();resize(1360,900);wait(160);sample("window-resize");
     workflowCase("view-resize.window-resize-retains-ratios",std::abs(ratio().x()-retained.x())<.015&&std::abs(ratio().y()-retained.y())<.015);

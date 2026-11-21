@@ -92,11 +92,19 @@ void DocumentWorkspace::accepted(MainWindow* doc){const int i=pages_->indexOf(do
     pages_->removeWidget(doc);tabs_->removeTab(i);if(tabs_->currentIndex()>=0)pages_->setCurrentIndex(tabs_->currentIndex());
     if(!pages_->count()||closing_)QTimer::singleShot(0,this,[this]{if(!pages_->count())close();else if(closing_)closeNext();});
 }
-void DocumentWorkspace::cancelled(){closing_=false;}
+void DocumentWorkspace::cancelled(){closing_=false;
+#ifdef Q_OS_LINUX
+    setProperty("fs26_restart_after_close",false);
+#endif
+}
 void DocumentWorkspace::closeNext(){if(auto* doc=active()){
     if(!doc->close()&&doc->documentExit_==MainWindow::DocumentExit::None&&!doc->calculationExitPending_&&!doc->closeApproved_)cancelled();
 }}
-void DocumentWorkspace::closeEvent(QCloseEvent* event){if(!active()){event->accept();if(persistent_)qApp->quit();return;}
+void DocumentWorkspace::closeEvent(QCloseEvent* event){if(!active()){event->accept();
+#ifdef Q_OS_LINUX
+    if(persistent_&&property("fs26_restart_after_close").toBool()){qApp->exit(75);return;}
+#endif
+    if(persistent_)qApp->quit();return;}
     event->ignore();if(!closing_){closing_=true;closeNext();}}
 void DocumentWorkspace::dragEnterEvent(QDragEnterEvent* e){if(active())active()->dragEnterEvent(e);}
 void DocumentWorkspace::dropEvent(QDropEvent* e){if(active())active()->dropEvent(e);}

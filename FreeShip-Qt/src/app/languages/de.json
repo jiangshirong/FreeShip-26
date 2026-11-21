@@ -4,6 +4,9 @@
   "id": "de",
   "name": "Deutsch",
   "messages": {
+    "更新已就绪": "Aktualisierung bereit",
+    "正在更新…": "Wird aktualisiert…",
+    "重新启动": "Neu starten",
     "文件已在其他窗口打开：": "Datei bereits in einem anderen Fenster geöffnet: ",
     "请先关闭其他船模窗口，再安装更新。": "Schließen Sie die anderen Modellfenster, bevor Sie das Update installieren.",
     "选择模型打开": "Zu öffnendes Modell auswählen",
@@ -4556,6 +4559,7 @@
     "需要打印机能够同时做到<b>A4 无边距、100% 原尺寸打印</b>": "Der Drucker muss <b>randlosen A4-Druck und Druck in Originalgröße (100 %)</b> unterstützen.",
     "按编号排列，纸边相接后贴合。": "Die Blätter nach Nummern anordnen, Kanten aneinanderlegen und zusammenkleben.",
     "中心线和基线": "Mittellinie und Basislinie",
-    "无法写入 PDF 的实际纸张尺寸。": "Die tatsächliche Seitengröße konnte nicht in die PDF-Datei geschrieben werden."
+    "无法写入 PDF 的实际纸张尺寸。": "Die tatsächliche Seitengröße konnte nicht in die PDF-Datei geschrieben werden.",
+    "开发Linux版": "Entwicklung der Linux-Version"
   }
 }

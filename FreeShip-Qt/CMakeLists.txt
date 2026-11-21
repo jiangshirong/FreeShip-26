@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.24)
 project(FreeShipQt VERSION 0.1 LANGUAGES CXX)
+option(FS26_FLATPAK "Build for the Flatpak distribution" OFF)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(Qt6 6.8 REQUIRED COMPONENTS Widgets OpenGL PrintSupport Network)
@@ -95,6 +96,8 @@ if(WIN32)
     VERBATIM)
   add_custom_target(freeship_updater ALL DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/FreeShipUpdater.exe")
   add_dependencies(FreeShipQt freeship_updater)
+elseif(FS26_FLATPAK AND CMAKE_SYSTEM_NAME STREQUAL "Linux")
+  include(src/updater/flatpak_updater.cmake)
 elseif(UNIX AND NOT APPLE)
   include(src/updater/linux_updater.cmake)
   add_dependencies(FreeShipQt FreeShipUpdater)
@@ -113,6 +116,7 @@ qt_add_resources(FreeShipQt "ai_vendor_logos"
         src/app/assets/ai-vendors/deepseek.png
         src/app/assets/ai-vendors/deepl.png
         src/app/assets/ai-vendors/qwen.png
+        src/app/assets/ai-vendors/claude.png
 )
 qt_add_resources(FreeShipQt "product_brand"
     PREFIX "/brand"
@@ -343,7 +347,8 @@ qt_add_resources(qt_update_about_tests "update_about_brand"
 qt_add_resources(qt_update_about_tests "update_about_vendors"
     PREFIX "/ai-vendors" BASE "src/app/assets/ai-vendors"
     FILES src/app/assets/ai-vendors/openai.png src/app/assets/ai-vendors/deepseek.png
-        src/app/assets/ai-vendors/deepl.png src/app/assets/ai-vendors/qwen.png)
+        src/app/assets/ai-vendors/deepl.png src/app/assets/ai-vendors/qwen.png
+        src/app/assets/ai-vendors/claude.png)
 add_executable(qt_message_lifecycle_tests "${CALCULATION_TEST_DIR}/message_lifecycle_tests.cpp")
 target_link_libraries(qt_message_lifecycle_tests PRIVATE property_ui)
 target_link_libraries(qt_math_notation_tests PRIVATE property_ui math_notation)

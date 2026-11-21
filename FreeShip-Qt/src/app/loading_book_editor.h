@@ -631,31 +631,35 @@ private:
                         cell->setToolTip(uiText(tankTables()[itemShape(kind)].location));
                     g->setItem(row,col,cell);
                 }
-                auto* combo=new ItemKindCombo;
-                combo->setObjectName("LoadWeightKind");
-                combo->setFont(g->font());
-                combo->setAccessibleName(uiText("种类"));
-                combo->addItem(uiText("固定物体"),"fixed");
-                for(const auto& shape:tankTables())combo->addItem(uiText(shape.title),shape.key);
-                combo->setCurrentIndex(combo->findData(kind));
-                g->setCellWidget(row,Kind,combo);
-                connect(combo,&QComboBox::activated,this,[this,t,row,combo]{
-                    const auto before=state_;
-                    auto data=t==Items?items():rows("shared_items");
-                    auto item=data.at(row).toObject();
-                    const auto kind=combo->currentData().toString();
-                    if(kind==item["kind"])return;
-                    // Retain shape-specific values when a draft row is switched back.
-                    const auto defaults=fs::loading::newWeightItem(kind);
-                    for(auto value=defaults.begin();value!=defaults.end();++value)
-                        if(!item.contains(value.key()))item[value.key()]=value.value();
-                    item["kind"]=kind;
-                    data[row]=item;putRows(t,data);
-                    checkpoint(before);
-                    QScopedValueRollback guard(painting_,true);
-                    paintRows(t,data);
-                    refreshSummary();
-                });
+                // A saved trapezoidal tank keeps its geometry and calculation inputs.
+                if(kind!="trapezoids"){
+                    auto* combo=new ItemKindCombo;
+                    combo->setObjectName("LoadWeightKind");
+                    combo->setFont(g->font());
+                    combo->setAccessibleName(uiText("种类"));
+                    combo->addItem(uiText("固定物体"),"fixed");
+                    for(const auto& shape:tankTables())
+                        if(shape.shape!=TankShape::Trapezoid)combo->addItem(uiText(shape.title),shape.key);
+                    combo->setCurrentIndex(combo->findData(kind));
+                    g->setCellWidget(row,Kind,combo);
+                    connect(combo,&QComboBox::activated,this,[this,t,row,combo]{
+                        const auto before=state_;
+                        auto data=t==Items?items():rows("shared_items");
+                        auto item=data.at(row).toObject();
+                        const auto kind=combo->currentData().toString();
+                        if(kind==item["kind"])return;
+                        // Retain shape-specific values when a draft row is switched back.
+                        const auto defaults=fs::loading::newWeightItem(kind);
+                        for(auto value=defaults.begin();value!=defaults.end();++value)
+                            if(!item.contains(value.key()))item[value.key()]=value.value();
+                        item["kind"]=kind;
+                        data[row]=item;putRows(t,data);
+                        checkpoint(before);
+                        QScopedValueRollback guard(painting_,true);
+                        paintRows(t,data);
+                        refreshSummary();
+                    });
+                }
             }
             auto* remove=rowAction("DeleteOne","删除",g->viewport());
             remove->setObjectName("LoadBookRemoveRow");
