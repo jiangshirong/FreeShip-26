@@ -6,7 +6,7 @@ After downloading, double-click the `.flatpak` file and follow the installation 
 
 ### If you see the “Open With” window
 
-If double-clicking the file opens the **Open With** window shown below, click **Cancel**.
+If double-clicking the file opens the **Open With** window shown below, click **Cancel**. Your desktop has no default app set to open Flatpak packages.
 
 ![Open With dialog showing no recommended application for the FreeShip Flatpak bundle](assets/linux-install/open-with.png)
 
