@@ -16,3 +16,9 @@ If double-clicking the file opens the **Open With** window shown below, click **
 - For **other Linux distributions**, ask an AI assistant how to install a graphical Flatpak installer for your distribution.
 
 Double-click the downloaded `.flatpak` file again. If **Open With** still appears, select the software center you installed and set it as the default for this file type. Click **Install**. When installation finishes, open the applications menu and search for **FreeShip 26**.
+
+If FreeShip 26 does not appear right away in Application Finder or your applications menu, open a terminal and run the following command to launch it:
+
+```bash
+flatpak run io.github.jiangshirong.FreeShip26
+```
