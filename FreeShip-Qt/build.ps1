@@ -21,7 +21,7 @@ function Get-Sha256([string]$Path) {
 function Get-SourceHashes {
     $hashes = [ordered]@{}
     $files = @(Get-ChildItem -LiteralPath (Join-Path $qtSourceRoot 'src'), (Join-Path $qtSourceRoot 'bridge'), (Join-Path $qtSourceRoot 'third_party') -File -Recurse |
-        Where-Object { ($_.Extension -in @('.h', '.cpp', '.pas', '.inc', '.py', '.json', '.cmake', '.rc', '.ico') -or $_.Name -eq 'CMakeLists.txt') -and $_.FullName -notmatch '[\\/]__pycache__[\\/]' })
+        Where-Object { ($_.Extension -in @('.h', '.cpp', '.pas', '.inc', '.py', '.json', '.cmake', '.rc', '.ico', '.gif', '.clip') -or $_.Name -eq 'CMakeLists.txt') -and $_.FullName -notmatch '[\\/]__pycache__[\\/]' })
     $files += Get-Item -LiteralPath (Join-Path $qtSourceRoot 'CMakeLists.txt'), (Join-Path $qtSourceRoot 'build.ps1'), (Join-Path $qtSourceRoot 'package-runtime.ps1'), (Join-Path $qtSourceRoot 'tools/package_runtime.py')
     $files += Get-Item -LiteralPath (Join-Path $qtSourceRoot 'tools/build_updater.py'), (Join-Path $qtSourceRoot 'tools/updates/Updater.cs'), (Join-Path $qtSourceRoot 'tools/updates/channel.json')
     foreach ($file in ($files | Sort-Object FullName)) {
@@ -40,6 +40,9 @@ function Get-TestHashes {
     $hashes['qt/lines_labels_tests.cpp'] = Get-Sha256 (Join-Path $testsAlias 'qt/lines_labels_tests.cpp')
     $hashes['qt/window_chrome_probe.h'] = Get-Sha256 (Join-Path $testsAlias 'qt/window_chrome_probe.h')
     $hashes['qt/winding_contours_cases.h'] = Get-Sha256 (Join-Path $testsAlias 'qt/winding_contours_cases.h')
+    foreach ($name in @('qt/station_deviation_cases.h','qt/station_reference_cases.h')) {
+        $hashes[$name] = Get-Sha256 (Join-Path $testsAlias $name)
+    }
     $hashes['qt/software_scene_cases.h'] = Get-Sha256 (Join-Path $testsAlias 'qt/software_scene_cases.h')
     $hashes['qt/ui_copy_probe.h'] = Get-Sha256 (Join-Path $testsAlias 'qt/ui_copy_probe.h')
     $hashes['qt/math_notation_tests.cpp'] = Get-Sha256 (Join-Path $testsAlias 'qt/math_notation_tests.cpp')
