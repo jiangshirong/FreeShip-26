@@ -17,12 +17,25 @@ int main(int argc,char**argv){
     for(auto value:request){auto r=value.toObject();QJsonObject result{{"name",r["name"]}};
         try{
             fs::exchange::Options o;auto options=r["options"].toObject();o.units=options["units"].toString("m");o.legacyAxes=options["legacy_axes"].toBool();o.controlNet=options["control_net"].toBool();o.symmetric=options["symmetric"].toBool();o.fullHull=options["full_hull"].toBool(true);o.includeHidden=options["include_hidden"].toBool();o.binaryStl=options["binary_stl"].toBool(true);
+            o.reconstructObj=options["reconstruct_obj"].toBool();
+            o.objToleranceMm=options["obj_tolerance_mm"].toDouble();
+            o.inferObjCreases=options["obj_infer_creases"].toBool(true);
             o.textEncoding=options["text_encoding"].toString("cp1252");for(auto v:options["face_ids"].toArray())o.faceIds.append(v.toInteger());
             o.columns=options["columns"].toInt(0);o.rows=options["rows"].toInt(10);o.intermediateBulkheads=options["intermediate_bulkheads"].toBool(true);
             if(r["method"]=="ghs_curve"||r["method"]=="waterline"){
                 fs::native_geometry::SectionCurve c;for(auto v:r["points"].toArray()){auto p=v.toArray();c.points.push_back({float(p[0].toDouble()),float(p[1].toDouble()),float(p[2].toDouble())});}for(auto v:r["knuckles"].toArray())c.knuckles.push_back(v.toBool());
                 QJsonArray points;if(r["method"]=="waterline"){for(auto y:fs::grid::sectionBreadths({c},float(r["z"].toDouble())))points.append(y);}else for(auto p:fs::ghs::sampleSection(c,r["tolerance"].toDouble()))points.append(QJsonArray{p[0],p[1]});result["points"]=points;
-            }else if(r["method"]=="read"){auto d=fs::exchange::read(r["path"].toString(),r["format"].toString(),o);result["discarded_zero_area_faces"]=d.discardedZeroAreaFaces;result["data"]=d.bridgeData();result["notes"]=QJsonArray::fromStringList(d.notes);}
+            }else if(r["method"]=="read"){
+                auto d=fs::exchange::read(r["path"].toString(),r["format"].toString(),o);
+                result["discarded_zero_area_faces"]=d.discardedZeroAreaFaces;
+                result["data"]=d.bridgeData();
+                result["notes"]=QJsonArray::fromStringList(d.notes);
+                if(d.objFit){
+                    const auto& fit=*d.objFit;
+                    result["fit"]=QJsonObject{{"maximum_mm",fit.maximumMm},{"rms_mm",fit.rmsMm},
+                                             {"tolerance_mm",fit.toleranceMm},{"samples",qint64(fit.samples)}};
+                }
+            }
             else{
                 auto model=fs::ModelSnapshot::load(r["model"].toString());
                 if(r.contains("sections")){QFile f(r["sections"].toString());if(!f.open(QIODevice::ReadOnly))throw std::runtime_error("Cannot read section artifact");model.loadSectionDisplay(f.readAll());}

@@ -5,7 +5,7 @@
 #include "developer_mode.h"
 #include "draft_history.h"
 #include "numeric_table_item.h"
-#include "studio_table.h"
+#include "studio_row_actions.h"
 #include "studio_ui.h"
 #include "ui_language.h"
 #include <memory>
@@ -35,125 +35,6 @@ enum Table { Cases, Items, Fixed, Criteria, Count };
 struct Draft {
     QJsonObject book;
     int selected = -1;
-};
-
-class RowActionsTable final : public QTableWidget {
-public:
-    static constexpr int ButtonSize=26;
-    static constexpr int ButtonInset=3;
-    static constexpr int ControlWidth=ButtonSize+ButtonInset;
-
-    RowActionsTable(int columns,bool rowActions):QTableWidget(0,columns){
-        setItemDelegate(new CellDelegate(this,rowActions));
-        if(!rowActions)return;
-        setProperty("studio_first_column_control_width",ControlWidth);
-        const auto place=[this]{placeButtons();};
-        connect(horizontalHeader(),&QHeaderView::sectionResized,this,place);
-        connect(verticalHeader(),&QHeaderView::sectionResized,this,place);
-        connect(horizontalHeader(),&QHeaderView::geometriesChanged,this,place);
-        connect(verticalHeader(),&QHeaderView::geometriesChanged,this,place);
-    }
-
-    void useCanvas(QScrollArea* canvas){canvas_=canvas;}
-    void clearRowButtons(){
-        for(auto* button:buttons_){button->hide();button->deleteLater();}
-        buttons_.clear();
-    }
-    void appendRowButton(QToolButton* button){buttons_.append(button);}
-    void placeButtons(){
-        const qreal scale=tableScale();
-        const int size=qRound(ButtonSize*scale),gap=qRound(ButtonInset*scale);
-        for(int row=0;row<buttons_.size();++row){
-            auto* button=buttons_[row];
-            const QRect cell=visualRect(model()->index(row,0));
-            const QRect area(cell.right()+1-size-gap,cell.center().y()-size/2,size,size);
-            const bool visible=cell.contains(area)&&viewport()->rect().intersects(area);
-            if(visible){
-                button->setGeometry(area);
-                const int icon=qRound(16*scale);
-                button->setIconSize({icon,icon});
-            }
-            button->setVisible(visible);
-        }
-    }
-    qreal tableScale()const{
-        const auto scale=horizontalHeader()->property("studio_table_scale");
-        return scale.isValid()?scale.toReal():1.0;
-    }
-
-protected:
-    void changeEvent(QEvent* event)override{
-        QTableWidget::changeEvent(event);
-        if(event->type()==QEvent::FontChange)
-            for(auto* combo:viewport()->findChildren<QComboBox*>(QString{},Qt::FindDirectChildrenOnly))
-                combo->setFont(font());
-    }
-    void wheelEvent(QWheelEvent* event)override{
-        if(!canvas_||event->modifiers().testFlag(Qt::ControlModifier)){
-            QTableWidget::wheelEvent(event);
-            return;
-        }
-        auto* viewport=canvas_->viewport();
-        QWheelEvent forwarded(viewport->mapFromGlobal(event->globalPosition()),event->globalPosition(),
-                              event->pixelDelta(),event->angleDelta(),event->buttons(),event->modifiers(),
-                              event->phase(),event->inverted(),event->source(),event->pointingDevice());
-        QApplication::sendEvent(viewport,&forwarded);
-        event->setAccepted(forwarded.isAccepted());
-    }
-    void scrollContentsBy(int dx,int dy)override{
-        QTableWidget::scrollContentsBy(dx,dy);
-        placeButtons();
-    }
-    void updateGeometries()override{
-        QTableWidget::updateGeometries();
-        placeButtons();
-    }
-
-private:
-    class CellDelegate final : public QStyledItemDelegate {
-    public:
-        CellDelegate(RowActionsTable* table,bool rowActions):QStyledItemDelegate(table),table_(table),rowActions_(rowActions){}
-        void paint(QPainter* painter,const QStyleOptionViewItem& option,const QModelIndex& index)const override{
-            auto text=option;
-            text.state&=~(QStyle::State_Selected|QStyle::State_HasFocus);
-            if(!rowActions_||index.column()!=0){QStyledItemDelegate::paint(painter,text,index);return;}
-            initStyleOption(&text,index);
-            auto background=text;
-            background.text.clear();
-            const auto* style=table_->style();
-            style->drawControl(QStyle::CE_ItemViewItem,&background,painter,table_);
-
-            // The button shares the cell background. Reserve space only in
-            // the text and editor, so the cell keeps a single border.
-            text.rect=textRect(text.rect);
-            const int padding=qRound(3*table_->tableScale());
-            text.rect.adjust(padding,0,-padding,0);
-            if(text.rect.isEmpty())return;
-            painter->save();
-            // Clip the second style pass to the text's interior. The first
-            // pass already drew the actual cell edge and selection.
-            painter->setClipRect(text.rect.adjusted(0,2,0,-2),Qt::IntersectClip);
-            style->drawControl(QStyle::CE_ItemViewItem,&text,painter,table_);
-            painter->restore();
-        }
-        void updateEditorGeometry(QWidget* editor,const QStyleOptionViewItem& option,const QModelIndex& index)const override{
-            auto text=option;
-            if(rowActions_&&index.column()==0){
-                text.rect=textRect(option.rect);
-                editor->setMaximumWidth(text.rect.width());
-            }
-            QStyledItemDelegate::updateEditorGeometry(editor,text,index);
-        }
-    private:
-        QRect textRect(QRect rect)const{
-            rect.setWidth(qMax(0,rect.width()-qRound(ControlWidth*table_->tableScale())));
-            return rect;
-        }
-        RowActionsTable* table_;
-        bool rowActions_;
-    };
-    QList<QToolButton*> buttons_;
-    QScrollArea* canvas_=nullptr;
 };
 
 class CaseList final : public QListWidget {
@@ -372,13 +253,14 @@ public:
         cases_->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
         bindUiText(cases_,"accessibleName","工况名");
         left->addWidget(cases_);
-        auto* addCase=rowAction("AddOne","添加",pages_[0]);
+        auto* addCase=RowActionsTable::actionButton("AddOne","添加",pages_[0]);
         addCase->setObjectName("load_add_cases");
         left->addWidget(addCase,0,Qt::AlignLeft);
         connect(addCase,&QToolButton::clicked,this,[this]{alter(Cases,true,cases_->count());});
 
         QStringList fields;
         for(const auto& field:fs::loading::itemFields)fields.append(field.title);
+        fields.append({QStringLiteral("X (m)"),QStringLiteral("Y (m)"),QStringLiteral("Z (m)")});
         panel(right,Items,"该工况拥有的重量项",fields);
         panel(right,Fixed,"所有工况都具有的重量项",fields);
         left->addStretch();right->addStretch();
@@ -422,8 +304,10 @@ public:
             if(example.book.isEmpty()){showMessage(example.description);return;}
             for(const auto* key:{"cases","shared_items","criteria"}){
                 if(rows(key).isEmpty())continue;
-                if(QMessageBox::question(parent,uiText("测试模板"),uiText("替换当前装载工况草稿？"),
-                       QMessageBox::Yes|QMessageBox::No,QMessageBox::No)!=QMessageBox::Yes)return;
+                QMessageBox question(QMessageBox::Question,uiText("测试模板"),uiText("替换当前装载工况草稿？"),
+                                     QMessageBox::Yes|QMessageBox::No,parent);
+                question.setDefaultButton(QMessageBox::No);
+                if(runStudioDialog(question)!=QMessageBox::Yes)return;
                 break;
             }
             const auto before=state_;auto sampleBook=example.book;
@@ -535,12 +419,6 @@ private:
         if(criteriaValid())criteriaChanged_(criteria);
         else criteriaChanged_(std::nullopt);
     }
-    static QToolButton* rowAction(const char* icon,const char* caption,QWidget* parent){
-        auto* button=new QToolButton(parent);
-        button->setIcon(studioIcon(icon));button->setIconSize({16,16});button->setAutoRaise(true);
-        bindUiText(button,"accessibleName",caption);bindUiText(button,"toolTip",caption);
-        return button;
-    }
     void panel(QVBoxLayout* parent,Table t,const QString& title,QStringList headers){
         if(!title.isEmpty()){
             auto* heading=new QLabel;heading->setWordWrap(true);
@@ -566,24 +444,23 @@ private:
             if(item&&item->flags().testFlag(Qt::ItemIsEditable))g->editItem(item);
         });
         auto* header=g->horizontalHeader();
-        {
-            header->setProperty("studio_first_header_control_width",RowActionsTable::ControlWidth);
-            g->horizontalHeaderItem(0)->setTextAlignment(Qt::AlignLeft|Qt::AlignVCenter);
-            auto* add=add_[t]=rowAction("AddOne","添加",header->viewport());
-            add->setObjectName("load_add_"+QString(key(t)));
-            const auto place=[g,header,add]{
-                const qreal factor=g->tableScale();
-                const int right=header->sectionViewportPosition(0)+header->sectionSize(0);
-                const int size=qRound(RowActionsTable::ButtonSize*factor), gap=qRound(RowActionsTable::ButtonInset*factor);
-                add->setGeometry(right-size-gap,(header->viewport()->height()-size)/2,size,size);
-                const int icon=qRound(16*factor);
-                add->setIconSize({icon,icon});
+        if(t!=Criteria){
+            using namespace fs::loading;
+            for(int axis=0;axis<3;++axis)header->moveSection(header->visualIndex(ColumnCount+axis),Z+1+axis);
+            const auto groups=[g]{
+                const QStringList axes{QStringLiteral("X"),QStringLiteral("Y"),QStringLiteral("Z")};
+                setStudioHeaderGroups(g,{
+                    {QString(uiText("重心 (%1)")).arg("m"),X,axes},
+                    {QString(uiText("底部中心 (%1)")).arg("m"),ColumnCount,axes}
+                });
             };
-            connect(header,&QHeaderView::geometriesChanged,add,place);
-            connect(header,&QHeaderView::sectionResized,add,place);
-            connect(g->horizontalScrollBar(),&QScrollBar::valueChanged,add,place);
+            groups();bindUiRefresh(g,groups);
+        }
+        {
+            g->horizontalHeaderItem(0)->setTextAlignment(Qt::AlignLeft|Qt::AlignVCenter);
+            auto* add=add_[t]=g->addHeaderButton("添加");
+            add->setObjectName("load_add_"+QString(key(t)));
             connect(add,&QToolButton::clicked,this,[this,t,g]{alter(t,true,g->rowCount());});
-            place();
         }
         applyStudioScrollbars(g);
         configureStudioDataTable(g);
@@ -610,7 +487,7 @@ private:
         using namespace fs::loading;
         auto* g=grid_[t];
         g->clearRowButtons();g->setRowCount(0);
-        std::array<bool,ColumnCount> used{};
+        std::array<bool,ColumnCount+3> used{};
         for(auto v:data){
             const int row=g->rowCount();g->insertRow(row);
             if(t==Criteria){
@@ -619,16 +496,18 @@ private:
             }else{
                 const auto item=v.toObject();const auto kind=item["kind"].toString();
                 for(int col=0;col<g->columnCount();++col){
-                    const bool active=usesItemColumn(kind,ItemColumn(col));
+                    const bool tank=itemShape(kind)>=0;
+                    const bool bottom=col>=ColumnCount;
+                    const int field=bottom?X+col-ColumnCount:col;
+                    const bool position=field>=X&&field<=Z;
+                    const bool active=usesItemColumn(kind,ItemColumn(field))&&(!position||tank==bottom);
                     used[col]=used[col]||active;
                     QTableWidgetItem* cell;
                     if(col==Name)cell=new QTableWidgetItem(item["name"].toString());
                     else if(col==Kind)cell=new QTableWidgetItem(uiText(itemTitle(kind)));
-                    else if(active)cell=numericItem(item[itemFields[col].key]);
+                    else if(active)cell=numericItem(item[itemFields[field].key]);
                     else cell=new QTableWidgetItem(QStringLiteral("—"));
                     if(col==Kind||!active)cell->setFlags(cell->flags()&~Qt::ItemIsEditable);
-                    if(col>=X&&col<=Z&&itemShape(kind)>=0)
-                        cell->setToolTip(uiText(tankTables()[itemShape(kind)].location));
                     g->setItem(row,col,cell);
                 }
                 // A saved trapezoidal tank keeps its geometry and calculation inputs.
@@ -661,7 +540,7 @@ private:
                     });
                 }
             }
-            auto* remove=rowAction("DeleteOne","删除",g->viewport());
+            auto* remove=RowActionsTable::actionButton("DeleteOne","删除",g->viewport());
             remove->setObjectName("LoadBookRemoveRow");
             connect(remove,&QToolButton::clicked,this,[this,t,row]{alter(t,false,row);});
             g->appendRowButton(remove);
@@ -671,7 +550,7 @@ private:
             for(int row=0;row<g->rowCount();++row)
                 width=std::max(width,g->fontMetrics().horizontalAdvance(g->item(row,Kind)->text()));
             g->horizontalHeaderItem(Kind)->setSizeHint({width+34,0});
-            for(int col=Mass;col<ColumnCount;++col)g->setColumnHidden(col,!used[col]&&!(data.isEmpty()&&col<=Z));
+            for(int col=Mass;col<g->columnCount();++col)g->setColumnHidden(col,!used[col]&&!(data.isEmpty()&&col<=Z));
         }
         g->placeButtons();
     }
@@ -695,7 +574,7 @@ private:
             auto* item=new QListWidgetItem(name,cases_);
             item->setFlags(item->flags()|Qt::ItemIsEditable);
             item->setToolTip(name);
-            auto* remove=rowAction("DeleteOne","删除",cases_->viewport());
+            auto* remove=RowActionsTable::actionButton("DeleteOne","删除",cases_->viewport());
             remove->setObjectName("LoadBookRemoveRow");
             const int row=cases_->row(item);
             connect(remove,&QToolButton::clicked,this,[this,row]{alter(Cases,false,row);});
@@ -740,7 +619,8 @@ private:
         if(t==Criteria){
             auto values=data.at(row).toArray();values[col]=value;data[row]=values;
         }else{
-            auto item=data.at(row).toObject();item[itemFields[col].key]=value;data[row]=item;
+            const int field=col>=ColumnCount?X+col-ColumnCount:col;
+            auto item=data.at(row).toObject();item[itemFields[field].key]=value;data[row]=item;
         }
         putRows(t,data);checkpoint(before);refreshSummary();
     }

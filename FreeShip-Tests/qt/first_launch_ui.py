@@ -46,14 +46,14 @@ def capture_window(hwnd, filename):
         win32gui.ReleaseDC(hwnd, source_handle)
 
 
-def exercise(report, runtime, output):
+def exercise(report, runtime, output, installer_profile=None, defaults_only=False):
     import pywintypes
     import win32con
     import win32gui
     import win32process
 
     require_private_desktop()
-    profile = output / 'profile'
+    profile = installer_profile if installer_profile is not None else output / 'profile'
     settings = profile / 'preferences.json'
     catalogs = {
         p.stem: json.loads(p.read_text(encoding='utf-8-sig'))['messages']
@@ -134,6 +134,63 @@ ConvertTo-Json -InputObject $controls -Compress
                     observed={'window_title': title, 'visible_text': texts, 'expected': expected})
         return hwnd, controls
 
+    def wait_main(process, language):
+        expected = catalogs[language]['未命名船模']
+        return wait_window(process, lambda title: title.startswith(expected))
+
+    def finish_main(process, hwnd):
+        # The chooser is what this probe tests. The main window can still be
+        # initializing its private document service and prompt on early close.
+        close(hwnd)
+        try:
+            process.wait(timeout=2)
+        except subprocess.TimeoutExpired:
+            process.kill()
+
+    if installer_profile is not None:
+        hint = profile / 'installer-language.json'
+        language = json.loads(hint.read_text(encoding='utf-8-sig'))['language']
+        for confirmed in ((True,) if defaults_only else (False, True)):
+            with launch() as app:
+                try:
+                    phase = (f'installer-language-{language}' if defaults_only else
+                             'installer-language-reappears' if confirmed else 'installer-language-on-first-launch')
+                    hwnd, _ = check_language(app, language, phase)
+                    report.case('first-launch.' + phase + '-no-saved-preferences', not settings.exists())
+                    if not confirmed:
+                        capture_window(hwnd, output / 'first-launch-installed-language.png')
+                        close(hwnd)
+                        report.case('first-launch.installer-language-close-does-not-save',
+                                    app.wait(timeout=8) == 0 and not settings.exists())
+                    else:
+                        if defaults_only:
+                            capture_window(hwnd, output / f'first-launch-{language}.png')
+                        key(hwnd, win32con.VK_RETURN)
+                        main, _ = wait_main(app, language)
+                        values = json.loads(settings.read_text(encoding='utf8'))['values']
+                        report.case('first-launch.' + (f'installer-language-{language}-defaults-on-confirm'
+                                    if defaults_only else 'installer-language-defaults-on-confirm'),
+                                    values.get('ui_language') == values.get('quick_language_first') == language
+                                    and values.get('quick_language_second') == ('en' if language == 'ru' else 'ru'),
+                                    observed=values)
+                        finish_main(app, main)
+                finally:
+                    if app.poll() is None:
+                        app.kill()
+        if defaults_only:
+            return
+        saved = settings.read_bytes()
+        hint.write_text(json.dumps({'language': 'en' if language != 'en' else 'ja'}), 'utf8')
+        with launch() as app:
+            try:
+                main, _ = wait_main(app, language)
+                report.case('first-launch.saved-preferences-take-precedence', settings.read_bytes() == saved)
+                finish_main(app, main)
+            finally:
+                if app.poll() is None:
+                    app.kill()
+        return
+
     with launch() as app:
         try:
             hwnd, controls = check_language(app, 'en')
@@ -176,15 +233,14 @@ ConvertTo-Json -InputObject $controls -Compress
             hwnd, _ = wait_window(app, lambda title: title.startswith(english_title))
             report.case('first-launch.shows-again-after-close', not settings.exists())
             key(hwnd, win32con.VK_RETURN)
-            main, _ = wait_window(app, lambda title: not title.startswith(english_title))
+            main, _ = wait_main(app, 'en')
             values = json.loads(settings.read_text(encoding='utf8'))['values']
             report.case('first-launch.confirm-saves-and-opens-main',
                         values.get('ui_language') == values.get('quick_language_first') == 'en'
                         and values.get('quick_language_second') == 'ru'
                         and values.get('quick_language_enabled') is True,
                         observed=values)
-            close(main)
-            app.wait(timeout=8)
+            finish_main(app, main)
         finally:
             if app.poll() is None:
                 app.kill()
@@ -192,11 +248,10 @@ ConvertTo-Json -InputObject $controls -Compress
     committed = settings.read_bytes()
     with launch() as app:
         try:
-            main, _ = wait_window(app, lambda title: not title.startswith(english_title))
+            main, _ = wait_main(app, 'en')
             report.case('first-launch.confirmed-profile-skips-setup',
                         settings.read_bytes() == committed)
-            close(main)
-            app.wait(timeout=8)
+            finish_main(app, main)
         finally:
             if app.poll() is None:
                 app.kill()

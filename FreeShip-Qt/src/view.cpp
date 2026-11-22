@@ -1,4 +1,5 @@
 #include "view.h"
+#include "lines_reference.h"
 #include "text_style.h"
 #include "app/math_notation.h"
 #include "software_scene.h"
@@ -22,12 +23,7 @@ void LinesView::rebuildLabelMetrics(){
     if(!scene_)return;
     for(int i:scene_->labels){
         const auto& p=scene_->primitives[i];
-        QString text=p.text;
-        // The immutable drawing stores these generated references using the legacy palette's captions.
-        if(!baselineCaption_.isEmpty()&&(text.startsWith(QStringLiteral("基线 "))||text.startsWith(QStringLiteral("Base "))))
-            text=baselineCaption_.arg(text.mid(text.indexOf(' ')+1));
-        if(!centerlineCaption_.isEmpty()&&(text==QStringLiteral("中心")||text==QStringLiteral("Center")))
-            text=centerlineCaption_;
+        const QString text=linesReferenceText(p.text,baselineCaption_,centerlineCaption_);
         QFont font=studioTextFont(QFont("Arial"));font.setPixelSize(p.pixels);QFontMetricsF metrics(font);
         labelMetrics_.insert(i,{text,font,notation::size(text,font),metrics.ascent()});
     }

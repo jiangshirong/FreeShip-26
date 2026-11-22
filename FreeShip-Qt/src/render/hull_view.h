@@ -31,6 +31,7 @@ public:
     void setLayerVisibilityPreview(const QSet<fs::EntityId>& changes);
     void setDisplayPreview(std::shared_ptr<const fs::ModelSnapshot> presentation);
     void setPendingPointMoves(const QVector<fs::PointMove>& moves);
+    void setPlateDiagnosticFaces(const QString& document, quint64 revision, QVector<QVector<fs::Vec3>> faces);
     bool curveEditMotionEnabled() const;
     void setCurveEditMotion(std::shared_ptr<fs::curveEdit::Motion> motion);
     std::shared_ptr<const fs::ModelSnapshot> snapshot() const;
@@ -126,6 +127,7 @@ public:
     std::function<void()> onPointPlacementEnded;
     std::function<void(QString)> onViewAction;
     std::function<void()> onViewSettingsChanged;
+    std::function<bool(QMenu&)> onPopulateSelectionMenu;
     std::function<void(QMenu&)> onPopulateContextMenu;
     std::function<void()> onShowControlNet;
 

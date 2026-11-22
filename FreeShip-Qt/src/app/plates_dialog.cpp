@@ -1,6 +1,8 @@
 #include "app/ui_language.h"
 #include "preferences_store.h"
 #include "plates_dialog.h"
+#include "pdf_scale_inputs.h"
+#include "plate_assembly.h"
 #include "table_number.h"
 #include "text_style.h"
 #include "model_session.h"
@@ -23,10 +25,6 @@
 #include <QPainter>
 #include <QPainterPath>
 #include <QPdfWriter>
-#include <QPrintDialog>
-#include <QPrinter>
-#include <QPrintPreviewDialog>
-#include "print_preview_style.h"
 #include <QPushButton>
 #include <QSaveFile>
 #include <QSignalBlocker>
@@ -37,30 +35,87 @@
 #include <QScrollArea>
 #include <QScrollBar>
 #include <QSpinBox>
+#include <QStyle>
 #include <QElapsedTimer>
 #include <QTemporaryDir>
 #include <QApplication>
 #include <QJsonArray>
 #include <cmath>
 #include <stdexcept>
+#include <optional>
+#include <limits>
+#include <QtMath>
 
 namespace {
 QPointF plateScreen(QPointF p){return {p.x(),-p.y()};}
 class PlateView:public QGraphicsView {
-    QPoint last_;bool pan_=false;
+    QPoint last_,press_;bool pan_=false,moved_=false;
+    std::optional<QPointF> pivot_;
+    QPointF previousArm_;
+    void turnTo(QPoint pos){
+        const auto arm=QPointF(pos)-viewportTransform().map(*pivot_);
+        if(QLineF({},arm).length()<4){previousArm_={};return;}
+        if(!previousArm_.isNull()){
+            const double cross=previousArm_.y()*arm.x()-previousArm_.x()*arm.y();
+            rotateBy(qRadiansToDegrees(std::atan2(cross,QPointF::dotProduct(previousArm_,arm))));
+        }
+        previousArm_=arm;
+    }
+    PlateEdgeHit pressedEdge_;
 public:
+    std::function<PlateEdgeHit(QPoint)> hitTest;
+    std::function<void(PlateEdgeHit)> hover,picked;
+    std::function<void(QPainter*)> overlay;
+    std::function<std::optional<QPointF>(QPoint)> rotationCenter;
+    std::function<void(double)> rotateBy;
+    void cancelRotation(){pivot_.reset();}
     explicit PlateView(QGraphicsScene* scene,QWidget* parent):QGraphicsView(scene,parent){
         setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
         setProperty("studio_canvas_kind","plates");
+        setMouseTracking(true);
     }
 protected:
+    void drawForeground(QPainter* painter,const QRectF& rect)override{
+        QGraphicsView::drawForeground(painter,rect);
+        if(overlay)overlay(painter);
+    }
     void wheelEvent(QWheelEvent* e)override{
         const auto before=mapToScene(e->position().toPoint());double factor=std::pow(1.0015,e->angleDelta().y());
-        double next=transform().m11()*factor;if(next>1e-6&&next<1e7){scale(factor,factor);const auto after=mapToScene(e->position().toPoint());translate(after.x()-before.x(),after.y()-before.y());}e->accept();
+        double next=transform().m11()*factor;if(next>1e-6&&next<1e7){scale(factor,factor);const auto after=mapToScene(e->position().toPoint());translate(after.x()-before.x(),after.y()-before.y());hover(hitTest(e->position().toPoint()));}e->accept();
     }
-    void mousePressEvent(QMouseEvent*e)override{if(e->button()==Qt::RightButton){pan_=true;last_=e->pos();setCursor(Qt::ClosedHandCursor);e->accept();}else QGraphicsView::mousePressEvent(e);}
-    void mouseMoveEvent(QMouseEvent*e)override{if(pan_){auto delta=mapToScene(e->pos())-mapToScene(last_);translate(delta.x(),delta.y());last_=e->pos();e->accept();}else QGraphicsView::mouseMoveEvent(e);}
-    void mouseReleaseEvent(QMouseEvent*e)override{if(e->button()==Qt::RightButton){pan_=false;unsetCursor();e->accept();}else QGraphicsView::mouseReleaseEvent(e);}
+    void leaveEvent(QEvent* e)override{if(hover)hover({});QGraphicsView::leaveEvent(e);}
+    void mousePressEvent(QMouseEvent* e)override{
+        press_=e->pos();moved_=false;
+        if(e->button()==Qt::RightButton){pan_=true;last_=press_;hover({});setCursor(Qt::ClosedHandCursor);e->accept();return;}
+        if(e->button()==Qt::LeftButton){
+            if(e->modifiers().testFlag(Qt::ControlModifier)){
+                pivot_=rotationCenter(press_);
+                if(pivot_){previousArm_={};turnTo(press_);hover({});e->accept();return;}
+            }
+            pressedEdge_=hitTest(press_);
+            if(pressedEdge_.valid()){hover(pressedEdge_);e->accept();return;}
+            picked({});hover({});
+        }
+        QGraphicsView::mousePressEvent(e);
+    }
+    void mouseMoveEvent(QMouseEvent* e)override{
+        if(pivot_&&e->buttons().testFlag(Qt::LeftButton)){turnTo(e->pos());e->accept();return;}
+        if(e->buttons()&&(e->pos()-press_).manhattanLength()>=QApplication::startDragDistance())moved_=true;
+        if(pan_){auto delta=mapToScene(e->pos())-mapToScene(last_);translate(delta.x(),delta.y());last_=e->pos();e->accept();return;}
+        if(pressedEdge_.valid()){if(moved_)hover({});e->accept();return;}
+        if(!e->buttons())hover(hitTest(e->pos()));
+        QGraphicsView::mouseMoveEvent(e);
+    }
+    void mouseReleaseEvent(QMouseEvent* e)override{
+        if(e->button()==Qt::LeftButton&&pivot_){turnTo(e->pos());cancelRotation();hover(hitTest(e->pos()));e->accept();return;}
+        if(e->button()==Qt::RightButton&&pan_){pan_=false;unsetCursor();hover(hitTest(e->pos()));e->accept();return;}
+        if(e->button()==Qt::LeftButton&&pressedEdge_.valid()){
+            const auto hit=hitTest(e->pos());
+            if(!moved_&&(e->pos()-press_).manhattanLength()<QApplication::startDragDistance()&&pressedEdge_.sameStroke(hit))picked(hit);
+            pressedEdge_={};hover(hit);e->accept();return;
+        }
+        QGraphicsView::mouseReleaseEvent(e);
+    }
 };
 struct PlateStyle {bool fill=true,interior=false,errors=false,dimensions=false,names=true,submerged=true,boxes=false;std::array<bool,4> sections{true,true,true,true};};
 // Device caches accelerate interactive translation only. Exports and print
@@ -87,6 +142,8 @@ public:
     quint64 paintCalls=0;
     fs::DevelopedPlate& plate;PlateStyle style;QPainterPath fill,under,screenFill,screenUnder;QVector<QLineF> boundary,inner,positive,negative;
     QColor underwaterColor;QVector<fs::PlateCurve> screenCurves;
+    QVector<int> boundaryIndices;
+    QHash<int,int> seamByEdge;
     std::function<void()> changed,selected;
     PlateItem(fs::DevelopedPlate& p,double waterline,QColor waterColor):plate(p),underwaterColor(waterColor){
         setFlags(ItemIsMovable|ItemIsSelectable|ItemSendsGeometryChanges);
@@ -117,7 +174,7 @@ public:
         }
         fill.setFillRule(Qt::WindingFill);under.setFillRule(Qt::WindingFill);
         screenFill=outline.path(vertices);screenUnder=wetOutline.path(vertices);
-        for(const auto&e:p.edges){QLineF line(plateScreen(p.points[e.a]),plateScreen(p.points[e.b]));(e.boundary?boundary:inner).append(line);
+        for(int i=0;i<p.edges.size();++i){const auto& e=p.edges[i];if(e.boundary)boundaryIndices.append(i);QLineF line(plateScreen(p.points[e.a]),plateScreen(p.points[e.b]));(e.boundary?boundary:inner).append(line);
             if(e.error>1e-7)positive.append(line);else if(e.error< -1e-7)negative.append(line);}
     }
     QRectF boundingRect()const override{return fill.boundingRect();}
@@ -147,23 +204,35 @@ PlatesDialog::PlatesDialog(ModelSession& session,bool hidden,QWidget* parent):QD
     setProperty("calculation_title_source",QStringLiteral("板材展开"));setWindowTitle(uiText("板材展开"));resize(1320,850);if(hidden)setAttribute(Qt::WA_DontShowOnScreen);
     auto* layout=new QVBoxLayout(this);auto* tools=new QHBoxLayout;layout->addLayout(tools);
     auto button=[&](QString text,QString op,std::function<void()> fn){auto*b=new QPushButton(text,this);b->setProperty("plates_action",op);connect(b,&QPushButton::clicked,this,fn);tools->addWidget(b);return b;};
-    calculate_=button(uiText("生成展开图"),"calculate",[this]{failure_.clear();status_->setMessage(uiText("正在生成展开图…"),StudioMessageRole::Feedback,true);session_.developPlates();refreshState();});
-    cancel_=button(uiText("取消计算"),"cancel",[this]{session_.cancelPlates();});
-    button(uiText("适合窗口"),"fit",[this]{fit();});button(uiText("重新排列"),"arrange",[this]{if(data_){data_->arrange();updateItems();fit();select(list_->currentRow());}});
     for(const auto& pair:QVector<QPair<QString,QString>>{{"展开图","dxf"},{"坐标表","txt"},{"展开数据","json"},{"图片","png"},{"展开图","pdf"}}){
         auto* control=button(uiText(pair.first),pair.second,[this,format=pair.second]{chooseExport(format);});
         const auto refreshFormat=[control,pair]{setStudioFormatButton(control,pair.second,uiText("导出 ")+uiText(pair.first)+" ("+pair.second.toUpper()+")");};
         refreshFormat();bindUiRefresh(control,refreshFormat);
     }
-    button(uiText("打印预览"),"print",[this]{if(!data_)return;QPrinter printer(QPrinter::HighResolution);printer.setPageSize(QPageSize(QPageSize::A4));printer.setPageOrientation(QPageLayout::Landscape);
-        QPrintPreviewDialog preview(&printer,this);styleStudioPrintPreview(&preview,true);preview.setAttribute(Qt::WA_DontShowOnScreen,testAttribute(Qt::WA_DontShowOnScreen));connect(&preview,&QPrintPreviewDialog::paintRequested,this,[this](QPrinter*p){try{renderPages(*p);}catch(const std::exception&e){showFailure(QString::fromUtf8(e.what()));}});preview.exec();});
-    tools->addStretch();auto* splitter=new QSplitter(this);layout->addWidget(splitter,1);
+    tools->addStretch();
+    rotationPresets_=new QWidget(this);
+    auto* presetLayout=new QHBoxLayout(rotationPresets_);presetLayout->setContentsMargins(0,0,0,0);
+    for(int angle:{-90,-5,-1,1,5,90}){
+        auto* preset=new QPushButton(QString::number(angle)+QChar(0x00b0),rotationPresets_);
+        preset->setFixedWidth(preset->fontMetrics().horizontalAdvance(QStringLiteral("-90°"))+20);
+        preset->setAutoDefault(false);preset->setProperty("plate_angle",angle);
+        presetLayout->addWidget(preset);
+        connect(preset,&QPushButton::clicked,this,[this,angle]{
+            const int row=list_->currentRow();
+            if(!data_||row<0||session_.busy()||!data_->plates[row].visible)return;
+            data_->plates[row].rotation=angle;placePlate(row);
+        });
+    }
+    tools->addWidget(rotationPresets_);rotationPresets_->hide();tools->addStretch();
+    connect(this,&QDialog::finished,rotationPresets_,&QWidget::hide);
+    auto* splitter=new QSplitter(this);layout->addWidget(splitter,1);
     auto* sidebar=new QWidget;auto* side=new QVBoxLayout(sidebar);list_=new QListWidget;list_->setMinimumHeight(110);side->addWidget(list_,1);
-    auto* form=new QFormLayout;side->addLayout(form);
-    auto spin=[&](QString text,QString field,double low,double high){auto*w=new QDoubleSpinBox;w->setRange(low,high);w->setDecimals(6);w->setProperty("plate_field",field);form->addRow(text,w);connect(w,qOverload<double>(&QDoubleSpinBox::valueChanged),this,[this]{transformActive();});return w;};
-    rotation_=spin(uiText("旋转 / °"),"rotation",-36000,36000);x_=spin(uiText("水平位置"),"x",-1e9,1e9);y_=spin(uiText("垂直位置"),"y",-1e9,1e9);
-    mirror_=new QCheckBox(uiText("镜像板片"));mirror_->setProperty("plate_field","mirror");form->addRow(mirror_);connect(mirror_,&QCheckBox::toggled,this,[this]{transformActive();});
-    auto* turns=new QHBoxLayout;side->addLayout(turns);for(int angle:{-90,-5,-1,1,5,90}){auto*b=new QPushButton(QString::number(angle)+"°");b->setProperty("plate_rotate",angle);b->setMinimumWidth(44);turns->addWidget(b);connect(b,&QPushButton::clicked,this,[this,angle]{rotation_->setValue(rotation_->value()+angle);});}
+    mirror_=new QCheckBox(uiText("镜像板片"));mirror_->setProperty("plate_field","mirror");side->addWidget(mirror_);
+    connect(mirror_,&QCheckBox::toggled,this,[this](bool checked){
+        const int row=list_->currentRow();
+        if(updating_||!data_||row<0)return;
+        data_->plates[row].mirrored=checked;placePlate(row);
+    });
     auto toggle=[&](QString text,QString field,bool checked){auto*c=new QCheckBox(text);c->setChecked(checked);c->setProperty("plate_display",field);side->addWidget(c);connect(c,&QCheckBox::toggled,this,[this]{updateItems();});return c;};
     fill_=toggle(uiText("填色"),"fill",true);submerged_=toggle(uiText("水下着色"),"submerged",true);interior_=toggle(uiText("内部边"),"interior",false);errors_=toggle(uiText("边长误差：红色伸长，蓝色缩短"),"errors",false);
     names_=toggle(uiText("板片名称"),"names",true);dimensions_=toggle(uiText("角点坐标（当前布局）"),"dimensions",false);boxes_=toggle(uiText("包围框"),"boxes",false);
@@ -171,47 +240,221 @@ PlatesDialog::PlatesDialog(ModelSession& session,bool hidden,QWidget* parent):QD
     auto* gridForm=new QFormLayout;side->addLayout(gridForm);
     for(int i=0;i<2;++i){auto*n=new QDoubleSpinBox;n->setRange(0,1e9);n->setDecimals(6);n->setSpecialValueText(uiText("不显示"));n->setProperty("plate_field",i?"grid_y":"grid_x");gridForm->addRow(i?uiText("网格间距 Y"):uiText("网格间距 X"),n);if(i)gridY_=n;else gridX_=n;connect(n,qOverload<double>(&QDoubleSpinBox::valueChanged),this,[this]{updateItems();});}
     fontSize_=new QSpinBox;fontSize_->setRange(6,36);fontSize_->setValue(10);gridForm->addRow(uiText("标注字号"),fontSize_);connect(fontSize_,qOverload<int>(&QSpinBox::valueChanged),this,[this]{updateItems();});
-    auto* printForm=new QFormLayout;side->addLayout(printForm);scale_=new QDoubleSpinBox;scale_->setRange(0,100000);scale_->setDecimals(3);scale_->setSpecialValueText(uiText("适合单页"));scale_->setValue(0);scale_->setProperty("plate_field","print_scale");printForm->addRow(uiText("打印比例 1 :"),scale_);
-    metrics_=new QTableWidget(6,3);metrics_->setObjectName("PlateMetrics");metrics_->setProperty("studio_content_role","result_data");
+    scale_=new PdfScaleInputs(QStringLiteral("PlatePdf"),100000);
+    scale_->setProperty("plate_field","print_scale");
+    scale_->denominator.setMinimum(0);
+    scale_->denominator.setValue(0);
+    auto* scaleLabel=new QLabel;
+    scaleLabel->setBuddy(&scale_->numerator);
+    const auto refreshScaleText=[this,scaleLabel]{
+        scaleLabel->setText(QString::fromUtf8(uiText("打印比例 1 :")).section(u'1',0,0).trimmed());
+        scale_->denominator.setSpecialValueText(uiText("适合单页"));
+    };
+    refreshScaleText();bindUiRefresh(scaleLabel,refreshScaleText);
+    gridForm->addRow(scaleLabel,scale_);
+    connect(&scale_->numerator,&QSpinBox::valueChanged,this,[this](int numerator){
+        if(numerator!=1&&scale_->denominator.value()==0)scale_->denominator.setValue(1);
+    });
+    connect(&scale_->denominator,&QSpinBox::valueChanged,this,[this](int denominator){
+        if(denominator==0)scale_->numerator.setValue(1);
+    });
+    metrics_=new QTableWidget(7,3);metrics_->setObjectName("PlateMetrics");metrics_->setProperty("studio_content_role","result_data");
     const auto refreshHeaders=[this]{metrics_->setHorizontalHeaderLabels({uiText("参数"),uiText("数值"),uiText("单位")});};
     refreshHeaders();bindUiRefresh(metrics_,refreshHeaders);metrics_->verticalHeader()->hide();
     metrics_->setEditTriggers(QAbstractItemView::NoEditTriggers);metrics_->setSelectionMode(QAbstractItemView::NoSelection);
     metrics_->setItemDelegate(new StudioWidgetCellDelegate(metrics_));metrics_->setAlternatingRowColors(false);metrics_->setShowGrid(false);
     metrics_->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);metrics_->horizontalHeader()->setStretchLastSection(false);
-    metrics_->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);metrics_->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    metrics_->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);metrics_->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
     metrics_->setStyleSheet("QTableWidget#PlateMetrics{background:#ffffff;border:1px solid #d8e2dc;border-radius:6px;color:#24463d} QTableWidget#PlateMetrics::item{border:0;border-bottom:1px solid #edf1ee;padding:5px 7px;} QTableWidget#PlateMetrics QHeaderView::section{background:#eef3f0;border:0;padding:6px;color:#365e50;}");
     metrics_->hide();side->addWidget(metrics_);
+    diagnosticNote_=new StudioMessage(StudioMessageRole::Warning);diagnosticNote_->hide();side->addWidget(diagnosticNote_);
     plateNote_=new StudioMessage(StudioMessageRole::Explanation,uiText("仅展开已勾选“可展开曲面”的图层。展开误差不等于材料成形余量。"));side->addWidget(plateNote_);
     auto* scroll=new QScrollArea;scroll->setWidgetResizable(true);scroll->setWidget(sidebar);scroll->setMinimumWidth(360);splitter->addWidget(scroll);
     scene_=new PlateScene(this);view_=new PlateView(scene_,this);view_->setTransformationAnchor(QGraphicsView::NoAnchor);view_->setRenderHints(QPainter::Antialiasing|QPainter::TextAntialiasing);splitter->addWidget(view_);splitter->setSizes({400,900});
     status_=new StudioMessage(StudioMessageRole::Feedback);status_->enableMathNotation();status_->setObjectName("PlateStatus");layout->addWidget(status_);
+    auto* sheetView=static_cast<PlateView*>(view_);
+    sheetView->rotationCenter=[this](QPoint pos)->std::optional<QPointF>{
+        if(!data_||session_.busy())return {};
+        const auto scenePoint=view_->mapToScene(pos);
+        const auto edge=edgeAt(pos);
+        int row=edge.plate;
+        if(row<0){
+            for(auto* hit:view_->items(pos)){
+                while(hit->parentItem())hit=hit->parentItem();
+                row=items_.indexOf(hit);
+                if(row>=0&&hit->contains(hit->mapFromScene(scenePoint)))break;
+                row=-1;
+            }
+        }
+        if(row<0)return {};
+        list_->setCurrentRow(row);
+        return items_[row]->mapToScene(plateScreen(data_->plates[row].bounds.center()));
+    };
+    sheetView->rotateBy=[this](double degrees){
+        const int row=list_->currentRow();
+        if(!data_||row<0||degrees==0)return;
+        data_->plates[row].rotation=std::remainder(data_->plates[row].rotation+degrees,360.);
+        placePlate(row);
+        rotationPresets_->show();
+    };
+    sheetView->hitTest=[this](QPoint pos){return edgeAt(pos);};
+    sheetView->hover=[this](PlateEdgeHit hit){
+        if(hovered_.sameStroke(hit))return;
+        hovered_=hit;view_->viewport()->update();
+    };
+    sheetView->picked=[this](PlateEdgeHit hit){
+        rotationPresets_->hide();
+        if(!hit.valid()&&seam_<0&&!singleEdge_.valid())return;
+        highlightSeam(hit.seam,hit.valid()&&hit.seam<0);
+        if(hit.valid()&&hit.seam<0)singleEdge_=hit;
+    };
+    sheetView->overlay=[this](QPainter* painter){
+        const int row=list_->currentRow();
+        if(data_&&row>=0&&row<items_.size()&&items_[row]->isVisible()){
+            const auto& plate=data_->plates[row];
+            if(plate.metrics["max_face_area_error"].toDouble()>plate.metrics["reference_area"].toDouble()*1e-7){
+                painter->save();
+                QPen pen(QColor(189,100,11),2);pen.setCosmetic(true);
+                painter->setPen(pen);painter->setBrush(QColor(246,155,41,75));
+                for(int face:plate.worstFaces){
+                    QPolygonF outline;
+                    for(int vertex:plate.faces[face])outline.append(items_[row]->mapToScene(plateScreen(plate.points[vertex])));
+                    painter->drawPolygon(outline);
+                }
+                painter->restore();
+            }
+        }
+        if(seam_<0&&!hovered_.valid()&&!singleEdge_.valid())return;
+        painter->save();painter->setRenderHint(QPainter::Antialiasing);
+        auto draw=[&](PlateEdgeHit hit,QColor color,double width){
+            const int index=hit.plate;
+            auto* item=items_[index];if(!item->isVisible())return;
+            const auto& p=data_->plates[index];QVector<QLineF> lines;
+            auto append=[&](int edge){
+                const auto& e=p.edges[edge];
+                lines.append(QLineF(item->mapToScene(plateScreen(p.points[e.a])),item->mapToScene(plateScreen(p.points[e.b]))));
+            };
+            if(hit.seam<0)append(hit.edge);
+            else {
+                const auto& s=seams_[hit.seam];for(auto [a,b]:s.segments)append(index==s.left?a:b);
+            }
+            QPen pen(Qt::white,width+2,Qt::SolidLine,Qt::RoundCap);pen.setCosmetic(true);
+            painter->setPen(pen);painter->drawLines(lines);
+            pen.setColor(color);pen.setWidthF(width);
+            painter->setPen(pen);painter->drawLines(lines);
+        };
+        if(seam_>=0){
+            for(int plate:{seams_[seam_].left,seams_[seam_].right})
+                draw({plate,-1,seam_},plateSeamColor,3);
+        }
+        if(singleEdge_.valid())draw(singleEdge_,plateSeamColor,3);
+        if(hovered_.valid()){
+            bool selected=(hovered_.seam>=0&&seam_==hovered_.seam)||hovered_.sameStroke(singleEdge_);
+            draw(hovered_,selected?plateSeamColor:plateHoverColor,selected?4:2.5);
+        }
+        if(seam_>=0){
+            const auto& seam=seams_[seam_];
+            const auto sceneToView=painter->worldTransform();
+            painter->resetTransform();
+            const QRectF viewport=view_->viewport()->rect();
+            QVector<QRectF> occupied;
+            for(int plate:{seam.left,seam.right}){
+                if(!items_[plate]->isVisible())continue;
+                for(int end=0;end<seam.ends.size();++end){
+                    const auto [left,right]=seam.ends[end];
+                    const int vertex=plate==seam.left?left:right;
+                    const auto local=plateScreen(data_->plates[plate].points[vertex]);
+                    const auto anchor=sceneToView.map(items_[plate]->mapToScene(local));
+                    if(!viewport.contains(anchor))continue;
+                    painter->setBrush(plateSeamColor);
+                    painter->setPen(QPen(Qt::white,1));
+                    painter->drawEllipse(anchor,3.5,3.5);
+                    const QString label=seam.endLabel(end);
+                    const QFontMetricsF metrics(painter->font());
+                    const QSizeF size(metrics.horizontalAdvance(label)+8,metrics.height()+2);
+                    auto freeSpace=[&](const QRectF& box){
+                        const auto margin=box.adjusted(-2,-2,2,2);
+                        if(!viewport.contains(margin))return false;
+                        for(const auto& used:occupied)if(used.intersects(margin))return false;
+                        for(auto* entry:items_){
+                            const auto* item=static_cast<PlateItem*>(entry);
+                            if(!item->isVisible())continue;
+                            const auto t=item->deviceTransform(sceneToView);
+                            if(!t.mapRect(item->boundingRect()).intersects(margin))continue;
+                            QPainterPath rect;rect.addRect(margin);
+                            if(item->screenFill.intersects(t.inverted().map(rect)))return false;
+                        }
+                        return true;
+                    };
+                    QRectF chosen;
+                    // Try nearby white space first, then the nearest free cell on the sheet.
+                    for(double gap:{6.,14.,24.,40.,64.}){
+                        for(const QPointF dir:{QPointF(0,-1),{0,1},{-1,0},{1,0},{-1,-1},{1,-1},{-1,1},{1,1}}){
+                            QRectF box({},size);
+                            box.moveCenter(anchor+QPointF(dir.x()*(gap+size.width()/2),dir.y()*(gap+size.height()/2)));
+                            if(freeSpace(box)){chosen=box;break;}
+                        }
+                        if(!chosen.isEmpty())break;
+                    }
+                    if(chosen.isEmpty()){
+                        double nearest=std::numeric_limits<double>::infinity();
+                        for(double y=3;y+size.height()+2<viewport.height();y+=size.height()+2)
+                            for(double x=3;x+size.width()+2<viewport.width();x+=size.width()+2){
+                                const QRectF box(QPointF(x,y),size);
+                                const double distance=QLineF(anchor,box.center()).length();
+                                if(distance<nearest&&freeSpace(box)){nearest=distance;chosen=box;}
+                            }
+                    }
+                    if(chosen.isEmpty())continue;
+                    occupied.append(chosen);
+                    painter->setPen(QPen(plateSeamColor,1));
+                    painter->drawLine(anchor,chosen.center());
+                    painter->setBrush(Qt::white);
+                    painter->drawRoundedRect(chosen,3,3);
+                    painter->drawText(chosen,Qt::AlignCenter,label);
+                }
+            }
+        }
+        painter->restore();
+    };
     connect(list_,&QListWidget::currentRowChanged,this,&PlatesDialog::select);
-    connect(list_,&QListWidget::itemChanged,this,[this](QListWidgetItem* item){if(updating_||!data_)return;data_->plates[list_->row(item)].visible=item->checkState()==Qt::Checked;updateItems();});
+    connect(list_,&QListWidget::itemChanged,this,[this](QListWidgetItem* item){if(updating_||!data_)return;data_->plates[list_->row(item)].visible=item->checkState()==Qt::Checked;if(item==list_->currentItem()&&item->checkState()!=Qt::Checked)rotationPresets_->hide();updateItems();refreshDiagnosticFaces();});
     refreshState();
+}
+void PlatesDialog::generateIfNeeded(){
+    if(session_.busy()||(hasResult()&&failure_.isEmpty()&&session_.calculationSnapshotCurrent()))return;
+    failure_.clear();
+    status_->setMessage(uiText("正在生成展开图…"),StudioMessageRole::Feedback,true);
+    session_.developPlates();
+    refreshState();
+}
+void PlatesDialog::previewAssembly(){
+    if(!data_)return;
+    auto* snapshot=data_.get();
+    const int chosen=showPlateAssembly(*data_,seams_,seam_,this);
+    if(snapshot==data_.get())highlightSeam(chosen);
 }
 void PlatesDialog::reject(){if(session_.isCalculationSession()){QDialog::reject();return;}if(session_.busy()){session_.cancelPlates();status_->setMessage(uiText("正在取消…"),StudioMessageRole::Feedback,true);return;}QDialog::reject();}
 void PlatesDialog::refreshState(){
     const bool idle=!session_.busy(),result=data_&&!data_->plates.isEmpty();
     const bool selected=result&&list_->currentRow()>=0&&list_->currentRow()<data_->plates.size();
-    calculate_->setEnabled(session_.ready()&&idle);cancel_->setEnabled(!idle);
+    if(!idle||!selected)rotationPresets_->hide();
     if(session_.calculationQueued())status_->setMessage(uiText("排队中")+QString(" · %1").arg(session_.calculationQueuePosition()),StudioMessageRole::Feedback);
     else if(!idle&&property("calculation_was_queued").toBool())status_->setMessage(uiText("正在生成展开图…"),StudioMessageRole::Feedback,true);
     setProperty("calculation_was_queued",session_.calculationQueued());
     for(auto* button:findChildren<QPushButton*>()){
-        const auto action=button->property("plates_action").toString();
-        if(!action.isEmpty()&&action!="calculate"&&action!="cancel")button->setEnabled(idle&&result);
-        if(button->property("plate_rotate").isValid())button->setEnabled(idle&&selected);
+        if(button->property("plates_action").isValid())button->setEnabled(idle&&result);
     }
     for(auto* widget:findChildren<QWidget*>()){
         const auto field=widget->property("plate_field").toString();
-        if(!field.isEmpty())widget->setEnabled(idle&&((field=="rotation"||field=="x"||field=="y"||field=="mirror")?selected:result));
+        if(!field.isEmpty())widget->setEnabled(idle&&((field=="mirror")?selected:result));
         if(widget->property("plate_display").isValid())widget->setEnabled(idle&&result);
     }
     fontSize_->setEnabled(idle&&result);list_->setEnabled(idle&&result);
 }
 void PlatesDialog::showFailure(const QString& text){failure_=text;status_->setMessage(uiText(text),StudioMessageRole::Warning);refreshState();}
 void PlatesDialog::receive(const QJsonObject& object){
-    try{auto next=std::make_unique<fs::DevelopedPlates>(fs::DevelopedPlates::parse(object));scene_->clear();items_.clear();list_->clear();data_=std::move(next);translatePlateNames();buildScene();failure_.clear();completionMessage_=completionText(data_->plates.size(),"已展开 %1 块板片。");status_->setMessage(completionMessage_,StudioMessageRole::Feedback);refreshState();}
+    try{auto next=std::make_unique<fs::DevelopedPlates>(fs::DevelopedPlates::parse(object));static_cast<PlateView*>(view_)->cancelRotation();scene_->clear();items_.clear();list_->clear();data_=std::move(next);resultModel_=session_.model();translatePlateNames();buildScene();failure_.clear();completionMessage_=completionText(data_->plates.size(),"已展开 %1 块板片。");status_->setMessage(completionMessage_,StudioMessageRole::Feedback);refreshState();refreshDiagnosticFaces();}
     catch(const std::exception&e){showFailure(QString::fromUtf8(e.what()));}
 }
 void PlatesDialog::translatePlateNames(){
@@ -228,52 +471,131 @@ void PlatesDialog::changeEvent(QEvent* event){
     if(event->type()!=QEvent::LanguageChange||!data_)return;
     translatePlateNames();
     updateItems();
+    select(list_->currentRow());
     if(!completionMessage_.isEmpty()&&status_->text()==completionMessage_){
         completionMessage_=completionText(data_->plates.size(),"已展开 %1 块板片。");
         status_->setMessage(completionMessage_,StudioMessageRole::Feedback);
     }
 }
+void PlatesDialog::hideEvent(QHideEvent* event){
+    QDialog::hideEvent(event);
+    if(onDiagnosticFaces)onDiagnosticFaces({},0,{});
+}
+void PlatesDialog::showEvent(QShowEvent* event){
+    QDialog::showEvent(event);
+    refreshDiagnosticFaces();
+}
+void PlatesDialog::refreshDiagnosticFaces(){
+    view_->viewport()->update();
+    if(!onDiagnosticFaces)return;
+    QVector<QVector<fs::Vec3>> polygons;
+    const int row=list_->currentRow();
+    if(isVisible()&&resultModel_&&row>=0&&row<items_.size()&&items_[row]->isVisible()){
+        const auto& plate=data_->plates[row];
+        if(plate.metrics["max_face_area_error"].toDouble()>plate.metrics["reference_area"].toDouble()*1e-7){
+            for(int face:plate.worstFaces){
+                QVector<fs::Vec3> polygon;
+                for(int vertex:plate.faces[face]){
+                    const auto p=plate.original[vertex];
+                    polygon.append({p.x(),p.y(),p.z()});
+                }
+                polygons.append(std::move(polygon));
+            }
+        }
+    }
+    if(polygons.isEmpty())onDiagnosticFaces({},0,{});
+    else onDiagnosticFaces(resultModel_->documentId,resultModel_->revision,polygons);
+}
 void PlatesDialog::buildScene(){
+    seam_=-1;hovered_={};singleEdge_={};seams_=collectPlateSeams(*data_);
     updating_=true;list_->clear();submerged_->setChecked(data_->shadeSubmerged);
     for(int i=0;i<data_->plates.size();++i){auto&p=data_->plates[i];auto* row=new QListWidgetItem(p.name,list_);row->setFlags(row->flags()|Qt::ItemIsUserCheckable);row->setCheckState(Qt::Checked);
         auto* item=new PlateItem(p,data_->waterline,data_->underwaterColor);scene_->addItem(item);items_.append(item);
         item->selected=[this,i]{if(!updating_)list_->setCurrentRow(i);};
         item->changed=[this,i]{positionChanged(i);};}
-    for(auto*n:{x_,y_,gridX_,gridY_})n->setSuffix(" "+data_->lengthUnit());
+    for(int i=0;i<seams_.size();++i){
+        const auto& s=seams_[i];for(auto [a,b]:s.segments){
+            static_cast<PlateItem*>(items_[s.left])->seamByEdge.insert(a,i);
+            static_cast<PlateItem*>(items_[s.right])->seamByEdge.insert(b,i);
+        }
+    }
+    for(auto*n:{gridX_,gridY_})n->setSuffix(" "+data_->lengthUnit());
     updating_=false;updateItems();list_->setCurrentRow(0);fit();
 }
+void PlatesDialog::highlightSeam(int index,bool unpaired){
+    seam_=index;singleEdge_={};
+    if(index>=0||unpaired){
+        scene_->clearSelection();list_->setCurrentRow(-1);list_->clearSelection();metrics_->hide();
+        refreshState();
+    }
+    if(index>=0)status_->setMessage(plateSeamMeasurement(*data_,seams_[index]),StudioMessageRole::Feedback);
+    else status_->setMessage(unpaired?uiText("这条边没有唯一的配对板片"):completionMessage_,StudioMessageRole::Feedback);
+    view_->viewport()->update();
+}
+PlateEdgeHit PlatesDialog::edgeAt(QPoint pos)const{
+    if(!data_)return {};
+    double best=36.;PlateEdgeHit hit;
+    const auto scenePoint=view_->mapToScene(pos);
+    const QRectF region=view_->mapToScene(QRect(pos-QPoint(8,8),QSize(17,17))).boundingRect();
+    for(int i=items_.size()-1;i>=0;--i){
+        auto* item=static_cast<PlateItem*>(items_[i]);if(!item->isVisible()||!item->sceneBoundingRect().intersects(region))continue;
+        const bool inside=item->screenFill.contains(item->mapFromScene(scenePoint));
+        const auto& p=data_->plates[i];const auto transform=item->deviceTransform(view_->viewportTransform());
+        for(int j:item->boundaryIndices){
+            const auto& e=p.edges[j];
+            const QPointF a=transform.map(plateScreen(p.points[e.a])),v=transform.map(plateScreen(p.points[e.b]))-a;
+            const double t=std::clamp(QPointF::dotProduct(pos-a,v)/std::max(1e-15,QPointF::dotProduct(v,v)),0.,1.);
+            const QPointF delta=pos-(a+t*v);const double d=QPointF::dotProduct(delta,delta);
+            if(d<best&&(!inside||d<=9.)){best=d;hit={i,j,item->seamByEdge.value(j,-1)};}
+        }
+        if(inside)break; // The visible plate interior occludes boundaries below it.
+    }
+    return hit;
+}
 void PlatesDialog::select(int row){
-    if(!data_||row<0||row>=data_->plates.size()){refreshState();return;}
+    rotationPresets_->hide();
+    if(!data_||row<0||row>=data_->plates.size()){metrics_->hide();diagnosticNote_->hide();refreshState();refreshDiagnosticFaces();return;}
+    if(seam_>=0||singleEdge_.valid())highlightSeam(-1);
     updating_=true;auto&p=data_->plates[row];
-    rotation_->setValue(p.rotation);x_->setValue(p.offset.x());y_->setValue(p.offset.y());mirror_->setChecked(p.mirrored);
+    mirror_->setChecked(p.mirrored);
     for(int i=0;i<items_.size();++i)items_[i]->setSelected(i==row);
     const auto m=p.metrics;double multiplier=p.joinedMirror?2:1;QString unit=data_->lengthUnit();
-    const QStringList keys{"min_edge_error","max_edge_error","signed_area_error","absolute_area_error","reference_area","normalized_error"};
-    const QStringList labels{uiText("最小边长误差"),uiText("最大边长误差"),uiText("面积差（有符号）"),uiText("面积差绝对值之和"),uiText("原表面积"),uiText("无量纲误差")};
+    const QStringList keys{"min_edge_error","max_edge_error","signed_area_error","area_percent","absolute_area_error","reference_area","normalized_error"};
+    const QStringList labels{uiText("最小边长误差"),uiText("最大边长误差"),uiText("展开面积 − 原表面积"),uiText("面积差占原表面积"),uiText("面积差绝对值之和"),uiText("原表面积"),uiText("无量纲误差")};
+    const QStringList units{unit,unit,unit+QChar(0x00b2),"%",unit+QChar(0x00b2),unit+QChar(0x00b2),{}};
     for(int row=0;row<keys.size();++row){
-        const double value=m[keys[row]].toDouble()*(row>=2&&row<=4?multiplier:1);
-        const QStringList cells{labels[row],tableNumber::display(value),row<2?unit:row<5?unit+QString(QChar(0x00b2)):QString{}};
+        const double value=row==3?100*m["signed_area_error"].toDouble()/m["reference_area"].toDouble():
+            m[keys[row]].toDouble()*(row>=2&&row<=5?multiplier:1);
+        const QStringList cells{labels[row],tableNumber::display(value),units[row]};
         for(int col=0;col<3;++col){auto* item=new QTableWidgetItem(cells[col]);item->setTextAlignment(col==1?Qt::AlignRight|Qt::AlignVCenter:Qt::AlignLeft|Qt::AlignVCenter);if(col==1)item->setToolTip(QString::number(value,'g',17));metrics_->setItem(row,col,item);}
         metrics_->setRowHeight(row,44);
     }
-    metrics_->setFixedHeight(6*44+metrics_->horizontalHeader()->height()+4);metrics_->show();
-    plateNote_->setText(QString(uiText("仅展开已勾选“可展开曲面”的图层。展开误差不等于材料成形余量。"))+"\n\n"+uiText("边长误差为展开长度减原长度。")+(p.joinedMirror?"\n"+QString(uiText("本板含对称的两半；DXF 分别保留两侧闭合轮廓。")):QString{}));updating_=false;refreshState();
+    const int scrollHeight=metrics_->style()->pixelMetric(QStyle::PM_ScrollBarExtent,nullptr,metrics_);
+    metrics_->setFixedHeight(metrics_->rowCount()*44+metrics_->horizontalHeader()->height()+scrollHeight+4);metrics_->show();
+    QStringList warnings;
+    if(p.flippedTriangles)warnings.append(uiText("展开图中有三角面翻转。"));
+    if(p.collapsedTriangles)warnings.append(uiText("展开图中有三角面退化。"));
+    if(p.overlapArea>0)warnings.append(uiText("展开图中有区域重叠。"));
+    diagnosticNote_->setText(warnings.join('\n'));diagnosticNote_->setVisible(!warnings.isEmpty());
+    plateNote_->setText(QString(uiText("仅展开已勾选“可展开曲面”的图层。展开误差不等于材料成形余量。"))+"\n\n"+uiText("边长误差为展开长度减原长度。")+(p.joinedMirror?"\n"+QString(uiText("本板含对称的两半；DXF 分别保留两侧闭合轮廓。")):QString{}));updating_=false;refreshState();refreshDiagnosticFaces();
 }
 void PlatesDialog::positionChanged(int row){
     if(updating_||!data_||row<0||row>=data_->plates.size())return;
     updating_=true;const auto& plate=data_->plates[row];
-    if(list_->currentRow()==row){x_->setValue(plate.offset.x());y_->setValue(plate.offset.y());}
     if(dimensions_->isChecked())for(auto* child:items_[row]->childItems())if(child->data(0).isValid()){
         auto* label=static_cast<QGraphicsSimpleTextItem*>(child);const auto v=plate.placement().map(plate.points[child->data(0).toInt()]);
         label->setText(QString("%1, %2").arg(v.x(),0,'g',6).arg(v.y(),0,'g',6));
     }
     updating_=false;
 }
-void PlatesDialog::transformActive(){if(updating_||!data_||list_->currentRow()<0)return;auto&p=data_->plates[list_->currentRow()];const auto field=sender()?sender()->property("plate_field").toString():QString{};
-    if(field=="rotation")p.rotation=rotation_->value();else if(field=="x")p.offset.setX(x_->value());else if(field=="y")p.offset.setY(y_->value());else if(field=="mirror")p.mirrored=mirror_->isChecked();
-    updateItems();}
-void PlatesDialog::updateItems(){if(!data_||updating_)return;updating_=true;
-    for(int i=0;i<items_.size();++i){auto* item=static_cast<PlateItem*>(items_[i]);auto&p=data_->plates[i];item->setVisible(p.visible);auto c=plateScreen(p.bounds.center());QTransform tr;tr.translate(c.x(),c.y());tr.rotate(-p.rotation);tr.scale(1,p.mirrored?-1:1);tr.translate(-c.x(),-c.y());item->setTransform(tr);item->setPos(plateScreen(p.offset));
+void PlatesDialog::placePlate(int row){
+    const auto& p=data_->plates[row];auto* item=items_[row];
+    const auto c=plateScreen(p.bounds.center());QTransform tr;
+    tr.translate(c.x(),c.y());tr.rotate(-p.rotation);tr.scale(1,p.mirrored?-1:1);tr.translate(-c.x(),-c.y());
+    item->setTransform(tr);item->setPos(plateScreen(p.offset));positionChanged(row);
+}
+void PlatesDialog::updateItems(){if(!data_||updating_)return;hovered_={};updating_=true;
+    for(int i=0;i<items_.size();++i){auto* item=static_cast<PlateItem*>(items_[i]);auto&p=data_->plates[i];item->setVisible(p.visible);auto c=plateScreen(p.bounds.center());placePlate(i);
         item->style={fill_->isChecked(),interior_->isChecked(),errors_->isChecked(),dimensions_->isChecked(),names_->isChecked(),submerged_->isChecked(),boxes_->isChecked(),{}};
         for(int k=0;k<4;++k)item->style.sections[k]=sections_[k]->isChecked();
         for(auto* child:item->childItems())delete child;
@@ -286,7 +608,7 @@ void PlatesDialog::updateItems(){if(!data_||updating_)return;updating_=true;
     static_cast<PlateScene*>(scene_)->gridX=gridX_->value();static_cast<PlateScene*>(scene_)->gridY=gridY_->value();scene_->invalidate(scene_->sceneRect(),QGraphicsScene::BackgroundLayer);
     updating_=false;
 }
-void PlatesDialog::fit(){if(!data_)return;QRectF rect;for(auto*i:items_)if(i->isVisible())rect=rect.united(i->sceneBoundingRect());if(rect.isEmpty())return;
+void PlatesDialog::fit(){if(!data_)return;hovered_={};QRectF rect;for(auto*i:items_)if(i->isVisible())rect=rect.united(i->sceneBoundingRect());if(rect.isEmpty())return;
     const auto d=qMax(rect.width(),rect.height())*.04;scene_->setSceneRect(rect.adjusted(-d,-d,d,d));view_->fitInView(scene_->sceneRect(),Qt::KeepAspectRatio);}
 QJsonObject PlatesDialog::result()const{return data_?data_->json():QJsonObject{};}
 QJsonObject PlatesDialog::measureDrag(){
@@ -369,7 +691,7 @@ QJsonObject PlatesDialog::measureDrag(){
     return {{"canvas_navigation",navigation},{"screen_interior_pixels",interiorPixels},{"screen_missing_pixels",missingPixels},{"png_cache_and_camera_independent",rasterEqual},{"first_render_ms",first},{"modes",modes},{"faces",item->plate.faces.size()},{"viewport_width",viewport->width()},{"viewport_height",viewport->height()},
         {"camera_modes",cameras},{"before_layout",before["layout"]},{"after_layout",result()["layout"]},{"data_restored",result()==before},{"dxf_restored",data_->dxf({true,true,true,true})==dxf},{"text_restored",data_->text()==text}};
 }
-void PlatesDialog::chooseExport(const QString& format){if(!data_)return;auto path=QFileDialog::getSaveFileName(this,uiText("保存展开图"),preferenceFileLocation("export",QString(uiText("展开图.%1")).arg(format)),QString("%1 (*.%1)").arg(format));if(path.isEmpty())return;auto error=exportFile(path,format);status_->setMessage(error.isEmpty()?uiText("已保存到：")+path:error,error.isEmpty()?StudioMessageRole::Feedback:StudioMessageRole::Warning);}
+void PlatesDialog::chooseExport(const QString& format){if(!data_)return;auto path=studioSaveFile(this,uiText("保存展开图"),preferenceFileLocation("export",QString(uiText("展开图.%1")).arg(format)),QString("%1 (*.%1)").arg(format));if(path.isEmpty())return;auto error=exportFile(path,format);status_->setMessage(error.isEmpty()?uiText("已保存到：")+path:error,error.isEmpty()?StudioMessageRole::Feedback:StudioMessageRole::Warning);}
 QString PlatesDialog::exportFile(const QString& path,const QString& format){
     try{if(!data_)throw std::runtime_error(uiText("尚未生成展开图。"));bool visible=false;for(const auto&p:data_->plates)visible|=p.visible;if(!visible)throw std::runtime_error(uiText("没有可见的板片可供导出。"));
         if(!QStringList{"dxf","txt","json","png","pdf"}.contains(format))throw std::runtime_error(uiText("不支持的导出格式。"));
@@ -393,14 +715,18 @@ void PlatesDialog::renderPages(QPagedPaintDevice& device){
     const qreal headerHeight=QFontMetricsF(printFont,&device).height()+16*dpiScale;
     const qreal footerHeight=studioMessageHeight(painter,warning,page.width(),dpiScale);
     QRectF target(0,headerHeight,page.width(),qMax(1.,page.height()-headerHeight-footerHeight-12*dpiScale));
-    double pixelsPerUnit=scale_->value()>0?(data_->units==0?1000:304.8)*device.logicalDpiX()/25.4/scale_->value():qMin(target.width()/bounds.width(),target.height()/bounds.height());
-    const double nx=scale_->value()==0?1:qMax(1.0,std::ceil(bounds.width()*pixelsPerUnit/target.width()));
-    const double ny=scale_->value()==0?1:qMax(1.0,std::ceil(bounds.height()*pixelsPerUnit/target.height()));
+    const int numerator=scale_->numerator.value(),denominator=scale_->denominator.value();
+    const bool fitSinglePage=denominator==0;
+    const double pixelsPerUnit=fitSinglePage?qMin(target.width()/bounds.width(),target.height()/bounds.height()):
+        (data_->units==0?1000.:304.8)*device.logicalDpiX()/25.4*numerator/denominator;
+    const double nx=fitSinglePage?1:qMax(1.0,std::ceil(bounds.width()*pixelsPerUnit/target.width()));
+    const double ny=fitSinglePage?1:qMax(1.0,std::ceil(bounds.height()*pixelsPerUnit/target.height()));
     if(!std::isfinite(nx*ny)||nx*ny>500)throw std::runtime_error(uiText("当前比例超过 500 页，请调小比例。"));
     const int columns=int(nx),rows=int(ny);
+    const QString scaleLabel=fitSinglePage?uiText(" · 适合单页"):QStringLiteral(" · %1:%2").arg(numerator).arg(denominator);
     scene_->clearSelection();
     for(int row=0;row<rows;++row)for(int col=0;col<columns;++col){if((row||col)&&!device.newPage())throw std::runtime_error(uiText("无法创建下一页。"));
-        painter.drawText(QRectF(0,0,page.width(),headerHeight),Qt::AlignLeft|Qt::AlignVCenter,QString(uiText("FreeShip 26 板材展开 · %1 · %2 / %3%4")).arg(data_->lengthUnit()).arg(row*columns+col+1).arg(rows*columns).arg(scale_->value()>0?QString(" · 1:%1").arg(scale_->value()):uiText(" · 适合单页")));
+        painter.drawText(QRectF(0,0,page.width(),headerHeight),Qt::AlignLeft|Qt::AlignVCenter,QString(uiText("FreeShip 26 板材展开 · %1 · %2 / %3%4")).arg(data_->lengthUnit()).arg(row*columns+col+1).arg(rows*columns).arg(scaleLabel));
         QRectF source(bounds.left()+col*target.width()/pixelsPerUnit,bounds.top()+row*target.height()/pixelsPerUnit,target.width()/pixelsPerUnit,target.height()/pixelsPerUnit);
         scene_->render(&painter,target,source,Qt::IgnoreAspectRatio);
         paintStudioMessage(painter,QRectF(0,page.height()-footerHeight,page.width(),footerHeight),warning,StudioMessageRole::Warning,dpiScale);

@@ -5,6 +5,7 @@
 #include "print_preview_style.h"
 #include <QAction>
 #include <QApplication>
+#include <QComboBox>
 #include <QDir>
 #include <QPainter>
 #include <QPrinter>
@@ -55,7 +56,7 @@ void MainWindow::auditPrintPreview(){
             view->resize(960,540);view->fit();view->finishPresentation();view->setFillVisible(filled);setUiLanguage("zh");
             bool captured=false;QString failure;QTimer timer;timer.setSingleShot(true);
             connect(&timer,&QTimer::timeout,this,[&]{
-                auto* preview=qobject_cast<QPrintPreviewDialog*>(QApplication::activeModalWidget());
+                auto* preview=qobject_cast<QPrintPreviewDialog*>(frontStudioDialog());
                 if(!preview){failure="Production print preview did not open";return;}
                 try{
                 QJsonObject row{{"projection",int(view->projection())},{"filled",filled},{"projection_label",view->projectionLabel()},{"renderer",preview->property("print_renderer").toString()},
@@ -71,10 +72,25 @@ void MainWindow::auditPrintPreview(){
                     workflowCase("print-toolbar-zoom-buttons",larger>zoom&&widget->zoomFactor()<larger);
                     click(preview,"FitWidth");workflowCase("print-toolbar-fit-width",widget->zoomMode()==QPrintPreviewWidget::FitToWidth);
                     click(preview,"FitPage");workflowCase("print-toolbar-fit-page",widget->zoomMode()==QPrintPreviewWidget::FitInView);
-                    // The visible orientation entry is Page setup. Exercise the
-                    // backing Qt orientation API without opening a printer dialog.
-                    widget->setPortraitOrientation();workflowCase("print-orientation-api-portrait",widget->orientation()==QPageLayout::Portrait);
+                    bool setupNonModal=false,printNonModal=false;
+                    QTimer::singleShot(0,preview,[&]{
+                        auto* setup=preview->findChild<QDialog*>("PrintPageSetup");
+                        if(!setup){if(auto* fallback=frontStudioDialog();fallback&&fallback!=preview)fallback->reject();return;}
+                        setupNonModal=setup->isVisible()&&!setup->isModal()&&!QApplication::activeModalWidget();
+                        setup->findChild<QComboBox*>("PrintPageOrientation")->setCurrentIndex(0);
+                        setup->accept();
+                    });
+                    click(preview,"Setup");
+                    workflowCase("print-page-setup-is-nonmodal-and-updates-the-preview",setupNonModal&&widget->orientation()==QPageLayout::Portrait);
                     widget->setLandscapeOrientation();workflowCase("print-orientation-api-landscape",widget->orientation()==QPageLayout::Landscape);
+                    QTimer::singleShot(0,preview,[&]{
+                        auto* setup=preview->findChild<QDialog*>("PrintDeviceSetup");
+                        if(!setup){if(auto* fallback=frontStudioDialog();fallback&&fallback!=preview)fallback->reject();return;}
+                        printNonModal=setup->isVisible()&&!setup->isModal()&&!QApplication::activeModalWidget();
+                        setup->reject();
+                    });
+                    click(preview,"Print");
+                    workflowCase("print-device-choice-is-nonmodal-and-can-cancel",printNonModal);
                     workflowCase("print-single-page-navigation-hidden",widget->pageCount()==1&&!button(preview,"Previous")->isVisibleTo(preview)&&!button(preview,"Next")->isVisibleTo(preview));
                     click(preview,"FitPage");
                     QJsonArray navigation;widget->setZoomFactor(widget->zoomFactor()*4);

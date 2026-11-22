@@ -178,6 +178,58 @@ int main(int argc,char** argv){
     wheel(small,-120);check("already-fitting-table-does-not-shrink",small.property("studio_table_scale").toDouble()==1);
     wheel(small,120);check("already-fitting-table-can-still-enlarge",small.property("studio_table_scale").toDouble()>1);
     small.grab().save(out+"/compact.png");
+    small.hide();
+
+    QStandardItemModel heightModel(4,4);
+    heightModel.setHorizontalHeaderLabels({"Weight (t)","X (m)","Y (m)","Z (m)"});
+    const QString groupTitle="Centre of gravity\n(m)";
+    const QString bodyText="First line\nSecond line";
+    heightModel.setData(heightModel.index(0,0),bodyText);
+    QTableView heightTable;
+    heightTable.setModel(&heightModel);
+    QFont largeFont=heightTable.font();
+    if(largeFont.pixelSize()>0)largeFont.setPixelSize(qRound(largeFont.pixelSize()*2.5));
+    else largeFont.setPointSizeF(largeFont.pointSizeF()*2.5);
+    heightModel.setData(heightModel.index(1,1),largeFont,Qt::FontRole);
+    heightModel.setData(heightModel.index(1,1),"X");
+    auto* control=new QLabel("Control");
+    control->setMinimumHeight(70);
+    heightTable.setIndexWidget(heightModel.index(2,0),control);
+    setStudioHeaderGroups(&heightTable,{{groupTitle,1,{"X","Y","Z"}}});
+    configureStudioDataTable(&heightTable);
+    heightTable.resize(640,480);heightTable.show();settle();
+    const QFontMetricsF bodyFont(heightTable.font());
+    const QFontMetricsF headerFont(heightTable.horizontalHeader()->font());
+    const int headerHeight=heightTable.horizontalHeader()->height();
+    const int regularHeight=heightTable.rowHeight(3);
+    check("stacked-header-adds-both-measured-tiers",
+          headerHeight>=std::ceil(headerFont.height()*3+headerFont.leading())+20,
+          {{"height",headerHeight},{"font_height",headerFont.height()}});
+    const auto* groupedHeader=heightTable.horizontalHeader();
+    const int lowerHeight=int(std::ceil(headerFont.height()))+10;
+    const QRect lowerTier(groupedHeader->sectionViewportPosition(1)+2,headerHeight-lowerHeight,
+                         groupedHeader->sectionSize(1)-4,lowerHeight-1);
+    const auto lowerImage=groupedHeader->viewport()->grab(lowerTier).toImage();
+    bool lowerTextDrawn=false;
+    for(int y=0;y<lowerImage.height()&&!lowerTextDrawn;++y)
+        for(int x=0;x<lowerImage.width();++x)
+            if(lowerImage.pixelColor(x,y).red()<120){lowerTextDrawn=true;break;}
+    check("stacked-header-renders-the-lower-tier",lowerTextDrawn);
+    check("tall-content-expands-only-its-own-row",
+          heightTable.rowHeight(0)>=std::ceil(bodyFont.height()+bodyFont.lineSpacing())+8&&
+          heightTable.rowHeight(1)>=std::ceil(QFontMetricsF(largeFont).height())+8&&
+          heightTable.rowHeight(2)>=control->minimumHeight()&&regularHeight<heightTable.rowHeight(0),
+          {{"multiline",heightTable.rowHeight(0)},{"multiline_text_height",bodyFont.height()+bodyFont.lineSpacing()},
+           {"large_font_row",heightTable.rowHeight(1)},
+           {"large_font_height",QFontMetricsF(largeFont).height()},{"widget_row",heightTable.rowHeight(2)},
+           {"widget_minimum",control->minimumHeight()},{"regular",regularHeight}});
+    heightTable.grab().save(out+"/content-height.png");
+    wheel(heightTable,120);
+    check("scroll-zoom-scales-content-and-both-header-tiers",heightTable.horizontalHeader()->height()>headerHeight&&
+          heightTable.rowHeight(0)>regularHeight&&heightTable.rowHeight(3)>regularHeight);
+    wheel(heightTable,-120);
+    heightModel.setData(heightModel.index(0,0),"First line");settle();
+    check("row-shrinks-when-multiline-text-is-replaced",heightTable.rowHeight(0)==regularHeight);
     int failures=0;for(const auto& item:cases)if(item.toObject()["status"]=="fail")++failures;
     QFile report(out+"/report.json");report.open(QIODevice::WriteOnly);
     report.write(QJsonDocument(QJsonObject{{"status",failures?"fail":"pass"},{"cases",cases},{"artifacts",QJsonObject{{"device_pixel_ratio",table.devicePixelRatioF()}}}}).toJson());

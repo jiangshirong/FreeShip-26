@@ -3,6 +3,7 @@
 // Original copyright Martijn van Engeland; Plus Timoshenko and Malakanov.
 #include "surface_display.h"
 #include "flowlines.h"
+#include "plate_regions.h"
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <algorithm>
@@ -75,7 +76,8 @@ QByteArray buildSurfaceDisplay(const DocumentInput &d, const SubdivisionLevel &m
     std::iota(order.begin(),order.end(),0);
     std::sort(order.begin(),order.end(),[&](auto a,auto b){return d.faceIds[a]<d.faceIds[b];});
     QJsonArray curves;
-    QByteArray triangles="[",vectors="[",analysisPoints="[",analysisFaces="[";
+    QByteArray triangles="[",vectors="[",analysisPoints="[",analysisFaces="[",analysisRegions="[";
+    const auto regions=plateRegions(d.geometry);
     std::size_t triangleCount=0,normalCount=0,faceCount=0;
     // Qt remains the numeric encoder. Reuse its exact float-to-double JSON
     // representation for shared vertices instead of encoding every triangle.
@@ -94,7 +96,8 @@ QByteArray buildSurfaceDisplay(const DocumentInput &d, const SubdivisionLevel &m
     for (auto root:order) {
         for (auto index:children[root]) {
             const auto &f=mesh.faces[index];
-            if(faceCount++)analysisFaces+=',';analysisFaces+='[';
+            if(faceCount++){analysisFaces+=',';analysisRegions+=',';}analysisFaces+='[';
+            analysisRegions+=QByteArray::number(qulonglong(regions[root]));
             for(std::size_t i=0;i<f.points.size();++i){if(i)analysisFaces+=',';analysisFaces+=QByteArray::number(qulonglong(f.points[i]));}
             analysisFaces+=']';
             for (std::size_t k=2;k<f.points.size();++k) {
@@ -125,10 +128,23 @@ QByteArray buildSurfaceDisplay(const DocumentInput &d, const SubdivisionLevel &m
         curves.append(QJsonObject{{"id",d.curveIds[i]},
             {"spline",QJsonObject{{"points",points},{"knuckles",flags}}}});
     }
-    triangles+=']';vectors+=']';analysisPoints+=']';analysisFaces+=']';
-    // Preserve QJsonObject's key order and the unchanged public wire format.
-    QByteArray result="{\"analysis_topology\":{\"faces\":";result+=analysisFaces;
-    result+=",\"points\":";result+=analysisPoints;result+="},\"child_faces\":";
+    triangles+=']';vectors+=']';analysisPoints+=']';analysisFaces+=']';analysisRegions+=']';
+    QJsonArray creases;
+    for (const auto& edge : mesh.edges) {
+        if (edge.faces.empty() || (!edge.crease && edge.faces.size() != 1)) continue;
+        std::vector<qint64> layers;
+        for (auto face : edge.faces) layers.push_back(d.layerIds.at(mesh.faces.at(face).layer));
+        std::sort(layers.begin(), layers.end());
+        layers.erase(std::unique(layers.begin(), layers.end()), layers.end());
+        QJsonArray row{qint64(edge.points[0]), qint64(edge.points[1])};
+        for (auto layer : layers) row.append(layer);
+        creases.append(row);
+    }
+    QByteArray result="{\"analysis_topology\":{\"creases\":";
+    result+=QJsonDocument(creases).toJson(QJsonDocument::Compact);
+    result+=",\"faces\":";result+=analysisFaces;
+    result+=",\"points\":";result+=analysisPoints;
+    result+=",\"regions\":";result+=analysisRegions;result+="},\"child_faces\":";
     result+=QByteArray::number(qulonglong(mesh.faces.size()));result+=",\"control_curves\":";
     result+=QJsonDocument(curves).toJson(QJsonDocument::Compact);result+=",\"flowlines\":";
     result+=QJsonDocument(buildFlowlines(d,mesh,normals)).toJson(QJsonDocument::Compact);

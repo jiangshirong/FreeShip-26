@@ -1,4 +1,5 @@
 // Production-widget audit. Only explicitly requested private startup probes run it.
+#include "studio_ui.h"
 #include "main_window.h"
 #include "about_dialog.h"
 #include "shortcuts_dialog.h"
@@ -56,6 +57,7 @@ void MainWindow::auditCloseControls(){
         // The native chrome probe deliberately leaves its owned window hidden.
         // Re-show on the private QA desktop before observing actual visibility.
         dialog->show();QApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+        const bool nonModal=dialog->windowModality()==Qt::NonModal&&!QApplication::activeModalWidget();
         if(scope=="export-stl"){
             QCheckBox* shell=nullptr;
             for(auto* box:dialog->findChildren<QCheckBox*>())
@@ -311,6 +313,7 @@ void MainWindow::auditCloseControls(){
             {"table_surfaces",tableSurfaces},{"close_controls",duplicates},{"buttons",controls},{"copy",copy},{"typography",typography},{"expanded_copy",expandedCopy},{"copy_states",copyStates},{"dropdowns",dropdowns},{"report_exports",reportExports},
             {"closed_by_window_close",closed},{"image",picture?path:QString{}},{"message_icon",messageIcon},{"message_states",messageStates},{"report_messages",reportMessages}});
         workflowCase("close-controls-"+scope,!titleClose||duplicates==0);
+        workflowCase("nonmodal-"+scope,nonModal);
         workflowCase("title-close-"+scope,titleClose&&closed);
         workflowCase("title-double-click-"+scope,chrome["available"].toBool()&&chrome["first_double_click_toggled"].toBool()&&chrome["second_double_click_restored"].toBool());
         workflowCase("title-native-icon-"+scope,chrome["native_icon"].toBool()&&chrome["icon_pixels"].toInt()>0);
@@ -318,12 +321,12 @@ void MainWindow::auditCloseControls(){
     auto modal=[&](const QString& scope,const std::function<void()>& open,bool picture=false){
         bool handled=false;QTimer timer;timer.setSingleShot(true);
         connect(&timer,&QTimer::timeout,this,[&]{
-            auto* dialog=qobject_cast<QDialog*>(QApplication::activeModalWidget());
+            auto* dialog=qobject_cast<QDialog*>(frontStudioDialog());
             if(!dialog){finishWorkflow("Audit dialog did not open: "+scope);return;}
             if(scope=="about")for(const auto& entry:QList<QPair<QString,QString>>{{"AboutVersionToggle","about-version"},{"AboutCopyrightToggle","about-license"}}){
                 QTimer childTimer;childTimer.setSingleShot(true);bool childObserved=false;
                 connect(&childTimer,&QTimer::timeout,this,[&]{
-                    auto* child=qobject_cast<QDialog*>(QApplication::activeModalWidget());
+                    auto* child=qobject_cast<QDialog*>(frontStudioDialog());
                     if(child&&child!=dialog){childObserved=true;observe(child,entry.second);}
                 });
                 auto* button=dialog->findChild<QPushButton*>(entry.first);
@@ -383,7 +386,11 @@ void MainWindow::auditCloseControls(){
         modal("model-check",[this]{modelCheckDialog();},true);
         modal("about",[this]{showFreeShipAbout(this);});
         modal("shortcuts",[this]{showShortcutGuide(this);});
-        modal("tutorial",[this]{showTutorialGuide(this);},true);
+        if(auto* tutorial=showTutorialGuide(this)){
+            workflowCase("tutorial-allows-main-window-interaction",tutorial->windowModality()==Qt::NonModal&&
+                QApplication::activeModalWidget()!=tutorial&&showTutorialGuide(this)==tutorial);
+            observe(tutorial,"tutorial",true);
+        }
         {QMessageBox dialog(QMessageBox::Question,uiText("确认"),uiText("是否继续？"),QMessageBox::Yes|QMessageBox::No,this);observe(&dialog,"confirmation",true);}
         for(const auto& family:QList<QPair<QMessageBox::Icon,QString>>{{QMessageBox::Information,"information"},{QMessageBox::Warning,"warning"},{QMessageBox::Critical,"error"}}){
             QMessageBox dialog(family.first,uiText("提示"),uiText("操作结果"),QMessageBox::Ok,this);observe(&dialog,"message-"+family.second,true);

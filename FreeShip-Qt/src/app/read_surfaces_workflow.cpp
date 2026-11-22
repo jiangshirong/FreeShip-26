@@ -1,13 +1,19 @@
 // Actual guide/about dialogs. Clipboard clicks use the offscreen platform's
 // private clipboard only; Windows desktop clipboard is never accessed by this probe.
+#include "studio_ui.h"
 #include "main_window.h"
 #include "about_dialog.h"
 #include "shortcuts_dialog.h"
 #include "tutorial_dialog.h"
+#include <QToolButton>
+#include <QMouseEvent>
+#include <QComboBox>
+#include <QElapsedTimer>
 #include <QEventLoop>
 #include <QScrollArea>
 #include <QScrollBar>
 #include <QKeyEvent>
+#include <QTextDocument>
 
 namespace {
 QJsonObject observeReadCellFocus(QTableWidget* table,const QString& directory,const QString& stem){
@@ -34,6 +40,114 @@ QJsonObject observeReadCellFocus(QTableWidget* table,const QString& directory,co
     const bool navigates=table->currentRow()!=0||table->currentColumn()!=0;table->setCurrentIndex(current);
     return {{"columns",columns},{"keyboard_navigation_retained",navigates}};
 }
+}
+
+void MainWindow::auditTutorialLanguage(const QJsonArray& settings){
+    if(!startupProbe_){finishWorkflow("Tutorial language check requires an isolated startup run");return;}
+    const auto oldLanguage=uiLanguage();
+    const bool hidden=testAttribute(Qt::WA_DontShowOnScreen);
+    setAttribute(Qt::WA_DontShowOnScreen);
+    QDir().mkpath(workflowOutput_+"/views");
+    const auto settle=[]{
+        QApplication::sendPostedEvents(nullptr,QEvent::LayoutRequest);
+        QApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+    };
+    const auto shortcut=[&](QDialog* dialog){
+        QApplication::setActiveWindow(dialog);
+        auto* focus=dialog->focusWidget()?dialog->focusWidget():dialog;
+        QKeyEvent press(QEvent::KeyPress,Qt::Key_L,Qt::ControlModifier|Qt::ShiftModifier,"l");
+        QApplication::sendEvent(focus,&press);
+        QKeyEvent release(QEvent::KeyRelease,Qt::Key_L,Qt::NoModifier);
+        QApplication::sendEvent(focus,&release);
+        settle();
+    };
+    const auto tabs=[](const QTabBar* bar){
+        QJsonArray values;
+        for(int i=0;i<bar->count();++i)
+            values.append(QJsonArray{bar->tabText(i),bar->tabToolTip(i),bar->accessibleTabName(i)});
+        return values;
+    };
+    const auto snapshot=[&](QDialog* dialog,int section,int index,bool select){
+        auto* sections=dialog->findChild<QTabWidget*>("TutorialSections");
+        auto* menu=dialog->findChild<QTabBar*>("TutorialDemoTabs");
+        auto* topics=dialog->findChild<QTabBar*>("TutorialFeatureSubjects");
+        auto* steps=dialog->findChild<QWidget*>("TutorialFeatureSteps");
+        auto* frame=dialog->findChild<QWidget*>("TutorialFeatureFrame");
+        auto* play=dialog->findChild<QToolButton*>("TutorialFeaturePlay");
+        auto* replay=dialog->findChild<QToolButton*>("TutorialFeatureReplay");
+        auto* menuReplay=dialog->findChild<QPushButton*>("TutorialMenuReplay");
+        if(!sections||!menu||!topics||!steps||!frame||!play||!replay||!menuReplay)
+            return QJsonObject{};
+        auto* bar=section==0?menu:topics;
+        if(index>=bar->count())return QJsonObject{};
+        if(select){sections->setCurrentIndex(section);bar->setCurrentIndex(index);}
+        settle();
+        QJsonObject value{{"title",dialog->windowTitle()},{"sections",tabs(sections->tabBar())},
+            {"menu_tabs",tabs(menu)},{"feature_tabs",tabs(topics)},
+            {"section",sections->currentIndex()},{"index",bar->currentIndex()}};
+        if(section==0){
+            value["replay"]=menuReplay->text();
+            for(auto* label:dialog->findChildren<QLabel*>("TutorialDemoExplanation")){
+                if(!label->isVisible())continue;
+                QTextDocument text;
+                if(label->textFormat()==Qt::RichText)text.setHtml(label->text());
+                else text.setPlainText(label->text());
+                value["explanation"]=text.toPlainText();
+                break;
+            }
+            if(value["explanation"].toString().isEmpty())return QJsonObject{};
+        }else{
+            const auto nodes=steps->findChildren<QToolButton*>("TutorialFeatureNode");
+            if(nodes.size()<2)return QJsonObject{};
+            if(select)nodes[1]->click();
+            QJsonArray tips;
+            for(const auto* node:nodes)tips.append(QJsonArray{node->toolTip(),node->accessibleName()});
+            value["steps"]=tips;
+            value["timeline"]=steps->accessibleName();
+            value["introduction"]=frame->property("introduction").toString();
+            value["frame_title"]=frame->accessibleName();
+            value["step"]=frame->property("tutorialStep").toInt();
+            value["frame"]=frame->property("frameNumber").toInt();
+            value["playback"]=QJsonArray{play->toolTip(),play->accessibleName(),replay->toolTip(),replay->accessibleName()};
+        }
+        return value;
+    };
+    for(const auto& item:settings){
+        const auto pair=item.toObject();
+        const auto from=pair["from"].toString(),to=pair["to"].toString();
+        loadPreferences(pair["file"].toString());
+        if(uiLanguage()!=from||!setUiLanguage(to).isEmpty()){
+            finishWorkflow("Cannot configure tutorial language shortcut");return;
+        }
+        auto* reference=showTutorialGuide(this);
+        QJsonArray expected;
+        for(int section=0;section<2;++section)
+            for(int index=0;index<6;++index)expected.append(snapshot(reference,section,index,true));
+        reference->reject();
+        if(!setUiLanguage(from).isEmpty()){finishWorkflow("Cannot restore tutorial language");return;}
+        auto* dialog=showTutorialGuide(this);
+        QJsonArray observations;
+        for(int section=0;section<2;++section)for(int index=0;index<6;++index){
+            const auto id=from+"-"+to+(section==0?".menu-":".feature-")+QString::number(index+1);
+            const auto before=snapshot(dialog,section,index,true);
+            shortcut(dialog);
+            const auto switched=snapshot(dialog,section,index,false);
+            workflowCase(id+".switch",uiLanguage()==to&&dialog->isVisible()&&!before.isEmpty()&&
+                         switched!=before&&switched==expected[section*6+index].toObject()&&
+                         (section==0||before["step"].toInt()==1));
+            if(to=="ru"&&((from=="zh"&&section==0&&index==0)||(from=="ja"&&section==1&&index==1)))
+                dialog->grab().save(workflowOutput_+"/views/tutorial-"+id+".png");
+            shortcut(dialog);
+            const auto restored=snapshot(dialog,section,index,false);
+            workflowCase(id+".restore",uiLanguage()==from&&!before.isEmpty()&&restored==before);
+            observations.append(QJsonObject{{"id",id},{"before",before},{"switched",switched},
+                                           {"expected",expected[section*6+index]},{"restored",restored}});
+        }
+        dialog->reject();
+        workflowArtifacts_["tutorial_"+from+"_"+to]=observations;
+    }
+    setAttribute(Qt::WA_DontShowOnScreen,hidden);
+    setUiLanguage(oldLanguage);
 }
 
 void MainWindow::auditReadSurfaces(bool copyOnly){
@@ -112,6 +226,197 @@ void MainWindow::auditReadSurfaces(bool copyOnly){
                 row["example_tabs"]=tabs?tabs->count():0;
                 row["example_stage_reachable"]=scroll&&example&&example->isVisible()&&
                     scroll->viewport()->rect().contains(QRect(example->mapTo(scroll->viewport(),QPoint{}),example->size()));
+                auto* sections=dialog->findChild<QTabWidget*>("TutorialSections");
+                auto* topics=dialog->findChild<QTabBar*>("TutorialFeatureSubjects");
+                auto* steps=dialog->findChild<QWidget*>("TutorialFeatureSteps");
+                auto* frame=dialog->findChild<QWidget*>("TutorialFeatureFrame");
+                auto* play=dialog->findChild<QToolButton*>("TutorialFeaturePlay");
+                auto* replay=dialog->findChild<QToolButton*>("TutorialFeatureReplay");
+                QJsonArray chapters;
+                if(sections&&topics&&steps&&frame&&play&&replay){
+                    sections->setCurrentIndex(1);
+                    QApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+                    frame->grab();
+                    const auto picture=frame->property("pictureRect").toRect();
+                    row["tutorial_picture_width"]=picture.width();
+                    row["tutorial_playback_icons"]=!play->icon().isNull()&&!replay->icon().isNull()&&
+                        play->text().isEmpty()&&replay->text().isEmpty()&&!play->accessibleName().isEmpty()&&!replay->accessibleName().isEmpty();
+                    row["tutorial_stage_fraction"]=double(frame->height())/topics->parentWidget()->height();
+                    row["tutorial_timeline_below_stage"]=steps->mapTo(dialog,QPoint{}).y()>=frame->mapTo(dialog,QPoint{}).y()+frame->height();
+                    for(int chapter=0;chapter<topics->count();++chapter){
+                        topics->setCurrentIndex(chapter);
+                        QApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+                        const auto nodes=steps->findChildren<QToolButton*>("TutorialFeatureNode");
+                        if(chapter==3&&nodes.size()==9){
+                            row["tutorial_a4_modes_in_order"]=nodes[5]->toolTip()==uiText("A4 拼页")&&
+                                nodes[6]->toolTip()==uiText("无需裁剪")&&
+                                nodes[7]->toolTip()==uiText("剪下第 2 页的裁切边");
+                        }
+                        const auto stem=workflowOutput_+"/views/tutorial-features-"+language+(compact?"-compact":"");
+                        const auto firstFrameImage=frame->grab();
+                        const auto introduction=frame->property("introduction").toString();
+                        const auto introRect=frame->property("introductionRect").toRect();
+                        const auto pictureRect=frame->property("pictureRect").toRect();
+                        const bool introAbove=!introduction.isEmpty()&&frame->rect().contains(introRect)&&
+                            introRect.bottom()<pictureRect.top();
+                        const auto initialCaption=frame->grab(introRect).toImage();
+                        auto blank=initialCaption;
+                        if(!blank.isNull())blank.fill(initialCaption.pixel(0,0));
+                        const auto captionIsFixed=[&]{
+                            return frame->grab(introRect).toImage()==initialCaption&&
+                                frame->property("introduction").toString()==introduction&&
+                                frame->property("introductionRect").toRect()==introRect&&
+                                frame->property("pictureRect").toRect()==pictureRect;
+                        };
+                        if(!compact&&language=="zh"&&(chapter==1||chapter==2)){
+                            dialog->grab().save(stem+(chapter==1?"-rebuild-intro.png":"-compare-intro.png"));
+                        }
+                        bool sought=true;
+                        int lastX=-1;
+                        for(int step=0;step<nodes.size();++step){
+                            const auto x=nodes[step]->pos().x();
+                            nodes[step]->click();
+                            QApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+                            sought=sought&&x>lastX&&nodes[step]->isChecked()&&
+                                frame->property("tutorialStep").toInt()==step&&
+                                frame->property("frameNumber").toInt()==90*step&&
+                                frame->property("introduction").toString()==introduction;
+                            lastX=x;
+                        }
+                        {
+                            const auto seekAt=[&](QEvent::Type type,QPoint position,Qt::MouseButton button,Qt::MouseButtons buttons){
+                                QMouseEvent event(type,position,steps->mapToGlobal(position),button,buttons,Qt::NoModifier,QPointingDevice::primaryPointingDevice());
+                                QApplication::sendEvent(steps,&event);
+                            };
+                            const auto track=[&](int step,double progress){
+                                const int a=nodes[step]->geometry().center().x()+1;
+                                const int b=step+1<nodes.size()?nodes[step+1]->geometry().center().x()+1:steps->width()-4;
+                                return QPoint(a+qRound((b-a)*progress),steps->height()/2);
+                            };
+                            const auto select=[&](QPoint position){
+                                seekAt(QEvent::MouseButtonPress,position,Qt::LeftButton,Qt::LeftButton);
+                                seekAt(QEvent::MouseButtonRelease,position,Qt::LeftButton,Qt::NoButton);
+                            };
+                            if(chapter==2&&nodes.size()==5){
+                                const auto first=track(0,.73),far=track(3,.82),back=track(1,.75);
+                                seekAt(QEvent::MouseButtonPress,first,Qt::LeftButton,Qt::LeftButton);
+                                const auto firstFrame=frame->property("frameNumber").toInt();
+                                seekAt(QEvent::MouseMove,far,Qt::NoButton,Qt::LeftButton);
+                                const auto farFrame=frame->property("frameNumber").toInt();
+                                seekAt(QEvent::MouseMove,back,Qt::NoButton,Qt::LeftButton);
+                                seekAt(QEvent::MouseButtonRelease,back,Qt::LeftButton,Qt::NoButton);
+                                const auto returned=frame->property("frameNumber").toInt();
+                                row["tutorial_scrub_both_directions"]=firstFrame>57&&firstFrame<90&&farFrame>333&&farFrame<360&&
+                                    returned>150&&returned<170&&frame->property("tutorialStep").toInt()==1&&
+                                    captionIsFixed();
+                                QApplication::setActiveWindow(dialog);
+                                play->setFocus(Qt::OtherFocusReason);
+                                const auto unfocusedTrack=steps->grab().toImage();
+                                steps->setFocus(Qt::MouseFocusReason);
+                                const bool trackUnchanged=steps->hasFocus()&&steps->grab().toImage()==unfocusedTrack;
+                                nodes[1]->setFocus(Qt::MouseFocusReason);
+                                row["tutorial_mouse_focus_preserves_timeline_appearance"]=trackUnchanged&&
+                                    nodes[1]->hasFocus()&&steps->grab().toImage()==unfocusedTrack;
+                                steps->setFocus(Qt::TabFocusReason);
+                                QKeyEvent right(QEvent::KeyPress,Qt::Key_Right,Qt::NoModifier);
+                                QApplication::sendEvent(steps,&right);
+                                row["tutorial_timeline_keeps_keyboard_seek"]=steps->hasFocus()&&
+                                    frame->property("frameNumber").toInt()>returned;
+                                select(back);
+                                const auto playIcon=play->icon().cacheKey();
+                                play->click();
+                                const auto pauseIcon=play->icon().cacheKey();
+                                seekAt(QEvent::MouseButtonPress,far,Qt::LeftButton,Qt::LeftButton);
+                                seekAt(QEvent::MouseMove,back,Qt::NoButton,Qt::LeftButton);
+                                seekAt(QEvent::MouseButtonRelease,back,Qt::LeftButton,Qt::NoButton);
+                                QEventLoop progress;
+                                QTimer::singleShot(235,&progress,&QEventLoop::quit);
+                                progress.exec(QEventLoop::ExcludeUserInputEvents);
+                                row["tutorial_scrub_resumes_playback"]=frame->property("frameNumber").toInt()>returned&&
+                                    play->icon().cacheKey()==pauseIcon&&playIcon!=pauseIcon;
+                                select(track(0,.97));
+                                QEventLoop next;
+                                QTimer::singleShot(280,&next,&QEventLoop::quit);
+                                next.exec(QEventLoop::ExcludeUserInputEvents);
+                                row["tutorial_next_step_keeps_caption"]=frame->property("tutorialStep").toInt()==1&&
+                                    frame->property("frameNumber").toInt()>90&&captionIsFixed();
+                                play->click();
+                                row["tutorial_paused_keeps_caption"]=captionIsFixed();
+                            }
+                            if((language=="zh"&&!compact)||language=="ru"){
+                                const auto saveArtwork=[&](const QString& name){
+                                    const auto prefix=language=="ru"?stem:workflowOutput_+"/views/tutorial-features";
+                                    dialog->grab().save(prefix+"-"+name+".png");
+                                };
+                                if(chapter==0&&nodes.size()==3){
+                                    select(track(2,.97));
+                                    saveArtwork("crease-colour");
+                                }else if(chapter==2&&nodes.size()==5){
+                                    select(track(1,.97));
+                                    saveArtwork("compare-widen");
+                                    select(track(2,.96));
+                                    saveArtwork("compare-draft");
+                                    select(track(4,.98));
+                                    saveArtwork("compare-load");
+                                }else if(chapter==1&&nodes.size()==3){
+                                    select(track(1,.50));
+                                    saveArtwork("rebuild-transition");
+                                    select(track(2,.97));
+                                    saveArtwork("rebuild-before-after");
+                                }else if(chapter==3&&nodes.size()==9){
+                                    select(track(3,.97));
+                                    dialog->grab().save(workflowOutput_+"/views/tutorial-features-template-assembly.png");
+                                    steps->setFocus(Qt::MouseFocusReason);
+                                    const auto left=play->mapTo(dialog,QPoint{});
+                                    const auto right=steps->mapTo(dialog,QPoint(steps->width(),steps->height()));
+                                    dialog->grab(QRect(left,right)).save(workflowOutput_+"/views/tutorial-features-player-controls.png");
+                                }else if(chapter==4&&nodes.size()==3){
+                                    select(track(0,.93));
+                                    saveArtwork("reference-import");
+                                    select(track(1,.97));
+                                    saveArtwork("reference-legend");
+                                    select(track(2,.97));
+                                    saveArtwork("reference-overlay");
+                                }else if(chapter==5){
+                                    select(track(0,.83));
+                                    dialog->grab().save(workflowOutput_+"/views/tutorial-features-print-shell-separate.png");
+                                    select(track(3,.96));
+                                    dialog->grab().save(workflowOutput_+"/views/tutorial-features-print-shell.png");
+                                }
+                            }
+                            if(chapter==3&&nodes.size()==9&&(!compact||language=="en")){
+                                const QList<QPair<int,QString>> drawings={
+                                    {0,"section"},{1,"mould"},{2,"kit"},
+                                    {5,"tile-modes"},{6,"edge"},{7,"trim"}
+                                };
+                                for(const auto& [step,label]:drawings){
+                                    select(track(step,.56));
+                                    dialog->grab().save(stem+"-template-"+label+".png");
+                                }
+                            }
+                        }
+                        const bool captionAfterSeek=captionIsFixed();
+                        replay->click();
+                        QApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+                        const bool replayed=!nodes.isEmpty()&&nodes.first()->isChecked()&&
+                            frame->property("frameNumber").toInt()==0&&captionIsFixed();
+                        if(chapter==0&&!compact&&language=="zh"){
+                            QEventLoop firstMotion;
+                            QTimer::singleShot(210,&firstMotion,&QEventLoop::quit);
+                            firstMotion.exec(QEventLoop::ExcludeUserInputEvents);
+                            row["tutorial_playback_starts_without_caption_delay"]=frame->property("frameNumber").toInt()>0&&
+                                frame->grab().toImage()!=firstFrameImage.toImage()&&captionIsFixed();
+                        }
+                        play->click();
+                        chapters.append(QJsonObject{{"name",topics->tabText(chapter)},
+                            {"introduction",introduction},{"seek",sought},{"intro_above",introAbove},{"replay",replayed},
+                            {"caption_painted_from_first_frame",initialCaption!=blank},{"caption_fixed_after_seek",captionAfterSeek},
+                            {"icon",!topics->tabIcon(chapter).isNull()},{"node_count",nodes.size()}});
+                    }
+                    topics->setCurrentIndex(0);
+                    sections->setCurrentIndex(0);
+                }
+                row["feature_chapters"]=chapters;
                 for(auto* scroll:dialog->findChildren<QScrollArea*>())scroll->verticalScrollBar()->setValue(0);
             }
             surfaces.append(row);
@@ -120,17 +425,19 @@ void MainWindow::auditReadSurfaces(bool copyOnly){
     for(const auto& language:QStringList{"zh","en"}){
         setUiLanguage(language);
         if(!copyOnly){
-            QTimer::singleShot(0,this,[&]{auto* dialog=qobject_cast<QDialog*>(QApplication::activeModalWidget());if(dialog){capture(dialog,"tutorial",language);dialog->reject();}});showTutorialGuide(this);
-            QTimer::singleShot(0,this,[&]{auto* dialog=qobject_cast<QDialog*>(QApplication::activeModalWidget());if(dialog){capture(dialog,"shortcuts",language);dialog->reject();}});showShortcutGuide(this);
+            auto* tutorial=showTutorialGuide(this);
+            capture(tutorial,"tutorial",language);
+            tutorial->close();
+            QTimer::singleShot(0,this,[&]{auto* dialog=qobject_cast<QDialog*>(frontStudioDialog());if(dialog){capture(dialog,"shortcuts",language);dialog->reject();}});showShortcutGuide(this);
         }
         QTimer::singleShot(0,this,[&]{
-            auto* about=qobject_cast<QDialog*>(QApplication::activeModalWidget());if(!about)return;
+            auto* about=qobject_cast<QDialog*>(frontStudioDialog());if(!about)return;
             if(!copyOnly)capture(about,"about",language);
             for(bool version:{true,false}){
                 if(copyOnly&&version)continue;
                 auto* button=about->findChild<QPushButton*>(version?"AboutVersionToggle":"AboutCopyrightToggle");if(!button)continue;
                 QTimer::singleShot(0,this,[&,version]{
-                    auto* child=qobject_cast<QDialog*>(QApplication::activeModalWidget());if(!child)return;
+                    auto* child=qobject_cast<QDialog*>(frontStudioDialog());if(!child)return;
                     if(!copyOnly)capture(child,version?"version":"license",language);
                     if(!version){
                         for(auto* copy:child->findChildren<QToolButton*>())if(copy->property("copy_email").isValid()){
@@ -156,6 +463,13 @@ void MainWindow::auditReadSurfaces(bool copyOnly){
                 });button->click();
             }about->reject();
         });showFreeShipAbout(this);
+    }
+    if(!copyOnly){
+        setUiLanguage("zh");
+        auto* tutorial=showTutorialGuide(this);
+        setUiLanguage("ru");
+        capture(tutorial,"tutorial","ru");
+        tutorial->close();
     }
     workflowArtifacts_["read_surfaces"]=surfaces;workflowArtifacts_["email_copy"]=copies;
     setAttribute(Qt::WA_DontShowOnScreen,hidden);setUiLanguage(oldLanguage);

@@ -49,6 +49,8 @@ QJsonObject catalog(const QString& id,QString* error,const QString& directory = 
     return o;
 }
 QString lookup(const QString& source){
+    static const QString winding=QStringLiteral("截面方向不一致，请检查参与静水力计算的面朝向。");
+    if(source.startsWith(winding+QStringLiteral(" X=")))return lookup(winding)+source.mid(winding.size());
     const auto split=source.indexOf(QChar(4));
     const auto plain=split<0?source:source.mid(split+1);
     // Units are scientific notation, not translated UI vocabulary. This also

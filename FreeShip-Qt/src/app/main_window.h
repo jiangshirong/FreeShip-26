@@ -47,11 +47,12 @@ public:
     void openDocument(const QString& path);
     ~MainWindow() override;
     void openModel(const QString& path);
-    void startSession(const QString& explicitFile={});
+    void startSession(const QString& explicitFile={},const std::function<void()>& reveal={});
     void verifyDocumentWindows(const QString& request,const QString& output);
     void verifyStartup(const QString& request,const QString& output);
     void auditPrintPreview();
     void auditReadSurfaces(bool copyOnly=false);
+    void auditTutorialLanguage(const QJsonArray& settings);
     void verifyWorkflow(const QString& model, const QString& output);
     void verifyEditing(const QString& model, const QString& output);
     void verifyTopology(const QString& model, const QString& output);
@@ -140,6 +141,8 @@ private:
     void auditViewGridResize(bool frameTiming);
     void updateModel();
     void updateState();
+    QString documentDisplayPath() const;
+    void updateDocumentTitle();
     QPointer<ProjectDialog> activeProject_;
     void bindDisplayToggle(QAction* action);
     void requestDisplayChange(const QString& key, const QJsonValue& value);
@@ -173,7 +176,7 @@ private:
     void advancedStep(const QString& method);
     QSet<fs::EntityId> transformPoints()const;
     void advancedDialog(const QString& operation);
-    void buildModelingActions(QMenu* point,QMenu* edge,QMenu* face,QMenu* layer,QMenu* view,QMenu* transform,QMenu* checks);
+    void buildModelingActions(QMenu* point,QMenu* edge,QMenu* face,QMenu* layer,QMenu* view,QList<QAction*>& transforms,QMenu* checks);
     void updateModelingActions();
     void modelingAction(const QString& operation);
     void modelingDialog(const QString& operation,const QJsonObject& initial={});
@@ -242,6 +245,7 @@ private:
     QTimer* modelingDialogTimer_=nullptr;
     QString modelingPhase_;
     void editSections();
+    void openHullComparison(int preferredStation=-1,QWidget* sectionEditor=nullptr);
     void createLayer();
     void openLayers();
     void deleteLayer(fs::EntityId id);
@@ -275,9 +279,9 @@ private:
     void workflowCase(const QString& name, bool pass, const QString& message = {});
     ModelSession session_;
     std::unique_ptr<FileHistory> fileHistory_;
-    QMenu* primaryMenu_=nullptr;
+    QMenu *primaryMenu_=nullptr,*toolsMenu_=nullptr;
     QMenu* recentMenu_=nullptr;
-    QString restoringFile_;
+    QString restoringFile_,startupFile_;
     bool startupProbe_=false;
     bool startupClosing_=false;
     QJsonArray startupCommands_,startupObservations_;
@@ -304,7 +308,7 @@ private:
     QVector<fs::EntityId> selectionOrder_;
     QAction *addPoint_=nullptr,*addFace_=nullptr,*splitEdge_=nullptr,*crease_=nullptr,*smooth_=nullptr;
     QAction *delete_=nullptr,*assignLayer_=nullptr,*lock_=nullptr,*unlock_=nullptr;
-    QAction *sectionsAction_=nullptr,*layerProperties_=nullptr;
+    QAction *sectionsAction_=nullptr,*layerProperties_=nullptr,*compareModels_=nullptr;
     QDialog* layerDialog_=nullptr;
     QSet<fs::EntityId> hiddenControlLayers_;
     SectionDialog* sections_=nullptr;

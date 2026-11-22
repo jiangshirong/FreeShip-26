@@ -117,12 +117,42 @@ void ModelSnapshot::loadSurfaceDisplay(const QByteArray& data) {
         result->points.append({number(p[0],"analysis x"),number(p[1],"analysis y"),number(p[2],"analysis z")});
         result->types.append(int(integer(p[3],"analysis type",0,3)));
     }
+    if (topology.contains("creases")) {
+        QSet<EntityId> layersById;
+        for (const auto& layer : layers) layersById.insert(layer.id);
+        for (const auto& value : array(topology["creases"], "surface creases", 5000000)) {
+            const auto row = array(value, "surface crease", layers.size()+2);
+            if (row.size() < 3 || result->points.isEmpty()) invalid("incomplete surface crease");
+            SurfaceCrease crease{{int(integer(row[0], "surface crease start", 0, result->points.size()-1)),
+                                  int(integer(row[1], "surface crease end", 0, result->points.size()-1))}, {}};
+            if (crease.points[0] == crease.points[1]) invalid("repeated surface crease endpoint");
+            for (qsizetype i=2; i<row.size(); ++i) {
+                const auto id = EntityId(integer(row[i], "surface crease layer"));
+                if (!layersById.contains(id)) invalid("unknown surface crease layer");
+                crease.layers.append(id);
+            }
+            result->creases.append(std::move(crease));
+        }
+    }
+    const bool hasRegions=topology.contains("regions");
+    const auto regions=hasRegions?array(topology["regions"],"analysis regions",5000000):QJsonArray{};
+    QHash<EntityId,int> fallbackRegions;
     qsizetype triangle=0,corners=0;
     for(const auto& value:array(topology["faces"],"analysis faces",5000000)){
         const auto polygon=array(value,"analysis polygon",1000000);if(polygon.size()<3)invalid("analysis polygon has fewer than three points");
         corners+=polygon.size();if(corners>15000000||result->points.isEmpty())invalid("analysis topology exceeds limits");
         QVector<int> face;QSet<int> unique;
         for(const auto& index:polygon){int p=int(integer(index,"analysis index",0,result->points.size()-1));if(unique.contains(p))invalid("repeated analysis polygon point");unique.insert(p);face.append(p);}
+        if(triangle>=triangles.size())invalid("extra analysis faces");
+        if(hasRegions) {
+            const auto faceIndex=result->faces.size();
+            if(faceIndex>=regions.size())invalid("missing analysis region");
+            result->plateRegions.append(int(integer(regions[faceIndex],"analysis region",0,4999999)));
+        } else {
+            const auto layer=triangles[triangle].layer;
+            if(!fallbackRegions.contains(layer))fallbackRegions.insert(layer,fallbackRegions.size());
+            result->plateRegions.append(fallbackRegions.value(layer));
+        }
         for(int k=2;k<face.size();++k){
             if(triangle>=triangles.size())invalid("extra analysis triangles");
             const int indices[]{face[0],face[k-1],face[k]};
@@ -133,6 +163,7 @@ void ModelSnapshot::loadSurfaceDisplay(const QByteArray& data) {
         result->faces.append(std::move(face));
     }
     if(triangle!=triangles.size())invalid("missing analysis triangles");
+    if(hasRegions&&regions.size()!=result->faces.size())invalid("extra analysis regions");
     surfaceTopology=std::move(result);
 }
 

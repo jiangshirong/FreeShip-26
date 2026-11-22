@@ -3,15 +3,22 @@
 #pragma once
 #include "fbm_codec.h"
 #include <memory>
+#include <array>
 #include <optional>
 #include <functional>
 namespace fs::document {
 // Owns a subdivision mesh and its section index for one immutable FBM revision.
 // A calculation cannot edit the document, history, cached drawing or FBM bytes.
+struct ComparisonConditions {
+    double draftM=0,trimM=0,densityKgM3=1025,massKg=0;
+    std::array<double,3> gravityM{};
+    bool equilibrium=false;
+};
 class Hydrostatics {
 public:
     explicit Hydrostatics(const Fbm &source,const QJsonObject &bindings={});
     ~Hydrostatics();
+    static QJsonObject comparison(const Fbm&,const ComparisonConditions&,const QString& cancelFile);
     QJsonObject calculate(const QJsonObject &request, const QString &cancelFile,
                           const std::function<void(int,int)> &progress={});
     QJsonObject defaults(const QString &encoding);

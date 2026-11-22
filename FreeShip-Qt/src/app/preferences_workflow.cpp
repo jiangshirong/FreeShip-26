@@ -305,7 +305,7 @@ void MainWindow::preferencesStep(const QString& operation){
                 if(!guide)throw std::runtime_error("Shortcut guide action unavailable");
                 const auto before=uiLanguage();
                 QTimer::singleShot(0,this,[this,before]{
-                    auto* dialog=QApplication::activeModalWidget();
+                    auto* dialog=frontStudioDialog();
                     if(!dialog||dialog->objectName()!="ShortcutGuide")return;
                     QApplication::setActiveWindow(dialog);
                     QKeyEvent press(QEvent::KeyPress,Qt::Key_L,Qt::ControlModifier|Qt::ShiftModifier,"l");
@@ -313,7 +313,7 @@ void MainWindow::preferencesStep(const QString& operation){
                     if(dialog->isVisible())dialog->close();
                     if(uiLanguage()==before)return;
                     QTimer::singleShot(0,this,[this]{
-                        auto* translated=QApplication::activeModalWidget();
+                        auto* translated=frontStudioDialog();
                         auto* table=translated?translated->findChild<QTableWidget*>("ShortcutGuideTable"):nullptr;
                         workflowCase("language.guide-reopened-with-translated-table",table&&
                             table->horizontalHeader()->isHidden()&&table->item(0,0)&&

@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 #include "model_exchange.h"
 #include "curve_import.h"
+#include "obj_fit.h"
 #include "document/fbm_text.h"
 #include <QFile>
 #include <QFileInfo>
@@ -56,7 +57,7 @@ void edges(Document& d,bool crease){
 }
 // Ear clipping preserves a planar concave polygon. Self intersections and
 // zero-area ears are rejected; no convex fan that fills an absent region.
-QVector<QVector<EntityId>> triangulate(const QVector<EntityId>& ids,const ModelSnapshot& m){
+QVector<QVector<EntityId>> triangulate(const QVector<EntityId>& ids,const ModelSnapshot& m,bool fitQuad=false){
     if(ids.size()<3||ids.size()>maxCorners)bad("面的顶点数须为 3–4096。");
     QSet<EntityId> seen;Vec3 normal{};
     for(int i=0;i<ids.size();++i){auto id=ids[i];if(id<1||id>EntityId(m.points.size())||seen.contains(id))bad("面含重复或越界的顶点。");seen.insert(id);}
@@ -65,7 +66,8 @@ QVector<QVector<EntityId>> triangulate(const QVector<EntityId>& ids,const ModelS
     if(dot(normal,normal)==0)bad("面退化或自相交。");
     normal=unit(normal);
     for(auto id:ids){auto v=sub(m.points[id-1].position,origin);scale=std::max(scale,std::sqrt(dot(v,v)));}
-    for(auto id:ids)if(std::abs(dot(sub(m.points[id-1].position,origin),normal))>scale*2e-6)bad("多边形不共面；请先在来源软件中三角化。");
+    if(!fitQuad||ids.size()!=4)
+        for(auto id:ids)if(std::abs(dot(sub(m.points[id-1].position,origin),normal))>scale*2e-6)bad("多边形不共面；请先在来源软件中三角化。");
     int drop=std::abs(normal.x)>std::abs(normal.y)?0:1;if(std::abs(normal.z)>(drop==0?std::abs(normal.x):std::abs(normal.y)))drop=2;
     QVector<std::array<double,2>> p;for(auto id:ids){auto v=sub(m.points[id-1].position,origin);p.append(drop==0?std::array<double,2>{v.y,v.z}:drop==1?std::array<double,2>{v.z,v.x}:std::array<double,2>{v.x,v.y});}
     auto area=[&](int a,int b,int c){return (p[b][0]-p[a][0])*(p[c][1]-p[a][1])-(p[b][1]-p[a][1])*(p[c][0]-p[a][0]);};
@@ -93,31 +95,176 @@ void finishMesh(Document& d,const Options& o){
     d.validate();auto lo=m.points[0].position,hi=lo;for(const auto& p:m.points){lo.x=std::min(lo.x,p.position.x);lo.y=std::min(lo.y,p.position.y);lo.z=std::min(lo.z,p.position.z);hi.x=std::max(hi.x,p.position.x);hi.y=std::max(hi.y,p.position.y);hi.z=std::max(hi.z,p.position.z);}
     m.length=hi.x-lo.x;m.beam=o.symmetric?2*std::max(std::abs(lo.y),std::abs(hi.y)):hi.y-lo.y;m.draft=0;
 }
-Document obj(const QByteArray& bytes,const Options& o){
-    Document d;auto& m=d.model;QString group="OBJ",object;QHash<QString,EntityId> groups;int normals=0,uvs=0;bool appearance=false;QSet<QVector<EntityId>> polygons;
+struct ObjEdgeAppearance {
+    int face=-1, normalA=-1, normalB=-1;
+};
+struct ObjFaceAppearance {
+    QString smoothing;
+    Vec3 normal{};
+};
+
+void assignObjCreases(ModelSnapshot& m, const QHash<quint64,std::array<ObjEdgeAppearance,2>>& uses,
+                      const QVector<ObjFaceAppearance>& faces, const QVector<Vec3>& normals,
+                      const QSet<quint64>& specified, bool explicitCreases, const Options& options) {
+    QVector<QVector<EntityId>> creaseNeighbours(m.points.size());
+    int tagged=0;
+    const auto splitNormal=[&](int a,int b) {
+        return a>=0 && b>=0 && dot(normals[a],normals[a])>0 && dot(normals[b],normals[b])>0 &&
+               dot(normals[a],normals[b])<.99985; // tolerate rounded OBJ normals
+    };
+    for(auto& edge:m.edges) {
+        const auto key=edgeKey(edge.a,edge.b);
+        const auto pair=uses.value(key);
+        edge.crease=pair[1].face<0 || specified.contains(key);
+        if(specified.contains(key))++tagged;
+        if(!edge.crease && !explicitCreases && options.inferObjCreases) {
+            const auto& a=faces[pair[0].face];
+            const auto& b=faces[pair[1].face];
+            // Flat/flat shading on its own cannot identify an authored crease.
+            const bool bothFlat=a.smoothing=="0" && b.smoothing=="0";
+            edge.crease=(!a.smoothing.isEmpty() && !b.smoothing.isEmpty() && a.smoothing!=b.smoothing) ||
+                        (!bothFlat && (splitNormal(pair[0].normalA,pair[1].normalA) ||
+                                       splitNormal(pair[0].normalB,pair[1].normalB))) ||
+                        (options.reconstructObj && dot(a.normal,b.normal)<.5);
+        }
+        if(edge.crease) {
+            creaseNeighbours[edge.a-1].append(edge.b);
+            creaseNeighbours[edge.b-1].append(edge.a);
+        }
+    }
+    if(tagged!=specified.size())bad("明确指定的 OBJ 折痕必须是一个面的边。");
+    for(qsizetype i=0;i<m.points.size();++i) {
+        const auto& adjacent=creaseNeighbours[i];
+        const qsizetype count=adjacent.size();
+        int type=count==0?0:count==1?2:count==2?1:3;
+        if(options.reconstructObj && count==2) {
+            const auto p=m.points[i].position;
+            const auto a=unit(sub(m.points[adjacent[0]-1].position,p));
+            const auto b=unit(sub(m.points[adjacent[1]-1].position,p));
+            if(dot(a,b)>-.7071067811865476)type=3;
+        }
+        m.points[i].vertexType=type;
+    }
+}
+
+Document obj(const QByteArray& bytes,const Options& options,const std::atomic_bool* cancel=nullptr,
+             bool objFeatures=true){
+    Options o=options;
+    o.controlNet|=o.reconstructObj;
+    const bool readCreases=o.controlNet&&objFeatures;
+    Document d;
+    auto& m=d.model;
+    QString group="OBJ",object,smoothing;
+    QHash<QString,EntityId> groups;
+    QVector<Vec3> normals;
+    QVector<ObjFaceAppearance> faceAppearance;
+    QHash<quint64,std::array<ObjEdgeAppearance,2>> edgeAppearance;
+    QVector<std::array<int,3>> creaseRecords;
+    bool explicitCreases=false, appearance=false, unusedSmoothing=false;
+    int uvs=0;
+    QSet<QVector<EntityId>> polygons;
     const auto lines=decodeExchangeText(bytes).split('\n');
-    for(int row=0;row<lines.size();++row){QString line=lines[row].section('#',0,0).trimmed();if(line.isEmpty())continue;auto w=words(line);QString k=w.takeFirst();
+    for(int row=0;row<lines.size();++row){
+        if(cancel && row%1024==0 && cancel->load(std::memory_order_relaxed))bad("已取消船型重建。");
+        const auto text=lines[row].trimmed();
         try{
+            if(readCreases && text.startsWith("# FreeShip26 crease")){
+                const auto fields=words(text);
+                if(fields.size()>=3 && fields[2]=="creases"){
+                    sizeIs(fields,4);
+                    if(fields[3]!="1")bad("不支持此 OBJ 折痕声明的版本。");
+                    explicitCreases=true;
+                }else if(fields.size()>=3 && fields[2]=="crease"){
+                    sizeIs(fields,5);
+                    creaseRecords.append({integer(fields[3],1,maxPoints),integer(fields[4],1,maxPoints),row+1});
+                    explicitCreases=true;
+                }
+            }
+            const auto line=text.section('#',0,0).trimmed();
+            if(line.isEmpty())continue;
+            auto w=words(line);
+            const auto k=w.takeFirst();
             if(k=="v"){if(w.size()!=3&&w.size()!=4)bad("顶点须有三个坐标及可选齐次分量。");double div=w.size()==4?number(w[3]):1;if(div==0)bad("齐次分量不能为零。");addPoint(d,imported({number(w[0])/div,number(w[1])/div,number(w[2])/div},o),o.controlNet?0:3);}
-            else if(k=="vn"){sizeIs(w,3);for(const auto& n:w)number(n);++normals;}
+            else if(k=="vn"){sizeIs(w,3);normals.append(unit({number(w[0]),number(w[1]),number(w[2])}));}
             else if(k=="vt"){if(w.isEmpty()||w.size()>3)bad("纹理坐标字段数不正确。");for(const auto& n:w)number(n);++uvs;appearance=true;}
             else if(k=="g")group=w.join(' ');
             else if(k=="o")object=w.join(' ');
-            else if(k=="usemtl"||k=="mtllib"||k=="s")appearance=true;
+            else if(k=="usemtl"||k=="mtllib")appearance=true;
+            else if(k=="s"){
+                unusedSmoothing|=!readCreases || !o.inferObjCreases;
+                smoothing=w.join(' ').toLower();
+                if(smoothing=="off")smoothing="0";
+                if(smoothing=="on")smoothing="1";
+            }
             else if(k=="f"){
                 if(w.size()<3||w.size()>maxCorners)bad("面的顶点数须为 3–4096。");
                 QVector<EntityId> ids;
-                for(const auto& v:w){auto f=v.split('/');if(f.isEmpty()||f.size()>3)bad("无效的面索引。");int counts[]={int(m.points.size()),uvs,normals};
-                    for(int i=0;i<f.size();++i){if(i>0&&f[i].isEmpty())continue;int n=integer(f[i],-counts[i],counts[i]);if(n==0)bad("OBJ 索引不能为零。");if(i==0)ids.append(n<0?counts[i]+n+1:n);}}
+                QVector<int> cornerNormals;
+                for(const auto& v:w){
+                    const auto f=v.split('/');
+                    if(f.isEmpty()||f.size()>3)bad("无效的面索引。");
+                    const int counts[]={int(m.points.size()),uvs,int(normals.size())};
+                    int normal=-1;
+                    for(int i=0;i<f.size();++i){
+                        if(i>0&&f[i].isEmpty())continue;
+                        const int n=integer(f[i],-counts[i],counts[i]);
+                        if(n==0)bad("OBJ 索引不能为零。");
+                        const int resolved=n<0?counts[i]+n+1:n;
+                        if(i==0)ids.append(resolved);
+                        if(i==2)normal=resolved-1;
+                    }
+                    if(readCreases)cornerNormals.append(normal);
+                }
                 QString name=object.isEmpty()?group:(group.isEmpty()||group=="OBJ"?object:object+" / "+group);if(name.isEmpty())name="OBJ";
                 auto sorted=ids;std::sort(sorted.begin(),sorted.end());if(polygons.contains(sorted))bad("存在重复的面。");polygons.insert(sorted);
                 if(!groups.contains(name)){if(m.layers.size()>=1000)bad("图层过多。");groups[name]=m.layers.size()+1;m.layers.append(layer(name,groups[name],o.symmetric));}
+                if(readCreases){
+                    const int face=faceAppearance.size();
+                    Vec3 normal{};
+                    const auto origin=m.points[ids[0]-1].position;
+                    for(qsizetype i=1;i+1<ids.size();++i){
+                        const auto n=cross(sub(m.points[ids[i]-1].position,origin),sub(m.points[ids[i+1]-1].position,origin));
+                        normal.x+=n.x;normal.y+=n.y;normal.z+=n.z;
+                    }
+                    faceAppearance.append({smoothing,unit(normal)});
+                    for(qsizetype i=0;i<ids.size();++i){
+                        const auto j=(i+1)%ids.size();
+                        auto& pair=edgeAppearance[edgeKey(ids[i],ids[j])];
+                        if(pair[1].face>=0)bad("同一条边连接了两个以上的面，请先修复非流形网格。");
+                        auto& side=pair[pair[0].face<0?0:1];
+                        side={face,cornerNormals[i],cornerNormals[j]};
+                        if(ids[i]>ids[j])std::swap(side.normalA,side.normalB);
+                    }
+                }
                 if(o.controlNet)addFace(d,ids,groups[name]);else for(auto tri:triangulate(ids,m))addFace(d,tri,groups[name]);
             }else bad("暂不支持 OBJ 记录："+k+"。请导出多边形网格。");
         }catch(const std::exception& e){bad(QString("OBJ 第 %1 行：%2").arg(row+1).arg(QString::fromUtf8(e.what())));}
     }
-    if(appearance)d.notes<<"未导入文件中的材质、纹理或平滑组。";
-    finishMesh(d,o);return d;
+    if(appearance)d.notes<<"未导入 OBJ 材质或纹理。";
+    if(unusedSmoothing)d.notes<<"未使用 OBJ 平滑组。";
+    finishMesh(d,o);
+    if(readCreases && (o.reconstructObj || explicitCreases ||
+                       (o.inferObjCreases && (!normals.isEmpty() || std::any_of(faceAppearance.begin(),faceAppearance.end(),
+                           [](const auto& f){return !f.smoothing.isEmpty();}))))){
+        QSet<quint64> specified;
+        for(const auto& record:creaseRecords){
+            if(record[0]>m.points.size()||record[1]>m.points.size()||record[0]==record[1])
+                bad(QString("OBJ 第 %1 行：指定折痕的顶点索引无效。").arg(record[2]));
+            specified.insert(edgeKey(record[0],record[1]));
+        }
+        assignObjCreases(m,edgeAppearance,faceAppearance,normals,specified,explicitCreases,o);
+    }
+    if(o.reconstructObj){
+        std::vector<ObjTriangle> triangles;
+        for(qsizetype i=0;i<m.faces.size();++i){
+            if(cancel && i%1024==0 && cancel->load(std::memory_order_relaxed))bad("已取消船型重建。");
+            for(const auto& row:triangulate(m.faces[i].points,m,true))
+                triangles.push_back({{size_t(row[0]-1),size_t(row[1]-1),size_t(row[2]-1)},size_t(i)});
+        }
+        reconstructObj(d,triangles,o,cancel);
+        d.validate();
+    }
+    return d;
 }
 float littleFloat(const char* p){quint32 bits=qFromLittleEndian<quint32>(p);float n;std::memcpy(&n,&bits,4);if(!std::isfinite(n))bad("STL 含非有限数值。");return n;}
 Document stl(const QByteArray& bytes,const Options& o){
@@ -301,9 +448,9 @@ QJsonObject Document::bridgeData()const{
     if(!stations.isEmpty()){QJsonArray positions;for(double v:stations)positions.append(v);result["stations"]=positions;}
     return result;
 }
-Document read(const QString& path,const QString& format,const Options& options){
+Document read(const QString& path,const QString& format,const Options& options,const std::atomic_bool* cancel){
     QFile file(path);if(!file.open(QIODevice::ReadOnly)||file.size()<1||file.size()>maxBytes)bad("无法读取文件，或文件大于 128 MiB。");auto bytes=file.readAll();if(file.error()!=QFile::NoError)bad("文件读取不完整。");
-    Document d;if(format=="obj")d=obj(bytes,options);else if(format=="stl")d=stl(bytes,options);else if(format=="fef")d=fef(bytes);else if(format=="polycad")d=polycad(bytes,options);else if(format=="part")d=part(bytes,options);else if(format=="vrml")d=vrml(bytes,options);else if(format=="waves")d=waves(bytes);
+    Document d;if(format=="obj")d=obj(bytes,options,cancel);else if(format=="stl")d=stl(bytes,options);else if(format=="fef")d=fef(bytes);else if(format=="polycad")d=polycad(bytes,options);else if(format=="part")d=part(bytes,options);else if(format=="vrml")d=vrml(bytes,options);else if(format=="waves")d=waves(bytes);
     else if(format=="chines"||format=="carene"||format=="hull"||format=="surface")d=readCurveFile(bytes,format,options);else bad("不支持的导入格式。");return d;
 }
 
@@ -332,8 +479,45 @@ void write(const QString& path,const QString& format,const ModelSnapshot& m,cons
             auto group=[&](EntityId l){if(lastLayer==l)return;lastLayer=l;QString name=ls[l]->name;name.replace('\n',' ');name.replace('\r',' ');name.replace('#','_');s<<"g "<<name<<'\n';};
             auto vertex=[&](Vec3 v){s<<"v "<<num(v.x)<<' '<<num(v.y)<<' '<<num(v.z)<<'\n';return next++;};
             auto meshVertex=[&](EntityId l,Vec3 p){auto key=std::make_tuple(l,p.x,p.y,p.z);auto it=meshIds.find(key);if(it!=meshIds.end())return it->second;return meshIds[key]=vertex(p);};
-            if(o.controlNet){for(const auto& f:m.faces)if(selected(f.layer)){group(f.layer);bool off=false;for(auto id:f.points)off|=points[id].y!=0;
-                for(int side=0;side<(o.fullHull&&ls[f.layer]->symmetric&&off?2:1);++side){QVector<quint64> indices;auto ids=f.points;if(side)std::reverse(ids.begin(),ids.end());for(auto id:ids){auto p=points[id];bool reflected=side&&p.y!=0;auto key=std::make_tuple(EntityId(0),id,reflected);auto it=controlIds.find(key);quint64 idx;if(it!=controlIds.end())idx=it->second;else{if(reflected)p.y=-p.y;idx=controlIds[key]=vertex(transform(p));}indices.append(idx);}s<<'f';for(auto id:indices)s<<' '<<id;s<<'\n';++faceCount;}}}
+            if(o.controlNet){
+                s<<"# FreeShip26 creases 1\n";
+                QSet<quint64> exportedEdges;
+                for(const auto& f:m.faces)if(selected(f.layer)){
+                    group(f.layer);
+                    const auto off=std::any_of(f.points.begin(),f.points.end(),[&](EntityId id){return points[id].y!=0;});
+                    for(int side=0;side<(o.fullHull&&ls[f.layer]->symmetric&&off?2:1);++side){
+                        QVector<quint64> indices;
+                        auto ids=f.points;
+                        if(side)std::reverse(ids.begin(),ids.end());
+                        for(auto id:ids){
+                            auto p=points[id];
+                            const bool reflected=side&&p.y!=0;
+                            const auto key=std::make_tuple(EntityId(0),id,reflected);
+                            auto found=controlIds.find(key);
+                            if(found==controlIds.end()){
+                                if(reflected)p.y=-p.y;
+                                found=controlIds.emplace(key,vertex(transform(p))).first;
+                            }
+                            indices.append(found->second);
+                        }
+                        s<<'f';
+                        for(qsizetype i=0;i<indices.size();++i){
+                            s<<' '<<indices[i];
+                            exportedEdges.insert(edgeKey(indices[i],indices[(i+1)%indices.size()]));
+                        }
+                        s<<'\n';
+                        ++faceCount;
+                    }
+                }
+                for(const auto& edge:m.edges)if(edge.crease){
+                    for(bool mirror:{false,true}){
+                        const auto a=controlIds.find({0,edge.a,mirror&&points[edge.a].y!=0});
+                        const auto b=controlIds.find({0,edge.b,mirror&&points[edge.b].y!=0});
+                        if(a!=controlIds.end()&&b!=controlIds.end()&&exportedEdges.remove(edgeKey(a->second,b->second)))
+                            s<<"# FreeShip26 crease "<<a->second<<' '<<b->second<<'\n';
+                    }
+                }
+            }
             else emitTriangles([&](EntityId l,Vec3 a,Vec3 b,Vec3 c){group(l);auto ia=meshVertex(l,a),ib=meshVertex(l,b),ic=meshVertex(l,c);s<<"f "<<ia<<' '<<ib<<' '<<ic<<'\n';++faceCount;});
             if(!faceCount)bad("所选范围没有可导出的面。");
         }else{

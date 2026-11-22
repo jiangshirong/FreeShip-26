@@ -1,4 +1,5 @@
 // Retained hidden production-action regression. No desktop automation.
+#include "studio_ui.h"
 #include "main_window.h"
 #include <QAction>
 #include <QApplication>
@@ -27,7 +28,7 @@ void MainWindow::advancedStep(const QString&){
             }
             bool handled=false;QString error;QTimer timer;timer.setSingleShot(true);
             connect(&timer,&QTimer::timeout,this,[&]{
-                auto* dialog=qobject_cast<QDialog*>(QApplication::activeModalWidget());
+                auto* dialog=qobject_cast<QDialog*>(frontStudioDialog());
                 if(!dialog||!dialog->testAttribute(Qt::WA_DontShowOnScreen)){error="Missing private production dialog";if(dialog)dialog->reject();return;}
                 QSet<QString> used;QJsonArray fields;
                 for(auto* control:dialog->findChildren<QObject*>()){

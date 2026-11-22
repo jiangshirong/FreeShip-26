@@ -22,6 +22,7 @@ public:
     std::function<bool(const QString&,int,QJsonObject)> onEdit;
     std::function<void(int,QSet<int>)> onSelection;
     std::function<void(QSet<int>)> onTemplates;
+    std::function<void(int)> onComparison;
 private:
     void refreshHeaders();void refill();void add(bool range);void clearCurrent();
     void selectionChanged();void updateActions();
@@ -35,7 +36,7 @@ private:
     int renderedKind_=0,pending_=0;
     QTabWidget* tabs_;QTableWidget* table_;StudioMessage* error_;
     QAction *addOne_,*addRange_,*clear_;
-    QPushButton* templates_;
+    QPushButton *templates_, *comparison_;
     bool filling_=false,enabled_=false;
     std::shared_ptr<const fs::ModelSnapshot> model_;
 };

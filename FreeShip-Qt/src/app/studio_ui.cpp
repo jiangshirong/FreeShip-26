@@ -19,11 +19,13 @@
 #include <QApplication>
 #include <QCoreApplication>
 #include <QComboBox>
+#include <QCloseEvent>
 #include <QDir>
 #include <QDateTime>
 #include <QDialog>
 #include <QFileDialog>
 #include <QEvent>
+#include <QEventLoop>
 #include <QFile>
 #include <QHash>
 #include <QIconEngine>
@@ -61,6 +63,73 @@
 #include <functional>
 
 namespace {
+quint64 dialogShowOrder=0;
+constexpr auto waitingDialogCount="studio_waiting_dialogs";
+constexpr auto deferredDialogDelete="studio_deferred_dialog_delete";
+constexpr auto nativeFileDialog="studio_native_file_dialog";
+
+// Small input forms still return a result to their caller. Closing an owner
+// first ends that form and unwinds its caller before the owner can be deleted.
+class DialogWait final : public QObject {
+public:
+    explicit DialogWait(QDialog& dialog):dialog_(dialog){
+        dialog_.installEventFilter(this);
+        for(auto* owner=dialog.parentWidget();owner;owner=owner->parentWidget()){
+            owners_.append(owner);
+            owner->setProperty(waitingDialogCount,owner->property(waitingDialogCount).toInt()+1);
+            owner->installEventFilter(this);
+            if(auto* parentDialog=qobject_cast<QDialog*>(owner)){
+                if(parentDialog->testAttribute(Qt::WA_DeleteOnClose)){
+                    parentDialog->setProperty(deferredDialogDelete,true);
+                    parentDialog->setAttribute(Qt::WA_DeleteOnClose,false);
+                }
+                connect(parentDialog,&QDialog::finished,this,[this,parentDialog]{
+                    if(parentDialog->property(deferredDialogDelete).toBool())parentDialog->setProperty("studio_waited_close",true);
+                    dialog_.hide();
+                });
+            }
+        }
+        connect(&dialog_,&QDialog::finished,this,[this](int result){result_=result;finished_=true;loop_.quit();});
+    }
+    ~DialogWait() override {
+        dialog_.removeEventFilter(this);
+        for(const auto& owner:owners_)if(owner){
+            owner->removeEventFilter(this);
+            const int remaining=owner->property(waitingDialogCount).toInt()-1;
+            owner->setProperty(waitingDialogCount,remaining);
+            if(remaining==0&&owner->property(deferredDialogDelete).toBool()){
+                owner->setProperty(deferredDialogDelete,false);
+                owner->setAttribute(Qt::WA_DeleteOnClose,true);
+                if(owner->property("studio_waited_close").toBool())owner->deleteLater();
+            }
+        }
+        if(closingOwner_)QMetaObject::invokeMethod(closingOwner_,"close",Qt::QueuedConnection);
+    }
+    int run(){
+        showStudioDialog(dialog_);
+        if(!finished_&&dialog_.isVisible())loop_.exec(QEventLoop::DialogExec);
+        return result_;
+    }
+private:
+    bool eventFilter(QObject* watched,QEvent* event) override {
+        if(watched==&dialog_){
+            if(event->type()==QEvent::Hide)loop_.quit();
+        }else if(event->type()==QEvent::Close){
+            closingOwner_=qobject_cast<QWidget*>(watched);
+            static_cast<QCloseEvent*>(event)->ignore();
+            dialog_.hide();
+            return true;
+        }
+        return false;
+    }
+    QDialog& dialog_;
+    QList<QPointer<QWidget>> owners_;
+    QPointer<QWidget> closingOwner_;
+    QEventLoop loop_;
+    int result_=QDialog::Rejected;
+    bool finished_=false;
+};
+
 constexpr int MenuTextInset = 35;
 constexpr int MenuStatusGutter = 29;
 constexpr int MenuRowHeight = 32;
@@ -370,14 +439,19 @@ void centerStudioMessage(QMessageBox* message){
     frame.moveCenter(available.center());message->move(frame.topLeft());
 }
 void prepareStudioWindow(QWidget* widget){
-    if(!studioWindow(widget)||widget->property("studio_window_prepared").toBool())return;
+    if(!studioWindow(widget)||widget->property(nativeFileDialog).toBool()
+        ||widget->property("studio_window_prepared").toBool())return;
     widget->setProperty("studio_window_prepared",true);
+    if(qobject_cast<QDialog*>(widget))widget->setWindowModality(Qt::NonModal);
     auto flags=widget->windowFlags();flags|=Qt::CustomizeWindowHint|Qt::WindowTitleHint|Qt::WindowSystemMenuHint|Qt::WindowCloseButtonHint;
     flags&=~(Qt::MSWindowsFixedSizeDialogHint|Qt::WindowContextHelpButtonHint);
     // The custom main caption paints its own controls, but Windows must know
     // minimize/maximize are supported BEFORE the initial show/maximize call.
     if(widget->property("studio_caption_minimize").toBool())flags|=Qt::WindowMinMaxButtonsHint;
-    else flags&=~Qt::WindowMinMaxButtonsHint;
+    else {
+        flags&=~Qt::WindowMinMaxButtonsHint;
+        if(widget->property("studio_caption_maximize").toBool())flags|=Qt::WindowMaximizeButtonHint;
+    }
 #ifdef Q_OS_LINUX
     // X11 treats explicit title/system menu hints as decoration requests.
     if(widget->property("studio_caption_minimize").toBool())flags=(flags & Qt::WindowType_Mask) | Qt::FramelessWindowHint;
@@ -508,6 +582,13 @@ public:
             return true;
         }
         if(event->type()==QEvent::Show)if(auto* window=qobject_cast<QWidget*>(watched);studioWindow(window)){
+            if(window->property(nativeFileDialog).toBool())return QProxyStyle::eventFilter(watched,event);
+            if(qobject_cast<QDialog*>(window)){
+                // Qt's widget file chooser also creates its own warning boxes.
+                // The Show event arrives before their native window is shown.
+                if(window->isModal())window->setWindowModality(Qt::NonModal);
+                window->setProperty("studio_dialog_show_order",++dialogShowOrder);
+            }
             configureStudioNumericForms(window);
             studio_motion::dismissMenuPresentations();
             relaxWindowLimits(window);
@@ -747,11 +828,93 @@ void applyStudioTheme() {
         "QTabBar[studio_tab_motion=true]::tab:selected {border-bottom-color:transparent;}"
         "QTabBar::tab:disabled {color:#929b96;}"));
 }
+void showStudioDialog(QDialog& dialog){
+    bool nativeFile=false;
+    if(auto* file=qobject_cast<QFileDialog*>(&dialog)){
+#ifdef Q_OS_WIN
+        // The Windows Shell picker requires a modal owner.
+        nativeFile=QGuiApplication::platformName()=="windows"
+            && !QCoreApplication::testAttribute(Qt::AA_DontUseNativeDialogs)
+            && !file->testAttribute(Qt::WA_DontShowOnScreen)
+            && !file->testOption(QFileDialog::DontUseNativeDialog);
+#endif
+        if(!nativeFile)file->setOption(QFileDialog::DontUseNativeDialog);
+        file->setProperty(nativeFileDialog,nativeFile);
+    }
+    dialog.setWindowModality(nativeFile?Qt::WindowModal:Qt::NonModal);
+    if(auto* color=qobject_cast<QColorDialog*>(&dialog))color->setOption(QColorDialog::DontUseNativeDialog);
+    if(auto* message=qobject_cast<QMessageBox*>(&dialog))message->setOption(QMessageBox::Option::DontUseNativeDialog);
+    dialog.setProperty("studio_dialog_show_order",++dialogShowOrder);
+    dialog.show();
+}
+int runStudioDialog(QDialog& dialog){
+    for(auto* widget:QApplication::topLevelWidgets())if(auto* other=qobject_cast<QDialog*>(widget);
+        other&&other!=&dialog&&other->isVisible()&&other->parentWidget()==dialog.parentWidget()&&
+        other->property("studio_dialog_waiting").toBool()&&other->windowTitle()==dialog.windowTitle()&&
+        other->objectName()==dialog.objectName()&&other->metaObject()==dialog.metaObject()){
+        other->raise();other->activateWindow();return QDialog::Rejected;
+    }
+    dialog.setProperty("studio_dialog_waiting",true);
+    auto* file=qobject_cast<QFileDialog*>(&dialog);
+    const bool confirmOverwrite=file&&file->acceptMode()==QFileDialog::AcceptSave&&!file->testOption(QFileDialog::DontConfirmOverwrite);
+    if(confirmOverwrite)file->setOption(QFileDialog::DontConfirmOverwrite);
+    const auto result=DialogWait(dialog).run();
+    dialog.setProperty("studio_dialog_waiting",false);
+    if(confirmOverwrite){
+        file->setOption(QFileDialog::DontConfirmOverwrite,false);
+        const auto path=file->selectedFiles().value(0);
+        if(result==QDialog::Accepted&&QFileInfo::exists(path)&&
+           !confirmStudioAction(dialog.parentWidget(),uiText("替换文件"),uiText("文件已存在，是否替换？\n")+path))
+            return QDialog::Rejected;
+    }
+    return result;
+}
+bool hasPendingStudioDialog(const QWidget* owner){return owner&&owner->property(waitingDialogCount).toInt()>0;}
+QDialog* frontStudioDialog(){
+    QDialog* front=nullptr;
+    quint64 order=0;
+    for(auto* widget:QApplication::topLevelWidgets())if(auto* dialog=qobject_cast<QDialog*>(widget);dialog&&dialog->isVisible()){
+        const auto shown=dialog->property("studio_dialog_show_order").toULongLong();
+        if(!front||shown>order){front=dialog;order=shown;}
+    }
+    return front;
+}
+namespace {
+QStringList studioFileSelection(QWidget* parent,const QString& title,const QString& path,const QString& filter,
+                               QFileDialog::AcceptMode accept,QFileDialog::FileMode mode){
+    QFileDialog picker(parent,title,{},filter);
+    picker.setAcceptMode(accept);picker.setFileMode(mode);
+    picker.setOption(QFileDialog::ShowDirsOnly,mode==QFileDialog::Directory);
+    const QFileInfo initial(path);
+    if(initial.isDir())picker.setDirectory(initial.absoluteFilePath());
+    else if(!path.isEmpty()){
+        picker.setDirectory(initial.absolutePath());picker.selectFile(initial.fileName());
+    }
+    return runStudioDialog(picker)==QDialog::Accepted?picker.selectedFiles():QStringList{};
+}
+}
+QString studioOpenFile(QWidget* parent,const QString& title,const QString& path,const QString& filter){
+    return studioFileSelection(parent,title,path,filter,QFileDialog::AcceptOpen,QFileDialog::ExistingFile).value(0);
+}
+QStringList studioOpenFiles(QWidget* parent,const QString& title,const QString& path,const QString& filter){
+    return studioFileSelection(parent,title,path,filter,QFileDialog::AcceptOpen,QFileDialog::ExistingFiles);
+}
+QString studioSaveFile(QWidget* parent,const QString& title,const QString& path,const QString& filter){
+    return studioFileSelection(parent,title,path,filter,QFileDialog::AcceptSave,QFileDialog::AnyFile).value(0);
+}
+QString studioChooseDirectory(QWidget* parent,const QString& title,const QString& path){
+    return studioFileSelection(parent,title,path,{},QFileDialog::AcceptOpen,QFileDialog::Directory).value(0);
+}
+QColor studioChooseColor(const QColor& initial,QWidget* parent,const QString& title,QColorDialog::ColorDialogOptions options){
+    QColorDialog dialog(initial,parent);
+    dialog.setWindowTitle(title);dialog.setOptions(options|QColorDialog::DontUseNativeDialog);
+    return runStudioDialog(dialog)==QDialog::Accepted?dialog.selectedColor():QColor{};
+}
 bool confirmStudioAction(QWidget* parent,const QString& title,const QString& question){
     QMessageBox dialog(QMessageBox::Question,title,question,QMessageBox::Yes|QMessageBox::No,parent);
     dialog.setAttribute(Qt::WA_DontShowOnScreen,parent&&parent->testAttribute(Qt::WA_DontShowOnScreen));
     dialog.button(QMessageBox::Yes)->setText(uiText("确认"));dialog.button(QMessageBox::No)->setText(uiText("取消"));
-    dialog.setDefaultButton(QMessageBox::No);return dialog.exec()==QMessageBox::Yes;
+    dialog.setDefaultButton(QMessageBox::No);return runStudioDialog(dialog)==QMessageBox::Yes;
 }
 void applyStudioScrollbars(QAbstractScrollArea* area) {
     if(auto* table=qobject_cast<QTableView*>(area)) {

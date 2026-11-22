@@ -69,7 +69,8 @@ void MainWindow::advancedDialog(const QString& operation){
     layout->addLayout(form);auto* buttons=new QDialogButtonBox(QDialogButtonBox::Ok|QDialogButtonBox::Cancel);
     buttons->button(QDialogButtonBox::Ok)->setText(uiText("确定"));buttons->button(QDialogButtonBox::Cancel)->setText(uiText("取消"));
     connect(buttons,&QDialogButtonBox::accepted,&dialog,&QDialog::accept);connect(buttons,&QDialogButtonBox::rejected,&dialog,&QDialog::reject);layout->addWidget(buttons);
-    if(dialog.exec()!=QDialog::Accepted)return;
+    if(runStudioDialog(dialog)!=QDialog::Accepted)return;
+    if(!session_.ready()||session_.busy()||session_.model()!=m){showError(uiText("船模已更改，请重新打开此窗口。"));return;}
     if(mirror){fields["axis"]=axis->currentIndex();fields["distance"]=distance->value();fields["weld"]=weld->isChecked();}
     else{fields["vector"]=QJsonArray{vector[0]->value(),vector[1]->value(),vector[2]->value()};
         if(extrusion)fields["layer_id"]=double(layer->currentData().toULongLong());else fields["adjust_markers"]=markers&&markers->isChecked();}

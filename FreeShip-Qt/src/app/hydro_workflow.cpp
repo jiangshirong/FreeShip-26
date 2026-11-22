@@ -3,6 +3,7 @@
 #include "main_window.h"
 #include "hydro_dialog.h"
 #include "hydro_number_list.h"
+#include "studio_table.h"
 #include "calculation_plot.h"
 #include <QAbstractAnimation>
 #include <QToolTip>
@@ -254,6 +255,14 @@ void MainWindow::hydroStep(const QString& operation){
                 QApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
             }
         };
+        auto captureGroupedResults=[&](QTableWidget* table){
+            const auto size=hydroDialog_->size();
+            if(table->horizontalHeader()->length()+100>size.width())
+                hydroDialog_->resize(table->horizontalHeader()->length()+100,size.height());
+            settleLayout();
+            workflowCase("grouped-result-image",hydroDialog_->grab().save(workflowOutput_+"/views/grouped-results.png"));
+            hydroDialog_->resize(size);settleLayout();
+        };
         auto captureMessages=[this](const QString& state){
             hydroDialog_->layout()->activate();
             QJsonArray messages;
@@ -417,11 +426,11 @@ void MainWindow::hydroStep(const QString& operation){
                 grid->item(0)->setText("keep my edit");
                 const auto edited=hydroDialog_->savedInputs();
                 bool prompted=false;
-                QTimer::singleShot(0,d,[&]{if(auto* m=qobject_cast<QMessageBox*>(QApplication::activeModalWidget())){prompted=true;m->button(QMessageBox::No)->click();}});
+                QTimer::singleShot(0,d,[&]{if(auto* m=qobject_cast<QMessageBox*>(frontStudioDialog())){prompted=true;m->button(QMessageBox::No)->click();}});
                 button->click();
                 workflowCase("decline-replacement-preserves-draft",prompted&&grid->item(0)->text()=="keep my edit");
                 workflowCase("template-edits-save-immediately",edited!=initial&&hydroDialog_->savedInputs()==edited);
-                QTimer::singleShot(0,d,[]{if(auto* m=qobject_cast<QMessageBox*>(QApplication::activeModalWidget()))m->button(QMessageBox::Yes)->click();});
+                QTimer::singleShot(0,d,[]{if(auto* m=qobject_cast<QMessageBox*>(frontStudioDialog()))m->button(QMessageBox::Yes)->click();});
                 button->click();
                 workflowCase("confirmed-replacement-reloads-template",grid->item(0)->text()!="keep my edit");
                 toggle();workflowCase("developer-tools-hide-again",!button->isVisible());
@@ -650,7 +659,9 @@ void MainWindow::hydroStep(const QString& operation){
                     converted=selected&&selected->currentData()==kindName&&
                         !grid->item(row,Mass)->flags().testFlag(Qt::ItemIsEditable)&&
                         !grid->isColumnHidden(Fill)&&grid->item(row,Fill)->flags().testFlag(Qt::ItemIsEditable)&&
-                        grid->item(row,Name)->text()=="Cargo check"&&cellValue(grid,row,X)=="91.25";
+                        grid->item(row,Name)->text()=="Cargo check"&&cellValue(grid,row,ColumnCount)=="91.25"
+                        &&grid->item(row,ColumnCount)->flags().testFlag(Qt::ItemIsEditable)
+                        &&!grid->item(row,X)->flags().testFlag(Qt::ItemIsEditable);
                     for(auto field:tankDimensions()[i-1])
                         converted=converted&&!grid->isColumnHidden(field)&&grid->item(row,field)->flags().testFlag(Qt::ItemIsEditable);
                 }
@@ -914,15 +925,14 @@ void MainWindow::hydroStep(const QString& operation){
                             if(w->property("hydro_list_action")==name)return w;
                         return nullptr;
                     };
-                    auto* add=action("add");auto* range=action("range");auto* drop=action("drop");
+                    auto* add=action("add");auto* range=action("range");
                     QLabel* label=nullptr;
                     for(auto* candidate:list->findChildren<QLabel*>())
                         if(candidate->property("hydro_field_label").isValid()){label=candidate;break;}
-                    if(!label||!add||!range||!drop)return false;
+                    if(!label||!add||!range||action("drop"))return false;
                     const auto x=[list](QWidget* w){return w->mapTo(list,QPoint{}).x();};
                     return x(add)>x(label)&&x(add)-x(label)-label->width()<45&&
-                           x(range)-x(add)-add->width()<12&&x(drop)-x(range)-range->width()<18&&
-                           drop->y()<=add->y()+add->height();
+                           x(range)-x(add)-add->width()<12;
                 };
                 workflowCase("number-actions-next-to-parameter-caption",grouped(angles)&&grouped(displacements));
                 const auto blockAt=[&](int index)->QToolButton*{
@@ -931,11 +941,10 @@ void MainWindow::hydroStep(const QString& operation){
                     return nullptr;
                 };
                 auto* add=qobject_cast<QToolButton*>(action("add"));
-                auto* drop=action("drop");
                 QLineEdit* editor=nullptr;
                 for(auto* line:angles->findChildren<QLineEdit*>())
                     if(line->property("hydro_list_value").toBool())editor=line;
-                if(!add||!drop||!editor){unavailable("Stability value actions unavailable");return;}
+                if(!add||!editor){unavailable("Stability value actions unavailable");return;}
                 add->click();settleLayout();
                 workflowArtifacts_["stability_empty_row"]=observe();
                 QKeyEvent enter(QEvent::KeyPress,Qt::Key_Return,Qt::NoModifier);
@@ -948,29 +957,27 @@ void MainWindow::hydroStep(const QString& operation){
                 hydroDialog_->grab().save(workflowOutput_+"/views/stability-value-blocks.png");
                 auto* last=blockAt(3);
                 if(!last){unavailable("New stability value unavailable");return;}
-                bool ghostMatches=false;
-                const auto drag=[&](QToolButton* block,const QPoint& destination){
-                    const auto start=block->mapToGlobal(block->rect().center());
-                    const auto send=[&](QEvent::Type type,QPoint global,Qt::MouseButton button,Qt::MouseButtons buttons){
-                        QMouseEvent event(type,block->mapFromGlobal(global),global,button,buttons,Qt::NoModifier);
-                        QApplication::sendEvent(block,&event);
-                    };
-                    send(QEvent::MouseButtonPress,start,Qt::LeftButton,Qt::LeftButton);
-                    send(QEvent::MouseMove,destination,Qt::NoButton,Qt::LeftButton);
-                    const auto* ghost=angles->findChild<QLabel*>("HydroValueGhost");
-                    ghostMatches=ghost&&ghost->isVisible()&&ghost->size()==block->size()&&
-                        ghost->mapToGlobal(block->rect().center())==destination;
-                    const bool highlighted=drop->property("dragOver").toBool();
-                    send(QEvent::MouseButtonRelease,destination,Qt::LeftButton,Qt::NoButton);
-                    settleLayout();
-                    return highlighted;
+                const auto send=[&](QToolButton* block,QEvent::Type type,QPoint position,Qt::MouseButton button,Qt::MouseButtons buttons){
+                    QMouseEvent event(type,position,block->mapToGlobal(position),button,buttons,Qt::NoModifier);
+                    QApplication::sendEvent(block,&event);
                 };
-                const bool cancelHighlighted=drag(last,angles->mapToGlobal(QPoint(-20,0)));
-                workflowArtifacts_["stability_drag_cancel"]=observe();
-                const bool highlighted=drag(last,drop->mapToGlobal(drop->rect().center()));
-                workflowArtifacts_["stability_drop_highlight"]=QJsonObject{
-                    {"outside",cancelHighlighted},{"inside",highlighted},{"after",drop->property("dragOver").toBool()},
-                    {"ghost_matches",ghostMatches}};
+                const auto centre=last->rect().center();
+                const auto previousRect=last->geometry();
+                send(last,QEvent::MouseButtonPress,centre,Qt::LeftButton,Qt::LeftButton);
+                send(last,QEvent::MouseMove,centre+QPoint(70,0),Qt::NoButton,Qt::LeftButton);
+                send(last,QEvent::MouseMove,centre,Qt::NoButton,Qt::LeftButton);
+                send(last,QEvent::MouseButtonRelease,centre,Qt::LeftButton,Qt::NoButton);
+                settleLayout();
+                workflowCase("stability-left-drag-does-not-move-edit-or-delete",
+                    !angles->isEditing()&&last->geometry()==previousRect&&angles->values()==QJsonArray{-5,.1,5,15}
+                    &&!angles->findChild<QLabel*>("HydroValueGhost"));
+                const auto rightClick=[&](QToolButton* block){
+                    const auto pos=block->rect().center();
+                    send(block,QEvent::MouseButtonPress,pos,Qt::RightButton,Qt::RightButton);
+                    send(block,QEvent::MouseButtonRelease,pos,Qt::RightButton,Qt::NoButton);
+                    settleLayout();
+                };
+                rightClick(last);
                 workflowArtifacts_["stability_row_removed"]=observe();
                 if(hydroRequest_["exercise_delete_undo"].toBool()){
                     draftKey(hydroDialog_,add,Qt::Key_Z,Qt::ControlModifier);settleLayout();
@@ -986,6 +993,15 @@ void MainWindow::hydroStep(const QString& operation){
                     }
                     workflowArtifacts_["stability_delete_undo"]=QJsonObject{{"undo",afterUndo},{"redo",afterRedo},
                         {"keyboard",keyboardUndo}};
+                }
+                for(auto* block:displacements->findChildren<QToolButton*>()){
+                    if(!visible(block)||!block->property("hydro_value_index").isValid())continue;
+                    const auto before=displacements->values();
+                    rightClick(block);
+                    const bool removed=displacements->values().size()==before.size()-1;
+                    draftKey(hydroDialog_,add,Qt::Key_Z,Qt::ControlModifier);settleLayout();
+                    workflowCase("displacement-right-click-delete-and-undo",removed&&displacements->values()==before);
+                    break;
                 }
                 if(auto* first=blockAt(0)){
                     first->click();editor->setText("-6");QApplication::sendEvent(editor,&enter);settleLayout();
@@ -1018,7 +1034,7 @@ void MainWindow::hydroStep(const QString& operation){
                 QSet<int> rows;
                 int left=angles->width(),right=0;
                 bool fits=true,compact=true;
-                const int dropBottom=drop->mapTo(angles,QPoint{}).y()+drop->height();
+                const int headerBottom=add->mapTo(angles,QPoint{}).y()+add->height();
                 for(int i=0;i<range.size();++i){
                     auto* block=blockAt(i);
                     if(!block){fits=false;continue;}
@@ -1027,7 +1043,7 @@ void MainWindow::hydroStep(const QString& operation){
                     left=qMin(left,pos.x());right=qMax(right,pos.x()+block->width());
                     const int textWidth=block->fontMetrics().horizontalAdvance(block->text());
                     compact&=block->width()>=textWidth+12&&block->width()<=qMax(24,textWidth+14);
-                    fits&=pos.y()>=dropBottom&&pos.y()+block->height()<=angles->height();
+                    fits&=pos.y()>=headerBottom&&pos.y()+block->height()<=angles->height();
                 }
                 workflowArtifacts_["stability_full_grid"]=QJsonObject{
                     {"state",observe()},{"rows",rows.size()},
@@ -1209,16 +1225,16 @@ void MainWindow::hydroStep(const QString& operation){
                     return std::max(double(QFontMetricsF(font).horizontalAdvance(s)),double(notation::size(s,font).width()));
                 };
                 for(int col=0;col<comparison->columnCount();++col){
-                    const auto caption=comparison->horizontalHeaderItem(col)->text();
+                    const auto caption=studioHeaderCaption(comparison,col);
                     double needed=labelSize(caption,comparison->horizontalHeader()->font());
                     for(int i=0;i<comparison->rowCount();++i)
                         needed=std::max(needed,labelSize(comparison->item(i,col)->text(),comparison->font()));
                     columnSizes.append(QJsonObject{{"label",caption},{"size",comparison->columnWidth(col)},{"content",needed}});
                 }
                 for(int row=0;row<comparison->rowCount();++row){
-                    const auto label=comparison->verticalHeaderItem(row)->text();
-                    rowSizes.append(QJsonObject{{"label",label},{"size",comparison->verticalHeader()->width()},
-                        {"content",labelSize(label,comparison->verticalHeader()->font())}});
+                    const auto label=comparison->item(row,0)->text();
+                    rowSizes.append(QJsonObject{{"label",label},{"size",comparison->columnWidth(0)},
+                        {"content",labelSize(label,comparison->font())}});
                 }
                 hydroDialog_->grab().save(workflowOutput_+"/views/stability-comparison-columns.png");
 
@@ -1227,6 +1243,7 @@ void MainWindow::hydroStep(const QString& operation){
                     return inspectResultStatus(result);
                 };
                 const auto status=inspectStatus();
+                if(hydroRequest_["capture_grouped_headers"].toBool())captureGroupedResults(result);
                 hydroDialog_->grab().save(workflowOutput_+"/views/stability-status-first-column.png");
                 tabs->setCurrentWidget(page);settleLayout();
                 const bool legendAbove=first&&canvas&&first->mapTo(chart,QPoint{}).y()<canvas->mapTo(chart,QPoint{}).y();
@@ -1295,6 +1312,8 @@ void MainWindow::hydroStep(const QString& operation){
             // the actual visible result page, not stale hidden-view geometry.
             for(auto* tabs:hydroDialog_->findChildren<QTabWidget*>())if(tabs->indexOf(table)>=0)tabs->setCurrentWidget(table);
             settleLayout();table->ensurePolished();
+            if(hydroRequest_["capture_grouped_headers"].toBool()&&table->rowCount()>0&&
+                !hydroRequest_["observe_stability_presentation"].toBool())captureGroupedResults(table);
             if(hydroRequest_["observe_draft_status"].toBool())
                 workflowArtifacts_["draft_status"]=inspectResultStatus(table);
             // Observe the actual calculated result widget independently of CSV/report layout.
@@ -1461,7 +1480,7 @@ void MainWindow::hydroStep(const QString& operation){
                             QJsonArray sizes;
                             const auto textWidth=[](QString text,const QFont& font){return notation::contains(text)?notation::size(text,font).width():QFontMetricsF(font).horizontalAdvance(text);};
                             for(int column=0;column<view->model()->columnCount();++column){
-                                double width=textWidth(view->model()->headerData(column,Qt::Horizontal).toString(),view->horizontalHeader()->font());
+                                double width=textWidth(studioHeaderCaption(view,column),view->horizontalHeader()->font());
                                 for(int row=0;row<view->model()->rowCount();++row)
                                     width=std::max(width,textWidth(view->model()->index(row,column).data().toString(),view->font()));
                                 sizes.append(QJsonObject{{"width",view->columnWidth(column)},{"required",int(std::ceil(width))+14}});

@@ -24,6 +24,8 @@ done
 mv "$payload/languages" "$out/previous-languages"
 cp -a "$qt/src/app/languages" "$payload/languages"
 install -m644 "$qt/COPYING" "$qt/NOTICE.md" "$payload"
+install -Dm644 "$qt/src/app/assets/brand/freeship26.png" \
+    "$out/stage/files/share/icons/hicolor/256x256/apps/$id.png"
 # The matching .flatpak base supplies its Qt/Wine runtime, bridge resources,
 # examples, calculator dependencies, and desktop metadata.
 python3 - "$payload/build-manifest.json" "$qt" "$version" "$revision" <<'PY'
@@ -40,6 +42,7 @@ Path(p).write_text(json.dumps(m,ensure_ascii=False,indent=2)+'\n',encoding='utf-
 PY
 mv "$out/stage/export" "$out/previous-export"
 flatpak build-finish --command=freeship26 "$out/stage"
+cmp "$qt/src/app/assets/brand/freeship26.png" "$out/stage/export/share/icons/hicolor/256x256/apps/$id.png"
 flatpak build-export --arch=x86_64 --gpg-sign="$FS26_FLATPAK_SIGN_KEY" \
     --gpg-homedir="$GNUPGHOME" "$out/repo" "$out/stage" stable
 flatpak build-update-repo --gpg-sign="$FS26_FLATPAK_SIGN_KEY" --gpg-homedir="$GNUPGHOME" "$out/repo"

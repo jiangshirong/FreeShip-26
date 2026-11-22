@@ -108,6 +108,7 @@ public:
     QString sourcePath() const { return sourcePath_; }
     QString lastBackupPath()const{return lastBackupPath_;}
     QString modelPath() const { return modelPath_; }
+    QString calculationStatePath() const { return calculationState_; }
     QString scenePath() const { return scenePath_; }
     QString dxfPath() const { return dxfPath_; }
     std::shared_ptr<const fs::ModelSnapshot> model() const { return model_; }

@@ -96,11 +96,30 @@ void MainWindow::rememberFile(const QString& path){
     if(!fileHistory_->remember(path))showStatusMessage(uiText("船模已打开或保存，但未能更新最近文件记录。"),StudioMessageRole::Warning);
     refreshRecentFiles();
 }
-void MainWindow::startSession(const QString& explicitFile){
-    if(!explicitFile.isEmpty()){openDocument(explicitFile);return;}
-    if(!fs::recoveryEntries(session_.recoveryRoot()).isEmpty()&&showRecoveries())return;
-    const auto path=fileHistory_?fileHistory_->read().last:QString{};if(path.isEmpty())return;
-    if(!QFileInfo(path).isFile()){
+void MainWindow::startSession(const QString& explicitFile,const std::function<void()>& reveal){
+    bool revealed=false;
+    const auto revealFor=[&](const QString& path){
+        if(!reveal||revealed)return;
+        startupFile_=path;
+        updateDocumentTitle();
+        revealed=true;
+        reveal();
+        startupFile_.clear();
+    };
+    if(!explicitFile.isEmpty()){
+        revealFor(QFileInfo(explicitFile).absoluteFilePath());
+        openDocument(explicitFile);
+        return;
+    }
+    const auto path=fileHistory_?fileHistory_->read().last:QString{};
+    const auto restore=QFileInfo(path).isFile();
+    if(!fs::recoveryEntries(session_.recoveryRoot()).isEmpty()){
+        revealFor(restore?path:QString{});
+        if(showRecoveries()){updateDocumentTitle();return;}
+    }
+    revealFor(restore?path:QString{});
+    if(path.isEmpty())return;
+    if(!restore){
         fileHistory_->stopRestore(path);refreshRecentFiles();
         showStartupRestoreWarning(QString::fromUtf8(uiText("找不到上次打开的船模，请从“打开模型”重新选择："))+"\n"+path);return;
     }
@@ -109,7 +128,7 @@ void MainWindow::startSession(const QString& explicitFile){
 bool MainWindow::showRecoveries(){
     if(session_.busy())return false;
     RecoveryDialog dialog(session_.recoveryRoot(),this);
-    if(dialog.exec()!=QDialog::Accepted||dialog.selectedId().isEmpty())return false;
+    if(runStudioDialog(dialog)!=QDialog::Accepted||dialog.selectedId().isEmpty())return false;
     // Reclaiming the same interrupted editor is not replacing another live
     // document. A Save prompt here offers an operation the dead service cannot
     // perform. Let the session validate revision and capsule before publishing.

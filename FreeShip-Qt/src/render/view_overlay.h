@@ -7,7 +7,15 @@
 #include <functional>
 namespace fs::presentation {
 struct Annotation {QString key,text;QPointF anchor,preferred;QColor color;LabelKind kind=LabelKind::Point;bool symbol=false;};
-struct ViewOverlay {QVector<Stroke> grid,wave;QVector<Annotation> labels;};
+struct HorizontalReferences {Vec3 minimum,maximum;double waterlineZ=0;};
+struct ViewOverlay {
+    struct ReferenceSlots {qsizetype stroke=-1,label=-1;};
+    QVector<Stroke> grid,wave;
+    QVector<Annotation> labels;
+    std::array<ReferenceSlots,2> references;
+};
+void updateHorizontalReferences(ViewOverlay& overlay,const ModelSnapshot& model,int view,const QFont& font,
+                                const std::function<QPointF(Vec3)>& project,const HorizontalReferences& frame);
 // view: 0 profile, 1 plan, 2 body, 3 perspective (HullProjection order).
 ViewOverlay makeOverlay(const ModelSnapshot& model,int view,bool grid,bool hydro,const QFont& font,const std::function<QPointF(Vec3)>& project,const std::array<bool,4>& kinds={true,true,true,true});
 QString dimension(double value,bool imperial);

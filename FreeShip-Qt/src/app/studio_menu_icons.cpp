@@ -6,7 +6,7 @@
 #include <QPainterPath>
 #include <cmath>
 
-QStringList studioSupplementIconKeys(){return {"History","RenderMode","Wireframe","GaussianCurvature","Developability","Zebra",
+QStringList studioSupplementIconKeys(){return {"History","Tools","RenderMode","Wireframe","GaussianCurvature","Developability","Zebra",
     "BackgroundImage","CropFrame","PickColor","Blend","Tolerance","Coordinates","CoordinateX","CoordinateY","CoordinateZ","CoordinateOff","Resistance","Propeller","Person","Copy",
     "MessageQuestion","MessageInformation","MessageWarning","MessageCritical","MessageSuccess",
     "LayerVisible","LayerHidden",
@@ -102,6 +102,11 @@ public:
         }else if(key_=="History"){
             QPainterPath path;path.moveTo(4,8);path.cubicTo(6,2,15,1,19,7);path.cubicTo(25,16,14,25,7,19);p->drawPath(path);
             p->drawPolyline(QPolygonF{{3,3},{3,9},{9,9}});line(12,7,12,12);line(12,12,16,14);
+        }else if(key_=="Tools"){
+            p->drawRoundedRect(QRectF(2.5,7.5,19,12.5),2,2);
+            p->drawPolyline(QPolygonF{{8.5,7.5},{8.5,4},{15.5,4},{15.5,7.5}});
+            line(2.5,12.5,9.5,12.5);line(14.5,12.5,21.5,12.5);
+            p->drawRoundedRect(QRectF(9.5,11,5,4.5),.75,.75);
         }else if(key_=="Wireframe"||key_=="RenderMode"){
             p->drawPolygon(QPolygonF{{12,2.5},{21,7.5},{21,17},{12,22},{3,17},{3,7.5}});
             p->drawPolyline(QPolygonF{{3,7.5},{12,12.5},{21,7.5}});line(12,12.5,12,22);

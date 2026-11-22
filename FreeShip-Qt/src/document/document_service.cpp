@@ -57,6 +57,12 @@
 #endif
 namespace {
 using fs::document::Fbm;
+constexpr auto EncodingKey="fbm_text_encoding";
+Fbm markUtf8(const Fbm& document){
+    auto metadata=document.calculationParameters();
+    metadata[EncodingKey]="UTF-8";
+    return document.withCalculationParameters(metadata);
+}
 constexpr quint64 MaxInteger=9007199254740991ULL;
 const QStringList Kinds{"points","edges","faces","layers","curves","flows"};
 [[noreturn]] void bad(const QString& text){throw std::runtime_error(text.toUtf8().constData());}
@@ -323,9 +329,15 @@ class Service {
         auto bytes=read(artifact(response,"state_file",directory));auto fbm=std::make_shared<Fbm>(Fbm::read(bytes));
         // Legacy workers do not know this native extension. Retain the current
         // complete input sets when importing their geometry-only checkpoint.
-        if(!history_.empty()&&id==document_&&(!current().engine->calculationParameters()["calculators"].toObject().isEmpty()||
-           !current().engine->calculationParameters()["principal_dimensions"].toObject().isEmpty()))
-            fbm=std::make_shared<Fbm>(fbm->withCalculationParameters(current().engine->calculationParameters()));
+        if(!history_.empty()&&id==document_){
+            const auto& source=*current().engine;
+            for(const auto& block:source.inspect()["blocks"].toArray()){
+                if(block.toObject()["name"]=="calculation_parameters"){
+                    fbm=std::make_shared<Fbm>(fbm->withCalculationParameters(source.calculationParameters()));
+                    break;
+                }
+            }
+        }
         auto bindings=json(read(artifact(response,"binding_file",directory),128*1024*1024));
         if(bindings["format"]!="FreeShipDocumentBindings"||integer(bindings["version"])!=1||bindings["document_id"]!=id||integer(bindings["revision"],1)!=revision)bad("Invalid document checkpoint identity");
         auto high=bindings["high_water"].toObject();
@@ -419,11 +431,20 @@ public:
                 stop();QElapsedTimer contextTimer;contextTimer.start();
                 auto context=fs::document::documentContext(QCoreApplication::applicationDirPath()+"/bridge",
                     original?fs::document::documentColors(*original):QJsonArray{},request["preferences"].toObject());
-                if(original&&loadedBytes!=original->bytes())original=std::make_shared<Fbm>(Fbm::readModel(loadedBytes,context["fbm_encoding"].toString()));
+                // FTM import already produced UTF-8 strings. Preserve them in its new binary document.
+                if(original&&loadedBytes!=original->bytes())original=std::make_shared<Fbm>(markUtf8(*original));
+                if(original){
+                    const auto declared=original->calculationParameters().value(EncodingKey);
+                    if(!declared.isUndefined()){
+                        if(declared!="UTF-8")bad("Unsupported FBM text encoding marker");
+                        context["fbm_encoding"]="UTF-8";
+                    }
+                }else context["fbm_encoding"]="UTF-8"; // New hull and whole-model exchange import.
                 const double contextMs=contextTimer.nsecsElapsed()/1e6;
                 QElapsedTimer createTimer;createTimer.start();
                 auto candidate=method=="load"?fs::document::loadDocument(*original,context):method=="new"?
                     fs::document::newDocument(request,context):fs::document::importDocument(exchange,context);
+                if(!original)candidate.document=markUtf8(candidate.document);
                 const double createMs=createTimer.nsecsElapsed()/1e6;
                 auto engine=std::make_shared<Fbm>(std::move(candidate.document));
                 State next{original?original:engine,engine,candidate.bindings,0};

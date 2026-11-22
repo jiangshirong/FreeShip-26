@@ -1,4 +1,5 @@
 // Retained hidden production workflow. No desktop input injection.
+#include "studio_ui.h"
 #include "main_window.h"
 #include <QAction>
 #include <QApplication>
@@ -46,7 +47,7 @@ void MainWindow::backgroundStep(const QString& method){
         auto dialogs=[&](std::function<void()> trigger,bool accept,QJsonObject values=QJsonObject{}){
             int handled=0;QString failure;QTimer timer;timer.setInterval(10);QPointer<QDialog> visited;QElapsedTimer elapsed;elapsed.start();
             connect(&timer,&QTimer::timeout,this,[&]{
-                auto* dialog=qobject_cast<QDialog*>(QApplication::activeModalWidget());
+                auto* dialog=qobject_cast<QDialog*>(frontStudioDialog());
                 if(!dialog)for(auto* candidate:findChildren<QDialog*>())if(candidate->isVisible()&&candidate->isModal()){dialog=candidate;break;}
                 if(!dialog){
                     if(elapsed.elapsed()>10000){failure="No safely discoverable active dialog";for(auto* candidate:findChildren<QDialog*>())candidate->reject();}

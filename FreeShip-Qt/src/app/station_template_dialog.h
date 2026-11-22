@@ -4,15 +4,14 @@
 #include "core/station_sheets.h"
 #include <QDialog>
 class QListWidget;
-class QAction;
 class QComboBox;
 class QCheckBox;
 class QDoubleSpinBox;
-class QSpinBox;
-class QRadioButton;
 class QPushButton;
 class QTimer;
-class StudioMessage;
+class RowActionsTable;
+class QToolButton;
+class StationStatus;
 class StationPreview;
 
 class StationTemplateDialog final : public QDialog {
@@ -21,29 +20,35 @@ public:
                           QString fileBase,const QSet<int>& selected,QWidget* parent);
     ~StationTemplateDialog() override;
 private:
-    void schedule();
+    void schedule(bool animate=false);
     void generate();
+    void insertKitStation(int row,double x,int order,bool fromModel);
+    void updateKitStationActions();
     void updateStationWarnings();
-    void refresh();
-    void save(bool pdf,fs::frames::PdfLayout layout=fs::frames::PdfLayout::A4Tiles);
-    void writeSelection(bool pdf,fs::frames::PdfLayout layout,const QString& path);
+    void refresh(bool animate=false);
+    void configurePdf();
+    void save(bool pdf,fs::frames::PdfLayout layout=fs::frames::PdfLayout::A4Tiles,
+              fs::frames::PdfScale scale={});
+    void writeSelection(bool pdf,fs::frames::PdfLayout layout,fs::frames::PdfScale scale,const QString& path);
     std::shared_ptr<const fs::ModelSnapshot> model_;
     QString inputPath_,fileBase_,error_;
     QListWidget* stations_;
     QComboBox *type_,*layer_;
     QDoubleSpinBox* thickness_;
-    QSpinBox* scale_;
-    QRadioButton* noTrim_;
-    fs::frames::PdfLayout tileLayout() const;
     QCheckBox* cap_;
+    QWidget *kitSettings_,*kitStationPanel_;
+    RowActionsTable* kitStations_;
+    QDoubleSpinBox* stock_;
+    QToolButton* addKitStation_;
+    int nextKitSectionOrder_=0;
     StationPreview* preview_;
-    StudioMessage* message_;
+    StationStatus* message_;
     QPushButton *pdf_,*dxf_;
-    QAction *tiledPdf_,*wholePdf_;
+    fs::frames::PdfLayout pdfLayout_=fs::frames::PdfLayout::A4Tiles;
+    fs::frames::PdfScale pdfScale_;
     QTimer* timer_;
     std::shared_ptr<std::atomic_bool> cancel_;
     QList<fs::frames::Station> sheets_;
-    int pageCount_=0;
-    bool pending_=true,writing_=false;
+    bool pending_=true,writing_=false,animatePreview_=false;
 };
 

@@ -5,6 +5,8 @@
 #include "geometry_input.h"
 #include "fbm_text.h"
 #include "native/sections.h"
+#include "native/plate_regions.h"
+#include <clipper2/clipper.engine.h>
 #include <QElapsedTimer>
 #include <QFileInfo>
 #include <QJsonArray>
@@ -130,14 +132,17 @@ struct Face { std::vector<Index> points,edges;float area=0;Vec3 normal{}; };
 struct Trial {
     std::vector<Vec3> uv;std::vector<Index> order;std::vector<double> errors;
     double reference=0,signedArea=0,absolute=0,maxArea=0,normalized=0;
-    Index errorFace=Missing;
+    Index errorFace=Missing,maxAreaFace=Missing;
 };
 struct Patch {
     std::vector<Vec3> original;std::vector<VertexType> types;
     std::vector<std::vector<Index>> pointFaces;
     std::vector<Face> faces;std::vector<Edge> edges;
+    std::vector<Index> meshEdgeIds;
     Trial best;int iterations=0;Vec3 lo{},hi{};float angle=0,cs=1,sn=0;
     bool joined=false;Plane mirror;
+    int flipped=0,collapsed=0;
+    double overlapArea=0;
 
     Patch(const SubdivisionLevel &mesh,const std::vector<Index> &selected,
           const std::map<Key,Index> &meshEdges,Job &job) {
@@ -159,6 +164,7 @@ struct Patch {
             out.boundary=out.faces.size()==1;
             out.seam=e.faces.size()==1 && std::abs(original[out.a].y)<=1e-4 && std::abs(original[out.b].y)<=1e-4;
             edges.push_back(std::move(out));
+            meshEdgeIds.push_back(source);
         }
         for(auto f:selected) {
             if((faces.size()&255)==0)job.check();
@@ -203,7 +209,8 @@ struct Patch {
         for(auto f:t.order) {
             const auto &p=faces[f].points;double area=0;
             for(Index i=2;i<p.size();++i)area+=area2(t.uv[p[0]],t.uv[p[i-1]],t.uv[p[i]]);
-            const auto error=area-faces[f].area;t.reference+=std::abs(faces[f].area);t.signedArea+=error;t.absolute+=std::abs(error);t.maxArea=std::max(t.maxArea,std::abs(error));
+            const auto error=area-faces[f].area;t.reference+=std::abs(faces[f].area);t.signedArea+=error;t.absolute+=std::abs(error);
+            if(std::abs(error)>t.maxArea){t.maxArea=std::abs(error);t.maxAreaFace=f;}
         }
         double maximum=0,length=0;
         for(const auto &e:edges) {
@@ -246,6 +253,48 @@ struct Patch {
         }
         rotation(opt);auto [a,b]=extents();if(b.x-a.x<b.y-a.y)rotation(angle-90);
         if(symmetric)joinMirror();
+        diagnose(job);
+    }
+    void diagnose(Job& job) {
+        using namespace Clipper2Lib;
+        const double span=std::max(double(hi.x)-lo.x,double(hi.y)-lo.y);
+        const double scale=span>0?1e8/span:1.;
+        Paths64 triangles;
+        double positiveArea=0,negativeArea=0,total=0;
+        int positive=0,negative=0;
+        for(int side=0;side<=int(joined);++side) {
+            std::vector<Point64> flat;
+            flat.reserve(best.uv.size());
+            for(auto point:best.uv) {
+                if(side)point=*mirror.mirror(point);
+                flat.emplace_back(std::llround((double(point.x)-lo.x)*scale),
+                                  std::llround((double(point.y)-lo.y)*scale));
+            }
+            for(Index f=0;f<faces.size();++f) {
+                if((f&255)==0)job.check();
+                const auto& indices=faces[f].points;
+                for(Index i=2;i<indices.size();++i) {
+                    Path64 triangle{flat[indices[0]],flat[indices[i-1]],flat[indices[i]]};
+                    const double area=Area(triangle);
+                    if(area==0){++collapsed;continue;}
+                    // Reflection reverses the winding of an entire half.
+                    if((side?-area:area)>0){++positive;positiveArea+=std::abs(area);}
+                    else {++negative;negativeArea+=std::abs(area);}
+                    if(area<0)std::reverse(triangle.begin(),triangle.end());
+                    total+=std::abs(area);
+                    triangles.push_back(std::move(triangle));
+                }
+            }
+        }
+        flipped=positiveArea>=negativeArea?negative:positive;
+        if(triangles.empty())return;
+        Clipper64 clip;
+        clip.AddSubject(triangles);
+        Paths64 covered;
+        if(!clip.Execute(ClipType::Union,FillRule::NonZero,covered))bad("无法检查展开板片重叠。");
+        job.check();
+        const double difference=total-std::abs(Area(covered));
+        if(difference>std::max(16.,total*1e-7))overlapArea=finite(difference/(scale*scale));
     }
     void joinMirror() {
         std::vector<Index> seam;for(Index i=0;i<edges.size();++i)if(edges[i].seam)seam.push_back(i);
@@ -305,7 +354,7 @@ struct Patch {
         QJsonArray out;for(auto &rows:output)for(auto row:rows)out.append(row);return out;
     }
     QJsonObject snapshot(const QString &name,const QJsonObject &nameFields,int color,int dxf,const Style &style,Job &job) const {
-        QJsonArray pts,orig,es,fs,corners;const auto n=original.size();
+        QJsonArray pts,orig,es,fs,corners,boundaryIds,worstFaces;const auto n=original.size();
         for(int side=0;side<=int(joined);++side) {
             const auto offset=side*n;
             for(Index i=0;i<n;++i) {
@@ -314,14 +363,26 @@ struct Patch {
                 pts.append(xy(display(p)));orig.append(xyz(v));
                 if(pointFaces[i].size()==1 || types[i]==VertexType::Corner)corners.append(qint64(i+offset));
             }
-            for(Index i=0;i<edges.size();++i) {const auto &e=edges[i];es.append(QJsonArray{qint64(e.a+offset),qint64(e.b+offset),finite(best.errors[i]),e.boundary});}
-            for(auto f:best.order) {QJsonArray row;for(auto p:faces[f].points)row.append(qint64(p+offset));fs.append(row);}
+            for(Index i=0;i<edges.size();++i) {
+                const auto &e=edges[i];
+                es.append(QJsonArray{qint64(e.a+offset),qint64(e.b+offset),finite(best.errors[i]),e.boundary});
+                if(e.boundary) {
+                    const bool reflected=side || nameFields["side"]==" (P)";
+                    const qint64 id=qint64(meshEdgeIds[i])+1;
+                    boundaryIds.append(reflected && !e.seam ? -id : id);
+                }
+            }
+            for(auto f:best.order) {
+                if(f==best.maxAreaFace)worstFaces.append(fs.size());
+                QJsonArray row;for(auto p:faces[f].points)row.append(qint64(p+offset));fs.append(row);
+            }
         }
         const auto range=std::minmax_element(best.errors.begin(),best.errors.end());
         return {{"name",name},{"name_fields",nameFields},{"color",color},{"dxf_color",dxf},{"joined_mirror",joined},{"reference_area",finite(best.reference)},
             {"signed_area_error",finite(best.signedArea)},{"absolute_area_error",finite(best.absolute)},{"max_face_area_error",finite(best.maxArea)},
             {"min_edge_error",finite(*range.first)},{"max_edge_error",finite(*range.second)},{"normalized_error",finite(best.normalized)},{"iterations",iterations},
-            {"points",pts},{"original",orig},{"edges",es},{"faces",fs},{"corners",corners},{"curves",curves(style,job)}};
+            {"worst_faces",worstFaces},{"flipped_triangles",flipped},{"collapsed_triangles",collapsed},{"overlap_area",overlapArea},
+            {"points",pts},{"original",orig},{"edges",es},{"boundary_mesh_ids",boundaryIds},{"faces",fs},{"corners",corners},{"curves",curves(style,job)}};
     }
 };
 }
@@ -330,9 +391,9 @@ QJsonObject developPlates(const Fbm &source,const QJsonObject &bindings,const QJ
     Job job(cancelFile);const auto input=documentGeometry(source);Style style(source,bindings,context);
     SubdivisionSurface surface(input);const auto &mesh=surface.level(input.desiredLevel);job.check();
     std::map<Key,Index> meshEdges;for(Index e=0;e<mesh.edges.size();++e)meshEdges.emplace(key(mesh.edges[e].points[0],mesh.edges[e].points[1]),e);
-    std::map<Key,std::vector<Index>> controlEdges;
-    for(Index f=0;f<input.faces.size();++f) {const auto &p=input.faces[f].points;for(Index i=0;i<p.size();++i)controlEdges[key(p[(i+p.size()-1)%p.size()],p[i])].push_back(f);}
-    std::vector<std::vector<Index>> children(input.faces.size());for(Index f=0;f<mesh.faces.size();++f)children[mesh.faces[f].rootControlFace].push_back(f);
+    const auto regions=plateRegions(input);
+    std::vector<std::vector<Index>> children(input.faces.size());
+    for(Index f=0;f<mesh.faces.size();++f)children[regions[mesh.faces[f].rootControlFace]].push_back(f);
     QJsonArray plates;bool first=true;float keel=mesh.minimum.z;
     for(const auto &face:mesh.faces)if(input.layers[face.layer].useInHydrostatics)for(auto p:face.points) {const float z=mesh.points[p].position.z;if(first || z<keel)keel=z;first=false;}
     const auto orders=bindings["layer_faces"].toArray(),ids=bindings["faces"].toArray();std::map<qint64,Index> byId;
@@ -342,17 +403,10 @@ QJsonObject developPlates(const Fbm &source,const QJsonObject &bindings,const QJ
         std::vector<Index> order;
         if(l<Index(orders.size()))for(auto id:orders[qsizetype(l)].toArray())order.push_back(byId.at(id.toInteger()));
         else for(Index f=0;f<input.faces.size();++f)if(input.faces[f].layer==l)order.push_back(f);
-        std::vector<bool> todo(input.faces.size());for(auto f:order)todo[f]=true;
         std::vector<std::vector<Index>> groups;
-        for(auto start=order.rbegin();start!=order.rend();++start)if(todo[*start]) {
-            std::vector<Index> queue{*start};todo[*start]=false;
-            for(Index i=0;i<queue.size();++i) {
-                if((i&255)==0)job.check();
-                const auto &p=input.faces[queue[i]].points;
-                for(Index j=0;j<p.size();++j)for(auto f:controlEdges.at(key(p[(j+p.size()-1)%p.size()],p[j])))if(todo[f]) {todo[f]=false;queue.push_back(f);}
-            }
-            std::vector<Index> selected;for(auto f:queue)selected.insert(selected.end(),children[f].begin(),children[f].end());
-            std::sort(selected.begin(),selected.end());if(!selected.empty())groups.push_back(std::move(selected));
+        for(auto start=order.rbegin();start!=order.rend();++start) {
+            auto& selected=children[regions[*start]];
+            if(!selected.empty()){groups.emplace_back();groups.back().swap(selected);}
         }
         // FDescription may be empty in saved/new layers. Match FGetName rather
         // than emitting an empty label that the Qt plate parser must reject.

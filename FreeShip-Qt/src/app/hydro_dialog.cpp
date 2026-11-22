@@ -12,6 +12,7 @@
 #include "studio_motion.h"
 #include "data_motion.h"
 #include "studio_table.h"
+#include "solve_status_table.h"
 #include "report_browser.h"
 #include "feedback_text.h"
 #include "studio_read_ui.h"
@@ -39,9 +40,6 @@
 #include <QPainter>
 #include <QPainterPath>
 #include <QMouseEvent>
-#include <QScrollBar>
-#include <QStyledItemDelegate>
-#include <QToolTip>
 #include <QPdfWriter>
 #include <QPageLayout>
 #include <QPushButton>
@@ -380,51 +378,6 @@ private:
     struct Layer{QJsonObject data;QJsonArray faces;int start;};
     QString file_;QJsonArray waterlines_,stations_;QStringList headers_;QList<Layer> layers_;QList<QStringList> geometryRows_;int rowCount_=0;
 };
-class SolveStatusDelegate final:public QStyledItemDelegate {
-public:
-    using QStyledItemDelegate::QStyledItemDelegate;
-    void paint(QPainter* painter,const QStyleOptionViewItem& option,const QModelIndex& index)const override{
-        QStyleOptionViewItem cell(option);initStyleOption(&cell,index);
-        const auto icon=cell.icon;cell.icon={};cell.features&=~QStyleOptionViewItem::HasDecoration;
-        const auto* style=cell.widget?cell.widget->style():QApplication::style();
-        style->drawControl(QStyle::CE_ItemViewItem,&cell,painter,cell.widget);
-        const int side=std::min({cell.rect.width(),cell.rect.height(),std::max(12,cell.fontMetrics.height())});
-        icon.paint(painter,QStyle::alignedRect(cell.direction,Qt::AlignCenter,QSize(side,side),cell.rect));
-    }
-};
-class HydroStatusTable final:public QTableWidget {
-public:
-    HydroStatusTable(){
-        setMouseTracking(true);viewport()->setMouseTracking(true);
-        setItemDelegateForColumn(0,new SolveStatusDelegate(this));
-        for(auto* scroll:{horizontalScrollBar(),verticalScrollBar()})
-            connect(scroll,&QScrollBar::valueChanged,this,[this]{clearStatusTip();});
-        connect(model(),&QAbstractItemModel::modelAboutToBeReset,this,[this]{clearStatusTip();});
-    }
-protected:
-    bool viewportEvent(QEvent* event)override{
-        if(event->type()==QEvent::MouseMove){
-            const auto* mouse=static_cast<QMouseEvent*>(event);
-            const auto index=indexAt(mouse->position().toPoint());
-            if(index!=hovered_){
-                clearStatusTip();
-                if(index.isValid()&&index.column()==0){
-                    hovered_=index;
-                    shown_=index.data(Qt::ToolTipRole).toString();
-                    if(!shown_.isEmpty())QToolTip::showText(mouse->globalPosition().toPoint(),shown_,viewport(),visualRect(index));
-                }
-            }
-        }else if(event->type()==QEvent::Leave||event->type()==QEvent::Hide)clearStatusTip();
-        return QTableWidget::viewportEvent(event);
-    }
-private:
-    QPersistentModelIndex hovered_;
-    QString shown_;
-    void clearStatusTip(){
-        if(!shown_.isEmpty()&&QToolTip::text()==shown_)QToolTip::hideText();
-        hovered_=QPersistentModelIndex{};shown_.clear();
-    }
-};
 class HydroPlot final:public QWidget {
 public:
     QJsonObject result;QString lengthUnit;
@@ -560,6 +513,12 @@ HydroDialog::HydroDialog(ModelSession& session,const QString& mode,const QJsonOb
         loadingValues_->setSelectionMode(QAbstractItemView::SingleSelection);
         loadingValues_->verticalHeader()->hide();loadingValues_->setMinimumWidth(0);
         loadingValues_->setSizePolicy(QSizePolicy::Ignored,QSizePolicy::Fixed);
+        setStudioHeaderGroups(loadingValues_,{});
+        connect(loadingValues_->horizontalHeader(),&QHeaderView::geometriesChanged,loadingValues_,[this]{
+            const int height=loadingValues_->horizontalHeader()->height()
+                +qMin(4,loadingValues_->rowCount())*loadingValues_->verticalHeader()->defaultSectionSize()+16;
+            if(loadingValues_->maximumHeight()!=height)loadingValues_->setFixedHeight(height);
+        });
         applyStudioScrollbars(loadingValues_);configureStudioDataTable(loadingValues_);
         summaryLayout->addWidget(loadingValues_);form->addRow(loadingSummary_);
         loadingNotice_=new StudioMessage(StudioMessageRole::Warning,{},this);
@@ -616,7 +575,7 @@ HydroDialog::HydroDialog(ModelSession& session,const QString& mode,const QJsonOb
         static_cast<StabilityTabs*>(tabs_)->selectParameters(tabs_->currentIndex());
     }
     if(mode=="single")table_=new SingleHydroTable;
-    else table_=new HydroStatusTable;
+    else table_=new SolveStatusTable;
     table_->setProperty("hydro_result_table",true);table_->setProperty("calculation_page","results");
     table_->setEditTriggers(QAbstractItemView::NoEditTriggers);table_->setAlternatingRowColors(false);tabs_->addTab(table_,uiText("结果表"));
     applyStudioScrollbars(table_);
@@ -636,7 +595,8 @@ HydroDialog::HydroDialog(ModelSession& session,const QString& mode,const QJsonOb
     if(mode=="cross"){
         comparison_=new QTableWidget;comparison_->setObjectName("LoadingComparison");comparison_->setProperty("calculation_page","comparison");
         comparison_->setEditTriggers(QAbstractItemView::NoEditTriggers);
-        applyStudioScrollbars(comparison_);configureStudioDataTable(comparison_,true,-1,true);
+        comparison_->verticalHeader()->hide();
+        applyStudioScrollbars(comparison_);configureStudioDataTable(comparison_,true);
         tabs_->addTab(comparison_,uiText("工况对比"));tabs_->setTabVisible(tabs_->indexOf(comparison_),false);
     }
     if(mode=="single"){
@@ -683,7 +643,7 @@ HydroDialog::HydroDialog(ModelSession& session,const QString& mode,const QJsonOb
             // Only the explicitly hidden regression flow can supply a path;
             // ordinary use always asks which file to save and confirms overwrite.
             QString path=hidden?auxiliarySave_->property("probe_save_path").toString():QString{};
-            if(path.isEmpty())path=QFileDialog::getSaveFileName(this,uiText("保存附加表"),QDir(preferenceFileLocation("export")).filePath(file["name"].toString()),uiText("文本文件 (*.txt)"));
+            if(path.isEmpty())path=studioSaveFile(this,uiText("保存附加表"),QDir(preferenceFileLocation("export")).filePath(file["name"].toString()),uiText("文本文件 (*.txt)"));
             if(path.isEmpty())return;const auto error=exportAuxiliary(path,index);
             status_->setMessage(error.isEmpty()?uiText("报告已保存：")+path:error,error.isEmpty()?StudioMessageRole::Feedback:StudioMessageRole::Warning);
             auxiliarySave_->setProperty("export_error",error);
@@ -734,7 +694,7 @@ HydroDialog::HydroDialog(ModelSession& session,const QString& mode,const QJsonOb
         const auto refreshFormat=[b,format]{setStudioFormatButton(b,format,uiText("导出 ")+format.toUpper());};
         refreshFormat();bindUiRefresh(b,refreshFormat);
         b->setProperty("hydro_export",format);exports_.append(b);footer->addWidget(b);
-        connect(b,&QPushButton::clicked,this,[this,format]{const auto path=QFileDialog::getSaveFileName(this,uiText("保存计算报告"),preferenceFileLocation("export"),format.toUpper()+" (*."+format+")");if(path.isEmpty())return;
+        connect(b,&QPushButton::clicked,this,[this,format]{const auto path=studioSaveFile(this,uiText("保存计算报告"),preferenceFileLocation("export"),format.toUpper()+" (*."+format+")");if(path.isEmpty())return;
             const auto error=exportReport(path,format);
             status_->setMessage(error.isEmpty()?uiText("报告已保存：")+path:error,error.isEmpty()?StudioMessageRole::Feedback:StudioMessageRole::Warning);});
     }
@@ -929,6 +889,7 @@ void HydroDialog::refreshLoadingSummary(){
     const auto column=[&](const char* key,const QString& unit){return QString(uiText(key))+" ("+unit+")";};
     loadingValues_->setHorizontalHeaderLabels({uiText("工况名称"),column("排水量",mass),
         column("重心 X",length),column("重心 Y",length),column("重心 Z",length)});
+    setStudioHeaderGroups(loadingValues_,{{column("总重心",length),2,{"X","Y","Z"}}});
     loadingValues_->setRowCount(0);loadingError_.clear();
     if(!loadingEditor_->weightError().isEmpty())loadingError_=uiText(loadingEditor_->weightError());
     else if(loadingBook_.value("cases").toArray().isEmpty())loadingError_=uiText("请先编辑装载工况。");
@@ -951,7 +912,7 @@ void HydroDialog::refreshLoadingSummary(){
     loadingValues_->setVisible(loadingValues_->rowCount()>0);
     loadingSummary_->setVisible(loadingValues_->rowCount()>0);
     loadingNotice_->setMessage(loadingError_,StudioMessageRole::Warning);
-    loadingValues_->setFixedHeight(header->sizeHint().height()+qMin(4,loadingValues_->rowCount())*loadingValues_->verticalHeader()->defaultSectionSize()+16);
+    loadingValues_->setFixedHeight(header->height()+qMin(4,loadingValues_->rowCount())*loadingValues_->verticalHeader()->defaultSectionSize()+16);
     refreshStudioDataTable(loadingValues_);
 }
 void HydroDialog::refreshState(){
@@ -1045,7 +1006,7 @@ void HydroDialog::refreshOutputTabs(){
     const bool chart=mode_=="cross"?stabilityChart_&&stabilityChart_->data&&!stabilityChart_->data->curves.isEmpty()
         :mode_=="table"&&std::any_of(rows.begin(),rows.end(),[](const auto& entry){return entry.toObject()["status"]=="ok";});
     enable(plot_->parentWidget(),chart);
-    if(comparison_)enable(comparison_,tabs_->isTabVisible(tabs_->indexOf(comparison_))&&comparison_->columnCount()>0);
+    if(comparison_)enable(comparison_,tabs_->isTabVisible(tabs_->indexOf(comparison_))&&comparison_->rowCount()>0);
     if(auxiliaryPage_)enable(auxiliaryPage_,!auxiliaryResults_.isEmpty()||!aboveWaterGeometry(result_).isEmpty());
 }
 void HydroDialog::render(){
@@ -1070,22 +1031,26 @@ void HydroDialog::render(){
         tabs_->setTabVisible(tabs_->indexOf(comparison_),named);
         if(named){
             auto summary=details;
-            summary.prepend({"target_displacement",uiText("重量")+QStringLiteral(" (")+w+")"});
+            summary.prepend({"case_name",uiText("工况名")});
+            summary.insert(1,{"target_displacement",uiText("重量")+QStringLiteral(" (")+w+")"});
             summary.resize(summary.size()-2);
-            comparison_->clear();comparison_->setRowCount(summary.size());comparison_->setColumnCount(0);
+            comparison_->clear();comparison_->setRowCount(0);comparison_->setColumnCount(summary.size());
             QStringList labels;for(const auto& field:summary)labels<<field.second;
-            comparison_->setVerticalHeaderLabels(labels);
+            comparison_->setHorizontalHeaderLabels(labels);
+            setStudioHeaderGroups(comparison_,{
+                {QString(uiText("重心 (%1)")).arg(u),2,{"X","Y","Z"}},
+                {QString(uiText("垂线吃水 (%1)")).arg(u),6,{uiText("艉"),uiText("艏")}}
+            });
             for(const auto& entry:rows){
                 const auto row=entry.toObject();
                 if(!row["heel"].isDouble()||row["heel"].toDouble()!=0)continue;
-                const int column=comparison_->columnCount();comparison_->insertColumn(column);
-                comparison_->setHorizontalHeaderItem(column,new QTableWidgetItem(row["case_name"].toString()));
+                const int index=comparison_->rowCount();comparison_->insertRow(index);
                 for(int j=0;j<summary.size();++j){
                     const auto val=row[summary[j].first];
-                    auto* item=new QTableWidgetItem(val.isDouble()?tableNumber::display(val.toDouble()):QStringLiteral("—"));
-                    item->setTextAlignment(Qt::AlignRight|Qt::AlignVCenter);
+                    auto* item=new QTableWidgetItem(!j?val.toString():val.isDouble()?tableNumber::display(val.toDouble()):QStringLiteral("—"));
+                    if(j)item->setTextAlignment(Qt::AlignRight|Qt::AlignVCenter);
                     if(val.isDouble())item->setToolTip(full(val.toDouble()));
-                    comparison_->setItem(j,column,item);
+                    comparison_->setItem(index,j,item);
                 }
             }
             refreshStudioDataTable(comparison_);
@@ -1102,28 +1067,38 @@ void HydroDialog::render(){
         const QStringList optional={"aft_draft","forward_draft","required_gz","gz_margin"};
         for(int j=0;j<displayColumns.size();++j){const auto& k=displayColumns[j].first;
             table_->setColumnHidden(j,named&&optional.contains(k)&&!reported(k=="gz_margin"?QString("required_gz"):k));}
+        const auto group=[&](const char* key,const char* title,const QString& unit,const QStringList& labels,QList<StudioHeaderGroup>& groups){
+            auto first=std::find_if(displayColumns.cbegin(),displayColumns.cend(),[&](const auto& field){return field.first==key;});
+            if(first!=displayColumns.cend())groups.append({QString(uiText(title)).arg(unit),int(first-displayColumns.cbegin()),labels});
+        };
+        QList<StudioHeaderGroup> groups;
+        group("lcg","重心 (%1)",u,{"X","Y","Z"},groups);
+        group("aft_draft","垂线吃水 (%1)",u,{uiText("艉"),uiText("艏")},groups);
+        group("buoyancy.0","浮心 (%1)",u,{"X","Y","Z"},groups);
+        group("waterplane_cog.0","漂心 (%1)",u,{"X","Y"},groups);
+        group("waterplane_ix","水线面惯性矩 (%1)",u+"⁴",{"Ix","Iy"},groups);
+        group("kmt","稳心高度 (%1)",u,{"KMt","KMl"},groups);
+        setStudioHeaderGroups(table_,std::move(groups));
         table_->setRowCount(rows.size());
     }
     for(int i=0;i<rows.size();++i){const auto row=rows[i].toObject();const bool valid=row["status"]=="ok";if(!valid)++errors;if(row["partial"].toBool())++partial;
         if(mode_=="single")continue;
         for(int j=0;j<displayColumns.size();++j){const auto key=displayColumns[j].first;const auto v=value(row,key);
             if(key=="message"){
-                auto* item=new QTableWidgetItem;
-                item->setIcon(studioIcon(valid?"MessageSuccess":"MessageCritical"));
-                item->setData(Qt::UserRole,valid);
                 const auto message=hydroMessage(v.toString());
                 const bool incomplete=row["partial"].toBool();
                 const auto status=message.isEmpty()
                     ?QString(!valid?uiText("未得到有效结果"):incomplete?uiText("部分量未提供"):
                         mode_=="cross"?uiText("已求解"):uiText("完成"))
                     :message;
-                item->setData(Qt::AccessibleTextRole,status);
+                QString tooltip;
                 if(!valid||incomplete||!message.isEmpty()){
-                    item->setToolTip(notation::contains(status)
+                    tooltip=notation::contains(status)
                         ?QStringLiteral("<p>%1</p>").arg(notation::html(status,table_->font().pointSizeF()).replace('\n',"<br>"))
-                        :status);
+                        :status;
                 }
-                table_->setItem(i,j,item);continue;
+                static_cast<SolveStatusTable*>(table_)->setSolveStatus(i,valid,status,tooltip);
+                continue;
             }
             QString s=v.isDouble()?reportNumber(v.toDouble(),key):v.toString();
             if(v.isNull()&&valid)s=(key=="trim"&&row.contains("pitch_deg"))?uiText("不适用"):uiText("未提供");
@@ -1242,8 +1217,9 @@ QByteArray HydroDialog::csv()const{
     }
     return QByteArray("\xEF\xBB\xBF")+(lines.join("\r\n")+"\r\n").toUtf8();
 }
-QString HydroDialog::reportText(bool html)const{
-    if(mode_=="table")return draftReport(html);
+QString HydroDialog::reportText(bool html,const report::PdfTableLayout* pdf)const{
+    if(mode_=="table")return draftReport(html,pdf);
+    const auto renderTable=[html,pdf](const report::Table& table){return report::render(table,html,pdf);};
     const bool metric=result_["units"]=="metric";
     const QString unit=metric?"m":"ft",mass=metric?"t":"long ton";
     const auto inputs=result_["inputs"].toObject();
@@ -1267,33 +1243,53 @@ QString HydroDialog::reportText(bool html)const{
             v.isArray()?list(v.toArray()):reportNumber(v.toDouble());
         parameters.rows.append({label,display,units});
     }
-    QString text=report::heading("FreeShip 26 — "+windowTitle(),html,true)+report::render(conditions,html)+report::render(parameters,html);
+    QString text=report::heading("FreeShip 26 — "+windowTitle(),html,true)+renderTable(conditions)+renderTable(parameters);
     if(inputs["use_loading_book"].toBool()){
         using namespace fs::loading;
         const auto book=unifiedBook(inputs["loading_book"].toObject(),uiText("货物"));
         const auto appendWeights=[&](const QString& title,const QJsonArray& items){
             if(items.isEmpty())return;
             report::Table table{title,{},{},{}};
-            std::vector<int> columns;
+            if(pdf)table.leftColumns={0,1};
+            struct WeightColumn {int field; bool tankCoordinate=false;};
+            std::vector<WeightColumn> columns;
             for(int col=Name;col<ColumnCount;++col){
+                if(pdf&&col==X){
+                    for(const bool tank:{false,true}){
+                        const bool hasKind=std::any_of(items.begin(),items.end(),[tank](const auto& item){
+                            return (itemShape(item.toObject()["kind"].toString())>=0)==tank;
+                        });
+                        if(!hasKind)continue;
+                        table.groups.append({QString(uiText(tank?"底部中心 (%1)":"重心 (%1)")).arg("m"),
+                                             int(columns.size()),{"X","Y","Z"}});
+                        for(int axis=X;axis<=Z;++axis){
+                            table.headers.append(uiText(itemFields[axis].title));
+                            columns.push_back({axis,tank});
+                        }
+                    }
+                    col=Z;
+                    continue;
+                }
                 if(std::none_of(items.begin(),items.end(),[col](const auto& item){
                     return usesItemColumn(item.toObject()["kind"].toString(),ItemColumn(col));
                 }))continue;
                 table.headers.append(uiText(itemFields[col].title));
-                columns.push_back(col);
+                columns.push_back({col});
             }
             for(auto entry:items){
                 const auto item=entry.toObject();const auto kind=item["kind"].toString();
                 QStringList cells;
-                for(int col:columns){
+                for(const auto& column:columns){
+                    const int col=column.field;
                     const auto v=item[itemFields[col].key];
                     if(col==Kind)cells<<uiText(itemTitle(kind));
                     else if(!usesItemColumn(kind,ItemColumn(col)))cells<<QStringLiteral("—");
+                    else if(pdf&&col>=X&&col<=Z&&column.tankCoordinate!=(itemShape(kind)>=0))cells<<QStringLiteral("—");
                     else cells<<(v.isDouble()?tableNumber::display(v.toDouble()):v.toString());
                 }
                 table.rows.append(cells);
             }
-            text+=report::render(table,html);
+            text+=renderTable(table);
         };
         appendWeights(uiText("所有工况都具有的重量项"),book["shared_items"].toArray());
         for(auto entry:book["cases"].toArray()){
@@ -1319,21 +1315,41 @@ QString HydroDialog::reportText(bool html)const{
             if(row["status"]!="ok"&&value(row,field.first).isUndefined()&&field.first!="message")continue;
             results.rows.append({label,cell(row,field.first),units});
         }
-        text+=report::render(results,html);
+        text+=renderTable(results);
     }else{
         if(inputs["use_loading_book"].toBool()){
             const auto book=inputs["loading_book"].toObject();
             for(auto c:book["cases"].toArray()){
                 const auto name=c.toArray()[0].toString().trimmed();
                 report::Table eq{name+" · "+uiText("正浮角 0°"),headings,{}, {}};
+                if(pdf){
+                    eq.headers.clear();
+                    eq.groups={
+                        {QString(uiText("总重心"))+" ("+unit+")",1,{"X","Y","Z"}},
+                        {QString(uiText("垂线吃水 (%1)")).arg(unit),5,{uiText("艉"),uiText("艏")}}
+                    };
+                }
                 report::Table curve{name+" · GZ",{uiText("横倾角 (°)"),"GZ ("+unit+")",uiText("状态")},{},{}};
                 report::Table criteria{uiText("自定义 GZ 衡准"),{uiText("横倾角 (°)"),uiText("要求值")+QString(" (")+unit+")",uiText("计算值")+QString(" (")+unit+")",uiText("裕量")+QString(" (")+unit+")",uiText("判定")},{},{}};
                 for(auto item:rows){auto r=item.toObject();if(r["case_name"]!=name)continue;
-                    if(r["heel"].toDouble()==0)for(auto col:columns_)if(QStringList{"target_displacement","lcg","tcg","vcg","gg0","aft_draft","forward_draft"}.contains(col.first)){auto [title,u]=splitUnit(col.second);eq.rows.append({title,cell(r,col.first),u});}
+                    if(r["heel"].toDouble()==0){
+                        QStringList upright;
+                        for(const auto& col:columns_){
+                            if(!QStringList{"target_displacement","lcg","tcg","vcg","gg0","aft_draft","forward_draft"}.contains(col.first))continue;
+                            if(pdf){
+                                if(eq.headers.size()<7)eq.headers.append(col.second);
+                                upright.append(cell(r,col.first));
+                            }else{
+                                auto [title,u]=splitUnit(col.second);
+                                eq.rows.append({title,cell(r,col.first),u});
+                            }
+                        }
+                        if(pdf)eq.rows.append(upright);
+                    }
                     curve.rows.append({cell(r,"heel"),cell(r,"gz"),cell(r,"message")});
                     if(r.contains("required_gz")){auto margin=r["gz_margin"];criteria.rows.append({cell(r,"heel"),cell(r,"required_gz"),cell(r,"gz"),cell(r,"gz_margin"),!margin.isDouble()?uiText("未评估"):margin.toDouble()>=0?uiText("满足"):uiText("不满足")});}
                 }
-                text+=report::render(eq,html)+report::render(curve,html);if(!criteria.rows.isEmpty())text+=report::render(criteria,html);
+                text+=renderTable(eq)+renderTable(curve)+renderTable(criteria);
             }return text;
         }
         report::Table results{uiText("结果"),{},{},{int(columns_.size()-1)}};
@@ -1343,11 +1359,11 @@ QString HydroDialog::reportText(bool html)const{
             for(const auto& field:columns_)cells.append(cell(row,field.first));
             results.rows.append(cells);
         }
-        text+=report::render(results,html);
+        text+=renderTable(results);
     }
     return text;
 }
-QString HydroDialog::draftReport(bool html)const{
+QString HydroDialog::draftReport(bool html,const report::PdfTableLayout* pdf)const{
     const bool metric=result_["units"]=="metric";
     const QString unit=metric?"m":"ft";
     const auto inputs=result_["inputs"].toObject();
@@ -1371,7 +1387,7 @@ QString HydroDialog::draftReport(bool html)const{
         {uiText("横倾"),"0","°"},{uiText("纵倾差"),length("trim"),unit},
         {uiText("水密度"),summary(result_["water_density"].toDouble()),metric?"t/m³":"lb/ft³"},
         {uiText("附体系数"),summary(result_["appendage_coefficient"].toDouble())}};
-    QString report=report::heading("FreeShip 26 — "+windowTitle(),html,true)+report::render(conditions,html);
+    QString report=report::heading("FreeShip 26 — "+windowTitle(),html,true)+report::render(conditions,html,pdf);
     report::Table issues{uiText("需查看的工况"),{columnHeading("draft"),columnHeading("message")},{},{1}};
     for(const auto& entry:rows){
         const auto row=entry.toObject();
@@ -1380,10 +1396,18 @@ QString HydroDialog::draftReport(bool html)const{
         if(message.isEmpty())message=row["status"]=="ok"?uiText("部分量未提供"):uiText("未得到有效结果");
         issues.rows.append({reportNumber(row["draft"].toDouble(),"draft"),message});
     }
-    report+=report::render(issues,html);
+    report+=report::render(issues,html,pdf);
     for(const auto& group:tables){
         report::Table table{group.title,{},{},{}};
         for(const auto& key:group.keys)table.headers.append(columnHeading(key));
+        if(pdf&&group.keys.contains("buoyancy.0"))table.groups={
+            {QString(uiText("浮心 (%1)")).arg(unit),1,{"X","Y","Z"}},
+            {QString(uiText("稳心高度 (%1)")).arg(unit),4,{"KMt","KMl"}}
+        };
+        if(pdf&&group.keys.contains("waterplane_cog.0"))table.groups={
+            {QString(uiText("漂心 (%1)")).arg(unit),1,{"X","Y"}},
+            {QString(uiText("水线面惯性矩 (%1)")).arg(unit+"⁴"),3,{"Ix","Iy"}}
+        };
         for(const auto& entry:rows){
             const auto row=entry.toObject();QStringList cells;
             for(const auto& key:group.keys){
@@ -1393,7 +1417,7 @@ QString HydroDialog::draftReport(bool html)const{
             }
             table.rows.append(cells);
         }
-        report+=report::render(table,html);
+        report+=report::render(table,html,pdf);
     }
     return report;
 }
@@ -1421,7 +1445,16 @@ void HydroDialog::renderAuxiliaryPage(){
     const auto data=auxiliaryResults_.value(name);
     if(data.isEmpty()||table->model())return;
     QStringList layerLabels;for(const auto& layer:session_.model()->layers)layerLabels.append(layer.name);
-    table->setModel(new AuxiliaryTable(data["auxiliary"].toObject(),name,data["units"]=="metric",layerLabels,table));
+    const bool metric=data["units"]=="metric";
+    const QString unit=metric?"m":"ft";
+    table->setModel(new AuxiliaryTable(data["auxiliary"].toObject(),name,metric,layerLabels,table));
+    if(name=="Weights.txt")setStudioHeaderGroups(table,{
+        {QString(uiText("面积形心 (%1)")).arg(unit),4,{"X","Y","Z"}},
+        {QString(uiText("纵向范围 (%1)")).arg(unit),7,{uiText("最小 X"),uiText("最大 X")}}
+    });
+    else if(name=="Sterns.txt")setStudioHeaderGroups(table,{
+        {QString(uiText("水线端点 X (%1)")).arg(unit),1,{uiText("艉端"),uiText("艏端")}}
+    });
     data_motion::finishTableUpdate(table,"auxiliary:"+name);
     refreshStudioDataTable(table);
 }
@@ -1456,8 +1489,13 @@ QString HydroDialog::exportReport(const QString& path,const QString& format)cons
         QPdfWriter writer(&file);writer.setPageSize(QPageSize(QPageSize::A4));writer.setResolution(120);
         QTextDocument doc;
         if(mode_!="single")writer.setPageOrientation(QPageLayout::Landscape);
-        doc.setDefaultFont(QFont("Microsoft YaHei UI",9));
-        report::setHtml(&doc,reportText(true));
+        doc.setDefaultFont(studioTextFont(QFont("Microsoft YaHei UI",9)));
+        // QTextDocument::print uses 20 mm margins for an unpaginated document.
+        constexpr qreal printMarginsMm=40;
+        const qreal usableMm=writer.pageLayout().fullRect(QPageLayout::Millimeter).width()-printMarginsMm;
+        const int usableWidth=qFloor(usableMm*QFontMetricsF(doc.defaultFont()).fontDpi()/25.4-2*doc.documentMargin());
+        const report::PdfTableLayout layout{doc.defaultFont(),usableWidth};
+        report::setHtml(&doc,reportText(true,&layout));
         doc.print(&writer);
     }else{
         QByteArray bytes;if(format=="csv")bytes=csv();else if(format=="json")bytes=QJsonDocument(result_).toJson(QJsonDocument::Indented);else if(format=="txt")bytes=reportText(false).toUtf8();else return uiText("未知报告格式。");

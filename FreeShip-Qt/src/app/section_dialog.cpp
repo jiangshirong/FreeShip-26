@@ -51,7 +51,7 @@ private:
 }
 
 SectionDialog::SectionDialog(QWidget* parent):QDialog(parent) {
-    setWindowTitle(uiText("剖面线"));setStudioWindowIcon(this,"Sections");setWindowModality(Qt::WindowModal);resize(760,680);setMinimumSize(620,480);
+    setWindowTitle(uiText("剖面线"));setStudioWindowIcon(this,"Sections");setWindowModality(Qt::NonModal);resize(760,680);setMinimumSize(620,480);
     auto* layout=new QVBoxLayout(this);layout->setContentsMargins(10,10,10,10);
     auto action=[&](const QString& name,const QString& icon,const QString& operation){
         auto* a=new QAction(studioIcon(icon),name,this);a->setProperty("section_operation",operation);return a;
@@ -81,6 +81,13 @@ SectionDialog::SectionDialog(QWidget* parent):QDialog(parent) {
     table_->horizontalHeader()->setMinimumSectionSize(55);
     table_->horizontalHeader()->setSectionResizeMode(0,QHeaderView::Fixed);table_->setColumnWidth(0,180);
     table_->horizontalHeader()->setSectionResizeMode(2,QHeaderView::ResizeToContents);layout->addWidget(table_,1);
+    comparison_=new QPushButton(studioIcon("Sections"),uiText("横剖线对照…"));
+    comparison_->setProperty("section_operation","compare");
+    layout->addWidget(comparison_,0,Qt::AlignRight);
+    connect(comparison_,&QPushButton::clicked,this,[this]{
+        const auto ids=selectedIndices();
+        if(onComparison)onComparison(ids.isEmpty()?-1:*std::min_element(ids.cbegin(),ids.cend()));
+    });
     error_=new StudioMessage(StudioMessageRole::Warning);error_->setObjectName("SectionWarning");layout->addWidget(error_);
     connect(tabs_,&QTabWidget::currentChanged,this,[this]{refill();});
     connect(table_,&QTableWidget::itemSelectionChanged,this,&SectionDialog::selectionChanged);
@@ -173,7 +180,9 @@ void SectionDialog::setEditingEnabled(bool enabled){enabled_=enabled;table_->set
 void SectionDialog::updateActions(){
     addOne_->setEnabled(enabled_);addRange_->setEnabled(enabled_);clear_->setEnabled(enabled_&&table_->rowCount()>0);
     templates_->setVisible(kind()==1);
-    templates_->setEnabled(enabled_ && !pending_ && model_ && table_->rowCount()>0);
+    templates_->setEnabled(enabled_ && !pending_ && model_);
+    comparison_->setVisible(kind()==1);
+    comparison_->setEnabled(templates_->isEnabled() && table_->rowCount()>0);
 }
 void SectionDialog::selectionChanged(){updateActions();if(onSelection)onSelection(kind(),pending_?QSet<int>{}:selectedIndices());}
 void SectionDialog::showError(const QString& message){error_->setText(message);error_->setVisible(!message.isEmpty());}
@@ -234,6 +243,7 @@ void SectionDialog::refill(){
 }
 void SectionDialog::add(bool range){
     if(!enabled_||!model_)return;
+    const int category=kind();const auto model=model_;
     QDialog dialog(this);setStudioWindowIcon(&dialog,range?"AddRange":"AddOne");dialog.setAttribute(Qt::WA_DontShowOnScreen,testAttribute(Qt::WA_DontShowOnScreen));dialog.setWindowTitle(range?uiText("批量新增剖面线"):uiText("新增剖面线"));
     auto* layout=new QVBoxLayout(&dialog);auto* form=new QFormLayout;layout->addLayout(form);
     auto field=[&](const QString& name,const QString& key,double value){auto* box=new QDoubleSpinBox;box->setProperty("section_field",key);box->setRange(-1e9,1e9);box->setDecimals(9);box->setValue(value);box->setSuffix(model_->units=="imperial"?" ft":" m");form->addRow(name,box);return box;};
@@ -252,15 +262,19 @@ void SectionDialog::add(bool range){
         for(int i=0;i<int(n);++i)positions.append(first->value()+i*step->value());
         dialog.accept();
     });
-    if(dialog.exec()==QDialog::Accepted&&onEdit)submit("add",kind(),{{"positions",positions}});
+    if(runStudioDialog(dialog)==QDialog::Accepted&&onEdit&&enabled_&&model_&&
+       model_->documentId==model->documentId&&model_->units==model->units)
+        submit("add",category,{{"positions",positions}});
 }
 void SectionDialog::clearCurrent(){
     if(!enabled_)return;
     if(!model_||table_->rowCount()==0)return;
+    const auto model=model_;const int category=kind();
     QDialog dialog(this);setStudioWindowIcon(&dialog,"DeleteMany");dialog.setAttribute(Qt::WA_DontShowOnScreen,testAttribute(Qt::WA_DontShowOnScreen));dialog.setWindowTitle(uiText("删除剖面线"));
     auto* layout=new QVBoxLayout(&dialog);layout->addWidget(new StudioMessage(StudioMessageRole::Warning,uiText("清空当前类别的全部剖面线？")));
     auto* buttons=new QDialogButtonBox(QDialogButtonBox::Yes|QDialogButtonBox::No);buttons->button(QDialogButtonBox::No)->setDefault(true);buttons->button(QDialogButtonBox::Yes)->setAutoDefault(false);
     buttons->button(QDialogButtonBox::Yes)->setText(uiText("确定"));buttons->button(QDialogButtonBox::No)->setText(uiText("取消"));
     connect(buttons,&QDialogButtonBox::accepted,&dialog,&QDialog::accept);connect(buttons,&QDialogButtonBox::rejected,&dialog,&QDialog::reject);layout->addWidget(buttons);
-    if(dialog.exec()==QDialog::Accepted&&onEdit)submit("clear",kind(),{});
+    if(runStudioDialog(dialog)==QDialog::Accepted&&onEdit&&enabled_&&model_==model)
+        submit("clear",category,{});
 }

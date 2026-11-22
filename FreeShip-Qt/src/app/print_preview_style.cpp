@@ -5,16 +5,76 @@
 #include <QAction>
 #include <QComboBox>
 #include <QCoreApplication>
+#include <QDialogButtonBox>
+#include <QDoubleSpinBox>
+#include <QFormLayout>
 #include <QGraphicsView>
 #include <QLineEdit>
 #include <QLabel>
 #include <QPrintPreviewDialog>
 #include <QPrintPreviewWidget>
+#include <QPrinter>
+#include <QPrinterInfo>
+#include <QPushButton>
+#include <QSpinBox>
 #include <QSet>
 #include <QToolBar>
 #include <QToolButton>
 
 namespace {
+QDialogButtonBox* confirmation(QDialog& dialog,QFormLayout& form){
+    auto* buttons=new QDialogButtonBox(QDialogButtonBox::Ok|QDialogButtonBox::Cancel);
+    form.addRow(buttons);
+    QObject::connect(buttons,&QDialogButtonBox::rejected,&dialog,&QDialog::reject);
+    QObject::connect(buttons,&QDialogButtonBox::accepted,&dialog,&QDialog::accept);
+    return buttons;
+}
+void previewPaper(QPrintPreviewDialog* preview,QPrintPreviewWidget* view,QPrinter& printer){
+    QDialog dialog(preview);dialog.setObjectName("PrintPageSetup");dialog.setWindowTitle(uiText("页面设置"));setStudioWindowIcon(&dialog,"Print");
+    auto layout=printer.pageLayout();layout.setUnits(QPageLayout::Millimeter);
+    auto* form=new QFormLayout(&dialog);
+    auto* paper=new QComboBox;
+    auto sizes=QPrinterInfo::printerInfo(printer.printerName()).supportedPageSizes();
+    if(sizes.isEmpty())for(const auto id:{QPageSize::A4,QPageSize::A3,QPageSize::Letter,QPageSize::Legal})sizes.append(QPageSize(id));
+    if(!sizes.contains(layout.pageSize()))sizes.prepend(layout.pageSize());
+    for(const auto& size:sizes)paper->addItem(size.name());
+    paper->setCurrentIndex(sizes.indexOf(layout.pageSize()));form->addRow(uiText("纸张"),paper);
+    auto* orientation=new QComboBox;
+    orientation->setObjectName("PrintPageOrientation");
+    orientation->addItems({uiText("纵向"),uiText("横向")});orientation->setCurrentIndex(layout.orientation()==QPageLayout::Landscape?1:0);
+    form->addRow(uiText("方向"),orientation);
+    const auto margins=layout.margins();
+    QList<QDoubleSpinBox*> fields;
+    for(const auto& edge:QList<QPair<QString,double>>{{uiText("左边距"),margins.left()},{uiText("上边距"),margins.top()},
+            {uiText("右边距"),margins.right()},{uiText("下边距"),margins.bottom()}}){
+        auto* field=new QDoubleSpinBox;field->setRange(0,1000);field->setSuffix(QStringLiteral(" mm"));field->setValue(edge.second);
+        form->addRow(edge.first,field);fields.append(field);
+    }
+    confirmation(dialog,*form);
+    if(runStudioDialog(dialog)!=QDialog::Accepted)return;
+    layout.setOrientation(orientation->currentIndex()==1?QPageLayout::Landscape:QPageLayout::Portrait);
+    layout.setPageSize(sizes.at(paper->currentIndex()),layout.minimumMargins());
+    layout.setMargins({fields[0]->value(),fields[1]->value(),fields[2]->value(),fields[3]->value()},QPageLayout::OutOfBoundsPolicy::Clamp);
+    if(printer.setPageLayout(layout))view->updatePreview();
+}
+void previewPrint(QPrintPreviewDialog* preview,QPrintPreviewWidget* view,QPrinter& printer){
+    const auto names=QPrinterInfo::availablePrinterNames();
+    QDialog dialog(preview);dialog.setObjectName("PrintDeviceSetup");dialog.setWindowTitle(uiText("打印"));setStudioWindowIcon(&dialog,"Print");
+    auto* form=new QFormLayout(&dialog);
+    auto* printers=new QComboBox;
+    printers->addItems(names);printers->setCurrentIndex(std::max(0,int(names.indexOf(printer.printerName()))));
+    form->addRow(uiText("打印机"),printers);
+    auto* copies=new QSpinBox;copies->setRange(1,999);copies->setValue(printer.copyCount());form->addRow(uiText("份数"),copies);
+    auto* color=new QComboBox;color->addItems({uiText("彩色"),uiText("灰度")});color->setCurrentIndex(printer.colorMode()==QPrinter::GrayScale?1:0);
+    form->addRow(uiText("颜色"),color);
+    auto* button=confirmation(dialog,*form)->button(QDialogButtonBox::Ok);
+    button->setText(uiText("打印"));button->setEnabled(!names.isEmpty());
+    if(runStudioDialog(dialog)!=QDialog::Accepted||printers->currentText().isEmpty())return;
+    const auto page=printer.pageLayout();
+    printer.setPrinterName(printers->currentText());printer.setPageLayout(page);
+    printer.setCopyCount(copies->value());printer.setColorMode(color->currentIndex()==1?QPrinter::GrayScale:QPrinter::Color);
+    if(printer.isValid())view->print();
+}
 // Keep Qt's original PrintSupport connections and widget actions. Only the
 // visible toolbar policy changes; orientation stays in the native page setup.
 class PreviewControls final:public QObject {
@@ -97,7 +157,7 @@ public:
     }
 };
 }
-void styleStudioPrintPreview(QPrintPreviewDialog* dialog,bool allowMultiPage){
+void styleStudioPrintPreview(QPrintPreviewDialog* dialog,bool allowMultiPage,QPrinter* printer){
     if(!dialog||dialog->property("studio_print_preview").toBool())return;
     dialog->setProperty("studio_print_preview",true);
     dialog->setProperty("studio_print_allow_multipage",allowMultiPage);
@@ -115,7 +175,18 @@ void styleStudioPrintPreview(QPrintPreviewDialog* dialog,bool allowMultiPage){
         const auto iconKey="PrintPreview"+QString::fromLatin1(role.second);
         const QSet<QString> iconRoles{"FitWidth","FitPage","ZoomIn","ZoomOut","Previous","Next","Overview","Setup","Print"};
         if(iconRoles.contains(QString::fromLatin1(role.second)))action->setIcon(studioIcon(iconKey));
-        action->setProperty("print_operation",role.second);break;
+        action->setProperty("print_operation",role.second);
+        const auto operation=QLatin1String(role.second);
+        if(printer&&(operation=="Setup"||operation=="Print")){
+            if(auto* view=dialog->findChild<QPrintPreviewWidget*>()){
+                QObject::disconnect(action,SIGNAL(triggered(bool)),nullptr,nullptr);
+                QObject::connect(action,&QAction::triggered,dialog,[dialog,view,printer,setup=operation=="Setup"]{
+                    if(setup)previewPaper(dialog,view,*printer);
+                    else previewPrint(dialog,view,*printer);
+                });
+            }
+        }
+        break;
     }
     for(auto* bar:dialog->findChildren<QToolBar*>()){
         bar->setObjectName("StudioPrintToolbar");bar->setIconSize({22,22});bar->setMovable(false);bar->setFloatable(false);

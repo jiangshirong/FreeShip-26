@@ -32,7 +32,7 @@ void MainWindow::backgroundAction(HullView* view,const QString& operation,QPoint
         QMessageBox dialog(QMessageBox::Question,uiText("背景影像"),message,QMessageBox::Yes|QMessageBox::No,this);
         dialog.setProperty("background_operation",operation);dialog.setDefaultButton(QMessageBox::No);
         dialog.button(QMessageBox::Yes)->setText(uiText("确认"));dialog.button(QMessageBox::No)->setText(uiText("取消"));
-        return dialog.exec()==QMessageBox::Yes&&current();
+        return runStudioDialog(dialog)==QMessageBox::Yes&&current();
     };
     if(operation=="import"){
         if(image&&!confirm(uiText("当前视图已有背景图片，是否替换？")))return;
@@ -40,7 +40,7 @@ void MainWindow::backgroundAction(HullView* view,const QString& operation,QPoint
         dialog.setProperty("background_operation","import_file");dialog.setFileMode(QFileDialog::ExistingFile);
         dialog.setLabelText(QFileDialog::Accept,uiText("打开"));dialog.setLabelText(QFileDialog::Reject,uiText("取消"));dialog.setLabelText(QFileDialog::FileName,uiText("文件名"));dialog.setLabelText(QFileDialog::FileType,uiText("文件类型"));
         dialog.setNameFilter(uiText("图片 (*.jpg *.jpeg *.bmp)"));if(workflow_)dialog.setOption(QFileDialog::DontUseNativeDialog);
-        if(dialog.exec()!=QDialog::Accepted||dialog.selectedFiles().size()!=1||!current())return;
+        if(runStudioDialog(dialog)!=QDialog::Accepted||dialog.selectedFiles().size()!=1||!current())return;
         const auto path=dialog.selectedFiles().first();QImageReader reader(path);
         session_.importBackground(view->backgroundView(),path,view->backgroundImportScale(reader.size().width()));return;
     }
@@ -61,7 +61,7 @@ void MainWindow::backgroundAction(HullView* view,const QString& operation,QPoint
         QDoubleSpinBox values[2];for(int i=0;i<2;++i){values[i].setRange(-1e9,1e9);values[i].setDecimals(8);values[i].setKeyboardTracking(false);
             values[i].setProperty("background_field",i?"coordinate_y":"coordinate_x");values[i].setValue(i?reference.y():reference.x());form->addRow((i?y:x)+"（"+units+"）",&values[i]);}
         buttons(dialog,layout);
-        if(dialog.exec()==QDialog::Accepted&&current()&&!view->calibrateBackgroundAt(position,{values[0].value(),values[1].value()}))
+        if(runStudioDialog(dialog)==QDialog::Accepted&&current()&&!view->calibrateBackgroundAt(position,{values[0].value(),values[1].value()}))
             showStatusMessage(uiText("比例无效，请选取非零参考位置并输入同方向的坐标。"),StudioMessageRole::Warning);
         return;
     }
@@ -70,7 +70,7 @@ void MainWindow::backgroundAction(HullView* view,const QString& operation,QPoint
         QVBoxLayout layout(&dialog);auto* form=new QFormLayout;layout.addLayout(form);QSpinBox value;
         value.setRange(0,255);value.setValue(operation=="alpha"?image->alpha:image->tolerance);value.setProperty("background_field",operation);
         form->addRow(operation=="alpha"?uiText("不透明度（0–255）"):uiText("颜色容差（0–255）"),&value);buttons(dialog,layout);
-        if(dialog.exec()==QDialog::Accepted&&current())session_.editBackground(view->backgroundView(),"update",{{"changes",QJsonObject{{operation,value.value()}}}});return;
+        if(runStudioDialog(dialog)==QDialog::Accepted&&current())session_.editBackground(view->backgroundView(),"update",{{"changes",QJsonObject{{operation,value.value()}}}});return;
     }
     if(operation=="export"){
         QFileDialog dialog(this,uiText("保存背景图片"),preferenceFileLocation("export",QFileInfo(session_.sourcePath()).path()));dialog.setProperty("background_operation","export_file");
@@ -78,7 +78,7 @@ void MainWindow::backgroundAction(HullView* view,const QString& operation,QPoint
         dialog.setLabelText(QFileDialog::Accept,uiText("保存"));dialog.setLabelText(QFileDialog::Reject,uiText("取消"));dialog.setLabelText(QFileDialog::FileName,uiText("文件名"));dialog.setLabelText(QFileDialog::FileType,uiText("文件类型"));
         connect(&dialog,&QFileDialog::filterSelected,&dialog,[&](const QString& filter){dialog.setDefaultSuffix(filter.contains("*.bmp")?"bmp":"jpg");});
         if(workflow_)dialog.setOption(QFileDialog::DontUseNativeDialog);
-        if(dialog.exec()!=QDialog::Accepted||dialog.selectedFiles().size()!=1||!current())return;
+        if(runStudioDialog(dialog)!=QDialog::Accepted||dialog.selectedFiles().size()!=1||!current())return;
         const auto path=dialog.selectedFiles().first();const bool bitmap=QFileInfo(path).suffix().compare("bmp",Qt::CaseInsensitive)==0;
         QSaveFile file(path);bool ok=file.open(QIODevice::WriteOnly);
         if(ok)ok=bitmap?image->pixels.save(&file,"BMP"):file.write(image->jpeg)==image->jpeg.size();

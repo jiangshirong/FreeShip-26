@@ -1,4 +1,5 @@
 // Hidden production callbacks and evidence; never desktop automation.
+#include "studio_ui.h"
 #include "main_window.h"
 #include "performance_dialog.h"
 #include "ui_language.h"
@@ -340,7 +341,7 @@ void MainWindow::performanceStep(const QString& operation){
                 auto* convert=button("water_temperature");if(!convert){unavailable("Temperature conversion unavailable");return;}
                 const QJsonValue before=performanceDialog_->inputs()["values"];
                 QTimer::singleShot(0,this,[this] {
-                    auto* dialog=qobject_cast<QInputDialog*>(QApplication::activeModalWidget());
+                    auto* dialog=qobject_cast<QInputDialog*>(frontStudioDialog());
                     if(!dialog){finishWorkflow("Temperature dialog did not open");return;}
                     dialog->setDoubleValue(performanceRequest_["water_temperature"].toDouble());
                     if(performanceRequest_["cancel_temperature"].toBool())dialog->reject();else dialog->accept();

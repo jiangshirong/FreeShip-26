@@ -66,7 +66,7 @@ class ColorEditor final : public QPushButton {
 public:
     explicit ColorEditor(QWidget* parent = nullptr) : QPushButton(parent) {
         connect(this, &QPushButton::clicked, this, [this] {
-            const auto color = QColorDialog::getColor(displayColor(property("colorValue").toUInt()), this, uiText("选择颜色"), QColorDialog::DontUseNativeDialog);
+            const auto color = studioChooseColor(displayColor(property("colorValue").toUInt()), this, uiText("选择颜色"), QColorDialog::DontUseNativeDialog);
             if (color.isValid()) setProperty("colorValue", storedColor(color));
         });
     }
@@ -116,7 +116,7 @@ ProjectDialog::ProjectDialog(const fs::ModelSnapshot& snapshot, QWidget* parent)
     setStudioWindowIcon(this,"ProjectSettings");
     resize(960, 720);
     setMinimumSize(500, 360);
-    setModal(true);
+
     auto& s = *state_;
     s.initialUnits = s.units = snapshot.units;
     s.original=projectValues(snapshot);

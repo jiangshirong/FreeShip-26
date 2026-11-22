@@ -169,6 +169,7 @@ struct DisplayData {
     QVector<DisplayPoint> points;
     QVector<DisplayEdge> edges;
     QVector<DisplayFace> faces;
+    QVector<fs::presentation::Segment> surfaceCreases, mirroredSurfaceCreases;
     QHash<fs::EntityId, int> pointIndices;
     mutable std::unique_ptr<HullGpu> gpu;
     mutable bool gpuAttempted=false;
@@ -264,6 +265,27 @@ std::shared_ptr<const DisplayData> displayData(std::shared_ptr<const fs::ModelSn
                             mirrored(triangle.vertices[1])},color,source,true);
         }
     }
+    if (const auto& topology = snapshot.surfaceTopology) {
+        const double split = fs::presentation::splitLocation(snapshot);
+        for (const auto& crease : topology->creases) {
+            bool visible = false, symmetric = false;
+            for (const auto id : crease.layers) {
+                const auto* layer = layers.value(id);
+                if (!visibleLayer(layer)) continue;
+                visible = true;
+                symmetric |= layer->symmetric;
+            }
+            if (!visible) continue;
+            const auto a = topology->points[crease.points[0]], b = topology->points[crease.points[1]];
+            if (splitBody) {
+                result->surfaceCreases.append(fs::presentation::bodySegments(a,b,split));
+            } else {
+                result->surfaceCreases.append(fs::presentation::Segment{a,b});
+                if (bothSides && symmetric && (a.y != 0 || b.y != 0))
+                    result->mirroredSurfaceCreases.append(fs::presentation::Segment{mirrored(a),mirrored(b)});
+            }
+        }
+    }
     QSet<fs::EntityId> owned,visible;
     QSet<QPair<fs::EntityId,fs::EntityId>> ownedEdges,visibleEdges,symmetricEdges;
     auto edgeKey=[](fs::EntityId a,fs::EntityId b) {return qMakePair(qMin(a,b),qMax(a,b));};
@@ -329,6 +351,9 @@ struct HullView::State {
     QSet<fs::EntityId> selection;
     HullEntity kind=HullEntity::Point;
     QSet<fs::EntityId> entities;
+    QString plateDiagnosticDocument;
+    quint64 plateDiagnosticRevision=0;
+    QVector<QVector<fs::Vec3>> plateDiagnosticFaces;
     bool studio=false,fillVisible=true,controlNetVisible=true;
     mutable bool paintedHull=false;
     QSet<fs::EntityId> hiddenControlLayers,visibilityChanges;
@@ -654,17 +679,19 @@ struct HullView::State {
             (kind==2&&(projection==HullProjection::Body||projection==HullProjection::Plan))||
             (kind==3&&(projection==HullProjection::Profile||projection==HullProjection::Body));
     }
-    fs::presentation::ViewOverlay viewOverlay(const QFont& font,bool motion)const{
+    fs::presentation::ViewOverlay viewOverlay(const QFont& font,const fs::curveEdit::Motion* motion)const{
         if(!snapshot)return {};
         const bool hydro=hydroVisible&&!fillVisible;
-        const auto build=[&]{return fs::presentation::makeOverlay(*snapshot,int(projection),gridVisible,hydro,font,
-            [this](auto point){return projectPoint(point).pixel;},sectionVisible);};
+        const auto project=[this](auto point){return projectPoint(point).pixel;};
+        const auto build=[&]{return fs::presentation::makeOverlay(*snapshot,int(projection),gridVisible,hydro,font,project,sectionVisible);};
         if(!motion)return build();
         const auto language=uiLanguage();
         if(animatedOverlay.model.lock()!=snapshot||animatedOverlay.camera!=cameraRevision||
            animatedOverlay.grid!=gridVisible||animatedOverlay.hydro!=hydro||animatedOverlay.visible!=sectionVisible||
            animatedOverlay.font!=font||animatedOverlay.language!=language)
             animatedOverlay={snapshot,cameraRevision,gridVisible,hydro,sectionVisible,font,language,build()};
+        if(const auto frame=motion->referenceFrame(motion->progress()))
+            fs::presentation::updateHorizontalReferences(animatedOverlay.geometry,*snapshot,int(projection),font,project,*frame);
         return animatedOverlay.geometry;
     }
     QMatrix4x4 camera(QSize size) const {
@@ -917,6 +944,13 @@ void HullView::setSnapshot(std::shared_ptr<const fs::ModelSnapshot> snapshot,
     update();
 }
 std::shared_ptr<const fs::ModelSnapshot> HullView::snapshot() const { return state_->committedSnapshot; }
+void HullView::setPlateDiagnosticFaces(const QString& document, quint64 revision, QVector<QVector<fs::Vec3>> faces){
+    if(faces.isEmpty()&&state_->plateDiagnosticFaces.isEmpty())return;
+    state_->plateDiagnosticDocument=document;
+    state_->plateDiagnosticRevision=revision;
+    state_->plateDiagnosticFaces=std::move(faces);
+    update();
+}
 void HullView::setPendingPointMoves(const QVector<fs::PointMove>& moves){
     if(moves.isEmpty()&&state_->pendingPointPositions.isEmpty())return;
     state_->pendingPointPositions.clear();
@@ -1120,6 +1154,9 @@ void HullView::contextMenuEvent(QContextMenuEvent* event){
     finishPresentation();
     auto* menu=new QMenu(this);menu->setAttribute(Qt::WA_DeleteOnClose);
     menu->setAttribute(Qt::WA_DontShowOnScreen,testAttribute(Qt::WA_DontShowOnScreen));
+    if(onPopulateSelectionMenu&&onPopulateSelectionMenu(*menu)){
+        menu->popup(event->globalPos());event->accept();return;
+    }
     auto add=[&](QMenu* owner,const QString& text,const QString& operation,auto callback){
         auto* action=owner->addAction(text);
         action->setProperty("view_operation",operation);
@@ -1477,7 +1514,7 @@ void HullView::draw(QPainter& painter,qreal dpr,bool final,bool forceSoftware,in
         const auto* editMotion=!final&&state_->curveEditMotion&&state_->curveEditMotion->active()?state_->curveEditMotion.get():nullptr;
         const double editProgress=editMotion?editMotion->progress():0.;
         QFont annotationFont=studioTextFont(QFont("Arial",snapshot?snapshot->overlay.fontSize:9));
-        const auto overlay=state_->viewOverlay(annotationFont,editMotion!=nullptr);
+        const auto overlay=state_->viewOverlay(annotationFont,editMotion);
         auto strokes=[&](const QVector<Stroke>& lines){
             QVector<QLineF> batch;
             for(qsizetype start=0;start<lines.size();){
@@ -1719,6 +1756,25 @@ void HullView::draw(QPainter& painter,qreal dpr,bool final,bool forceSoftware,in
             }
             painter.restore();
         }
+        if (!state_->fillVisible && !preview) {
+            QVector<QLineF> lines;
+            const QRectF clip = QRectF(rect()).adjusted(-1,-1,1,1);
+            const auto addCreases = [&](const auto& segments) {
+                for (const auto& segment : segments) {
+                    const QLineF line(project(segment[0]), project(segment[1]));
+                    if (line.length() >= 1. && clip.intersects(
+                            QRectF(line.p1(), line.p2()).normalized().adjusted(-1,-1,1,1)))
+                        lines.append(line);
+                }
+            };
+            addCreases(data->surfaceCreases);
+            if (state_->projection != HullProjection::Profile) addCreases(data->mirroredSurfaceCreases);
+            if (!lines.isEmpty()) {
+                painter.setPen(QPen(state_->preferred("creasecolor", Qt::black), 1));
+                painter.drawLines(lines);
+                state_->paintedHull = true;
+            }
+        }
         // The annotation collision pass uses the same unmirrored screen edges and
         // points as the control net. Collect them once, in original model order.
         QVector<QLineF> labelEdges;
@@ -1854,6 +1910,21 @@ void HullView::draw(QPainter& painter,qreal dpr,bool final,bool forceSoftware,in
                 for(const auto& p:state_->controlPolygons(points)){QPolygonF polygon;for(auto point:p)polygon.append(project(point));painter.drawPolygon(polygon);}
             }
         }
+        if(!final&&!state_->plateDiagnosticFaces.isEmpty()&&snapshot->documentId==state_->plateDiagnosticDocument&&
+           snapshot->revision==state_->plateDiagnosticRevision){
+            painter.save();
+            painter.setPen(QPen(QColor(189,100,11),2));
+            painter.setBrush(QColor(246,155,41,75));
+            for(const auto& face:state_->plateDiagnosticFaces){
+                if(!snapshot->bothSides&&std::all_of(face.begin(),face.end(),[](auto p){return p.y<0;}))continue;
+                for(const auto& part:state_->controlPolygons(face)){
+                    QPolygonF polygon;
+                    for(auto point:part)polygon.append(project(point));
+                    painter.drawPolygon(polygon);
+                }
+            }
+            painter.restore();
+        }
         if (state_->gesture==State::Gesture::Box && state_->moved) {
             painter.setPen(QPen(QColor(36,106,175),1,Qt::DashLine));
             painter.setBrush(QColor(36,106,175,28));
@@ -1896,15 +1967,6 @@ void HullView::draw(QPainter& painter,qreal dpr,bool final,bool forceSoftware,in
         state_->evidence.insert("projection_title_text_width",QFontMetricsF(titleFont).horizontalAdvance(title));
         state_->evidence.insert("projection_title_available_width",titleRect.width());
         state_->evidence.insert("projection_title_rect",QJsonArray{titleRect.x(),titleRect.y(),titleRect.width(),titleRect.height()});
-    }
-    if(state_->fillVisible&&state_->shadeMode!=HullShade::Flat&&data&&data->analysis){
-        QString text;
-        if(state_->shadeMode==HullShade::Gaussian)text=QString(uiText("角亏（°）：%1 至 %2；灰色：边界或无法评估")).arg(data->analysis->minimum,0,'g',4).arg(data->analysis->maximum,0,'g',4);
-        else if(state_->shadeMode==HullShade::Developable)text=uiText("绿：角亏接近零；红：非零；灰：无法评估");
-        else text=uiText("斑马纹 · 检查曲面法向连续性");
-        painter.save();painter.setFont(QApplication::font());const auto box=painter.fontMetrics().boundingRect(QRect(8,0,qMax(1,width()-16),100),Qt::TextWordWrap,text);
-        QRect area(4,height()-box.height()-10,width()-8,box.height()+6);
-        painter.fillRect(area,QColor(246,249,247,235));painter.setPen(QColor(30,53,50));painter.drawText(area.adjusted(4,3,-4,-3),Qt::TextWordWrap,text);painter.restore();
     }
     painter.setPen(QColor(215,222,228));painter.setBrush(Qt::NoBrush);
     painter.drawRect(rect().adjusted(0,0,-1,-1));

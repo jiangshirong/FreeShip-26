@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 // Hidden production actions. No native desktop input or user settings.
+#include "studio_ui.h"
 #include "main_window.h"
 #include <QAction>
 #include <QApplication>
@@ -40,7 +41,7 @@ void MainWindow::shadingStep(){
             auto* root=menu(perspective);auto* save=discover(root,"view_operation","save_image");if(!save)return;const auto path=workflowOutput_+QString("/mode-%1-export.png").arg(mode);const auto expected=perspective->image();
             // Poll like the viewport workflow: the hidden modal dialog may register after the first nested event pass.
             bool handled=false;QTimer picker;picker.setInterval(10);QElapsedTimer deadline;deadline.start();
-            connect(&picker,&QTimer::timeout,this,[&]{auto* file=qobject_cast<QFileDialog*>(QApplication::activeModalWidget());if(!file||file->property("view_operation")!="save_image_file")return;picker.stop();handled=true;file->selectFile(path);QMetaObject::invokeMethod(file,"accept",Qt::DirectConnection);});
+            connect(&picker,&QTimer::timeout,this,[&]{auto* file=qobject_cast<QFileDialog*>(frontStudioDialog());if(!file||file->property("view_operation")!="save_image_file")return;picker.stop();handled=true;file->selectFile(path);QMetaObject::invokeMethod(file,"accept",Qt::DirectConnection);});
             picker.start();save->trigger();root->hide();
             while(!handled&&deadline.elapsed()<10000)QApplication::processEvents(QEventLoop::AllEvents,20);
             if(!handled){finishWorkflow("Missing safe image dialog");return;}

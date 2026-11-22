@@ -23,6 +23,7 @@
 #include <QSpinBox>
 #include <QTabWidget>
 #include <QThread>
+#include <QToolButton>
 
 void MainWindow::openExchange(bool importing,const QString& format){
     if(session_.busy()||(!importing&&!session_.ready()))return;
@@ -33,11 +34,13 @@ void MainWindow::openExchange(bool importing,const QString& format){
     dialog.exec();exchangeDialog_=nullptr;
     if(exchangeWorkflow_){
         const auto command=exchangeRequest_["commands"].toArray()[exchangeIndex_].toObject();const auto key=command["name"].toString();bool expectFailure=command["expect_failure"].toBool();
-        const bool declined=command.contains("confirm_zero_faces")&&!command["confirm_zero_faces"].toBool();
+        const bool declined=(command.contains("confirm_zero_faces")&&!command["confirm_zero_faces"].toBool())||
+                            (command.contains("confirm_obj_fit")&&!command["confirm_obj_fit"].toBool());
         const bool keptFile=command.contains("confirm_overwrite")&&!command["confirm_overwrite"].toBool();
         if(command["cancel"].toBool()||command["cancel_save"].toBool()||declined||keptFile)workflowCase(key+".cancelled",!dialog.succeeded()&&dialog.failure().isEmpty(),dialog.failure());
         else workflowCase(key+".completed",expectFailure?!dialog.failure().isEmpty():dialog.succeeded(),dialog.failure());
         if(dialog.printHull())workflowArtifacts_[key+"_shell_final"]=dialog.printHull()->evidence();
+        if(!dialog.objFitEvidence().isEmpty())workflowArtifacts_[key+"_obj_fit"]=dialog.objFitEvidence();
         if(session_.ready())captureWorkflow(key);
         workflowArtifacts_[key+"_error"]=dialog.failure();
         if(importing&&!expectFailure&&!declined&&format!="part"&&format!="waves")workflowCase(key+".new-unsaved-document",session_.modified()&&!session_.canUndo()&&session_.sourcePath().isEmpty());
@@ -65,8 +68,14 @@ void MainWindow::exchangeStep(const QString& method){
     }
     auto commands=exchangeRequest_["commands"].toArray();if(exchangeIndex_>=commands.size()){finishWorkflow();return;}
     auto c=commands[exchangeIndex_].toObject();auto action=c["method"].toString();auto key=c["name"].toString();
-    if(action=="save"){session_.save(c["path"].toString());return;}
-    if(action=="reopen"){session_.load(c["path"].toString());return;}
+    if(action=="save"){
+        if(!session_.save(c["path"].toString()))finishWorkflow(key+": save request did not start");
+        return;
+    }
+    if(action=="reopen"){
+        if(!session_.load(c["path"].toString()))finishWorkflow(key+": reopen request did not start");
+        return;
+    }
     if(action=="undo"){session_.undo();return;}if(action=="redo"){session_.redo();return;}
     const auto operation=action+'_'+c["format"].toString();QList<QAction*> entries;for(auto*a:findChildren<QAction*>())if(a->property("operation")==operation)entries.append(a);
     if(entries.size()!=1||!entries[0]->isEnabled()){workflowCases_.append(QJsonObject{{"name",key+".entry"},{"status","not_run"}});++exchangeIndex_;QTimer::singleShot(0,this,[this]{exchangeStep("advance");});return;}
@@ -108,6 +117,42 @@ void MainWindow::exchangeStep(const QString& method){
         for(auto*w:d->findChildren<QLineEdit*>()){auto key=w->property("exchange_number").toString();auto refs=options["references"].toObject();if(refs.contains(key))w->setText(refs[key].isString()?refs[key].toString():QString::number(refs[key].toDouble(),'g',17));}
         for(auto*w:d->findChildren<QCheckBox*>()){auto field=w->property("exchange_field").toString();if(options.contains(field))w->setChecked(options[field].toBool());}
         for(auto*w:d->findChildren<QComboBox*>()){auto field=w->property("exchange_field").toString();if(options.contains(field))w->setCurrentIndex(w->findData(options[field].toString()));}
+        if(options["obj_import_mode"]=="fit"){
+            QToolButton *relative=nullptr,*manual=nullptr;
+            QLineEdit* value=nullptr;
+            for(auto* button:d->findChildren<QToolButton*>()){
+                const auto mode=button->property("obj_tolerance_mode").toString();
+                if(mode=="relative")relative=button;
+                if(mode=="manual")manual=button;
+            }
+            for(auto* edit:d->findChildren<QLineEdit*>())
+                if(edit->property("obj_tolerance_value").toBool())value=edit;
+            if(relative&&manual&&value){
+                const auto tolerance=options["references"].toObject()["obj_tolerance_mm"];
+                if(!tolerance.isUndefined())
+                    value->setText(tolerance.isString()?tolerance.toString():QString::number(tolerance.toDouble(),'g',17));
+                if(c["check_obj_tolerance_toggle"].toBool()){
+                    workflowCase(key+".relative-default",relative->isChecked()&&!manual->isChecked()&&
+                                 !value->isVisible()&&!value->isEnabled());
+                    const int slotWidth=manual->width();
+                    manual->click();
+                    workflowCase(key+".manual-enables-input",manual->isChecked()&&!relative->isChecked()&&
+                                 value->isVisible()&&value->isEnabled()&&!value->isReadOnly());
+                    workflowCase(key+".manual-fills-slot",value->width()>=96&&value->width()==slotWidth);
+                    relative->click();
+                    workflowCase(key+".relative-disables-input",relative->isChecked()&&!manual->isChecked()&&
+                                 !value->isVisible()&&!value->isEnabled());
+                }
+                const auto fallback=options["references"].toObject().contains("obj_tolerance_mm")?"manual":"relative";
+                if(options["obj_tolerance_mode"].toString(fallback)=="manual")manual->click();
+            }else if(c["check_obj_tolerance_toggle"].toBool()){
+                workflowCases_.append(QJsonObject{{"name",key+".tolerance-toggle"},{"status","not_run"}});
+            }
+        }
+        if(options["control_net"].toBool()&&!options.contains("obj_import_mode")){
+            for(auto* w:d->findChildren<QComboBox*>())
+                if(w->property("exchange_field")=="obj_import_mode")w->setCurrentIndex(w->findData("control"));
+        }
         for(auto*w:d->findChildren<QComboBox*>()){auto key=w->property("exchange_parameter").toString();auto refs=options["references"].toObject();if(refs.contains(key))w->setCurrentIndex(w->findData(refs[key].toVariant()));}
         for(auto*w:d->findChildren<QSpinBox*>()){auto field=w->property("exchange_count").toString();if(options.contains(field))w->setValue(options[field].toInt());}
         if(options["print_shell"].toBool() && d->printHull()){
@@ -133,16 +178,18 @@ void MainWindow::exchangeStep(const QString& method){
         for(auto* tabs:d->findChildren<QTabWidget*>())if(tabs->property("exchange_tabs").toBool()){int original=tabs->currentIndex();for(int i=0;i<tabs->count();++i){tabs->setCurrentIndex(i);d->grab().save(workflowOutput_+"/views/"+key+"-tab-"+QString::number(i)+".png");}tabs->setCurrentIndex(original);}
         const QDir workspace(QFileInfo(QFileInfo(session_.modelPath()).absolutePath()).absolutePath());
         const auto previous=workspace.entryList({"request-*"},QDir::Dirs|QDir::NoDotAndDotDot);
-        if(c.contains("confirm_zero_faces")){
+        if(c.contains("confirm_zero_faces")||c.contains("confirm_obj_fit")){
             // Separate timer: the submission timer is still dispatching while
             // the production confirmation dialog runs its nested event loop.
             auto* confirmation=new QTimer(d);confirmation->setInterval(10);
             connect(confirmation,&QTimer::timeout,d,[this,d,c,key,confirmation]{
                 for(auto* message:d->findChildren<QMessageBox*>())if(message->isVisible()){
                     confirmation->stop();confirmation->deleteLater();
-                    workflowCase(key+".zero-face-warning-default-cancel",message->defaultButton()==message->button(QMessageBox::No));
-                    workflowArtifacts_[key+"_zero_face_warning"]=message->text();
-                    message->button(c["confirm_zero_faces"].toBool()?QMessageBox::Yes:QMessageBox::No)->click();return;
+                    const bool fit=c.contains("confirm_obj_fit");
+                    workflowCase(key+(fit?".fit-review-default-cancel":".zero-face-warning-default-cancel"),
+                                 message->defaultButton()==message->button(QMessageBox::No));
+                    workflowArtifacts_[key+(fit?"_fit_confirmation":"_zero_face_warning")]=message->text();
+                    message->button(c[fit?"confirm_obj_fit":"confirm_zero_faces"].toBool()?QMessageBox::Yes:QMessageBox::No)->click();return;
                 }
             });confirmation->start();
         }

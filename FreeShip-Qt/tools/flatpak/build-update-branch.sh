@@ -62,6 +62,7 @@ sed -e 's/^Name=.*/Name=FreeShip 26 (Update Test)/' -e '/^MimeType=/d' "$f" > "$
 unlink "$f"
 assets="$stage/files/share/icons/hicolor/scalable/apps"
 mv "$assets/$id.svg" "$assets/$id.UpdateTest.svg"
+install -Dm644 "$qt/src/app/assets/brand/freeship26.png" "$stage/files/share/icons/hicolor/256x256/apps/$id.UpdateTest.png"
 sed -i -e "s/^Icon=$id\$/Icon=$id.UpdateTest/" -e '/^Name\[zh_CN\]=/cName[zh_CN]=FS26 更新测试' "$stage/files/share/applications/$id.UpdateTest.desktop"
 mv "$stage/files/share/mime/packages/$id.xml" "$work/$mode.sample-mime.xml"
 # Metadata from the exported baseline already includes its finish args.

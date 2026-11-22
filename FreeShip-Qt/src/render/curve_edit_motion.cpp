@@ -15,6 +15,10 @@ double mix(double a,double b,double t){return a+(b-a)*t;}
 Vec3 mix(Vec3 a,Vec3 b,double t){return {mix(a.x,b.x,t),mix(a.y,b.y,t),mix(a.z,b.z,t)};}
 double distance(Vec3 a,Vec3 b){return std::hypot(a.x-b.x,a.y-b.y,a.z-b.z);}
 bool equal(Vec3 a,Vec3 b){return a.x==b.x&&a.y==b.y&&a.z==b.z;}
+bool sameReferences(const presentation::HorizontalReferences& a,const presentation::HorizontalReferences& b){
+    return equal(a.minimum,b.minimum)&&a.maximum.x==b.maximum.x&&a.maximum.y==b.maximum.y&&a.waterlineZ==b.waterlineZ;
+}
+presentation::HorizontalReferences references(const ModelSnapshot& model){return {model.minimum,model.maximum,model.waterlineZ};}
 bool equalShape(const Shape& a,const Shape& b){
     if(a.path.size()!=b.path.size()||a.cubics.size()!=b.cubics.size())return false;
     if(!std::equal(a.path.begin(),a.path.end(),b.path.begin(),equal))return false;
@@ -42,6 +46,9 @@ double pathLength(const QVector<Vec3>& path){
     for(qsizetype i=1;i<path.size();++i)length+=distance(path[i-1],path[i]);
     return length;
 }
+bool isClosed(const QVector<Vec3>& path,double length){
+    return distance(path.front(),path.back())<=length*1e-8;
+}
 double orientationCost(const QVector<Vec3>& a,const QVector<double>& aLengths,
                        const QVector<Vec3>& b,const QVector<double>& bLengths,bool reversed){
     double cost=0;
@@ -51,30 +58,45 @@ double orientationCost(const QVector<Vec3>& a,const QVector<double>& aLengths,
 double correspondence(const Shape& a,const Shape& b){
     if(a.path.size()<2||b.path.size()<2)return std::numeric_limits<double>::infinity();
     const double lengthA=pathLength(a.path),lengthB=pathLength(b.path);
-    const bool closedA=distance(a.path.front(),a.path.back())<=lengthA*1e-8;
-    const bool closedB=distance(b.path.front(),b.path.back())<=lengthB*1e-8;
-    if(closedA!=closedB||std::min(lengthA,lengthB)<=1e-12||std::min(lengthA,lengthB)<.5*std::max(lengthA,lengthB))
+    if(std::min(lengthA,lengthB)<=1e-12||isClosed(a.path,lengthA)!=isClosed(b.path,lengthB))
         return std::numeric_limits<double>::infinity();
     const auto aLengths=lengths(a.path),bLengths=lengths(b.path);
-    const double score=std::min(orientationCost(a.path,aLengths,b.path,bLengths,false),
-                                orientationCost(a.path,aLengths,b.path,bLengths,true));
-    return score<=.75*std::max(lengthA,lengthB)?score:std::numeric_limits<double>::infinity();
+    return std::min(orientationCost(a.path,aLengths,b.path,bLengths,false),
+                    orientationCost(a.path,aLengths,b.path,bLengths,true));
 }
-bool align(Shape& a,Shape& b){
+bool matchingSegments(const QVector<Vec3>& a,const QVector<Vec3>& b){
+    if(a.size()!=b.size())return false;
+    for(qsizetype i=1;i<a.size();++i){
+        const auto u=difference(a[i],a[i-1]),v=difference(b[i],b[i-1]);
+        const auto limit=.95*std::hypot(u.x,u.y,u.z)*std::hypot(v.x,v.y,v.z);
+        if(limit<=1e-12||u.x*v.x+u.y*v.y+u.z*v.z<limit)return false;
+    }
+    return true;
+}
+bool align(Shape& a,Shape& b,bool preserveCorners=false){
     if(!a.cubics.isEmpty()||!b.cubics.isEmpty())return !a.cubics.isEmpty()&&a.cubics.size()==b.cubics.size();
-    if(!std::isfinite(correspondence(a,b)))return false;
-    if(a.path.size()+b.path.size()>4096)return false;
+    const double lengthA=pathLength(a.path),lengthB=pathLength(b.path);
+    if(std::min(lengthA,lengthB)<=1e-12||isClosed(a.path,lengthA)!=isClosed(b.path,lengthB))return false;
     auto aLengths=lengths(a.path);const auto bLengths=lengths(b.path);
     if(orientationCost(a.path,aLengths,b.path,bLengths,true)<orientationCost(a.path,aLengths,b.path,bLengths,false)){
         std::reverse(a.path.begin(),a.path.end());
         aLengths=lengths(a.path);
     }
+    if(preserveCorners&&matchingSegments(a.path,b.path))return true;
     QVector<double> cuts;
     std::set_union(aLengths.begin(),aLengths.end(),bLengths.begin(),bLengths.end(),std::back_inserter(cuts));
     cuts.erase(std::unique(cuts.begin(),cuts.end()),cuts.end());
     QVector<Vec3> from,to;
     from.reserve(cuts.size());to.reserve(cuts.size());
-    for(double t:cuts){from.append(at(a.path,aLengths,t));to.append(at(b.path,bLengths,t));}
+    auto resample=[&cuts](const QVector<Vec3>& path,const QVector<double>& positions,QVector<Vec3>& result){
+        qsizetype end=1;
+        for(double t:cuts){
+            while(end<positions.size()&&positions[end]<=t)++end;
+            if(end==positions.size())result.append(path.back());
+            else result.append(mix(path[end-1],path[end],(t-positions[end-1])/(positions[end]-positions[end-1])));
+        }
+    };
+    resample(a.path,aLengths,from);resample(b.path,bLengths,to);
     a.path=std::move(from);b.path=std::move(to);
     return true;
 }
@@ -95,6 +117,10 @@ Shapes shapes(const ModelSnapshot& model){
 }
 }
 
+bool horizontalReferencesChanged(const ModelSnapshot& before,const ModelSnapshot& after){
+    return before.documentId==after.documentId&&before.units==after.units&&
+        before.overlay.present&&after.overlay.present&&!sameReferences(references(before),references(after));
+}
 bool onlyPointPositionsChanged(const ModelSnapshot& before,const ModelSnapshot& after){
     if(before.documentId!=after.documentId||before.units!=after.units||before.revision==after.revision||
         before.points.size()!=after.points.size()||before.edges.size()!=after.edges.size()||
@@ -167,6 +193,19 @@ static double eased(qint64 elapsed){
     return 1.-remaining*remaining*remaining;
 }
 double Motion::progress()const{return eased(elapsed_);}
+std::optional<presentation::HorizontalReferences> Motion::referenceFrame(double t)const{
+    if(!references_)return {};
+    const auto& [from,to]=*references_;
+    if(t<=0)return from;
+    if(t>=1)return to;
+    return presentation::HorizontalReferences{mix(from.minimum,to.minimum,t),mix(from.maximum,to.maximum,t),mix(from.waterlineZ,to.waterlineZ,t)};
+}
+std::optional<Motion::Track> Motion::pathTrack(QVector<Vec3> from,QVector<Vec3> to){
+    if(from.size()<2||to.size()<2)return {};
+    Track track{{std::move(from),{},{},1.},{std::move(to),{},{},1.},true};
+    if(!align(track.from,track.to,true))return {};
+    return track;
+}
 Shape Motion::sample(const Track& track,double t){
     if(t<=0)return track.from;
     if(t>=1)return track.to;
@@ -197,40 +236,68 @@ const Shapes& Motion::frameAt(qint64 elapsed)const{
 }
 
 std::shared_ptr<Motion> Motion::between(const ModelSnapshot& before,const ModelSnapshot& after,
-    const PointPositions& pending,const std::shared_ptr<Motion>& previous){
+    const PointPositions& pending,const std::shared_ptr<Motion>& previous,bool includeCurves){
+    auto motion=std::make_shared<Motion>();
+    if(before.overlay.present&&after.overlay.present){
+        auto from=references(before);
+        const auto to=references(after);
+        if(previous&&previous->active())from=previous->referenceFrame(previous->progress()).value_or(from);
+        if(!sameReferences(from,to))motion->references_=ReferenceTrack{from,to};
+    }
+    if(!includeCurves)return motion->references_?motion:nullptr;
     auto from=shapes(before),to=shapes(after);
-    if(previous&&previous->active())
-        for(const auto& [key,frame]:previous->frame())from[key]=frame;
+    Shapes exiting;
+    if(previous&&previous->active()){
+        const double progress=previous->progress();
+        for(const auto& [key,tracks]:previous->tracks()){
+            auto& current=from[key];current.clear();
+            for(const auto& track:tracks){
+                auto shape=sample(track,progress);
+                if(track.to.opacity>0)current.append(std::move(shape));
+                else if(shape.opacity>0)exiting[key].append(std::move(shape));
+            }
+        }
+    }
     for(const auto& curve:before.controlCurves)if(affects(curve,pending))
         for(auto& shape:from[{0,curve.id}])shape.cubics=preview(curve,before,pending,shape.cubics);
-    auto motion=std::make_shared<Motion>();
     std::set<Key> keys;
     for(const auto& [key,_]:from)keys.insert(key);
     for(const auto& [key,_]:to)keys.insert(key);
     for(const auto& key:keys){
         auto& old=from[key];auto& next=to[key];
-        if(old.size()==next.size()&&std::equal(old.begin(),old.end(),next.begin(),[](const auto& a,const auto& b){
+        const auto leaving=exiting.find(key);
+        if(leaving==exiting.end()&&old.size()==next.size()&&std::equal(old.begin(),old.end(),next.begin(),[](const auto& a,const auto& b){
             return a.color==b.color&&a.opacity==b.opacity&&equalShape(a,b);
         }))continue;
         auto& tracks=motion->tracks_[key];
         const auto leave=[&](const Shape& shape){auto faded=shape;faded.opacity=0;tracks.append({shape,std::move(faded)});};
         const auto enter=[&](const Shape& shape){auto faded=shape;faded.opacity=0;tracks.append({std::move(faded),shape});};
-        // Exact siblings survive splits and merges. Changed paths in such a
-        // group fade independently rather than being joined to the wrong branch.
-        const bool sameCount=old.size()==next.size()&&old.size()<=8;
+        const bool sameCount=old.size()==next.size();
         QVector<bool> used(next.size(),false);
-        for(auto a:old){
-            qsizetype match=-1;
+        QVector<qsizetype> matches(old.size(),-1);
+        qsizetype unmatched=0;
+        // Pair unchanged siblings first. A sole changed branch on the same
+        // section has a known counterpart even when it moves a long way.
+        for(qsizetype i=0;i<old.size();++i){
             for(qsizetype j=0;j<next.size();++j)
-                if(!used[j]&&equalShape(a,next[j])){match=j;break;}
+                if(!used[j]&&old[i].color==next[j].color&&equalShape(old[i],next[j])){matches[i]=j;used[j]=true;break;}
+            if(matches[i]<0)++unmatched;
+        }
+        if(leaving!=exiting.end())for(const auto& shape:leaving->second)leave(shape);
+        for(qsizetype i=0;i<old.size();++i){
+            auto a=old[i];
+            auto match=matches[i];
             if(match<0&&sameCount){
-                double first=std::numeric_limits<double>::infinity(),second=first;
-                for(qsizetype j=0;j<next.size();++j)if(!used[j]){
-                    const double cost=key.kind<=0&&old.size()==1?0.:correspondence(a,next[j]);
-                    if(cost<first){second=first;first=cost;match=j;}
-                    else second=std::min(second,cost);
+                if(unmatched==1)match=std::find(used.begin(),used.end(),false)-used.begin();
+                else if(unmatched<=8){
+                    double first=std::numeric_limits<double>::infinity(),second=first;
+                    for(qsizetype j=0;j<next.size();++j)if(!used[j]){
+                        const double cost=correspondence(a,next[j]);
+                        if(cost<first){second=first;first=cost;match=j;}
+                        else second=std::min(second,cost);
+                    }
+                    if(second<=first*1.25)match=-1;
                 }
-                if(second<=first*1.25)match=-1;
             }
             if(match>=0){
                 auto b=next[match];
@@ -243,7 +310,7 @@ std::shared_ptr<Motion> Motion::between(const ModelSnapshot& before,const ModelS
         }
         for(qsizetype i=0;i<next.size();++i)if(!used[i])enter(next[i]);
     }
-    if(motion->tracks_.empty())return {};
+    if(motion->tracks_.empty()&&!motion->references_)return {};
     return motion;
 }
 }

@@ -16,6 +16,7 @@ class QLabel;
 class StudioMessage;
 class QPushButton;
 class QSpinBox;
+class QToolButton;
 class GridPreviewPanel;
 class PrintHullPanel;
 class ExchangeDialog final:public QDialog {
@@ -29,6 +30,7 @@ public:
     QString failure()const;
     bool succeeded()const{return succeeded_;}
     bool busy()const;
+    QJsonObject objFitEvidence()const{return objFitEvidence_;}
     GridPreviewPanel* gridPreview()const{return preview_;}
     PrintHullPanel* printHull()const{return printHull_;}
     void reject()override;
@@ -37,12 +39,21 @@ public:
     std::function<bool(const QString&)> confirmOverwrite;
 private:
     void submit();
+    void startObjFit(const QString& path,const fs::exchange::Options& options);
+    void importPrepared(fs::exchange::Document document);
     QString chooseExportPath();
     void startSections(const QString& path);
     QJsonObject referenceValues() const;
     void finishSections(int code);
     ModelSession& session_;bool importing_,succeeded_=false;QString format_;
     QLineEdit* importPath_=nullptr;QComboBox* units_;QComboBox* encoding_=nullptr;QCheckBox *axes_,*control_,*symmetric_,*hidden_,*binary_,*closeDeck_;
+    QComboBox* objImportMode_=nullptr;
+    QCheckBox* objInferCreases_=nullptr;
+    QWidget* objToleranceRow_=nullptr;
+    QToolButton* objManualTolerance_=nullptr;
+    QLineEdit* objTolerance_=nullptr;
+    std::shared_ptr<std::atomic_bool> objCancel_;
+    QJsonObject objFitEvidence_;
     QMap<QString,QLineEdit*> references_;
     QMap<QString,QComboBox*> referenceChoices_;
     QSpinBox *columns_=nullptr,*rows_=nullptr;QCheckBox* intermediate_=nullptr;

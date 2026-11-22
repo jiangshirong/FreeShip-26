@@ -1,11 +1,13 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 #pragma once
 #include "auxiliary_geometry.h"
+#include "view_overlay.h"
 #include <QColor>
 #include <QHash>
 #include <QTimer>
 #include <map>
 #include <memory>
+#include <optional>
 
 namespace fs::curveEdit {
 using PointPositions=QHash<EntityId,Vec3>;
@@ -28,6 +30,7 @@ struct Shape {
 using Shapes=std::map<Key,QVector<Shape>>;
 
 bool onlyPointPositionsChanged(const ModelSnapshot& before,const ModelSnapshot& after);
+bool horizontalReferencesChanged(const ModelSnapshot& before,const ModelSnapshot& after);
 bool affects(const AuxiliaryCurve&,const PointPositions&);
 QVector<presentation::Cubic> preview(const AuxiliaryCurve&,const ModelSnapshot&,const PointPositions&,
                                    const QVector<presentation::Cubic>& basis);
@@ -39,12 +42,14 @@ public:
     using Tracks=std::map<Key,QVector<Track>>;
     Motion();
     static std::shared_ptr<Motion> between(const ModelSnapshot& before,const ModelSnapshot& after,
-        const PointPositions& pending,const std::shared_ptr<Motion>& previous);
+        const PointPositions& pending,const std::shared_ptr<Motion>& previous,bool includeCurves=true);
     void start();
     bool active() const;
     bool contains(Key key) const;
     const Tracks& tracks()const{return tracks_;}
     double progress()const;
+    std::optional<presentation::HorizontalReferences> referenceFrame(double progress)const;
+    static std::optional<Track> pathTrack(QVector<Vec3> from,QVector<Vec3> to);
     static Shape sample(const Track& track,double progress);
     QMetaObject::Connection onFrame(QObject* owner,std::function<void()> repaint);
     const Shapes& frame() const;
@@ -52,6 +57,8 @@ public:
 private:
     static qint64 now();
     Tracks tracks_;
+    struct ReferenceTrack {presentation::HorizontalReferences from,to;};
+    std::optional<ReferenceTrack> references_;
     QTimer timer_;
     qint64 start_=-1;
     qint64 elapsed_=0;

@@ -8,6 +8,7 @@
 #include "studio_view_grid.h"
 #include "section_dialog.h"
 #include "station_template_dialog.h"
+#include "station_comparison_dialog.h"
 #include <QDir>
 #include <QFileInfo>
 #include "history_shortcuts.h"
@@ -82,7 +83,7 @@ fs::EntityId chooseLayer(const fs::ModelSnapshot& model,QWidget* parent,const QS
     layout->addWidget(field);auto* buttons=new QDialogButtonBox(QDialogButtonBox::Ok|QDialogButtonBox::Cancel);
     QObject::connect(buttons,&QDialogButtonBox::accepted,&dialog,&QDialog::accept);
     QObject::connect(buttons,&QDialogButtonBox::rejected,&dialog,&QDialog::reject);layout->addWidget(buttons);
-    return dialog.exec()==QDialog::Accepted?field->currentData().toULongLong():0;
+    return runStudioDialog(dialog)==QDialog::Accepted?field->currentData().toULongLong():0;
 }
 }
 bool MainWindow::canEditDisplay() const {
@@ -163,7 +164,7 @@ void MainWindow::buildStudioShell() {
         if(!operation.isEmpty())a->setProperty("operation",operation);
         static const QSet<QString> windows{"add_point","add_face","assign_layer","delete","layer_properties",
             "translate","scale","rotate","extrude","mirror",
-            "model_check","develop_plates","sections","lines_window","shortcut_guide","tutorial"};
+            "model_check","compare_models","develop_plates","sections","lines_window","shortcut_guide","tutorial"};
         if(windows.contains(operation)||operation.startsWith("hydro_")||operation.startsWith("performance_"))
             a->setProperty("studio_opens_dialog",true);
         addAction(a);return a;
@@ -176,14 +177,13 @@ void MainWindow::buildStudioShell() {
     for(auto* child:root->actions())addAction(child);
     menuBar()->hide();auto* menu=action(uiText("菜单"),"Menu");menu->setMenu(root);
     open_->setIcon(studioIcon("Open"));save_->setIcon(studioIcon("Save"));
-    QMenu *selectionMenu,*pointMenu,*edgeMenu,*faceMenu,*layerMenu,*visibilityMenu,*transformMenu;
+    QMenu *selectionMenu,*pointMenu,*edgeMenu,*faceMenu,*layerMenu,*visibilityMenu;
     auto* selectionModes=group(uiText("选择"),"SelectAll",selectionMenu);
     selectionModes->setObjectName("StudioSelection");selectionModes->setProperty("operation","selection_modes");
     auto* edges=group(uiText("边"),"Edge",edgeMenu);auto* faces=group(uiText("面"),"Face",faceMenu);
     auto* points=group(uiText("点"),"Point",pointMenu);auto* layers=group(uiText("图层","collection"),"Layers",layerMenu);
     bindUiText(layers,"text","图层","collection");bindUiText(layerMenu,"title","图层","collection");
     auto* visibility=group(uiText("视图"),"Observe",visibilityMenu);
-    auto* transform=group(uiText("变换"),"Transform",transformMenu);
     auto* choices=new QActionGroup(this);choices->setExclusive(true);
     auto selection=[&](const QString& text,const QString& icon,HullEntity kind) {
         const auto key=kind==HullEntity::Point?"point":kind==HullEntity::Edge?"edge":kind==HullEntity::Face?"face":kind==HullEntity::Curve?"curve":"flow";
@@ -254,28 +254,51 @@ void MainWindow::buildStudioShell() {
     const QStringList operations{"translate","scale","rotate","extrude","mirror"};
     const QStringList transformNames{uiText("移动所选对象…"),uiText("缩放所选对象…"),uiText("旋转所选对象…"),uiText("挤出所选边…"),uiText("镜像所选面…")};
     const QStringList transformIcons{"Move","Scale","RotateCW","ExtrudeEdge","Mirror"};
+    QList<QAction*> transforms;
     for(int i=0;i<5;++i){auto* a=action(transformNames[i],transformIcons[i],operations[i]);advancedActions_[i]=a;
-        (i==3?edgeMenu:i==4?faceMenu:transformMenu)->addAction(a);connect(a,&QAction::triggered,this,[this,operation=operations[i]]{advancedDialog(operation);});}
+        if(i<3)transforms.append(a);else (i==3?edgeMenu:faceMenu)->addAction(a);
+        connect(a,&QAction::triggered,this,[this,operation=operations[i]]{advancedDialog(operation);});}
     QMenu* checksMenu=nullptr;
     auto* checks=group(uiText("模型检查"),"ModelCheck",checksMenu);
     auto* checkModel=action(uiText("模型检查"),"ModelCheck","model_check");
     checkModel->setProperty("studio_opens_dialog",true);
     checksMenu->addAction(checkModel);modelingActions_.append(checkModel);
     connect(checkModel,&QAction::triggered,this,&MainWindow::modelCheckDialog);
-    buildModelingActions(pointMenu,edgeMenu,faceMenu,layerMenu,visibilityMenu,transformMenu,checksMenu);
+    buildModelingActions(pointMenu,edgeMenu,faceMenu,layerMenu,visibilityMenu,transforms,checksMenu);
     visibilityMenu->addAction(markers);
+    auto* tools=group(uiText("工具"),"Tools",toolsMenu_);
+    bindUiText(tools,"text","工具");bindUiText(toolsMenu_,"title","工具");
+    compareModels_=action(uiText("比较船模…"),"Sections","compare_models");
+    compareModels_->setObjectName("StudioCompareModels");
+    connect(compareModels_,&QAction::triggered,this,[this]{openHullComparison();});
     QMenu* calculationsMenu=nullptr;auto* calculations=group(uiText("计算","menu"),"Calculate",calculationsMenu);
     bindUiText(calculations,"text","计算","menu");bindUiText(calculationsMenu,"title","计算","menu");
     platesAction_=action(uiText("板材展开"),"Develop","develop_plates");
-    platesAction_->setProperty("studio_opens_dialog",true);
-    // Also used by self-deleting viewport popups: leave mouse dispatch first.
-    connect(platesAction_,&QAction::triggered,this,&MainWindow::openPlates,Qt::QueuedConnection);
-    for(auto* view:views_)view->onPopulateContextMenu=[this,normals,curvature](QMenu& menu){
-        for(auto* item:menu.actions())
-            if(item->property("view_operation")=="save_image")setStudioFormatMenuAction(&menu,item,"png");
-        menu.addSeparator();
-        menu.addActions({normals,curvature,decreaseCurvature_,increaseCurvature_,platesAction_});
-    };
+    connect(platesAction_,&QAction::triggered,this,&MainWindow::openPlates);
+    toolsMenu_->addActions({compareModels_,platesAction_});
+    for(auto* view:views_){
+        view->onPopulateSelectionMenu=[this,transforms](QMenu& menu){
+            if(transformPoints().isEmpty())return false;
+            for(auto* source:transforms){
+                auto* entry=new QAction(&menu);
+                entry->setProperty("operation",source->property("operation"));
+                entry->setProperty("studio_opens_dialog",true);
+                const auto sync=[entry,source]{entry->setText(source->text());entry->setIcon(source->icon());entry->setEnabled(source->isEnabled());};
+                sync();
+                connect(source,&QAction::changed,entry,sync);
+                // Open dialogs after the self-deleting popup finishes mouse dispatch.
+                connect(entry,&QAction::triggered,source,&QAction::trigger,Qt::QueuedConnection);
+                menu.addAction(entry);
+            }
+            return true;
+        };
+        view->onPopulateContextMenu=[this,normals,curvature](QMenu& menu){
+            for(auto* item:menu.actions())
+                if(item->property("view_operation")=="save_image")setStudioFormatMenuAction(&menu,item,"png");
+            menu.addSeparator();
+            menu.addActions({normals,curvature,decreaseCurvature_,increaseCurvature_});
+        };
+    }
     const QStringList hydroModes{"single","table","cross"},hydroNames{uiText("设计静水力…"),uiText("静水力吃水表…"),uiText("稳性曲线与平衡…")};
     for(int i=0;i<3;++i){auto* a=action(hydroNames[i],"Hydrostatics","hydro_"+hydroModes[i]);hydroActions_.append(a);calculationsMenu->addAction(a);
         connect(a,&QAction::triggered,this,[this,mode=hydroModes[i]]{openHydro(mode);});}
@@ -333,7 +356,7 @@ void MainWindow::buildStudioShell() {
     connect(shortcuts,&QAction::triggered,this,[this]{
         while(showShortcutGuide(this,languageShortcut_,[this]{switchUiLanguage();})){}
     });
-    bar->addGroup({menu,selectionModes,edges,faces,points,layers,visibility,checks,transform,calculations},QColor(237,244,248));
+    bar->addGroup({menu,selectionModes,points,edges,faces,layers,visibility,checks,tools,calculations},QColor(237,244,248));
     bar->addGroup({project_,sections,lines},QColor(248,243,232));
     bar->addGroup({net,viewActions_[1],viewActions_[0],viewActions_[2],viewActions_[3]},QColor(229,239,223));
     auto* tutorial=action(uiText("教程"),"Tutorial","tutorial");tutorial->setProperty("studio_opens_dialog",true);
@@ -356,6 +379,26 @@ void MainWindow::layoutViews() {
     studio_view_grid::setVisibleCount(viewGrid_,count);
     });
 }
+void MainWindow::openHullComparison(int index,QWidget* sectionEditor){
+    if(!session_.ready() || session_.busy())return;
+    QVector<ComparisonSource> sources;
+    for(auto* other:documentWindows()){
+        const auto& session=other->session_;
+        if(other==this || !session.ready() || session.busy())continue;
+        QString label=QFileInfo(other->documentDisplayPath()).fileName();
+        if(label.isEmpty())label=uiText("未命名船模");
+        if(session.modified())label+=" *";
+        sources.append({label,QFileInfo(session.modelPath()).dir().filePath("native-input.json"),session.model(),session.calculationStatePath()});
+    }
+    QString currentName=QFileInfo(documentDisplayPath()).fileName();
+    if(currentName.isEmpty())currentName=uiText("未命名船模");
+    auto* dialog=new StationComparisonDialog(session_.model(),
+        QFileInfo(session_.modelPath()).dir().filePath("native-input.json"),index,
+        sectionEditor?sectionEditor:this,std::move(sources),!sectionEditor,session_.calculationStatePath(),currentName);
+    dialog->setAttribute(Qt::WA_DeleteOnClose);
+    dialog->setAttribute(Qt::WA_DontShowOnScreen,workflow_);
+    showStudioDialog(*dialog);
+}
 void MainWindow::editSections(){
     if(!session_.ready())return;
     if(!sections_){
@@ -366,17 +409,18 @@ void MainWindow::editSections(){
         sections_->onPredictionMismatch=[this]{session_.dropQueuedSectionCommands();};
         sections_->onEdit=[this](const QString& operation,int kind,QJsonObject fields){return session_.editSections(operation,kind,std::move(fields));};
         sections_->onSelection=[this](int kind,QSet<int> ids){for(auto* view:views_)view->highlightSections(kind,ids);};
+        sections_->onComparison=[this](int index){openHullComparison(index,sections_);};
         sections_->onTemplates=[this](QSet<int> ids){
             if(!session_.ready() || session_.busy()) return;
             const auto source=QFileInfo(session_.sourcePath());
             auto* dialog=new StationTemplateDialog(session_.model(),QFileInfo(session_.modelPath()).dir().filePath("native-input.json"),
                     source.dir().filePath(source.completeBaseName()+"-stations"),ids,sections_);
             dialog->setAttribute(Qt::WA_DeleteOnClose);dialog->setAttribute(Qt::WA_DontShowOnScreen,workflow_);
-            dialog->open();
+            showStudioDialog(*dialog);
         };
         connect(sections_,&QDialog::finished,this,[this]{for(auto* view:views_)view->highlightSections(0,{});});
     }
-    sections_->setSnapshot(session_.model());sections_->setEditingEnabled(!session_.busy()||session_.canQueueSectionEdits());sections_->show();sections_->raise();
+    sections_->setSnapshot(session_.model());sections_->setEditingEnabled(!session_.busy()||session_.canQueueSectionEdits());sections_->show();sections_->raise();sections_->activateWindow();
 }
 void MainWindow::openLayers(){
     if(!session_.ready())return;
@@ -408,31 +452,40 @@ void MainWindow::selectEntities(HullEntity kind,QSet<fs::EntityId> selected) {
 }
 void MainWindow::createPoint() {
     if(!session_.ready()||session_.busy())return;
+    const auto model=session_.model();
     QDialog dialog(this);setStudioWindowIcon(&dialog,"Point");dialog.setWindowTitle(uiText("新增控制点"));dialog.setAttribute(Qt::WA_DontShowOnScreen,workflow_);auto* layout=new QVBoxLayout(&dialog);
     auto* form=new QFormLayout;std::array<QDoubleSpinBox*,3> values{};
     for(int i=0;i<3;++i){auto* spin=new QDoubleSpinBox;values[i]=spin;spin->setRange(-1e9,1e9);spin->setDecimals(12);form->addRow(QString(QChar('X'+i))+" ("+(session_.model()->units=="metric"?"m":"ft")+")",spin);}
     layout->addLayout(form);auto* buttons=new QDialogButtonBox(QDialogButtonBox::Ok|QDialogButtonBox::Cancel);
     connect(buttons,&QDialogButtonBox::accepted,&dialog,&QDialog::accept);connect(buttons,&QDialogButtonBox::rejected,&dialog,&QDialog::reject);layout->addWidget(buttons);
-    if(dialog.exec()==QDialog::Accepted)session_.editTopology("add_point",{{"position",QJsonArray{values[0]->value(),values[1]->value(),values[2]->value()}}});
+    if(runStudioDialog(dialog)!=QDialog::Accepted)return;
+    if(!session_.ready()||session_.busy()||session_.model()->documentId!=model->documentId||session_.model()->units!=model->units){showError(uiText("船模已更改，请重新打开此窗口。"));return;}
+    session_.editTopology("add_point",{{"position",QJsonArray{values[0]->value(),values[1]->value(),values[2]->value()}}});
 }
 void MainWindow::createFace() {
     if(!session_.ready()||session_.busy()||selectionOrder_.size()<3)return;
-    const auto layer=chooseLayer(*session_.model(),this,uiText("新建面的图层"),workflow_);if(!layer)return;
+    const auto model=session_.model();
     QJsonArray ordered;for(auto id:selectionOrder_)ordered.append(double(id));
+    const auto layer=chooseLayer(*model,this,uiText("新建面的图层"),workflow_);if(!layer)return;
+    if(!session_.ready()||session_.busy()||session_.model()!=model){showError(uiText("船模已更改，请重新打开此窗口。"));return;}
     session_.editTopology("add_face",{{"ids",ordered},{"layer_id",double(layer)}});
 }
 void MainWindow::assignFaceLayer() {
     if(!session_.ready()||session_.busy()||entitySelection_.isEmpty())return;
-    const auto layer=chooseLayer(*session_.model(),this,uiText("所选面的图层"),workflow_);
-    if(layer)session_.editTopology("assign_layer",{{"ids",ids(entitySelection_)},{"layer_id",double(layer)}});
+    const auto model=session_.model();const auto selected=ids(entitySelection_);
+    const auto layer=chooseLayer(*model,this,uiText("所选面的图层"),workflow_);if(!layer)return;
+    if(!session_.ready()||session_.busy()||session_.model()!=model){showError(uiText("船模已更改，请重新打开此窗口。"));return;}
+    session_.editTopology("assign_layer",{{"ids",selected},{"layer_id",double(layer)}});
 }
 void MainWindow::deleteSelection() {
-    const auto selected=selectionKind_==HullEntity::Point?selection_:entitySelection_;
+    const auto kind=selectionKind_;
+    const auto selected=kind==HullEntity::Point?selection_:entitySelection_;
     if(!session_.ready()||session_.busy()||selected.isEmpty())return;
+    const auto model=session_.model();
     QDialog question(this);setStudioWindowIcon(&question,"DeleteSelected");question.setWindowTitle(uiText("删除所选对象"));
     question.setAttribute(Qt::WA_DontShowOnScreen,workflow_);
     auto* layout=new QVBoxLayout(&question);
-    const bool auxiliary=selectionKind_==HullEntity::Curve||selectionKind_==HullEntity::Flowline;
+    const bool auxiliary=kind==HullEntity::Curve||kind==HullEntity::Flowline;
     layout->addWidget(new StudioMessage(StudioMessageRole::Warning,auxiliary?uiText("删除所选曲线？船体控制网会保留。"):uiText("删除所选对象及依赖它们的边、面？")));
     auto* buttons=new QDialogButtonBox(QDialogButtonBox::Yes|QDialogButtonBox::No);
     buttons->button(QDialogButtonBox::Yes)->setText(uiText("确认"));
@@ -441,9 +494,10 @@ void MainWindow::deleteSelection() {
     buttons->button(QDialogButtonBox::No)->setDefault(true);
     connect(buttons,&QDialogButtonBox::accepted,&question,&QDialog::accept);
     connect(buttons,&QDialogButtonBox::rejected,&question,&QDialog::reject);layout->addWidget(buttons);
-    if(question.exec()!=QDialog::Accepted)return;
-    if(auxiliary)session_.editAuxiliary("delete",{{"kind",selectionKind_==HullEntity::Curve?"curve":"flow"},{"ids",ids(selected)}});
-    else session_.editTopology("delete",{{"kind",selectionKind_==HullEntity::Point?"point":selectionKind_==HullEntity::Edge?"edge":"face"},{"ids",ids(selected)}});
+    if(runStudioDialog(question)!=QDialog::Accepted)return;
+    if(!session_.ready()||session_.busy()||session_.model()!=model){showError(uiText("船模已更改，请重新打开此窗口。"));return;}
+    if(auxiliary)session_.editAuxiliary("delete",{{"kind",kind==HullEntity::Curve?"curve":"flow"},{"ids",ids(selected)}});
+    else session_.editTopology("delete",{{"kind",kind==HullEntity::Point?"point":kind==HullEntity::Edge?"edge":"face"},{"ids",ids(selected)}});
 }
 void MainWindow::beginFlowline(){
     if(!session_.ready()||session_.busy())return;

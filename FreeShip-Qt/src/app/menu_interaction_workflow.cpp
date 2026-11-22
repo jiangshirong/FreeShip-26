@@ -415,7 +415,7 @@ void MainWindow::auditMenuInteraction(){
             const auto error=setUiLanguage(language);if(!error.isEmpty())throw std::runtime_error(error.toStdString());
             bool captured=false;QTimer timer;timer.setSingleShot(true);
             connect(&timer,&QTimer::timeout,this,[&]{
-                auto* dialog=qobject_cast<QDialog*>(QApplication::activeModalWidget());if(!dialog)return;
+                auto* dialog=qobject_cast<QDialog*>(frontStudioDialog());if(!dialog)return;
                 QJsonArray kinds;bool inside=true;
                 bool tabsOnlyText=true;
                 auto* demoTabs=dialog->findChild<QTabBar*>("TutorialDemoTabs");
@@ -425,7 +425,7 @@ void MainWindow::auditMenuInteraction(){
                     tabsOnlyText=tabsOnlyText&&!demoTabs->tabButton(i,QTabBar::RightSide)&&demoTabs->tabIcon(i).isNull();
                 }
                 for(auto* label:dialog->findChildren<QLabel*>()){
-                    if(label->window()!=dialog)continue;
+                    if(label->window()!=dialog||!label->isVisible())continue;
                     // Scrolled content may extend below the viewport. Its
                     // actual containing surface, not the dialog, owns bounds.
                     QWidget* surface=dialog;
@@ -449,8 +449,8 @@ void MainWindow::auditMenuInteraction(){
                            menu->actionGeometry(menu->actions().first()).isValid())return menu;
                     return static_cast<QMenu*>(nullptr);
                 };
-                const auto layerExample=[](QWidget* demoWidget){
-                    auto* view=demoWidget->findChild<QGraphicsView*>("TutorialLayerExample");
+                const auto windowExample=[](QWidget* demoWidget){
+                    auto* view=demoWidget->findChild<QGraphicsView*>("TutorialWindowExample");
                     if(view&&view->isVisible())for(auto* item:view->scene()->items()){
                         auto* proxy=qgraphicsitem_cast<QGraphicsProxyWidget*>(item);
                         if(!proxy)continue;
@@ -462,7 +462,7 @@ void MainWindow::auditMenuInteraction(){
                 const auto staysInPreview=[dialog](QMdiSubWindow* sample){
                     return sample&&sample->isVisible()&&sample->windowType()==Qt::SubWindow&&
                         sample->widget()&&!sample->widget()->isWindow()&&sample->parentWidget()->rect().contains(sample->geometry())&&
-                        QApplication::activeModalWidget()==dialog;
+                        dialog&&!dialog->isModal();
                 };
                 QString ctrlExplanation,windowExplanation;
                 bool compactFits=false,compactTabsFit=false;
@@ -522,17 +522,14 @@ void MainWindow::auditMenuInteraction(){
                             submenu->actions().size()>1;
                         if(liveSubmenu)submenu->grab().save(workflowOutput_+"/views/tutorial-"+language+"-live-submenu.png");
                         const auto copy=explanation(actionDemo);
-                        auto* sample=layerExample(actionDemo);
-                        const LayerPanel* samplePanel=nullptr;
-                        if(sample&&sample->widget())for(auto* child:sample->widget()->children())
-                            if(const auto* panel=dynamic_cast<LayerPanel*>(child)){samplePanel=panel;break;}
-                        const bool openedRealDialog=staysInPreview(sample)&&
-                            samplePanel&&samplePanel->selectedLayerId()==1&&!layerDialog_->isVisible();
+                        auto* sample=windowExample(actionDemo);
+                        const bool openedSchematic=staysInPreview(sample)&&
+                            sample->widget()->objectName()=="TutorialWindowSchematic"&&!layerDialog_->isVisible();
                         replay->click();
                         examples.append(QJsonObject{{"kind",demoTabs->tabData(i).toString()},{"result",result},
                             {"menu_open",menuOpen},{"changed",before!=after},{"visible",visible},
                             {"live_popup",showsActualMenu},{"live_submenu",liveSubmenu},
-                            {"real_dialog_opened",openedRealDialog},
+                            {"schematic_opened",openedSchematic},
                             {"shows_inline_mark",copy.contains("<img src=\"data:image/png;base64,")},
                             {"started_clear",startsWithCommand&&startsEmpty},
                             {"restarts",actionDemo->property("tutorial_action_result").toString().isEmpty()&&
@@ -543,11 +540,12 @@ void MainWindow::auditMenuInteraction(){
                     windowExplanation=explanation(windowDemo);
                     const auto windowFrame=[&](const QString& name){
                         const auto path=workflowOutput_+"/views/tutorial-"+language+"-window-"+name+".png";
-                        auto* sample=layerExample(windowDemo);
+                        auto* sample=windowExample(windowDemo);
                         const auto geometry=sample?sample->geometry():QRect{};
                         dialog->grab().save(path);
                         windowAnimation.append(QJsonObject{{"phase",name},{"maximized",sample&&sample->isMaximized()},
                             {"image",path},{"inside_preview",staysInPreview(sample)},
+                            {"schematic",sample&&sample->widget()&&sample->widget()->objectName()=="TutorialWindowSchematic"},
                             {"x",geometry.x()},{"y",geometry.y()},{"width",geometry.width()},{"height",geometry.height()}});
                     };
                     windowFrame("normal");

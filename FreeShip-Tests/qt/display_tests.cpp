@@ -69,6 +69,32 @@ int main(int argc,char** argv){
         auto bothPainted=std::make_shared<fs::ModelSnapshot>(*painted);bothPainted->revision=11;bothPainted->bothSides=true;view.setSnapshot(bothPainted);view.fit();auto bothImage=view.image();
         check("both-body-fill-includes-both-halves",bothImage.pixelColor(view.project({-1,-2,.5}).toPoint())==QColor(0,128,0)&&bothImage.pixelColor(view.project({-1,2,.5}).toPoint())==QColor(0,128,0));
         bothImage.save(out+"/both-fill.png");view.setSelectionKind(HullEntity::Point);view.setFillVisible(false);
+        auto creaseModel=std::make_shared<fs::ModelSnapshot>(*bothPainted);
+        auto topology=std::make_shared<fs::SurfaceTopology>();
+        topology->points={{-1,1,0},{-1,3,0},{-1,2,2}};
+        topology->creases={{{0,2},{1}}};
+        creaseModel->surfaceTopology=topology;
+        view.setSnapshot(creaseModel);view.fit();
+        const auto creaseImage=view.image();
+        const auto port=view.project({-1,1.5,1}).toPoint();
+        const auto starboard=view.project({-1,-1.5,1}).toPoint();
+        const auto blank=view.project({-1,2.5,1}).toPoint();
+        view.setSnapshot(bothPainted);view.fit();
+        const auto background=view.image();
+        const auto changedNear=[&](QPoint center) {
+            for (int y=-2; y<=2; ++y) for (int x=-2; x<=2; ++x) {
+                const auto pixel=center+QPoint(x,y);
+                if (creaseImage.pixelColor(pixel)!=background.pixelColor(pixel)) return true;
+            }
+            return false;
+        };
+        check("wireframe-shows-surface-crease-with-control-net-off",
+              changedNear(port));
+        check("wireframe-mirrors-surface-crease-on-symmetric-layer",
+              changedNear(starboard));
+        check("wireframe-omits-unmarked-segment",
+              !changedNear(blank));
+        creaseImage.save(out+"/surface-crease.png");
         fs::Section section;section.kind=1;section.index=0;section.showCurvature=true;section.color=0x003300;section.paths={{{1,0,0},{1,1,1},{1,2,0}}};section.splines={{{{1,0,0},{1,1,1},{1,2,0}},{false,false,false}}};
         auto combModel=std::make_shared<fs::ModelSnapshot>(*m);combModel->revision=2;combModel->sections={section};combModel->showCurvature=false;
         view.setSnapshot(combModel);view.setControlNetVisible(false);view.image();check("hidden-curvature-is-lazy",view.overlayEvidence()["curvature_builds"].toInt()==0);

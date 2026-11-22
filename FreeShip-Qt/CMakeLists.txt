@@ -24,10 +24,10 @@ target_include_directories(recovery_store PUBLIC src)
 target_link_libraries(recovery_store PUBLIC Qt6::Core)
 target_link_libraries(model_core PUBLIC recovery_store)
 target_sources(model_core PRIVATE src/core/developed_plates.cpp)
-target_sources(model_core PRIVATE src/core/model_exchange.cpp)
+target_sources(model_core PRIVATE src/core/model_exchange.cpp src/core/obj_fit.cpp)
 target_sources(model_core PRIVATE src/core/curve_import.cpp)
 target_sources(model_core PRIVATE src/core/cad_export.cpp)
-target_link_libraries(model_core PUBLIC native_geometry fbm_document)
+target_link_libraries(model_core PUBLIC native_geometry fbm_document PRIVATE native_subdivision)
 set(EXCHANGE_TEST_SOURCE "${CMAKE_CURRENT_SOURCE_DIR}/../FreeShip-Tests/qt/exchange_tests.cpp" CACHE FILEPATH "Model exchange probe entry")
 add_executable(qt_exchange_tests "${EXCHANGE_TEST_SOURCE}")
 target_link_libraries(qt_exchange_tests PRIVATE model_core Qt6::Core)
@@ -108,6 +108,18 @@ target_sources(FreeShipQt PRIVATE src/app/view_reactivation_workflow.cpp)
 target_sources(FreeShipQt PRIVATE src/app/print_preview_workflow.cpp)
 target_sources(FreeShipQt PRIVATE src/app/print_preview_style.cpp)
 target_sources(FreeShipQt PRIVATE src/app/read_surfaces_workflow.cpp)
+target_sources(FreeShipQt PRIVATE src/app/tutorial_features.cpp)
+qt_add_resources(FreeShipQt "tutorial_features"
+    BIG_RESOURCES
+    PREFIX "/tutorial-features"
+    BASE "src/app/tutorial_media"
+    FILES src/app/tutorial_media/creases.clip
+          src/app/tutorial_media/rebuild.clip
+          src/app/tutorial_media/compare.clip
+          src/app/tutorial_media/templates.clip
+          src/app/tutorial_media/reference.clip
+          src/app/tutorial_media/print-shell.clip
+)
 qt_add_resources(FreeShipQt "ai_vendor_logos"
     PREFIX "/ai-vendors"
     BASE "src/app/assets/ai-vendors"
@@ -144,7 +156,7 @@ endif()
 target_include_directories(FreeShipQt PRIVATE "${CALCULATION_TEST_DIR}")
 add_executable(qt_calculation_chart_tests "${CALCULATION_TEST_DIR}/calculation_chart_tests.cpp")
 target_link_libraries(qt_calculation_chart_tests PRIVATE calculation_charts Qt6::OpenGL)
-target_sources(FreeShipQt PRIVATE src/app/plates_dialog.cpp src/app/plates_workflow.cpp)
+target_sources(FreeShipQt PRIVATE src/app/plates_dialog.cpp src/app/plates_workflow.cpp src/app/plate_assembly.cpp)
 target_sources(FreeShipQt PRIVATE src/app/exchange_dialog.cpp src/app/exchange_workflow.cpp)
 target_sources(FreeShipQt PRIVATE src/core/print_hull.cpp src/app/print_hull_panel.cpp)
 target_link_libraries(FreeShipQt PRIVATE print_manifold)
@@ -234,6 +246,8 @@ target_link_libraries(FreeShipNativeLinesplan PRIVATE native_linesplan_engine)
 
 add_library(ship_export src/core/hull_sections.cpp src/core/ghs_export.cpp src/core/ship_formats.cpp src/core/grid_export.cpp)
 target_sources(FreeShipQt PRIVATE src/app/station_template_dialog.cpp src/core/station_sheets.cpp)
+target_sources(FreeShipQt PRIVATE src/app/comparison_parameters.cpp src/app/station_comparison_dialog.cpp src/app/station_reference_contours.cpp)
+target_sources(FreeShipQt PRIVATE src/app/lines_pdf.cpp)
 target_sources(ship_export PRIVATE src/core/station_templates.cpp src/core/station_shell.cpp)
 target_link_libraries(ship_export PRIVATE clipper2_engine)
 target_link_libraries(FreeShipQt PRIVATE ship_export)
@@ -326,7 +340,7 @@ target_link_libraries(native_lackenby_probe PRIVATE fbm_document)
 target_compile_options(native_lackenby_probe PRIVATE -fno-fast-math -ffp-contract=off)
 
 set(AUXILIARY_TEST_SOURCE "${CMAKE_CURRENT_SOURCE_DIR}/../FreeShip-Tests/qt/auxiliary_tests.cpp" CACHE FILEPATH "Curves and flowline regression entry")
-add_executable(qt_auxiliary_tests "${AUXILIARY_TEST_SOURCE}")
+add_executable(qt_auxiliary_tests "${AUXILIARY_TEST_SOURCE}" src/app/station_reference_contours.cpp)
 target_link_libraries(qt_auxiliary_tests PRIVATE hull_views model_core linesplan)
 target_compile_options(qt_auxiliary_tests PRIVATE -Wall -Wextra)
 

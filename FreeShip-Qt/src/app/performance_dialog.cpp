@@ -468,8 +468,8 @@ PerformanceDialog::PerformanceDialog(ModelSession& session,const QJsonObject& sc
     auto* presetRow=new QHBoxLayout;auto* presetSave=button(uiText("保存参数…"),"save_parameters");auto* presetLoad=button(uiText("载入参数…"),"load_parameters");
     presetSave->setIcon(studioIcon("SaveAs"));presetLoad->setIcon(studioIcon("OpenFile"));
     presetRow->addWidget(presetSave);presetRow->addWidget(presetLoad);presetRow->addStretch();form->addLayout(presetRow);
-    connect(presetSave,&QPushButton::clicked,this,[this]{const auto path=QFileDialog::getSaveFileName(this,uiText("保存计算参数"),preferenceFileLocation("save"),uiText("计算参数 (*.json)"));if(!path.isEmpty()){auto err=saveParameters(path);status_->setMessage(err.isEmpty()?uiText("参数已保存。"):err,err.isEmpty()?StudioMessageRole::Feedback:StudioMessageRole::Warning);}});
-    connect(presetLoad,&QPushButton::clicked,this,[this]{const auto path=QFileDialog::getOpenFileName(this,uiText("载入计算参数"),preferenceFileLocation("open"),uiText("计算参数 (*.json)"));if(!path.isEmpty()){auto err=loadParameters(path);if(!err.isEmpty())showFailure(err);}});
+    connect(presetSave,&QPushButton::clicked,this,[this]{const auto path=studioSaveFile(this,uiText("保存计算参数"),preferenceFileLocation("save"),uiText("计算参数 (*.json)"));if(!path.isEmpty()){auto err=saveParameters(path);status_->setMessage(err.isEmpty()?uiText("参数已保存。"):err,err.isEmpty()?StudioMessageRole::Feedback:StudioMessageRole::Warning);}});
+    connect(presetLoad,&QPushButton::clicked,this,[this]{const auto path=studioOpenFile(this,uiText("载入计算参数"),preferenceFileLocation("open"),uiText("计算参数 (*.json)"));if(!path.isEmpty()){auto err=loadParameters(path);if(!err.isEmpty())showFailure(err);}});
     auto* tablePage=new QWidget;resultPage_=tablePage;
     auto* tableLayout=new QVBoxLayout(tablePage);tableLayout->setContentsMargins(0,0,0,0);
     auto* chooser=new QWidget(tablePage);
@@ -500,7 +500,7 @@ PerformanceDialog::PerformanceDialog(ModelSession& session,const QJsonObject& sc
         const auto refreshFormat=[control,entry]{setStudioFormatButton(control,entry.first,QString(uiText("导出 "))+entry.first.toUpper()+" · "+uiText(entry.second));};
         refreshFormat();bindUiRefresh(control,refreshFormat);
         exports_.append(control);toolbar->insertWidget(exportPosition++,control);
-        connect(control,&QPushButton::clicked,this,[this,format]{const auto path=QFileDialog::getSaveFileName(this,uiText("保存计算报告"),preferenceFileLocation("export"),format.toUpper()+" (*."+format+")");if(path.isEmpty())return;const auto err=exportReport(path,format);status_->setMessage(err.isEmpty()?uiText("报告已保存：")+path:err,err.isEmpty()?StudioMessageRole::Feedback:StudioMessageRole::Warning);});
+        connect(control,&QPushButton::clicked,this,[this,format]{const auto path=studioSaveFile(this,uiText("保存计算报告"),preferenceFileLocation("export"),format.toUpper()+" (*."+format+")");if(path.isEmpty())return;const auto err=exportReport(path,format);status_->setMessage(err.isEmpty()?uiText("报告已保存：")+path:err,err.isEmpty()?StudioMessageRole::Feedback:StudioMessageRole::Warning);});
     }
     connect(run_,&QPushButton::clicked,this,&PerformanceDialog::calculate);
     connect(cancel_,&QPushButton::clicked,this,[this]{if(preparingResult_){++resultGeneration_;preparingResult_=false;showFailure(uiText("计算已取消。"));return;}session_.cancelPerformance();if(session_.busy())status_->setMessage(uiText("正在取消计算…"),StudioMessageRole::Feedback,true);});
@@ -516,7 +516,7 @@ void PerformanceDialog::convertViscosityFromTemperature(){
     QInputDialog dialog(this);dialog.setAttribute(Qt::WA_DontShowOnScreen,hidden_);
     dialog.setWindowTitle(uiText("水温换算"));dialog.setLabelText(uiText("水温（°C，0–30）"));
     dialog.setInputMode(QInputDialog::DoubleInput);dialog.setDoubleRange(0,30);dialog.setDoubleDecimals(2);dialog.setDoubleValue(15);
-    if(dialog.exec()!=QDialog::Accepted)return;
+    if(runStudioDialog(dialog)!=QDialog::Accepted)return;
     const auto key=method_=="maneuver"?"Edit11":"WaterViscosity";
     if(auto* field=qobject_cast<QDoubleSpinBox*>(fields_.value(key))){
         const double value=fs::waterViscosity(float(dialog.doubleValue()));

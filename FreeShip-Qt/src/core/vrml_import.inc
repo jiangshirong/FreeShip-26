@@ -88,5 +88,5 @@ Document vrml(const QByteArray& bytes,const Options& options){
         if(type=="Translation"||type=="Rotation"||type=="Scale"){if(!v1)bad("VRML 2 不支持此旧版变换节点。");state.matrix=multiply(state.matrix,vrTransform(n));return;}
         if(type!="NormalBinding"&&type!="MaterialBinding"&&type!="TextureCoordinateBinding"&&type!="WorldInfo"&&type!="Info"&&type!="Normal"&&type!="TextureCoordinate"&&type!="TextureCoordinate2")bad("VRML 未处理节点。");
     };
-    State state;for(auto node:roots)visit(node.toObject(),state,0);out.flush();auto o=options;o.legacyAxes=false;auto d=obj(mesh,o);d.discardedZeroAreaFaces=discarded;d.notes.clear();if(appearance)d.notes<<"材质、纹理及渲染属性不转换为船体属性。";return d;
+    State state;for(auto node:roots)visit(node.toObject(),state,0);out.flush();auto o=options;o.legacyAxes=false;o.reconstructObj=false;auto d=obj(mesh,o,nullptr,false);d.discardedZeroAreaFaces=discarded;d.notes.clear();if(appearance)d.notes<<"材质、纹理及渲染属性不转换为船体属性。";return d;
 }

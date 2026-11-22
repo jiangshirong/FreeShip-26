@@ -12,6 +12,7 @@
 #include "light_dialog.h"
 #include <QGroupBox>
 #include "plates_dialog.h"
+#include "studio_caption.h"
 #include "studio_ui.h"
 #include <QAction>
 #include <QCheckBox>
@@ -19,6 +20,7 @@
 #include <QComboBox>
 #include <QSpinBox>
 #include <QDoubleSpinBox>
+#include <QDialogButtonBox>
 #include <QLineEdit>
 #include <QApplication>
 #include <QDir>
@@ -102,11 +104,76 @@ void MainWindow::verifyDocumentWindows(const QString& request,const QString& out
     if(!workspace_){finishWorkflow("Missing tab workspace");return;}
     setAttribute(Qt::WA_DeleteOnClose,false); // Keep the observer until its final report is written.
     auto* host=workspace_;auto* tabs=host->tabBar();host->resize(1000,720);host->show();
+#ifdef Q_OS_WIN
+    const auto cancelNativePicker=[&](auto openPicker){
+        const bool wereDisabled=QCoreApplication::testAttribute(Qt::AA_DontUseNativeDialogs);
+        QCoreApplication::setAttribute(Qt::AA_DontUseNativeDialogs,false);
+        const auto restore=qScopeGuard([wereDisabled]{QCoreApplication::setAttribute(Qt::AA_DontUseNativeDialogs,wereDisabled);});
+        struct Search {HWND owner;HWND picker=nullptr;};
+        Search search{reinterpret_cast<HWND>(host->winId())};
+        QElapsedTimer elapsed;elapsed.start();
+        QTimer poll;poll.setInterval(30);
+        bool blocked=false;
+        connect(&poll,&QTimer::timeout,this,[&]{
+            EnumWindows([](HWND window,LPARAM data)->BOOL{
+                auto& s=*reinterpret_cast<Search*>(data);
+                DWORD process=0;
+                GetWindowThreadProcessId(window,&process);
+                if(process!=GetCurrentProcessId()||GetWindow(window,GW_OWNER)!=s.owner||!IsWindowVisible(window))
+                    return TRUE;
+                wchar_t name[32]={};
+                GetClassNameW(window,name,32);
+                if(QString::fromWCharArray(name)!="#32770")return TRUE;
+                s.picker=window;
+                return FALSE;
+            },reinterpret_cast<LPARAM>(&search));
+            if(search.picker){
+                blocked=!IsWindowEnabled(search.owner);
+                PostMessageW(search.picker,WM_CLOSE,0,0);
+                poll.stop();
+            }else if(elapsed.elapsed()>4500){
+                if(auto* picker=qobject_cast<QFileDialog*>(frontStudioDialog()))picker->reject();
+                poll.stop();
+            }
+        });
+        poll.start();
+        openPicker();
+        return search.picker&&blocked&&IsWindowEnabled(search.owner);
+    };
+    if(qEnvironmentVariableIsSet("FREESHIP_QA_DESKTOP")){
+        workflowCase("native-open-picker",cancelNativePicker([&]{open_->trigger();}));
+        QString directory;
+        const bool native=cancelNativePicker([&]{directory=studioChooseDirectory(this,uiText("选择目录"),QFileInfo(a).absolutePath());});
+        workflowCase("native-folder-picker-cancels",native&&directory.isEmpty());
+    }
+#endif
     auto drop=[&](const QList<QUrl>& urls){QMimeData mime;mime.setUrls(urls);
         QDragEnterEvent enter({1,1},Qt::CopyAction,&mime,Qt::LeftButton,Qt::NoModifier);QApplication::sendEvent(host,&enter);
         if(!enter.isAccepted())return false;
         QDropEvent drop(QPointF(1,1),Qt::CopyAction,&mime,Qt::LeftButton,Qt::NoModifier);QApplication::sendEvent(host,&drop);return drop.isAccepted();};
     auto wait=[](auto predicate){QElapsedTimer timer;timer.start();while(!predicate()&&timer.elapsed()<20000){QCoreApplication::processEvents(QEventLoop::AllEvents,30);QThread::msleep(5);}return predicate();};
+    for(const QString mode:{"explicit","restored","blank"}){
+        DocumentWorkspace startupHost(false);
+        auto* doc=startupHost.addDocument();
+        doc->session_.setRecoveryRoot(output+"/startup-recovery-"+mode);
+        doc->fileHistory_=std::make_unique<FileHistory>(output+"/startup-history-"+mode+".json");
+        const bool historyReady=mode!="restored"||doc->fileHistory_->remember(a);
+        const auto expected=mode=="blank"?QString::fromUtf8(uiText("未命名船模")):QFileInfo(a).fileName();
+        QString shownName;
+        bool shownWithNoLoadedModel=false;
+        doc->startSession(mode=="explicit"?a:QString{},[&]{
+            showStudioMainWindow(&startupHost);
+            shownName=startupHost.tabBar()->tabText(0);
+            shownWithNoLoadedModel=startupHost.isVisible()&&!doc->session_.model();
+        });
+        workflowCase("first-show-title-"+mode,historyReady&&shownWithNoLoadedModel&&shownName==expected,shownName);
+        if(mode!="blank"){
+            const bool pendingName=startupHost.tabBar()->tabText(0)==expected&&QFileInfo(doc->session_.pendingFilePath())==QFileInfo(a);
+            const bool loaded=wait([&]{return !doc->session_.busy();})&&doc->session_.ready()&&QFileInfo(doc->session_.sourcePath())==QFileInfo(a);
+            workflowCase("stable-loading-title-"+mode,pendingName&&loaded&&startupHost.tabBar()->tabText(0)==expected);
+        }
+        startupHost.close();
+    }
     auto explorerLaunch=[&](const QString& path){
         QProcess child;child.setWorkingDirectory(QFileInfo(path).absolutePath());
         child.start(QCoreApplication::applicationFilePath(),{QFileInfo(path).fileName()});
@@ -137,6 +204,13 @@ void MainWindow::verifyDocumentWindows(const QString& request,const QString& out
     workflowCase("one-frame-two-tabs",!isWindow()&&!other->isWindow()&&window()==host&&other->window()==host&&host->active()==other&&tabs->count()==2&&other->isVisible()&&!isVisible());
     workflowCase("caption-filenames-and-full-path-tooltips",host->windowTitle()=="FreeShip 26"&&tabs->tabText(0)==QFileInfo(a).fileName()+" *"&&tabs->tabText(1)==QFileInfo(b).fileName()&&QFileInfo(tabs->tabToolTip(0))==QFileInfo(a)&&QFileInfo(tabs->tabToolTip(1))==QFileInfo(b));
     tabs->setCurrentIndex(0);workflowCase("select-tab-restores-editor",host->active()==this&&isVisible()&&!other->isVisible());
+#ifdef Q_OS_WIN
+    if(qEnvironmentVariableIsSet("FREESHIP_QA_DESKTOP")){
+        const auto source=session_.sourcePath();
+        workflowCase("native-save-picker-cancels",cancelNativePicker([&]{saveAs_->trigger();})
+            &&session_.sourcePath()==source&&session_.modified());
+    }
+#endif
     const auto tabPoint=tabs->tabRect(0).center();
     QWheelEvent tabWheel(tabPoint,tabs->mapToGlobal(tabPoint),{},QPoint(0,-120),
                          Qt::NoButton,Qt::NoModifier,Qt::NoScrollPhase,false);
@@ -144,7 +218,7 @@ void MainWindow::verifyDocumentWindows(const QString& request,const QString& out
     workflowCase("document-tab-wheel-keeps-active-model",tabs->currentIndex()==0&&host->active()==this);
     tabs->setCurrentIndex(0);
     bool cancelSeen=false;
-    QTimer::singleShot(0,this,[&]{if(auto* box=qobject_cast<QMessageBox*>(QApplication::activeModalWidget())){cancelSeen=true;box->button(QMessageBox::Cancel)->click();}});
+    QTimer::singleShot(0,this,[&]{if(auto* box=qobject_cast<QMessageBox*>(frontStudioDialog())){cancelSeen=true;box->button(QMessageBox::Cancel)->click();}});
     const bool closed=host->close();
     workflowCase("cancel-close-keeps-dirty-document",cancelSeen&&!closed&&isVisible()&&session_.modified()&&documentWindows().size()==2);
     const bool undone=session_.undo()&&wait([&]{return !session_.busy();})&&session_.model()->layers.front().name!="QA temporary name";
@@ -303,7 +377,7 @@ void MainWindow::startupStep(const QString& completedOperation,const QString& er
         const auto observed=startupObservations_.size();
         const auto kind=command["kind"].toString(),path=command["path"].toString();
         if(command.contains("recovery_decision"))QTimer::singleShot(0,this,[this,command]{
-            auto* dialog=qobject_cast<QDialog*>(QApplication::activeModalWidget());
+            auto* dialog=qobject_cast<QDialog*>(frontStudioDialog());
             if(!dialog){finishWorkflow("Recovery dialog did not open");return;}
             const auto id=command["recovery_id"].toString();
             if(!id.isEmpty())for(auto* list:dialog->findChildren<QListWidget*>())for(int i=0;i<list->count();++i)
@@ -314,7 +388,7 @@ void MainWindow::startupStep(const QString& completedOperation,const QString& er
                 workflowCases_.append(QJsonObject{{"name","recovery_action_unavailable"},{"status","not_run"}});dialog->reject();return;
             }
             if(command["recovery_decision"]=="delete")QTimer::singleShot(0,this,[dialog,command]{
-                if(auto* question=qobject_cast<QMessageBox*>(QApplication::activeModalWidget())){
+                if(auto* question=qobject_cast<QMessageBox*>(frontStudioDialog())){
                     auto* button=question->button(command["confirm_delete"].toBool()?QMessageBox::Yes:QMessageBox::No);
                     if(button)button->click();
                 }
@@ -322,11 +396,77 @@ void MainWindow::startupStep(const QString& completedOperation,const QString& er
             });
             found[0]->click();
         });
-        if(kind=="station_templates"){
+        if(kind=="station_reference_import"){
+            QAction* target=nullptr;
+            for(auto* action:modelingActions_)if(action->property("operation")=="add_markers")target=action;
+            if(!target||!target->isEnabled()){finishWorkflow("Reference import unavailable");return;}
+            const bool previous=QApplication::testAttribute(Qt::AA_DontUseNativeDialogs);
+            QApplication::setAttribute(Qt::AA_DontUseNativeDialogs,true);
+            const auto restore=qScopeGuard([previous]{QApplication::setAttribute(Qt::AA_DontUseNativeDialogs,previous);});
+            bool accepted=false;
+            QTimer choose;
+            choose.setSingleShot(true);
+            connect(&choose,&QTimer::timeout,this,[&]{
+                auto* picker=qobject_cast<QFileDialog*>(frontStudioDialog());
+                if(!picker || picker->property("modeling_operation")!="add_markers")return;
+                picker->selectFile(command["reference_file"].toString());
+                QMetaObject::invokeMethod(picker,"accept",Qt::DirectConnection);
+                accepted=picker->result()==QDialog::Accepted;
+                if(!accepted)picker->reject();
+            });
+            choose.start(20);
+            target->trigger();
+            if(!accepted){finishWorkflow("Reference text was not accepted by file picker");return;}
+        }
+        else if(kind=="station_templates"||kind=="station_deviation"||kind=="hull_parameters"){
             try {
-                editSections();
-                if(!sections_) throw std::runtime_error("Section editor unavailable");
-                auto result=observeStationExport(*sections_,workflowOutput_,command);
+                std::unique_ptr<DocumentWorkspace> referenceHost;
+                if(command.contains("reference_tab")){
+                    referenceHost=std::make_unique<DocumentWorkspace>(false);
+                    auto* other=referenceHost->addDocument();
+                    auto& session=other->session_;
+                    auto waitIdle=[&]{QElapsedTimer timer;timer.start();
+                        while(session.busy() && timer.elapsed()<30000)QCoreApplication::processEvents(QEventLoop::AllEvents,20);
+                        if(!session.ready()||session.busy())throw std::runtime_error("Reference tab unavailable");
+                    };
+                    if(!session.load(command["reference_tab"].toString()))throw std::runtime_error("Cannot load reference tab");
+                    waitIdle();
+                    if(command.contains("reference_moves")){
+                        QVector<fs::PointMove> moves;
+                        for(auto v:command["reference_moves"].toArray()){
+                            auto p=v.toObject();auto a=p["position"].toArray();
+                            moves.append(fs::PointMove{p["point_id"].toInt(),{a[0].toDouble(),a[1].toDouble(),a[2].toDouble()}});
+                        }
+                        if(!session.movePoints(moves))throw std::runtime_error("Reference tab edit rejected");
+                        waitIdle();if(!session.modified())throw std::runtime_error("Expected unsaved tab");
+                    }
+                }
+                QJsonObject result;
+                if(kind=="hull_parameters"){
+                    if(!toolsMenu_->actions().contains(compareModels_)||!compareModels_->isEnabled())
+                        throw std::runtime_error("Comparison unavailable in Tools");
+                    compareModels_->trigger();
+                    result=observeModelComparison(findChild<QDialog*>("StationComparison"),workflowOutput_,command);
+                }else{
+                    editSections();
+                    if(!sections_)throw std::runtime_error("Section editor unavailable");
+                    std::function<bool()> editCurrent;
+                    const auto completed=session_.onCompleted;
+                    const auto restore=qScopeGuard([&]{session_.onCompleted=completed;});
+                    if(command.contains("comparison_edit")){
+                        // The edit is internal to this probe. Its publication refreshes
+                        // the view, but must not advance the outer command sequence.
+                        session_.onCompleted=[](const QString&){};
+                        editCurrent=[this,edit=command["comparison_edit"].toObject()]{
+                            const auto id=fs::EntityId(edit["point_id"].toInt());const auto* p=session_.model()->point(id);
+                            if(!p)return false;
+                            auto position=p->position;position.y+=edit["dy"].toDouble();
+                            return session_.movePoint(id,position);
+                        };
+                    }
+                    result=kind=="station_templates"?observeStationExport(*sections_,workflowOutput_,command)
+                                                    :observeStationComparison(*sections_,workflowOutput_,command,editCurrent);
+                }
                 workflowArtifacts_[command["label"].toString()]=result;
             }catch(const std::exception& e){finishWorkflow(QString::fromUtf8(e.what()));return;}
         }
@@ -433,8 +573,8 @@ void MainWindow::startupStep(const QString& completedOperation,const QString& er
                     QJsonObject result;
                     QTimer ready;ready.setSingleShot(true);
                     connect(&ready,&QTimer::timeout,owner.get(),[&]{
-                        auto* picker=qobject_cast<QColorDialog*>(QApplication::activeModalWidget());
-                        if(!picker){if(auto* modal=qobject_cast<QDialog*>(QApplication::activeModalWidget()))modal->reject();return;}
+                        auto* picker=qobject_cast<QColorDialog*>(frontStudioDialog());
+                        if(!picker){if(auto* modal=qobject_cast<QDialog*>(frontStudioDialog()))modal->reject();return;}
                         if(picker->parentWidget()!=(id=="preferences"?static_cast<QWidget*>(owner.get()):static_cast<QWidget*>(colorButton.data()))){picker->reject();return;}
                         picker->setCurrentColor(QColor("#3a70a1"));
                         QApplication::setActiveWindow(picker);
@@ -475,6 +615,7 @@ void MainWindow::startupStep(const QString& completedOperation,const QString& er
             workflowArtifacts_["live_window_language"]=coverage;
         }
         else if(kind=="read_surfaces_check")auditReadSurfaces(command["copy_only"].toBool());
+        else if(kind=="tutorial_language_check")auditTutorialLanguage(command["settings"].toArray());
         else if(kind=="print_preview_check")auditPrintPreview();
         else if(kind=="menu_interaction_check")auditMenuInteraction();
         else if(kind=="object_lifetime_check")auditObjectLifetime();
@@ -519,6 +660,7 @@ void MainWindow::startupStep(const QString& completedOperation,const QString& er
                 row["plates_empty"]=controls();
                 if(command["plate_result"].isObject()){
                     dialog.receive(command["plate_result"].toObject());row["plates_ready"]=dialog.hasResult();row["plates_populated"]=controls();
+                    if(!dialog.hasResult())row["plate_fixture_error"]=dialog.failure();
                     dialog.findChild<QListWidget*>()->setCurrentRow(-1);row["plates_unselected"]=controls();
                 }
             }
@@ -597,6 +739,11 @@ void MainWindow::startupStep(const QString& completedOperation,const QString& er
                 inspect(menu,scope,true);
                 for(auto* a:menu->actions())if(auto* child=a->menu())walk(child,scope+"/"+a->text());
             };
+            QJsonArray toolbar;
+            for(auto* button:studioBar_->buttons())if(auto* action=button->defaultAction())
+                toolbar.append(QJsonObject{{"name",action->objectName()},{"text",action->text()},
+                                           {"icon",!action->icon().isNull()},{"dropdown",bool(action->menu())}});
+            workflowArtifacts_["menu_toolbar"]=toolbar;
             for(auto* button:menuWidget()->findChildren<QToolButton*>()){
                 if(auto* action=button->defaultAction();action&&action->menu())walk(action->menu(),action->objectName());
                 if(button->menu())walk(button->menu(),button->objectName().isEmpty()?"toolbar-overflow":button->objectName());
@@ -951,7 +1098,7 @@ void MainWindow::startupStep(const QString& completedOperation,const QString& er
             if(!requestedLanguage.isEmpty())setUiLanguage(requestedLanguage);
             const auto suffix=requestedLanguage.isEmpty()?QString{}:"-"+requestedLanguage;
             QTimer::singleShot(0,this,[this,suffix]{
-                auto* dialog=qobject_cast<QDialog*>(QApplication::activeModalWidget());
+                auto* dialog=qobject_cast<QDialog*>(frontStudioDialog());
                 auto* table=dialog?dialog->findChild<QTableWidget*>("ShortcutGuideTable"):nullptr;
                 if(!table){finishWorkflow("Shortcut guide missing");return;}
                 QJsonArray rows,groups,ctrlGestures;QJsonObject scopes;int previewCount=0,viewGroup=-1;
@@ -1044,11 +1191,13 @@ void MainWindow::startupStep(const QString& completedOperation,const QString& er
             qApp->setQuitOnLastWindowClosed(false);
             const auto previousLanguage=uiLanguage();
             const auto requestedLanguage=command["language"].toString();
+            const auto shortcutSettings=command["shortcut_settings"].toString();
+            if(!shortcutSettings.isEmpty())loadPreferences(shortcutSettings);
             if(!requestedLanguage.isEmpty()&&!setUiLanguage(requestedLanguage).isEmpty()){
                 finishWorkflow("About test language unavailable");return;
             }
-            QTimer::singleShot(0,this,[this]{
-                auto* dialog=qobject_cast<QDialog*>(QApplication::activeModalWidget());
+            QTimer::singleShot(0,this,[this,checkShortcut=!shortcutSettings.isEmpty()]{
+                auto* dialog=qobject_cast<QDialog*>(frontStudioDialog());
                 if(!dialog){finishWorkflow("About window missing");return;}
                 auto* table=dialog->findChild<QTableWidget*>("AboutCredits");
                 workflowCase("about-credits-table",table&&table->columnCount()>0);
@@ -1110,6 +1259,31 @@ void MainWindow::startupStep(const QString& completedOperation,const QString& er
                             {"resolved_weight",resolved.weight()}});
                     }
                     workflowArtifacts_["about_column_styles"]=styles;
+                    if(checkShortcut){
+                        const auto frame=[&]{
+                            QJsonArray entries;
+                            for(int row=0;row<table->rowCount();++row)
+                                entries.append(QJsonArray{table->item(row,yearColumn)->text(),
+                                    table->item(row,nameColumn)->text(),table->item(row,workColumn)->text()});
+                            return QJsonObject{{"language",uiLanguage()},{"rows",entries}};
+                        };
+                        const auto shortcut=[&]{
+                            auto* focus=dialog->focusWidget();
+                            if(!focus)focus=dialog;
+                            QKeyEvent press(QEvent::KeyPress,Qt::Key_L,Qt::ControlModifier|Qt::ShiftModifier,"l");
+                            QApplication::sendEvent(focus,&press);
+                            QKeyEvent release(QEvent::KeyRelease,Qt::Key_L,Qt::NoModifier);
+                            QApplication::sendEvent(focus,&release);
+                        };
+                        QApplication::setActiveWindow(dialog);
+                        const auto initial=frame();shortcut();const auto switched=frame();
+                        QApplication::sendPostedEvents(nullptr,QEvent::LayoutRequest);
+                        QApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+                        dialog->grab().save(workflowOutput_+"/views/about-after-shortcut.png");
+                        shortcut();
+                        workflowArtifacts_["about_shortcut_credits"]=QJsonObject{
+                            {"before",initial},{"after",switched},{"restored",frame()}};
+                    }
                 }
                 auto* brand=dialog->findChild<QLabel*>("AboutProductLogo");
                 auto* title=dialog->findChild<QLabel*>("AboutProductName");
@@ -1122,7 +1296,7 @@ void MainWindow::startupStep(const QString& completedOperation,const QString& er
                     auto* button=dialog->findChild<QPushButton*>(version?"AboutVersionToggle":"AboutCopyrightToggle");
                     workflowCase(version?"about-version-button":"about-license-button",button!=nullptr);if(!button)continue;
                     QTimer::singleShot(0,this,[this,version]{
-                        auto* child=qobject_cast<QDialog*>(QApplication::activeModalWidget());
+                        auto* child=qobject_cast<QDialog*>(frontStudioDialog());
                         auto* grid=child?child->findChild<QTableWidget*>("InformationGrid"):nullptr;
                         workflowCase(version?"about-version-details":"about-license-details",grid&&grid->rowCount()==(version?6:4));
                         if(!version&&grid)if(auto* identity=grid->cellWidget(grid->rowCount()-1,0)){
@@ -1292,15 +1466,62 @@ void MainWindow::startupStep(const QString& completedOperation,const QString& er
             }
             const auto png=workflowOutput_+"/lines-export-"+QString::number(startupCommand_)+".png";
             QTimer::singleShot(0,this,[this,png]{
-                auto* picker=qobject_cast<QFileDialog*>(QApplication::activeModalWidget());
+                auto* picker=qobject_cast<QFileDialog*>(frontStudioDialog());
                 if(!picker){finishWorkflow("Missing lines image save dialog");return;}
                 picker->selectFile(png);QMetaObject::invokeMethod(picker,"accept",Qt::DirectConnection);
             });
             pngAction->trigger();
             workflowCase("lines-save-exports-lines",QImage(png).convertToFormat(QImage::Format_RGBA8888)==image.convertToFormat(QImage::Format_RGBA8888));
+            if(command["verify_pdf"].toBool()){
+                auto* action=exportAction("PDF");
+                if(!action||!action->isEnabled()){finishWorkflow("Missing PDF action");return;}
+                auto exportSheet=[&](const QString& mode){
+                    const auto target=workflowOutput_+"/lines-"+mode+".pdf";
+                    QTimer::singleShot(0,this,[this,mode,target]{
+                        auto* settings=qobject_cast<QDialog*>(frontStudioDialog());
+                        if(!settings||settings->objectName()!="LinesPdfSettings"){finishWorkflow("Missing PDF settings");return;}
+                        auto* paper=settings->findChild<QComboBox*>("LinesPdfPaper");
+                        auto* numerator=settings->findChild<QSpinBox*>("LinesPdfNumerator");
+                        auto* denominator=settings->findChild<QSpinBox*>("LinesPdfDenominator");
+                        auto* footer=settings->findChild<QDialogButtonBox*>();
+                        if(!paper||!numerator||!denominator||!footer){
+                            settings->reject();finishWorkflow("Missing PDF controls");return;
+                        }
+                        auto* confirm=footer->button(QDialogButtonBox::Ok);
+                        if(mode=="fixed"){
+                            paper->setCurrentIndex(1); // A3
+                            const int fitted=denominator->value();
+                            denominator->setValue(1);
+                            workflowCase("lines-pdf-rejects-oversize",!confirm->isEnabled());
+                            numerator->setValue(2);
+                            denominator->setValue(2*fitted+1);
+                            workflowArtifacts_["lines_pdf_numerator"]=numerator->value();
+                            workflowArtifacts_["lines_pdf_denominator"]=denominator->value();
+                        }
+                        if(mode=="cancel"){settings->reject();return;}
+                        if(!confirm->isEnabled()){settings->reject();finishWorkflow("Selected PDF ratio cannot be exported");return;}
+                        confirm->click();
+                        QTimer::singleShot(0,this,[this,target]{
+                            auto* picker=qobject_cast<QFileDialog*>(frontStudioDialog());
+                            if(!picker){finishWorkflow("Missing PDF destination");return;}
+                            picker->selectFile(target);QMetaObject::invokeMethod(picker,"accept",Qt::DirectConnection);
+                        });
+                    });
+                    action->trigger();
+                    workflowCase("lines-pdf-"+mode,QFileInfo::exists(target)!=(mode=="cancel"));
+                };
+                exportSheet("cancel");exportSheet("fit");
+                const bool wasFilled=tools.front()->isChecked();
+                tools.front()->setChecked(false);exportSheet("fixed");tools.front()->setChecked(wasFilled);
+                const auto offset=lines_->offset();
+                lines_->panBy({8000.,5000.});exportSheet("panned");
+                // Restore the exact camera, including low bits lost when adding a large pan.
+                lines_->panBy(-lines_->offset());lines_->panBy(offset);
+                workflowArtifacts_["lines_pdf_units"]=model->units;
+            }
             const auto dxf = workflowOutput_ + "/lines-export-" + QString::number(startupCommand_) + ".dxf";
             QTimer::singleShot(0, this, [this, dxf] {
-                auto* picker = qobject_cast<QFileDialog*>(QApplication::activeModalWidget());
+                auto* picker = qobject_cast<QFileDialog*>(frontStudioDialog());
                 if (!picker) { finishWorkflow("Missing lines DXF save dialog"); return; }
                 picker->selectFile(dxf);
                 QMetaObject::invokeMethod(picker, "accept", Qt::DirectConnection);
@@ -1346,7 +1567,7 @@ void MainWindow::startupStep(const QString& completedOperation,const QString& er
                 workflowCases_.append(QJsonObject{{"name","project_action_unavailable"},{"status","not_run"}});finishWorkflow();return;
             }
             QTimer::singleShot(0,this,[this,command]{
-                auto* dialog=dynamic_cast<ProjectDialog*>(QApplication::activeModalWidget());
+                auto* dialog=dynamic_cast<ProjectDialog*>(frontStudioDialog());
                 if(!dialog){finishWorkflow("Project dialog did not open");return;}
                 if(command["observe_fields"].toBool()){
                     QJsonArray fields;
@@ -1398,7 +1619,7 @@ void MainWindow::startupStep(const QString& completedOperation,const QString& er
               auto* timer=new QTimer(this);timer->setInterval(10);timer->setProperty("attempts",0);
               connect(timer,&QTimer::timeout,this,[this,command,timer]{
                 if(workflowFinished_){timer->stop();timer->deleteLater();return;}
-                auto* picker=qobject_cast<QFileDialog*>(QApplication::activeModalWidget());
+                auto* picker=qobject_cast<QFileDialog*>(frontStudioDialog());
                 if(!picker){const int n=timer->property("attempts").toInt()+1;timer->setProperty("attempts",n);if(n<200)return;
                     timer->stop();timer->deleteLater();finishWorkflow("Save file picker did not open: "+QString::fromUtf8(QJsonDocument(startupObservations_).toJson(QJsonDocument::Compact)));return;}
                 const auto options=command["save_dialog"].toObject();
@@ -1428,9 +1649,9 @@ void MainWindow::startupStep(const QString& completedOperation,const QString& er
         else if(kind=="move"){
             if(!session_.model()){finishWorkflow("No model to edit");return;}
             const fs::ControlPoint* chosen=nullptr;
-            for(const auto& point:session_.model()->points)if(!point.locked&&point.batchMovable){chosen=&point;break;}
+            for(const auto& point:session_.model()->points)if(!point.locked&&point.batchMovable&&(!command.contains("point_id")||point.id==command["point_id"].toInt())){chosen=&point;break;}
             if(!chosen){finishWorkflow("No movable point");return;}
-            auto position=chosen->position;position.x+=command["dx"].toDouble(.125);session_.movePoint(chosen->id,position);
+            auto position=chosen->position;position.x+=command["dx"].toDouble(.125);position.y+=command["dy"].toDouble();session_.movePoint(chosen->id,position);
         }
         else if(kind=="undo")session_.undo();
         else if(kind=="redo")session_.redo();
@@ -1471,7 +1692,7 @@ void MainWindow::startupStep(const QString& completedOperation,const QString& er
             }
             auto* responder=new QTimer(this);responder->setInterval(5);
             connect(responder,&QTimer::timeout,this,[this,command,responder]{
-                auto* dialog=qobject_cast<QMessageBox*>(QApplication::activeModalWidget());
+                auto* dialog=qobject_cast<QMessageBox*>(frontStudioDialog());
                 if(!dialog)return;
                 QJsonObject evidence{{"edit_in_flight",session_.busy()},{"owner_minimized",isMinimized()},{"owner_visible",isVisible()},
                     {"dialog_frame_x",dialog->frameGeometry().x()},{"dialog_frame_y",dialog->frameGeometry().y()},

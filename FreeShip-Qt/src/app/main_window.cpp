@@ -5,6 +5,7 @@
 #include "history_shortcuts.h"
 #include "project_dialog.h"
 #include "layer_panel.h"
+#include "lines_pdf.h"
 #include "studio_ui.h"
 #include "studio_caption.h"
 #include "point_coordinate_popup.h"
@@ -40,6 +41,7 @@
 #include <QShortcut>
 #include <QSignalBlocker>
 #include <QScopedValueRollback>
+#include "station_comparison_dialog.h"
 #include <QSplitter>
 #include "data_motion.h"
 #include "message_motion.h"
@@ -205,7 +207,7 @@ MainWindow::MainWindow(QWidget* parent,bool rememberFiles) : QMainWindow(parent)
     statusBar()->setSizeGripEnabled(false);statusBar()->hide();
     auto* file = primaryMenu_ = new QMenu(this);
     open_ = file->addAction(uiText("打开模型…"), QKeySequence::Open, this, [this] {
-        const auto paths = QFileDialog::getOpenFileNames(this, uiText("打开船模"), preferenceFileLocation("open",session_.sourcePath()), uiText("FreeShip 船模 (*.fbm *.ftm)"));
+        const auto paths = studioOpenFiles(this, uiText("打开船模"), preferenceFileLocation("open",session_.sourcePath()), uiText("FreeShip 船模 (*.fbm *.ftm)"));
         for (const auto& path : paths) openDocument(path);
     });
     save_ = file->addAction(uiText("保存"), QKeySequence::Save, this, [this] { saveModel(); });
@@ -244,8 +246,8 @@ MainWindow::MainWindow(QWidget* parent,bool rememberFiles) : QMainWindow(parent)
     connect(quit,&QShortcut::activated,this,[this]{window()->close();});
     undo_ = new QAction(uiText("撤销"), this);
     redo_ = new QAction(uiText("重做"), this);
-    connect(undo_, &QAction::triggered, this, [this] { if(layerDialog_&&QApplication::activeWindow()==layerDialog_&&layers_->previewHistory(false))return; if(sections_&&sections_->isVisible()&&QApplication::activeWindow()!=layerDialog_)sections_->previewHistory(false);else session_.undo(); });
-    connect(redo_, &QAction::triggered, this, [this] { if(layerDialog_&&QApplication::activeWindow()==layerDialog_&&layers_->previewHistory(true))return; if(sections_&&sections_->isVisible()&&QApplication::activeWindow()!=layerDialog_)sections_->previewHistory(true);else session_.redo(); });
+    connect(undo_, &QAction::triggered, this, [this] { if(layerDialog_&&QApplication::activeWindow()==layerDialog_&&layers_->previewHistory(false))return; if(sections_&&QApplication::activeWindow()==sections_)sections_->previewHistory(false);else session_.undo(); });
+    connect(redo_, &QAction::triggered, this, [this] { if(layerDialog_&&QApplication::activeWindow()==layerDialog_&&layers_->previewHistory(true))return; if(sections_&&QApplication::activeWindow()==sections_)sections_->previewHistory(true);else session_.redo(); });
     bindHistoryShortcut(this, undo_, QKeySequence(Qt::CTRL | Qt::Key_Z));
     bindHistoryShortcut(this, redo_, QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_Z));
     project_ = new QAction(studioIcon("ProjectSettings"), uiText("工程设置"), this);
@@ -337,6 +339,19 @@ MainWindow::MainWindow(QWidget* parent,bool rememberFiles) : QMainWindow(parent)
     linesTools->addSeparator();
     linesPng_ = linesTools->addAction(studioFormatIcon("png"), "PNG", this, &MainWindow::exportLinesImage);
     linesPng_->setToolTip(uiText("保存图片…"));
+    auto* pdf=linesTools->addAction(studioFormatIcon("pdf"),"PDF");
+    pdf->setToolTip(QString(uiText("导出 "))+"PDF");
+    connect(linesPng_,&QAction::changed,pdf,[this,pdf]{pdf->setEnabled(linesPng_->isEnabled());});
+    connect(pdf,&QAction::triggered,this,[this,pdf,fill]{
+        if(!session_.ready()||session_.busy())return;
+        const auto scene=session_.scene();
+        if(!scene){afterDrawing_=[pdf]{pdf->trigger();};if(!session_.ensureDrawing())afterDrawing_={};return;}
+        const QFileInfo source(session_.sourcePath());
+        const auto name=(source.completeBaseName().isEmpty()?QStringLiteral("Linesplan"):source.completeBaseName())+".pdf";
+        const auto target=preferenceFileLocation("export",source.dir().filePath(name));
+        const auto error=exportLinesPdf(linesDialog_,*scene,session_.model()->units=="imperial",fill->isChecked(),target);
+        if(!error.isEmpty())showError(error);
+    });
     dxf_ = linesTools->addAction(studioFormatIcon("dxf"), "DXF", this, &MainWindow::exportDxf);
     dxf_->setToolTip(uiText("导出型线图 DXF…"));
     connect(linesDialog_,&QDialog::finished,this,[this]{views_.front()->setFocus();});
@@ -414,7 +429,7 @@ MainWindow::MainWindow(QWidget* parent,bool rememberFiles) : QMainWindow(parent)
         }
         HydroDialog dialog(session_,hydroMode_,defaults,workflow_,this);hydroDialog_=&dialog;
         if(hydroMode_=="table")dialog.addAction(save_);
-        dialog.exec();hydroDialog_=nullptr;
+        runStudioDialog(dialog);hydroDialog_=nullptr;
         if(hydroWorkflow_)QTimer::singleShot(0,this,[this]{hydroStep("closed");});
     };
     session_.onHydrostatics=[this](const QJsonObject& result){
@@ -429,7 +444,7 @@ MainWindow::MainWindow(QWidget* parent,bool rememberFiles) : QMainWindow(parent)
         if(performanceDialog_){performanceDialog_->receive(result,defaults);return;}
         if(!defaults)return;
         PerformanceDialog dialog(session_,result,workflow_,this);performanceDialog_=&dialog;
-        dialog.exec();performanceDialog_=nullptr;
+        runStudioDialog(dialog);performanceDialog_=nullptr;
         if(!workflow_)preferences_=QCoreApplication::instance()->property("freeship.preferences").toJsonObject();
         if(performanceWorkflow_)QTimer::singleShot(0,this,[this]{performanceStep("closed");});
     };
@@ -454,7 +469,12 @@ void MainWindow::updateModel() {
     const auto changed=coordinatesChanged_;
     const std::array<double,3> draft{coordinates_[0]->value(),coordinates_[1]->value(),coordinates_[2]->value()};
     const auto model = session_.model(); const bool fresh = shownDocument_ != model->documentId;
-    if(!calculationWindows_.contains("hydro:cross")&&stabilityDialog_&&(stabilityDocument_!=model->documentId||stabilityRevision_!=model->revision)){
+    for(auto* dialog:findChildren<QDialog*>(QStringLiteral("StationComparison")))
+        if(auto* comparison=dynamic_cast<StationComparisonDialog*>(dialog))
+            comparison->updateCurrentHull(model,QFileInfo(session_.modelPath()).dir().filePath("native-input.json"),
+                                          session_.calculationStatePath());
+    if(!calculationWindows_.contains("hydro:cross")&&stabilityDialog_&&!hasPendingStudioDialog(stabilityDialog_)&&
+       (stabilityDocument_!=model->documentId||stabilityRevision_!=model->revision)){
         if(hydroDialog_==stabilityDialog_)hydroDialog_=nullptr;
         stabilityDialog_->onBackground={};stabilityDialog_->hide();stabilityDialog_->deleteLater();stabilityDialog_=nullptr;
         stabilityUnread_=false;if(stabilityBall_)stabilityBall_->dismiss();
@@ -467,9 +487,10 @@ void MainWindow::updateModel() {
     const auto changes=layers_->projectedVisibilityChanges();
     const auto previous=views_.front()->snapshot();
     const bool pointEdit=previous&&session_.publishingPointEdit()&&fs::curveEdit::onlyPointPositionsChanged(*previous,*model);
+    const bool referencesMoved=previous&&fs::curveEdit::horizontalReferencesChanged(*previous,*model);
     bool startCurveMotion=false;
-    if(pointEdit&&std::any_of(views_.begin(),views_.end(),[](const HullView* view){return view->curveEditMotionEnabled();})){
-        curveEditMotion_=fs::curveEdit::Motion::between(*previous,*model,releasedCurvePositions_,curveEditMotion_);
+    if((pointEdit||referencesMoved)&&std::any_of(views_.begin(),views_.end(),[](const HullView* view){return view->curveEditMotionEnabled();})){
+        curveEditMotion_=fs::curveEdit::Motion::between(*previous,*model,releasedCurvePositions_,curveEditMotion_,pointEdit);
         startCurveMotion=bool(curveEditMotion_);
     }else if(fresh||!session_.drawingUnchanged())curveEditMotion_.reset();
     releasedCurvePositions_.clear();
@@ -523,6 +544,7 @@ void MainWindow::updateState() {
     }
     if(sections_)sections_->setEditingEnabled(ready&&(idle||session_.canQueueSectionEdits()));
     if(sectionsAction_)sectionsAction_->setEnabled(ready);
+    compareModels_->setEnabled(ready && idle);
     updateDisplayControls();
     if(addCurve_)addCurve_->setEnabled(ready&&idle&&selectionKind_==HullEntity::Edge&&!entitySelection_.isEmpty());
     if(addFlow_)addFlow_->setEnabled(ready&&idle);
@@ -554,11 +576,20 @@ void MainWindow::updateState() {
         }
         lock_->setEnabled(canLock);unlock_->setEnabled(canUnlock);
     }
-    QString name = QDir::toNativeSeparators(session_.sourcePath());
-    if(name.isEmpty()&&!session_.recoveryOrigin().isEmpty())name=QDir::toNativeSeparators(session_.recoveryOrigin())+uiText("（恢复副本）");
+    updateDocumentTitle();
+    if (session_.busy()) statusBar()->showMessage(uiText(session_.model() ? "正在更新模型…" : "正在打开船模…"));
+}
+QString MainWindow::documentDisplayPath() const {
+    if(!session_.sourcePath().isEmpty())return session_.sourcePath();
+    if(!session_.recoveryOrigin().isEmpty())return session_.recoveryOrigin();
+    if(!session_.pendingFilePath().isEmpty())return session_.pendingFilePath();
+    return startupFile_;
+}
+void MainWindow::updateDocumentTitle(){
+    QString name=QDir::toNativeSeparators(documentDisplayPath());
+    if(session_.sourcePath().isEmpty()&&!session_.recoveryOrigin().isEmpty())name+=uiText("（恢复副本）");
     if (name.isEmpty()) name = uiText("未命名船模");
     setWindowTitle(name + (session_.modified() ? " *" : ""));
-    if (session_.busy()) statusBar()->showMessage(uiText(session_.model() ? "正在更新模型…" : "正在打开船模…"));
 }
 void MainWindow::selectPoint(fs::EntityId id) {
     selectPoints(id ? QSet<fs::EntityId>{id} : QSet<fs::EntityId>{});
@@ -598,11 +629,15 @@ void MainWindow::selectPoints(QSet<fs::EntityId> ids) {
 }
 void MainWindow::editProject() {
     if (!session_.ready()) return;
+    if(activeProject_){activeProject_->raise();activeProject_->activateWindow();return;}
+    const auto original=session_.model();
     ProjectDialog dialog(*session_.model(), this);
     dialog.setAttribute(Qt::WA_DontShowOnScreen,workflow_||startupProbe_);
     activeProject_=&dialog;dialog.setEditingEnabled(!session_.busy());
-    const auto accepted=dialog.exec()==QDialog::Accepted;activeProject_.clear();
-    if(accepted&&!session_.busy())session_.updateProject(dialog.changes());
+    const auto accepted=runStudioDialog(dialog)==QDialog::Accepted;activeProject_.clear();
+    if(!accepted)return;
+    if(!session_.ready()||session_.busy()||session_.model()->documentId!=original->documentId){showError(uiText("船模已更改，请重新打开此窗口。"));return;}
+    session_.updateProject(dialog.changes());
 }
 void MainWindow::updateCoordinates() {
     const auto model = session_.model(); const auto* point = model ? model->point(selected_) : nullptr;
@@ -659,24 +694,23 @@ int MainWindow::askSaveChanges(bool exitingBusy) {
     question.button(QMessageBox::Discard)->setText(uiText("不保存"));
     question.button(QMessageBox::Cancel)->setText(uiText("取消"));
     if(documentExit_==DocumentExit::Choosing)exitQuestion_=&question;
-    return question.exec();
+    return runStudioDialog(question);
 }
 void MainWindow::withSavedChanges(std::function<void()> next) {
     if (session_.busy()) return;
     if (!session_.modified()&&calculationDrafts().isEmpty()) { next(); return; }
+    const auto model=session_.model();
     const auto result=askSaveChanges();
+    if(result==QMessageBox::Cancel||result==QDialog::Rejected)return;
+    if(session_.busy()||model!=session_.model()){
+        showError(uiText("船模已更改，请重新打开此窗口。"));return;
+    }
     if (result == QMessageBox::Discard) { afterSave_ = {}; next(); }
     else if (result == QMessageBox::Save) { afterSave_ = std::move(next); saveModel(); }
     else afterSave_ = {};
 }
 void MainWindow::openModel(const QString& path) {
-    if (!path.isEmpty()) withSavedChanges([this, path] {
-        // Reflect the file selected by the user before the asynchronous load
-        // starts. Otherwise a newly created document briefly keeps the default
-        // "Untitled Model" title even though its source path is already known.
-        setWindowTitle(QDir::toNativeSeparators(path));
-        session_.load(path);
-    });
+    if (!path.isEmpty()) withSavedChanges([this,path]{session_.load(path);});
 }
 void MainWindow::saveModel(bool saveAs) {
     if (!session_.ready() || session_.busy()) {
@@ -689,12 +723,15 @@ void MainWindow::saveModel(bool saveAs) {
         const QFileInfo source(path);path=source.absolutePath()+'/'+source.completeBaseName()+".fbm";saveAs=true;
     }
     if (saveAs || path.isEmpty()) {
+        const auto document=session_.model()->documentId;
         if(path.isEmpty()&&!session_.recoveryOrigin().isEmpty()){
             const QFileInfo original(session_.recoveryOrigin());path=original.absolutePath()+'/'+original.completeBaseName()+uiText("-恢复.fbm");
         }
-        path=QFileDialog::getSaveFileName(this,uiText("保存船模"),preferenceFileLocation("save",path),uiText("FreeShip 船模 (*.fbm)"),nullptr,
-            (startupProbe_||testAttribute(Qt::WA_DontShowOnScreen))?QFileDialog::DontUseNativeDialog:QFileDialog::Options{});
+        path=studioSaveFile(this,uiText("保存船模"),preferenceFileLocation("save",path),uiText("FreeShip 船模 (*.fbm)"));
         if(path.isEmpty()){afterSave_={};return;}
+        if(!session_.ready()||session_.busy()||session_.model()->documentId!=document){
+            afterSave_={};showError(uiText("船模已更改，请重新打开此窗口。"));return;
+        }
         if (QFileInfo(path).suffix().isEmpty()) path += ".fbm";
     }
     if(auto* other=windowForFile(path);other && other!=this){
@@ -714,7 +751,7 @@ void MainWindow::fitCurrent() { for(auto* view:views_)view->fit(); }
 void MainWindow::exportLinesImage() {
     if (!session_.ready()||session_.busy()) return;
     if(!session_.scene()){afterDrawing_=[this]{exportLinesImage();};if(!session_.ensureDrawing())afterDrawing_={};return;}
-    auto path = QFileDialog::getSaveFileName(linesDialog_, uiText("保存当前视图图片"), preferenceFileLocation("export",QFileInfo(session_.sourcePath()).path()), uiText("PNG 图片 (*.png)"));
+    auto path = studioSaveFile(linesDialog_, uiText("保存当前视图图片"), preferenceFileLocation("export",QFileInfo(session_.sourcePath()).path()), uiText("PNG 图片 (*.png)"));
     if (path.isEmpty()) return;
     if (QFileInfo(path).suffix().isEmpty()) path += ".png";
     const QImage pixels = lines_->image();
@@ -726,7 +763,7 @@ void MainWindow::exportLinesImage() {
 void MainWindow::exportDxf() {
     if (!session_.ready() || session_.busy()) return;
     if(!session_.scene()){afterDrawing_=[this]{exportDxf();};if(!session_.ensureDrawing())afterDrawing_={};return;}
-    auto path = QFileDialog::getSaveFileName(linesDialog_, uiText("导出型线图 DXF"), preferenceFileLocation("export",QFileInfo(session_.sourcePath()).path()), "DXF (*.dxf)");
+    auto path = studioSaveFile(linesDialog_, uiText("导出型线图 DXF"), preferenceFileLocation("export",QFileInfo(session_.sourcePath()).path()), "DXF (*.dxf)");
     if (path.isEmpty()) return;
     if (QFileInfo(path).suffix().isEmpty()) path += ".dxf";
     try { ModelSession::atomicCopy(session_.dxfPath(), path); showStatusMessage(uiText("DXF 已导出：") + path); }
@@ -760,10 +797,10 @@ void MainWindow::showError(const QString& sourceMessage,bool sessionError) {
     }
     if(startupProbe_){afterSave_={};statusBar()->showMessage(message);startupStep("error",message);return;}
     afterSave_ = {}; statusBar()->showMessage(uiText("操作未完成。当前画面已保留。"));
-    if(sections_&&sections_->isVisible()&&!workflow_){sections_->setSnapshot(session_.model());sections_->showError(message);return;}
+    if(sections_&&QApplication::activeWindow()==sections_&&!workflow_){sections_->setSnapshot(session_.model());sections_->showError(message);return;}
     if (workflow_) finishWorkflow(message); else {
         QMessageBox dialog(QMessageBox::Warning,uiText("操作未完成"),message,QMessageBox::Ok,this);
-        dialog.setOption(QMessageBox::Option::DontUseNativeDialog);dialog.exec();
+        dialog.setOption(QMessageBox::Option::DontUseNativeDialog);runStudioDialog(dialog);
     }
 }
 void MainWindow::operationCompleted(const QString& method) {
@@ -868,10 +905,12 @@ void MainWindow::openCalculation(const QString& kind,const QString& method){
         const bool reset=task->session&&!task->session->busy()&&!task->initializing&&session_.ready()&&
             (!task->session->ready()||task->inputDocument!=session_.model()->documentId||
              task->inputUnits!=session_.model()->units);
-        if(!reset){
+        if(!reset||hasPendingStudioDialog(task->dialog)){
             if(session_.ready()&&task->session&&!task->session->busy())
                 if(auto* dialog=dynamic_cast<PerformanceDialog*>(task->dialog.data()))dialog->syncPrincipalDimensions(session_.model()->principalDimensions);
-            showCalculation(key);return;
+            showCalculation(key);
+            if(auto* dialog=dynamic_cast<PlatesDialog*>(task->dialog.data()))dialog->generateIfNeeded();
+            return;
         }
         if(hydroDialog_==task->dialog)hydroDialog_=nullptr;
         if(performanceDialog_==task->dialog)performanceDialog_=nullptr;
@@ -903,13 +942,22 @@ void MainWindow::openCalculation(const QString& kind,const QString& method){
             if(task->kind=="plates"&&platesWorkflow_)QTimer::singleShot(0,this,[this]{platesStep("closed");});
         });
         if(task->key=="hydro:cross")stabilityDialog_=static_cast<HydroDialog*>(dialog);
-        if(!calculationExitPending_)showCalculation(task->key);
+        if(!calculationExitPending_){
+            showCalculation(task->key);
+            if(auto* plates=dynamic_cast<PlatesDialog*>(dialog))plates->generateIfNeeded();
+        }
     };
     task->session->onCompleted=[this,task,bindDialog](const QString& operation){
         if(operation=="calculation_ready"&&!task->dialog){
             if(task->kind=="hydro")task->session->hydroDefaults();
             else if(task->kind=="performance")task->session->performanceDefaults({{"calculator",task->method},{"auto_extract",true}});
-            else bindDialog(new PlatesDialog(*task->session,workflow_,this));
+            else {
+                auto* dialog=new PlatesDialog(*task->session,workflow_,this);
+                dialog->onDiagnosticFaces=[this](const QString& document,quint64 revision,const QVector<QVector<fs::Vec3>>& faces){
+                    for(auto* view:views_)view->setPlateDiagnosticFaces(document,revision,faces);
+                };
+                bindDialog(dialog);
+            }
         }
     };
     task->session->onStateChanged=[this,task]{
@@ -1105,7 +1153,7 @@ void MainWindow::closeEvent(QCloseEvent* event) {
         question.setOption(QMessageBox::Option::DontUseNativeDialog);
         question.setDefaultButton(QMessageBox::Cancel);
         question.button(QMessageBox::Yes)->setText(uiText("退出"));question.button(QMessageBox::Cancel)->setText(uiText("取消"));
-        if(question.exec()==QMessageBox::Yes)stopCalculationsAndClose();
+        if(runStudioDialog(question)==QMessageBox::Yes)stopCalculationsAndClose();
         return;
     }
     if(session_.busy()||session_.modified()||!calculationDrafts().isEmpty()){

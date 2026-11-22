@@ -207,7 +207,7 @@ bool chooseInitialLanguages(QWidget* parent,QJsonObject* values){
         (*values)["quick_language_enabled"]=true;
         dialog.accept();
     });
-    return dialog.exec()==QDialog::Accepted;
+    return runStudioDialog(dialog)==QDialog::Accepted;
 }
 
 PreferencesDialog::PreferencesDialog(QJsonObject values,QWidget* parent,const QString& solverDefault):QDialog(parent),draft_(std::move(values)){
@@ -246,8 +246,8 @@ PreferencesDialog::PreferencesDialog(QJsonObject values,QWidget* parent,const QS
     auto* undo=new QSpinBox;undo->setRange(0,1048576);undo->setSuffix(" MB");undo->setValue(effective.value("undo_memory_mb").toInt());undo->setProperty("preference_field","undo_memory_mb");
     form->addRow(uiText("撤销内存上限"),undo);connect(undo,&QSpinBox::valueChanged,this,[this](int v){draft_["undo_memory_mb"]=v;});
     auto* encoding=new QComboBox;encoding->setEditable(true);encoding->addItems({"cp1251","cp1252","cp936","UTF-8"});encoding->setCurrentText(effective.value("fbm_encoding").toString());encoding->setProperty("preference_field","fbm_encoding");
-    form->addRow(uiText("FBM 文字编码"),encoding);connect(encoding,&QComboBox::currentTextChanged,this,[this](const QString& s){draft_["fbm_encoding"]=s;});
-    encoding->setToolTip(uiText("用于之后打开的船模。"));addPage(general,uiText("常规"));
+    form->addRow(uiText("旧版 FBM 文字编码"),encoding);connect(encoding,&QComboBox::currentTextChanged,this,[this](const QString& s){draft_["fbm_encoding"]=s;});
+    addPage(general,uiText("常规"));
     auto* directories=new QWidget;auto* paths=new QFormLayout(directories);paths->setSpacing(12);
     paths->setRowWrapPolicy(QFormLayout::WrapLongRows);
     for(const auto& pair:{std::pair{"open",uiText("打开模型")},{"save",uiText("保存模型")},{"import",uiText("导入文件")},{"export",uiText("导出文件")},{"solver",uiText("外部求解器目录")},{"temporary",uiText("临时文件")}}){
@@ -265,7 +265,7 @@ PreferencesDialog::PreferencesDialog(QJsonObject values,QWidget* parent,const QS
         connect(edit,&QLineEdit::textChanged,this,[this,key](const QString& s){auto d=draft_.value("directories").toObject();d[key]=s;draft_["directories"]=d;});
         connect(browse,&QPushButton::clicked,this,[this,edit,fallback]{
             const auto start=edit->text().isEmpty()?fallback:edit->text();
-            const auto path=QFileDialog::getExistingDirectory(this,uiText("选择目录"),start);
+            const auto path=studioChooseDirectory(this,uiText("选择目录"),start);
             if(!path.isEmpty())edit->setText(QDir::toNativeSeparators(path));
         });
     }
@@ -279,7 +279,7 @@ PreferencesDialog::PreferencesDialog(QJsonObject values,QWidget* parent,const QS
 void PreferencesDialog::importLegacy(){
     QFileDialog picker(this,uiText("导入旧版设置"));picker.setFileMode(QFileDialog::ExistingFile);
     picker.setNameFilter(uiText("FreeShip 设置 (*.ini *.dta)"));picker.setProperty("preference_file_action","import_legacy");
-    if(picker.exec()!=QDialog::Accepted || picker.selectedFiles().isEmpty())return;
+    if(runStudioDialog(picker)!=QDialog::Accepted || picker.selectedFiles().isEmpty())return;
     try{
         const auto report=fs::document::importLegacyPreferences(picker.selectedFiles().front(),QCoreApplication::applicationDirPath()+"/bridge");
         const auto imported=report["values"].toObject();auto candidate=draft_;
@@ -327,7 +327,7 @@ void PreferencesDialog::buildGraphics(){
     for(const auto& pair:{std::pair{"viewportcolor",uiText("视图背景")},{"edgecolor",uiText("控制网边线")},{"creaseedgecolor",uiText("折角边线")},{"regularpointcolor",uiText("普通控制点")},{"creasepointcolor",uiText("折角控制点")},{"cornerpointcolor",uiText("角点")},{"dartpointcolor",uiText("尖点")},{"leakpointcolor",uiText("泄漏点")},{"selectcolor",uiText("选中控制点")},{"normalcolor",uiText("面法线")},{"stationcolor",uiText("横剖线")},{"buttockcolor",uiText("纵剖线")},{"waterlinecolor",uiText("水线")},{"diagonalcolor",uiText("斜剖线")},{"gridcolor",uiText("网格")},{"gridfontcolor",uiText("网格文字")},{"markercolor",uiText("参考曲线")},{"curvatureplotcolor",uiText("曲率图")},{"controlcurvecolor",uiText("控制曲线")},{"hydrostaticsfontcolor",uiText("静水力标注")},{"layercolor",uiText("新建图层默认颜色")},{"underwatercolor",uiText("新船模水下部分")}}){
         const QString key=pair.first;auto* button=new QPushButton;button->setAutoDefault(false);button->setProperty("preference_field","graphic."+key);
         const auto color=QColor::fromRgb(colors[key].toInt());auto paint=[button](QColor c){QPixmap p(32,18);p.fill(c);button->setIcon(QIcon(p));button->setText(c.name().toUpper());button->setProperty("color",c);};paint(color);form->addRow(pair.second,button);
-        connect(button,&QPushButton::clicked,this,[this,guard=QPointer<QPushButton>(button),key,paint]{if(!guard)return;auto c=QColorDialog::getColor(guard->property("color").value<QColor>(),this,uiText("选择颜色"), QColorDialog::DontUseNativeDialog);if(!guard||!c.isValid())return;auto g=draft_.value("graphic").toObject();g[key]=c.red()|(c.green()<<8)|(c.blue()<<16);draft_["graphic"]=g;paint(c);});
+        connect(button,&QPushButton::clicked,this,[this,guard=QPointer<QPushButton>(button),key,paint]{if(!guard)return;auto c=studioChooseColor(guard->property("color").value<QColor>(),this,uiText("选择颜色"), QColorDialog::DontUseNativeDialog);if(!guard||!c.isValid())return;auto g=draft_.value("graphic").toObject();g[key]=c.red()|(c.green()<<8)|(c.blue()<<16);draft_["graphic"]=g;paint(c);});
     }
     spin("underwatercoloralpha",uiText("新船模水下不透明度 (0–255)"),graphic.value("underwatercoloralpha").toInt(),0,255,true);
     auto* reset=new QPushButton(uiText("恢复默认绘图设置"));reset->setAutoDefault(false);reset->setProperty("preference_action","reset_graphics");form->addRow(reset);

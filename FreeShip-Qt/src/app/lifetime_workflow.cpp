@@ -4,11 +4,13 @@
 #include "exchange_save_probe.h"
 #include "plates_dialog.h"
 #include "preferences_dialog.h"
+#include "studio_ui.h"
 #include <QApplication>
 #include <QAction>
 #include <QContextMenuEvent>
 #include <QColorDialog>
 #include <QComboBox>
+#include <QDialog>
 #include <QElapsedTimer>
 #include <QEventLoop>
 #include <QFile>
@@ -17,8 +19,11 @@
 #include <QMouseEvent>
 #include <QPointer>
 #include <QPushButton>
+#include <QScopeGuard>
 #include <QScrollArea>
 #include <QTimer>
+#include <QToolButton>
+#include <algorithm>
 #include <stdexcept>
 
 void MainWindow::auditObjectLifetime(){
@@ -26,29 +31,117 @@ void MainWindow::auditObjectLifetime(){
     const auto original=session_.model();const bool oldWorkflow=workflow_;workflow_=true;
     qApp->setQuitOnLastWindowClosed(false);
     try{
-        // The real shared Plates action used to bypass the local popup fix.
-        QJsonArray popups;
-        for(auto* view:views_)for(bool ctrl:{false,true}){
+        const auto viewportMenu=[](HullView* view){
             view->setAttribute(Qt::WA_DontShowOnScreen);
-            QContextMenuEvent event(QContextMenuEvent::Keyboard,QPoint(20,20),view->mapToGlobal(QPoint(20,20)));
+            QContextMenuEvent event(QContextMenuEvent::Mouse,QPoint(20,20),view->mapToGlobal(QPoint(20,20)));
             QApplication::sendEvent(view,&event);
             QPointer<QMenu> menu;
             for(auto* m:view->findChildren<QMenu*>(QString{},Qt::FindDirectChildrenOnly))if(m->isVisible())menu=m;
-            if(!menu||!menu->actions().contains(platesAction_))throw std::runtime_error("Shared plates popup action missing");
-            bool opened=false;int opens=0;QElapsedTimer elapsed;elapsed.start();QTimer close;close.setInterval(10);
-            connect(&close,&QTimer::timeout,this,[&]{if(platesDialog_){opened=true;++opens;platesDialog_->reject();close.stop();}});close.start();
-            const QPointF local=menu->actionGeometry(platesAction_).center(),global=menu->mapToGlobal(local.toPoint());
-            const auto modifiers=ctrl?Qt::ControlModifier:Qt::NoModifier;
-            QMouseEvent press(QEvent::MouseButtonPress,local,global,Qt::LeftButton,Qt::LeftButton,modifiers);
-            QMouseEvent release(QEvent::MouseButtonRelease,local,global,Qt::LeftButton,Qt::NoButton,modifiers);
-            QApplication::sendEvent(menu,&press);QApplication::sendEvent(menu,&release);
-            const bool deferred=!opened;
-            while(!opened&&elapsed.elapsed()<10000)QApplication::processEvents(QEventLoop::AllEvents,20);
-            popups.append(QJsonObject{{"view",int(view->projection())},{"ctrl",ctrl},{"deferred",deferred},{"opens",opens},{"closed",platesDialog_==nullptr}});
-            workflowCase("plates-popup-"+QString::number(int(view->projection()))+(ctrl?"-ctrl":"-normal"),deferred&&opens==1&&!platesDialog_);
+            return menu;
+        };
+        const QStringList transforms{"translate","scale","rotate","rotate_midship","lackenby"};
+        const auto menuItems=[](QMenu* menu){
+            QStringList found;
+            if(menu)for(auto* entry:menu->actions())if(entry->isVisible()&&!entry->isSeparator())
+                found.append(entry->property("operation").toString());
+            return found;
+        };
+        const auto standardMenu=[&](QMenu* menu){
+            if(!menu)return false;
+            const auto items=menuItems(menu);
+            const auto actions=menu->actions();
+            return std::none_of(items.begin(),items.end(),[&](const auto& id){return transforms.contains(id);})&&
+                std::any_of(actions.begin(),actions.end(),[](const auto* a){return a->property("view_operation")=="save_image";})&&
+                std::any_of(actions.begin(),actions.end(),[](const auto* a){return a->menu()&&a->menu()->property("menu_role")=="render_mode";});
+        };
+        QJsonArray popups;
+        for(auto* view:views_){
+            const auto menu=viewportMenu(view);
+            const bool absent=menu&&!menu->actions().contains(platesAction_);
+            popups.append(QJsonObject{{"view",int(view->projection())},{"visible",!menu.isNull()},{"plates_absent",absent}});
+            workflowCase("no-plates-in-view-menu-"+QString::number(int(view->projection())),absent);
+            workflowCase("ordinary-menu-without-selection-"+QString::number(int(view->projection())),standardMenu(menu));
             if(menu)menu->hide();
         }
-        workflowArtifacts_["plates_popup_lifetime"]=popups;
+        workflowArtifacts_["viewport_menus"]=popups;
+        studioBar_->setStartupLayoutWidth(1920);
+        const auto buttons=studioBar_->buttons();
+        workflowCase("no-transform-toolbar-button",std::none_of(buttons.begin(),buttons.end(),[](auto* button){
+            auto* action=button->defaultAction();return action&&action->objectName()=="StudioTransform";
+        }));
+        QToolButton* platesButton=nullptr;
+        for(auto* button:buttons)if(button->defaultAction()==platesAction_)platesButton=button;
+        const auto index=buttons.indexOf(platesButton);
+        workflowCase("plates-next-to-lines-in-top-bar",index>=2&&
+            buttons[index-2]->defaultAction()==sectionsAction_&&buttons[index-1]->defaultAction()==linesAction_&&
+            studioBar_->isAncestorOf(platesButton)&&platesButton->parentWidget()==buttons[index-1]->parentWidget()&&
+            platesButton->x()-buttons[index-1]->geometry().right()<=3&&
+            platesButton->x()>buttons[index-1]->geometry().right()&&!platesButton->menu());
+        if(platesButton)platesButton->click();
+        QElapsedTimer elapsed;elapsed.start();
+        while(!platesDialog_&&elapsed.elapsed()<10000)QApplication::processEvents(QEventLoop::AllEvents,20);
+        const bool opened=platesDialog_&&platesDialog_->isVisible();
+        if(platesDialog_)platesDialog_->reject();
+        workflowCase("plates-toolbar-opens-and-closes-dialog",opened&&!platesDialog_);
+        studioBar_->setStartupLayoutWidth(0);
+
+        // Exercise the real menu entries and dismiss their parameter windows.
+        if(original->points.isEmpty()||original->edges.isEmpty()||original->faces.isEmpty()||original->controlCurves.isEmpty())
+            throw std::runtime_error("Transform menu fixture requires a point, edge, face and control curve");
+        const auto completed=session_.onCompleted;
+        const auto restoreCompletion=qScopeGuard([this,completed]{session_.onCompleted=completed;});
+        session_.onCompleted=[completed](const QString& operation){
+            if(operation!="inspect_modeling"&&completed)completed(operation);
+        };
+        struct Selection {HullEntity kind;fs::EntityId id;QString name;};
+        const QList<Selection> selections{
+            {HullEntity::Point,original->points.front().id,"point"},
+            {HullEntity::Edge,original->edges.front().id,"edge"},
+            {HullEntity::Face,original->faces.front().id,"face"},
+            {HullEntity::Curve,original->controlCurves.front().id,"curve"}};
+        for(const auto& [kind,id,type]:selections){
+            setSelectionKind(kind);
+            if(kind==HullEntity::Point)selectPoints({id});else selectEntities(kind,{id});
+            for(auto* view:views_){
+                const auto menu=viewportMenu(view);
+                const auto observed=menuItems(menu);
+                workflowCase("transform-only-menu-"+type+"-"+QString::number(int(view->projection())),observed==transforms,
+                    observed.join('|'));
+                if(menu)menu->hide();
+            }
+            const auto clicks=kind==HullEntity::Point?QStringList{"translate"}:
+                kind==HullEntity::Edge?QStringList{"scale"}:kind==HullEntity::Face?QStringList{"rotate","rotate_midship","lackenby"}:QStringList{};
+            for(const auto& operation:clicks){
+                const auto menu=viewportMenu(views_[0]);
+                QAction* entry=nullptr;
+                if(menu)for(auto* item:menu->actions())if(item->property("operation")==operation)entry=item;
+                if(!entry||!entry->isEnabled())throw std::runtime_error("Transform action is missing or disabled");
+                bool shown=false;
+                QTimer close;close.setInterval(5);
+                connect(&close,&QTimer::timeout,this,[&]{
+                    auto* dialog=qobject_cast<QDialog*>(frontStudioDialog());
+                    if(!dialog)return;
+                    shown=dialog->property("advanced_operation")==operation||dialog->property("modeling_operation")==operation;
+                    dialog->reject();close.stop();
+                });
+                close.start();elapsed.restart();
+                const QPointF local=menu->actionGeometry(entry).center(),global=menu->mapToGlobal(local.toPoint());
+                QMouseEvent press(QEvent::MouseButtonPress,local,global,Qt::LeftButton,Qt::LeftButton,Qt::NoModifier);
+                QMouseEvent release(QEvent::MouseButtonRelease,local,global,Qt::LeftButton,Qt::NoButton,Qt::NoModifier);
+                QApplication::sendEvent(menu,&press);QApplication::sendEvent(menu,&release);
+                const bool deferred=!shown;
+                while(close.isActive()&&elapsed.elapsed()<10000)QApplication::processEvents(QEventLoop::AllEvents,20);
+                workflowCase("viewport-transform-opens-"+operation,deferred&&shown&&session_.model()==original);
+                if(menu)menu->hide();
+            }
+            if(kind==HullEntity::Point)selectPoints({});else selectEntities(kind,{});
+        }
+        setSelectionKind(HullEntity::Point);
+        for(auto* view:views_){
+            const auto menu=viewportMenu(view);
+            workflowCase("ordinary-menu-after-clearing-selection-"+QString::number(int(view->projection())),standardMenu(menu));
+            if(menu)menu->hide();
+        }
 
         int destroyedViewCalls=0;
         {
@@ -73,7 +166,7 @@ void MainWindow::auditObjectLifetime(){
             QApplication::setAttribute(Qt::AA_DontUseNativeDialogs,true);
             QTimer picker;picker.setInterval(10);
             connect(&picker,&QTimer::timeout,&preferences,[&]{
-                if(auto* dialog=qobject_cast<QColorDialog*>(QApplication::activeModalWidget())){
+                if(auto* dialog=qobject_cast<QColorDialog*>(frontStudioDialog())){
                     picker.stop();if(oldPanel)QCoreApplication::sendPostedEvents(oldPanel,QEvent::DeferredDelete);
                     oldDeleted=color.isNull();chosen=true;dialog->setCurrentColor(QColor("#123456"));dialog->accept();
                 }

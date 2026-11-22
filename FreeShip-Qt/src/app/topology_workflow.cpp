@@ -31,7 +31,7 @@ void MainWindow::topologyStep(const QString& method){
             if(!action->isEnabled())throw std::runtime_error("Production dialog action is disabled");
             bool handled=false;QString error;QTimer timer;timer.setSingleShot(true);
             connect(&timer,&QTimer::timeout,this,[&]{
-                auto* dialog=qobject_cast<QDialog*>(QApplication::activeModalWidget());
+                auto* dialog=qobject_cast<QDialog*>(frontStudioDialog());
                 if(!dialog){error="Production modal dialog not found";return;}
                 if(!dialog->testAttribute(Qt::WA_DontShowOnScreen)){error="Verification dialog is not private";dialog->reject();return;}
                 const auto coordinates=dialog->findChildren<QDoubleSpinBox*>();

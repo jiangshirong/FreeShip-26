@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 #pragma once
+#include "studio_flow_layout.h"
+#include "studio_block_button.h"
 #include "draft_history.h"
 #include "studio_ui.h"
 #include "ui_language.h"
-#include <QApplication>
 #include <QFocusEvent>
 #include <QFormLayout>
 #include <QHBoxLayout>
@@ -13,9 +14,7 @@
 #include <QLineEdit>
 #include <QLocale>
 #include <QMap>
-#include <QMouseEvent>
 #include <QScrollArea>
-#include <QScrollBar>
 #include <QSet>
 #include <QSpinBox>
 #include <QStyleOptionToolButton>
@@ -29,9 +28,9 @@
 #include <functional>
 #include <limits>
 
-class HydroValueBlock final : public QToolButton {
+class HydroValueBlock final : public StudioBlockButton {
 public:
-    explicit HydroValueBlock(QWidget* parent):QToolButton(parent){}
+    explicit HydroValueBlock(QWidget* parent):StudioBlockButton(parent){}
     QString previewText()const{
         const auto full=text();
         int digits=0;
@@ -48,15 +47,9 @@ public:
         const int textWidth=metrics.horizontalAdvance(previewText());
         return {qMax(24,textWidth+12),30};
     }
-    void setDragging(bool dragging){dragging_=dragging;update();}
 protected:
     void paintEvent(QPaintEvent*)override{
         QStylePainter painter(this);
-        if(dragging_){
-            painter.setPen(QPen(QColor("#bfd4cb"),1,Qt::DashLine));
-            painter.drawRoundedRect(rect().adjusted(0,0,-1,-1),4,4);
-            return;
-        }
         QStyleOptionToolButton option;
         initStyleOption(&option);
         const auto metrics=fontMetrics();
@@ -69,51 +62,12 @@ protected:
         painter.setPen(QColor(isEnabled()?"#225e55":"#7b8582"));
         painter.drawText(rect().adjusted(5,0,-5,0),Qt::AlignCenter|Qt::TextSingleLine,label);
     }
-private:
-    bool dragging_=false;
 };
 
 class HydroInlineValueEdit final : public QLineEdit {
 public:
     explicit HydroInlineValueEdit(QWidget* parent):QLineEdit(parent){}
     QSize sizeHint()const override{return {qMax(46,fontMetrics().horizontalAdvance(text())+18),30};}
-};
-
-class HydroValueFlow final : public QLayout {
-public:
-    HydroValueFlow(){setContentsMargins(0,0,0,0);setSpacing(4);}
-    ~HydroValueFlow()override{while(auto* item=takeAt(0))delete item;}
-    void addItem(QLayoutItem* item)override{items_.append(item);invalidate();}
-    int count()const override{return items_.size();}
-    QLayoutItem* itemAt(int index)const override{return items_.value(index);}
-    QLayoutItem* takeAt(int index)override{
-        if(index<0||index>=items_.size())return nullptr;
-        auto* item=items_.takeAt(index);invalidate();return item;
-    }
-    bool hasHeightForWidth()const override{return true;}
-    int heightForWidth(int width)const override{return arrange(QRect(0,0,width,0),false);}
-    QSize minimumSize()const override{return items_.isEmpty()?QSize(0,0):QSize(24,30);}
-    QSize sizeHint()const override{return {240,heightForWidth(240)};}
-    void setGeometry(const QRect& rect)override{
-        QLayout::setGeometry(rect);arrange(rect,true);
-        if(onLayout)onLayout();
-    }
-    std::function<void()> onLayout;
-private:
-    int arrange(const QRect& rect,bool place)const{
-        int x=0,y=0,rowHeight=0;
-        const int available=qMax(1,rect.width());
-        for(auto* item:items_){
-            const auto size=item->widget()->sizeHint();
-            const int width=qMin(available,size.width());
-            const int height=size.height();
-            if(x>0&&x+width>available){x=0;y+=rowHeight+spacing();rowHeight=0;}
-            if(place)item->setGeometry(QRect(rect.x()+x,rect.y()+y,width,height));
-            x+=width+spacing();rowHeight=qMax(rowHeight,height);
-        }
-        return y+rowHeight;
-    }
-    QList<QLayoutItem*> items_;
 };
 
 class HydroNumberList final : public QWidget {
@@ -130,11 +84,7 @@ public:
             "QToolButton#HydroValueBlock:pressed { background:#c8dfd5; }"
             "QToolButton#HydroValueBlock:disabled { color:#7b8582; }"
             "QLineEdit#HydroInlineValueEdit { background:#f6faf7; border:1px solid #6c9d8c;"
-            " border-radius:4px; color:#225e55; padding:0 5px; }"
-            "QWidget#HydroValueDrop { border:none; border-radius:4px; background:transparent; }"
-            "QWidget#HydroValueDrop[dragOver=\"true\"] { background:#f9eae5; }"
-            "QLabel#HydroValueDropLabel { color:#466960; }"
-            "QLabel#HydroValueDropLabel[dragOver=\"true\"] { color:#a02d1e; }");
+            " border-radius:4px; color:#225e55; padding:0 5px; }");
         auto* root=new QVBoxLayout(this);
         root->setContentsMargins(0,0,0,0);root->setSpacing(5);
         header_=new QHBoxLayout;
@@ -142,7 +92,7 @@ public:
         root->addLayout(header_);
         add_=actionButton(header_,"add",studioIcon("AddOne"));
         range_=actionButton(header_,"range",studioIcon("AddRange"));
-        flow_=new HydroValueFlow;
+        flow_=new StudioFlowLayout;
         root->addLayout(flow_);
 
         edit_=new HydroInlineValueEdit(this);
@@ -152,24 +102,8 @@ public:
         flow_->onLayout=[this]{placeEditor();};
         createRangeEditor(root);
 
-        drop_=new QWidget;
-        drop_->setSizePolicy(QSizePolicy::Maximum,QSizePolicy::Preferred);
-        drop_->setObjectName("HydroValueDrop");drop_->setProperty("hydro_list_action","drop");
-        auto* dropLine=new QHBoxLayout(drop_);
-        dropLine->setContentsMargins(6,3,6,3);dropLine->setSpacing(5);
-        auto* trash=new QLabel;trash->setPixmap(studioIcon("DeleteOne").pixmap(14,14));
-        dropLabel_=new QLabel;
-        dropLabel_->setObjectName("HydroValueDropLabel");dropLabel_->setWordWrap(true);dropLabel_->setMinimumWidth(0);
-        dropLine->addWidget(trash,0,Qt::AlignVCenter);
-        dropLine->addWidget(dropLabel_,1);
-        header_->addSpacing(6);
-        header_->addWidget(drop_,0,Qt::AlignVCenter);
         header_->addStretch();
 
-        ghost_=new QLabel(this);ghost_->setObjectName("HydroValueGhost");
-        ghost_->setAttribute(Qt::WA_TransparentForMouseEvents);ghost_->setAlignment(Qt::AlignCenter);ghost_->hide();
-        dragScroll_.setInterval(30);
-        connect(&dragScroll_,&QTimer::timeout,this,[this]{scrollAtDragEdge();});
         connect(add_,&QToolButton::clicked,this,[this]{startEdit(entries_.size());});
         connect(range_,&QToolButton::clicked,this,[this]{showRangeEditor();});
         connect(edit_,&QLineEdit::textChanged,this,[this]{
@@ -185,7 +119,6 @@ public:
 
     void setValues(const QJsonValue& source){
         history_.clear();
-        cancelDrag();
         closeEditor(false);
         rangePanel_->hide();
         entries_=source.toArray();
@@ -247,43 +180,6 @@ protected:
         if(!block)return QWidget::eventFilter(watched,event);
         if(event->type()==QEvent::KeyPress&&static_cast<QKeyEvent*>(event)->key()==Qt::Key_Delete){
             removeValue(block->property("hydro_value_index").toInt());return true;
-        }
-        if(event->type()==QEvent::MouseButtonPress){
-            const auto* mouse=static_cast<QMouseEvent*>(event);
-            if(mouse->button()==Qt::LeftButton){
-                pressed_=block;pressPosition_=mouse->globalPosition().toPoint();
-            }
-        }else if(event->type()==QEvent::MouseMove&&pressed_==block){
-            const auto* mouse=static_cast<QMouseEvent*>(event);
-            const auto global=mouse->globalPosition().toPoint();
-            if(mouse->buttons().testFlag(Qt::LeftButton)&&
-               (dragging_||(global-pressPosition_).manhattanLength()>=QApplication::startDragDistance())){
-                if(!dragging_){
-                    dragging_=true;
-                    block->setDown(false);
-                    block->setCursor(Qt::ClosedHandCursor);
-                    ghost_->setPixmap(block->grab());ghost_->resize(block->size());
-                    dragOffset_=block->mapFromGlobal(pressPosition_);
-                    block->setDragging(true);
-                    ghost_->raise();ghost_->show();
-                    dragScroll_.start();
-                }
-                dragPosition_=global;
-                updateDragPosition();
-                return true;
-            }
-        }else if(event->type()==QEvent::MouseButtonRelease&&pressed_==block){
-            const auto* mouse=static_cast<QMouseEvent*>(event);
-            if(mouse->button()==Qt::LeftButton&&dragging_){
-                const bool remove=overDrop(mouse->globalPosition().toPoint());
-                const int index=block->property("hydro_value_index").toInt();
-                cancelDrag();
-                if(remove)removeValue(index);
-                return true;
-            }
-            cancelDrag();
-        }else if(event->type()==QEvent::UngrabMouse||event->type()==QEvent::Hide){
-            if(pressed_==block)cancelDrag();
         }
         return QWidget::eventFilter(watched,event);
     }
@@ -440,17 +336,16 @@ private:
             auto* block=new HydroValueBlock(this);
             block->setObjectName("HydroValueBlock");block->setProperty("hydro_value_index",i);
             block->setText(label);block->setToolTip(value.isDouble()?shortest(value.toDouble()):label);
-            block->setCursor(Qt::OpenHandCursor);
             block->setSizePolicy(QSizePolicy::Preferred,QSizePolicy::Fixed);block->setMinimumWidth(20);
             block->setFixedHeight(30);block->installEventFilter(this);
             flow_->addWidget(block);
             blocks_.append(block);
             connect(block,&QToolButton::clicked,this,[this,i]{startEdit(i);});
+            block->onRemove=[this,i]{removeValue(i);};
         }
         updateValueNames();updateControls();
     }
     void updateControls(){
-        drop_->setVisible(!blocks_.isEmpty());
         const bool editingRange=!rangePanel_->isHidden();
         add_->setEnabled(entries_.size()<limit_&&editIndex_<0&&!editingRange);
         range_->setEnabled(editIndex_<0&&!editingRange);
@@ -459,7 +354,6 @@ private:
         const auto caption=[](QToolButton* button,const QString& text){button->setToolTip(text);button->setAccessibleName(text);};
         caption(add_,uiText("添加数值"));
         caption(range_,uiText("批量添加数值"));
-        dropLabel_->setText(uiText("拖动到此区域删除"));
         rangeStartLabel_->setText(uiText("起始值"));
         rangeEndLabel_->setText(uiText("终止值"));
         rangeCountLabel_->setText(uiText("数量（含起点和终点）"));
@@ -529,7 +423,7 @@ private:
     void recordChange(const QJsonArray& before,int index){
         if(before==entries_)return;
         const auto restore=[this,index](const QJsonArray& values){
-            cancelDrag();closeEditor(false);rangePanel_->hide();
+            closeEditor(false);rangePanel_->hide();
             entries_=values;rebuild();
             if(isVisible())
                 focusValue(index>=0&&!blocks_.isEmpty()?blocks_[qMin(index,int(blocks_.size())-1)]:add_);
@@ -549,61 +443,19 @@ private:
             if(auto* scroll=parameterScroll();scroll&&widget->hasFocus())scroll->ensureWidgetVisible(widget,0,0);
         });
     }
-    void updateDragPosition(){
-        ghost_->move(mapFromGlobal(dragPosition_)-dragOffset_);
-        setDropHover(overDrop(dragPosition_));
-    }
-    void scrollAtDragEdge(){
-        auto* scroll=parameterScroll();
-        if(!scroll)return;
-        const auto rect=scroll->viewport()->rect();
-        const auto position=scroll->viewport()->mapFromGlobal(dragPosition_);
-        if(!rect.contains(position))return;
-        constexpr int edge=24;
-        auto* bar=scroll->verticalScrollBar();
-        if(position.y()<edge)bar->setValue(bar->value()-12);
-        else if(position.y()>rect.bottom()-edge)bar->setValue(bar->value()+12);
-        updateDragPosition();
-    }
-    bool overDrop(QPoint global)const{
-        if(const auto* scroll=parameterScroll();scroll&&
-           !scroll->viewport()->rect().contains(scroll->viewport()->mapFromGlobal(global)))return false;
-        return drop_->isVisible()&&drop_->rect().contains(drop_->mapFromGlobal(global));
-    }
-    void setDropHover(bool hover){
-        if(hover==dropHovered_)return;
-        dropHovered_=hover;
-        for(QWidget* widget:{drop_,static_cast<QWidget*>(dropLabel_)}){
-            widget->setProperty("dragOver",hover);
-            widget->style()->unpolish(widget);widget->style()->polish(widget);widget->update();
-        }
-    }
-    void cancelDrag(){
-        if(pressed_){
-            pressed_->setCursor(Qt::OpenHandCursor);
-            pressed_->setDragging(false);
-        }
-        pressed_=nullptr;dragging_=false;
-        dragScroll_.stop();
-        ghost_->hide();setDropHover(false);
-    }
     void notify(bool committed=true){if(onChanged)onChanged(committed);}
     int limit_,editIndex_=-1;
     double minimum_,maximum_;
     QUndoStack& history_;
     QJsonArray entries_;
     QList<QToolButton*> blocks_;
-    QWidget *rangePanel_,*drop_;
+    QWidget* rangePanel_;
     QHBoxLayout* header_;
-    HydroValueFlow* flow_;
+    StudioFlowLayout* flow_;
     QToolButton *add_,*range_,*rangeApply_,*rangeCancel_;
-    HydroValueBlock* pressed_=nullptr;
-    QLabel *dropLabel_,*ghost_,*rangeStartLabel_,*rangeEndLabel_,*rangeCountLabel_,*rangeStepLabel_,*rangeStep_,*rangeError_;
+    QLabel *rangeStartLabel_,*rangeEndLabel_,*rangeCountLabel_,*rangeStepLabel_,*rangeStep_,*rangeError_;
     HydroInlineValueEdit* edit_;
     QLineEdit *rangeStart_,*rangeEnd_;
     QSpinBox* rangeCount_;
     QJsonArray rangePreview_;
-    QPoint pressPosition_,dragPosition_,dragOffset_;
-    QTimer dragScroll_;
-    bool dragging_=false,dropHovered_=false;
 };

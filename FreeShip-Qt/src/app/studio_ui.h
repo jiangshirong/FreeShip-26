@@ -3,6 +3,7 @@
 #include <QLabel>
 #include <QIcon>
 #include <QColor>
+#include <QColorDialog>
 #include <QVector>
 #include <QPointer>
 #include "message_style.h"
@@ -15,6 +16,15 @@ class QPushButton;
 class QScrollArea;
 class QToolBar;
 class QTimer;
+void showStudioDialog(QDialog& dialog);
+int runStudioDialog(QDialog& dialog);
+QDialog* frontStudioDialog(); // Visible dialog for isolated workflow probes.
+bool hasPendingStudioDialog(const QWidget* owner);
+QString studioOpenFile(QWidget* parent,const QString& title,const QString& path={},const QString& filter={});
+QStringList studioOpenFiles(QWidget* parent,const QString& title,const QString& path={},const QString& filter={});
+QString studioSaveFile(QWidget* parent,const QString& title,const QString& path={},const QString& filter={});
+QString studioChooseDirectory(QWidget* parent,const QString& title,const QString& path={});
+QColor studioChooseColor(const QColor& initial,QWidget* parent,const QString& title,QColorDialog::ColorDialogOptions options={});
 void applyStudioToolTipPolicy();
 void applyStudioTheme();
 bool confirmStudioAction(QWidget* parent,const QString& title,const QString& question);

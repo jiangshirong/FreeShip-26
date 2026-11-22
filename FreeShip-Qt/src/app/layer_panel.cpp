@@ -256,7 +256,7 @@ public:
     std::function<void()> onChanged;
     explicit ColorEditor(QWidget* parent = nullptr) : QPushButton(parent) {
         connect(this, &QPushButton::clicked, this, [this] {
-            const auto color = QColorDialog::getColor(displayColor(property("colorValue").toUInt()), this, uiText("选择图层颜色"), QColorDialog::DontUseNativeDialog);
+            const auto color = studioChooseColor(displayColor(property("colorValue").toUInt()), this, uiText("选择图层颜色"), QColorDialog::DontUseNativeDialog);
             if (color.isValid()) setProperty("colorValue", storedColor(color));
         });
     }

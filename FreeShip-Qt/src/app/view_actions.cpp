@@ -17,14 +17,14 @@ void MainWindow::viewAction(HullView* view,const QString& action){
     if(!session_.ready()||!view||view->snapshot()!=session_.model())return;
     if(action=="clear_selection"){modelingAction(action);return;}
     if(action=="light_settings"){openLightDialog(view);return;}
-    // Capture the invoked view, with final labels, before a modal dialog can
+    // Capture the invoked view, with final labels, before the user can
     // change the current tab, focus or document. Never export all four cameras.
     if(action=="save_image"){
         const auto pixels=view->image();
         QFileDialog dialog(this,uiText("保存当前视图图片"),preferenceFileLocation("export",QFileInfo(session_.sourcePath()).path()),uiText("PNG 图片 (*.png)"));
         dialog.setProperty("view_operation","save_image_file");dialog.setAcceptMode(QFileDialog::AcceptSave);dialog.setDefaultSuffix("png");
         if(workflow_){dialog.setOption(QFileDialog::DontUseNativeDialog);dialog.setAttribute(Qt::WA_DontShowOnScreen);}
-        if(dialog.exec()!=QDialog::Accepted||dialog.selectedFiles().isEmpty())return;
+        if(runStudioDialog(dialog)!=QDialog::Accepted||dialog.selectedFiles().isEmpty())return;
         const auto path=dialog.selectedFiles().front();QSaveFile target(path);target.setDirectWriteFallback(false);
         if(!target.open(QIODevice::WriteOnly)||!pixels.save(&target,"PNG")||!target.commit())showError(uiText("图片保存失败，原文件未被替换：")+target.errorString());
         else showStatusMessage(uiText("图片已保存：")+path);
@@ -35,7 +35,7 @@ void MainWindow::viewAction(HullView* view,const QString& action){
         const auto picture=view->printPicture(qMin(qreal(rasterPage.width())/source.width(),qreal(rasterPage.height())/source.height()));
         QPrintPreviewDialog preview(&printer,this);preview.setProperty("view_operation","print_preview");preview.setAttribute(Qt::WA_DontShowOnScreen,workflow_);
         preview.setWindowTitle(uiText("打印预览"));setStudioWindowIcon(&preview,"Print");
-        styleStudioPrintPreview(&preview);
+        styleStudioPrintPreview(&preview,false,&printer);
         preview.setProperty("print_renderer","vector-picture");preview.setProperty("print_source_size",source);
         connect(&preview,&QPrintPreviewDialog::paintRequested,this,[picture,source](QPrinter* device){
             QPainter painter(device);if(!painter.isActive())return;
@@ -50,7 +50,7 @@ void MainWindow::viewAction(HullView* view,const QString& action){
             painter.scale(qreal(picture.logicalDpiX())/device->logicalDpiX(),qreal(picture.logicalDpiY())/device->logicalDpiY());
             painter.drawPicture(QPointF(),picture);
         });
-        preview.exec();
+        runStudioDialog(preview);
     }
 }
 void MainWindow::openLightDialog(HullView* view){

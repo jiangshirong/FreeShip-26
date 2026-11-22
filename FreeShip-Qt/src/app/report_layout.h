@@ -7,14 +7,19 @@
 #include "math_notation.h"
 #include "numeric_range_text.h"
 #include "text_style.h"
+#include "studio_table.h"
+#include <QFontMetricsF>
 #include <QTextCursor>
 #include <QTextDocument>
 #include <QTextTable>
 #include <QTextBlock>
 #include <QTextImageFormat>
 #include <QTextFragment>
+#include <QRegularExpression>
 #include <QImage>
 #include <QUrl>
+#include <QtMath>
+#include <numeric>
 
 namespace report {
 struct Table {
@@ -24,6 +29,12 @@ struct Table {
     QList<int> leftColumns;
     QList<int> widthPercent{};
     int htmlWidth=0;
+    QList<StudioHeaderGroup> groups{};
+};
+
+struct PdfTableLayout {
+    QFont font;
+    int availableWidth;
 };
 
 inline int textWidth(const QString& text) {
@@ -102,11 +113,109 @@ inline QString messageRole(const QTextTable* table){
     return {};
 }
 
-inline QString render(const Table& table, bool html) {
+inline QString pdfTable(const Table& table,const PdfTableLayout& layout){
+    constexpr int padding=5;
+    const auto font=layout.font;
+    auto headingFont=font;headingFont.setBold(true);
+    const auto width=[](const QString& text,const QFont& font){
+        const QFontMetricsF metrics(font);
+        qreal longest=0;
+        for(const auto& line:text.split('\n'))
+            longest=std::max(longest,notation::contains(line)?notation::size(line,font).width():metrics.horizontalAdvance(line));
+        return qCeil(longest)+2*padding+4;
+    };
+    const auto wordWidth=[&](const QString& text,const QFont& font){
+        static const QRegularExpression spaces("\\s+");
+        int longest=width({},font);
+        for(const auto& word:text.split(spaces,Qt::SkipEmptyParts))longest=std::max(longest,width(word,font));
+        return longest;
+    };
+    auto captions=table.headers;
+    for(const auto& group:table.groups)
+        for(int i=0;i<group.labels.size();++i)captions[group.first+i]=group.labels[i];
+    const int columns=captions.size();
+    QList<int> widths,withoutBodyWrap,minimum;
+    for(int col=0;col<columns;++col){
+        const int headingWidth=width(captions[col],headingFont);
+        int bodyWidth=0,bodyWordWidth=0;
+        for(const auto& row:table.rows){
+            const auto text=row.value(col);
+            bodyWidth=std::max(bodyWidth,width(text,font));
+            bodyWordWidth=std::max(bodyWordWidth,wordWidth(text,font));
+        }
+        const int headingWordWidth=wordWidth(captions[col],headingFont);
+        widths.append(std::max(headingWidth,bodyWidth));
+        withoutBodyWrap.append(std::max(headingWordWidth,bodyWidth));
+        minimum.append(std::max(headingWordWidth,bodyWordWidth));
+    }
+    const auto fitGroup=[](QList<int>& columns,const StudioHeaderGroup& group,int titleWidth){
+        const auto first=columns.begin()+group.first;
+        const int count=group.labels.size();
+        const int extra=titleWidth-std::accumulate(first,first+count,0);
+        for(int i=0;i<count&&extra>0;++i)first[i]+=extra/count+(i<extra%count);
+    };
+    for(const auto& group:table.groups){
+        const int natural=width(group.title,headingFont),word=wordWidth(group.title,headingFont);
+        fitGroup(widths,group,natural);
+        fitGroup(withoutBodyWrap,group,word);
+        fitGroup(minimum,group,word);
+    }
+    const auto sum=[](const QList<int>& sizes){return std::accumulate(sizes.cbegin(),sizes.cend(),0);};
+    int total=sum(widths);
+    if(total>layout.availableWidth){
+        const auto& lower=sum(withoutBodyWrap)<=layout.availableWidth?withoutBodyWrap:minimum;
+        const int spare=layout.availableWidth-sum(lower);
+        if(spare>=0){
+            int adaptable=0;
+            for(int col=0;col<columns;++col)adaptable+=std::max(0,widths[col]-lower[col]);
+            for(int col=0;col<columns;++col)
+                widths[col]=lower[col]+(adaptable?int(qint64(std::max(0,widths[col]-lower[col]))*spare/adaptable):0);
+            total=sum(widths);
+        }
+    }
+    const bool fits=total<=layout.availableWidth;
+    const auto escape=[](const QString& text){return text.toHtmlEscaped().replace('\n',"<br>");};
+    const auto columnWidth=[&](int col){
+        return " width='"+(fits?QString::number(widths[col]):QString::number(100.*widths[col]/total,'f',3)+"%")+"'";
+    };
+    const auto header=[&](const QString& text,const QString& attributes){
+        return "<th align='center' valign='middle'"+attributes+" style='border:1px solid #d6e3dc'>"+escape(text)+"</th>";
+    };
+    const QString headerRow="<tr style='background-color:#e0eee8'>";
+    QString result="<table width='"+(fits?QString::number(total):QString("100%"))+
+        "' cellspacing='0' cellpadding='"+QString::number(padding)+"'><thead>"+headerRow;
+    QString lowerRow;
+    for(int col=0;col<columns;){
+        const auto group=std::find_if(table.groups.begin(),table.groups.end(),[col](const auto& g){return g.first==col;});
+        if(group==table.groups.end()){
+            result+=header(captions[col],columnWidth(col)+(table.groups.isEmpty()?"":" rowspan='2'"));
+            ++col;
+            continue;
+        }
+        result+=header(group->title,QString(" colspan='%1'").arg(group->labels.size()));
+        for(int i=0;i<group->labels.size();++i,++col)lowerRow+=header(captions[col],columnWidth(col));
+    }
+    result+="</tr>";
+    if(!lowerRow.isEmpty())result+=headerRow+lowerRow+"</tr>";
+    result+="</thead>";
+    for(const auto& row:table.rows){
+        result+="<tr>";
+        for(int col=0;col<columns;++col){
+            const auto alignment=table.leftColumns.contains(col)?"left":"right";
+            result+=QString("<td align='%1' valign='middle' style='border:1px solid #e1e8e4'>%2</td>")
+                .arg(alignment,escape(row.value(col)));
+        }
+        result+="</tr>";
+    }
+    return result+"</table>";
+}
+
+inline QString render(const Table& table, bool html,const PdfTableLayout* pdf=nullptr) {
     if(table.rows.isEmpty())return {};
     QString result=html?heading(table.title,true):table.title.isEmpty()?QString{}:table.title+'\n';
     const int columns=table.headers.size();
     if(!columns)return result;
+    if(html&&pdf)return result+pdfTable(table,*pdf);
     if(html) {
         result+="<table width='"+(table.htmlWidth>0?QString::number(table.htmlWidth):QString("100%"))+"' cellspacing='0' cellpadding='5'><thead>";
         const auto append=[&](const QStringList& row, const QString& tag, const QString& color) {

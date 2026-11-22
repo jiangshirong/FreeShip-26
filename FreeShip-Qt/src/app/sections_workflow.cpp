@@ -1,4 +1,5 @@
 // Hidden tests of production actions; no desktop input or user files.
+#include "studio_ui.h"
 #include "main_window.h"
 #include "section_dialog.h"
 #include "layer_panel.h"
@@ -59,7 +60,7 @@ void MainWindow::sectionsStep(const QString& method){
             if(!a->isEnabled())throw std::runtime_error("Disabled production action");
             bool handled=false;QString error;QTimer timer;timer.setSingleShot(true);
             connect(&timer,&QTimer::timeout,this,[&]{
-                auto* dialog=qobject_cast<QDialog*>(QApplication::activeModalWidget());
+                auto* dialog=qobject_cast<QDialog*>(frontStudioDialog());
                 if(!dialog){error="No production dialog";return;}
                 if(!dialog->testAttribute(Qt::WA_DontShowOnScreen)){error="Dialog is not private";dialog->reject();return;}
                 for(auto* field:dialog->findChildren<QDoubleSpinBox*>()){
@@ -89,6 +90,11 @@ void MainWindow::sectionsStep(const QString& method){
             editingOriginal_=model;captureWorkflow("original");
             workflowOriginalDigest_=bytes(session_.scenePath());sectionsAction_->trigger();
             workflowCase("section_action_opens_production_dialog",sections_&&sections_->isVisible());
+            workflowCase("section_editor_does_not_block_owner",sections_->windowModality()==Qt::NonModal&&
+                QApplication::activeModalWidget()!=sections_);
+            openLayers();
+            workflowCase("section_and_layer_editors_can_remain_open",sections_->isVisible()&&layerDialog_->isVisible());
+            layerDialog_->reject();
             sections_->grab().save(workflowOutput_+"/section-dialog.png");
             auto* definitions=table();
             QDir().mkpath(workflowOutput_+"/icons");QJsonArray iconEvidence;

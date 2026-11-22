@@ -68,6 +68,11 @@ int main(int argc, char** argv) {
     auto arguments = app.arguments();
     const bool verifyDevelopment=arguments.removeAll("--development")>0;
     const bool verification=arguments.size()>1&&arguments[1].startsWith("--verify-");
+#ifdef Q_OS_WIN
+    // Widget-based probes select files through Qt controls. The native picker
+    // probe opts in on the isolated desktop.
+    if(verification)app.setAttribute(Qt::AA_DontUseNativeDialogs);
+#endif
     QFile manifest(app.applicationDirPath()+"/build-manifest.json");
     const auto buildInfo=manifest.open(QIODevice::ReadOnly)&&manifest.size()<=1024*1024?
         QJsonDocument::fromJson(manifest.readAll()).object():QJsonObject{};
@@ -83,7 +88,11 @@ int main(int argc, char** argv) {
     if(!verification || launchProbe){
         const auto result=launches.start(launchProbe?QStringList{}:arguments.mid(1));
         if(result==DocumentLaunch::Forwarded)return 0;
-        if(result==DocumentLaunch::Failed){QMessageBox::warning(nullptr,app.applicationDisplayName(),launches.error);return 1;}
+        if(result==DocumentLaunch::Failed){
+            QMessageBox warning(QMessageBox::Warning,app.applicationDisplayName(),launches.error,QMessageBox::Ok);
+            runStudioDialog(warning);
+            return 1;
+        }
     }
     DeveloperMode::toggle();
     QString languageIssue;
@@ -190,9 +199,13 @@ int main(int argc, char** argv) {
     } else if (arguments.size() == 4 && arguments[1] == "--verify-advanced") {
         QTimer::singleShot(0, &window, [&] { window.verifyAdvanced(arguments[2], arguments[3]); });
     } else {
-        showStudioMainWindow(window.window());
-        if(!firstLaunchProbe)
-            QTimer::singleShot(0,&window,[&]{window.startSession(arguments.value(1));for(int i=2;i<arguments.size();++i)window.openDocument(arguments[i]);if(!verification)enableExternalOpen();});
+        const auto reveal=[&]{showStudioMainWindow(window.window());};
+        if(firstLaunchProbe)reveal();
+        else {
+            window.startSession(arguments.value(1),reveal);
+            for(int i=2;i<arguments.size();++i)window.openDocument(arguments[i]);
+            if(!verification)enableExternalOpen();
+        }
     }
     return app.exec();
 }

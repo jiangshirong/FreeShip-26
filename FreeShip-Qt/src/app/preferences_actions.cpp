@@ -69,6 +69,7 @@ void MainWindow::switchUiLanguage(){
     }catch(const std::exception& e){showError(QString::fromUtf8(e.what()));}
 }
 void MainWindow::editPreferences(){
+    if(preferencesDialog_){preferencesDialog_->raise();preferencesDialog_->activateWindow();return;}
     if(session_.busy())return;
     try{
         if(!preferencesStore_)throw std::runtime_error(uiText("偏好设置的保存位置不可用。"));
@@ -78,7 +79,7 @@ void MainWindow::editPreferences(){
         PreferencesDialog dialog(storedPreferences_,this,solverDefault);preferencesDialog_=&dialog;
         dialog.setAttribute(Qt::WA_DontShowOnScreen,workflow_);
         dialog.onApply=[this](const QJsonObject& values){applyPreferences(values);};
-        dialog.exec();preferencesDialog_=nullptr;
+        runStudioDialog(dialog);preferencesDialog_=nullptr;
         if(preferencesWorkflow_)QTimer::singleShot(0,this,[this]{preferencesStep("closed");});
     }catch(const std::exception& e){preferencesDialog_=nullptr;showError(QString::fromUtf8(e.what()));}
 }

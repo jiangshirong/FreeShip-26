@@ -7,14 +7,16 @@
 #include <array>
 
 namespace fs {
-struct PlateEdge { int a,b; double error; bool boundary; };
+struct PlateEdge { int a,b; double error; bool boundary; qint64 meshId=0; };
 struct PlateCurve { int kind,dxfColor; QColor color; QPolygonF points; };
 struct DevelopedPlate {
     QString name,layerName,sideSuffix; int partNumber=0;
     QColor color; int dxfColor=7;
     QPolygonF points; QVector<QVector3D> original;
     QVector<PlateEdge> edges; QVector<QVector<int>> faces,loops;
-    QVector<int> corners; QVector<PlateCurve> curves;
+    QVector<int> corners,worstFaces; QVector<PlateCurve> curves;
+    int flippedTriangles=0,collapsedTriangles=0;
+    double overlapArea=0;
     QJsonObject metrics; bool joinedMirror=false;
     QRectF bounds; QPointF offset; double rotation=0; bool mirrored=false,visible=true;
     QTransform placement()const;

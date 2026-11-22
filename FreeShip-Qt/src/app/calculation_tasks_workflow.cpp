@@ -1,5 +1,6 @@
 // User-authorized parallel task and draggable-ball regression observer.
 // Invoked only by the existing --verify-hydro isolated desktop entry.
+#include "studio_ui.h"
 #include "main_window.h"
 #include "hydro_dialog.h"
 #include "performance_dialog.h"
@@ -101,7 +102,7 @@ void MainWindow::startCalculationTaskProbe(){
         if(state->phase==3){
             if(state->timer.elapsed()<80)return;
             if(hydroRequest_.contains("close_tasks")){
-                QTimer::singleShot(0,this,[]{if(auto* box=qobject_cast<QMessageBox*>(QApplication::activeModalWidget()))box->button(QMessageBox::Cancel)->click();});
+                QTimer::singleShot(0,this,[]{if(auto* box=qobject_cast<QMessageBox*>(frontStudioDialog()))box->button(QMessageBox::Cancel)->click();});
                 close();
                 workflowCase("exit.decline-keeps-window",isVisible());
                 workflowCase("exit.decline-keeps-running-and-queue",state->workers[keys[0]]->calculationActive()&&state->workers[keys[1]]->calculationActive()&&state->workers[keys[2]]->calculationQueued()&&state->workers[keys[3]]->calculationQueued());
@@ -117,7 +118,7 @@ void MainWindow::startCalculationTaskProbe(){
                 });
                 auto* choices=new QTimer(this);choices->setInterval(10);
                 connect(choices,&QTimer::timeout,this,[this,state,choices]{
-                    auto* box=qobject_cast<QMessageBox*>(QApplication::activeModalWidget());if(!box||box->property("exit_probe_answered").toBool())return;
+                    auto* box=qobject_cast<QMessageBox*>(frontStudioDialog());if(!box||box->property("exit_probe_answered").toBool())return;
                     box->setProperty("exit_probe_answered",true);
                     if(box->objectName()=="CalculationExitConfirmation"){
                         box->grab().save(workflowOutput_+"/views/exit-confirmation.png");

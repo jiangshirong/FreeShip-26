@@ -4,7 +4,7 @@
 #include "ui_language.h"
 #include "studio_read_ui.h"
 #include "studio_motion.h"
-#include "layer_panel.h"
+#include "tutorial_features.h"
 #include <QApplication>
 #include <QBuffer>
 #include <QDialog>
@@ -21,6 +21,7 @@
 #include <QScrollArea>
 #include <QStackedWidget>
 #include <QTabBar>
+#include <QTabWidget>
 #include <QPainter>
 #include <QPushButton>
 #include <QResizeEvent>
@@ -175,37 +176,55 @@ protected:
     }
 };
 
-class LayerExample final : public QGraphicsView {
+class ExampleWindowBody final : public QWidget {
 public:
-    explicit LayerExample(QWidget* parent):QGraphicsView(parent){
-        setObjectName("TutorialLayerExample");
+    ExampleWindowBody(){setObjectName("TutorialWindowSchematic");}
+protected:
+    void paintEvent(QPaintEvent*) override{
+        QPainter p(this);
+        p.fillRect(rect(),QColor("#f4f8f5"));
+        p.setRenderHint(QPainter::Antialiasing);
+        const auto viewport=QRectF(rect());
+        const QSizeF form(qMin(460.,viewport.width()*.78),qMin(232.,viewport.height()*.65));
+        const QRectF panel(viewport.center()-QPointF(form.width()/2,form.height()/2),form);
+        box(p,panel,Qt::white,QColor("#d4e1da"),12);
+        const qreal inset=panel.width()*.09;
+        for(int row=0;row<3;++row){
+            const qreal top=panel.top()+panel.height()*(.14+.19*row);
+            const QRectF label(panel.left()+inset,top+9,panel.width()*.24,9);
+            const QRectF field(panel.left()+panel.width()*.43,top,panel.width()*.48,27);
+            box(p,label,QColor("#b3cfc2"),Qt::transparent,4);
+            box(p,field,QColor("#f4f8f5"),QColor("#d4e1da"),5);
+        }
+        const QRectF affordance(panel.right()-inset-74,panel.bottom()-43,74,24);
+        box(p,affordance,QColor("#d9ebe2"),QColor("#bdd7ca"),6);
+    }
+};
+
+class WindowExample final : public QGraphicsView {
+public:
+    explicit WindowExample(QWidget* parent):QGraphicsView(parent){
+        setObjectName("TutorialWindowExample");
         setFrameShape(QFrame::NoFrame);
         setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
         setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
         setInteractive(false);
         setFocusPolicy(Qt::NoFocus);
         auto* scene=new QGraphicsScene(this);
-        scene->setSceneRect(QRectF(0,0,1080,800));
+        scene->setSceneRect(QRectF(0,0,640,470));
         setScene(scene);
         setBackgroundBrush(QColor("#eef3f0"));
         area_=new QMdiArea;
-        area_->setFixedSize(1080,800);
+        area_->setFixedSize(sceneRect().size().toSize());
         area_->setBackground(QColor("#dae7e1"));
         scene->addWidget(area_);
-        LayerPanel* panel=nullptr;
-        auto* dialog=createLayerPropertiesDialog(nullptr,panel);
         window_=new ExampleSubWindow;
-        window_->setWidget(dialog);
+        window_->setWidget(new ExampleWindowBody);
         area_->addSubWindow(window_,Qt::SubWindow|Qt::CustomizeWindowHint|Qt::WindowTitleHint|
                                    Qt::WindowSystemMenuHint|Qt::WindowCloseButtonHint);
-        window_->setObjectName("TutorialLayerSubWindow");
-        window_->setWindowTitle(dialog->windowTitle());
-        window_->setWindowIcon(dialog->windowIcon());
-        auto sample=std::make_shared<fs::ModelSnapshot>();
-        sample->units="metric";
-        sample->layers.append(fs::Layer{1,uiText("船体"),0x9c8455});
-        panel->setSnapshot(sample);
-        panel->setEditingEnabled(false);
+        window_->setObjectName("TutorialExampleSubWindow");
+        bindUiText(window_,"windowTitle",QStringLiteral("图层属性"));
+        window_->setWindowIcon(studioIcon("Layers"));
         pointer_=new PopupCursor(area_->viewport());
         window_->hide();
     }
@@ -214,7 +233,9 @@ public:
         show();
         hidePointer();
         window_->showNormal();
-        window_->setGeometry(140,35,800,730);
+        QRect normal(QPoint{},QSize(416,300));
+        normal.moveCenter(area_->viewport()->rect().center());
+        window_->setGeometry(normal);
         area_->setActiveSubWindow(window_);
     }
     void reset(){hidePointer();window_->hide();hide();}
@@ -245,9 +266,9 @@ private:
 
 class TutorialActionDemo final : public QWidget {
 public:
-    explicit TutorialActionDemo(QWidget* parent):QWidget(parent),layerExample_(new tutorial::LayerExample(this)){
+    explicit TutorialActionDemo(QWidget* parent):QWidget(parent),windowExample_(new tutorial::WindowExample(this)){
         setObjectName("TutorialActionDemo");setFixedHeight(212);
-        layerExample_->reset();
+        windowExample_->reset();
         for(auto& menu:menus_)menu=new tutorial::DemoPopup(this);
         entries_[0]=menus_[0]->addAction(studioIcon("SelectAll"),uiText("全选"));
         entries_[1]=menus_[1]->addAction(studioIcon("Layers"),uiText("图层属性"));
@@ -264,8 +285,8 @@ public:
         connect(entries_[1],&QAction::triggered,this,[this]{
             QTimer::singleShot(0,this,[this]{
                 if(!isVisible()||example_!=1||!done_)return;
-                layerExample_->setGeometry(rect());
-                layerExample_->open();
+                windowExample_->setGeometry(rect());
+                windowExample_->open();
             });
         });
         connect(submenu_,&QMenu::aboutToShow,this,[this]{setResult(3);});
@@ -280,7 +301,7 @@ public:
         setProperty("tutorial_action_menu_open",false);
         motion_.start();update();
     }
-    void stop(){motion_.stop();submenu_->hide();for(auto* menu:menus_)menu->hide();layerExample_->reset();}
+    void stop(){motion_.stop();submenu_->hide();for(auto* menu:menus_)menu->hide();windowExample_->reset();}
     void setPreviewHeight(int height){
         previewHeight_=height;
         if(example_==1)setFixedHeight(height);
@@ -288,7 +309,7 @@ public:
 protected:
     void resizeEvent(QResizeEvent* e) override{
         QWidget::resizeEvent(e);
-        layerExample_->setGeometry(rect());
+        windowExample_->setGeometry(rect());
     }
     void paintEvent(QPaintEvent*) override{
         QPainter p(this);p.setRenderHint(QPainter::Antialiasing);
@@ -348,7 +369,7 @@ private:
     std::array<tutorial::DemoPopup*,4> menus_{};
     std::array<QAction*,4> entries_{};
     QMenu* submenu_=nullptr;
-    tutorial::LayerExample* layerExample_;
+    tutorial::WindowExample* windowExample_;
     QVariantAnimation motion_;
     QPointF target_,pointer_;
     bool done_=false,pointerInPopup_=false;
@@ -359,7 +380,7 @@ class TutorialMenuDemo final : public QWidget {
 public:
     explicit TutorialMenuDemo(QWidget* parent):QWidget(parent),menu_(new tutorial::DemoPopup(this)){
         setObjectName("TutorialMenuDemo");
-        setAccessibleName(uiText("按住 Ctrl 连续点击，菜单保持展开。"));
+        bindUiText(this,"accessibleName",QStringLiteral("按住 Ctrl 连续点击，菜单保持展开。"));
         setFixedHeight(212);
         const std::array<const char*,3> names{"横剖线","纵剖线","水线"};
         for(size_t i=0;i<names.size();++i){
@@ -432,13 +453,13 @@ private:
 
 class TutorialWindowDemo final : public QWidget {
 public:
-    explicit TutorialWindowDemo(QWidget* parent):QWidget(parent),layerExample_(new tutorial::LayerExample(this)){
+    explicit TutorialWindowDemo(QWidget* parent):QWidget(parent),windowExample_(new tutorial::WindowExample(this)){
         setObjectName("TutorialWindowDemo");
         setFixedHeight(360);
-        setAccessibleName(uiText("双击标题栏可最大化窗口，再双击可还原。"));
+        bindUiText(this,"accessibleName",QStringLiteral("双击标题栏可最大化窗口，再双击可还原。"));
         auto* layout=new QVBoxLayout(this);
         layout->setContentsMargins(0,0,0,0);
-        layout->addWidget(layerExample_);
+        layout->addWidget(windowExample_);
         playback_.setStartValue(0);
         playback_.setEndValue(3300);
         playback_.setDuration(3300);
@@ -446,20 +467,20 @@ public:
     }
     void play(){
         stop();time_=0;
-        layerExample_->open();
+        windowExample_->open();
         playback_.start();
     }
-    void stop(){playback_.stop();layerExample_->reset();}
+    void stop(){playback_.stop();windowExample_->reset();}
 private:
     static constexpr int Maximize=830,Restore=2300;
     void showFrame(int time){
         const int previous=time_;time_=time;
-        if(!layerExample_->isVisible())return;
+        if(!windowExample_->isVisible())return;
         if((previous<Maximize&&time>=Maximize)||(previous<Restore&&time>=Restore))
-            layerExample_->doubleClickTitle();
-        if(time>=Maximize-300)layerExample_->showPointer(time-(time>=Restore?Restore:Maximize));
+            windowExample_->doubleClickTitle();
+        if(time>=Maximize-300)windowExample_->showPointer(time-(time>=Restore?Restore:Maximize));
     }
-    tutorial::LayerExample* layerExample_;
+    tutorial::WindowExample* windowExample_;
     QVariantAnimation playback_;
     int time_=0;
 };
@@ -475,21 +496,32 @@ protected:
     }
 };
 
-inline void showTutorialGuide(QWidget* owner){
-    TutorialGuideDialog dialog(owner);setStudioWindowIcon(&dialog,"Tutorial");dialog.setObjectName("TutorialGuide");dialog.setWindowTitle(uiText("教程"));
+inline QDialog* showTutorialGuide(QWidget* owner){
+    if(auto* existing=owner?owner->findChild<QDialog*>("TutorialGuide",Qt::FindDirectChildrenOnly):nullptr){
+        if(existing->isVisible()){
+            existing->raise();existing->activateWindow();return existing;
+        }
+    }
+    auto& dialog=*new TutorialGuideDialog(owner);
+    dialog.setAttribute(Qt::WA_DeleteOnClose);
+    setStudioWindowIcon(&dialog,"Tutorial");dialog.setObjectName("TutorialGuide");dialog.setWindowTitle(uiText("教程"));
     dialog.setAttribute(Qt::WA_DontShowOnScreen,owner&&owner->testAttribute(Qt::WA_DontShowOnScreen));
-    dialog.resize(860,720);dialog.setMinimumSize(660,500);styleStudioReadDialog(&dialog);
+    dialog.resize(1120,740);dialog.setMinimumSize(660,500);styleStudioReadDialog(&dialog);
     auto face=dialog.font();face.setPointSizeF(qMax(10.5,face.pointSizeF()));dialog.setFont(face);
     auto* layout=new QVBoxLayout(&dialog);layout->setContentsMargins(28,24,28,24);layout->setSpacing(24);
-    layout->addWidget(studioReadHeading(uiText("菜单与窗口"),"Tutorial",&dialog));
+    auto* sections=new QTabWidget(&dialog);
+    sections->setObjectName("TutorialSections");
+    layout->addWidget(sections,1);
     auto* scroll=new QScrollArea;scroll->setFrameShape(QFrame::NoFrame);scroll->setWidgetResizable(true);applyStudioScrollbars(scroll);
-    auto* content=new QWidget;auto* body=new QVBoxLayout(content);body->setContentsMargins(0,0,0,0);body->setSpacing(20);scroll->setWidget(content);layout->addWidget(scroll,1);
+    auto* content=new QWidget;auto* body=new QVBoxLayout(content);body->setContentsMargins(0,0,0,0);body->setSpacing(20);scroll->setWidget(content);
+    sections->addTab(scroll,uiText("菜单与窗口"));
+    sections->addTab(createFeatureTutorial(sections),uiText("新功能"));
     auto* gallery=new QVBoxLayout;gallery->setSpacing(8);body->addLayout(gallery);
     auto* tabs=new QTabBar;tabs->setObjectName("TutorialDemoTabs");tabs->setExpanding(false);
     tabs->setStyleSheet("QTabBar#TutorialDemoTabs::tab{padding:9px 9px;margin-right:2px}");
-    const auto captions=QStringList{uiText("命令项"),uiText("对话框项"),uiText("切换项"),uiText("子菜单项"),uiText("连续操作"),uiText("窗口操作")};
+    const std::array<const char*,6> captions{"命令项","对话框项","切换项","子菜单项","连续操作","窗口操作"};
     const auto kinds=QStringList{"command","dialog","toggle","submenu","ctrl","window"};
-    for(int i=0;i<captions.size();++i)tabs->setTabData(tabs->addTab(captions[i]),kinds[i]);
+    for(int i=0;i<int(captions.size());++i)tabs->setTabData(tabs->addTab(uiText(captions[i])),kinds[i]);
     gallery->addWidget(tabs);
     auto* stage=new QStackedWidget;
     auto* actionExplanation=new QLabel;
@@ -506,12 +538,22 @@ inline void showTutorialGuide(QWidget* owner){
         windowDemo->setFixedHeight(height);
     };
     dialog.resizeExamples();
-    const auto descriptions=QStringList{uiText("点击后立即执行命令。"),uiText("点击后打开对话框。"),
-        uiText("点击可切换状态。对勾表示开启，空心圆表示关闭。"),uiText("点击或悬停可展开子菜单。")};
-    QStringList explanations;
-    for(int i=0;i<descriptions.size();++i)
-        explanations.append(tutorial::markedExplanation(descriptions[i],i,dialog.devicePixelRatioF()));
-    actionExplanation->setText(explanations.first());
+    const std::array<const char*,4> descriptions{"点击后立即执行命令。","点击后打开对话框。",
+        "点击可切换状态。对勾表示开启，空心圆表示关闭。","点击或悬停可展开子菜单。"};
+    const auto refreshExplanation=[=]{
+        const int index=tabs->currentIndex();
+        if(index<0||index>=int(descriptions.size()))return;
+        actionExplanation->setText(tutorial::markedExplanation(uiText(descriptions[index]),index,actionExplanation->devicePixelRatioF()));
+        actionDemo->setAccessibleName(uiText(captions[index]));
+    };
+    refreshExplanation();
+    bindUiRefresh(tabs,[=]{
+        for(int i=0;i<int(captions.size());++i)tabs->setTabText(i,uiText(captions[i]));
+        refreshExplanation();
+        actionDemo->update();
+        ctrlDemo->update();
+        windowDemo->update();
+    });
     gallery->addWidget(stage);
     auto* replay=new QPushButton(uiText("重播演示"));replay->setObjectName("TutorialMenuReplay");
     gallery->addWidget(replay,0,Qt::AlignRight);
@@ -521,13 +563,19 @@ inline void showTutorialGuide(QWidget* owner){
         if(index==4){stage->setCurrentWidget(ctrlPanel);ctrlDemo->play();}
         else if(index==5){stage->setCurrentWidget(windowPanel);windowDemo->play();}
         else{
-            actionExplanation->setText(explanations[index]);
-            actionDemo->setAccessibleName(captions[index]);
+            refreshExplanation();
             stage->setCurrentWidget(actionPanel);actionDemo->play(index);
         }
     };
     QObject::connect(replay,&QPushButton::clicked,stage,play);
     QObject::connect(tabs,&QTabBar::currentChanged,stage,play);
+    QObject::connect(sections,&QTabWidget::currentChanged,stage,[=](int index){
+        if(index==0)play();
+        else{actionDemo->stop();ctrlDemo->stop();windowDemo->stop();}
+    });
     QTimer::singleShot(0,stage,play);
-    body->addStretch();dialog.exec();
+    body->addStretch();
+    dialog.setWindowModality(Qt::NonModal);
+    dialog.show();
+    return &dialog;
 }

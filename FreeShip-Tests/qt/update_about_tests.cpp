@@ -33,7 +33,9 @@ int verifyLiveDownload(QApplication& app,const QString& out,bool reopen){
     QVBoxLayout layout(&owner);
     auto* button=new QPushButton;
     layout.addWidget(button);
-    bool ready=false,showedNotes=false,measuredSpeed=false;
+    bool ready=false,showedNotes=false,measuredSpeed=false,switchedLive=false,switchedPaused=false;
+    int afterSwitch=-1;
+    const bool loadedInitialLanguage=setUiLanguage(reopen?"en":"ru").isEmpty();
     int step=0,beforePause=-1,paused=-1,exiting=-1,restored=-1;
     QFile state(out+"/retained-progress.json");
     if(reopen&&state.open(QIODevice::ReadOnly)){
@@ -55,19 +57,38 @@ int verifyLiveDownload(QApplication& app,const QString& out,bool reopen){
         const auto status=controller.state();
         const int percent=bar->maximum()==100?bar->value():-1;
         if(step==0&&action->isEnabled()&&status==(reopen?"paused":"available")){
-            showedNotes=notes->isVisible()&&notes->toPlainText().contains("Added version notes.");
+            showedNotes=loadedInitialLanguage&&notes->isVisible()&&notes->toPlainText().contains(
+                reopen?QStringLiteral("Added version notes."):QStringLiteral("Добавлено описание версии."));
             if(reopen){
                 restored=percent;
                 window->grab().save(out+"/resumed-after-restart.png");
             }
             step=1;action->click();
-        }else if(!reopen&&step==1&&status=="downloading"&&percent>0&&percent<100&&rate->text().contains("/s")){
+        }else if(!reopen&&step==1&&status=="downloading"&&percent>0&&percent<100&&rate->text()!="—"&&!rate->text().isEmpty()){
             measuredSpeed=true;
             beforePause=percent;
+            const auto previousNotes=notes->toPlainText();
+            window->grab().save(out+"/live-download-progress-ru.png");
+            const auto* amount=window->findChild<QLabel*>("UpdateDownloadAmount");
+            const auto previousAmount=amount->text();
+            const auto* stage=window->findChild<QLabel*>("UpdateDownloadStatus");
+            const auto languageError=setUiLanguage("ja");
+            const auto translated=notes->toPlainText();
+            afterSwitch=bar->value();
+            switchedLive=languageError.isEmpty()&&controller.state()=="downloading"&&controller.lastRequestedMode()=="--download"&&
+                previousNotes.contains(QStringLiteral("Добавлено описание версии."))&&translated!=previousNotes&&
+                translated.contains(QStringLiteral("数式の表示を修正しました。"))&&
+                translated.contains(QStringLiteral("ダウンロード状況の表示を改善しました。"))&&
+                translated.contains(QStringLiteral("リリースノートを追加しました。"))&&translated.contains(uiText("Bug 修复"))&&
+                window->windowTitle()==uiText("更新")&&action->text()==uiText("暂停")&&
+                stage->text()==uiText("正在下载更新…")&&afterSwitch==percent&&amount->text()==previousAmount;
             window->grab().save(out+"/live-download-progress.png");
             step=2;action->click();
         }else if(!reopen&&step==2&&status=="paused"&&action->isEnabled()){
             paused=percent;
+            // The signed fixture has no German notes: keep the download and show the English fallback.
+            switchedPaused=setUiLanguage("de").isEmpty()&&notes->toPlainText().contains("Added version notes.")&&
+                controller.state()=="paused"&&bar->value()==paused&&action->text()==uiText("继续下载");
             window->grab().save(out+"/paused-download.png");
             step=3;action->click();
         }else if(!reopen&&step==3&&status=="downloading"&&percent>paused&&percent<100){
@@ -82,17 +103,22 @@ int verifyLiveDownload(QApplication& app,const QString& out,bool reopen){
     poll.start(25);
     QTimer::singleShot(35000,&app,&QCoreApplication::quit);
     app.exec();
-    const bool pass=reopen?showedNotes&&exiting>0&&restored>=exiting&&restored<100&&ready:
+    const bool transferPassed=reopen?showedNotes&&exiting>0&&restored>=exiting&&restored<100&&ready:
         showedNotes&&measuredSpeed&&beforePause>0&&paused>=beforePause&&exiting>paused;
+    const bool pass=transferPassed&&(reopen||(switchedLive&&switchedPaused));
     const QJsonObject evidence{{"before_pause",beforePause},{"paused",paused},{"exit_percent",exiting},{"reopened_percent",restored},
-        {"state_at_quit",controller.state()},{"last_step",step},
+        {"state_at_quit",controller.state()},{"last_step",step},{"after_language_switch",afterSwitch},
+        {"live_language_switch",switchedLive},{"paused_fallback",switchedPaused},
         {"verified_notes",showedNotes},{"reached_install_request",ready}};
     if(!reopen&&state.open(QIODevice::WriteOnly))state.write(QJsonDocument(evidence).toJson());
     QFile report(out+"/report.json");report.open(QIODevice::WriteOnly);
-    report.write(QJsonDocument(QJsonObject{{"status",pass?"pass":"fail"},{"cases",QJsonArray{
-        QJsonObject{{"id",reopen?"reopened-process-resumes-saved-progress":"same-window-pause-resume-and-exit"},
-            {"status",pass?"pass":"fail"},{"observed",evidence}}
-    }}}).toJson());
+    QJsonArray cases{QJsonObject{{"id",reopen?"reopened-process-resumes-saved-progress":"same-window-pause-resume-and-exit"},
+        {"status",transferPassed?"pass":"fail"},{"observed",evidence}}};
+    if(!reopen){
+        cases.append(QJsonObject{{"id","signed-notes-switch-from-russian-to-japanese-with-live-progress"},{"status",switchedLive?"pass":"fail"}});
+        cases.append(QJsonObject{{"id","missing-language-falls-back-without-changing-paused-progress"},{"status",switchedPaused?"pass":"fail"}});
+    }
+    report.write(QJsonDocument(QJsonObject{{"status",pass?"pass":"fail"},{"cases",cases}}).toJson());
     return pass?0:1;
 }
 

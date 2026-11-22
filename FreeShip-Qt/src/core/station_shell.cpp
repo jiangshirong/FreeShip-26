@@ -80,6 +80,26 @@ clip::Path64 sectionOfShell(const ShellTriangle& tri,double x,double t) {
     }
     return band;
 }
+
+clip::Paths64 unionBands(clip::Paths64 bands,const std::atomic_bool& cancelled) {
+    constexpr size_t batchSize=64;
+    if(cancelled.load())return {};
+    if(bands.size()>batchSize){
+        const auto middle=bands.begin()+bands.size()/2;
+        clip::Paths64 second(std::make_move_iterator(middle),std::make_move_iterator(bands.end()));
+        bands.erase(middle,bands.end());
+        bands=unionBands(std::move(bands),cancelled);
+        auto right=unionBands(std::move(second),cancelled);
+        bands.insert(bands.end(),std::make_move_iterator(right.begin()),std::make_move_iterator(right.end()));
+    }
+    if(cancelled.load()||bands.size()<=1)return bands;
+    clip::Clipper64 engine;
+    engine.AddSubject(bands);
+    clip::Paths64 combined;
+    if(!engine.Execute(clip::ClipType::Union,clip::FillRule::NonZero,combined))
+        throw std::runtime_error("无法计算板厚包络。");
+    return combined;
+}
 }
 QList<QPolygonF> innerContours(const QList<QPolygonF>& exterior,const std::vector<ShellTriangle>& nearby,
                               double x,double t,const std::atomic_bool& cancelled) {
@@ -95,6 +115,10 @@ QList<QPolygonF> innerContours(const QList<QPolygonF>& exterior,const std::vecto
         if(vertices>5000000) throw std::runtime_error("该站板厚包络过于复杂，请单独选择船壳图层。");
         bands.push_back(std::move(band));
     }
+    // Merge groups of overlapping bands before the final difference. With a
+    // large thickness, a single sweep over all interior edges is expensive.
+    if(bands.size()>128)bands=unionBands(std::move(bands),cancelled);
+    if(cancelled.load())return {};
     QList<QPolygonF> result;
     for(const auto& outline:exterior) {
         clip::Path64 subject;

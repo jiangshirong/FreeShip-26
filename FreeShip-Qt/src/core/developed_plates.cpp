@@ -59,10 +59,23 @@ DevelopedPlates DevelopedPlates::parse(const QJsonObject& root){
         for(auto v:o["original"].toArray()){auto a=v.toArray();if(a.size()!=3)invalid();p.original.append(QVector3D(number(a[0]),number(a[1]),number(a[2])));}
         if(p.original.size()!=p.points.size())invalid();
         p.bounds=p.points.boundingRect();
+        const auto boundaryIds=o.value("boundary_mesh_ids").toArray();
+        qsizetype boundaryIndex=0;
         for(auto v:o["edges"].toArray()){auto a=v.toArray();if(a.size()!=4||!a[3].isBool())invalid();
-            PlateEdge e{index(a[0],p.points.size()),index(a[1],p.points.size()),number(a[2]),a[3].toBool()};if(e.a==e.b)invalid();p.edges.append(e);}
+            PlateEdge e{index(a[0],p.points.size()),index(a[1],p.points.size()),number(a[2]),a[3].toBool()};if(e.a==e.b)invalid();
+            if(e.boundary && o.contains("boundary_mesh_ids")) {
+                if(boundaryIndex>=boundaryIds.size())invalid();
+                e.meshId=boundaryIds[boundaryIndex++].toInteger();
+                if(!e.meshId)invalid();
+            }
+            p.edges.append(e);}
+        if(boundaryIndex!=boundaryIds.size())invalid();
         for(auto v:o["faces"].toArray()){QVector<int> face;for(auto n:v.toArray())face.append(index(n,p.points.size()));if(face.size()<3)invalid();p.faces.append(face);}
         if(p.faces.isEmpty()||p.edges.isEmpty())invalid();
+        for(auto v:o["worst_faces"].toArray())p.worstFaces.append(index(v,p.faces.size()));
+        if(o.contains("flipped_triangles"))p.flippedTriangles=index(o["flipped_triangles"],15000001);
+        if(o.contains("collapsed_triangles"))p.collapsedTriangles=index(o["collapsed_triangles"],15000001);
+        if(o.contains("overlap_area")){p.overlapArea=number(o["overlap_area"]);if(p.overlapArea<0)invalid();}
         for(auto v:o["corners"].toArray())p.corners.append(index(v,p.points.size()));
         for(auto v:o["curves"].toArray()){auto c=v.toObject();PlateCurve curve;curve.kind=index(c["kind"],5);if(!curve.kind)invalid();
             curve.color=color(c["color"]);curve.dxfColor=index(c["dxf_color"],256);
@@ -114,7 +127,7 @@ QJsonObject DevelopedPlates::json()const{
     auto o=source;auto rows=o["plates"].toArray();QJsonArray layout;
     for(qsizetype i=0;i<plates.size();++i){
         const auto& p=plates[i];
-        auto row=rows[i].toObject();row["name"]=p.name;rows[i]=row;
+        auto row=rows[i].toObject();row.remove("boundary_mesh_ids");row["name"]=p.name;rows[i]=row;
         layout.append(QJsonObject{{"name",p.name},{"x",p.offset.x()},{"y",p.offset.y()},{"rotation",p.rotation},{"mirrored",p.mirrored},{"visible",p.visible}});
     }
     o["plates"]=rows;o["layout"]=layout;return o;

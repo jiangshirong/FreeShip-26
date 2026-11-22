@@ -4,6 +4,8 @@
 #include "render/auxiliary_geometry.h"
 #include "native/geometry.h"
 #include "winding_contours_cases.h"
+#include "station_deviation_cases.h"
+#include "station_reference_cases.h"
 #include <QApplication>
 #include <QDir>
 #include <QFile>
@@ -26,6 +28,8 @@ int main(int argc,char** argv){
     auto check=[&](QString id,bool ok){cases.append(QJsonObject{{"id",id},{"status",ok?"pass":"fail"}});failed|=!ok;};
     try{
         windingContourCases(check);
+        checkStationDeviationCases(check);
+        checkStationReferenceCases(check);
         QVector<fs::SectionSpline> samples{
             {{{0,0,0},{1,2,3},{2,-1,4},{3,2,1}},{false,false,false,false}},
             {{{0,0,0},{1,2,3},{2,-1,4},{3,2,1}},{true,true,true,true}},

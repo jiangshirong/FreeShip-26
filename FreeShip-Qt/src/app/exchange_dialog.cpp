@@ -10,6 +10,7 @@
 #include "studio_ui.h"
 #include "grid_preview_panel.h"
 #include "print_hull_panel.h"
+#include <QButtonGroup>
 #include <QCheckBox>
 #include <QComboBox>
 #include <QDialogButtonBox>
@@ -31,6 +32,11 @@
 #include <QSpinBox>
 #include <QRegularExpression>
 #include <QTabWidget>
+#include <QStackedWidget>
+#include <QToolButton>
+#include <QFutureWatcher>
+#include <QPromise>
+#include <QThreadPool>
 #include <cmath>
 namespace {
 QString localizedExchangeError(const QString& source){
@@ -46,6 +52,9 @@ QString localizedExchangeError(const QString& source){
     static const QRegularExpression line(QStringLiteral("^(OBJ|Polycad) 第 ([0-9]+) 行：(.*)$"));
     if(const auto match=line.match(source);match.hasMatch())
         return uiText(match.captured(1)+QStringLiteral(" 第 %1 行：%2")).arg(match.captured(2),localizedExchangeError(match.captured(3)));
+    static const QRegularExpression fitError(QStringLiteral("^重建未达到容差。最大采样偏差 (\\S+) mm，容差 (\\S+) mm。$"));
+    if(const auto match=fitError.match(source);match.hasMatch())
+        return QString(uiText("重建未达到容差。最大采样偏差 %1 mm，容差 %2 mm。")).arg(match.captured(1),match.captured(2));
     for(const auto* framing:{"无效数字：","数量或单位标识无效：","无效或超出范围的数字：","无效的索引或数量：",
                               "无效的布尔值：","VRML 缺少 ","VRML 节点暂不支持，未导入部分模型：","VRML 字段重复：","VRML 字段暂不支持："}){
         const auto prefix=QString::fromUtf8(framing);
@@ -60,6 +69,10 @@ bool sectionFormat(const QString& f){return f=="dxfcrease"||f=="offset_table"||f
 bool metricFormat(const QString& f){return f=="michlet"||f=="addmass"||f=="arch_hll"||f=="arch_app"||f=="pam";}
 bool fileUnits(const QString& f){return f=="part"||f=="waves"||f=="fef"||f=="chines"||f=="surface"||f=="hull";}
 bool chineFormat(const QString& f){return f=="chines"||f=="carene"||f=="hull";}
+struct ObjFitResult {
+    fs::exchange::Document document;
+    QString error;
+};
 }
 
 ExchangeDialog::ExchangeDialog(ModelSession& session,bool importing,QString format,QWidget* parent)
@@ -79,7 +92,7 @@ ExchangeDialog::ExchangeDialog(ModelSession& session,bool importing,QString form
             const auto ext=fs::cad::extension(format_);
             const auto filter=uiText(fs::cad::title(format_))+" (*."+ext+(format_=="iges"?" *.iges":"")+")";
             const auto start=importPath_->text().isEmpty()?preferenceFileLocation("import"):importPath_->text();
-            const auto path=QFileDialog::getOpenFileName(this,windowTitle(),start,filter);
+            const auto path=studioOpenFile(this,windowTitle(),start,filter);
             if(!path.isEmpty())importPath_->setText(path);
         });
     }
@@ -94,6 +107,71 @@ ExchangeDialog::ExchangeDialog(ModelSession& session,bool importing,QString form
     hidden_=check(uiText("包含隐藏图层"),"include_hidden");binary_=check(uiText("二进制 STL"),"binary_stl");binary_->setChecked(true);
     closeDeck_=check(uiText("将敞开甲板按水平线封到中心线"),"close_deck");closeDeck_->setVisible(format_=="ghs"||format_=="arch_hll"||format_=="arch_app"||format_=="pam");
     axes_->setVisible(format_=="obj");control_->setVisible(format_=="obj");hidden_->setVisible(!importing&&format_!="fef");binary_->setVisible(!importing&&format_=="stl");symmetric_->setVisible(format_!="fef");units_->setEnabled(format_!="fef");
+    if(importing_&&format_=="obj"){
+        control_->hide();
+        objImportMode_=new QComboBox;
+        objImportMode_->setProperty("exchange_field","obj_import_mode");
+        addUiItem(objImportMode_,"保留原网格","mesh");
+        addUiItem(objImportMode_,"作为控制网导入","control");
+        addUiItem(objImportMode_,"光顺重建船型","fit");
+        form->addRow(uiText("导入方式"),objImportMode_);
+        objInferCreases_=check(uiText("自动识别折痕"),"obj_infer_creases");
+        objInferCreases_->setChecked(true);
+        objToleranceRow_=new QWidget;
+        auto* row=new QHBoxLayout(objToleranceRow_);
+        row->setContentsMargins(0,0,0,0);
+        row->setSpacing(6);
+        objToleranceRow_->setStyleSheet(
+            "QToolButton {color:#315d57;background:#f8faf9;border:1px solid #d7e3dd;"
+            "border-radius:5px;padding:5px 10px;}"
+            "QToolButton:hover {background:#e3eee8;}"
+            "QToolButton:focus {border-color:#739f90;}"
+            "QToolButton:checked {color:#124f47;background:#d5e9df;border-color:#82b3a3;}"
+            "QToolButton:disabled {color:#8d9994;}"
+            "QLineEdit#ObjToleranceValue {border-color:#82b3a3;}");
+        auto* relative=new QToolButton;
+        relative->setText(uiText("按船壳大小"));
+        relative->setToolTip(uiText("船壳外接长方体的对角线长度的 0.1%"));
+        relative->setProperty("obj_tolerance_mode","relative");
+        objManualTolerance_=new QToolButton;
+        objManualTolerance_->setText(uiText("输入数值"));
+        objManualTolerance_->setProperty("obj_tolerance_mode","manual");
+        objManualTolerance_->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Preferred);
+        auto* choices=new QButtonGroup(objToleranceRow_);
+        relative->setCheckable(true);
+        relative->setFocusPolicy(Qt::StrongFocus);
+        objManualTolerance_->setCheckable(true);
+        objManualTolerance_->setFocusPolicy(Qt::StrongFocus);
+        choices->addButton(relative);
+        choices->addButton(objManualTolerance_);
+        relative->setChecked(true);
+
+        auto* manual=new QStackedWidget;
+        manual->setMinimumWidth(96);
+        objTolerance_=new QLineEdit;
+        objTolerance_->setObjectName("ObjToleranceValue");
+        objTolerance_->setProperty("obj_tolerance_value",true);
+        objTolerance_->setAccessibleName(uiText("最大允许采样偏差 (mm)"));
+        objTolerance_->setPlaceholderText(uiText("输入数值"));
+        objTolerance_->setEnabled(false);
+        manual->addWidget(objManualTolerance_);
+        manual->addWidget(objTolerance_);
+        connect(objManualTolerance_,&QToolButton::toggled,this,[this,manual](bool selected){
+            objTolerance_->setEnabled(selected);
+            manual->setCurrentWidget(selected?static_cast<QWidget*>(objTolerance_):objManualTolerance_);
+            if(selected)objTolerance_->setFocus(Qt::OtherFocusReason);
+        });
+        row->addWidget(relative);
+        row->addWidget(manual,1);
+        form->addRow(uiText("最大允许采样偏差 (mm)"),objToleranceRow_);
+        const auto showOptions=[this,form]{
+            const auto mode=objImportMode_->currentData().toString();
+            form->setRowVisible(objInferCreases_,mode!="mesh");
+            form->setRowVisible(objToleranceRow_,mode=="fit");
+        };
+        connect(objImportMode_,&QComboBox::currentIndexChanged,this,showOptions);
+        showOptions();
+    }
     if(format_=="coordinates"){control_->setVisible(true);control_->setText(uiText("导出原控制点（不补镜像，不按图层显隐筛选）"));connect(control_,&QCheckBox::toggled,this,[this](bool b){hidden_->setEnabled(!b);symmetric_->setEnabled(!b);});}
     if(format_=="offset_table"||format_=="offsets"||format_=="dxf3d"){hidden_->hide();symmetric_->hide();}
     if(format_=="ghs"){hidden_->hide();symmetric_->hide();units_->clear();addUiItem(units_,"米 (m)","m");addUiItem(units_,"英尺 (ft)","ft");if(session.model()&&session.model()->units=="imperial")units_->setCurrentIndex(1);}
@@ -206,12 +284,20 @@ ExchangeDialog::ExchangeDialog(ModelSession& session,bool importing,QString form
     connect(&exportProcess_,&QProcess::finished,this,[this](int code,QProcess::ExitStatus){finishSections(code);});
     connect(&exportProcess_,&QProcess::errorOccurred,this,[this](QProcess::ProcessError e){if(e==QProcess::FailedToStart){exportTimeout_.stop();exporting_=false;showFailure(uiText("无法启动几何导出组件。"));}});
 }
-ExchangeDialog::~ExchangeDialog(){exportTimeout_.stop();cancelled_=true;exportProcess_.disconnect(this);if(exportProcess_.state()!=QProcess::NotRunning){exportProcess_.kill();exportProcess_.waitForFinished(2000);}}
-bool ExchangeDialog::busy()const{return session_.busy()||exporting_||(printHull_&&printHull_->pending());}
+ExchangeDialog::~ExchangeDialog(){
+    if(objCancel_)objCancel_->store(true,std::memory_order_relaxed);
+    exportTimeout_.stop();cancelled_=true;exportProcess_.disconnect(this);if(exportProcess_.state()!=QProcess::NotRunning){exportProcess_.kill();exportProcess_.waitForFinished(2000);}
+}
+bool ExchangeDialog::busy()const{return session_.busy()||exporting_||objCancel_||(printHull_&&printHull_->pending());}
 void ExchangeDialog::refreshState(){
     const bool idle=!busy();run_->setEnabled(idle&&(importing_||session_.ready()));
     if(importPath_)importPath_->setReadOnly(!idle);
     units_->setEnabled(idle&&!fileUnits(format_)&&!metricFormat(format_));for(auto* box:{axes_,control_,symmetric_,hidden_,binary_,closeDeck_})box->setEnabled(idle);
+    if(objImportMode_){
+        objImportMode_->setEnabled(idle);
+        objInferCreases_->setEnabled(idle);
+        objToleranceRow_->setEnabled(idle);
+    }
     if(columns_)columns_->setEnabled(idle);if(rows_)rows_->setEnabled(idle);if(intermediate_)intermediate_->setEnabled(idle);
     for(auto* edit:references_)edit->setReadOnly(!idle);
     for(auto* box:referenceChoices_)box->setEnabled(idle);
@@ -222,7 +308,12 @@ void ExchangeDialog::refreshState(){
         if(printMode_->isChecked()){printHull_->syncSource();units_->setEnabled(false);run_->setEnabled(idle&&session_.ready());}
     }
 }
-void ExchangeDialog::reject(){if(exporting_){cancelled_=true;exportProcess_.kill();status_->setMessage(uiText("正在取消导出…"),StudioMessageRole::Feedback,true);}else if(!session_.busy())QDialog::reject();else if(format_=="iges"){session_.cancelCad();status_->setMessage(uiText("正在取消曲面生成…"),StudioMessageRole::Feedback,true);}}
+void ExchangeDialog::reject(){
+    if(objCancel_){
+        objCancel_->store(true,std::memory_order_relaxed);
+        QDialog::reject();
+    }else if(exporting_){cancelled_=true;exportProcess_.kill();status_->setMessage(uiText("正在取消导出…"),StudioMessageRole::Feedback,true);}else if(!session_.busy())QDialog::reject();else if(format_=="iges"){session_.cancelCad();status_->setMessage(uiText("正在取消曲面生成…"),StudioMessageRole::Feedback,true);}
+}
 QString ExchangeDialog::failure()const{
     const auto error=status_->property("error").toString();
     return error.isEmpty()&&printMode_&&printMode_->isChecked()?printHull_->failure():error;
@@ -246,11 +337,11 @@ QString ExchangeDialog::chooseExportPath(){
     picker.setNameFilter(uiText(fs::cad::title(format_))+" (*."+ext+(format_=="iges"?" *.iges":"")+")");
     picker.setDefaultSuffix(ext);
     picker.setDirectory(QFileInfo(suggested).absolutePath());picker.selectFile(QFileInfo(suggested).fileName());
-    return picker.exec()==QDialog::Accepted?picker.selectedFiles().value(0):QString{};
+    return runStudioDialog(picker)==QDialog::Accepted?picker.selectedFiles().value(0):QString{};
 }
 void ExchangeDialog::submit(){
     if(busy())return;
-    status_->setProperty("error",QString{});status_->clear();succeeded_=false;
+    status_->setProperty("error",QString{});status_->clear();succeeded_=false;objFitEvidence_={};
     try{
         const auto source=session_.model();
         QString path;
@@ -266,13 +357,34 @@ void ExchangeDialog::submit(){
         fs::exchange::Options o;o.units=units_->currentData().toString();o.legacyAxes=format_=="obj"&&axes_->isChecked();o.controlNet=(format_=="obj"||format_=="coordinates"||format_=="vrml")&&control_->isChecked();o.symmetric=symmetric_->isChecked();o.fullHull=symmetric_->isChecked();o.includeHidden=hidden_->isChecked();o.binaryStl=binary_->isChecked();
         o.faceIds=faceIds;o.textEncoding=encoding_?encoding_->currentData().toString():QString("cp1252");
         if(columns_)o.columns=columns_->value();if(rows_)o.rows=rows_->value();if(intermediate_)o.intermediateBulkheads=intermediate_->isChecked();
-        if(importing_){const bool append=format_=="part"||format_=="waves";if(append&&!session_.ready())throw std::runtime_error(uiText("请先打开或新建工程，再追加部件或波形。"));auto d=fs::exchange::read(path,format_,o);if(d.discardedZeroAreaFaces&&!confirmStudioAction(this,uiText("导入 VRML"),QString(uiText("文件含 %1 个零面积面。忽略这些面并导入其余模型？")).arg(d.discardedZeroAreaFaces)))return;auto data=d.bridgeData();if(format_=="waves"){auto refs=referenceValues();data["wave_patch"]=true;data["wave_origin_m"]=QJsonObject{{"x",refs["origin_x"]},{"y",refs["origin_y"]}};}auto submit=[guard=QPointer<ExchangeDialog>(this),data,append]{if(!guard||!guard->isVisible())return;guard->status_->setMessage(uiText("正在生成模型…"),StudioMessageRole::Feedback,true);guard->session_.importModel(data,append);guard->refreshState();};if(beforeImport&&!append)beforeImport(submit);else submit();}
+        if(importing_){
+            if((format_=="part"||format_=="waves")&&!session_.ready())
+                throw std::runtime_error(uiText("请先打开或新建工程，再追加部件或波形。"));
+            if(objImportMode_){
+                const auto mode=objImportMode_->currentData().toString();
+                o.controlNet=mode=="control";
+                o.inferObjCreases=objInferCreases_->isChecked();
+                if(mode=="fit"){
+                    o.reconstructObj=true;
+                    if(objManualTolerance_->isChecked()){
+                        bool ok=false;
+                        o.objToleranceMm=objTolerance_->text().trimmed().toDouble(&ok);
+                        if(!ok||!std::isfinite(o.objToleranceMm)||o.objToleranceMm<=0||o.objToleranceMm>1e9)
+                            throw std::runtime_error(uiText("请输入大于零的容差（mm）。"));
+                    }
+                    startObjFit(path,o);
+                    return;
+                }
+            }
+            importPrepared(fs::exchange::read(path,format_,o));
+        }
         else{
             if(!session_.ready())return;
             if(QFileInfo(path).suffix().isEmpty())path+='.'+fs::cad::extension(format_);
             if(!fs::cad::acceptsExtension(format_,QFileInfo(path).suffix()))throw std::runtime_error(uiText("文件扩展名与所选导出格式不一致。"));
             if(!session_.sourcePath().isEmpty()&&QFileInfo(path).absoluteFilePath().compare(QFileInfo(session_.sourcePath()).absoluteFilePath(),Qt::CaseInsensitive)==0)throw std::runtime_error(uiText("请另选导出路径，避免覆盖当前 FBM 工程。"));
             if(QFileInfo::exists(path)&&(!confirmOverwrite||!confirmOverwrite(path)))return;
+            if(source!=session_.model()||!session_.ready())throw std::runtime_error(uiText("模型版本已改变，请重新导出。"));
             if(sectionFormat(format_)){startSections(path);return;}
             if(format_=="iges"){pendingCadPath_=path;pendingCadOptions_=o;status_->setMessage(uiText("正在生成曲面…"),StudioMessageRole::Feedback,true);session_.cadPatches();return;}
             if(printMode_&&printMode_->isChecked()){
@@ -287,6 +399,76 @@ void ExchangeDialog::submit(){
             succeeded_=true;status_->setMessage(uiText("已导出：")+path,StudioMessageRole::Feedback);
         }
     }catch(const std::exception& e){showFailure(QString::fromUtf8(e.what()));}
+}
+
+void ExchangeDialog::startObjFit(const QString& path,const fs::exchange::Options& options){
+    const auto source=session_.model();
+    const auto cancel=std::make_shared<std::atomic_bool>(false);
+    objCancel_=cancel;
+    status_->setMessage(uiText("正在重建船型并测量偏差…"),StudioMessageRole::Feedback,true);
+    refreshState();
+    auto promise=std::make_shared<QPromise<ObjFitResult>>();
+    auto* watcher=new QFutureWatcher<ObjFitResult>(this);
+    connect(watcher,&QFutureWatcher<ObjFitResult>::finished,this,[this,watcher,source,cancel]{
+        watcher->deleteLater();
+        if(cancel->load(std::memory_order_relaxed))return;
+        auto result=watcher->result();
+        if(!result.error.isEmpty()||!result.document.objFit){
+            objCancel_.reset();
+            showFailure(result.error.isEmpty()?uiText("船型重建失败。"):result.error);
+            return;
+        }
+        const auto& fit=*result.document.objFit;
+        const auto& model=result.document.model;
+        objFitEvidence_={{"tolerance_mm",fit.toleranceMm},{"maximum_mm",fit.maximumMm},{"rms_mm",fit.rmsMm},
+                         {"samples",qint64(fit.samples)},{"points",qint64(model.points.size())},
+                         {"faces",qint64(model.faces.size())},{"precision",model.precision}};
+        const auto description=QString(uiText("控制点 %1 个，控制面 %2 个。\n最大采样偏差 %3 mm，均方根偏差 %4 mm。\n允许偏差 %5 mm。导入重建船型？"))
+            .arg(model.points.size()).arg(model.faces.size()).arg(fit.maximumMm,0,'g',6)
+            .arg(fit.rmsMm,0,'g',6).arg(fit.toleranceMm,0,'g',6);
+        const bool proceed=confirmStudioAction(this,uiText("OBJ 船型重建结果"),description);
+        objCancel_.reset();
+        status_->clear();
+        refreshState();
+        if(!proceed)return;
+        const auto current=session_.model();
+        if(bool(source)!=bool(current)||(source&&(source->documentId!=current->documentId||source->revision!=current->revision))){
+            showFailure(uiText("当前模型已改变，请重新导入。"));
+            return;
+        }
+        try{importPrepared(std::move(result.document));}
+        catch(const std::exception& e){showFailure(QString::fromUtf8(e.what()));}
+    });
+    promise->start();
+    watcher->setFuture(promise->future());
+    QThreadPool::globalInstance()->start([promise,cancel,path,options]{
+        ObjFitResult result;
+        try{result.document=fs::exchange::read(path,"obj",options,cancel.get());}
+        catch(const std::exception& e){result.error=QString::fromUtf8(e.what());}
+        promise->addResult(std::move(result));
+        promise->finish();
+    });
+}
+
+void ExchangeDialog::importPrepared(fs::exchange::Document document){
+    const bool append=format_=="part"||format_=="waves";
+    if(append&&!session_.ready())throw std::runtime_error(uiText("请先打开或新建工程，再追加部件或波形。"));
+    if(document.discardedZeroAreaFaces&&!confirmStudioAction(this,uiText("导入 VRML"),
+        QString(uiText("文件含 %1 个零面积面。忽略这些面并导入其余模型？")).arg(document.discardedZeroAreaFaces)))return;
+    auto data=document.bridgeData();
+    if(format_=="waves"){
+        const auto refs=referenceValues();
+        data["wave_patch"]=true;
+        data["wave_origin_m"]=QJsonObject{{"x",refs["origin_x"]},{"y",refs["origin_y"]}};
+    }
+    auto apply=[guard=QPointer<ExchangeDialog>(this),data,append]{
+        if(!guard||!guard->isVisible())return;
+        guard->status_->setMessage(uiText("正在生成模型…"),StudioMessageRole::Feedback,true);
+        guard->session_.importModel(data,append);
+        guard->refreshState();
+    };
+    if(beforeImport&&!append)beforeImport(apply);
+    else apply();
 }
 QJsonObject ExchangeDialog::referenceValues() const {
     QJsonObject refs;for(auto it=references_.cbegin();it!=references_.cend();++it){if(!it.value()->isEnabled())continue;auto text=it.value()->text().trimmed();if(text.isEmpty()&&it.value()->property("exchange_optional").toBool())continue;bool ok=false;double value=text.toDouble(&ok);if(!ok||!std::isfinite(value)||std::abs(value)>1e9)throw std::runtime_error(uiText("参数必须是有限数值，请使用小数点。"));refs[it.key()]=value;}

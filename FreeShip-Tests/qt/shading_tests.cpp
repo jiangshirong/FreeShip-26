@@ -15,10 +15,11 @@
 #include <algorithm>
 
 using fs::Vec3;
-static std::shared_ptr<fs::ModelSnapshot> mesh(QVector<Vec3> points,QVector<QVector<int>> faces,int type=0){
+static std::shared_ptr<fs::ModelSnapshot> mesh(QVector<Vec3> points,QVector<QVector<int>> faces,int type=0,QVector<int> regions={}){
     auto m=std::make_shared<fs::ModelSnapshot>();m->documentId="independent-analysis";m->revision=1;m->units="metric";m->length=m->beam=2;m->draft=1;m->bothSides=false;m->shadeUnderwater=false;
     m->useDefaultSplitSectionLocation=false;m->splitSectionLocation=0;
     m->layers={{1,"Surface",0x78b4dc,true,false}};auto topology=std::make_shared<fs::SurfaceTopology>();topology->points=points;topology->faces=faces;topology->types.fill(type,points.size());m->surfaceTopology=topology;
+    topology->plateRegions=std::move(regions);
     for(int i=0;i<points.size();++i)m->points.append({fs::EntityId(i+1),points[i]});
     for(const auto& face:faces)for(int i=2;i<face.size();++i)m->triangles.append({1,{{points[face[0]],points[face[i-1]],points[face[i]]}}});return m;
 }
@@ -50,6 +51,41 @@ int main(int argc,char** argv){
         check("flat-interior-angle-deficit-zero",plane->valid[0]&&std::abs(plane->angleDefect[0])<1e-10);
         check("open-boundary-is-unknown-not-green",plane->boundary==4&&!plane->valid[1]&&plane->triangles[0][1].developable==QColor(150,150,150));
         check("saddle-angle-deficit-minus-120",negative->valid[0]&&std::abs(negative->angleDefect[0]+120)<1e-10);
+        check("saddle-interior-is-flagged",negative->triangles[0][0].developable==QColor(255,0,0));
+        QVector<Vec3> quadSaddlePoints;
+        QVector<QVector<int>> quadSaddleFaces;
+        for(int x=-1;x<=1;++x)for(int y=-1;y<=1;++y)
+            quadSaddlePoints.append({double(x),double(y),.25*x*y});
+        for(int first:{0,1,3,4})quadSaddleFaces.append({first,first+3,first+4,first+1});
+        const auto quadSaddle=mesh(quadSaddlePoints,quadSaddleFaces);
+        const auto twisted=analyzeSurface(*quadSaddle);
+        check("twisted-quad-saddle-has-negative-deficit",
+              twisted->valid[4]&&twisted->angleDefect[4]<-1&&
+              twisted->triangles[0][2].developable==QColor(255,0,0));
+        QVector<Vec3> chinePoints;
+        QVector<QVector<int>> chineFaces;
+        QVector<int> chineRegions;
+        // The rockered bottom is an extrusion and the side is a vertical
+        // plane. The two plates share a bent seam along the middle row.
+        for(int x=0;x<3;++x)for(int strip=0;strip<5;++strip)
+            chinePoints.append({double(x),std::min(strip,2)*.5,.25*std::abs(x-1)+.5*std::max(0,strip-2)});
+        for(int x=0;x<2;++x)for(int strip=0;strip<4;++strip){
+            const int a=x*5+strip;
+            chineFaces.append({a,a+5,a+6,a+1});
+            chineRegions.append(strip<2?0:1);
+        }
+        const auto joinedChine=mesh(chinePoints,chineFaces);
+        const auto cutChine=mesh(chinePoints,chineFaces,0,chineRegions);
+        const auto joined=analyzeSurface(*joinedChine),cut=analyzeSurface(*cutChine);
+        check("curved-chine-whole-shell-retains-gaussian-angle-deficit",
+              std::abs(cut->angleDefect[7])>10&&cut->angleDefect==joined->angleDefect);
+        check("curved-chine-plate-seam-is-neutral",
+              joined->triangles[2][2].developable==QColor(255,0,0)&&
+              cut->triangles[2][2].developable==QColor(150,150,150)&&
+              cut->triangles[4][1].developable==QColor(150,150,150));
+        check("curved-chine-two-plate-interiors-are-developable",
+              cut->triangles[0][2].developable==QColor(0,255,0)&&
+              cut->triangles[4][2].developable==QColor(0,255,0));
         const QVector<Vec3> octaPoints{{1,0,0},{-1,0,0},{0,1,0},{0,-1,0},{0,0,1},{0,0,-1}};
         const QVector<QVector<int>> octaFaces{{0,2,4},{2,1,4},{1,3,4},{3,0,4},{2,0,5},{1,2,5},{3,1,5},{0,3,5}};
         auto octa=mesh(octaPoints,octaFaces);const auto positive=analyzeSurface(*octa);bool convex=true;double total=0;

@@ -50,7 +50,7 @@ void buttons(QDialog& dialog,QVBoxLayout* layout){
 }
 }
 
-void MainWindow::buildModelingActions(QMenu* point,QMenu* edge,QMenu* face,QMenu* layer,QMenu* view,QMenu* transform,QMenu* checks){
+void MainWindow::buildModelingActions(QMenu* point,QMenu* edge,QMenu* face,QMenu* layer,QMenu* view,QList<QAction*>& transforms,QMenu* checks){
     auto add=[this](QMenu* menu,const QString& title,const QString& icon,const QString& op,const QString& kind={},int count=0){
         auto* a=new QAction(studioIcon(icon),title,this);a->setProperty("operation",op);a->setProperty("selection_kind",kind);a->setProperty("minimum_selection",count);
         const QStringList direct{"collapse_points","collapse_edges","connect_points","split_edges","flip_faces","assemble_faces","clear_constraints","unlock_all","clear_selection","select_leaks","select_all","invert_selection"};
@@ -86,8 +86,8 @@ void MainWindow::buildModelingActions(QMenu* point,QMenu* edge,QMenu* face,QMenu
     add(face,uiText("组装面片"),"Face","assemble_faces");
     add(face,uiText("添加网格面板…"),"Grid","grid_panel");add(face,uiText("添加圆柱…"),"Face","cylinder");
     add(layer,uiText("按折痕自动分组…"),"LayerAutoGroup","auto_group_layers");
-    add(transform,uiText("绕船中旋转…"),"RotateCW","rotate_midship","transform",1);
-    add(transform,uiText("Lackenby 船型变换…"),"Transform","lackenby");
+    transforms.append(add(nullptr,uiText("绕船中旋转…"),"RotateCW","rotate_midship","transform",1));
+    transforms.append(add(nullptr,uiText("Lackenby 船型变换…"),"Transform","lackenby"));
     auto* selection=point->addMenu(uiText("选择"));add(selection,uiText("全选"),"SelectAll","select_all");add(selection,uiText("反选"),"SelectAll","invert_selection");
     selection->setIcon(studioIcon("SelectAll"));
     add(view,uiText("导入参考曲线…"),"OpenFile","add_markers");
@@ -139,7 +139,9 @@ void MainWindow::modelingAction(const QString& op){
         QFileDialog dialog(this,uiText("导入参考曲线"),preferenceFileLocation("import"));dialog.setProperty("modeling_operation",op);dialog.setFileMode(QFileDialog::ExistingFile);
         dialog.setNameFilter(uiText("参考曲线文本 (*.txt);;所有文件 (*)"));dialog.setLabelText(QFileDialog::Accept,uiText("打开"));dialog.setLabelText(QFileDialog::Reject,uiText("取消"));
         if(workflow_){dialog.setOption(QFileDialog::DontUseNativeDialog);dialog.setAttribute(Qt::WA_DontShowOnScreen);}
-        if(dialog.exec()!=QDialog::Accepted||dialog.selectedFiles().size()!=1)return;const auto filename=dialog.selectedFiles().first();
+        if(runStudioDialog(dialog)!=QDialog::Accepted||dialog.selectedFiles().size()!=1)return;
+        if(!session_.ready()||session_.busy()||session_.model()->documentId!=m->documentId||session_.model()->units!=m->units){showError(uiText("船模已更改，请重新打开此窗口。"));return;}
+        const auto filename=dialog.selectedFiles().first();
         QFile file(filename);if(file.size()>8*1024*1024||!file.open(QIODevice::ReadOnly)){showError(uiText("无法读取参考曲线文件，或文件超过 8 MB。"));return;}
         // Plus markers have a heading and XYZ paths separated by blank lines.
         // Coordinates keep the current model units.
@@ -219,7 +221,8 @@ void MainWindow::modelingDialog(const QString& op,const QJsonObject& initial){
     }else if(op=="repair_normals")note(uiText("开放曲面需确认外侧方向。"));
     else if(op=="delete_group"){request["index"]=initial["index"];note(uiText("解除这个点组。组内的控制点和曲面会保留。"));}
     else return;
-    layout->addLayout(form);buttons(dialog,layout);if(dialog.exec()!=QDialog::Accepted)return;
+    layout->addLayout(form);buttons(dialog,layout);if(runStudioDialog(dialog)!=QDialog::Accepted)return;
+    if(op!="new"&&(!session_.ready()||session_.busy()||session_.model()!=m)){showError(uiText("船模已更改，请重新打开此窗口。"));return;}
     for(auto it=fields.begin();it!=fields.end();++it){QWidget* w=it.value();QJsonValue v;
         if(auto* n=qobject_cast<QDoubleSpinBox*>(w))v=n->value();else if(auto* n=qobject_cast<QSpinBox*>(w))v=n->value();
         else if(auto* c=qobject_cast<QComboBox*>(w))v=it.key().endsWith("layer_id")?c->currentData().toDouble():c->currentIndex();
@@ -241,7 +244,9 @@ void MainWindow::pointGroupsDialog(){
     layout->addWidget(list);int action=0;auto* controls=new QDialogButtonBox;
     for(const auto& pair:{std::pair<QString,int>{uiText("选择","action"),1},{uiText("编辑"),2},{uiText("解组"),3}}){auto* b=controls->addButton(pair.first,QDialogButtonBox::ActionRole);b->setProperty("group_action",pair.second);if(pair.second==1)bindUiText(b,"text","选择","action");connect(b,&QPushButton::clicked,&dialog,[&dialog,&action,list,code=pair.second]{if(list->currentRow()>=0){action=code;dialog.accept();}});}
     layout->addWidget(controls);
-    if(dialog.exec()!=QDialog::Accepted)return;const auto& g=m->pointGroups[list->currentRow()];setSelectionKind(HullEntity::Point);selectPoints(QSet<fs::EntityId>(g.points.begin(),g.points.end()));
+    if(runStudioDialog(dialog)!=QDialog::Accepted)return;
+    if(!session_.ready()||session_.busy()||session_.model()!=m){showError(uiText("船模已更改，请重新打开此窗口。"));return;}
+    const auto& g=m->pointGroups[list->currentRow()];setSelectionKind(HullEntity::Point);selectPoints(QSet<fs::EntityId>(g.points.begin(),g.points.end()));
     if(selection_.size()!=g.points.size()){showError(uiText("点组包含隐藏图层的点。请先显示这些图层，再操作整组。"));return;}
     if(action>1)modelingDialog(action==2?"update_group":"delete_group",{{"index",g.index},{"name",g.name},{"locked",g.locked}});
 }
@@ -257,5 +262,5 @@ void MainWindow::modelCheckDialog(){
         QSet<fs::EntityId> ids(issue.ids.begin(),issue.ids.end());if(kind==HullEntity::Point)selectPoints(ids);else selectEntities(kind,ids);});
     auto* repair=b->addButton(uiText("修复相邻面朝向…"),QDialogButtonBox::ActionRole);repair->setProperty("check_action","repair_normals");
     bool fix=false;connect(repair,&QPushButton::clicked,&dialog,[&]{fix=true;dialog.accept();});layout->addWidget(b);
-    dialog.resize(600,380);dialog.exec();if(fix)modelingDialog("repair_normals");
+    dialog.resize(600,380);runStudioDialog(dialog);if(fix)modelingDialog("repair_normals");
 }

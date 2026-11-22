@@ -6,7 +6,7 @@
 #include <memory>
 struct CalculationChartState;
 class QLabel;class QPushButton;class QTableWidget;class QTableView;class QTabWidget;
-namespace report {class Browser;}
+namespace report {class Browser;struct PdfTableLayout;}
 namespace loadingEditor {class Workspace;}
 class StudioMessage;
 class QStackedWidget;class QButtonGroup;
@@ -47,8 +47,8 @@ private:
     void renderAuxiliaryPage();
     int currentAuxiliaryIndex()const;
     QByteArray csv()const;
-    QString reportText(bool html)const;
-    QString draftReport(bool html)const;
+    QString reportText(bool html,const report::PdfTableLayout* pdf=nullptr)const;
+    QString draftReport(bool html,const report::PdfTableLayout* pdf)const;
     ModelSession& session_;QString mode_;bool closing_=false;
     QMap<QString,QWidget*> fields_;QMap<QString,QLabel*> fieldLabels_;QJsonObject result_;
     StudioMessage* status_;QPushButton *run_,*cancel_;

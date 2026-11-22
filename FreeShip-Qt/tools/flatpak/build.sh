@@ -69,6 +69,7 @@ exec /app/lib/freeship26/FreeShipQt "$@"
 SH
 chmod 755 "$app/bin/freeship26"
 cp "$qt/src/app/assets/brand/freeship26.svg" "$app/share/icons/hicolor/scalable/apps/$id.svg"
+install -Dm644 "$qt/src/app/assets/brand/freeship26.png" "$app/share/icons/hicolor/256x256/apps/$id.png"
 cat > "$app/share/applications/$id.desktop" <<EOF
 [Desktop Entry]
 Type=Application

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
-// Angle deficit and color scale follow FreeSubdivisionPoint.FGetCurvature and
-// FreeSubdivisionControlFace.Draw. Invalid/boundary vertices are explicitly unknown.
+// Angle deficit follows the display triangles. The spectrum follows
+// FreeSubdivisionControlFace.Draw. Invalid/boundary vertices are unknown.
 #pragma once
 #include "core/model_snapshot.h"
 #include <QColor>

@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 // Hidden production menus, modeless light controls and current-view export.
+#include "studio_ui.h"
 #include "main_window.h"
 #include <QAction>
 #include <QApplication>
@@ -120,7 +121,7 @@ void MainWindow::viewportStep(){
         root->grab().save(workflowOutput_+"/view-menu.png");const auto path=workflowOutput_+"/export.png";const auto expected=view->image();
         bool handled=false;QTimer picker;picker.setInterval(10);QElapsedTimer deadline;deadline.start();
         connect(&picker,&QTimer::timeout,this,[&]{
-            auto* file=qobject_cast<QFileDialog*>(QApplication::activeModalWidget());
+            auto* file=qobject_cast<QFileDialog*>(frontStudioDialog());
             if(!file||file->property("view_operation")!="save_image_file")return;
             picker.stop();handled=true;file->selectFile(path);QMetaObject::invokeMethod(file,"accept",Qt::DirectConnection);
         });picker.start();save->trigger();root->hide();

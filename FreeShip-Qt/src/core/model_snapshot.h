@@ -25,12 +25,18 @@ struct Layer {
     std::optional<int> defaultNameNumber;
 };
 struct HullTriangle {EntityId layer=0;std::array<Vec3,3> vertices;};
+struct SurfaceCrease {
+    std::array<int,2> points;
+    QVector<EntityId> layers;
+};
 // Indexed subdivision polygons, distinct even when positions coincide.
 // Display-only data; never serialized back into the editable document.
 struct SurfaceTopology {
     QVector<Vec3> points;
     QVector<int> types;
     QVector<QVector<int>> faces;
+    QVector<int> plateRegions;
+    QVector<SurfaceCrease> creases;
 };
 struct SectionSpline {QVector<Vec3> points;QVector<bool> knuckles;};
 struct PointGroup {int index=0;QString name;bool locked=false;QVector<EntityId> points;};

@@ -192,6 +192,7 @@ inline bool showShortcutGuide(QWidget* owner,QShortcut* languageShortcut=nullptr
     add(View,uiText("平移视图"),uiText("右键拖动"),uiText("当前视图或型线图窗口"),ShortcutGesture::Pan,ShortcutViewScope::CurrentOrLines);
     add(View,uiText("框选控制点"),uiText("空白处左键拖动"),uiText("当前视图"),ShortcutGesture::Box,ShortcutViewScope::Current);
     add(View,uiText("旋转视角"),uiText("Ctrl + 左键拖动"),uiText("透视图"),ShortcutGesture::Rotate,ShortcutViewScope::Perspective,true);
+    add(View,uiText("旋转板片"),uiText("Ctrl + 左键拖动"),uiText("板材展开"),ShortcutGesture::Rotate,ShortcutViewScope::None,true);
     add(View,uiText("缩放视图"),uiText("鼠标滚轮"),uiText("当前视图或型线图窗口"),ShortcutGesture::Wheel,ShortcutViewScope::CurrentOrLines);
     add(View,uiText("缩放表格"),uiText("Ctrl + 鼠标滚轮"),uiText("计算结果表格"),ShortcutGesture::Wheel,ShortcutViewScope::None,true);
     add(View,uiText("缩放至全图"),uiText("空白处双击左键"),uiText("当前视图"),ShortcutGesture::DoubleClick,ShortcutViewScope::Current);
@@ -279,7 +280,7 @@ inline bool showShortcutGuide(QWidget* owner,QShortcut* languageShortcut=nullptr
         });
         languageShortcut->setEnabled(false);
     }
-    const int result=dialog.exec();
+    const int result=runStudioDialog(dialog);
     if(localLanguage)languageShortcut->setEnabled(true);
     return result==languageChanged;
 }

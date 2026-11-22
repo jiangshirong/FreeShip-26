@@ -6,6 +6,11 @@
 namespace fs::presentation {
 namespace {
 QColor color(quint32 c){return QColor(c&255,(c>>8)&255,(c>>16)&255);}
+void expandBounds(Vec3& lo,Vec3& hi,bool mirror){
+    if(mirror){lo.y=-std::max(std::abs(lo.y),std::abs(hi.y));hi.y=-lo.y;}
+    const auto expand=[](double& a,double& b){const auto d=(b-a)*.03;a-=d;b+=d;};
+    expand(lo.x,hi.x);expand(lo.y,hi.y);expand(lo.z,hi.z);
+}
 
 QString hydroMarkerText(const HydroMarker& marker){
     const auto separator=marker.text.indexOf('=');
@@ -25,10 +30,27 @@ QString dimension(double value,bool imperial){
     auto feet=qint64(std::trunc(stored));auto inches=std::abs(stored-float(feet))*12.f;
     return (stored<0&&feet==0?QString("-"):QString())+QString::number(feet)+"' "+QString::number(inches,'f',1)+"''";
 }
+void updateHorizontalReferences(ViewOverlay& overlay,const ModelSnapshot& model,int view,const QFont& font,
+                                const std::function<QPointF(Vec3)>& project,const HorizontalReferences& frame){
+    if(overlay.references[0].stroke<0)return;
+    auto a=frame.minimum,b=frame.maximum;
+    expandBounds(a,b,model.bothSides||view==2);
+    const QFontMetricsF fm(font);
+    for(std::size_t i=0;i<overlay.references.size();++i){
+        const auto indices=overlay.references[i];
+        if(indices.stroke<0)continue;
+        a.z=b.z=i==0?frame.minimum.z:frame.waterlineZ;
+        const auto p=project(a),q=project(b);
+        const auto text=(i==0?QString::fromUtf8(uiText("基线 ")):QStringLiteral("DWL "))+dimension(a.z,model.units=="imperial");
+        const QPointF preferred(p.x()-(i==0?0:fm.horizontalAdvance(text)/2),p.y()-fm.height());
+        overlay.wave[indices.stroke]={{p,q},Qt::blue,2};
+        overlay.labels[indices.label]={i==0?QStringLiteral("reference:base:start"):QStringLiteral("reference:dwl:start"),
+            text,p,preferred,Qt::blue,LabelKind::Named};
+    }
+}
 ViewOverlay makeOverlay(const ModelSnapshot& m,int view,bool grid,bool hydro,const QFont& font,const std::function<QPointF(Vec3)>& project,const std::array<bool,4>& kinds){
     ViewOverlay result;if(!m.overlay.present)return result;QFontMetricsF fm(font);double height=fm.height();
-    auto lo=m.minimum,hi=m.maximum;if(m.bothSides||view==2){lo.y=-std::max(std::abs(lo.y),std::abs(hi.y));hi.y=-lo.y;}
-    auto expand=[](double& a,double& b){auto d=(b-a)*.03;a-=d;b+=d;};expand(lo.x,hi.x);expand(lo.y,hi.y);expand(lo.z,hi.z);
+    auto lo=m.minimum,hi=m.maximum;expandBounds(lo,hi,m.bothSides||view==2);
     auto label=[&](QString key,QString text,QPointF a,QPointF preferred,QColor c,LabelKind kind,bool symbol=false){result.labels.append({key,text,a,preferred,c,kind,symbol});};
     auto line=[&](QString key,QString text,Vec3 a,Vec3 b,bool named,QColor c,double width=1){
         auto p=project(a),q=project(b);auto kind=std::abs(q.x()-p.x())<std::abs(q.y()-p.y())?LabelKind::VerticalTick:LabelKind::HorizontalTick;
@@ -44,10 +66,8 @@ ViewOverlay makeOverlay(const ModelSnapshot& m,int view,bool grid,bool hydro,con
             if(view==2){start={p.x()-w/2,p.y()};end={q.x()-w/2,q.y()-height};}
             else {start={p.x()-w,p.y()-height};end={q.x(),q.y()-height};}
         }
-        if(key=="reference:dwl")start.setX(p.x()-w/2);
         label(key+":start",text,p,start,named?c:color(m.overlay.gridFontColor),kind);
-        if(key!="reference:base"&&key!="reference:dwl")
-            label(key+":end",text,q,end,named?c:color(m.overlay.gridFontColor),kind);
+        label(key+":end",text,q,end,named?c:color(m.overlay.gridFontColor),kind);
     };
     if(grid&&view!=3){
         for(const auto& s:m.sections){
@@ -59,8 +79,12 @@ ViewOverlay makeOverlay(const ModelSnapshot& m,int view,bool grid,bool hydro,con
         }
         if(view!=0){auto a=lo,b=hi;a.y=b.y=0;line("reference:center",uiText("中心线"),a,b,true,Qt::blue,2);}
         if(view!=1){
-            auto a=lo,b=hi;a.z=b.z=m.minimum.z;line("reference:base",uiText("基线 ")+dimension(a.z,m.units=="imperial"),a,b,true,Qt::blue,2);
-            if(m.overlay.mainParticulars){a.z=b.z=m.waterlineZ;line("reference:dwl","DWL "+dimension(a.z,m.units=="imperial"),a,b,true,Qt::blue,2);}
+            const auto count=m.overlay.mainParticulars?2:1;
+            for(int i=0;i<count;++i){
+                result.references[i]={result.wave.size(),result.labels.size()};
+                result.wave.append(Stroke{});result.labels.append(Annotation{});
+            }
+            updateHorizontalReferences(result,m,view,font,project,{m.minimum,m.maximum,m.waterlineZ});
         }
         if(view==0||view==1){auto a=lo,b=hi;a.x=b.x=m.useDefaultSplitSectionLocation?float(m.length*.5):m.splitSectionLocation;
             auto p=project(a)+QPointF(0,30),q=project(b)-QPointF(0,20);auto text=uiText("分割剖面:")+dimension(a.x,m.units=="imperial");

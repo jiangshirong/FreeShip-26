@@ -81,7 +81,7 @@ MainWindow* DocumentWorkspace::addDocument(){
 }
 void DocumentWorkspace::refresh(MainWindow* doc){
     const int i=pages_->indexOf(doc);if(i<0)return;
-    auto path=doc->session_.sourcePath();if(path.isEmpty())path=doc->session_.recoveryOrigin();if(path.isEmpty())path=doc->session_.pendingFilePath();
+    const auto path=doc->documentDisplayPath();
     auto name=path.isEmpty()?QString::fromUtf8(uiText("未命名船模")):QFileInfo(path).fileName();if(doc->session_.modified())name+=" *";
     tabs_->setTabText(i,name.replace('&',"&&"));tabs_->setTabToolTip(i,QDir::toNativeSeparators(path));
 }
@@ -98,7 +98,8 @@ void DocumentWorkspace::cancelled(){closing_=false;
 #endif
 }
 void DocumentWorkspace::closeNext(){if(auto* doc=active()){
-    if(!doc->close()&&doc->documentExit_==MainWindow::DocumentExit::None&&!doc->calculationExitPending_&&!doc->closeApproved_)cancelled();
+    const bool dismissingDialog=hasPendingStudioDialog(doc);
+    if(!doc->close()&&!dismissingDialog&&doc->documentExit_==MainWindow::DocumentExit::None&&!doc->calculationExitPending_&&!doc->closeApproved_)cancelled();
 }}
 void DocumentWorkspace::closeEvent(QCloseEvent* event){if(!active()){event->accept();
 #ifdef Q_OS_LINUX

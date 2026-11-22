@@ -41,18 +41,39 @@ std::shared_ptr<const SurfaceAnalysis> analyzeSurface(const fs::ModelSnapshot& s
     const auto& mesh=*key;auto result=std::make_shared<SurfaceAnalysis>();auto& out=*result;
     const auto n=mesh.points.size();out.angleDefect.fill(0,n);out.normals.resize(n);out.valid.fill(true,n);
     QVector<int> incident(n),boundary(n),invalid(n);QVector<QVector<int>> fans(n);
+    QVector<int> regionAtPoint(n,-1);
+    QVector<bool> plateBoundary(n,false);
+    QVector<double> angles;
+    const double pi=std::acos(-1.);
     struct Edge {int count=0,orientation=0;};QHash<quint64,Edge> edges;
-    for(const auto& face:mesh.faces){
+    for(qsizetype faceIndex=0;faceIndex<mesh.faces.size();++faceIndex){
+        const auto& face=mesh.faces[faceIndex];
+        const auto region=mesh.plateRegions.value(faceIndex,0);
         Vec3 area{};for(int j=2;j<face.size();++j)area=add(area,cross(sub(mesh.points[face[j-1]],mesh.points[face[0]]),sub(mesh.points[face[j]],mesh.points[face[0]])));
         const bool degenerate=std::hypot(area.x,area.y,area.z)<=1e-30;
+        // A twisted quad can have four polygon-edge angles that hide its
+        // angular defect. Use the same diagonal as the display mesh.
+        angles.fill(0.,face.size());
+        for(qsizetype j=2;j<face.size();++j){
+            const auto a=mesh.points[face[0]],b=mesh.points[face[j-1]],c=mesh.points[face[j]];
+            const auto ab=sub(b,a),ac=sub(c,a),bc=sub(c,b),normal=cross(ab,ac);
+            const double sine=std::hypot(normal.x,normal.y,normal.z);
+            // Subtract reversed fan triangles for concave polygon corners.
+            const double sign=dot(area,normal)<0?-1.:1.;
+            angles[0]+=sign*std::atan2(sine,dot(ab,ac));
+            angles[j-1]+=sign*std::atan2(sine,-dot(ab,bc));
+            angles[j]+=sign*std::atan2(sine,dot(ac,bc));
+        }
         for(int j=0;j<face.size();++j){const int p=face[j],prev=face[(j+face.size()-1)%face.size()],next=face[(j+1)%face.size()];
+            if(regionAtPoint[p]<0)regionAtPoint[p]=region;
+            else if(regionAtPoint[p]!=region)plateBoundary[p]=true;
             auto& e=edges[edge(p,next)];++e.count;e.orientation+=p<next?1:-1;
             fans[p].append(prev);fans[p].append(next);if(degenerate)invalid[p]=1;
             auto a=sub(mesh.points[prev],mesh.points[p]),b=sub(mesh.points[next],mesh.points[p]);
             const double la=std::hypot(a.x,a.y,a.z),lb=std::hypot(b.x,b.y,b.z);++incident[p];
             if(la<=1e-30||lb<=1e-30){invalid[p]=1;continue;}
             a={a.x/la,a.y/la,a.z/la};b={b.x/lb,b.y/lb,b.z/lb};
-            out.angleDefect[p]+=std::atan2(std::hypot(cross(a,b).x,cross(a,b).y,cross(a,b).z),std::clamp(dot(a,b),-1.,1.));
+            out.angleDefect[p]+=angles[j]<-1e-12?angles[j]+2*pi:std::max(angles[j],0.);
             // Use actual vector addition. The old AddPoint helper incorrectly
             // clamped negative Y on normals; that would distort zebra bands.
             out.normals[p]=add(out.normals[p],unit(cross(b,a)));
@@ -62,7 +83,6 @@ std::shared_ptr<const SurfaceAnalysis> analyzeSurface(const fs::ModelSnapshot& s
         if(it->count==1){boundary[a]=boundary[b]=1;}
         else if(it->count!=2||it->orientation!=0){invalid[a]=invalid[b]=1;}
     }
-    const double pi=std::acos(-1.);
     for(int p=0;p<n;++p){
         // A bow-tie vertex may have two closed fans despite manifold edges.
         const auto& fan=fans[p];QHash<int,QVector<int>> links;
@@ -80,7 +100,7 @@ std::shared_ptr<const SurfaceAnalysis> analyzeSurface(const fs::ModelSnapshot& s
         auto flat=unit(cross(sub(mesh.points[indices[1]],mesh.points[indices[0]]),sub(mesh.points[indices[2]],mesh.points[indices[0]])));
         for(int k=0;k<3;++k){int p=indices[k];auto& v=triangle[k];v.normal=(mesh.types[p]==0||mesh.types[p]==2)?out.normals[p]:flat;
             v.gaussian=out.valid[p]?gaussianColor(out.angleDefect[p],out.minimum,out.maximum):unknown;
-            v.developable=out.valid[p]?(std::abs(out.angleDefect[p])<1e-4?QColor(0,255,0):QColor(255,0,0)):unknown;}
+            v.developable=out.valid[p]&&!plateBoundary[p]?(std::abs(out.angleDefect[p])<1e-4?QColor(0,255,0):QColor(255,0,0)):unknown;}
         out.triangles.append(triangle);
     }
     if(out.triangles.size()!=snapshot.triangles.size())throw std::runtime_error("Analysis triangle count mismatch");

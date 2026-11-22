@@ -19,6 +19,7 @@
 #include <map>
 #include <set>
 #include <limits>
+#include <numeric>
 #include <stdexcept>
 #include <QJsonDocument>
 
@@ -118,7 +119,7 @@ struct Area { float value=0;Vec3 cog{};float ix=0,iy=0; };
 // Double intermediates for oriented polygon integrals. Input vertices remain
 // the exact stored subdivision mesh; no spline fitting or resampling is used.
 struct CutPoint { double x=0,y=0,z=0; };
-struct CutSegment { CutPoint a,b; };
+struct CutSegment { CutPoint a,b; size_t root; bool checkRing=false; };
 CutPoint mix(CutPoint a,CutPoint b,double t) {return {a.x+t*(b.x-a.x),a.y+t*(b.y-a.y),a.z+t*(b.z-a.z)};}
 double evaluate(const Plane& p,CutPoint v) {const auto& n=p.coefficients();return n[0]*v.x+n[1]*v.y+n[2]*v.z+n[3];}
 struct Volume {
@@ -498,9 +499,7 @@ struct Hydrostatics::Impl {
         for(auto &curve:result)curve.sourceSegments.clear();
         return result;
     }
-    const std::vector<CutSegment>& fullSection(const Plane& plane,Job& job) {
-        const auto key=plane.coefficients();auto cached=fullCuts.find(key);
-        if(cached!=fullCuts.end())return cached->second;
+    std::vector<CutSegment> cutPlane(const Plane& plane,Job& job) {
         job.check();prepare(job);++job.sections;
         double low=1e300,high=-1e300;
         for(const auto& v:vertices){double d=evaluate(plane,{v.point.x,v.point.y,v.point.z});low=std::min(low,d);high=std::max(high,d);}
@@ -526,10 +525,18 @@ struct Hydrostatics::Impl {
                         const auto p=mix(triangle[j],triangle[k],side[j]/(side[j]-side[k]));
                         if(a){leave=p;hasLeave=true;}else{enter=p;hasEnter=true;}
                     }
-                    if(hasEnter && hasLeave && (enter.x!=leave.x || enter.y!=leave.y || enter.z!=leave.z))cuts.push_back({enter,leave});
+                    if(hasEnter && hasLeave && (enter.x!=leave.x || enter.y!=leave.y || enter.z!=leave.z))cuts.push_back({enter,leave,face.rootControlFace});
                 }
             }
         }
+        return cuts;
+    }
+#include "station_tip.inc"
+    const std::vector<CutSegment>& fullSection(const Plane& plane,Job& job) {
+        const auto key=plane.coefficients();auto cached=fullCuts.find(key);
+        if(cached!=fullCuts.end())return cached->second;
+        auto cuts=cutPlane(plane,job);
+        if(key[0]==1 && key[1]==0 && key[2]==0)removeTerminalSlivers(cuts,-key[3],job);
         // A bounded per-revision cache also serves all Bonjean waterlines.
         if(fullCuts.size()>=1024 || fullCutSegments+cuts.size()>2000000){fullCuts.clear();fullCutSegments=0;}
         fullCutSegments+=cuts.size();return fullCuts.emplace(key,std::move(cuts)).first->second;
@@ -557,14 +564,20 @@ struct Hydrostatics::Impl {
             return {p.x*rotate.ct+(p.y*rotate.sh+p.z*rotate.ch)*rotate.st,p.y*rotate.ch-p.z*rotate.sh};
         };
         double area=0,mx=0,my=0,xx=0,yy=0,absoluteArea=0;
+        auto wet=[&](CutSegment& cut){
+            if(kind!=Section::Waterline){
+                const double a=evaluate(water,cut.a),b=evaluate(water,cut.b);
+                if(a>0 && b>0)return false;
+                if((a>0)!=(b>0)){const auto p=mix(cut.a,cut.b,a/(a-b));if(a>0)cut.a=p;else cut.b=p;}
+            }
+            return true;
+        };
+        bool checkRings=false;
         size_t count=0;
         for(auto cut:cuts){
             if(++count%1024==0)job.check();
-            if(kind!=Section::Waterline){
-                const double a=evaluate(water,cut.a),b=evaluate(water,cut.b);
-                if(a>0 && b>0)continue;
-                if((a>0)!=(b>0)){const auto p=mix(cut.a,cut.b,a/(a-b));if(a>0)cut.a=p;else cut.b=p;}
-            }
+            checkRings|=cut.checkRing;
+            if(!wet(cut))continue;
             const auto a=xy(cut.a),b=xy(cut.b);
             const double cross=(a.first*b.second-b.first*a.second)*(kind==Section::Buttock?-1:1),da=cross/2;
             area+=da;absoluteArea+=std::abs(da);
@@ -573,7 +586,35 @@ struct Hydrostatics::Impl {
             xx+=cross*(a.second*a.second+a.second*b.second+b.second*b.second)/12;
             yy+=cross*(a.first*a.first+a.first*b.first+b.first*b.first)/12;
         }
-        if(area< -absoluteArea*1e-12)bad("截面方向不一致，请检查参与静水力计算的面朝向。");
+        const bool reversed=area< -absoluteArea*1e-12;
+        if(reversed || checkRings){
+            QString message=QStringLiteral("截面方向不一致，请检查参与静水力计算的面朝向。");
+            QStringList details;
+            if(kind==Section::Station){
+                const double mm=settings.geometry.imperial?304.8:1000.;
+                for(const auto& ring:stationLoops(cuts)){
+                    if(!reversed && !cuts[ring.edges.front()].checkRing)continue;
+                    double signedSum=0,total=0;
+                    for(auto i:ring.edges){
+                        auto edge=cuts[i];if(!wet(edge))continue;
+                        auto a=xy(edge.a),b=xy(edge.b);
+                        double v=a.first*b.second-b.first*a.second;
+                        signedSum+=v;total+=std::abs(v);
+                    }
+                    if(signedSum>=-total*1e-12)continue;
+                    QStringList names;
+                    for(auto root:ring.roots){
+                        const auto layer=input.faces[root].layer;
+                        QString name=decodeFbmText(QByteArray::fromStdString(input.layers[layer].name),encoding);
+                        names.append(name.isEmpty()?QString("#%1").arg(layer+1):name);
+                    }
+                    names.removeDuplicates();
+                    details.append(QString("[%1: %2 × %3 mm]").arg(names.join(", ")).arg(ring.width()*mm,0,'g',5).arg(ring.height()*mm,0,'g',5));
+                }
+                message+=QString(" X=%1 m ").arg(origin.x*mm/1000.,0,'g',9)+details.join(" ");
+            }
+            if(reversed || !details.isEmpty())throw std::runtime_error(message.toUtf8().constData());
+        }
         if(area<=absoluteArea*1e-12)return out;
         const double x=mx/area,y=my/area;
         out.value=float(finite(area));
@@ -1013,6 +1054,82 @@ struct Hydrostatics::Impl {
 
 Hydrostatics::Hydrostatics(const Fbm &source,const QJsonObject &bindings) {QElapsedTimer timer;timer.start();impl_=std::make_unique<Impl>(source,bindings);impl_->buildMs=timer.nsecsElapsed()/1e6;}
 Hydrostatics::~Hydrostatics()=default;
+QJsonObject Hydrostatics::comparison(const Fbm& source,const ComparisonConditions& in,const QString& cancelFile) {
+    Impl h(source,{});
+    auto& s=h.settings.geometry;
+    const double unit=s.imperial?.3048:1.;
+    const double massUnit=s.imperial?1016.0469088:1000.;
+    QJsonObject values;
+    try {
+        Job job(cancelFile);
+        if(h.faces.empty() || s.length<=0)bad("没有有效的船体几何。");
+        double ymin=h.minimum.y,ymax=h.maximum.y;
+        for(const auto f:h.faces)if(h.input.layers[h.mesh.faces[f].layer].symmetric)
+            for(const auto p:h.mesh.faces[f].points){
+                double y=-double(h.mesh.points[p].position.y);
+                ymin=std::min(ymin,y);ymax=std::max(ymax,y);
+            }
+        values["length_m"]=(double(h.maximum.x)-h.minimum.x)*unit;
+        values["beam_m"]=(ymax-ymin)*unit;
+        s.appendage=1;
+        s.actualCoefficients=true;
+        s.density=float(in.densityKgM3*unit*unit*unit/(s.imperial?.45359237:1000.));
+        h.prepare(job);
+        double draft=in.draftM/unit,trim=in.trimM/unit,heel=0;
+        auto draftAt=[&](const QJsonArray& plane,double x){
+            return (-plane[3].toDouble()-plane[0].toDouble()*x)/plane[2].toDouble()-h.keel;
+        };
+        if(in.equilibrium){
+            const Vec3 cg{float(in.gravityM[0]/unit),float(in.gravityM[1]/unit),float(in.gravityM[2]/unit)};
+            auto solve=[&](double angle){return h.balance(in.massKg/massUnit,angle,0,true,cg,job);};
+            auto eq=solve(0);
+            const auto balanced=[](const QJsonObject& r){
+                return std::abs(r["gz"].toDouble())<=r["length_tolerance"].toDouble();
+            };
+            if(!balanced(eq)){
+                const double direction=eq["gz"].toDouble()<0?1.:-1.;
+                double nearAngle=0;
+                // Follow the upright loading branch toward the low side.
+                // Each trial independently balances displacement and pitch.
+                for(double end:{1.,2.,4.,8.,12.,16.,20.,25.,30.,35.,40.,45.,50.,55.,60.}){
+                    heel=direction*end;eq=solve(heel);
+                    if(balanced(eq))break;
+                    if(direction*eq["gz"].toDouble()>0){
+                        double farAngle=heel;
+                        for(int i=0;i<40&&!balanced(eq);++i){
+                            heel=.5*(nearAngle+farAngle);eq=solve(heel);
+                            if(direction*eq["gz"].toDouble()>0)farAngle=heel;
+                            else nearAngle=heel;
+                        }
+                        break;
+                    }
+                    nearAngle=heel;
+                }
+                if(!balanced(eq))bad("在 60° 横倾范围内未找到横向平衡。");
+            }
+            trim=eq["trim"].toDouble();
+            draft=draftAt(eq["plane"].toArray(),.5*s.length);
+        }
+        const auto row=h.single(float(draft),float(heel),float(trim),job);
+        values["heel_deg"]=heel;
+        const auto plane=row["plane"].toArray();
+        values["draft_m"]=draft*unit;values["trim_m"]=trim*unit;
+        for(const char* side:{"aft","forward"}){
+            const auto x=h.principalDimensions[QString(side)+"_perpendicular_m"];
+            if(x.isDouble())values[QString("draft_")+side+"_m"]=draftAt(plane,x.toDouble()/unit)*unit;
+        }
+        values["mass_kg"]=row["displacement"].toDouble()*massUnit;
+        values["volume_m3"]=row["volume"].toDouble()*unit*unit*unit;
+        values["lwl_m"]=row["lwl"].toDouble()*unit;
+        values["bwl_m"]=row["bwl"].toDouble()*unit;
+        values["wetted_area_m2"]=row["wetted_area"].toDouble()*unit*unit;
+        if(row["midship_area"].toDouble()>0 && row["cp"].toDouble()>0)values["cp"]=row["cp"];
+        const Rotation attitude(float(heel),float(trim),s.length,h.keel);
+        const auto center=row["buoyancy"].toArray();
+        values["lcb_m"]=(center[0].toDouble()*attitude.ct-center[2].toDouble()*attitude.st)*unit;
+    }catch(const std::exception& e){return {{"values",values},{"error",QString::fromUtf8(e.what())}};}
+    return {{"values",values}};
+}
 double Hydrostatics::longitudinalSpan() const {return double(impl_->maximum.x)-impl_->minimum.x;}
 void Hydrostatics::updateSectionDefinitions(const Fbm& source){
     const Settings next(source);impl_->settings.stations=next.stations;impl_->settings.waterlines=next.waterlines;

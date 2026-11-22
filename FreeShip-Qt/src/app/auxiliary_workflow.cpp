@@ -1,4 +1,5 @@
 // Hidden production commands and flow placement, retained for regression.
+#include "studio_ui.h"
 #include "main_window.h"
 #include <QAction>
 #include <QApplication>
@@ -25,7 +26,7 @@ void MainWindow::auxiliaryStep(const QString&){
         };
         auto remove=[&]{
             auto* a=action("delete");if(!a)return;
-            QTimer::singleShot(0,this,[this]{auto* dialog=qobject_cast<QDialog*>(QApplication::activeModalWidget());
+            QTimer::singleShot(0,this,[this]{auto* dialog=qobject_cast<QDialog*>(frontStudioDialog());
                 if(!dialog||!dialog->testAttribute(Qt::WA_DontShowOnScreen)){finishWorkflow("Unsafe or missing deletion dialog");return;}
                 auto* buttons=dialog->findChild<QDialogButtonBox*>();auto* yes=buttons?buttons->button(QDialogButtonBox::Yes):nullptr;
                 if(!yes){dialog->reject();finishWorkflow("Missing deletion confirmation role");return;}yes->click();});a->trigger();
