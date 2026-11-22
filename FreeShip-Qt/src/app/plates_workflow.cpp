@@ -347,6 +347,9 @@ void MainWindow::platesStep(const QString& operation){
                 QTimer::singleShot(0,this,[this]{
                     auto* d=qobject_cast<QDialog*>(frontStudioDialog());
                     if(!d){workflowCase("assembly.sheet-selection-to-preview",false);return;}
+                    // Refreshing the sheet can write its implicitly shared plate array
+                    // while the preview snapshot is still alive.
+                    platesDialog_->data_->plates.detach();
                     auto* choice=d->findChild<QComboBox*>("PlateAssemblySeams");
                     workflowCase("assembly.sheet-selection-to-preview",choice&&choice->currentText()=="Bottom (SB) ↔ Sides (SB)");
                     d->reject();

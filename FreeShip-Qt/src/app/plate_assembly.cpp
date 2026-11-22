@@ -427,7 +427,10 @@ QVector<QPolygonF> plateAssemblyScreenGeometry(QWidget* widget) {
 
 int showPlateAssembly(const fs::DevelopedPlates& source,const QVector<PlateSeam>& seams,int initial,QWidget* parent) {
     // A calculation completion can replace the parent dialog's snapshot during exec().
-    const fs::DevelopedPlates snapshot=source;
+    auto snapshot=source;
+    // Sheet items keep references to the original plates. Keep the preview's
+    // storage separate so accesses during its event loop cannot detach them.
+    snapshot.plates.detach();
     QDialog dialog(parent);dialog.setWindowTitle(uiText("拼合预览"));dialog.resize(980,590);
     dialog.setAttribute(Qt::WA_DontShowOnScreen,parent->testAttribute(Qt::WA_DontShowOnScreen));
     setStudioWindowIcon(&dialog,"Face");
