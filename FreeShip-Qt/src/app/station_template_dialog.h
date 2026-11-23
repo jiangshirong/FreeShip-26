@@ -29,6 +29,7 @@ private:
     void configurePdf();
     void save(bool pdf,fs::frames::PdfLayout layout=fs::frames::PdfLayout::A4Tiles,
               fs::frames::PdfScale scale={});
+    fs::frames::SheetLabels sheetLabels(fs::frames::PdfLayout layout) const;
     void writeSelection(bool pdf,fs::frames::PdfLayout layout,fs::frames::PdfScale scale,const QString& path);
     std::shared_ptr<const fs::ModelSnapshot> model_;
     QString inputPath_,fileBase_,error_;

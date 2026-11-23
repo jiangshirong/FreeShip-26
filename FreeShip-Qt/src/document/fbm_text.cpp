@@ -18,7 +18,7 @@
 namespace fs::document {
 namespace {
 [[noreturn]] void invalid(const QString &encoding) {
-    throw std::invalid_argument(("Text cannot round-trip through FBM encoding " + encoding).toStdString());
+    throw std::invalid_argument((QLatin1String(FbmTextDiagnosticPrefix) + encoding).toStdString());
 }
 QString normalized(QString encoding) {
     encoding = encoding.toLower(); encoding.remove('-');
@@ -41,15 +41,15 @@ const codepages::Table *table(const QString &encoding) {
     return nullptr;
 }
 #ifndef Q_OS_WIN
-QByteArray convert(const QByteArray &input, const QByteArray &from, const QByteArray &to) {
+QByteArray convert(const QByteArray &input, const QByteArray &from, const QByteArray &to, const QString &encoding) {
     auto converter = iconv_open(to.constData(), from.constData());
-    if (converter == (iconv_t)-1) invalid(QString::fromLatin1(from + " -> " + to));
+    if (converter == (iconv_t)-1) invalid(encoding);
     QByteArray output(input.size() * 4 + 16, '\0');
     char *src = const_cast<char *>(input.constData()), *dst = output.data();
     size_t remaining = input.size(), space = output.size();
     const auto result = iconv(converter, &src, &remaining, &dst, &space);
     iconv_close(converter);
-    if (result == size_t(-1) || remaining) invalid(QString::fromLatin1(from + " -> " + to));
+    if (result == size_t(-1) || remaining) invalid(encoding);
     output.resize(output.size() - qsizetype(space)); return output;
 }
 #endif
@@ -92,7 +92,7 @@ QString decode(const QByteArray &bytes, const QString &encoding) {
     return QString::fromStdWString(result);
 #else
     Q_UNUSED(cp);
-    return QString::fromUtf8(convert(bytes, encoding.toLatin1(), "UTF-8"));
+    return QString::fromUtf8(convert(bytes, encoding.toLatin1(), "UTF-8", encoding));
 #endif
 }
 }
@@ -136,7 +136,7 @@ QByteArray encodeFbmText(const QString &text, const QString &encoding) {
         }
 #else
         Q_UNUSED(cp);
-        result = convert(text.toUtf8(), "UTF-8", name.toLatin1());
+        result = convert(text.toUtf8(), "UTF-8", name.toLatin1(), encoding);
 #endif
     }
     if (decode(result,name) != text) invalid(encoding);

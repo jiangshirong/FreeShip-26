@@ -2,6 +2,7 @@
 // ModelTools.inc, Plus ControlPointGroup and Marker/FreeSpline persistence.
 // Every mutation is built privately; a late validation error commits nothing.
 #include "attribute_edit.h"
+#include "group_fixes.h"
 #include "fbm_text.h"
 #include <QHash>
 #include <QJsonArray>
@@ -55,6 +56,12 @@ QByteArray groupBytes(const std::vector<Group> &groups) {
         for (size_t i=0;i<g.points.size();++i) w.string(i<g.spelling.size()?g.spelling[i]:QByteArray::number(g.points[i])); }
     return w.bytes;
 }
+QBitArray coveredPoints(const std::vector<Group>& list,const GroupFixes& state,int count) {
+    QBitArray covered(count);
+    for(int i=0;i<int(list.size());++i)if(GroupFixes::has(state.fixed,i))
+        for(int p:list[i].points)covered.setBit(p);
+    return covered;
+}
 QString text(const QJsonObject &request) {
     if (!request["name"].isString()) bad("Invalid name");
     const auto name=request["name"].toString();
@@ -88,6 +95,21 @@ QString pointName(const Fbm &source, int point, const QString &encoding) {
 }
 }
 
+TopologyEdit editScopedPointLocks(const Fbm& source,const QJsonObject& bindings,const std::vector<int>& points,bool lock,bool all) {
+    auto metadata=source.calculationParameters();auto state=GroupFixes::read(metadata);
+    auto net=source.controlNet();const auto covered=coveredPoints(groups(source),state,int(net.points.size()));
+    bool changed=false;
+    for(int p:points) {
+        const bool pinned=!all && covered.testBit(p), effective=lock || pinned;
+        changed |= net.points[p].value.locked!=effective || GroupFixes::has(state.only,p)!=(pinned && !lock);
+        net.points[p].value.locked=effective;GroupFixes::set(state.only,p,pinned && !lock);
+    }
+    if(all){changed |= state.fixed.count(true)>0;state={};}
+    if(!changed)return {source,bindings,false};
+    state.write(metadata);
+    return {source.withControlNet(net,false).withCalculationParameters(metadata),bindings,true};
+}
+
 bool nativeAttributeCommand(const QJsonObject &request) {
     static const QSet<QString> operations{"point_properties","create_group","update_group","delete_group","add_markers","delete_markers"};
     return request["method"]=="modeling" && operations.contains(request["operation"].toString());
@@ -100,7 +122,13 @@ TopologyEdit editAttributes(const Fbm &source, const QJsonObject &bindings, cons
     if (operation=="point_properties") {
         const auto ids=selected(source,bindings,request);
         if (ids.size()!=1) bad("Select one point to edit properties");
-        const auto name=text(request);const auto encoded=encodeFbmText(name,encoding);
+        const auto name=text(request);QByteArray encoded;
+        try { encoded=encodeFbmText(name,encoding); }
+        catch(const std::invalid_argument&) {
+            if(encoding.compare("UTF-8",Qt::CaseInsensitive)==0)throw;
+            auto next=bindings;next["fbm_encoding"]="UTF-8";
+            return editAttributes(source.withUtf8Text(encoding),next,request);
+        }
         const int type=integer(request["vertex_type"],0,3), index=ids[0];
         auto net=source.controlNet();auto &p=net.points[index];
         const bool typeChanged=p.value.vertexType!=type, nameChanged=pointName(source,index,encoding)!=name;
@@ -111,27 +139,37 @@ TopologyEdit editAttributes(const Fbm &source, const QJsonObject &bindings, cons
         return {source.withControlNet(net,typeChanged),bindings,true};
     }
     if (operation=="create_group" || operation=="update_group" || operation=="delete_group") {
-        auto list=groups(source);int index=-1;
+        auto list=groups(source);auto metadata=source.calculationParameters();auto state=GroupFixes::read(metadata);int index=-1;
+        const auto oldOnly=state.only;state.fixed.resize(list.size());
         if (operation!="create_group") index=integer(request["index"],0,int(list.size())-1);
         auto net=source.controlNet();
         if (operation=="delete_group") {
             for (int p:list[index].points) net.points[p].value.selected=false;
             list.erase(list.begin()+index);
+            for(int i=index;i<int(list.size());++i)state.fixed.setBit(i,state.fixed.testBit(i+1));
+            state.fixed.resize(list.size());
         } else {
             const auto ids=selected(source,bindings,request);if (ids.size()<2) bad("A group needs at least two points");
             const auto name=text(request);if (name.isEmpty()) bad("Group name must not be empty");
             const auto encoded=encodeFbmText(name,encoding);const bool locked=flag(request,"locked");
             if (index>=0) {
-                const auto &old=list[index];bool oldLocked=!old.points.empty();
-                for (int p:old.points) oldLocked &= net.points[p].value.locked;
+                const auto &old=list[index];const bool oldLocked=GroupFixes::has(state.fixed,index);
                 auto a=old.points,b=ids;std::sort(a.begin(),a.end());std::sort(b.begin(),b.end());
                 if (decodeFbmText(old.name,encoding)==name && oldLocked==locked && a==b) return {source,bindings,false};
             } else { index=int(list.size());list.push_back({}); }
             list[index]={encoded,ids,{}};
-            for (int p:ids) if (locked || operation=="update_group") net.points[p].value.locked=locked;
+            GroupFixes::set(state.fixed,index,locked);
         }
-        auto candidate=source.withControlNet(net,false);
-        return {candidate.withBlocks({{"point_groups",groupBytes(list)}}),bindings,true};
+        const auto covered=coveredPoints(list,state,int(net.points.size()));state.only.clear();
+        for(int p=0;p<int(net.points.size());++p) {
+            const bool personal=net.points[p].value.locked && !GroupFixes::has(oldOnly,p);
+            net.points[p].value.locked=personal || covered.testBit(p);
+            if(covered.testBit(p) && !personal)GroupFixes::set(state.only,p,true);
+        }
+        auto candidate=source.withControlNet(net,false).withBlocks({{"point_groups",groupBytes(list)}});
+        const auto before=metadata;state.write(metadata);
+        if(before!=metadata)candidate=candidate.withCalculationParameters(metadata);
+        return {std::move(candidate),bindings,true};
     }
     QByteArray stored;
     if (source.version()>=11) stored=source.blockBytes("markers");

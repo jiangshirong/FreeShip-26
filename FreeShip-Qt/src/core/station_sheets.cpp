@@ -23,11 +23,24 @@ QPen templatePen(double width,bool dashed) {
     if(dashed)pen.setDashPattern({12,6});
     return pen;
 }
+QRectF outlineBounds(const Station& sheet) {
+    double left=INFINITY,right=-INFINITY,low=INFINITY,high=-INFINITY;
+    const auto expand=[&](const QPolygonF& path){
+        if(path.isEmpty())return;
+        const auto b=path.boundingRect();
+        left=std::min(left,b.left());right=std::max(right,b.right());
+        low=std::min(low,b.top());high=std::max(high,b.bottom());
+    };
+    for(const auto& path:sheet.outlines)expand(path);
+    for(const auto& path:sheet.shellReference)expand(path);
+    return left<=right?QRectF(QPointF(left,low),QPointF(right,high)):QRectF{};
+}
 QRectF drawingArea(const Station& sheet,double divisor) {
     const QRectF model=plotBounds(sheet);
     return QRectF(model.topLeft()/divisor,model.bottomRight()/divisor).adjusted(-4,-4,4,4);
 }
 const QRectF a4Paper(0,0,297,210);
+QRectF wholeDrawingRect(QSizeF paper){return {10,20,paper.width()-20,paper.height()-42};}
 int tileCount(double size,double span,double lap) {
     const double count=1+std::ceil(std::max(0.,size-span)/(span-lap));
     if(!std::isfinite(count) || count>maximumPdfPages) return maximumPdfPages+1;
@@ -35,22 +48,20 @@ int tileCount(double size,double span,double lap) {
 }
 QRectF tiledArea(const Station& sheet,double divisor,bool edge) {
     auto bounds=drawingArea(sheet,divisor);
-    if(!edge)return bounds;
-    bounds.adjust(0,0,0,edgeHeader);
-    // Keep Z=0 on the drawing when it fits. A datum outside the part
-    // should not force an extra row of sheets.
-    double low=INFINITY,high=-INFINITY;
-    const auto expand=[&](const QPolygonF& path){
-        const auto extent=path.boundingRect();
-        low=std::min(low,extent.top());
-        high=std::max(high,extent.bottom());
-    };
-    for(const auto& path:sheet.outlines)expand(path);
-    for(const auto& path:sheet.shellReference)expand(path);
-    const double bottom=low/divisor-4,top=high/divisor+4+edgeHeader;
-    if(tileCount(top-bottom,a4Paper.height(),0)<tileCount(bounds.height(),a4Paper.height(),0)){
-        bounds.setTop(bottom);
-        bounds.setBottom(top);
+    const double header=edge?edgeHeader:0.;
+    bounds.adjust(0,0,0,header);
+    const auto model=outlineBounds(sheet);
+    const auto part=QRectF(model.topLeft()/divisor,model.bottomRight()/divisor).adjusted(-4,-4,4,4+header);
+    const auto paper=edge?a4Paper:ink;
+    const double lap=edge?0.:overlap;
+    // A distant datum is optional if including it would use more sheets.
+    if(tileCount(part.width(),paper.width(),lap)<tileCount(bounds.width(),paper.width(),lap)){
+        bounds.setLeft(part.left());
+        bounds.setRight(part.right());
+    }
+    if(tileCount(part.height(),paper.height(),lap)<tileCount(bounds.height(),paper.height(),lap)){
+        bounds.setTop(part.top());
+        bounds.setBottom(part.bottom());
     }
     return bounds;
 }
@@ -177,7 +188,8 @@ void drawAssemblyGuide(QPainter& p,const Station& sheet,Tiles tiles,double divis
     p.setPen(QPen(datum,.3,Qt::DashLine));
     const double top=b.bottom()-(edge?edgeHeader:0);
     const bool showBaseline=b.top()<=0 && top>=0;
-    p.drawLine(point({0,b.top()}),point({0,top}));
+    const bool showVerticalDatum=b.left()<=0 && b.right()>=0;
+    if(showVerticalDatum)p.drawLine(point({0,b.top()}),point({0,top}));
     if(showBaseline)p.drawLine(point({b.left(),0}),point({b.right(),0}));
     QPainterPath outlinePath;
     const auto drawOutline=[&](const QPolygonF& path){
@@ -252,8 +264,10 @@ void drawAssemblyGuide(QPainter& p,const Station& sheet,Tiles tiles,double divis
         p.setPen(QPen(align,.6));crossMark(p,{174,114});
         caption({184,104,103,21},labels.align,4);
     }
-    p.setPen(QPen(datum,.35,Qt::DashLine));p.drawLine(QLineF(168,137,179,137));
-    caption({184,127,103,21},showBaseline?labels.datum:labels.centreline,4);
+    if(showBaseline||showVerticalDatum){
+        p.setPen(QPen(datum,.35,Qt::DashLine));p.drawLine(QLineF(168,137,179,137));
+        caption({184,127,103,21},showBaseline?(showVerticalDatum?labels.datum:labels.baseline):labels.centreline,4);
+    }
     p.setPen(templatePen(.6,hasReference));p.drawLine(QLineF(168,160,179,160));
     caption({184,150,103,21},hasReference?labels.templateCut:labels.contour,4);
     if(hasReference){
@@ -271,7 +285,7 @@ void drawSheet(QPainter& p,const Station& sheet,const SheetLabels& labels,QSizeF
                PdfLayout layout,int row,int col,Tiles tiles,int unit,double divisor,const QString& scaleLabel) {
     const bool tiled=layout!=PdfLayout::WholeStation;
     const bool edge=layout==PdfLayout::A4EdgeToEdge;
-    const QRectF drawing=edge?a4Paper:QRectF(10,20,paper.width()-20,paper.height()-42);
+    const QRectF drawing=edge?a4Paper:wholeDrawingRect(paper);
     const QRectF header=QRectF(10,edge?1:5,paper.width()-20,10).adjusted(tiled&&col>0?10:0,0,0,0);
     p.save();
     const double px=p.device()->logicalDpiX()/25.4, py=p.device()->logicalDpiY()/25.4;
@@ -292,7 +306,7 @@ void drawSheet(QPainter& p,const Station& sheet,const SheetLabels& labels,QSizeF
         p.restore();
         p.drawText(header.adjusted(0,0,edge?-15:0,0),Qt::AlignRight|Qt::AlignVCenter,scaleLabel);
     }
-    const QRectF bounds=tiledArea(sheet,divisor,edge);
+    const QRectF bounds=tiled?tiledArea(sheet,divisor,edge):drawingArea(sheet,divisor);
     const auto span=edge?a4Paper:ink;
     const double lap=edge?0.:overlap;
     const QPointF corner(bounds.left()+col*(span.width()-lap),bounds.bottom()-row*(span.height()-lap));
@@ -316,7 +330,7 @@ void drawSheet(QPainter& p,const Station& sheet,const SheetLabels& labels,QSizeF
     p.translate(drawing.topLeft());p.scale(1,-1);p.translate(-corner);
     p.setPen(QPen(QColor(120,120,120),.16,Qt::DashLine));
     const double top=bounds.bottom()-(edge?edgeHeader:0);
-    p.drawLine(QLineF(0,bounds.top(),0,top));
+    if(bounds.left()<=0 && bounds.right()>=0)p.drawLine(QLineF(0,bounds.top(),0,top));
     if(bounds.top()<=0 && top>=0)p.drawLine(QLineF(bounds.left(),0,bounds.right(),0));
     p.scale(1./divisor,1./divisor);
     const bool hasReference=!sheet.shellReference.isEmpty();
@@ -356,25 +370,52 @@ void drawSheet(QPainter& p,const Station& sheet,const SheetLabels& labels,QSizeF
 }
 }
 QRectF plotBounds(const Station& station) {
-    double left=0,right=0,low=0,high=0;
-    const auto expand=[&](const QPolygonF& path){
-        auto b=path.boundingRect();
-        left=std::min(left,b.left());right=std::max(right,b.right());
-        low=std::min(low,b.top());high=std::max(high,b.bottom());
-    };
-    for(const auto& path:station.outlines)expand(path);
-    for(const auto& path:station.shellReference)expand(path);
-    return {QPointF(left,low),QPointF(right,high)};
+    const auto b=outlineBounds(station);
+    return {QPointF(std::min(0.,b.left()),std::min(0.,b.top())),
+            QPointF(std::max(0.,b.right()),std::max(0.,b.bottom()))};
 }
 QString SheetLabels::title(const Station& sheet) const {
     if(!sheet.slotLabels.isEmpty())return spine;
     const auto location=QStringLiteral("%1 %2     X = %3 mm").arg(station).arg(sheet.number).arg(sheet.x,0,'f',2);
     return interlocking?location:location+QStringLiteral("     ")+heading;
 }
+double pdfDivisor(const QList<Station>& stations,PdfScale scale,PdfLayout layout) {
+    if(!(scale.numerator>0&&scale.denominator>0&&std::isfinite(scale.numerator)&&std::isfinite(scale.denominator)))
+        throw std::invalid_argument("Invalid PDF scale");
+    if(!scale.fit)return scale.denominator/scale.numerator;
+    const bool edge=layout==PdfLayout::A4EdgeToEdge;
+    const auto paper=layout==PdfLayout::WholeStation?wholeDrawingRect(a4Paper.size()):(edge?a4Paper:ink);
+    double divisor=0.;
+    for(const auto& station:stations){
+        const auto bounds=plotBounds(station);
+        divisor=std::max({divisor,bounds.width()/(paper.width()-8),
+            bounds.height()/(paper.height()-8-(edge?edgeHeader:0.))});
+    }
+    // Allow for the rounding of the physical margins in tiledArea().
+    return divisor>0 ? divisor*(1.+1e-10) : 1.;
+}
+QSizeF firstPdfPaper(const Station& station,PdfLayout layout,double divisor,bool fit) {
+    return layout==PdfLayout::WholeStation&&!fit?wholePage(station,divisor):a4Paper.size();
+}
+bool firstPdfIsGuide(const Station& station,PdfLayout layout,double divisor) {
+    if(layout==PdfLayout::WholeStation)return false;
+    const auto tiles=tilesFor(station,divisor,layout==PdfLayout::A4EdgeToEdge);
+    return tiles.rows!=1||tiles.cols!=1;
+}
+void paintFirstPdfPage(QPainter& p,const Station& station,const SheetLabels& labels,
+                       PdfLayout layout,double divisor,QSizeF paper,const QString& caption,bool guide) {
+    const bool edge=layout==PdfLayout::A4EdgeToEdge;
+    const auto tiles=layout==PdfLayout::WholeStation?Tiles{1,1}:tilesFor(station,divisor,edge);
+    p.save();
+    // The sheet painters normally receive a device-coordinate PDF painter.
+    p.scale(25.4/p.device()->logicalDpiX(),25.4/p.device()->logicalDpiY());
+    if(guide)drawAssemblyGuide(p,station,tiles,divisor,labels,edge);
+    else drawSheet(p,station,labels,paper,layout,0,0,tiles,1,divisor,caption);
+    p.restore();
+}
 int pdfPageCount(const QList<Station>& stations,PdfScale scale,PdfLayout layout) {
-    if(scale.numerator<1 || scale.denominator<1)throw std::invalid_argument("Invalid PDF scale");
+    const double divisor=pdfDivisor(stations,scale,layout);
     if(layout==PdfLayout::WholeStation) return int(std::min(stations.size(),qsizetype(maximumPdfPages+1)));
-    const double divisor=double(scale.denominator)/scale.numerator;
     int total=0;
     QSet<QPair<int,int>> layouts;
     for(const auto& sheet:stations) {
@@ -391,10 +432,11 @@ void writePdf(const QString& path,const QList<Station>& stations,const SheetLabe
     const int pageCount=pdfPageCount(stations,scale,layout);
     if(pageCount>maximumPdfPages)
         throw std::runtime_error("PDF 超过 500 页，请减少所选站位。");
-    const double divisor=double(scale.denominator)/scale.numerator;
-    const QString scaleLabel=QStringLiteral("%1:%2").arg(scale.numerator).arg(scale.denominator);
+    const double divisor=pdfDivisor(stations,scale,layout);
+    const QString scaleLabel=scale.fit?labels.fitScale:QStringLiteral("%1:%2").arg(scale.numerator,0,'g',15).arg(scale.denominator,0,'g',15);
     int unit=1;
-    if(!tiled) for(const auto& station:stations) {
+    const bool standardPaper=tiled||scale.fit;
+    if(!standardPaper) for(const auto& station:stations) {
         const auto paper=wholePage(station,divisor);
         const double needed=std::ceil(std::max(paper.width(),paper.height())/5080.);
         if(!std::isfinite(needed) || needed>75000) throw std::runtime_error("站位超出 PDF 的纸张尺寸范围。");
@@ -418,12 +460,12 @@ void writePdf(const QString& path,const QList<Station>& stations,const SheetLabe
         };
         QSet<QPair<int,int>> layouts;
         for(const auto& station:stations) {
-            QSizeF paper=tiled?QSizeF(297,210):wholePage(station,divisor);
-            const auto size=tiled?QPageSize(QPageSize::A4):QPageSize(paper/unit,QPageSize::Millimeter,{},QPageSize::ExactMatch);
-            const auto orientation=tiled?QPageLayout::Landscape:QPageLayout::Portrait;
+            QSizeF paper=firstPdfPaper(station,layout,divisor,scale.fit);
+            const auto size=standardPaper?QPageSize(QPageSize::A4):QPageSize(paper/unit,QPageSize::Millimeter,{},QPageSize::ExactMatch);
+            const auto orientation=standardPaper?QPageLayout::Landscape:QPageLayout::Portrait;
             if(!size.isValid() || !pdf.setPageLayout(QPageLayout(size,orientation,QMarginsF(),QPageLayout::Millimeter)))
                 throw std::runtime_error("无法设置 PDF 纸张尺寸。");
-            if(!tiled) paper=QSizeF(size.sizePoints())*(25.4*unit/72.);
+            if(!standardPaper) paper=QSizeF(size.sizePoints())*(25.4*unit/72.);
             const auto tiles=tiled?tilesFor(station,divisor,edge):Tiles{1,1};
             if(firstAssemblyGuide(tiles,layouts)){
                 beginPage();

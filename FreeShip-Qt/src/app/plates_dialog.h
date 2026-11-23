@@ -7,7 +7,7 @@
 #include <memory>
 class ModelSession;class QListWidget;class StudioMessage;class QTableWidget;class QDoubleSpinBox;
 class QCheckBox;class QGraphicsScene;class QGraphicsView;class QGraphicsItem;class QPagedPaintDevice;
-class QSpinBox;class PdfScaleInputs;
+class QSpinBox;
 class PlatesDialog final:public QDialog {
 public:
     PlatesDialog(ModelSession& session,bool hidden,QWidget* parent=nullptr);
@@ -31,19 +31,23 @@ private:
     void translatePlateNames();
     void refreshDiagnosticFaces();
     PlateEdgeHit edgeAt(QPoint pos)const;
+    int plateAt(QPoint pos)const;
     void highlightSeam(int index,bool unpaired=false);
     PlateEdgeHit hovered_,singleEdge_;
     QVector<PlateSeam> seams_;int seam_=-1;
-    void fit();void renderPages(QPagedPaintDevice& device);void chooseExport(const QString& format);
+    struct PdfSheet;
+    std::shared_ptr<PdfSheet> pdfSheet(bool prepare=true);
+    bool selectPdfSettings(std::shared_ptr<PdfSheet>& sheet);
+    void fit();void chooseExport(const QString& format);
     ModelSession& session_;bool hidden_,updating_=false;QString failure_,completionMessage_;
     std::unique_ptr<fs::DevelopedPlates> data_;
     std::shared_ptr<const fs::ModelSnapshot> resultModel_;
     QListWidget* list_;StudioMessage *status_,*plateNote_,*diagnosticNote_;QTableWidget* metrics_;
     QWidget* rotationPresets_;
-    PdfScaleInputs* scale_;
+    double pdfNumerator_=1,pdfDenominator_=0,pdfFixedDenominator_=1;
     QDoubleSpinBox *gridX_,*gridY_;
     QSpinBox* fontSize_;
-    QCheckBox *mirror_,*fill_,*interior_,*errors_,*dimensions_,*names_,*submerged_,*boxes_;
+    QCheckBox *fill_,*interior_,*errors_,*dimensions_,*names_,*submerged_,*boxes_;
     std::array<QCheckBox*,4> sections_{};
     QGraphicsScene* scene_;QGraphicsView* view_;QVector<QGraphicsItem*> items_;
 };

@@ -8,6 +8,9 @@
 #include <QKeyEvent>
 #include <QMessageBox>
 #include <QShortcut>
+#include <QSettings>
+#include <QScopedValueRollback>
+#include <QAction>
 #include <QStatusBar>
 #include <QTimer>
 #include <stdexcept>
@@ -18,6 +21,55 @@ void MainWindow::loadPreferences(const QString& filename){
         if(!error.isEmpty())throw std::runtime_error(error.toStdString());
         preferences_=values;session_.setPreferences(nativePreferenceOptions(values),values.value("directories").toObject()["temporary"].toString());
         updatePreferenceAppearance();
+        const auto path=preferencesStore_->filename()+".views.ini";
+        QSettings settings(path,QSettings::IniFormat);
+        for(auto* view:views_){
+            const auto prefix="projection/"+QString::number(int(view->projection()))+"/";
+            const auto value=[&](const QString& key){return settings.value(prefix+key);};
+            view->onViewSettingsChanged={};
+            view->restoreDisplayMode(value("mode").toString());
+            view->setCoordinateAxis(value("axis").toInt());
+            view->setFocalLength(value("lens").toInt());
+            const auto components=value("light").toList();
+            if(components.size()==6){
+                HullLight light;
+                light.direction={components[0].toDouble(),components[1].toDouble(),components[2].toDouble()};
+                light.ambient=components[3].toInt();light.intensity=components[4].toInt();light.enabled=components[5].toBool();
+                view->setLight(light);
+            }
+            view->onViewSettingsChanged=[this,path,prefix,view](const QString& key){
+                QVariant setting;
+                if(key=="mode")setting=view->displayModeKey();
+                else if(key=="axis")setting=view->coordinateAxis();
+                else if(key=="lens")setting=view->focalLength();
+                else if(key=="light"){
+                    refreshLightDialog(view);
+                    const auto l=view->light();
+                    setting=QVariantList{l.direction.x,l.direction.y,l.direction.z,l.ambient,l.intensity,l.enabled};
+                }else return;
+                QSettings(path,QSettings::IniFormat).setValue(prefix+key,setting);
+            };
+        }
+        for(auto* action:findChildren<QAction*>()){
+            const auto key=action->property("viewPreference").toString();
+            if(key.isEmpty())continue;
+            const auto saved=settings.value(key);
+            if(saved.isValid()){
+                action->setChecked(saved.toBool());
+                // File-provided overlay defaults apply until the first explicit choice.
+                if(key=="overlay_grid")for(auto* v:views_)v->setGridVisible(saved.toBool());
+                if(key=="overlay_hydro")for(auto* v:views_)v->setHydroVisible(saved.toBool());
+            }
+            if(!action->property("viewPreferenceBound").toBool()){
+                action->setProperty("viewPreferenceBound",true);
+                connect(action,&QAction::triggered,this,[this,key,action]{
+                    QSettings(preferencesStore_->filename()+".views.ini",QSettings::IniFormat).setValue(key,action->isChecked());
+                });
+            }
+        }
+        if(std::none_of(viewActions_.begin(),viewActions_.end(),[](auto* a){return a->isChecked();}))
+            viewActions_.back()->setChecked(true);
+        layoutViews();
     }catch(const std::exception& e){showStatusMessage(QString::fromUtf8(e.what()),StudioMessageRole::Warning);}
 }
 void MainWindow::updatePreferenceAppearance(){

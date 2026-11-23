@@ -52,7 +52,7 @@ void MainWindow::auditObjectLifetime(){
             const auto actions=menu->actions();
             return std::none_of(items.begin(),items.end(),[&](const auto& id){return transforms.contains(id);})&&
                 std::any_of(actions.begin(),actions.end(),[](const auto* a){return a->property("view_operation")=="save_image";})&&
-                std::any_of(actions.begin(),actions.end(),[](const auto* a){return a->menu()&&a->menu()->property("menu_role")=="render_mode";});
+                std::none_of(actions.begin(),actions.end(),[](const auto* a){return a->menu()&&a->menu()->property("menu_role")=="render_mode";});
         };
         QJsonArray popups;
         for(auto* view:views_){

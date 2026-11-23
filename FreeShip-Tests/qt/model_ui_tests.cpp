@@ -54,8 +54,11 @@ int main(int argc,char** argv){
         LayerPanel panel;panel.resize(800,650);m->layers[0].thickness=10;m->layers[0].materialDensity=2;panel.setSnapshot(m);panel.setSelectedLayerId(1);
         auto measurements=panel.property("layer_measurements").toJsonObject();auto cg=measurements["center"].toArray();check("independent-area-mass-centroid",std::abs(measurements["area"].toDouble()-100)<1e-10&&std::abs(measurements["weight"].toDouble()-2)<1e-10&&cg==QJsonArray{5,0,5});
         auto* symmetric=qobject_cast<QCheckBox*>(panel.fieldEditor("symmetric"));symmetric->setChecked(true);measurements=panel.property("layer_measurements").toJsonObject();check("symmetric-area-and-weight-double",measurements["area"]==200&&measurements["weight"]==4);
-        auto* alphaField=qobject_cast<QSpinBox*>(panel.fieldEditor("alpha_blend"));alphaField->setValue(75);check("percent-transparency-to-alpha",panel.changes()["alpha_blend"]==64);panel.discardDrafts();check("cancel-discards-draft-and-keeps-layer",panel.changes().isEmpty()&&panel.selectedLayerId()==1);
-        auto exact=std::make_shared<fs::ModelSnapshot>(*m);exact->revision++;exact->layers[0].alphaBlend=137;panel.setSnapshot(exact);check("display-rounding-does-not-rewrite-alpha",panel.changes().isEmpty());
+        int commands=0;QJsonObject edits;
+        panel.onListCommand=[&](const QString&,QJsonObject fields){++commands;edits=fields["changes"].toObject();return true;};
+        auto* alphaField=qobject_cast<QSpinBox*>(panel.fieldEditor("alpha_blend"));alphaField->setValue(75);
+        check("percent-transparency-to-alpha",commands==1&&edits["alpha_blend"]==64);
+        auto exact=std::make_shared<fs::ModelSnapshot>(*m);exact->revision++;exact->layers[0].alphaBlend=137;panel.setSnapshot(exact);check("display-rounding-does-not-rewrite-alpha",commands==1&&panel.selectedLayerId()==1);
         LabelLayout layout;layout.begin({0,0,600,400},0,false);auto named=layout.place("dwl","DWL 1000",{100,100},{110,100},{90,16},LabelKind::Named);
         check("nearby-named-value-suppresses-numeric-tick",named.visible&&!layout.place("tick","1000",{110,100},{110,130},{40,16},LabelKind::VerticalTick).visible);
         check("distant-numeric-tick-is-not-suppressed",layout.place("far","1000",{400,300},{400,320},{40,16},LabelKind::VerticalTick).visible);

@@ -55,7 +55,10 @@ MainWindow* MainWindow::destinationWindow(){
 }
 void MainWindow::openDocument(const QString& path){
     if(path.isEmpty())return;
-    if(auto* w=windowForFile(path)){w->activateDocument();return;}
+    if(auto* w=windowForFile(path)){
+        w->activateDocument();
+        return;
+    }
     destinationWindow()->openModel(path);
 }
 void MainWindow::dragEnterEvent(QDragEnterEvent* e){

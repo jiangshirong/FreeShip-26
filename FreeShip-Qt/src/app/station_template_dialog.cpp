@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 #include "station_template_dialog.h"
 #include "pdf_scale_inputs.h"
+#include "pdf_export_dialog.h"
 #include "studio_row_actions.h"
 #include "studio_motion.h"
 #include "studio_ui.h"
@@ -673,14 +674,11 @@ void StationTemplateDialog::refresh(bool animate) {
 void StationTemplateDialog::configurePdf() {
     const auto generation=cancel_;
     using frames::PdfLayout;
-    QDialog options(this);
+    PdfExportDialog options(this);
     options.setObjectName("StationPdfSettings");
     options.setWindowTitle(QString::fromUtf8(uiText("导出横剖面图"))+QStringLiteral(" · PDF"));
-    options.setWindowIcon(studioFormatWindowIcon("PDF"));
-    options.setProperty("studio_window_icon","format:PDF");
     if(testAttribute(Qt::WA_DontShowOnScreen)) options.setAttribute(Qt::WA_DontShowOnScreen);
 
-    QFormLayout form(&options);
     QComboBox layout;
     layout.setObjectName("StationPdfLayout");
     auto* layoutList=new PdfLayoutList;
@@ -697,36 +695,44 @@ void StationTemplateDialog::configurePdf() {
     const auto wholeLabel=QString::fromUtf8(uiText("每个站位一张整图（%1 页）…")).section(u'(',0,0).section(u'（',0,0).trimmed();
     layout.addItem(wholeLabel,int(PdfLayout::WholeStation));
     layout.setCurrentIndex(layout.findData(int(pdfLayout_)));
-    form.addRow(uiText("导出设置"),&layout);
+    options.pageOptions.addRow(uiText("导出模式"),&layout);
 
     PdfScaleInputs scale(QStringLiteral("StationPdf"));
     scale.numerator.setValue(pdfScale_.numerator);
     scale.denominator.setValue(pdfScale_.denominator);
-    form.addRow(uiText("出图比例"),&scale);
+    options.addScale(&scale);
+    options.fit.setChecked(pdfScale_.fit);
 
     QLabel pages;
     pages.setObjectName("StationPdfPageCount");
-    form.addRow(uiText("页数"),&pages);
-    QDialogButtonBox buttons(QDialogButtonBox::Ok|QDialogButtonBox::Cancel);
-    auto* confirm=buttons.button(QDialogButtonBox::Ok);
-    confirm->setText(uiText("确定"));
-    buttons.button(QDialogButtonBox::Cancel)->setText(uiText("取消"));
-    form.addRow(&buttons);
-    connect(&buttons,&QDialogButtonBox::accepted,&options,&QDialog::accept);
-    connect(&buttons,&QDialogButtonBox::rejected,&options,&QDialog::reject);
-
+    options.scaleOptions.addRow(uiText("页数"),&pages);
+    const auto sheets=sheets_;
     const auto selectedLayout=[&]{return PdfLayout(layout.currentData().toInt());};
-    const auto selectedScale=[&]{return frames::PdfScale{scale.numerator.value(),scale.denominator.value()};};
+    const auto selectedScale=[&]{return frames::PdfScale{scale.numerator.value(),scale.denominator.value(),
+        options.fit.isChecked()};};
     const auto refreshPages=[&]{
-        const int count=frames::pdfPageCount(sheets_,selectedScale(),selectedLayout());
+        const auto mode=selectedLayout();const auto ratio=selectedScale();
+        const double divisor=frames::pdfDivisor(sheets,ratio,mode);
+        scale.showFitRatio(ratio.fit,divisor);
+        const int count=frames::pdfPageCount(sheets,ratio,mode);
         const bool fits=count<=frames::maximumPdfPages;
         pages.setText(fits?options.locale().toString(count):uiText("超过 500 页"));
-        confirm->setEnabled(fits);
+        options.confirm()->setEnabled(fits);
         layout.setToolTip(layout.currentData(Qt::ToolTipRole).toString());
+        if(!fits){options.setPageDimensions({});options.preview.clearPage();return;}
+        const auto labels=sheetLabels(mode);
+        const bool guide=frames::firstPdfIsGuide(sheets.front(),mode,divisor);
+        const auto paper=frames::firstPdfPaper(sheets.front(),mode,divisor,ratio.fit);
+        options.setPageDimensions(paper);
+        const auto caption=ratio.fit?labels.fitScale:QStringLiteral("%1:%2").arg(ratio.numerator,0,'g',15).arg(ratio.denominator,0,'g',15);
+        options.preview.showPage(paper,1./divisor,2*int(mode)+int(guide),[&,labels,mode,caption,guide](QPainter& p,QSizeF size,double k){
+            frames::paintFirstPdfPage(p,sheets.front(),labels,mode,1./k,size,caption,guide);
+        });
     };
     connect(&layout,&QComboBox::currentIndexChanged,&options,refreshPages);
-    connect(&scale.numerator,&QSpinBox::valueChanged,&options,refreshPages);
-    connect(&scale.denominator,&QSpinBox::valueChanged,&options,refreshPages);
+    connect(&options.fit,&QCheckBox::toggled,&options,refreshPages);
+    connect(&scale.numerator,&QDoubleSpinBox::valueChanged,&options,refreshPages);
+    connect(&scale.denominator,&QDoubleSpinBox::valueChanged,&options,refreshPages);
     refreshPages();
     if(runStudioDialog(options)!=QDialog::Accepted) return;
     if(generation!=cancel_||!pdf_->isEnabled())return;
@@ -756,6 +762,16 @@ void StationTemplateDialog::save(bool pdf,frames::PdfLayout layout,frames::PdfSc
     });
     showStudioDialog(*picker);
 }
+frames::SheetLabels StationTemplateDialog::sheetLabels(frames::PdfLayout layout) const {
+    return {type_->currentText(),uiText("站"),uiText("A4 拼接示意（以%1为例）"),
+                               uiText("带剪刀的虚线：只剪有剪刀的一侧，另一张保留搭接边。"),
+                               uiText("十字：上页压住底页，让一条接缝上的两个十字同时对齐。"),
+                               layout==frames::PdfLayout::A4EdgeToEdge?uiText("中心线和基线"):uiText("无剪刀的轴线：中心线和基线，保留纸面。"),
+                               uiText("黑色实线：当前站位的轮廓。"),
+                               uiText("按编号排列，纸边相接后贴合。"),uiText("中心纵板"),uiText("中心线"),
+                               uiText("样板切割线"),uiText("船壳外轮廓"),
+                               type_->currentIndex()==2,uiText("基线"),uiText("适合单页")};
+}
 void StationTemplateDialog::writeSelection(bool pdf,frames::PdfLayout layout,frames::PdfScale scale,const QString& path) {
     if(writing_ || path.isEmpty()) return;
     const QString suffix=pdf?"pdf":"dxf";
@@ -763,14 +779,7 @@ void StationTemplateDialog::writeSelection(bool pdf,frames::PdfLayout layout,fra
         message_->setMessage(uiText("文件扩展名与所选导出格式不一致。"),StudioMessageRole::Warning);return;
     }
     const double t=type_->currentIndex()?thickness_->value():0;
-    frames::SheetLabels labels{type_->currentText(),uiText("站"),uiText("A4 拼接示意（以%1为例）"),
-                               uiText("带剪刀的虚线：只剪有剪刀的一侧，另一张保留搭接边。"),
-                               uiText("十字：上页压住底页，让一条接缝上的两个十字同时对齐。"),
-                               layout==frames::PdfLayout::A4EdgeToEdge?uiText("中心线和基线"):uiText("无剪刀的轴线：中心线和基线，保留纸面。"),
-                               uiText("黑色实线：当前站位的轮廓。"),
-                               uiText("按编号排列，纸边相接后贴合。"),uiText("中心纵板"),uiText("中心线"),
-                               uiText("样板切割线"),uiText("船壳外轮廓"),
-                               type_->currentIndex()==2};
+    const auto labels=sheetLabels(layout);
     writing_=true;kitSettings_->setEnabled(false);kitStationPanel_->setEnabled(false);type_->setEnabled(false);layer_->setEnabled(false);thickness_->setEnabled(false);cap_->setEnabled(false);stations_->setEnabled(false);
     refresh();
     auto token=cancel_;

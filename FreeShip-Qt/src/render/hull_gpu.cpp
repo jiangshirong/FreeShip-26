@@ -44,6 +44,14 @@ HullGpu::HullGpu(const HullRenderMesh& mesh) {
         program_->link();
     if (!linked) { context_.doneCurrent(); return; }
 
+    context_.doneCurrent();
+    setMesh(mesh);
+}
+
+void HullGpu::setMesh(const HullRenderMesh& mesh) {
+    ready_=false;analysisReady_=false;
+    if(!program_||!program_->isLinked()||!context_.makeCurrent(&surface_))return;
+    auto* gl=context_.functions();
     // Buffer byte sizes are signed ints in Qt's OpenGL wrapper.
     if (mesh.triangles.size() > std::numeric_limits<int>::max() / (45 * int(sizeof(float)))) {
         context_.doneCurrent();

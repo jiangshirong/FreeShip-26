@@ -14,11 +14,15 @@ namespace ng=fs::native_geometry;
 using Id=size_t;
 using Key=std::pair<Id,Id>; // vertex (i,i) or canonical edge (i,j)
 Key edgeKey(Id a,Id b) { return std::minmax(a,b); }
-Id physicalVertex(const ng::SubdivisionLevel& mesh,Id i,bool mirror) {
-    return i*2+(mirror && mesh.points.at(i).position.y!=0);
+// Ignore sub-nanometre noise at the symmetry plane, below the cutting grid.
+constexpr double centrelineToleranceMm=1e-6;
+float centreY(float y,double tolerance) { return std::abs(y)<=tolerance ? 0.f : y; }
+Id physicalVertex(const ng::SubdivisionLevel& mesh,Id i,bool mirror,double tolerance) {
+    return i*2+(mirror && centreY(mesh.points.at(i).position.y,tolerance)!=0);
 }
-ng::Vec3 physicalPoint(const ng::SubdivisionLevel& mesh,Id id) {
+ng::Vec3 physicalPoint(const ng::SubdivisionLevel& mesh,Id id,double tolerance) {
     auto p=mesh.points.at(id/2).position;
+    p.y=centreY(p.y,tolerance);
     if(id%2) p.y=-p.y;
     return p;
 }
@@ -114,10 +118,9 @@ void validate(const QList<QPolygonF>& paths) {
         }
     }
 }
-void closeTops(QList<QPolygonF>& paths,bool allow) {
+void closeTops(QList<QPolygonF>& paths) {
     for(auto& path:paths) {
         if(path.isClosed()) continue;
-        if(!allow) throw std::runtime_error("该站舷顶开放。要使用直线封顶，请勾选「舷顶直线封合」。");
         QPointF a=path.front(),b=path.back();
         if(a.x()>b.x()) std::swap(a,b);
         auto chord=b-a;
@@ -132,25 +135,54 @@ void closeTops(QList<QPolygonF>& paths,bool allow) {
             throw std::runtime_error("所选轮廓相互嵌套，请单独选择外板图层。");
 }
 
-std::vector<bool> reflectedLayers(const ng::SubdivisionLevel& mesh) {
+// Thickness subtraction and slot intersection need an area. Discard only
+// segments on its temporary top chord before exposing paths to the exporters.
+QList<QPolygonF> withoutTop(const QPolygonF& loop,QPointF a,QPointF b) {
+    const auto chord=b-a;
+    const double length=std::hypot(chord.x(),chord.y());
+    constexpr double tolerance=.0003; // Intersection rounding on the 0.0001 mm clipping grid.
+    auto onTop=[&](QPointF p) {
+        const double along=QPointF::dotProduct(chord,p-a)/length;
+        return along>=-tolerance && along<=length+tolerance &&
+               std::abs(cross(chord,p-a))<=length*tolerance;
+    };
+    const int count=loop.size()-1;
+    int first=0;
+    while(first<count && !(onTop(loop[first]) && onTop(loop[first+1])))++first;
+    if(first==count)return {loop}; // The shell itself may close below the sheer.
+    QList<QPolygonF> paths;
+    QPolygonF run;
+    for(int k=1;k<=count;++k){
+        const int i=(first+k)%count;
+        if(onTop(loop[i]) && onTop(loop[i+1])){
+            if(!run.isEmpty()){paths.append(std::move(run));run.clear();}
+        }else{
+            if(run.isEmpty())run.append(loop[i]);
+            run.append(loop[i+1]);
+        }
+    }
+    return paths;
+}
+
+std::vector<bool> reflectedLayers(const ng::SubdivisionLevel& mesh,double tolerance) {
     std::vector<int> sides(mesh.layers.size());
     for(const auto& face:mesh.faces) for(Id id:face.points) {
-        const float y=mesh.points[id].position.y;
+        const float y=centreY(mesh.points[id].position.y,tolerance);
         sides[face.layer]|= y>0 ? 1 : (y<0 ? 2 : 0);
     }
     std::vector<bool> reflect(sides.size());
     for(Id i=0;i<sides.size();++i) reflect[i]=mesh.layers[i].symmetric && (sides[i]==1 || sides[i]==2);
     return reflect;
 }
-bool onCentre(const ng::SubdivisionLevel& mesh,const ng::SubdivisionFace& face) {
-    return std::all_of(face.points.begin(),face.points.end(),[&](Id i){return mesh.points[i].position.y==0;});
+bool onCentre(const ng::SubdivisionLevel& mesh,const ng::SubdivisionFace& face,double tolerance) {
+    return std::all_of(face.points.begin(),face.points.end(),[&](Id i){return centreY(mesh.points[i].position.y,tolerance)==0;});
 }
 // A boundary of a half transom becomes interior when its face is mirrored.
 // A transverse cut through a keel or a non-coplanar face must retain its edges.
 bool mirroredSeam(const ng::SubdivisionLevel& mesh,const ng::SectionSegment& segment,
-                  const ng::SubdivisionFace& face) {
+                  const ng::SubdivisionFace& face,double tolerance) {
     if(segment.start.edge!=segment.end.edge || !segment.start.vertex || !segment.end.vertex ||
-       segment.start.position.y!=0 || segment.end.position.y!=0) return false;
+       centreY(segment.start.position.y,tolerance)!=0 || centreY(segment.end.position.y,tolerance)!=0) return false;
     const auto& edge=mesh.edges[segment.start.edge];
     if(edge.faces.size()!=1) return false;
     // SectionIndex has already classified this edge as lying on the station.
@@ -158,18 +190,18 @@ bool mirroredSeam(const ng::SubdivisionLevel& mesh,const ng::SectionSegment& seg
     return std::all_of(face.points.begin(),face.points.end(),[&](Id i){return mesh.points[i].position.x==x;});
 }
 void outerLines(const ng::SectionIndex& index,const ng::SubdivisionLevel& mesh,
-                const std::vector<bool>& mirrors,const ng::Plane& plane,double units,Station& station) {
+                const std::vector<bool>& mirrors,const ng::Plane& plane,double units,double tolerance,Station& station) {
     const auto cut=index.intersect(plane);
     Contours graph;
     for(const auto& segment:cut.segments) {
         const auto& face=mesh.faces[segment.face];
-        if(mirrors[face.layer] && (onCentre(mesh,face) || mirroredSeam(mesh,segment,face))) continue;
+        if(mirrors[face.layer] && (onCentre(mesh,face,tolerance) || mirroredSeam(mesh,segment,face,tolerance))) continue;
         for(int side=0;side<=(mirrors[face.layer]?1:0);++side) {
             auto endpoint=[&](const ng::SectionEndpoint& e){
                 auto ids=mesh.edges[e.edge].points;
                 if(e.vertex) ids={*e.vertex,*e.vertex};
-                auto key=edgeKey(physicalVertex(mesh,ids[0],side),physicalVertex(mesh,ids[1],side));
-                return graph.node(key,{(side?-1:1)*e.position.y*units,e.position.z*units},e.knuckle);
+                auto key=edgeKey(physicalVertex(mesh,ids[0],side,tolerance),physicalVertex(mesh,ids[1],side,tolerance));
+                return graph.node(key,{(side?-1:1)*centreY(e.position.y,tolerance)*units,e.position.z*units},e.knuckle);
             };
             const auto a=endpoint(segment.start),b=endpoint(segment.end);
             graph.link(a,b);
@@ -183,15 +215,15 @@ void outerLines(const ng::SectionIndex& index,const ng::SubdivisionLevel& mesh,
 
 struct IndexedTriangle { std::array<Id,3> ids; double minX,maxX; };
 std::vector<IndexedTriangle> shellMesh(const ng::SubdivisionLevel& mesh,const std::vector<bool>& mirrors,
-                                      const ng::GeometryInput& input,double units) {
+                                      const ng::GeometryInput& input,double units,double tolerance) {
     std::vector<IndexedTriangle> triangles;
     for(const auto& face:mesh.faces) {
-        if(!input.layers[face.layer].useForIntersections || (mirrors[face.layer] && onCentre(mesh,face))) continue;
+        if(!input.layers[face.layer].useForIntersections || (mirrors[face.layer] && onCentre(mesh,face,tolerance))) continue;
         for(int side=0;side<=(mirrors[face.layer]?1:0);++side) {
             for(Id i=2;i<face.points.size();++i) {
                 std::array<Id,3> ids{face.points.front(),face.points[i-1],face.points[i]};
-                for(auto& id:ids) id=physicalVertex(mesh,id,side);
-                const auto x=[&](int j){return physicalPoint(mesh,ids[j]).x*units;};
+                for(auto& id:ids) id=physicalVertex(mesh,id,side,tolerance);
+                const auto x=[&](int j){return mesh.points[ids[j]/2].position.x*units;};
                 triangles.push_back({ids,std::min({x(0),x(1),x(2)}),std::max({x(0),x(1),x(2)})});
             }
         }
@@ -199,13 +231,13 @@ std::vector<IndexedTriangle> shellMesh(const ng::SubdivisionLevel& mesh,const st
     return triangles;
 }
 void innerLines(const ng::SubdivisionLevel& mesh,const std::vector<IndexedTriangle>& triangles,
-                double units,Station& station,const Options& options,const std::atomic_bool& cancelled) {
+                double units,double tolerance,Station& station,const Options& options,const std::atomic_bool& cancelled) {
     Contours graph;
     std::map<Key,int> coplanar;
     std::vector<ShellTriangle> nearby;
     const double x=station.x;
     auto point=[&](Id id){
-        auto p=physicalPoint(mesh,id);return ShellPoint{p.x*units,{p.y*units,p.z*units}};
+        auto p=physicalPoint(mesh,id,tolerance);return ShellPoint{p.x*units,{p.y*units,p.z*units}};
     };
     auto vertex=[&](Id id){return graph.node({id,id},point(id).yz,true);};
     for(const auto& face:triangles) {
@@ -234,10 +266,19 @@ void innerLines(const ng::SubdivisionLevel& mesh,const std::vector<IndexedTriang
     auto& preview=station.diagnosticOutlines;
     preview=graph.paths(false,units,preview);
     auto contours=preview;
-    closeTops(contours,options.closeSheer);
+    closeTops(contours);
     auto result=innerContours(contours,nearby,x,options.thickness,cancelled);
     validate(result);
-    station.outlines=std::move(result);
+    QList<QPolygonF> cutLines;
+    for(int i=0;i<result.size();++i){
+        const auto& raw=preview[i];
+        if(!options.closeSheer && !raw.isClosed()){
+            const auto paths=withoutTop(result[i],raw.front(),raw.back());
+            if(paths.isEmpty())throw std::runtime_error("扣厚后轮廓消失、分裂或出现内孔，请检查板厚和船壳图层。");
+            cutLines.append(paths);
+        }else cutLines.append(std::move(result[i]));
+    }
+    station.outlines=std::move(cutLines);
     station.shellReference.swap(preview);
 }
 }
@@ -253,9 +294,15 @@ QList<Station> interlockFrames(QList<Station> frames,double stock) {
         };
         if(!f.error.isEmpty())reject(f.error);
         if(i && f.x-frames[i-1].x<=stock)reject(QStringLiteral("槽位重叠，请增大站距。"));
-        if(f.outlines.size()!=1 || !f.outlines.first().isClosed())
+        if(f.outlines.size()!=1 || f.outlines.first().size()<3)
             reject(QStringLiteral("需要一条穿过中心线的闭合轮廓。"));
-        const auto& poly=f.outlines.first();
+        auto poly=f.outlines.first();
+        if(!poly.isClosed()){
+            if(std::min(poly.first().x(),poly.last().x())>-half ||
+               std::max(poly.first().x(),poly.last().x())<half)
+                reject(QStringLiteral("中心槽范围超出板片或穿过多个轮廓。"));
+            poly.append(poly.first());
+        }
         QList<double> cuts{-half,half};
         for(auto p:poly)if(std::abs(p.x())<half)cuts.append(p.x());
         std::sort(cuts.begin(),cuts.end());
@@ -284,11 +331,15 @@ QList<Station> interlockFrames(QList<Station> frames,double stock) {
     QPolygonF rail;
     rail<<QPointF(left,low);
     for(auto& f:frames){
-        auto& outline=f.outlines.first();
+        auto outline=f.outlines.first();
+        const auto a=outline.front(),b=outline.back();
+        if(a!=b)outline.append(a);
         const double top=outline.boundingRect().bottom()+stock;
         outline=outline.subtracted(QPolygonF(QRectF(QPointF(-half,seat),QPointF(half,top))));
         if(outline.size()<4)throw std::runtime_error("横板开槽失败。");
         if(!outline.isClosed())outline.append(outline.first());
+        f.outlines=a==b?QList<QPolygonF>{outline}:withoutTop(outline,a,b);
+        if(f.outlines.isEmpty())throw std::runtime_error("横板开槽失败。");
         const double x=f.x;
         rail<<QPointF(x-half,low)<<QPointF(x-half,seat)<<QPointF(x+half,seat)<<QPointF(x+half,low);
         spine.slotLabels.append({f.number,{x,(seat+high)/2}});
@@ -310,17 +361,18 @@ QList<Station> sectionTemplatesAt(const ng::DocumentInput& document,const std::v
     if(options.layer < -1 || options.layer>=int(input.layers.size())) throw std::invalid_argument("图层已更改。");
     if(options.layer>=0) for(int i=0;i<int(input.layers.size());++i) input.layers[i].useForIntersections=(i==options.layer);
     const double units=document.imperial?304.8:1000.;
+    const double tolerance=centrelineToleranceMm/units;
     // Exterior lines follow the project's own precision and native section splines.
     // The thickness envelope uses the finest supported subdivision of the same FBM.
     const unsigned level=options.thickness>0?4:input.desiredLevel;
     ng::SubdivisionSurface surface(std::move(input));
     if(cancelled.load()) return {};
     const auto& mesh=surface.level(level);
-    const auto mirrors=reflectedLayers(mesh);
+    const auto mirrors=reflectedLayers(mesh,tolerance);
     std::unique_ptr<ng::SectionIndex> index;
     std::vector<IndexedTriangle> triangles;
     if(options.thickness==0) index=std::make_unique<ng::SectionIndex>(surface.input(),mesh);
-    else triangles=shellMesh(mesh,mirrors,surface.input(),units);
+    else triangles=shellMesh(mesh,mirrors,surface.input(),units,tolerance);
     QList<Station> results;
     for(const auto& section:sections) {
         if(cancelled.load()) return {};
@@ -329,8 +381,8 @@ QList<Station> sectionTemplatesAt(const ng::DocumentInput& document,const std::v
         if(p[0]!=1 || p[1]!=0 || p[2]!=0) throw std::runtime_error("横剖站的平面定义不正确。");
         Station station;station.number=section.order+1;station.x=-double(p[3])*units;
         try {
-            if(index)outerLines(*index,mesh,mirrors,section.plane,units,station);
-            else innerLines(mesh,triangles,units,station,options,cancelled);
+            if(index)outerLines(*index,mesh,mirrors,section.plane,units,tolerance,station);
+            else innerLines(mesh,triangles,units,tolerance,station,options,cancelled);
         } catch(const std::runtime_error& e) { station.error=QString::fromUtf8(e.what()); }
         results.append(std::move(station));
     }

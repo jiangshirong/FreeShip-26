@@ -8,7 +8,23 @@
 #include <functional>
 namespace fs::document {
 class Hydrostatics;
-class Publication {
+// Value snapshot of private, validated output. No mutable solver, live file path or worker.
+class PublicationFrame {
+public:
+    bool canReuseMetadata() const {return !artifacts_.empty();}
+    qsizetype retainedBytes() const;
+    PublicationFrame packedForHistory() const;
+    bool canonicalHistoryLayer(const QJsonObject &bindings) const;
+    QJsonObject replay(const QString &directory,const QString &id,quint64 revision) const;
+protected:
+    QJsonObject input_;
+    bool packed_=false;
+    mutable fs::SnapshotMetadata generatedMetadata_;
+    std::map<QString,QByteArray> artifacts_;
+    void writeArtifacts(const QString &directory,const QString &documentId,quint64 revision) const;
+    QJsonObject writeFrame(const QString &directory,const QString &id,quint64 revision,const fs::SnapshotMetadata &model,bool withArtifacts=true) const;
+};
+class Publication : public PublicationFrame {
 public:
     Publication(const Fbm &source, const QJsonObject &bindings,const Publication* previous=nullptr,bool parallelPresentation=false);
     // Writes into a private transaction directory owned by the caller. The
@@ -18,7 +34,6 @@ public:
     // Retain only artifacts that the service has fully validated. Private bytes
     // avoid trusting old, externally writable transaction directories on reuse.
     void retainValidatedArtifacts(const QString &directory);
-    bool canReuseMetadata() const {return !artifacts_.empty();}
     QJsonObject generateMetadata(const QString &directory,const QJsonObject &texts,
                                 const QString &documentId,quint64 revision);
     std::optional<QJsonObject> metadataChanges(const Publication &previous) const;
@@ -26,13 +41,9 @@ public:
     bool meshReused() const {return hydroReused_;}
 private:
     mutable QJsonObject model_;
-    QJsonObject input_;
     mutable QJsonObject generatedSurface_;
-    mutable fs::SnapshotMetadata generatedMetadata_;
-    std::map<QString,QByteArray> artifacts_;
     std::shared_ptr<Hydrostatics> hydro_;
     mutable std::future<QJsonObject> presentation_;
     bool hydroReused_=false;
-    void writeArtifacts(const QString &directory,const QString &documentId,quint64 revision) const;
 };
 }

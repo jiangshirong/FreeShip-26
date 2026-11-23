@@ -86,6 +86,7 @@ public:
     const QByteArray &bytes() const noexcept { return bytes_; }
     int version() const noexcept { return version_; } // On-disk enum ordinal.
     QString versionName() const;
+    Fbm withUtf8Text(const QString& oldEncoding) const;
     int precision() const noexcept { return precision_; }
     const std::vector<FbmControlPoint> &controlPoints() const noexcept { return points_; }
     QJsonObject inspect() const;

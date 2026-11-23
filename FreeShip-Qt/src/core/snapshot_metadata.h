@@ -61,6 +61,10 @@ public:
         if(!std::all_of(seen.begin(),seen.end(),[](bool v){return v;}))bad();
         std::sort(result.spans_.begin(),result.spans_.end(),[](const Span&a,const Span&b){return a.begin<b.begin;});return result;
     }
+    // Only used by the private, bounded history cache. Offsets still refer to
+    // the validated uncompressed bytes; expand before applying a revision.
+    SnapshotMetadata packedForHistory() const {auto copy=*this;copy.bytes_=qCompress(bytes_,1);return copy;}
+    SnapshotMetadata expandedFromHistory() const {auto copy=*this;copy.bytes_=qUncompress(bytes_);if(copy.bytes_.isEmpty())bad();return copy;}
     SnapshotMetadata updated(const QJsonObject &patch,quint64 revision) const {
         if(empty())bad();SnapshotMetadata result=*this;
         for(auto i=patch.begin();i!=patch.end();++i)result.settings_[i.key()]=i.value();

@@ -1,6 +1,7 @@
 #include "lines_pdf.h"
 #include "lines_reference.h"
 #include "pdf_scale_inputs.h"
+#include "pdf_export_dialog.h"
 #include "scene.h"
 #include "studio_ui.h"
 #include "ui_language.h"
@@ -80,10 +81,8 @@ struct Sheet {
 QString exportLinesPdf(QWidget* parent,const Scene& scene,bool imperial,bool fill,const QString& suggestedPath){
     const Sheet sheet(scene);
     const double pointsPerUnit=(imperial?304.8:1000.)*pointsPerMm;
-    QDialog options(parent);options.setObjectName("LinesPdfSettings");
-    options.setWindowIcon(studioFormatWindowIcon("PDF"));options.setProperty("studio_window_icon","format:PDF");
+    PdfExportDialog options(parent);options.setObjectName("LinesPdfSettings");
     options.setWindowTitle(QString(uiText("型线图"))+" · PDF");
-    QFormLayout form(&options);
     QComboBox paper;
     PdfScaleInputs scale(QStringLiteral("LinesPdf"));
     paper.setObjectName("LinesPdfPaper");
@@ -91,11 +90,13 @@ QString exportLinesPdf(QWidget* parent,const Scene& scene,bool imperial,bool fil
         QPageSize page(id);auto mm=page.size(QPageSize::Millimeter).transposed();
         paper.addItem(QString("%1  (%2 × %3 mm)").arg(page.key()).arg(mm.width()).arg(mm.height()),int(id));
     }
-    form.addRow(uiText("页面设置"),&paper);form.addRow(uiText("出图比例"),&scale);
+    options.pageOptions.addRow(uiText("纸张样式"),&paper);options.addScale(&scale);
     auto pageLayout=[&]{return QPageLayout(QPageSize(QPageSize::PageSizeId(paper.currentData().toInt())),
                                            QPageLayout::Landscape,QMarginsF(),QPageLayout::Point);};
     const auto pageFit=[&]{return sheet.fit(pageLayout().fullRect(QPageLayout::Point).size());};
-    const auto factor=[&]{return pointsPerUnit*scale.numerator.value()/scale.denominator.value();};
+    const auto factor=[&]{return options.fit.isChecked()?pageFit():pointsPerUnit*scale.numerator.value()/scale.denominator.value();};
+    const auto caption=[&]{return options.fit.isChecked()?QString(uiText("适合单页")):
+        QStringLiteral("%1 : %2").arg(scale.numerator.value(),0,'g',15).arg(scale.denominator.value(),0,'g',15);};
     const auto defaultDenominator=[&]{
         const double fit=pageFit();
         return fit>0?int(std::clamp(std::ceil(pointsPerUnit/fit),1.,double(PdfScaleInputs::maximum)))
@@ -105,13 +106,20 @@ QString exportLinesPdf(QWidget* parent,const Scene& scene,bool imperial,bool fil
     scale.denominator.setValue(suggestedDenominator);
     StudioMessage scaleWarning(StudioMessageRole::Warning);
     scaleWarning.setMessage(uiText("当前比例超出纸张范围。"),StudioMessageRole::Warning);
-    form.addRow(&scaleWarning);
-    QDialogButtonBox buttons(QDialogButtonBox::Ok|QDialogButtonBox::Cancel);
-    form.addRow(&buttons);
+    options.scaleOptions.addRow(&scaleWarning);
     const auto validate=[&]{
-        const bool fits=factor()<=pageFit();
-        form.setRowVisible(&scaleWarning,!fits);
-        buttons.button(QDialogButtonBox::Ok)->setEnabled(fits);
+        const auto page=pageLayout();
+        const auto size=page.fullRect(QPageLayout::Point).size();
+        options.setPageDimensions(page.fullRect(QPageLayout::Millimeter).size());
+        const auto drawingScale=factor();
+        const bool fits=drawingScale>0&&drawingScale<=pageFit();
+        options.scaleOptions.setRowVisible(&scaleWarning,!fits);
+        options.confirm()->setEnabled(fits);
+        scale.showFitRatio(options.fit.isChecked(),pointsPerUnit/drawingScale);
+        const auto text=caption();
+        options.preview.showPage(size,drawingScale,0,[&,text](QPainter& p,QSizeF page,double k){
+            sheet.paint(p,scene,page,k,fill,text);
+        });
     };
     QObject::connect(&paper,&QComboBox::currentIndexChanged,&options,[&]{
         const bool usingDefault=scale.numerator.value()==1&&scale.denominator.value()==suggestedDenominator;
@@ -119,10 +127,9 @@ QString exportLinesPdf(QWidget* parent,const Scene& scene,bool imperial,bool fil
         if(usingDefault)scale.denominator.setValue(suggestedDenominator);
         validate();
     });
-    QObject::connect(&scale.numerator,&QSpinBox::valueChanged,&options,validate);
-    QObject::connect(&scale.denominator,&QSpinBox::valueChanged,&options,validate);
-    QObject::connect(&buttons,&QDialogButtonBox::accepted,&options,&QDialog::accept);
-    QObject::connect(&buttons,&QDialogButtonBox::rejected,&options,&QDialog::reject);
+    QObject::connect(&scale.numerator,&QDoubleSpinBox::valueChanged,&options,validate);
+    QObject::connect(&scale.denominator,&QDoubleSpinBox::valueChanged,&options,validate);
+    QObject::connect(&options.fit,&QCheckBox::toggled,&options,validate);
     validate();
     if(runStudioDialog(options)!=QDialog::Accepted)return {};
     auto path=studioSaveFile(parent,options.windowTitle(),suggestedPath,"PDF (*.pdf)");
@@ -137,11 +144,10 @@ QString exportLinesPdf(QWidget* parent,const Scene& scene,bool imperial,bool fil
         const auto size=page.fullRect(QPageLayout::Point).size();
         const double drawingScale=factor();
         if(!(drawingScale<=sheet.fit(size)))return uiText("当前比例超出纸张范围。");
-        const auto caption=QStringLiteral("%1 : %2").arg(scale.numerator.value()).arg(scale.denominator.value());
         QPainter painter;
         if(!painter.begin(&pdf))return uiText("无法写入 PDF 页面。");
         painter.scale(pdf.resolution()/72.,pdf.resolution()/72.);
-        sheet.paint(painter,scene,size,drawingScale,fill,caption);
+        sheet.paint(painter,scene,size,drawingScale,fill,caption());
         if(!painter.end())return uiText("无法写入 PDF 页面。");
     }
     if(!file.commit())return QString(uiText("无法写入文件："))+file.errorString();

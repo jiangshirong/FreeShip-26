@@ -14,8 +14,8 @@
 #include <array>
 #include <functional>
 
-enum class ShortcutGesture { None, DoubleClick, Pan, Rotate, Box, Wheel };
-enum class ShortcutViewScope { None, All, Current, CurrentOrLines, Perspective };
+enum class ShortcutGesture { None, DoubleClick, TitleBarDoubleClick, Pan, Rotate, Box, Wheel };
+enum class ShortcutViewScope { None, Current, CurrentOrLines, Perspective };
 
 inline QWidget* shortcutViewScopeIcons(ShortcutViewScope scope,const QString& description,QWidget* owner){
     auto* cell=new QWidget;
@@ -44,10 +44,6 @@ inline QWidget* shortcutViewScopeIcons(ShortcutViewScope scope,const QString& de
         add(viewRow,"ViewPlan",uiText("俯视图"));
     }
     add(viewRow,"ViewPerspective",uiText("透视图"));
-    if(scope==ShortcutViewScope::All){
-        views->setObjectName("ShortcutAllViews");
-        views->setStyleSheet("QWidget#ShortcutAllViews{background:#e7f0ea;border-radius:4px}");
-    }
     row->addWidget(views);
     if(scope==ShortcutViewScope::CurrentOrLines){
         auto* separator=new QFrame;
@@ -70,6 +66,7 @@ public:
     }
     QSize sizeHint()const override{return {gesture_==ShortcutGesture::Wheel?62:84,43};}
     void setElapsed(qint64 ms){
+        elapsed_=ms;
         phase_=(ms%1800)/1800.;
         update();
     }
@@ -79,6 +76,7 @@ protected:
         painter.setRenderHint(QPainter::Antialiasing);
         const QColor ink("#315b55"), accent("#007e74"), fill("#cae8da");
         if(gesture_==ShortcutGesture::Wheel){paintWheel(painter,ink,accent,fill);return;}
+        if(gesture_==ShortcutGesture::TitleBarDoubleClick){paintTitleBarDoubleClick(painter,ink,accent,fill);return;}
         const bool dragging=gesture_==ShortcutGesture::Pan||gesture_==ShortcutGesture::Rotate||gesture_==ShortcutGesture::Box;
         const bool right=gesture_==ShortcutGesture::Pan;
         const qreal progress=qBound(0.,(phase_-.15)/.58,1.);
@@ -112,6 +110,38 @@ protected:
         }
     }
 private:
+    void paintTitleBarDoubleClick(QPainter& p,const QColor& ink,const QColor& accent,const QColor& fill)const{
+        constexpr int halfCycle=1600, firstClick=280, secondClick=490, transitionStart=secondClick+100;
+        const int t=static_cast<int>(elapsed_%(2*halfCycle));
+        const int local=t%halfCycle;
+        const qreal u=qBound(0.,(local-transitionStart)/240.,1.);
+        const qreal motion=u*u*(3-2*u);
+        const qreal expanded=t<halfCycle?motion:1-motion;
+        const QRectF window(16-12*expanded,10-6*expanded,38+32*expanded,22+8*expanded);
+        QPainterPath silhouette;
+        silhouette.addRoundedRect(window,3,3);
+        p.fillPath(silhouette,Qt::white);
+        QPainterPath title;
+        title.addRect(QRectF(window.topLeft(),QSizeF(window.width(),8)));
+        p.fillPath(silhouette.intersected(title),fill);
+        p.setPen(QPen(ink,1.3));p.setBrush(Qt::NoBrush);p.drawPath(silhouette);
+        p.drawLine(QPointF(window.left(),window.top()+8),QPointF(window.right(),window.top()+8));
+        p.setPen(QPen(accent,1.1));
+        p.drawLine(QPointF(window.left()+5,window.top()+4),QPointF(window.left()+10,window.top()+4));
+        const QPointF tip(38,window.top()+4);
+        const int sinceClick=local-(local>=secondClick?secondClick:firstClick);
+        if(sinceClick>=0&&sinceClick<145){
+            const qreal progress=sinceClick/145.;
+            auto ring=accent;ring.setAlphaF(1-.7*progress);
+            p.setPen(QPen(ring,1.5));p.drawEllipse(tip,3+6*progress,3+6*progress);
+        }
+        QPainterPath cursor;
+        cursor.moveTo(tip);
+        cursor.lineTo(tip+QPointF(3,12));cursor.lineTo(tip+QPointF(5,8));
+        cursor.lineTo(tip+QPointF(10,8));cursor.closeSubpath();
+        p.setPen(QPen(ink,1.2,Qt::SolidLine,Qt::RoundCap,Qt::RoundJoin));
+        p.setBrush(Qt::white);p.drawPath(cursor);
+    }
     void paintWheel(QPainter& p,const QColor& ink,const QColor& accent,const QColor& fill)const{
         p.setPen(QPen(ink,1.6));p.setBrush(Qt::white);p.drawRoundedRect(QRectF(3,3,26,36),11,11);
         p.drawLine(QPointF(4,17),QPointF(28,17));
@@ -133,6 +163,7 @@ private:
         p.drawLine(QPointF(51,tip-direction*5),QPointF(46,tip));
     }
     ShortcutGesture gesture_;
+    qint64 elapsed_=0;
     qreal phase_=0;
 };
 
@@ -185,7 +216,6 @@ inline bool showShortcutGuide(QWidget* owner,QShortcut* languageShortcut=nullptr
         auto viewScope=ShortcutViewScope::None;
         if(axis>=1&&axis<=3)description=QString(uiText("显示或隐藏 %1 坐标")).arg(QString("XYZ").at(axis-1));
         if(axis){group=View;viewScope=ShortcutViewScope::Current;}
-        if(source=="缩放至全图"){group=View;viewScope=ShortcutViewScope::All;}
         if(source=="退出程序")group=Window;
         for(const auto& key:shortcut->keys())add(group,description,key.toString(QKeySequence::NativeText),scope,ShortcutGesture::None,viewScope);
     }
@@ -200,7 +230,7 @@ inline bool showShortcutGuide(QWidget* owner,QShortcut* languageShortcut=nullptr
         for(const auto& key:languageShortcut->keys())
             add(Window,uiText("切换语言"),key.toString(QKeySequence::NativeText),target(languageShortcut));
     add(Window,uiText("关闭当前窗口"),"Esc",uiText("支持 Esc 关闭的窗口"));
-    add(Window,uiText("最大化或还原窗口"),uiText("双击标题栏"),uiText("可最大化的窗口"));
+    add(Window,uiText("最大化或还原窗口"),uiText("双击标题栏"),uiText("可最大化的窗口"),ShortcutGesture::TitleBarDoubleClick);
 
     const std::array<QString,Groups> headings{uiText("船模文件"),uiText("视图"),uiText("窗口")};
     QList<QPair<int,ShortcutGesturePreview*>> previews;
@@ -226,15 +256,7 @@ inline bool showShortcutGuide(QWidget* owner,QShortcut* languageShortcut=nullptr
             for(int col=0;col<3;++col)table->setItem(row,col,new QTableWidgetItem(cells[col]));
             if(entry.viewScope!=ShortcutViewScope::None)
                 table->setCellWidget(row,2,shortcutViewScopeIcons(entry.viewScope,entry.scope,&dialog));
-            if(entry.gesture==ShortcutGesture::None){
-                if(group==Window&&entry.key==uiText("双击标题栏")){
-                    auto* label=new QLabel(entry.key);
-                    label->setContentsMargins(12,0,8,0);label->setWordWrap(true);
-                    table->setCellWidget(row,1,label);
-                    table->setItemDelegateForRow(row,new StudioWidgetCellDelegate(table));
-                }
-                continue;
-            }
+            if(entry.gesture==ShortcutGesture::None)continue;
             auto* gestureCell=new QWidget;
             auto* gestureLayout=new QHBoxLayout(gestureCell);
             gestureLayout->setContentsMargins(12,0,8,0);

@@ -6,7 +6,7 @@
 #include <QPainterPath>
 #include <cmath>
 
-QStringList studioSupplementIconKeys(){return {"History","Tools","RenderMode","Wireframe","GaussianCurvature","Developability","Zebra",
+QStringList studioSupplementIconKeys(){return {"History","Tools","Wireframe","InspectControlFaces","InspectLineTypes","GaussianCurvature","Developability","Zebra",
     "BackgroundImage","CropFrame","PickColor","Blend","Tolerance","Coordinates","CoordinateX","CoordinateY","CoordinateZ","CoordinateOff","Resistance","Propeller","Person","Copy",
     "MessageQuestion","MessageInformation","MessageWarning","MessageCritical","MessageSuccess",
     "LayerVisible","LayerHidden",
@@ -107,10 +107,22 @@ public:
             p->drawPolyline(QPolygonF{{8.5,7.5},{8.5,4},{15.5,4},{15.5,7.5}});
             line(2.5,12.5,9.5,12.5);line(14.5,12.5,21.5,12.5);
             p->drawRoundedRect(QRectF(9.5,11,5,4.5),.75,.75);
-        }else if(key_=="Wireframe"||key_=="RenderMode"){
+        }else if(key_=="Wireframe"){
             p->drawPolygon(QPolygonF{{12,2.5},{21,7.5},{21,17},{12,22},{3,17},{3,7.5}});
             p->drawPolyline(QPolygonF{{3,7.5},{12,12.5},{21,7.5}});line(12,12.5,12,22);
-            if(key_=="RenderMode"){p->setBrush(QColor(mode==QIcon::Disabled?"#d8e1dc":"#bed9ce"));p->drawPolygon(QPolygonF{{12,12.5},{21,7.5},{21,17},{12,22}});}
+        }else if(key_=="InspectControlFaces"){
+            const bool disabled=mode==QIcon::Disabled;
+            p->setPen(QPen(disabled?ink:QColor("#355865"),1.5,Qt::SolidLine,Qt::RoundCap,Qt::RoundJoin));
+            p->setBrush(QColor(disabled?"#d8e1dc":"#b5d7dd"));
+            p->drawPolygon(QPolygonF{{2.5,9},{21.5,3.8},{21.5,15},{2.5,20.2}});
+            line(11.5,6.54,11.5,17.74);line(2.5,14.6,21.5,9.4);
+        }else if(key_=="InspectLineTypes"){
+            const bool disabled=mode==QIcon::Disabled;
+            p->setPen(QPen(disabled?ink:QColor("#14699e"),1.8,Qt::SolidLine,Qt::RoundCap));line(3,5,21,5);
+            p->setPen(QPen(disabled?ink:QColor("#ac4a00"),1.8,Qt::SolidLine,Qt::RoundCap));
+            for(int x:{3,10,17})line(x,12,x+4,12);
+            p->setPen(QPen(disabled?ink:QColor("#00a9bc"),1.8,Qt::SolidLine,Qt::RoundCap));
+            line(3,19,7,19);p->drawPoint(QPointF(10.5,19));line(14,19,18,19);p->drawPoint(QPointF(21,19));
         }else if(key_=="BackgroundImage"){
             p->drawRoundedRect(QRectF(2.5,3.5,19,17),2,2);p->drawEllipse(QPointF(8,8),1.5,1.5);
             p->drawPolyline(QPolygonF{{3,17},{9,12},{13,15},{17,10},{21,15}});

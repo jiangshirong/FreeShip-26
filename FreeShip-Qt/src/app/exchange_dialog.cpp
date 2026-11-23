@@ -63,7 +63,7 @@ QString localizedExchangeError(const QString& source){
             return caption+(caption==prefix||caption.endsWith(' ')?QString{}:QStringLiteral(" "))+source.mid(prefix.size());
         }
     }
-    return uiText(source);
+    return uiDiagnosticText(source);
 }
 bool sectionFormat(const QString& f){return f=="dxfcrease"||f=="offset_table"||f=="michlet"||f=="addmass"||f=="ghs"||f=="arch_hll"||f=="arch_app"||f=="pam";}
 bool metricFormat(const QString& f){return f=="michlet"||f=="addmass"||f=="arch_hll"||f=="arch_app"||f=="pam";}

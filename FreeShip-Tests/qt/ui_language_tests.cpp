@@ -107,6 +107,17 @@ int main(int argc,char** argv){
     check("feedback.en-empty-hydro-keeps-warning",hydroFeedbackText(0,1,0,5)=="Without valid results: 1.");
     check("feedback.en-export-omits-empty-point-count",sectionsFeedbackText(2,0,0,0,{})=="Exported 2 sections.");
     check("feedback.en-export-both",sectionsFeedbackText(10,42,1,2,{})=="Exported 10 sections and 42 points.\nSections capped horizontally: 1.\nSections not intersecting the hull: 2.");
+    const QString fbmDiagnostic=QString::fromLatin1(fs::document::FbmTextDiagnosticPrefix)+"cp1252";
+    const QString englishFbm="FBM text cannot be converted without loss using the cp1252 encoding.";
+    for(const auto* language:{"en","zh","ru","ja","de","fr","es"}){
+        const bool loaded=setUiLanguage(language).isEmpty();
+        const auto message=uiDiagnosticText(fbmDiagnostic);
+        const QString id=QString::fromLatin1(language);
+        const bool localized=id=="en"?message==englishFbm:id=="zh"?message=="无法按 cp1252 编码无损转换 FBM 中的文字。"
+            :message!=englishFbm&&message!="无法按 cp1252 编码无损转换 FBM 中的文字。";
+        check("fbm.localized-encoding-error."+id,loaded&&localized&&message!=fbmDiagnostic&&message.count("cp1252")==1);
+        feedback["fbm_encoding_"+id]=message;
+    }
     QFile report(app.arguments()[1]+"/report.json");if(!report.open(QIODevice::WriteOnly))return 3;
     report.write(QJsonDocument(QJsonObject{{"status",failed?"fail":"pass"},{"cases",cases},{"feedback_samples",feedback}}).toJson());return failed?1:0;
 }

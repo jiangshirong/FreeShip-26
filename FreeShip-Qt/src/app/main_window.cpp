@@ -1,4 +1,6 @@
+#include "move_section_preview.h"
 #include "app/ui_language.h"
+#include "feedback_text.h"
 #include "main_window.h"
 #include "document_workspace.h"
 #include "section_dialog.h"
@@ -33,6 +35,7 @@
 #include <QGridLayout>
 #include <QJsonDocument>
 #include <QLabel>
+#include <QLineEdit>
 #include <QMenuBar>
 #include <QMessageBox>
 #include <QPushButton>
@@ -65,6 +68,14 @@ QByteArray contents(const QString& path) {
     return file.readAll();
 }
 bool samePoint(fs::Vec3 a, fs::Vec3 b) { return a.x == b.x && a.y == b.y && a.z == b.z; }
+struct SelectionLimits {qsizetype found=0,lockedCount=0;bool locked=false,constrained=false;};
+SelectionLimits selectionLimits(const fs::ModelSnapshot* model,const QSet<fs::EntityId>& ids){
+    SelectionLimits result;if(!model||ids.isEmpty())return result;
+    auto visit=[&](const auto& p){++result.found;result.lockedCount+=p.locked;result.locked|=p.locked;result.constrained|=!p.batchMovable;};
+    if(ids.size()==1){if(auto* p=model->point(*ids.cbegin()))visit(*p);}
+    else for(const auto& p:model->points)if(ids.contains(p.id))visit(p);
+    return result;
+}
 class CoordinateEditor final : public QDoubleSpinBox {
 protected:
     QString textFromValue(double value) const override {
@@ -246,7 +257,7 @@ MainWindow::MainWindow(QWidget* parent,bool rememberFiles) : QMainWindow(parent)
     connect(quit,&QShortcut::activated,this,[this]{window()->close();});
     undo_ = new QAction(uiText("撤销"), this);
     redo_ = new QAction(uiText("重做"), this);
-    connect(undo_, &QAction::triggered, this, [this] { if(layerDialog_&&QApplication::activeWindow()==layerDialog_&&layers_->previewHistory(false))return; if(sections_&&QApplication::activeWindow()==sections_)sections_->previewHistory(false);else session_.undo(); });
+    connect(undo_, &QAction::triggered, this, [this] { if(layerDialog_&&QApplication::activeWindow()==layerDialog_&&layers_->previewHistory(false))return; if(sections_&&QApplication::activeWindow()==sections_)sections_->previewHistory(false);else if(!undoPlacement())session_.undo(); });
     connect(redo_, &QAction::triggered, this, [this] { if(layerDialog_&&QApplication::activeWindow()==layerDialog_&&layers_->previewHistory(true))return; if(sections_&&QApplication::activeWindow()==sections_)sections_->previewHistory(true);else session_.redo(); });
     bindHistoryShortcut(this, undo_, QKeySequence(Qt::CTRL | Qt::Key_Z));
     bindHistoryShortcut(this, redo_, QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_Z));
@@ -254,10 +265,6 @@ MainWindow::MainWindow(QWidget* parent,bool rememberFiles) : QMainWindow(parent)
     project_->setProperty("studio_opens_dialog",true);
     project_->setProperty("document_operation","project_settings");
     connect(project_, &QAction::triggered, this, &MainWindow::editProject);
-    auto* fit = new QShortcut(QKeySequence("F"), this);
-    fit->setProperty("shortcut_source","缩放至全图");
-    fit->setProperty("shortcut_target","全部四个视图");
-    connect(fit, &QShortcut::activated, this, &MainWindow::fitCurrent);
     preferencesAction_ = new QAction(studioIcon("Preferences"), uiText("首选项"), this);
     preferencesAction_->setProperty("studio_opens_dialog",true);
     preferencesAction_->setProperty("operation", "preferences");
@@ -277,24 +284,54 @@ MainWindow::MainWindow(QWidget* parent,bool rememberFiles) : QMainWindow(parent)
     viewGrid_=grid;grid->setContentsMargins(0,0,0,0);grid->setSpacing(2);
     const std::array<HullProjection, 4> projections{
         HullProjection::Profile, HullProjection::Body, HullProjection::Plan, HullProjection::Perspective};
+    auto *sectionPreview=new MoveSectionPreview(this,[this](auto model,auto sections,DragSections pairs,DragShell shell){
+        for(auto *canvas:views_)if(canvas&&(!model||(canvas->snapshot()&&canvas->snapshot()->documentId==model->documentId&&canvas->snapshot()->revision==model->revision))){
+            canvas->setMoveSectionPreview(sections);canvas->setDragSectionComparison(pairs,shell);
+        }
+    });
     for (size_t i = 0; i < views_.size(); ++i) {
         auto* frame = new QFrame;viewFrames_[i]=frame;frame->setFrameShape(QFrame::NoFrame);
         auto* layout = new QVBoxLayout(frame); layout->setContentsMargins(0, 0, 0, 0); layout->setSpacing(0);
         auto* view = new HullView; views_[i] = view; view->setProjection(projections[i]); view->setMinimumSize(200, 160);
         view->setStudioAppearance(true);view->setFillVisible(false);
+        view->installDisplayModeButton(studioIcon);
         layout->addWidget(view, 1); grid->addWidget(frame, int(i / 2), int(i % 2));
-        view->onSelectionChanged = [this](QSet<fs::EntityId> ids) { selectPoints(std::move(ids)); };
-        view->onPointsMoved = [this](QVector<fs::PointMove> moves) {
-            if(session_.busy()||!session_.ready())return;
+        view->onSelectionChanged = [this,view](QSet<fs::EntityId> ids) {
+            repeatOpensProperties_=selectedPointView_==view && pointPopup_ && pointPopup_->isVisible();
+            if(!repeatOpensProperties_)pointPropertiesPage_=false;
+            if(selectionKind_!=HullEntity::Point){selectionKind_=HullEntity::Point;entitySelection_.clear();for(auto* canvas:views_)canvas->setSelectedEntities({});}
+            selectPoints(std::move(ids),view);
+        };
+        view->onRepeatPointClick=[this,view](fs::EntityId id){
+            if(!repeatOpensProperties_||id!=selected_||selectionKind_!=HullEntity::Point||session_.busy())return;
+            pointPropertiesPage_=!pointPropertiesPage_;showPointPopup(view,id);
+        };
+        view->onTransformPreview=[this,view,sectionPreview](const QVector<fs::PointMove>& points){
+            const auto p=view->pointMoveAnchor();const auto projection=view->projection();
+            const int kind=projection==HullProjection::Profile?2:projection==HullProjection::Plan?3:1;
+            sectionPreview->request(QFileInfo(session_.modelPath()).dir().filePath("native-input.json"),view->snapshot(),points,kind,kind==2?p.y:kind==3?p.z:p.x,view->axisPointMove(),view->selectedPoints());
+            for(auto *other:views_)if(other && other!=view)other->setPendingPointMoves(points);
+        };
+        view->onPointMovePreviewChanged=[this]{followPointPopup();};
+        view->onPointsMoved = [this,view,sectionPreview](QVector<fs::PointMove> moves) {
+            if(session_.busy()||!session_.ready()||!view->snapshot()||view->snapshot()->documentId!=session_.model()->documentId ||
+               view->snapshot()->revision!=session_.model()->revision){sectionPreview->hold();for(auto *v:views_){v->setPendingPointMoves({});v->setMoveSectionPreview({});}followPointPopup();return;}
+            // Drop the gesture overlay now; ignore any in-flight preview for this gesture.
+            sectionPreview->hold();
+            for(auto* canvas:views_){canvas->retainReleasedCreases();canvas->setDragSectionComparison({});}
             // Keep the released control net on screen while the worker rebuilds the hull.
             for(const auto& move:moves)releasedCurvePositions_.insert(move.id,move.position);
             for(auto* canvas:views_)canvas->setPendingPointMoves(moves);
+            followPointPopup();
             if(!session_.movePoints(moves)){
+                sectionPreview->hold();
                 releasedCurvePositions_.clear();
-                for(auto* canvas:views_)canvas->setPendingPointMoves({});
+                for(auto* canvas:views_){canvas->setPendingPointMoves({});canvas->setMoveSectionPreview({});}
+                followPointPopup();
             }
         };
         view->onEditRejected = [this](const QString& message) { showStatusMessage(message,StudioMessageRole::Warning); };
+        view->onRepeatEntityClick=[this,view](HullEntity kind,fs::EntityId id,QPoint at){showEntityPopup(view,kind,id,at);};
         view->onEntitySelectionChanged=[this](HullEntity kind,QSet<fs::EntityId> ids){selectEntities(kind,std::move(ids));};
         view->onBackgroundAction=[this,view](const QString& operation,QPointF position){backgroundAction(view,operation,position);};
         view->onBackgroundChanged=[this,view](const QJsonObject& changes){
@@ -303,13 +340,15 @@ MainWindow::MainWindow(QWidget* parent,bool rememberFiles) : QMainWindow(parent)
         view->onFlowPlacementEnded=[this]{endFlowline();};
         view->onPointPlacementEnded=[this]{endPointPlacement();};
         view->onPointCreationRequested=[this,view](fs::Vec3 p){
-            if(!session_.ready()||session_.busy())return;
-            pendingNewPointAfter_=1;pendingPointView_=view;pendingPointIds_.clear();
-            for(const auto& point:session_.model()->points)pendingPointIds_.insert(point.id);
-            if(!session_.editTopology("add_point",{{"position",QJsonArray{p.x,p.y,p.z}}})){pendingNewPointAfter_=0;pendingPointView_.clear();}
+            if(placementUndos_||!session_.ready())return;
+            if(session_.busy()){
+                if(submittingPlacement_ && placementSource_ && placementSource_->documentId==session_.model()->documentId){waitingPlacements_.append({view,p});updatePlacementPreview();}
+                return;
+            }
+            submitPlacement(view,p);
         };
         view->onViewAction=[this,view](const QString& action){viewAction(view,action);};
-        view->onViewSettingsChanged=[this,view]{refreshLightDialog(view);};
+        view->onViewSettingsChanged=[this,view](const QString&){refreshLightDialog(view);};
         view->onFlowRequested=[this](int projection,QPointF source){session_.editAuxiliary("create_flow",{{"view",projection},{"source",QJsonArray{source.x(),source.y()}}});};
     }
     studio_view_grid::install(grid,{viewFrames_[0],viewFrames_[1],viewFrames_[2],viewFrames_[3]});
@@ -379,8 +418,7 @@ MainWindow::MainWindow(QWidget* parent,bool rememberFiles) : QMainWindow(parent)
     layerDialog_=createLayerPropertiesDialog(this,layers_);
     bindHistoryShortcut(layerDialog_, undo_, QKeySequence(Qt::CTRL | Qt::Key_Z));
     bindHistoryShortcut(layerDialog_, redo_, QKeySequence(Qt::CTRL | Qt::SHIFT | Qt::Key_Z));
-    connect(layerDialog_,&QDialog::finished,this,[this]{if(!session_.busy())layers_->discardDrafts();});
-    layers_->onLayerChanged = [this](fs::EntityId id, const QJsonObject& changes) { session_.updateLayer(id, changes); };
+    connect(layerDialog_,&QDialog::finished,layers_,&LayerPanel::finishEditing);
     layers_->onCreateLayer=[this]{createLayer();};
     layers_->onListCommand=[this](const QString& method,QJsonObject fields){return session_.layerListCommand(method,fields);};
     layers_->onVisibilityPreview=[this]{
@@ -399,20 +437,37 @@ MainWindow::MainWindow(QWidget* parent,bool rememberFiles) : QMainWindow(parent)
     split->setStretchFactor(0, 1); split->setStretchFactor(1, 0); split->setSizes({1140, 300}); setCentralWidget(split);
     side->hide();buildStudioShell();layoutViews();
     session_.onFirstFrame=[this](std::shared_ptr<const fs::ModelSnapshot> model){
-        for(auto* view:views_)view->setSnapshot(model);
+        loadDisplayDefaults();
+        const auto shown=withDisplayDefaults(model);
+        for(auto* view:views_)view->setSnapshot(model,shown);
+    };
+    session_.onBatchHistoryPreview=[this,sectionPreview](std::shared_ptr<const fs::ModelSnapshot> target){
+        if(suspendedExitUi_||!submittedDisplay_.isEmpty()||!queuedDisplay_.isEmpty()||views_.front()->snapshot()!=session_.model())return;
+        if(std::any_of(views_.begin(),views_.end(),[](auto* v){return !v->editingEnabled();}))return;
+        sectionPreview->hold();releasedCurvePositions_.clear();
+        for(auto* v:views_){v->setPendingPointMoves({});v->setMoveSectionPreview({});}
+        historyPreview_=std::move(target);
+        curveEditMotion_.reset();
+        for(auto* view:views_){view->setEditingEnabled(false);view->setCurveEditMotion({});view->setSnapshot(historyPreview_,withDisplayDefaults(historyPreview_),false,layers_->projectedVisibilityChanges());}
     };
     session_.onUpdated = [this] {
-        if(suspendedExitUi_)deferredExitRefresh_=true;else updateModel();
+        if(suspendedExitUi_)deferredExitRefresh_=true;else if(!session_.waitingForMoveUndo()||!historyPreview_)updateModel();
     };
     session_.onStateChanged = [this] {
         if(!suspendedExitUi_)updateState();
         if(!session_.busy()&&(documentExit_==DocumentExit::Save||documentExit_==DocumentExit::Discard))
             QTimer::singleShot(0,this,&MainWindow::continueDocumentExit);
     };
-    session_.onError = [this](const QString& message) {
+    session_.onError = [this,sectionPreview](const QString& message) {
+        if(historyPreview_){updateModel();}
+        sectionPreview->hold();
         releasedCurvePositions_.clear();
-        for(auto* view:views_)view->setPendingPointMoves({});
-        cancelDocumentExit();pendingNewPointAfter_=0;pendingPointIds_.clear();pendingPointView_.clear();
+        for(auto* view:views_){view->setPendingPointMoves({});view->setMoveSectionPreview({});}
+        followPointPopup();
+        const bool restoreUndoPopup=placementUndos_&&pointPopup_&&pointPopup_->property("placement_undo_hidden").toBool()&&pointPopup_->pointId()==selected_;
+        placedTail_.clear();placementUndos_=0;placementUndoRunning_=false;
+        cancelDocumentExit();pendingNewPointAfter_=0;placementSource_.reset();pendingPointView_.clear();waitingPlacements_.clear();submittingPlacement_.reset();updatePlacementPreview();
+        if(restoreUndoPopup&&selectedPointView_&&selected_&&session_.ready()&&!pointPopup_->isVisible())showPointPopup(selectedPointView_,selected_);
         if(layers_)layers_->discardPredictions();if(sections_)sections_->discardPending();showError(message,true);
     };
     session_.onCompleted = [this](const QString& method) { operationCompleted(method); };
@@ -461,7 +516,7 @@ MainWindow::~MainWindow() {
         delete task->dialog.data();delete task->ball.data();delete task->session.data();
     }
     calculationWindows_.clear();hydroDialog_=nullptr;performanceDialog_=nullptr;platesDialog_=nullptr;stabilityDialog_=nullptr;stabilityBall_=nullptr;
-    session_.onFirstFrame={};session_.onUpdated = {}; session_.onStateChanged = {}; session_.onError = {}; session_.onCompleted = {};session_.onFileCommitted={};
+    session_.onBatchHistoryPreview={};session_.onFirstFrame={};session_.onUpdated = {}; session_.onStateChanged = {}; session_.onError = {}; session_.onCompleted = {};session_.onFileCommitted={};
     session_.onHydroDefaults={};session_.onHydrostatics={};session_.onHydroProgress={};
     session_.onPerformance={};session_.onPlates={};session_.onCad={};
 }
@@ -480,36 +535,62 @@ void MainWindow::updateModel() {
         stabilityUnread_=false;if(stabilityBall_)stabilityBall_->dismiss();
     }
     refreshCalculationIdentity();
-    if(pointPopup_&&pointPopup_->isVisible()&&(pointPopupDocument_!=model->documentId||pointPopupRevision_!=model->revision||!model->point(pointPopup_->pointId())))pointPopup_->hide();
-    if (fresh) {selection_.clear();hiddenControlLayers_.clear();endFlowline();endPointPlacement();clearDisplayChanges();}
+    if(pointPopup_&&pointPopup_->isVisible()){
+        if(pointPopupDocument_!=model->documentId||!model->point(pointPopup_->pointId()))pointPopup_->hide();
+        else if(pointPopupRevision_!=model->revision){
+            const auto before=views_.front()->snapshot();
+            if(selectedPointView_&&pointPopup_->pointId()==selected_&&before&&before->revision==pointPopupRevision_&&session_.publishingPointEdit())
+                pointPopupRevision_=model->revision;
+            else pointPopup_->hide();
+        }
+    }
+    if (fresh) {loadDisplayDefaults();selection_.clear();hiddenControlLayers_.clear();endFlowline();endPointPlacement();clearDisplayChanges();}
     const auto presentation=displayModel();
     layers_->setSnapshot(model,session_.historyStates(),session_.layerIdHighWater());
     const auto changes=layers_->projectedVisibilityChanges();
     const auto previous=views_.front()->snapshot();
-    const bool pointEdit=previous&&session_.publishingPointEdit()&&fs::curveEdit::onlyPointPositionsChanged(*previous,*model);
-    const bool referencesMoved=previous&&fs::curveEdit::horizontalReferencesChanged(*previous,*model);
+    const bool confirmedPreview=historyPreview_&&previous==historyPreview_&&model->sameDrawing(*previous)&&session_.lastLoadTimings()["ui_batch_history_reused"].toBool();
+    const bool replaying=bool(historyPreview_);historyPreview_.reset();
+    if(replaying)for(auto* view:views_)view->setEditingEnabled(true);
+    const bool pointEdit=!replaying&&previous&&session_.publishingPointEdit()&&fs::curveEdit::onlyPointPositionsChanged(*previous,*model);
+    const bool referencesMoved=!replaying&&previous&&fs::curveEdit::horizontalReferencesChanged(*previous,*model);
+    const bool retainedDrag=pointEdit&&!releasedCurvePositions_.isEmpty();
     bool startCurveMotion=false;
-    if((pointEdit||referencesMoved)&&std::any_of(views_.begin(),views_.end(),[](const HullView* view){return view->curveEditMotionEnabled();})){
-        curveEditMotion_=fs::curveEdit::Motion::between(*previous,*model,releasedCurvePositions_,curveEditMotion_,pointEdit);
+    if(!retainedDrag&&(pointEdit||referencesMoved)&&std::any_of(views_.begin(),views_.end(),[](const HullView* view){return view->curveEditMotionEnabled();})){
+        const auto displayedSections=views_.front()->moveSectionPreview();
+        if(displayedSections && pointEdit){auto shown=*previous;shown.sections=*displayedSections;
+            curveEditMotion_=fs::curveEdit::Motion::between(shown,*model,releasedCurvePositions_,{},true);
+        }else curveEditMotion_=fs::curveEdit::Motion::between(*previous,*model,releasedCurvePositions_,curveEditMotion_,pointEdit);
         startCurveMotion=bool(curveEditMotion_);
-    }else if(fresh||!session_.drawingUnchanged())curveEditMotion_.reset();
+    }else if(retainedDrag||fresh||!session_.drawingUnchanged())curveEditMotion_.reset();
     releasedCurvePositions_.clear();
     for(auto* view:views_){
-        view->setSnapshot(model,presentation,session_.drawingUnchanged(),changes);
+        view->setSnapshot(model,presentation,confirmedPreview||session_.drawingUnchanged(),changes);
         view->setCurveEditMotion(curveEditMotion_);
     }
     if (!fresh) selection_ = views_.front()->selectedPoints();
     fs::EntityId createdPoint=0;
     if(pendingNewPointAfter_){
-        for(const auto& point:model->points)if(!pendingPointIds_.contains(point.id))createdPoint=point.id;
-        if(createdPoint)selection_={createdPoint};
-        pendingNewPointAfter_=0;pendingPointIds_.clear();
+        if(placementSource_ && placementSource_->documentId==model->documentId && model->points.size()==placementSource_->points.size()+1){
+            // The topology backend appends the new point; never guess its identity from its coordinates.
+            const auto id=model->points.back().id;if(!placementSource_->point(id))createdPoint=id;
+        }
+        submittingPlacement_.reset();if(!createdPoint)waitingPlacements_.clear();
+        if(createdPoint){placedTail_.append(createdPoint);while(placedTail_.size()>512)placedTail_.removeFirst();selection_={createdPoint};}
+        pendingNewPointAfter_=0;placementSource_.reset();
     }
+    if(!createdPoint && (fresh||!previous||previous->revision!=model->revision)){
+        if(!fresh&&placementUndoRunning_&&!placedTail_.isEmpty()&&!model->point(placedTail_.last())){
+            placedTail_.removeLast();--placementUndos_;placementUndoRunning_=false;
+        }else{placedTail_.clear();placementUndos_=0;placementUndoRunning_=false;}
+    }
+    updatePlacementPreview();
     lines_->setScene(session_.scene(), fresh || shownUnits_ != model->units);
     shownDocument_ = model->documentId; shownUnits_ = model->units;
     if(sections_)sections_->setSnapshot(model,session_.historyStates());
     selectPoints(selection_);
-    if(createdPoint&&pendingPointView_){showPointPopup(pendingPointView_,createdPoint);pendingPointView_.clear();}
+    if(createdPoint&&pendingPointView_){selectedPointView_.clear();if(!placementUndos_&&waitingPlacements_.isEmpty()&&pendingPointView_->pointPlacement()){selectedPointView_=pendingPointView_;showPointPopup(pendingPointView_,createdPoint);}pendingPointView_.clear();}
+    else followPointPopup();
     if(selectionKind_!=HullEntity::Point)selectEntities(selectionKind_,fresh?QSet<fs::EntityId>{}:entitySelection_);
     if(preferencesPending_){for(size_t i=0;i<3;++i){QSignalBlocker block(coordinates_[i]);coordinates_[i]->setValue(draft[i]);}coordinatesChanged_=changed;}
     if(startCurveMotion)curveEditMotion_->start();
@@ -550,31 +631,28 @@ void MainWindow::updateState() {
     if(addFlow_)addFlow_->setEnabled(ready&&idle);
     const auto transformed=transformPoints();bool transformable=ready&&idle&&!transformed.isEmpty();
     updateModelingActions();
-    if(transformable)for(auto id:transformed){auto* p=session_.model()->point(id);if(!p||p->locked||!p->batchMovable){transformable=false;break;}}
+    const auto limits=selectionLimits(ready&&idle?session_.model().get():nullptr,selection_);
+    if(transformable){const auto group=selectionKind_==HullEntity::Point?limits:selectionLimits(session_.model().get(),transformed);
+        transformable=group.found==transformed.size()&&!group.locked&&!group.constrained;}
     for(int i=0;i<5;++i)if(auto* action=advancedActions_[i])action->setEnabled(transformable&&(i<3||(i==3&&selectionKind_==HullEntity::Edge)||(i==4&&selectionKind_==HullEntity::Face)));
-    undo_->setEnabled((idle&&session_.canUndo())||session_.editingSections()||session_.editingLayerList());
+    undo_->setEnabled(session_.canUndoMovingBatch()||canUndoPlacement()||(idle&&session_.canUndo())||session_.editingSections()||session_.editingLayerList());
     redo_->setEnabled((idle&&session_.canRedo())||session_.editingSections()||session_.editingLayerList());
     if(linesAction_)linesAction_->setEnabled(bool(session_.model()));
     linesPng_->setEnabled(ready&&idle); dxf_->setEnabled(ready && idle);
-    bool editable = ready && idle && !selection_.isEmpty();
-    if (editable) for (auto id : selection_) {
-        const auto* point = session_.model()->point(id);
-        if (!point || point->locked || (selection_.size() > 1 && !point->batchMovable)) { editable = false; break; }
-    }
+    const bool editable=ready&&idle&&!selection_.isEmpty()&&limits.found==selection_.size()&&!limits.locked&&
+        (selection_.size()==1||!limits.constrained);
     for (auto* coordinate : coordinates_) coordinate->setEnabled(editable);
-    if(pointPopup_)pointPopup_->setEditingEnabled(ready&&idle&&session_.model()->point(pointPopup_->pointId())&&!session_.model()->point(pointPopup_->pointId())->locked);
+    if(pointPopup_){const auto* p=ready?session_.model()->point(pointPopup_->pointId()):nullptr;pointPopup_->setEditingEnabled(idle&&p,p&&!p->locked,p&&p->batchMovable);}
     apply_->setEnabled(editable);
-    if(addPoint_) {
-        addPoint_->setEnabled(ready&&idle);addFace_->setEnabled(ready&&idle&&selectionOrder_.size()>=3);
+    if(addFace_) {
+        addFace_->setEnabled(ready&&idle&&selectionOrder_.size()>=3);
         crease_->setEnabled(ready&&idle&&selectionKind_==HullEntity::Edge&&!entitySelection_.isEmpty());
         smooth_->setEnabled(crease_->isEnabled());
         assignLayer_->setEnabled(ready&&idle&&selectionKind_==HullEntity::Face&&!entitySelection_.isEmpty());
         delete_->setEnabled(ready&&idle&&(selectionKind_==HullEntity::Point?!selection_.isEmpty():!entitySelection_.isEmpty()));
-        bool canLock=false,canUnlock=false;
-        if(ready&&idle&&selectionKind_==HullEntity::Point)for(auto id:selection_)if(const auto* point=session_.model()->point(id)){
-            canLock|=!point->locked;canUnlock|=point->locked;
-        }
-        lock_->setEnabled(canLock);unlock_->setEnabled(canUnlock);
+        const bool pointSelection=ready&&idle&&selectionKind_==HullEntity::Point;
+        lock_->setEnabled(pointSelection&&limits.found>limits.lockedCount);
+        unlock_->setEnabled(pointSelection&&limits.locked);
     }
     updateDocumentTitle();
     if (session_.busy()) statusBar()->showMessage(uiText(session_.model() ? "正在更新模型…" : "正在打开船模…"));
@@ -615,17 +693,26 @@ void MainWindow::showStatusMessage(const QString& message,StudioMessageRole role
     statusNotice_->present(message,role);
 }
 void MainWindow::resizeEvent(QResizeEvent* event){QMainWindow::resizeEvent(event);QTimer::singleShot(0,this,[this]{updateStabilityBall();});}
-void MainWindow::selectPoints(QSet<fs::EntityId> ids) {
+void MainWindow::selectPoints(QSet<fs::EntityId> ids,HullView* source) {
+    const auto old=selected_;
     // Group handles and the group dialog select members together. Selecting an
     // individual point must still allow editing its own coordinates/properties.
     // The views filter hidden and missing points without emitting callbacks.
     views_.front()->setSelectedPoints(std::move(ids)); selection_ = views_.front()->selectedPoints();
     selectionOrder_.erase(std::remove_if(selectionOrder_.begin(),selectionOrder_.end(),[this](auto id){return !selection_.contains(id);}),selectionOrder_.end());
-    auto added=selection_.values();std::sort(added.begin(),added.end());
-    for(auto id:added)if(!selectionOrder_.contains(id))selectionOrder_.append(id);
+    if(selectionOrder_.size()!=selection_.size()){
+        auto added=(selection_-QSet<fs::EntityId>(selectionOrder_.cbegin(),selectionOrder_.cend())).values();
+        std::sort(added.begin(),added.end());selectionOrder_.append(added);
+    }
     selected_ = selection_.size() == 1 ? *selection_.begin() : 0;
+    if(old!=selected_||!selected_)pointPropertiesPage_=false;
+    if(!selected_){selectedPointView_.clear();if(pointPopup_)pointPopup_->hide();}
     for (auto* view : views_) view->setSelectedPoints(selection_);
     updateCoordinates(); updateState();
+    const bool selectedInView=source&&(source!=selectedPointView_||!pointPopup_||!pointPopup_->isVisible());
+    if(selected_ && selectionKind_==HullEntity::Point && !pendingPointView_ && (selectedInView || old!=selected_)){
+        selectedPointView_=source?source:views_[3];showPointPopup(selectedPointView_,selected_);
+    }
 }
 void MainWindow::editProject() {
     if (!session_.ready()) return;
@@ -642,8 +729,8 @@ void MainWindow::editProject() {
 void MainWindow::updateCoordinates() {
     const auto model = session_.model(); const auto* point = model ? model->point(selected_) : nullptr;
     const bool multiple = selection_.size() > 1;
-    bool locked = false, constrained = false;
-    if (model) for (auto id : selection_) { const auto* p = model->point(id); locked |= p && p->locked; constrained |= p && !p->batchMovable; }
+    const auto limits=selectionLimits(model.get(),selection_);
+    const bool locked=limits.locked,constrained=limits.constrained;
     const QString restriction = locked ? uiText(" · 含锁定点") : constrained ? uiText(" · 含约束点，请逐点编辑") : "";
     pointLabel_->setMessage(multiple ? QString(uiText("已选 %1 个控制点%2")).arg(selection_.size()).arg(restriction) :
         point ? QString(uiText("控制点 %1%2")).arg(selected_).arg(point->locked ? uiText(" · 已锁定") : "") : uiText("在视图中点击或框选控制点"),
@@ -746,7 +833,6 @@ void MainWindow::openLinesWindow() {
     linesDialog_->raise();linesDialog_->activateWindow();lines_->setFocus();
     if(!session_.scene()&&!session_.busy())session_.ensureDrawing();
 }
-void MainWindow::fitCurrent() { for(auto* view:views_)view->fit(); }
 
 void MainWindow::exportLinesImage() {
     if (!session_.ready()||session_.busy()) return;
@@ -775,8 +861,8 @@ void MainWindow::showError(const QString& sourceMessage,bool sessionError) {
     const QString translatedPrefix=uiText(exchangePrefix);
     const QString message=sourceMessage.startsWith(exchangePrefix)
         ?translatedPrefix+(translatedPrefix==exchangePrefix?QString{}:QStringLiteral(" "))
-            +uiText(sourceMessage.mid(exchangePrefix.size()))
-        :uiText(sourceMessage);
+            +uiDiagnosticText(sourceMessage.mid(exchangePrefix.size()))
+        :uiDiagnosticText(sourceMessage);
     if(!submittedDisplay_.isEmpty()||!queuedDisplay_.isEmpty())clearDisplayChanges();
     closingAfterRecoveryDiscard_=false;
     if(preferencesPending_){preferencesFinished(message);return;}
@@ -803,13 +889,51 @@ void MainWindow::showError(const QString& sourceMessage,bool sessionError) {
         dialog.setOption(QMessageBox::Option::DontUseNativeDialog);runStudioDialog(dialog);
     }
 }
+void MainWindow::submitPlacement(HullView* view,fs::Vec3 p){
+    pendingNewPointAfter_=1;pendingPointView_=view;placementSource_=session_.model();
+    submittingPlacement_=p;updatePlacementPreview();
+    if(!session_.editTopology("add_point",{{"position",QJsonArray{p.x,p.y,p.z}}})){pendingNewPointAfter_=0;pendingPointView_.clear();placementSource_.reset();waitingPlacements_.clear();submittingPlacement_.reset();updatePlacementPreview();}
+}
+bool MainWindow::canUndoPlacement() const{
+    if(!session_.ready()||(session_.busy()&&!submittingPlacement_&&!placementUndoRunning_))return false;
+    const int pending=int(waitingPlacements_.size())+int(submittingPlacement_.has_value());
+    return pending+(session_.canUndo()?placedTail_.size():0)>placementUndos_;
+}
+bool MainWindow::undoPlacement(){
+    if(!canUndoPlacement())return false;
+    ++placementUndos_;updatePlacementPreview();submitPlacementUndo();updateState();return true;
+}
+void MainWindow::submitPlacementUndo(){
+    if(!placementUndos_||placementUndoRunning_||session_.busy()||submittingPlacement_||!waitingPlacements_.isEmpty())return;
+    placementUndoRunning_=true;
+    if(placedTail_.isEmpty()||!session_.undo()){
+        placementUndoRunning_=false;placementUndos_=0;placedTail_.clear();updatePlacementPreview();
+    }
+}
+void MainWindow::updatePlacementPreview(){
+    QVector<fs::Vec3> points;if(submittingPlacement_)points.append(*submittingPlacement_);
+    for(const auto &p:waitingPlacements_)points.append(p.position);
+    // The confirmed tail plus the FIFO of outstanding clicks is the order of document history.
+    // Hide newest clicks first, even while an earlier creation is being published.
+    const int omit=std::min<int>(placementUndos_,points.size());points.resize(points.size()-omit);
+    QSet<fs::EntityId> hidden;for(int i=0;i<std::min<int>(placementUndos_-omit,placedTail_.size());++i)hidden.insert(placedTail_.at(placedTail_.size()-1-i));
+    if(pointPopup_&&pointPopup_->isVisible()&&hidden.contains(pointPopup_->pointId())){pointPopup_->setProperty("placement_undo_hidden",true);pointPopup_->hide();}
+    for(auto *view:views_)if(view){view->setPlacementUndoPreview(hidden);view->setPendingPlacements(points);}
+}
 void MainWindow::operationCompleted(const QString& method) {
+    if(method=="topology"&&!waitingPlacements_.isEmpty()&&!session_.busy()){
+        const auto next=waitingPlacements_.takeFirst();
+        if(next.view && next.view->pointPlacement())submitPlacement(next.view,next.position);
+        else {waitingPlacements_.clear();updatePlacementPreview();}
+    }
+    if(method=="topology"||method=="undo")submitPlacementUndo();
     if(method=="move_point"||method=="move_points")
     {
         releasedCurvePositions_.clear();
-        for(auto* view:views_)view->setPendingPointMoves({});
+        for(auto* view:views_){view->setPendingPointMoves({});view->setMoveSectionPreview({});}
     }
     if(method=="display"){
+        rememberDisplayChanges(submittedDisplay_);
         submittedDisplay_={};
         submitDisplayChanges();
     }

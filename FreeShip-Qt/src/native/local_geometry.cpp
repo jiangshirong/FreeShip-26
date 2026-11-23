@@ -143,6 +143,13 @@ LocalGeometry::LocalGeometry(const GeometryInput& g, const QString& directory, c
     if(!active()){full_=std::make_unique<SubdivisionSurface>(g);full_->level(g.desiredLevel);}
     computeMs_=t.nsecsElapsed()/1e6;
 }
+LocalGeometry::LocalGeometry(const GeometryInput& g):level_(g.desiredLevel){
+    try{program_=compileSubdivision(g,level_);}catch(const std::length_error&){full_=std::make_unique<SubdivisionSurface>(g);}
+}
+void LocalGeometry::updatePreviewPoints(const GeometryInput& g){
+    if(active())program_.update(g);
+    else for(size_t i=0;i<g.points.size();++i)full_->setPoint(i,g.points[i].position);
+}
 const SubdivisionLevel& LocalGeometry::mesh() const { return active()?program_.mesh:full_->level(level_); }
 void LocalGeometry::save() {
     if(!active()||path_.isEmpty())return;

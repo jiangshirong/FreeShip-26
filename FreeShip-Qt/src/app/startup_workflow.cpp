@@ -7,6 +7,8 @@
 #include "exchange_dialog.h"
 #include "section_dialog.h"
 #include "station_template_workflow.h"
+#include "pdf_preview_probe.h"
+#include "shortcuts_dialog.h"
 #include "preferences_dialog.h"
 #include "layer_panel.h"
 #include "light_dialog.h"
@@ -315,6 +317,14 @@ void MainWindow::startupStep(const QString& completedOperation,const QString& er
         QJsonArray actions;for(auto* action:recentMenu_->actions())actions.append(QJsonObject{{"text",action->text()},{"path",action->data().toString()},{"enabled",action->isEnabled()},{"operation",action->property("file_operation").toString()}});
         QJsonObject item{{"operation",operation},{"error",error},{"source",session_.sourcePath()},{"ready",session_.ready()},{"modified",session_.modified()},
             {"last",fileHistory_->read().last},{"recent",recent},{"actions",actions},{"status_text",statusBar()->currentMessage()}};
+        if(property("undo_wrong_frame").isValid()){item["undo_wrong_frame"]=property("undo_wrong_frame").toBool();setProperty("undo_wrong_frame",QVariant());}
+        if(property("shell_probe").isValid()){item["shell_probe"]=property("shell_probe").toJsonObject();setProperty("shell_probe",QVariant());}
+        if(property("drag_samples").isValid()){item["drag_four_view_ms"]=property("drag_samples").toJsonArray();setProperty("drag_samples",QVariant());}
+        if(property("history_paints").isValid()){
+            item["key_to_ready_ms"]=(workflowTimer_.nsecsElapsed()-property("history_key_start_ns").toLongLong())/1e6;
+            item["history_view_ms"]=property("history_paints").toJsonObject();setProperty("history_paints",QVariant());
+            for(auto* view:views_)view->onHullVisibleFrame={};
+        }
         item["window_maximized"]=isMaximized();
         item["window_title"]=windowTitle();item["status_bar_visible"]=statusBar()->isVisibleTo(this);
         item["window_full_screen"]=isFullScreen();
@@ -341,7 +351,7 @@ void MainWindow::startupStep(const QString& completedOperation,const QString& er
         item["first_hull_frame_ms"]=QJsonValue::fromVariant(property("first_hull_frame_ms"));
         item["first_visible_hull_ms"]=QJsonValue::fromVariant(property("first_visible_hull_ms"));
         item["view_first_visible_ms"]=property("view_first_visible_ms").toJsonObject();
-        item["operation_ms"]=session_.lastOperationMs();
+        item["operation_ms"]=session_.lastOperationMs();item["selected_points"]=selection_.size();
         item["startup_ready_ms"]=QJsonValue::fromVariant(property("startup_ready_ms"));
         item["save_preview_ms"]=session_.lastSavePreviewMs();
         if(!session_.lastBackupPath().isEmpty()&&QFileInfo(session_.lastBackupPath()).isFile()){
@@ -616,7 +626,7 @@ void MainWindow::startupStep(const QString& completedOperation,const QString& er
         }
         else if(kind=="read_surfaces_check")auditReadSurfaces(command["copy_only"].toBool());
         else if(kind=="tutorial_language_check")auditTutorialLanguage(command["settings"].toArray());
-        else if(kind=="print_preview_check")auditPrintPreview();
+        else if(kind=="viewport_pdf_check")auditViewportPdf();
         else if(kind=="menu_interaction_check")auditMenuInteraction();
         else if(kind=="object_lifetime_check")auditObjectLifetime();
         else if(kind=="view_reactivation_check")auditViewReactivation();
@@ -1006,11 +1016,13 @@ void MainWindow::startupStep(const QString& completedOperation,const QString& er
             QWidget* keyTarget=perspective;
             const fs::Vec3 reference{1,2,3};
             std::array<QPointF,4> fitted;
+            std::array<QPointF,4> panned;
             for(size_t i=0;i<views_.size();++i){
                 views_[i]->setAnimationsEnabled(false);
                 views_[i]->fit();
                 fitted[i]=views_[i]->project(reference);
                 views_[i]->panBy(QPointF(35,22));
+                panned[i]=views_[i]->project(reference);
             }
             const auto pressKey=[&](int key,Qt::KeyboardModifiers modifiers=Qt::NoModifier){
                 QKeyEvent press(QEvent::KeyPress,key,modifiers);
@@ -1018,13 +1030,22 @@ void MainWindow::startupStep(const QString& completedOperation,const QString& er
                 QKeyEvent release(QEvent::KeyRelease,key,Qt::NoModifier);
                 QApplication::sendEvent(keyTarget,&release);
             };
-            const auto panned=perspective->project(reference);
             pressKey(Qt::Key_Home);
-            workflowCase("shortcut.home-does-not-fit",panned==perspective->project(reference));
+            workflowCase("shortcut.home-does-not-fit",panned.back()==perspective->project(reference));
             pressKey(Qt::Key_F);
-            bool allFit=true;
-            for(size_t i=0;i<views_.size();++i)allFit&=views_[i]->project(reference)==fitted[i];
-            workflowCase("shortcut.f-fits-all-four-views",allFit);
+            bool staysPanned=true;
+            for(size_t i=0;i<views_.size();++i)
+                staysPanned&=panned[i]!=fitted[i]&&views_[i]->project(reference)==panned[i];
+            workflowCase("shortcut.f-keeps-all-views-panned",staysPanned);
+
+            const QPointF blank(1,1);
+            const bool startsOnBlank=!perspective->entityAt(blank);
+            QMouseEvent doubleClick(QEvent::MouseButtonDblClick,blank,blank,Qt::LeftButton,Qt::LeftButton,Qt::NoModifier);
+            QApplication::sendEvent(perspective,&doubleClick);
+            bool onlyCurrentFits=startsOnBlank&&perspective->project(reference)==fitted.back();
+            for(size_t i=0;i+1<views_.size();++i)
+                onlyCurrentFits&=views_[i]->project(reference)==panned[i];
+            workflowCase("shortcut.blank-double-click-fits-only-current-view",onlyCurrentFits);
 
             const auto drag=[](HullView* view,QPointF from,QPointF to,Qt::KeyboardModifiers modifiers,bool sendMove=true){
                 QMouseEvent press(QEvent::MouseButtonPress,from,from,Qt::LeftButton,Qt::LeftButton,modifiers);
@@ -1101,7 +1122,8 @@ void MainWindow::startupStep(const QString& completedOperation,const QString& er
                 auto* dialog=qobject_cast<QDialog*>(frontStudioDialog());
                 auto* table=dialog?dialog->findChild<QTableWidget*>("ShortcutGuideTable"):nullptr;
                 if(!table){finishWorkflow("Shortcut guide missing");return;}
-                QJsonArray rows,groups,ctrlGestures;QJsonObject scopes;int previewCount=0,viewGroup=-1;
+                QJsonArray rows,groups,ctrlGestures;QJsonObject scopes;int previewCount=0,viewGroup=-1,titleBarRow=-1;
+                ShortcutGesturePreview* titleBarPreview=nullptr;
                 for(int row=0;row<table->rowCount();++row){
                     if(table->item(row,0)->data(Qt::UserRole)=="group"){
                         if(table->item(row,0)->text()==uiText("视图"))viewGroup=row;
@@ -1110,7 +1132,13 @@ void MainWindow::startupStep(const QString& completedOperation,const QString& er
                     }
                     QJsonArray cells;
                     if(auto* cell=table->cellWidget(row,1)){
-                        if(cell->findChild<QWidget*>("ShortcutGesturePreview"))++previewCount;
+                        if(auto* preview=cell->findChild<QWidget*>("ShortcutGesturePreview")){
+                            ++previewCount;
+                            if(table->item(row,1)->text()==uiText("双击标题栏")){
+                                titleBarRow=row;
+                                titleBarPreview=static_cast<ShortcutGesturePreview*>(preview);
+                            }
+                        }
                         if(auto* key=cell->findChild<QWidget*>("StudioKeycap");key&&key->accessibleName()=="Ctrl")
                             ctrlGestures.append(table->item(row,0)->text());
                     }
@@ -1142,6 +1170,27 @@ void MainWindow::startupStep(const QString& completedOperation,const QString& er
                     wait(255);
                     workflowCase("shortcut-gesture-frames-change",first!=table->viewport()->grab().toImage());
                     workflowCase("shortcut-gesture-picture",dialog->grab().save(workflowOutput_+"/views/shortcuts-gestures"+suffix+".png"));
+                }
+                if(suffix.isEmpty()||suffix=="-en"){
+                    workflowCase("shortcut-titlebar-preview-present"+suffix,titleBarPreview!=nullptr);
+                    if(titleBarPreview){
+                        table->scrollToItem(table->item(titleBarRow,1),QAbstractItemView::EnsureVisible);
+                        wait(60);
+                        const auto frame=[&](int ms){titleBarPreview->setElapsed(ms);return titleBarPreview->grab().toImage();};
+                        const auto normal=frame(180),clickOne=frame(305),clickTwo=frame(515),
+                                   opening=frame(700),expanded=frame(950),
+                                   restoreClickOne=frame(1905),restoreClickTwo=frame(2115),
+                                   closing=frame(2300),restored=frame(2550);
+                        workflowCase("shortcut-titlebar-preview-cycle"+suffix,
+                                     !normal.isNull()&&normal==restored&&normal!=expanded&&
+                                     clickOne!=normal&&clickTwo!=normal&&opening!=normal&&opening!=expanded&&
+                                     restoreClickOne!=expanded&&restoreClickTwo!=expanded&&closing!=expanded&&closing!=restored);
+                        titleBarPreview->setElapsed(180);
+                        const bool normalPicture=dialog->grab().save(workflowOutput_+"/views/shortcuts-titlebar"+suffix+".png");
+                        titleBarPreview->setElapsed(950);
+                        const bool expandedPicture=dialog->grab().save(workflowOutput_+"/views/shortcuts-titlebar-expanded"+suffix+".png");
+                        workflowCase("shortcut-titlebar-picture"+suffix,normalPicture&&expandedPicture);
+                    }
                 }
                 if(!suffix.isEmpty()){dialog->reject();return;}
                 workflowCase("shortcut.save-and-delete-bindings-retained",save_->shortcuts().contains(QKeySequence("Ctrl+S"))&&delete_->shortcut()==QKeySequence(Qt::Key_Delete));
@@ -1481,20 +1530,30 @@ void MainWindow::startupStep(const QString& completedOperation,const QString& er
                         auto* settings=qobject_cast<QDialog*>(frontStudioDialog());
                         if(!settings||settings->objectName()!="LinesPdfSettings"){finishWorkflow("Missing PDF settings");return;}
                         auto* paper=settings->findChild<QComboBox*>("LinesPdfPaper");
-                        auto* numerator=settings->findChild<QSpinBox*>("LinesPdfNumerator");
-                        auto* denominator=settings->findChild<QSpinBox*>("LinesPdfDenominator");
+                        auto* numerator=settings->findChild<QDoubleSpinBox*>("LinesPdfNumerator");
+                        auto* denominator=settings->findChild<QDoubleSpinBox*>("LinesPdfDenominator");
                         auto* footer=settings->findChild<QDialogButtonBox*>();
                         if(!paper||!numerator||!denominator||!footer){
                             settings->reject();finishWorkflow("Missing PDF controls");return;
                         }
                         auto* confirm=footer->button(QDialogButtonBox::Ok);
+                        if(mode=="fit"||mode=="panned"){
+                            auto* fit=settings->findChild<QCheckBox*>("PdfFitSinglePage");
+                            if(!fit){settings->reject();finishWorkflow("Missing fit selector");return;}
+                            if(mode=="fit"){
+                                denominator->setValue(qMin(denominator->maximum(),denominator->value()*2));
+                                workflowCase("lines-pdf-fit-animates",observePdfPreviewMotion(settings,[&]{fit->setChecked(true);})
+                                    &&!numerator->isVisible()&&!denominator->isVisible());
+                                workflowCase("lines-pdf-preview-image",settings->grab().save(workflowOutput_+"/lines-pdf-settings.png"));
+                            }else fit->setChecked(true);
+                        }
                         if(mode=="fixed"){
                             paper->setCurrentIndex(1); // A3
-                            const int fitted=denominator->value();
+                            const double fitted=denominator->value();
                             denominator->setValue(1);
                             workflowCase("lines-pdf-rejects-oversize",!confirm->isEnabled());
-                            numerator->setValue(2);
-                            denominator->setValue(2*fitted+1);
+                            numerator->setValue(1.25);
+                            denominator->setValue(1.25*fitted+.5);
                             workflowArtifacts_["lines_pdf_numerator"]=numerator->value();
                             workflowArtifacts_["lines_pdf_denominator"]=denominator->value();
                         }
@@ -1646,12 +1705,79 @@ void MainWindow::startupStep(const QString& completedOperation,const QString& er
                 workflowCases_.append(QJsonObject{{"name","save_action_unavailable"},{"status","not_run"}});finishWorkflow();return;
             }found[0]->trigger();
         }
+        else if(kind=="batch_move_selection"){
+            const auto m=session_.model();if(!m){finishWorkflow("No model to move");return;}
+            QSet<fs::EntityId> ids;int index=0;for(const auto& p:m->points)if(!p.locked&&p.batchMovable&&(index++%std::max(1,command["stride"].toInt(1)))==0)ids.insert(p.id);
+            auto* view=views_[0];view->setControlNetVisible(true);view->finishPresentation();selectPoints(ids);view->grab();
+            if(selection_.size()<2){finishWorkflow("No batch selection");return;}
+            fs::Vec3 center{};for(const auto& p:m->points)if(selection_.contains(p.id)){
+                center.x+=p.position.x;center.y+=p.position.y;center.z+=p.position.z;}
+            center={center.x/selection_.size(),center.y/selection_.size(),center.z/selection_.size()};
+            const auto at=view->project(center)+QPointF(36,0),to=at+QPointF(14,0);
+            auto mouse=[&](QEvent::Type type,QPointF pos){QMouseEvent e(type,pos,view->mapToGlobal(pos),type==QEvent::MouseMove?Qt::NoButton:Qt::LeftButton,
+                    type==QEvent::MouseButtonRelease?Qt::NoButton:Qt::LeftButton,Qt::NoModifier);QApplication::sendEvent(view,&e);};
+            mouse(QEvent::MouseButtonPress,at);
+            const int samples=command["samples"].toInt();QPointF end=to;
+            if(command["verify_shell"].toBool()){
+                using Key=QPair<fs::EntityId,fs::EntityId>;QSet<Key> expected,focus;
+                for(const auto& f:m->faces){const auto* l=m->layer(f.layer);if(!l||!l->visible||f.points.isEmpty())continue;auto a=f.points.back();for(auto b:f.points){Key k{std::min(a,b),std::max(a,b)};expected.insert(k);if(ids.contains(a)||ids.contains(b))focus.insert(k);a=b;}}
+                QJsonArray ms,paintTimes;bool exact=true;int knots=0;
+                for(int j=0;j<5;++j){const auto old=view->dragShellComparison();QEventLoop loop;QElapsedTimer t;QSet<HullView*> painted;
+                    for(auto* v:views_)v->onHullVisibleFrame=[&,v]{auto layer=v->dragShellComparison();if(layer&&layer!=old){painted.insert(v);if(painted.size()==4)loop.quit();}};
+                    t.start();mouse(QEvent::MouseMove,at+QPointF(10+j,0));QTimer deadline;deadline.setSingleShot(true);connect(&deadline,&QTimer::timeout,&loop,&QEventLoop::quit);deadline.start(12000);if(painted.size()!=4)loop.exec();ms.append(t.nsecsElapsed()/1e6);
+                    double renderMs=0;for(auto* v:views_){v->onHullVisibleFrame={};renderMs+=v->lastPaintMs;}paintTimes.append(renderMs);auto layer=view->dragShellComparison();if(!layer||painted.size()!=4){finishWorkflow("Missing full shell frame");return;}
+                    QSet<Key> found,lit;for(const auto& e:*layer){Key k{std::min(e.a,e.b),std::max(e.a,e.b)};found.insert(k);if(!e.context)lit.insert(k);exact&=e.after.points.size()>=2;knots=e.after.points.size();}
+                    exact&=found==expected&&lit==focus&&found.size()==layer->size();
+                }
+                setProperty("shell_probe",QJsonObject{{"complete",exact},{"edges",expected.size()},{"highlighted",focus.size()},{"knots_per_edge",knots},{"four_view_ms",ms},{"paint_ms",paintTimes}});
+            }
+            if(samples>0){QJsonArray times;
+                for(int j=0;j<samples;++j){QEventLoop loop;QElapsedTimer t;QSet<HullView*> painted;double elapsed=-1;
+                    for(auto* canvas:views_)canvas->onHullVisibleFrame=[&,canvas]{painted.insert(canvas);if(painted.size()==4&&elapsed<0){elapsed=t.nsecsElapsed()/1e6;loop.quit();}};
+                    end=at+QPointF(5+j,0);t.start();mouse(QEvent::MouseMove,end);
+                    QTimer deadline;deadline.setSingleShot(true);connect(&deadline,&QTimer::timeout,&loop,&QEventLoop::quit);deadline.start(3000);
+                    if(elapsed<0)loop.exec();for(auto* canvas:views_)canvas->onHullVisibleFrame={};times.append(elapsed);
+                    if(elapsed<0){finishWorkflow("Missing drag frame");return;}
+                }setProperty("drag_samples",times);
+            }else mouse(QEvent::MouseMove,to);
+            mouse(QEvent::MouseButtonRelease,end);
+            if(!session_.busy()){finishWorkflow("Batch axis drag did not submit");return;}
+            if(command["immediate_undo"].toBool()){
+                const auto id=*ids.cbegin();const auto original=m->point(id)->position;
+                if(!undo_->isEnabled()||!view->displayedControlPoint(id)||view->displayedControlPoint(id)->x==original.x){finishWorkflow("Released batch cannot be undone");return;}
+                auto clock=std::make_shared<QElapsedTimer>();setProperty("history_paints",QJsonObject{});setProperty("undo_wrong_frame",false);
+                for(int i=0;i<int(views_.size());++i){auto* v=views_[i];v->onHullVisibleFrame=[this,i,v,id,original,clock]{
+                    auto pos=v->displayedControlPoint(id);if(!pos||pos->x!=original.x||pos->y!=original.y||pos->z!=original.z||v->dragShellComparison()||v->dragSectionComparison()||v->moveSectionPreview()){setProperty("undo_wrong_frame",true);return;}
+                    auto times=property("history_paints").toJsonObject();auto k=QString::number(i);if(!times.contains(k)){times[k]=clock->nsecsElapsed()/1e6;setProperty("history_paints",times);}
+                };}
+                QApplication::setActiveWindow(this);view->setFocus();setProperty("history_key_start_ns",workflowTimer_.nsecsElapsed());clock->start();
+                QKeyEvent key(QEvent::KeyPress,Qt::Key_Z,Qt::ControlModifier);QApplication::sendEvent(view,&key);
+                QKeyEvent up(QEvent::KeyRelease,Qt::Key_Z,Qt::ControlModifier);QApplication::sendEvent(view,&up);
+                if(!session_.waitingForMoveUndo()){finishWorkflow("Immediate undo was dropped");return;}
+            }
+        }
         else if(kind=="move"){
             if(!session_.model()){finishWorkflow("No model to edit");return;}
             const fs::ControlPoint* chosen=nullptr;
             for(const auto& point:session_.model()->points)if(!point.locked&&point.batchMovable&&(!command.contains("point_id")||point.id==command["point_id"].toInt())){chosen=&point;break;}
             if(!chosen){finishWorkflow("No movable point");return;}
             auto position=chosen->position;position.x+=command["dx"].toDouble(.125);position.y+=command["dy"].toDouble();session_.movePoint(chosen->id,position);
+        }
+        else if(kind=="history_fill")views_.back()->setFillVisible(true);
+        else if(kind=="history_key"){
+            const bool redo=command["redo"].toBool();auto* action=redo?redo_:undo_;
+            auto expected=session_.batchHistoryTarget(redo?"redo":"undo");
+            if(!expected||!action->isEnabled()){finishWorkflow("Missing history shortcut or target");return;}
+            auto clock=std::make_shared<QElapsedTimer>();setProperty("history_paints",QJsonObject{});
+            for(int i=0;i<int(views_.size());++i){auto* view=views_[i];view->onHullVisibleFrame=[this,i,view,expected,clock]{
+                if(!view->snapshot()||!view->snapshot()->sameDrawing(*expected))return;
+                auto times=property("history_paints").toJsonObject();auto key=QString::number(i);
+                if(!times.contains(key)){times[key]=clock->nsecsElapsed()/1e6;setProperty("history_paints",times);}
+            };}
+            auto* view=views_[0];QApplication::setActiveWindow(this);view->setFocus();const auto key=QKeyCombination(redo?Qt::ControlModifier|Qt::ShiftModifier:Qt::ControlModifier,Qt::Key_Z);setProperty("history_key_start_ns",workflowTimer_.nsecsElapsed());clock->start();
+            QKeyEvent press(QEvent::KeyPress,key.key(),key.keyboardModifiers());QApplication::sendEvent(view,&press);
+            QKeyEvent release(QEvent::KeyRelease,key.key(),key.keyboardModifiers());QApplication::sendEvent(view,&release);
+            if(!session_.busy()){finishWorkflow("History shortcut did not submit");return;}
         }
         else if(kind=="undo")session_.undo();
         else if(kind=="redo")session_.redo();

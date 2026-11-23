@@ -53,7 +53,7 @@ void buttons(QDialog& dialog,QVBoxLayout* layout){
 void MainWindow::buildModelingActions(QMenu* point,QMenu* edge,QMenu* face,QMenu* layer,QMenu* view,QList<QAction*>& transforms,QMenu* checks){
     auto add=[this](QMenu* menu,const QString& title,const QString& icon,const QString& op,const QString& kind={},int count=0){
         auto* a=new QAction(studioIcon(icon),title,this);a->setProperty("operation",op);a->setProperty("selection_kind",kind);a->setProperty("minimum_selection",count);
-        const QStringList direct{"collapse_points","collapse_edges","connect_points","split_edges","flip_faces","assemble_faces","clear_constraints","unlock_all","clear_selection","select_leaks","select_all","invert_selection"};
+        const QStringList direct{"collapse_points","collapse_edges","connect_points","split_edges","flip_faces","assemble_faces","clear_constraints","unlock_all","clear_selection","select_leaks"};
         a->setProperty("studio_opens_dialog",!direct.contains(op));
         if(menu)menu->addAction(a);
         addAction(a);modelingActions_.append(a);connect(a,&QAction::triggered,this,[this,op]{modelingAction(op);});return a;
@@ -61,9 +61,8 @@ void MainWindow::buildModelingActions(QMenu* point,QMenu* edge,QMenu* face,QMenu
     auto* fresh=add(nullptr,uiText("新建船型…"),"NewFile","new");fresh->setShortcut(QKeySequence::New);
     fresh->setProperty("shortcut_target","当前船模");
     primaryMenu_->insertAction(open_,fresh);
-    point->addSeparator();add(point,uiText("控制点属性…"),"ObjectDetails","point_properties","point",1);
+    point->addSeparator();
     add(point,uiText("折叠所选点"),"Collapse","collapse_points","point",1);
-    add(point,uiText("挤出所选点…"),"Point","extrude_points","point",1);
     auto* constraints=point->addMenu(uiText("对齐与约束"));
     constraints->setIcon(studioIcon("AlignPoints"));
     add(constraints,uiText("投影到首尾两点的直线"),"AlignPoints","align","point",3);
@@ -88,8 +87,6 @@ void MainWindow::buildModelingActions(QMenu* point,QMenu* edge,QMenu* face,QMenu
     add(layer,uiText("按折痕自动分组…"),"LayerAutoGroup","auto_group_layers");
     transforms.append(add(nullptr,uiText("绕船中旋转…"),"RotateCW","rotate_midship","transform",1));
     transforms.append(add(nullptr,uiText("Lackenby 船型变换…"),"Transform","lackenby"));
-    auto* selection=point->addMenu(uiText("选择"));add(selection,uiText("全选"),"SelectAll","select_all");add(selection,uiText("反选"),"SelectAll","invert_selection");
-    selection->setIcon(studioIcon("SelectAll"));
     add(view,uiText("导入参考曲线…"),"OpenFile","add_markers");
     add(view,uiText("删除全部参考曲线…"),"DeleteSelected","delete_markers");
     session_.onAnalysis=[this](const QJsonObject& info){modelingDialog("lackenby",info);
@@ -101,7 +98,7 @@ void MainWindow::updateModelingActions(){
     for(auto* a:modelingActions_){const auto op=a->property("operation").toString(),kind=a->property("selection_kind").toString();const int minimum=a->property("minimum_selection").toInt();
         int count=kind=="transform"?transformPoints().size():kind=="point"?selection_.size():entitySelection_.size();
         bool enabled=idle&&(op=="new"||ready)&&(kind.isEmpty()||kind=="transform"||kind==selectedKind)&&count>=minimum;
-        if(op=="point_properties"||op=="rename_control")enabled=enabled&&count==1;
+        if(op=="rename_control")enabled=enabled&&count==1;
         if(ready&&op=="point_groups")enabled=enabled&&!session_.model()->pointGroups.isEmpty();
         if(ready&&op=="delete_markers")enabled=enabled&&!session_.model()->markers.isEmpty();
         if(ready){
@@ -109,10 +106,7 @@ void MainWindow::updateModelingActions(){
             if(op=="unlock_all")enabled=enabled&&std::any_of(model.points.cbegin(),model.points.cend(),[](const auto& point){return point.locked;});
             if(op=="select_leaks")enabled=enabled&&std::any_of(model.points.cbegin(),model.points.cend(),[](const auto& point){return point.leak;});
             if(op=="clear_constraints")enabled=enabled&&std::any_of(model.points.cbegin(),model.points.cend(),[this](const auto& point){return selection_.contains(point.id)&&(point.anchor||point.lineA||point.lineB);});
-            if(op=="select_all"||op=="invert_selection"){
-                const int available=selectionKind_==HullEntity::Point?model.points.size():selectionKind_==HullEntity::Edge?model.edges.size():selectionKind_==HullEntity::Face?model.faces.size():selectionKind_==HullEntity::Curve?model.controlCurves.size():model.flowlines.size();
-                enabled=enabled&&available>0;
-            }
+            if(op=="select_all"||op=="invert_selection")enabled=enabled&&!model.points.isEmpty();
         }
         a->setEnabled(enabled);
     }
@@ -127,13 +121,11 @@ void MainWindow::modelingAction(const QString& op){
     if(op=="clear_selection"){selectEntities(selectionKind_,{});selectPoints({});return;}
     if(op=="select_leaks"){setSelectionKind(HullEntity::Point);QSet<fs::EntityId> ids;for(const auto& p:m->points)if(p.leak)ids.insert(p.id);selectPoints(ids);return;}
     if(op=="select_all"||op=="invert_selection"){
+        if(selectionKind_!=HullEntity::Point)setSelectionKind(HullEntity::Point);
         QSet<fs::EntityId> ids;
-        if(selectionKind_==HullEntity::Point)for(const auto& p:m->points)ids.insert(p.id);
-        else if(selectionKind_==HullEntity::Edge)for(const auto& e:m->edges)ids.insert(e.id);
-        else if(selectionKind_==HullEntity::Face)for(const auto& f:m->faces)ids.insert(f.id);
-        else for(const auto& c:selectionKind_==HullEntity::Curve?m->controlCurves:m->flowlines)ids.insert(c.id);
-        if(op=="invert_selection")ids.subtract(selectionKind_==HullEntity::Point?selection_:entitySelection_);
-        if(selectionKind_==HullEntity::Point)selectPoints(ids);else selectEntities(selectionKind_,ids);return;
+        for(const auto& p:m->points)ids.insert(p.id);
+        if(op=="invert_selection")ids.subtract(selection_);
+        selectPoints(ids);return;
     }
     if(op=="add_markers"){
         QFileDialog dialog(this,uiText("导入参考曲线"),preferenceFileLocation("import"));dialog.setProperty("modeling_operation",op);dialog.setFileMode(QFileDialog::ExistingFile);
@@ -191,13 +183,8 @@ void MainWindow::modelingDialog(const QString& op,const QJsonObject& initial){
         combo("axis",uiText("平面"),{"横剖面 X","纵剖面 Y","水平面 Z"});num("distance",uiText("坐标"),0);check("create_curve",uiText("生成控制曲线"),true);
     }else if(op=="intersect_layers"){
         layer("layer_id",uiText("插入控制点的图层"));layer("other_layer_id",uiText("用于求交的图层"));
-    }else if(op=="point_properties"){
-        if(selection_.size()!=1)return;const auto* p=m->point(*selection_.begin());request["ids"]=array(selection_);
-        text("name",uiText("名称"),p->name);combo("vertex_type",uiText("点类型"),{"普通点","折痕点","尖点","角点"},p->vertexType);
-        if(p->anchor||p->lineA)note(p->anchor?uiText("该点有锚点约束。"):uiText("该点有直线约束。"));
     }else if(op=="rename_control"){
         request["ids"]=array(entitySelection_);QString name;for(const auto& c:m->controlCurves)if(entitySelection_.contains(c.id))name=c.name;text("name",uiText("名称"),name);
-    }else if(op=="extrude_points"){request["ids"]=array(selection_);vector("position",uiText("偏移量"));
     }else if(op=="anchor"||op=="coincide"||op=="align"||op=="linear_constraint"){
         request["ids"]=array(selectionOrder_);
         if(op=="anchor"){note(uiText("第一点作为锚点，其余点保持当前相对位置。移动锚点时，关联点一起移动。"));check("hard",uiText("禁止单独移动关联点"),false);}
@@ -206,7 +193,7 @@ void MainWindow::modelingDialog(const QString& op,const QJsonObject& initial){
         for(int i=0;i<selectionOrder_.size();++i){const auto* p=m->point(selectionOrder_[i]);note(QString("%1：%2，%3，%4").arg(i+1).arg(p->position.x).arg(p->position.y).arg(p->position.z));}
     }else if(op=="create_group"||op=="update_group"){
         request["ids"]=array(selection_);if(initial.contains("index"))request["index"]=initial["index"];
-        text("name",uiText("组名"),QString("Group %1").arg(m->pointGroups.size()+1));check("locked",uiText("锁定整组"),false);note(QString(uiText("包含当前选中的 %1 个控制点。")).arg(selection_.size()));
+        text("name",uiText("组名"),QString("Group %1").arg(m->pointGroups.size()+1));check("locked",uiText("固定整组"),false);note(QString(uiText("包含当前选中的 %1 个控制点。")).arg(selection_.size()));
     }else if(op=="lackenby"){
         note(QString(uiText("当前排水量 %1，浮心纵坐标 %2，棱形系数 %3。")).arg(initial["displacement"].toDouble()).arg(initial["lcb"].toDouble()).arg(initial["cp"].toDouble()));
         num("displacement",m->units=="metric"?uiText("目标排水量 (t)"):uiText("目标排水量 (long ton)"),initial["displacement"].toDouble(),0.000001);
@@ -240,7 +227,7 @@ void MainWindow::pointGroupsDialog(){
     const auto m=session_.model();if(!m||session_.busy())return;
     QDialog dialog(this);setStudioWindowIcon(&dialog,"Point");dialog.setWindowTitle(uiText("点组"));dialog.setProperty("modeling_operation","point_groups");dialog.setAttribute(Qt::WA_DontShowOnScreen,workflow_);
     auto* layout=new QVBoxLayout(&dialog);auto* list=new QListWidget;
-    for(const auto& g:m->pointGroups)list->addItem(QString(uiText("%1 · %2 个点%3")).arg(g.name).arg(g.points.size()).arg(g.locked?uiText(" · 已锁定"):""));
+    for(const auto& g:m->pointGroups)list->addItem(QString(uiText("%1 · %2 个点%3")).arg(g.name).arg(g.points.size()).arg(g.locked?uiText(" · 已固定"):""));
     layout->addWidget(list);int action=0;auto* controls=new QDialogButtonBox;
     for(const auto& pair:{std::pair<QString,int>{uiText("选择","action"),1},{uiText("编辑"),2},{uiText("解组"),3}}){auto* b=controls->addButton(pair.first,QDialogButtonBox::ActionRole);b->setProperty("group_action",pair.second);if(pair.second==1)bindUiText(b,"text","选择","action");connect(b,&QPushButton::clicked,&dialog,[&dialog,&action,list,code=pair.second]{if(list->currentRow()>=0){action=code;dialog.accept();}});}
     layout->addWidget(controls);

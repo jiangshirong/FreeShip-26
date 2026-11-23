@@ -34,6 +34,7 @@
 #include <QPushButton>
 #include <QStatusBar>
 #include <QSignalBlocker>
+#include <QSettings>
 #include <QTabWidget>
 #include <QToolBar>
 #include <QVBoxLayout>
@@ -89,8 +90,41 @@ fs::EntityId chooseLayer(const fs::ModelSnapshot& model,QWidget* parent,const QS
 bool MainWindow::canEditDisplay() const {
     return session_.ready()&&(!session_.busy()||!submittedDisplay_.isEmpty());
 }
+void MainWindow::loadDisplayDefaults(){
+    restoredDisplay_={};
+    if(!preferencesStore_)return;
+    QSettings store(preferencesStore_->filename()+".views.ini",QSettings::IniFormat);
+    store.beginGroup("visibility");
+    for(const auto& key:store.childKeys()){
+        const auto value=store.value(key);
+        if(DisplayFlags.contains(key))restoredDisplay_[key]=value.toBool();
+        else if(key=="curvature_scale"){
+            const double scale=value.toDouble();
+            if(scale>=1e-9 && scale<=1e9)restoredDisplay_[key]=scale;
+        }
+    }
+}
+void MainWindow::rememberDisplayChanges(const QJsonObject& changes){
+    if(!preferencesStore_)return;
+    QSettings store(preferencesStore_->filename()+".views.ini",QSettings::IniFormat);
+    store.beginGroup("visibility");
+    for(auto it=changes.begin();it!=changes.end();++it){
+        store.setValue(it.key(),it.value().toVariant());
+        // Subsequent edits and undo in this document follow its live snapshot.
+        restoredDisplay_.remove(it.key());
+    }
+}
+std::shared_ptr<const fs::ModelSnapshot> MainWindow::withDisplayDefaults(std::shared_ptr<const fs::ModelSnapshot> model)const{
+    if(model)for(auto it=restoredDisplay_.begin();it!=restoredDisplay_.end();++it){
+        if(displaySetting(*model,it.key())==it.value())continue;
+        auto shown=std::make_shared<fs::ModelSnapshot>(*model);
+        applyDisplaySettings(*shown,restoredDisplay_);
+        return shown;
+    }
+    return model;
+}
 std::shared_ptr<const fs::ModelSnapshot> MainWindow::displayModel() const {
-    const auto model=session_.model();
+    const auto model=withDisplayDefaults(session_.model());
     if(!model||displayDocument_!=model->documentId||(submittedDisplay_.isEmpty()&&queuedDisplay_.isEmpty()))
         return model;
     // The vectors are implicitly shared. Only these display fields differ from
@@ -122,7 +156,10 @@ void MainWindow::submitDisplayChanges() {
     if(session_.busy())return;
     auto changes=std::exchange(queuedDisplay_,{});
     for(auto it=changes.begin();it!=changes.end();){
-        if(it.value()==displaySetting(*model,it.key()))it=changes.erase(it);
+        if(it.value()==displaySetting(*model,it.key())){
+            rememberDisplayChanges({{it.key(),it.value()}});
+            it=changes.erase(it);
+        }
         else ++it;
     }
     if(changes.isEmpty()){
@@ -162,7 +199,7 @@ void MainWindow::buildStudioShell() {
     auto action=[this](const QString& text,const QString& icon,const QString& operation={}) {
         auto* a=new QAction(studioIcon(icon),text,this);a->setObjectName("Studio"+icon);
         if(!operation.isEmpty())a->setProperty("operation",operation);
-        static const QSet<QString> windows{"add_point","add_face","assign_layer","delete","layer_properties",
+        static const QSet<QString> windows{"add_face","assign_layer","delete","layer_properties",
             "translate","scale","rotate","extrude","mirror",
             "model_check","compare_models","develop_plates","sections","lines_window","shortcut_guide","tutorial"};
         if(windows.contains(operation)||operation.startsWith("hydro_")||operation.startsWith("performance_"))
@@ -195,19 +232,15 @@ void MainWindow::buildStudioShell() {
     selection(uiText("选择边"),"Edge",HullEntity::Edge);selection(uiText("选择面"),"Face",HullEntity::Face);
     selection(uiText("选择控制曲线"),"NewCurve",HullEntity::Curve);
     selection(uiText("选择流线"),"Flowlines",HullEntity::Flowline);
+    for(const auto& [label,operation]:QList<QPair<QString,QString>>{{"全选点","select_all"},{"反选点","invert_selection"}}){
+        auto* command=action(uiText(label),"SelectAll",operation);
+        selectionMenu->addAction(command);modelingActions_.append(command);
+        connect(command,&QAction::triggered,this,[this,operation]{modelingAction(operation);});
+    }
     addCurve_=action(uiText("由所选边生成控制曲线"),"NewCurve","create_control_curve");edgeMenu->addAction(addCurve_);
     connect(addCurve_,&QAction::triggered,this,[this]{session_.editAuxiliary("create_control",{{"ids",ids(entitySelection_)}});});
     placePoint_=action(uiText("放置控制点"),"Point","place_point");placePoint_->setCheckable(true);pointMenu->addAction(placePoint_);
     connect(placePoint_,&QAction::triggered,this,[this](bool enabled){if(enabled)beginPointPlacement();else endPointPlacement();});
-    addPoint_=action(uiText("按坐标新增控制点…"),"Point","add_point");pointMenu->addAction(addPoint_);
-    connect(addPoint_,&QAction::triggered,this,&MainWindow::createPoint);
-    auto* details=action(uiText("所选对象详情"),"ObjectDetails");pointMenu->addAction(details);
-    details->setCheckable(true);
-    connect(pointMenu,&QMenu::aboutToShow,this,[this,details]{details->setChecked(!inspector_->isHidden());});
-    connect(details,&QAction::triggered,this,[this](bool visible){
-        inspector_->setVisible(visible);
-        if(visible)inspector_->setCurrentIndex(0);
-    });
     lock_=action(uiText("锁定所选点"),"Lock","set_locked");unlock_=action(uiText("解锁所选点"),"Unlock","set_unlocked");
     pointMenu->addAction(lock_);pointMenu->addAction(unlock_);
     connect(lock_,&QAction::triggered,this,[this]{session_.editTopology("set_locked",{{"ids",ids(selection_)},{"locked",true}});});
@@ -235,8 +268,8 @@ void MainWindow::buildStudioShell() {
     decreaseCurvature_=action(uiText("减小曲率梳"),"ZoomOut","curvature_decrease");
     connect(increaseCurvature_,&QAction::triggered,this,[this]{requestDisplayChange("curvature_scale",double(float(displayModel()->curvatureScale*1.1)));});
     connect(decreaseCurvature_,&QAction::triggered,this,[this]{requestDisplayChange("curvature_scale",double(float(displayModel()->curvatureScale/1.1)));});
-    auto* grid=action(uiText("网格"),"Grid","overlay_grid");grid->setCheckable(true);grid->setChecked(true);visibilityMenu->addAction(grid);
-    auto* hydro=action(uiText("静水力数据"),"Hydrostatics","overlay_hydro");hydro->setCheckable(true);hydro->setChecked(true);visibilityMenu->addAction(hydro);
+    auto* grid=action(uiText("网格"),"Grid","overlay_grid");grid->setProperty("viewPreference","overlay_grid");grid->setCheckable(true);grid->setChecked(true);visibilityMenu->addAction(grid);
+    auto* hydro=action(uiText("静水力数据"),"Hydrostatics","overlay_hydro");hydro->setProperty("viewPreference","overlay_hydro");hydro->setCheckable(true);hydro->setChecked(true);visibilityMenu->addAction(hydro);
     auto* curveVisible=action(uiText("控制曲线"),"NewCurve","show_control_curves");bindDisplayToggle(curveVisible);visibilityMenu->addAction(curveVisible);
     auto* flowMenu=visibilityMenu->addMenu(uiText("流线"));
     flowMenu->setIcon(studioIcon("Flowlines"));
@@ -265,7 +298,7 @@ void MainWindow::buildStudioShell() {
     checksMenu->addAction(checkModel);modelingActions_.append(checkModel);
     connect(checkModel,&QAction::triggered,this,&MainWindow::modelCheckDialog);
     buildModelingActions(pointMenu,edgeMenu,faceMenu,layerMenu,visibilityMenu,transforms,checksMenu);
-    visibilityMenu->addAction(markers);
+    visibilityMenu->addActions({markers,normals,curvature,decreaseCurvature_,increaseCurvature_});
     auto* tools=group(uiText("工具"),"Tools",toolsMenu_);
     bindUiText(tools,"text","工具");bindUiText(toolsMenu_,"title","工具");
     compareModels_=action(uiText("比较船模…"),"Sections","compare_models");
@@ -292,11 +325,12 @@ void MainWindow::buildStudioShell() {
             }
             return true;
         };
-        view->onPopulateContextMenu=[this,normals,curvature](QMenu& menu){
-            for(auto* item:menu.actions())
-                if(item->property("view_operation")=="save_image")setStudioFormatMenuAction(&menu,item,"png");
-            menu.addSeparator();
-            menu.addActions({normals,curvature,decreaseCurvature_,increaseCurvature_});
+        view->onPopulateContextMenu=[](QMenu& menu){
+            for(auto* item:menu.actions()){
+                const auto operation=item->property("view_operation").toString();
+                if(operation=="save_image")setStudioFormatMenuAction(&menu,item,"png");
+                else if(operation=="export_pdf")setStudioFormatMenuAction(&menu,item,"pdf");
+            }
         };
     }
     const QStringList hydroModes{"single","table","cross"},hydroNames{uiText("设计静水力…"),uiText("静水力吃水表…"),uiText("稳性曲线与平衡…")};
@@ -327,17 +361,17 @@ void MainWindow::buildStudioShell() {
     connect(sections,&QAction::triggered,this,&MainWindow::editSections);
     const std::array<QString,4> sectionNames{uiText("横剖线"),uiText("纵剖线"),uiText("水线"),uiText("斜剖线")};
     visibilityMenu->addSeparator();
-    for(int i=0;i<4;++i){auto* a=action(sectionNames[i],"Sections","section_visibility");a->setProperty("section_kind",i+1);a->setCheckable(true);a->setChecked(true);visibilityMenu->addAction(a);
+    for(int i=0;i<4;++i){auto* a=action(sectionNames[i],"Sections","section_visibility");a->setProperty("section_kind",i+1);a->setProperty("viewPreference","section_"+QString::number(i+1));a->setCheckable(true);a->setChecked(true);visibilityMenu->addAction(a);
         connect(a,&QAction::toggled,this,[this,i](bool value){for(auto* view:views_)view->setSectionVisible(i+1,value);});}
     auto* lines=action(uiText("型线图"),"LinesPlan","lines_window");linesAction_=lines;connect(lines,&QAction::triggered,this,&MainWindow::openLinesWindow);
     lines->setProperty("studio_opens_dialog",true);
-    auto* net=action(uiText("控制网格"),"ControlNet");net->setCheckable(true);net->setChecked(true);
+    auto* net=action(uiText("控制网格"),"ControlNet");net->setProperty("viewPreference","control_net");net->setCheckable(true);net->setChecked(true);
     connect(net,&QAction::toggled,this,[this](bool value){for(auto* view:views_)view->setControlNetVisible(value);});
-    for(auto* view:views_)view->onShowControlNet=[net]{net->setChecked(true);};
+    for(auto* view:views_)view->onShowControlNet=[net]{if(!net->isChecked())net->trigger();};
     const std::array<QString,4> names{uiText("纵剖面"),uiText("横剖面"),uiText("俯视图"),uiText("透视图")};
     const std::array<QString,4> icons{"ViewProfile","ViewBody","ViewPlan","ViewPerspective"};
     for(size_t i=0;i<4;++i){
-        auto* a=action(names[i],icons[i]);viewActions_[i]=a;a->setCheckable(true);a->setChecked(true);
+        auto* a=action(names[i],icons[i]);viewActions_[i]=a;a->setProperty("viewPreference","visible_"+QString::number(i));a->setCheckable(true);a->setChecked(true);
         connect(a,&QAction::triggered,this,[this,a]{
             if(std::none_of(viewActions_.begin(),viewActions_.end(),[](auto* item){return item->isChecked();}))a->setChecked(true);
             layoutViews();
@@ -374,7 +408,13 @@ void MainWindow::layoutViews() {
     int count=0;for(int index:{1,0,2,3})if(viewActions_[index]->isChecked())++count;
     int at=0;for(int index:{1,0,2,3}) {
         bool visible=viewActions_[index]->isChecked();viewFrames_[index]->setVisible(visible);
-        if(visible){viewGrid_->addWidget(viewFrames_[index],at/2,at%2);++at;}
+        if(visible){
+            viewGrid_->addWidget(viewFrames_[index],at/2,at%2);
+            const bool right=at%2==0,bottom=count>2&&at<2;
+            views_[index]->setDisplayModeButtonCorner(bottom?(right?Qt::BottomRightCorner:Qt::BottomLeftCorner):
+                                                             (right?Qt::TopRightCorner:Qt::TopLeftCorner));
+            ++at;
+        }
     }
     studio_view_grid::setVisibleCount(viewGrid_,count);
     });
@@ -444,23 +484,15 @@ void MainWindow::setSelectionKind(HullEntity kind) {
     tabs_->setCurrentIndex(0);updateState();
 }
 void MainWindow::selectEntities(HullEntity kind,QSet<fs::EntityId> selected) {
-    selectionKind_=kind;views_.front()->setSelectedEntities(std::move(selected));entitySelection_=views_.front()->selectedEntities();
-    for(auto* view:views_)view->setSelectedEntities(entitySelection_);
+    selectionKind_=kind;if(!selection_.isEmpty())selectPoints({});
+    entitySelection_.clear();
+    for(auto* view:views_){
+        if(view->selectionKind()!=kind){view->setSelectedEntities({});continue;}
+        view->setSelectedEntities(selected);entitySelection_.unite(view->selectedEntities());
+    }
     updateState();
     QStringList identity;auto ids=entitySelection_.values();std::sort(ids.begin(),ids.end());for(auto id:ids)identity.append(QString::number(id));
     data_motion::pulseProperties(inspector_,QString::number(int(kind))+":"+identity.join(','));
-}
-void MainWindow::createPoint() {
-    if(!session_.ready()||session_.busy())return;
-    const auto model=session_.model();
-    QDialog dialog(this);setStudioWindowIcon(&dialog,"Point");dialog.setWindowTitle(uiText("新增控制点"));dialog.setAttribute(Qt::WA_DontShowOnScreen,workflow_);auto* layout=new QVBoxLayout(&dialog);
-    auto* form=new QFormLayout;std::array<QDoubleSpinBox*,3> values{};
-    for(int i=0;i<3;++i){auto* spin=new QDoubleSpinBox;values[i]=spin;spin->setRange(-1e9,1e9);spin->setDecimals(12);form->addRow(QString(QChar('X'+i))+" ("+(session_.model()->units=="metric"?"m":"ft")+")",spin);}
-    layout->addLayout(form);auto* buttons=new QDialogButtonBox(QDialogButtonBox::Ok|QDialogButtonBox::Cancel);
-    connect(buttons,&QDialogButtonBox::accepted,&dialog,&QDialog::accept);connect(buttons,&QDialogButtonBox::rejected,&dialog,&QDialog::reject);layout->addWidget(buttons);
-    if(runStudioDialog(dialog)!=QDialog::Accepted)return;
-    if(!session_.ready()||session_.busy()||session_.model()->documentId!=model->documentId||session_.model()->units!=model->units){showError(uiText("船模已更改，请重新打开此窗口。"));return;}
-    session_.editTopology("add_point",{{"position",QJsonArray{values[0]->value(),values[1]->value(),values[2]->value()}}});
 }
 void MainWindow::createFace() {
     if(!session_.ready()||session_.busy()||selectionOrder_.size()<3)return;
@@ -516,29 +548,71 @@ void MainWindow::beginPointPlacement(){
     setSelectionKind(HullEntity::Point);
     if(placePoint_){QSignalBlocker block(placePoint_);placePoint_->setChecked(true);}
     tabs_->setCurrentIndex(0);
-    for(auto* view:views_){view->setFillVisible(false);view->setPointPlacement(true);}
-    showStatusMessage(uiText("在正交视图点击放置控制点；纵剖面 Y=0，俯视图 Z=0，横剖面 X=模型最大 X。Esc 或右键取消。"),StudioMessageRole::Explanation);
+    for(auto* view:views_){view->setFillVisible(false);view->setControlNetVisible(true);view->setPointPlacement(true);}
+    showStatusMessage(uiText("横剖面按所选站面放点；按住 Shift 点击可吸附中线或本站参考线。Esc 或右键结束。"),StudioMessageRole::Explanation);
 }
 void MainWindow::endPointPlacement(){
+    placementUndos_=std::max(0,placementUndos_-int(waitingPlacements_.size()));
+    waitingPlacements_.clear();updatePlacementPreview();
     if(pointPopup_)pointPopup_->hide();
     for(auto* view:views_)if(view&&view->pointPlacement())view->setPointPlacement(false);
     if(placePoint_){QSignalBlocker block(placePoint_);placePoint_->setChecked(false);}
 }
-void MainWindow::showPointPopup(HullView* view,fs::EntityId id){
-    const auto model=session_.model();const auto* point=model?model->point(id):nullptr;if(!point||!view)return;
+namespace {
+struct MeshDetails {QString layers;int count=0;bool crease=false;};
+MeshDetails meshDetails(const fs::ModelSnapshot& model,HullEntity kind,fs::EntityId id){
+    MeshDetails result;QSet<fs::EntityId> layerIds;fs::EntityId a=0,b=0;
+    if(kind==HullEntity::Edge)for(const auto& edge:model.edges)if(edge.id==id){a=edge.a;b=edge.b;result.crease=edge.crease;break;}
+    for(const auto& face:model.faces){
+        if(kind==HullEntity::Point){if(face.points.contains(id))layerIds.insert(face.layer);}
+        else if(kind==HullEntity::Face){if(face.id==id){layerIds.insert(face.layer);result.count=face.points.size();break;}}
+        else for(qsizetype i=0;i<face.points.size();++i){const auto x=face.points[i],y=face.points[(i+1)%face.points.size()];
+            if((x==a&&y==b)||(x==b&&y==a)){layerIds.insert(face.layer);++result.count;break;}}
+    }
+    QStringList names;for(const auto& layer:model.layers)if(layerIds.contains(layer.id))names<<layerDisplayName(layer);
+    result.layers=names.isEmpty()?uiText("无"):names.join("\n");return result;
+}
+}
+void MainWindow::showEntityPopup(HullView* view,HullEntity kind,fs::EntityId id,QPoint at){
+    const auto model=session_.model();if(!model||view->snapshot()!=model||!entitySelection_.contains(id))return;
+    ensurePointPopup();const auto info=meshDetails(*model,kind,id);
+    pointPopup_->presentEntity(kind==HullEntity::Edge,view->mapTo(pointPopup_->parentWidget(),at),info.layers,info.count,info.crease);
+}
+void MainWindow::ensurePointPopup(){
     if(!pointPopup_){
         pointPopup_=new PointCoordinatePopup(workspaceOverlayHost());
+        pointPopup_->canUndoPlacement=[this]{return canUndoPlacement();};
+        pointPopup_->undoPlacement=[this]{undoPlacement();};
         pointPopup_->onCancelPlacement=[this]{endPointPlacement();};
+        pointPopup_->onProperties=[this](fs::EntityId id,const QString& name,int type){
+            auto m=session_.model();if(!session_.ready()||session_.busy()||!m||m->documentId!=pointPopupDocument_||m->revision!=pointPopupRevision_||id!=selected_)return;
+            const auto* p=m->point(id);if(!p)return;
+            if((p->name==name&&p->vertexType==type)||session_.editModeling("point_properties",{{"ids",QJsonArray{double(id)}},{"name",name},{"vertex_type",type}}))pointPopup_->hide();
+        };
         pointPopup_->onApply=[this](fs::EntityId pointId,fs::Vec3 position){
             const auto model=session_.model();
             if(!session_.ready()||session_.busy()||!model||model->documentId!=pointPopupDocument_||model->revision!=pointPopupRevision_)return;
-            const auto* point=model->point(pointId);if(!point||point->locked)return;
+            const auto* point=model->point(pointId);if(!point||point->locked||pointId!=selected_)return;
             const bool unchanged=point->position.x==position.x&&point->position.y==position.y&&point->position.z==position.z;
-            if(unchanged||session_.movePoint(pointId,position))pointPopup_->hide();
+            if(selectedPointView_&&!selectedPointView_->pointPlacement()){
+                if(!unchanged)selectedPointView_->onPointsMoved({{pointId,position}});
+            }else if(unchanged||session_.movePoint(pointId,position))pointPopup_->hide();
         };
     }
+}
+void MainWindow::showPointPopup(HullView* view,fs::EntityId id){
+    const auto model=session_.model();const auto* point=model?model->point(id):nullptr;if(!point||!view)return;
+    ensurePointPopup();
+    if(view->pointPlacement()||pointPopupDocument_!=model->documentId)pointPropertiesPage_=false;
+    pointPopup_->setProperty("placement_undo_hidden",false);
     pointPopupDocument_=model->documentId;pointPopupRevision_=model->revision;
     const QPoint anchor=view->mapTo(pointPopup_->parentWidget(),view->projectControlPoint(id).toPoint());
-    pointPopup_->present(id,point->position,model->units,anchor);
-    pointPopup_->setEditingEnabled(!session_.busy()&&!point->locked);
+    pointPopup_->present(id,view->displayedControlPoint(id).value_or(point->position),model->units,view->projection(),anchor,point->batchMovable && !point->locked?84:12,view->pointPlacement(),pointPropertiesPage_,point->name,point->vertexType,pointPropertiesPage_?meshDetails(*model,HullEntity::Point,id).layers:QString());
+    pointPopup_->setEditingEnabled(!session_.busy(),!point->locked,point->batchMovable);
+}
+void MainWindow::followPointPopup(){
+    if(!pointPopup_||!pointPopup_->isVisible()||!selectedPointView_||pointPopup_->pointId()!=selected_)return;
+    auto* view=selectedPointView_.data();
+    if(const auto position=view->displayedControlPoint(selected_))
+        pointPopup_->follow(*position,view->mapTo(pointPopup_->parentWidget(),view->projectControlPoint(selected_).toPoint()));
 }

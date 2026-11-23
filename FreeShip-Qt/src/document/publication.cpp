@@ -2,6 +2,7 @@
 // ModelService.WriteModel, NativeLinesplanInput and OverlaySnapshot.inc.
 // Geometry remains in the existing native worker; no UI object is constructed.
 #include "publication.h"
+#include "group_fixes.h"
 #include "core/platform_process.h"
 #include "geometry_input.h"
 #include "fbm_text.h"
@@ -137,7 +138,7 @@ Publication::Publication(const Fbm &source,const QJsonObject &bindings,const Pub
     QJsonObject annotations;
     if(parallelPresentation){
         const auto split=hydro_->presentationCreaseSplit();annotations["crease_split"]=split;
-        // Only a new load uses this path. The worker owns an independent mesh;
+        // The annotation task owns its solver until publication has finished;
         // no other caller can use hydro_ until generate() joins this future.
         presentation_=std::async(std::launch::async,[hydro=hydro_,flags,context,split]{return hydro->presentation(flags,context,split);});
     }else annotations=hydro_->presentation(flags,context);
@@ -218,11 +219,12 @@ Publication::Publication(const Fbm &source,const QJsonObject &bindings,const Pub
     model_["control_curves"]=curves;model_["normal_color"]=context["normal_color"];
     QJsonArray groups,markers,backgrounds,flows,flowDefinitions,sections,sectionInput;
     if(version>=42) {
+        const auto fixes=GroupFixes::read(source.calculationParameters());
         Reader r{source.blockBytes("point_groups")};const int n=r.count();
         for(int i=0;i<n;++i) {
-            const auto label=decodeFbmText(r.string(),encoding);const int count=r.count();QJsonArray ids;bool locked=count>0;
+            const auto label=decodeFbmText(r.string(),encoding);const int count=r.count();QJsonArray ids;const bool locked=GroupFixes::has(fixes.fixed,i);
             for(int j=0;j<count;++j) {bool ok=false;const int index=r.string().toInt(&ok);if(!ok || index<0 || index>=pointIds.size())bad("Invalid group point");
-                ids.append(pointIds[index]);locked=locked && net.points[size_t(index)].value.locked;}
+                ids.append(pointIds[index]);}
             groups.append(QJsonObject{{"index",i},{"name",label},{"locked",locked},{"points",ids}});
         }
     }
@@ -363,9 +365,16 @@ std::optional<QJsonObject> Publication::metadataChanges(const Publication &previ
     if(a!=b)return {};
     return changes;
 }
-void Publication::writeArtifacts(const QString &directory,const QString &documentId,quint64 revision) const {
+void PublicationFrame::writeArtifacts(const QString &directory,const QString &documentId,quint64 revision) const {
     const QDir dir(directory);
-    for(const auto &[name,bytes]:artifacts_) {
+    // The two large independent blobs may be inflated/written concurrently.
+    // The owning transaction joins before validating and promoting any path.
+    std::future<void> sceneWrite;
+    for(const auto &[name,stored]:artifacts_) {
+        if(packed_&&name=="scene.fslp"){
+            sceneWrite=std::async(std::launch::async,[path=dir.filePath(name),data=stored]{save(path,qUncompress(data));});continue;
+        }
+        const QByteArray bytes=packed_?qUncompress(stored):stored;
         if(name=="native-report.json") {
             auto report=QJsonDocument::fromJson(bytes).object();
             report["document_id"]=documentId;report["revision"]=qint64(revision);report["artifacts_reused"]=true;
@@ -373,6 +382,7 @@ void Publication::writeArtifacts(const QString &directory,const QString &documen
             save(dir.filePath(name),report);
         }else save(dir.filePath(name),bytes);
     }
+    if(sceneWrite.valid())sceneWrite.get();
 }
 void Publication::retainValidatedArtifacts(const QString &directory) {
     if(generatedMetadata_.empty()){artifacts_.clear();return;}
@@ -389,7 +399,7 @@ void Publication::retainValidatedArtifacts(const QString &directory) {
 QJsonObject Publication::generateMetadata(const QString &directory,const QJsonObject &texts,
                                         const QString &documentId,quint64 revision) {
     if(!canReuseMetadata())bad("No validated metadata publication");
-    QElapsedTimer clock;clock.start();const QDir dir(directory);
+    QElapsedTimer clock;clock.start();
     const auto baseHash=QString::fromLatin1(QCryptographicHash::hash(generatedMetadata_.bytes(),QCryptographicHash::Sha256).toHex());
     auto settings=model_["settings"].toObject();
     for(auto i=texts.begin();i!=texts.end();++i) {
@@ -400,18 +410,42 @@ QJsonObject Publication::generateMetadata(const QString &directory,const QJsonOb
         }
         settings[i.key()]=i.value();
     }
-    auto input=input_;input["document_id"]=documentId;input["revision"]=qint64(revision);
-    writeArtifacts(directory,documentId,revision);
-    const auto nextMetadata=generatedMetadata_.updated(texts,revision);
-    const auto &modelBytes=nextMetadata.bytes();
-    if(modelBytes.size()>256LL*1024*1024)bad("Model snapshot exceeds file size limit");
-    save(dir.filePath("native-input.json"),input);save(dir.filePath("model.json"),modelBytes);
-    generatedMetadata_=nextMetadata;
+    auto next=generatedMetadata_.updated(texts,revision);
+    auto result=writeFrame(directory,documentId,revision,next);
+    generatedMetadata_=std::move(next);
     model_["settings"]=settings;model_["name"]=settings["name"];
+    result["metadata_reused"]=true;result["metadata_base_sha256"]=baseHash;result["metadata_patch"]=texts;
+    result["snapshot_write_ms"]=clock.nsecsElapsed()/1e6;return result;
+}
+PublicationFrame PublicationFrame::packedForHistory() const {
+    auto frame=*this;frame.packed_=true;frame.generatedMetadata_=generatedMetadata_.packedForHistory();
+    for(auto& [name,data]:frame.artifacts_)data=qCompress(data,1);
+    return frame;
+}
+qsizetype PublicationFrame::retainedBytes() const {
+    qsizetype n=generatedMetadata_.bytes().size()+QJsonDocument(input_).toJson(QJsonDocument::Compact).size();
+    for(const auto &item:artifacts_)n+=item.second.size();return n;
+}
+bool PublicationFrame::canonicalHistoryLayer(const QJsonObject &bindings) const {
+    // Undo rebuilds last_layer_number from the FBM rather than the live edit high water.
+    const int live=bindings.value("last_used_layer_id").toInt(-1);int file=-1;
+    for(const auto &v:input_["geometry"].toObject()["layers"].toArray())file=std::max(file,v.toObject()["layer_id"].toInt());
+    return live<=file;
+}
+QJsonObject PublicationFrame::replay(const QString &directory,const QString &id,quint64 revision) const {
+    if(!packed_)return writeFrame(directory,id,revision,generatedMetadata_.updated({},revision));
+    QElapsedTimer clock;clock.start();auto blobs=std::async(std::launch::async,[this,directory,id,revision]{writeArtifacts(directory,id,revision);});
+    auto result=writeFrame(directory,id,revision,generatedMetadata_.expandedFromHistory().updated({},revision),false);
+    blobs.get();result["snapshot_write_ms"]=clock.nsecsElapsed()/1e6;return result;
+}
+QJsonObject PublicationFrame::writeFrame(const QString &directory,const QString &documentId,quint64 revision,const fs::SnapshotMetadata &model,bool withArtifacts) const {
+    QElapsedTimer clock;clock.start();const QDir dir(directory);
+    auto input=input_;input["document_id"]=documentId;input["revision"]=qint64(revision);
+    if(withArtifacts)writeArtifacts(directory,documentId,revision);
+    save(dir.filePath("native-input.json"),input);save(dir.filePath("model.json"),model.bytes());
     return {{"document_id",documentId},{"revision",qint64(revision)},{"model",dir.filePath("model.json")},
         {"scene",dir.filePath("scene.fslp")},{"dxf",dir.filePath("reference.dxf")},{"native_report",dir.filePath("native-report.json")},
         {"sections",dir.filePath("sections.json")},{"surface",dir.filePath("surface.json")},{"snapshot_engine","cpp-publication"},
-        {"worker_ms",0},{"snapshot_write_ms",clock.nsecsElapsed()/1e6},{"metadata_reused",true},{"artifacts_reused",true},
-        {"metadata_base_sha256",baseHash},{"metadata_patch",texts}};
+        {"worker_ms",0},{"snapshot_write_ms",clock.nsecsElapsed()/1e6},{"artifacts_reused",true}};
 }
 }

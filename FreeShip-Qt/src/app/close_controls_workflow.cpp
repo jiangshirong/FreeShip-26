@@ -1,5 +1,7 @@
 // Production-widget audit. Only explicitly requested private startup probes run it.
 #include "studio_ui.h"
+#include "ui_language.h"
+#include <QFontDatabase>
 #include "main_window.h"
 #include "about_dialog.h"
 #include "shortcuts_dialog.h"
@@ -38,6 +40,8 @@
 #include <QPushButton>
 #include <QTimer>
 #include <QToolTip>
+#include <QWheelEvent>
+#include <QAbstractItemView>
 #include <stdexcept>
 
 void MainWindow::auditCloseControls(){
@@ -46,6 +50,19 @@ void MainWindow::auditCloseControls(){
     MessageLifecycleProbe messageLifecycle;
     const auto original=session_.model();const bool modified=session_.modified();
     QJsonArray rows;QDir().mkpath(workflowOutput_+"/views");
+    const auto clippedLabels=[](QDialog* dialog){
+        QJsonArray issues;
+        for(auto* label:dialog->findChildren<QLabel*>()){
+            if(label->window()!=dialog||!label->isVisibleTo(dialog)||!label->wordWrap()||label->text().isEmpty()||
+               label->textFormat()==Qt::RichText||(label->textFormat()==Qt::AutoText&&Qt::mightBeRichText(label->text())))continue;
+            const auto room=label->contentsRect().adjusted(label->margin(),label->margin(),-label->margin(),-label->margin());
+            const auto ink=label->fontMetrics().boundingRect(QRect(0,0,qMax(1,room.width()),100000),Qt::TextWordWrap,label->text());
+            if(ink.height()>room.height()+2||ink.width()>room.width()+2)
+                issues.append(QJsonObject{{"name",label->objectName()},{"text",label->text()},
+                    {"width",room.width()},{"height",room.height()},{"text_width",ink.width()},{"text_height",ink.height()}});
+        }
+        return issues;
+    };
     auto observe=[&](QDialog* dialog,const QString& scope,bool picture=false){
         dialog->setProperty("studio_private_window_probe",true);
         // QMessageBox::setVisible resets WA_DontShowOnScreen in Qt itself.
@@ -57,7 +74,37 @@ void MainWindow::auditCloseControls(){
         // The native chrome probe deliberately leaves its owned window hidden.
         // Re-show on the private QA desktop before observing actual visibility.
         dialog->show();QApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+        if(qobject_cast<QMessageBox*>(dialog)&&
+            (scope=="confirmation"||scope.startsWith("message-")))
+            workflowCase("short-message-default-width-"+scope,dialog->width()>=400);
         const bool nonModal=dialog->windowModality()==Qt::NonModal&&!QApplication::activeModalWidget();
+        if(scope=="modeling-grid-panel"){
+            QComboBox* plane=nullptr;
+            for(auto* combo:dialog->findChildren<QComboBox*>())if(combo->property("field")=="plane")plane=combo;
+            if(plane&&plane->count()==3){
+                const auto active=QApplication::activeWindow();
+                QApplication::setActiveWindow(dialog);
+                plane->setCurrentIndex(1);
+                const auto wheel=[](QWidget* target,int delta){
+                    const QPoint position=target->rect().center();
+                    QWheelEvent event(position,target->mapToGlobal(position),{},QPoint(0,delta),
+                                      Qt::NoButton,Qt::NoModifier,Qt::NoScrollPhase,false);
+                    QApplication::sendEvent(target,&event);
+                };
+                plane->clearFocus();wheel(plane,-120);
+                workflowCase("grid-plane-wheel-while-unfocused-keeps-value",!plane->hasFocus()&&plane->currentIndex()==1);
+                plane->setCurrentIndex(1);plane->setFocus(Qt::TabFocusReason);wheel(plane,120);
+                workflowCase("grid-plane-wheel-while-focused-keeps-value",plane->hasFocus()&&plane->currentIndex()==1);
+                plane->setCurrentIndex(1);plane->showPopup();
+                auto* view=plane->view();wheel(view->viewport(),-120);
+                workflowCase("grid-plane-popup-wheel-does-not-commit-value",view->isVisible()&&plane->currentIndex()==1);
+                plane->hidePopup();
+                QKeyEvent down(QEvent::KeyPress,Qt::Key_Down,Qt::NoModifier);
+                QApplication::sendEvent(plane,&down);
+                workflowCase("grid-plane-keyboard-still-selects",plane->currentIndex()==2);
+                QApplication::setActiveWindow(active);
+            }else workflowCase("grid-plane-wheel-probe-found-field",false);
+        }
         if(scope=="export-stl"){
             QCheckBox* shell=nullptr;
             for(auto* box:dialog->findChildren<QCheckBox*>())
@@ -295,6 +342,12 @@ void MainWindow::auditCloseControls(){
             }messageStates.append(QJsonObject{{"state",state},{"labels",labels}});
         };
         messages("initial");
+        const auto cropped=clippedLabels(dialog);
+        if(!cropped.isEmpty()){
+            auto all=workflowArtifacts_["wrapped_label_layout_issues"].toArray();
+            all.append(QJsonObject{{"scope",scope},{"issues",cropped}});
+            workflowArtifacts_["wrapped_label_layout_issues"]=all;
+        }
         // Public production error/status handlers; no numerical request or file write.
         const QString failure="Private message-style probe";bool failed=false;
         if(auto* d=dynamic_cast<PerformanceDialog*>(dialog)){d->showFailure(failure);failed=true;}
@@ -383,6 +436,10 @@ void MainWindow::auditCloseControls(){
         const bool oldWorkflow=workflow_;workflow_=true;
         modal("point-groups",[this]{pointGroupsDialog();});
         modal("modeling-auto-group-layers",[this]{modelingDialog("auto_group_layers");},true);
+        QAction* gridPanel=nullptr;
+        for(auto* action:modelingActions_)if(action->property("operation")=="grid_panel")gridPanel=action;
+        if(gridPanel&&gridPanel->isEnabled())modal("modeling-grid-panel",[gridPanel]{gridPanel->trigger();});
+        else workflowCase("grid-panel-action-available",false);
         modal("model-check",[this]{modelCheckDialog();},true);
         modal("about",[this]{showFreeShipAbout(this);});
         modal("shortcuts",[this]{showShortcutGuide(this);});
@@ -395,6 +452,44 @@ void MainWindow::auditCloseControls(){
         for(const auto& family:QList<QPair<QMessageBox::Icon,QString>>{{QMessageBox::Information,"information"},{QMessageBox::Warning,"warning"},{QMessageBox::Critical,"error"}}){
             QMessageBox dialog(family.first,uiText("提示"),uiText("操作结果"),QMessageBox::Ok,this);observe(&dialog,"message-"+family.second,true);
         }
+        const QString originalLanguage=uiLanguage();
+        const auto oldKind=selectionKind_;const auto oldPoints=selection_;const auto oldEntities=entitySelection_;
+        setSelectionKind(HullEntity::Point);
+        for(const auto& point:original->points){selectPoint(point.id);if(!selection_.isEmpty())break;}
+        if(selection_.isEmpty())throw std::runtime_error("No selectable point to audit the delete prompt");
+        QJsonArray deletePrompts;
+        for(const auto& entry:uiLanguages()){
+            const auto id=entry.toObject()["id"].toString();
+            if(!setUiLanguage(id).isEmpty())throw std::runtime_error("Unable to switch audit language");
+            bool observed=false;
+            QTimer timer;timer.setSingleShot(true);
+            connect(&timer,&QTimer::timeout,this,[&]{
+                auto* dialog=frontStudioDialog();
+                if(!dialog)return;
+                const auto title=dialog->windowTitle();
+                auto* label=dialog->findChild<QLabel*>();
+                auto* buttons=dialog->findChild<QDialogButtonBox*>();
+                auto* cancel=buttons?buttons->button(QDialogButtonBox::No):nullptr;
+                if(!label||!cancel||title!=uiText("删除所选对象")){dialog->reject();return;}
+                const auto image=workflowOutput_+"/views/delete-confirm-"+id+".png";
+                dialog->grab().save(image);
+                const auto issues=clippedLabels(dialog);
+                const int titleWidth=QFontMetrics(QFontDatabase::systemFont(QFontDatabase::TitleFont)).horizontalAdvance(title);
+                const bool titleFits=dialog->width()>=titleWidth+72;
+                const bool localized=buttons->button(QDialogButtonBox::Yes)->text()==uiText("确认")&&cancel->text()==uiText("取消");
+                deletePrompts.append(QJsonObject{{"language",id},{"title",title},{"body",label->text()},
+                    {"width",dialog->width()},{"height",dialog->height()},{"title_fits",titleFits},
+                    {"body_issues",issues},{"buttons_localized",localized},{"image",image}});
+                workflowCase("delete-prompt-readable-"+id,titleFits&&issues.isEmpty()&&localized&&cancel->isDefault());
+                workflowCase("delete-prompt-default-width-"+id,dialog->width()>=400);
+                observed=true;cancel->click();
+            });
+            timer.start(0);delete_->trigger();timer.stop();
+            if(!observed)throw std::runtime_error("The production delete prompt did not open");
+        }
+        workflowArtifacts_["delete_prompts"]=deletePrompts;
+        setUiLanguage(originalLanguage);setSelectionKind(oldKind);
+        if(oldKind==HullEntity::Point)selectPoints(oldPoints);else selectEntities(oldKind,oldEntities);
         workflow_=oldWorkflow;
         {
             QDialog negative(this);negative.setAttribute(Qt::WA_DontShowOnScreen);negative.ensurePolished();
@@ -412,6 +507,7 @@ void MainWindow::auditCloseControls(){
             workflowArtifacts_["chrome_blank_icon_control"]=result;
             workflowCase("native-probe-detects-blank-icon",result["icon_pixels"].toInt()==0);
         }
+        workflowCase("visible-wrapped-labels-fit-in-audited-windows",workflowArtifacts_["wrapped_label_layout_issues"].toArray().isEmpty());
         workflowArtifacts_["close_controls"]=rows;
         workflowArtifacts_["unexpected_message_windows"]=messageLifecycle.unexpected;
         workflowCase("message-components-never-open-independent-windows",messageLifecycle.unexpected.isEmpty());

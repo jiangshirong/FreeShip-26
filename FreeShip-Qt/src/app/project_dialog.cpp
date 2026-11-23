@@ -182,10 +182,12 @@ ProjectDialog::ProjectDialog(const fs::ModelSnapshot& snapshot, QWidget* parent)
         s.numbers.insert(field, {editor, quantity, value, value / factor(quantity, s.units), false});
         editor->setValue(value); bind(field, editor); form->addRow(label, editor);
         s.numberLabels.insert(field,form->labelForField(editor));
-        if(field=="aft_perpendicular"||field=="forward_perpendicular"||field=="length_between_perpendiculars"||field=="moulded_depth"){
+        const bool optionalDimension = field=="aft_perpendicular"||field=="forward_perpendicular"||
+            field=="length_between_perpendiculars"||field=="moulded_depth";
+        if (optionalDimension || field=="split_section_location")
             editor->setStyleSheet("QDoubleSpinBox:disabled {background-color:#e3e8e6;color:#7b8581;border:1px solid #cbd3cf;border-radius:4px;} QLineEdit:disabled {color:#7b8581;background:transparent;}");
+        if (optionalDimension)
             s.numberLabels[field]->setStyleSheet("QLabel:disabled {color:#7b8581;}");
-        }
         connect(editor, &QDoubleSpinBox::valueChanged, this, [this, field](double value) {
             auto& state = *state_;
             if (state.loading) return;
@@ -372,6 +374,7 @@ void ProjectDialog::updateSplitState() {
         split.widget->setValue(split.metricDraft * factor(Quantity::Length, s.units));
     }
     split.widget->setEnabled(!automatic);
+    split.widget->setButtonSymbols(automatic ? QAbstractSpinBox::NoButtons : QAbstractSpinBox::UpDownArrows);
     s.splitWasDefault = automatic;
     s.loading = priorLoading;
 }

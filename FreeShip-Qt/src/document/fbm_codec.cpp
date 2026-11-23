@@ -6,6 +6,7 @@
 // This deliberately retains the original serialization instead of rebuilding
 // it: Pascal records contain padding and historic, sometimes unset parameters.
 #include "fbm_codec.h"
+#include "group_fixes.h"
 #include "calculation_parameters_format.h"
 #include "fbm_text.h"
 
@@ -18,6 +19,7 @@
 #include <cstring>
 #include <limits>
 #include <map>
+#include <functional>
 #include <stdexcept>
 #include <utility>
 
@@ -174,7 +176,8 @@ struct Parsed {
 
 class Parser {
 public:
-    explicit Parser(const QByteArray &bytes) : r_(bytes), bytes_(bytes) {}
+    using TextVisitor = std::function<void(qsizetype,QByteArrayView)>;
+    explicit Parser(const QByteArray &bytes, TextVisitor visitor={}) : r_(bytes), bytes_(bytes), visitText_(std::move(visitor)) {}
 
     Parsed parse() {
         if (r_.string("signature") != QByteArrayView("FREE!ship", 9))
@@ -238,6 +241,11 @@ public:
     }
 
 private:
+    TextVisitor visitText_;
+    void textField(const char* label){
+        const auto start=r_.position();const auto value=r_.string(label);
+        if(visitText_)visitText_(start,value);
+    }
     int pointCount() const { return int(result_.points.size()); }
     void block(const char *name, qsizetype begin, int count = -1) {
         QJsonObject b{{"name", QString::fromLatin1(name)}, {"offset", qint64(begin)},
@@ -264,8 +272,8 @@ private:
         // SaveBinary gates the early project fields, although the modern
         // Pascal LoadBinary no longer contains all the pre-1.65 gates.
         if (v_ >= fv120) {
-            r_.string("project name");
-            r_.string("project designer");
+            textField("project name");
+            textField("project designer");
             r_.reals(3, "project dimensions");
             r_.flag("main particulars set");
             r_.reals(2, "water density and appendage coefficient");
@@ -277,8 +285,8 @@ private:
                 r_.real("split section position");
             }
             if (v_ >= fv165) r_.flag("disable model check");
-            r_.string("project comment");
-            r_.string("file created by");
+            textField("project comment");
+            textField("file created by");
         }
         if (v_ >= fv210) {
             r_.ranged("hydrostatic coefficients", 0, 1);
@@ -308,7 +316,7 @@ private:
         const int storedLayers = r_.count("layer count", 15);
         layers_ = std::max(1, storedLayers); // Zero keeps Pascal's default layer.
         for (int i = 0; i < storedLayers; ++i) {
-            r_.string("layer description");
+            textField("layer description");
             r_.integer("layer ID");
             r_.integer("layer color");
             r_.flags(3, "layer visibility and symmetry");
@@ -506,7 +514,7 @@ private:
         const int n = r_.count(name, 8);
         for (int i = 0; i < n; ++i) {
             r_.index(name, total);
-            r_.string(name);
+            textField(name);
         }
         block(name, begin, n);
     }
@@ -529,7 +537,7 @@ private:
         const auto begin = r_.position();
         const int n = r_.count("point group count", 8);
         for (int i = 0; i < n; ++i) {
-            r_.string("point group name");
+            textField("point group name");
             const int m = r_.count("group point count", 4);
             for (int j = 0; j < m; ++j) {
                 const auto text = r_.string("group point index");
@@ -757,6 +765,7 @@ Fbm Fbm::readModel(const QByteArray &bytes,const QString& encoding) {
 QByteArray Fbm::toText(const QString& encoding) const {
     if(inspection_["opaque_tail_bytes"].toInteger())badNet("cannot convert unknown extensions to FTM");
     if(!calculationParameters()["calculators"].toObject().isEmpty()||!calculationParameters()["principal_dimensions"].toObject().isEmpty())badNet("FTM cannot preserve project and calculation parameters; save as FBM");
+    if(calculationParameters().contains(GroupFixes::key))badNet("FTM cannot preserve point group pins; save as FBM");
     return FtmCodec(bytes_,false,inspection_,encoding).convert();
 }
 Fbm Fbm::read(const QByteArray &bytes) {
@@ -773,6 +782,24 @@ Fbm Fbm::read(const QByteArray &bytes) {
     result.inspection_ = std::move(parsed.info);
     for (auto &c : parsed.caches) result.caches_.push_back({c.offset, c.size, std::move(c.empty)});
     return result;
+}
+
+Fbm Fbm::withUtf8Text(const QString& oldEncoding) const {
+    // Rewrite just the counted text fields. Images, caches, indices, geometry and
+    // historical calculator padding are copied byte for byte from the original.
+    if(inspection_["opaque_tail_bytes"].toInteger())badNet("Cannot convert unknown FBM extensions");
+    QByteArray converted;qsizetype last=0;
+    Parser(bytes_,[&](qsizetype start,QByteArrayView value){
+        const auto old=value.toByteArray();const auto decoded=decodeFbmText(old,oldEncoding);
+        const auto utf8=encodeFbmText(decoded,"UTF-8");if(utf8==old)return;
+        if(converted.size()+start-last+4+utf8.size()>MaximumBytes)badNet("Converted model exceeds FBM size limit");
+        converted.append(bytes_.constData()+last,start-last);char length[4];qToLittleEndian<qint32>(utf8.size(),length);
+        converted.append(length,4);converted+=utf8;last=start+4+value.size();
+    }).parse();
+    if(converted.size()+bytes_.size()-last>MaximumBytes)badNet("Converted model exceeds FBM size limit");
+    converted.append(bytes_.constData()+last,bytes_.size()-last);
+    auto meta=calculationParameters();meta["fbm_text_encoding"]="UTF-8";
+    return read(converted).withCalculationParameters(meta);
 }
 
 QString Fbm::versionName() const {
@@ -1047,8 +1074,15 @@ Fbm Fbm::withControlNet(const FbmControlNet &net, bool invalidateGeometry) const
             w.countAtStart(count); replace("linear_constraints", std::move(w.data));
         }
     }
-    if (version_ >= fv430)
+    if (version_ >= fv430) {
         replace("point_groups", mappedGroups(bytes_, blocks.at("point_groups"), pointMap));
+        if(!pointIdentity && blocks.count("calculation_parameters")) {
+            auto metadata=calculationParameters();if(metadata.contains(GroupFixes::key)) {
+                auto fixes=GroupFixes::read(metadata);fixes.remap(pointMap);fixes.write(metadata);
+                replace("calculation_parameters",calculation_parameters_format::encode(metadata));
+            }
+        }
+    }
     if (version_ >= fv462 && (!pointIdentity || !relationsUnchanged)) {
         Writer w; w.integer(0); int count = 0;
         for (std::size_t i = 0; i < net.points.size(); ++i) {

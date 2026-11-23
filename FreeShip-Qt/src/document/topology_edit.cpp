@@ -2,6 +2,8 @@
 // FreeSubdivisionControl{Point,Edge,Face,Curve}. Geometry remains in FBM Singles.
 // Mutations happen on a private net. Only a fully serialized candidate is returned.
 #include "topology_edit.h"
+#include "attribute_edit.h"
+#include "group_fixes.h"
 #include "point_edit.h"
 #include "construction.h"
 #include "geometry_input.h"
@@ -416,6 +418,7 @@ TopologyEdit editTopology(const Fbm& source,const QJsonObject& bindings,const QJ
         editor.writeOrder(net.bindings);
     }else if(op=="clear_constraints"||op=="unlock_all"){
         std::vector<int> points;if(op=="unlock_all"){for(int i=0;i<int(n.points.size());++i)points.push_back(i);}else points=net.selection(0,r);
+        if(op=="unlock_all" && source.calculationParameters().contains(GroupFixes::key))return editScopedPointLocks(source,bindings,points,false,true);
         if(op=="clear_constraints")for(int i:points)if(n.points[i].value.locked)bad("Unlock points before removing their constraints");
         for(int i:points){auto&p=n.points[i].value;if(op=="unlock_all"){if(p.locked){p.locked=false;net.changed=true;}}
             else if(p.anchor>=0||p.hardAnchor||p.lineA>=0||p.lineB>=0){p.anchor=p.lineA=p.lineB=-1;p.hardAnchor=false;net.changed=true;}}
@@ -461,7 +464,9 @@ TopologyEdit editTopology(const Fbm& source,const QJsonObject& bindings,const QJ
         auto edges=net.selection(1,r);bool value=flag(r,"crease");for(int e:edges){net.editable(n.edges[e].a);net.editable(n.edges[e].b);if(!value&&net.faceCount(e)<2)bad("Boundary edges must remain creases");}
         for(int e:edges)if(n.edges[e].crease!=value){net.crease(e,value);net.changed=true;}
     }else if(op=="set_locked"){
-        auto points=net.selection(0,r);bool value=flag(r,"locked");net.geometry=false;for(int p:points)if(n.points[p].value.locked!=value){n.points[p].value.locked=value;net.changed=true;}
+        auto points=net.selection(0,r);bool value=flag(r,"locked");
+        if(source.calculationParameters().contains(GroupFixes::key))return editScopedPointLocks(source,bindings,points,value,false);
+        net.geometry=false;for(int p:points)if(n.points[p].value.locked!=value){n.points[p].value.locked=value;net.changed=true;}
     }else if(op=="add_face"){
         auto points=net.selection(0,r);if(points.size()<3||points.size()>4096)bad("A face requires 3..4096 ordered points");int layer=net.layer(r["layer_id"]);
         for(size_t i=0;i<points.size();++i){int a=points[i],b=points[(i+1)%points.size()];net.editable(a);if(coincident(n.points[a].value,n.points[b].value))bad("Face has coincident adjacent points");int e=net.edge(a,b);if(e>=0&&net.faceCount(e)>=2)bad("Face would create a nonmanifold edge");}

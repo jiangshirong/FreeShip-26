@@ -49,7 +49,7 @@ void LinesView::setScene(std::shared_ptr<const Scene>s,bool resetCamera){
         }
     }
     // Tiny scenes cost less to rasterize than a GPU readback and context startup.
-    if(gpuEnabled_&&scene_->triangles>=2048)gpu_=std::make_unique<GpuFill>(*scene_);
+    // The first filled draw creates the GPU resources. Hidden lines windows need none.
     labelScale_=-1;firstFramePending_=true;
     if(resetCamera)fit();else update();
 }

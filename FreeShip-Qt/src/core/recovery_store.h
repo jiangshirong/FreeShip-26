@@ -12,6 +12,7 @@ struct RecoveryEntry {
     QString id, source, savedUtc, error;
     quint64 revision=0;
     qint64 bytes=0;
+    QString textEncoding;
 };
 // One atomic container per document, not a second document authority. The lease
 // prevents another application instance from recovering a live editor's file.
@@ -19,7 +20,7 @@ class RecoveryLease {
 public:
     RecoveryLease(const QString& root,const QString& id);
     ~RecoveryLease();
-    void checkpoint(const QByteArray& fbm,quint64 revision,const QString& source);
+    void checkpoint(const QByteArray& fbm,quint64 revision,const QString& source,const QString& textEncoding={});
     QByteArray read(RecoveryEntry* entry=nullptr)const;
     void remove();
     QString path()const;

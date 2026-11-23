@@ -24,6 +24,7 @@
 #include <QDateTime>
 #include <QDialog>
 #include <QFileDialog>
+#include <QFontDatabase>
 #include <QEvent>
 #include <QEventLoop>
 #include <QFile>
@@ -140,7 +141,7 @@ void decorateStudioMenu(QMenu* menu){
         if(action->isSeparator()||!action->icon().isNull())continue;
         QString key;
         const auto operation=action->property("view_operation").toString(),background=action->property("background_operation").toString(),file=action->property("file_operation").toString();
-        const QHash<QString,QString> viewKeys{{"wireframe","Wireframe"},{"fill","FillColor"},{"shade_1","GaussianCurvature"},{"shade_2","Developability"},{"shade_3","Zebra"},{"light_settings","Lighting"},{"print","Print"},{"save_image","ExportImage"}};
+        const QHash<QString,QString> viewKeys{{"light_settings","Lighting"},{"save_image","ExportImage"}};
         const QHash<QString,QString> backgroundKeys{{"import","ImportFile"},{"origin","Point"},{"scale","Scale"},{"frame","CropFrame"},{"transparent_color","PickColor"},{"transparent","PickColor"},{"alpha","Blend"},{"tolerance","Tolerance"},{"visible","Observe"},{"export","SaveFile"},{"remove","DeleteOne"}};
         if(viewKeys.contains(operation))key=viewKeys[operation];
         else if(backgroundKeys.contains(background))key=backgroundKeys[background];
@@ -149,7 +150,7 @@ void decorateStudioMenu(QMenu* menu){
         else if(file=="recent")key="OpenFile";
         else if(action->menu()){
             const auto role=action->menu()->property("menu_role").toString();
-            key=QHash<QString,QString>{{"camera","Camera"},{"render_mode","RenderMode"},{"background","BackgroundImage"},{"coordinates","Coordinates"}}.value(role);
+            key=QHash<QString,QString>{{"camera","Camera"},{"background","BackgroundImage"},{"coordinates","Coordinates"}}.value(role);
         }
         if(!key.isEmpty())action->setIcon(studioIcon(key));
     }
@@ -429,11 +430,65 @@ void relaxWindowLimits(QWidget* widget){
         layout->setSizeConstraint(QLayout::SetDefaultConstraint);
     if(widget->maximumSize()!=QSize(QWIDGETSIZE_MAX,QWIDGETSIZE_MAX))widget->setMaximumSize(QWIDGETSIZE_MAX,QWIDGETSIZE_MAX);
 }
+constexpr int compactPromptWidth=400;
+QScreen* studioDialogScreen(const QWidget& widget){
+    auto* screen=widget.parentWidget()?widget.parentWidget()->screen():widget.screen();
+    return screen?screen:QGuiApplication::primaryScreen();
+}
+// QWidget's first size hint can be calculated before a wrapped label is
+// polished. Choose the width first, then ask the layout for the height at
+// that width, including the label padding and the response buttons.
+void fitStudioTextDialog(QDialog& dialog){
+    if(dialog.testAttribute(Qt::WA_Resized)||qobject_cast<QFileDialog*>(&dialog)||
+       qobject_cast<QMessageBox*>(&dialog))return;
+    auto* layout=dialog.layout();
+    if(!layout)return;
+    bool wraps=false;
+    for(int i=0;i<layout->count();++i){
+        auto* label=qobject_cast<QLabel*>(layout->itemAt(i)->widget());
+        if(label&&!label->isHidden()&&label->wordWrap()&&!label->text().isEmpty()){
+            label->ensurePolished();wraps=true;
+        }
+    }
+    if(!wraps)return;
+    dialog.ensurePolished();
+    layout->invalidate();
+    const auto minimum=layout->totalMinimumSize().expandedTo(dialog.minimumSize());
+    const auto preferred=layout->totalSizeHint().expandedTo(minimum);
+    auto* screen=studioDialogScreen(dialog);
+    const QSize available=screen?screen->availableGeometry().size()-QSize(32,64):QSize(960,640);
+    const QFontMetrics caption(QFontDatabase::systemFont(QFontDatabase::TitleFont));
+    const int titleWidth=dialog.windowTitle().isEmpty()?0:caption.horizontalAdvance(dialog.windowTitle())+96;
+    const int widthLimit=std::max(minimum.width(),available.width());
+    const int captionWidth=titleWidth<=widthLimit?titleWidth:0;
+    const bool compact=layout->count()<=2;
+    const int preferredWidth=compact?std::max(preferred.width(),compactPromptWidth):preferred.width();
+    int width=std::clamp(std::max(preferredWidth,captionWidth),minimum.width(),widthLimit);
+    const auto height=[&](int w){
+        const int wrapped=layout->totalHeightForWidth(w);
+        return wrapped<0?preferred.height():std::max(minimum.height(),wrapped);
+    };
+    while(height(width)>available.height()&&width<widthLimit)width=std::min(width+96,widthLimit);
+    const int fittedHeight=std::min(height(width),std::max(minimum.height(),available.height()));
+    if(compact)dialog.setMinimumSize(width,fittedHeight);
+    else if(captionWidth>0)dialog.setMinimumWidth(std::max(dialog.minimumWidth(),captionWidth));
+    dialog.resize(width,fittedHeight);
+}
+void widenStudioMessage(QMessageBox* message){
+    if(message->isMaximized()||message->isMinimized())return;
+    auto* screen=studioDialogScreen(*message);
+    const auto available=screen?screen->availableGeometry().width()-32:compactPromptWidth;
+    const QFontMetrics caption(QFontDatabase::systemFont(QFontDatabase::TitleFont));
+    const int titleWidth=message->windowTitle().isEmpty()?0:caption.horizontalAdvance(message->windowTitle())+96;
+    const int target=qMin(available,qMax(compactPromptWidth,titleWidth));
+    if(target>message->width()){
+        relaxWindowLimits(message);
+        message->resize(target,message->height());
+    }
+}
 void centerStudioMessage(QMessageBox* message){
     if(message->isMaximized()||message->isMinimized())return;
-    auto* owner=message->parentWidget()?message->parentWidget()->window():nullptr;
-    auto* screen=owner?owner->screen():message->screen();
-    if(!screen)screen=QGuiApplication::primaryScreen();
+    auto* screen=studioDialogScreen(*message);
     if(!screen)return;
     const auto available=screen->availableGeometry();auto frame=message->frameGeometry();
     frame.moveCenter(available.center());message->move(frame.topLeft());
@@ -521,7 +576,8 @@ public:
 
     void polish(QWidget* widget)override {
         QProxyStyle::polish(widget);
-        if(widget->windowType()==Qt::Popup&&qobject_cast<QComboBox*>(widget->parentWidget()))
+        if(qobject_cast<QComboBox*>(widget)||
+           (widget->windowType()==Qt::Popup&&qobject_cast<QComboBox*>(widget->parentWidget())))
             widget->installEventFilter(this);
         if(auto* tabs=qobject_cast<QTabWidget*>(widget))studio_motion::installTabs(tabs);
         if(auto* table=qobject_cast<QTableView*>(widget)){
@@ -539,6 +595,13 @@ public:
         QProxyStyle::unpolish(widget);
     }
     bool eventFilter(QObject* watched,QEvent* event)override {
+        if(event->type()==QEvent::Wheel&&qobject_cast<QComboBox*>(watched)){
+            // Don't let a closed field change value, even if it has focus.
+            // Ignore the wheel so a containing scroll area can still use it.
+            // The popup's item view receives its own wheel events.
+            event->ignore();
+            return true;
+        }
         if(event->type()==QEvent::Show){
             auto* popup=qobject_cast<QWidget*>(watched);
             if(popup&&popup->windowType()==Qt::Popup)
@@ -592,11 +655,19 @@ public:
             configureStudioNumericForms(window);
             studio_motion::dismissMenuPresentations();
             relaxWindowLimits(window);
-            if(auto* message=qobject_cast<QMessageBox*>(window);message&&!message->property("studio_message_positioned").toBool()){
-                // Never use an iconic/hidden owner's frame rectangle (or Qt's
-                // initial 0,0 placement) as the modal window's anchor.
-                centerStudioMessage(message);message->setProperty("studio_message_positioned",true);
-                QTimer::singleShot(0,message,[message]{centerStudioMessage(message);});
+            if(auto* message=qobject_cast<QMessageBox*>(window)){
+                const bool firstShow=!message->property("studio_message_positioned").toBool();
+                if(firstShow){
+                    // Never anchor the prompt to an iconic or hidden owner.
+                    centerStudioMessage(message);
+                    message->setProperty("studio_message_positioned",true);
+                }
+                // Qt recalculates the size in showEvent, also when a message box is reopened.
+                QTimer::singleShot(0,message,[message,firstShow]{
+                    if(!message->isVisible())return;
+                    widenStudioMessage(message);
+                    if(firstShow)centerStudioMessage(message);
+                });
             }
             // QMessageBox can impose a fixed size during its own show handler.
             QTimer::singleShot(0,window,[window]{relaxWindowLimits(window);});
@@ -845,6 +916,7 @@ void showStudioDialog(QDialog& dialog){
     if(auto* color=qobject_cast<QColorDialog*>(&dialog))color->setOption(QColorDialog::DontUseNativeDialog);
     if(auto* message=qobject_cast<QMessageBox*>(&dialog))message->setOption(QMessageBox::Option::DontUseNativeDialog);
     dialog.setProperty("studio_dialog_show_order",++dialogShowOrder);
+    fitStudioTextDialog(dialog);
     dialog.show();
 }
 int runStudioDialog(QDialog& dialog){
@@ -1033,13 +1105,17 @@ void StudioMessage::setText(const QString& text) {
     setTextFormat(math?Qt::RichText:Qt::PlainText);
     if(mathNotation_)setAccessibleName(display);
     QLabel::setText(math?notation::html(display,font().pointSizeF()).replace('\n',"<br>"):display);
-    setVisible(!text.isEmpty());
+    const bool visible=!text.isEmpty();
+    // Only changes in an already open screen animate. QWidget also invokes
+    // setVisible while revealing a parent's children for the first time;
+    // animating that path compresses static text after the dialog is sized.
+    if(parentWidget()&&message_motion::visibility(this,visible))return;
+    setVisible(visible);
 }
 void StudioMessage::setVisible(bool visible) {
     // Both text updates and conditional show() calls can happen before layout
     // adoption. Such a label is not an independent application window.
     if(visible&&!parentWidget()){setAttribute(Qt::WA_WState_ExplicitShowHide,false);return;}
-    if(parentWidget()&&message_motion::visibility(this,visible))return;
     QLabel::setVisible(visible);
 }
 void StudioMessage::clear() { setText({}); }

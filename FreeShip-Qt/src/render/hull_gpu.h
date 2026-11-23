@@ -38,6 +38,7 @@ class HullGpu {
 public:
     explicit HullGpu(const HullRenderMesh& mesh);
     ~HullGpu();
+    void setMesh(const HullRenderMesh& mesh);
     bool ready() const { return ready_; }
     bool setAnalysis(const QVector<SurfaceShadeTriangle>& triangles);
     QImage render(QSize logicalSize, qreal dpr, const QMatrix4x4& camera,

@@ -1,5 +1,6 @@
 #include "model_session.h"
 #include "core/platform_process.h"
+#include "core/snapshot_sha256.h"
 #include "calculation_scheduler.h"
 #include "ui_language.h"
 #include <QCoreApplication>
@@ -34,6 +35,13 @@ QByteArray boundedBytes(const QString& path,qint64 limit=256LL*1024*1024){
     auto data=f.readAll();return f.error()==QFile::NoError?data:QByteArray{};
 }
 QByteArray cacheHash(const QByteArray& bytes){return QCryptographicHash::hash(bytes,QCryptographicHash::Sha256).toHex();}
+// Hash verified publications in one pass. Keep streaming for large files.
+QByteArray artifactDigest(QFile& file){
+    if(!file.open(QIODevice::ReadOnly))return {};
+    const auto size=file.size();
+    if(size>=0&&size<=64*1024*1024){const auto data=file.readAll();return file.error()==QFile::NoError&&data.size()==size?fs::snapshotSha256(data):QByteArray{};}
+    QCryptographicHash hash(QCryptographicHash::Sha256);return hash.addData(&file)?hash.result().toHex():QByteArray{};
+}
 QString dependencyToken(const QString& root){
     const auto bytes=boundedBytes(root+"/current",256);if(bytes.isEmpty())return {};
     const auto token=QString::fromLatin1(bytes).trimmed();
@@ -96,8 +104,8 @@ PreparedSnapshot prepareSnapshot(const QJsonObject& response,const QJsonObject& 
     std::shared_ptr<fs::ModelSnapshot> nextModel;
     bool reusedFirstFrame=false;
     if(firstFrame_&&firstFrame_->documentId==pendingDocument_&&firstFrame_->revision==revision(response)) {
-        QFile f(modelFile);QCryptographicHash hash(QCryptographicHash::Sha256);
-        if(f.size()<=256LL*1024*1024&&f.open(QIODevice::ReadOnly)&&hash.addData(&f)&&hash.result().toHex()==firstFrame_->sourceDigest()){
+        QFile f(modelFile);
+        if(f.size()<=256LL*1024*1024&&!firstFrame_->sourceDigest().isEmpty()&&artifactDigest(f)==firstFrame_->sourceDigest()){
             if(firstFrame_->isCachedPreview()){
                 nextModel=std::make_shared<fs::ModelSnapshot>(fs::ModelSnapshot::load(modelFile));
                 nextModel->loadSectionDisplay(boundedBytes(path("sections")));nextModel->loadSurfaceDisplay(boundedBytes(path("surface")));
@@ -115,8 +123,8 @@ PreparedSnapshot prepareSnapshot(const QJsonObject& response,const QJsonObject& 
     }else nextModel=std::make_shared<fs::ModelSnapshot>(fs::ModelSnapshot::load(modelFile));
     std::shared_ptr<const Scene> nextScene;
     if(!deferred&&scene_) {
-        QFile file(sceneFile);QCryptographicHash hash(QCryptographicHash::Sha256);
-        if(file.open(QIODevice::ReadOnly)&&hash.addData(&file)&&hash.result().toHex()==scene_->digest)nextScene=scene_;
+        QFile file(sceneFile);
+        if(!scene_->digest.isEmpty()&&artifactDigest(file)==scene_->digest)nextScene=scene_;
     }
     if(!deferred&&!nextScene)nextScene=std::make_shared<Scene>(Scene::load(sceneFile));
     if (nextModel->documentId != pendingDocument_ || nextModel->documentId != response.value("document_id").toString() ||
@@ -142,7 +150,7 @@ PreparedSnapshot prepareSnapshot(const QJsonObject& response,const QJsonObject& 
     QFile sectionFile(path("sections"));
     if(sectionFile.size()>256LL*1024*1024||!sectionFile.open(QIODevice::ReadOnly))error("无法读取剖面线。");
     const auto sectionData=sectionFile.readAll();
-    const auto sectionsHash=QCryptographicHash::hash(sectionData,QCryptographicHash::Sha256).toHex();
+    const auto sectionsHash=fs::snapshotSha256(sectionData);
     if(native["sections_sha256"].toString().toLatin1()!=sectionsHash)
         error("剖面线结果校验失败。");
     if(reusedFirstFrame&&sectionsHash!=firstFrameSections_){
@@ -153,7 +161,7 @@ PreparedSnapshot prepareSnapshot(const QJsonObject& response,const QJsonObject& 
     QFile surfaceFile(path("surface"));
     if(surfaceFile.size()>256LL*1024*1024||!surfaceFile.open(QIODevice::ReadOnly))error("无法读取船体曲面。");
     const auto surfaceData=surfaceFile.readAll();
-    const auto surfaceHash=QCryptographicHash::hash(surfaceData,QCryptographicHash::Sha256).toHex();
+    const auto surfaceHash=fs::snapshotSha256(surfaceData);
     if(!native["surface_display"].toBool()||native["surface_sha256"].toString().toLatin1()!=surfaceHash)
         error("船体曲面结果校验失败。");
     if(reusedFirstFrame&&surfaceHash!=firstFrameSurface_){
@@ -162,7 +170,7 @@ PreparedSnapshot prepareSnapshot(const QJsonObject& response,const QJsonObject& 
     const bool sameSurface=model_&&surfaceHash==surfaceDigest_&&nextModel->reuseSurfaceDisplay(*model_);
     if(!sameSurface&&!(reusedFirstFrame&&surfaceHash==firstFrameSurface_))nextModel->loadSurfaceDisplay(surfaceData);
 
-    return {nextModel,nextScene,modelFile,sceneFile,dxfFile,sectionsHash,surfaceHash,sectionData,surfaceData,boundedBytes(modelFile),
+    return {nextModel,nextScene,modelFile,sceneFile,dxfFile,sectionsHash,surfaceHash,sectionData,surfaceData,method_=="load"?boundedBytes(modelFile):QByteArray{},
         metadata,reusedFirstFrame,sameSections,sameSurface,clock.nsecsElapsed()/1e6};
 }
 }
@@ -274,7 +282,9 @@ void ModelSession::startProcess() {
     process_.start();
 }
 
-bool ModelSession::load(const QString& file) {return loadInput(file,false);}
+bool ModelSession::load(const QString& file) {
+    return loadInput(file,false,QStringLiteral("cp1252"));
+}
 bool ModelSession::calculationQueued()const{return calculationScheduler_->position(this)>0;}
 int ModelSession::calculationQueuePosition()const{return calculationScheduler_->position(this);}
 bool ModelSession::calculationActive()const{return calculationScheduler_->active(this);}
@@ -393,7 +403,7 @@ bool ModelSession::resumeCurrent() {
             error("没有包含当前修改的完整恢复副本。当前画面和已有副本已保留，请勿放弃修改或覆盖原船模。");
         // Bind the expected version to the staged bytes actually loaded, not
         // an earlier path check that another writer could invalidate.
-        return loadInput(sourcePath_,false,&sourceVersion_);
+        return loadInput(sourcePath_,false,model_->textEncoding,&sourceVersion_);
     } catch(const std::exception& ex) {fail(QString::fromUtf8(ex.what()));return false;}
 }
 bool ModelSession::recover(const QString& id) {
@@ -408,7 +418,7 @@ bool ModelSession::recover(const QString& id) {
         QSaveFile file(stage.filePath("model.fbm"));file.setDirectWriteFallback(false);
         if(!file.open(QIODevice::WriteOnly)||file.write(bytes)!=bytes.size()||!file.commit())error("无法读取恢复船模到工作目录。");
         pendingRecovery_=std::move(lease);pendingRecoverySource_=entry.source;
-        return loadInput(file.fileName(),true);
+        return loadInput(file.fileName(),true,entry.textEncoding);
     }catch(const std::exception& ex){fail(QString::fromUtf8(ex.what()));return false;}
 }
 bool ModelSession::discardRecovery(){
@@ -420,7 +430,8 @@ bool ModelSession::discardRecovery(){
         if(onCompleted)onCompleted("discard_recovery");return true;
     }catch(const std::exception& ex){if(onError)onError(QString::fromUtf8(ex.what()));return false;}
 }
-bool ModelSession::loadInput(const QString& file,bool recovered,const fs::ModelFileVersion* requiredVersion) {
+bool ModelSession::loadInput(const QString& file,bool recovered,const QString& legacyEncoding,
+                             const fs::ModelFileVersion* requiredVersion) {
     if (busy_ || file.isEmpty()) return false;
     QElapsedTimer startupClock;startupClock.start();
     setProperty("startup_profile",QJsonObject{});
@@ -452,6 +463,9 @@ bool ModelSession::loadInput(const QString& file,bool recovered,const fs::ModelF
         stamp("source_staged_ms");
         pendingDocument_ = QUuid::createUuid().toString(QUuid::WithoutBraces);
         QJsonObject fields{{"path",copy},{"document_id",pendingDocument_}};
+        auto loadPreferences=preferences_;
+        if(!legacyEncoding.isEmpty())loadPreferences["fbm_encoding"]=legacyEncoding;
+        fields["preferences"]=loadPreferences;
         if(recovered)fields["recovered"]=true;
         setProperty("startup_cache_candidate",false);setProperty("startup_cache_hit",false);
         setProperty("startup_cache_key",QByteArray{});setProperty("startup_cache_root",QString{});
@@ -460,7 +474,7 @@ bool ModelSession::loadInput(const QString& file,bool recovered,const fs::ModelF
             const QString base=linesCacheRoot_.isNull()?QStandardPaths::writableLocation(QStandardPaths::CacheLocation):linesCacheRoot_;
             const auto manifest=boundedBytes(QCoreApplication::applicationDirPath()+"/build-manifest.json",16*1024*1024);
             if(!base.isEmpty()&&!manifest.isEmpty()){
-                const auto key=cacheHash(pendingSourceVersion_.sha256+cacheHash(manifest)+QJsonDocument(preferences_).toJson(QJsonDocument::Compact)+QLocale().name().toUtf8());
+                const auto key=cacheHash(pendingSourceVersion_.sha256+cacheHash(manifest)+QJsonDocument(loadPreferences).toJson(QJsonDocument::Compact)+QLocale().name().toUtf8());
                 const auto root=base+"/first-frame-v2";
                 setProperty("startup_cache_key",key);setProperty("startup_cache_root",root);
                 cacheMeta=QJsonDocument::fromJson(boundedBytes(root+"/entry.json",4096)).object();
@@ -555,6 +569,11 @@ bool ModelSession::updateLayer(fs::EntityId id, const QJsonObject& changes) {
     return !changes.isEmpty() && currentRequest("update_layer", {{"layer_id", double(id)}, {"changes", changes}});
 }
 bool ModelSession::undo() {
+    if(canUndoMovingBatch()){
+        undoAfterMove_=model_;
+        if(onBatchHistoryPreview)onBatchHistoryPreview(model_);
+        notifyState();return true;
+    }
     if(editingSections()){
         if(editorQueue_.size()>=512)return false;
         editorQueue_.append(QJsonObject{{"_queued_history","undo"}});notifyState();return true;
@@ -736,7 +755,8 @@ bool ModelSession::request(const QString& method, QJsonObject fields) {
         fields.insert("defer_drawing",method=="load"&&!model_&&property("defer_startup_drawing").toBool());
         if(!linesCacheRoot_.isNull())fields["lines_cache_root"]=linesCacheRoot_;
         if(method=="load" || method=="new" || method=="import_model"){
-            fields.insert("preferences",preferences_);fields["recovery_root"]=recoveryRoot_;
+            if(!fields.contains("preferences"))fields.insert("preferences",preferences_);
+            fields["recovery_root"]=recoveryRoot_;
             fields["recovery_source"]=pendingRecovery_?pendingRecoverySource_:pendingSource_;
         }
         busy_ = true;
@@ -748,6 +768,8 @@ bool ModelSession::request(const QString& method, QJsonObject fields) {
         if(calculationSession_&&(method=="hydrostatics"||method=="performance"||method=="develop_plates")){
             calculationScheduler_->submit(this,[this,line,method]{try{sendRequestLine(line,method);}catch(const std::exception& e){fail(QString::fromUtf8(e.what()),true);}},[this]{notifyState();});
         }else sendRequestLine(line,method);
+        if(busy_ && !sectionPreviewActive_ && !layerPreviewActive_ && onBatchHistoryPreview)
+            if(auto target=batchHistoryTarget(method))onBatchHistoryPreview(std::move(target));
         return true;
     } catch (const std::exception& ex) {
         fail(QString::fromUtf8(ex.what()), true);
@@ -845,11 +867,20 @@ void ModelSession::publishSnapshot(const QJsonObject& response,std::shared_ptr<P
     const auto sectionData=prepared->sectionData,surfaceData=prepared->surfaceData;
     const bool metadata=prepared->metadata,reusedFirstFrame=prepared->reusedFirstFrame,sameSections=prepared->sameSections,sameSurface=prepared->sameSurface;
     drawingUnchanged_=reusedFirstFrame||(metadata&&sameSections&&sameSurface&&nextScene==scene_);
+    const bool replay=response["move_history_reused"].toBool();
+    if(replay)drawingUnchanged_=false; // A verified historical frame differs from the current view.
+    if((method_=="move_points"||replay)&&model_&&model_->documentId==nextModel->documentId&&
+       !model_->isCachedPreview()&&!model_->sourceDigest().isEmpty()&&
+       QFileInfo(modelPath_).size()+QFileInfo(scenePath_).size()+QFileInfo(QFileInfo(modelPath_).dir(),"surface.json").size()+QFileInfo(QFileInfo(modelPath_).dir(),"sections.json").size()<=64LL*1024*1024){
+        batchHistoryDirection_=method_=="undo"?"redo":"undo";
+        batchHistoryModel_=model_;batchHistoryScene_=scene_;batchHistorySections_=sectionDigest_;batchHistorySurface_=surfaceDigest_;
+    }else{batchHistoryModel_.reset();batchHistoryScene_.reset();batchHistorySections_.clear();batchHistorySurface_.clear();}
     sectionDigest_=sectionsHash;surfaceDigest_=surfaceHash;
     lastLoadTimings_["ui_metadata_reused"]=metadata;lastLoadTimings_["ui_scene_reused"]=nextScene==scene_;
     lastLoadTimings_["ui_surface_reused"]=sameSurface;lastLoadTimings_["ui_drawing_unchanged"]=drawingUnchanged_;
     lastLoadTimings_["ui_parse_ms"]=prepared->parseMs;lastLoadTimings_["ui_parse_background"]=property("publication_background").toBool();
-    lastLoadTimings_["ui_first_frame_reused"]=reusedFirstFrame;
+    lastLoadTimings_["ui_first_frame_reused"]=reusedFirstFrame&&!replay;
+    lastLoadTimings_["ui_batch_history_reused"]=reusedFirstFrame&&replay;
     lastLoadTimings_["startup_cache_hit"]=property("startup_cache_hit").toBool();
     lastLoadTimings_["drawing_deferred"]=response["drawing_deferred"].toBool();
     if(method_=="load"&&!property("startup_cache_key").toByteArray().isEmpty()){
@@ -1098,18 +1129,19 @@ void ModelSession::receive(const QJsonObject& response) {
         finish("save");
         return;
     }
-    if(method_=="manage_layers"||method_=="update_layer"||method_=="load"||method_=="snapshot"||method_=="sections"||method_=="undo"||method_=="redo"){
+    if(method_=="move_points"||method_=="manage_layers"||method_=="update_layer"||method_=="load"||method_=="snapshot"||method_=="sections"||method_=="undo"||method_=="redo"){
         QJsonObject paths;for(const char* key:{"model","scene","dxf","sections","surface","native_report"})
             if(!response["drawing_deferred"].toBool()||(QByteArray(key)!="scene"&&QByteArray(key)!="dxf"))paths[key]=artifact(response,key);
         const auto document=pendingDocument_,method=method_;const auto request=pendingId_,generation=++parseGeneration_;
-        const auto model=model_;const auto scene=scene_;
+        const auto history=response["move_history_reused"].toBool()&&batchHistoryModel_&&batchHistoryModel_->documentId==document?batchHistoryModel_:nullptr;
+        const auto model=model_;const auto scene=history?batchHistoryScene_:scene_;
         const auto first=method_=="snapshot"?std::const_pointer_cast<fs::ModelSnapshot>(model_):firstFrame_;
         const auto sections=sectionDigest_,surface=surfaceDigest_;
-        const auto firstSections=method_=="snapshot"?sectionDigest_:firstFrameSections_,firstSurface=method_=="snapshot"?surfaceDigest_:firstFrameSurface_;
+        const auto firstSections=history?batchHistorySections_:method_=="snapshot"?sectionDigest_:firstFrameSections_,firstSurface=history?batchHistorySurface_:method_=="snapshot"?surfaceDigest_:firstFrameSurface_;
         parsing_=true;setProperty("publication_background",true);
-        parsingPool_.start([this,response,paths,document,method,request,generation,model,scene,first,sections,surface,firstSections,firstSurface]{
+        parsingPool_.start([this,response,paths,document,method,request,generation,model,scene,history,first,sections,surface,firstSections,firstSurface]{
             std::shared_ptr<PreparedSnapshot> prepared;QString issue;
-            try{prepared=std::make_shared<PreparedSnapshot>(prepareSnapshot(response,paths,document,method,model,scene,first,sections,surface,firstSections,firstSurface));}
+            try{prepared=std::make_shared<PreparedSnapshot>(prepareSnapshot(response,paths,document,method,model,scene,history?std::make_shared<fs::ModelSnapshot>(history->withMetadata({},document,revision(response))):first,sections,surface,firstSections,firstSurface));}
             catch(const std::exception& ex){issue=QString::fromUtf8(ex.what());}
             QMetaObject::invokeMethod(this,[this,response,request,generation,prepared,issue]{
                 if(stopping_||!busy_||pendingId_!=request||parseGeneration_!=generation)return;
@@ -1162,6 +1194,15 @@ void ModelSession::finish(const QString& operation) {
     calculationScheduler_->release(this);
     if(recordingCalculation_)completeCalculationRecord(true);
     discardOldArtifacts();
+    if(completed=="move_points"&&undoAfterMove_){
+        const auto before=std::move(undoAfterMove_);
+        if(model_&&before->documentId==model_->documentId&&model_->revision==before->revision+1&&canUndo()){
+            if(!currentRequest("undo"))fail("Queued batch undo could not be submitted");
+            return;
+        }
+        // No new history entry: never undo an older, unrelated change.
+        if(onUpdated)onUpdated();
+    }
     while(!editorQueue_.isEmpty()){
         auto next=editorQueue_.takeFirst();const auto method=next.take("_queued_method").toString("sections");
         const auto history=next.take("_queued_history").toString();
@@ -1220,6 +1261,7 @@ void ModelSession::completeCalculationRecord(bool recorded,const QString& issue)
 }
 
 void ModelSession::fail(const QString& message, bool lostBackend) {
+    undoAfterMove_.reset();batchHistoryDirection_.clear();
     ++parseGeneration_;parsing_=false;
     if(firstFrame_){firstFrame_.reset();if(onFirstFrame)onFirstFrame({});}
     editorQueue_.clear();

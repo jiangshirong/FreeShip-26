@@ -92,6 +92,8 @@ public:
     bool save(const QString& destination,const QJsonObject& calculationDrafts={});
     void setPreferences(const QJsonObject &options,const QString &temporaryDirectory={}) {preferences_=options;temporaryDirectory_=temporaryDirectory;}
     bool configurePreferences(const QJsonObject &options) {return currentRequest("configure_preferences",{{"preferences",options}});}
+    bool canUndoMovingBatch() const {return busy_&&method_=="move_points"&&!undoAfterMove_&&ready();}
+    bool waitingForMoveUndo() const {return bool(undoAfterMove_);}
     bool busy() const { return busy_; }
     bool hydroRunning()const{return busy_&&(method_=="hydrostatics"||(method_=="load_calculation"&&afterCalculationLoadMethod_=="hydrostatics"));}
     QString hydroRunningMode()const{return hydroRunning()?hydroRunningMode_:QString{};}
@@ -118,6 +120,11 @@ public:
     double lastSavePreviewMs() const { return lastSavePreviewMs_; }
     static void atomicCopy(const QString& source, const QString& destination);
 
+    // Only the adjacent batch move in this direction has a known historical drawing.
+    std::shared_ptr<const fs::ModelSnapshot> batchHistoryTarget(const QString& method) const {
+        return method==batchHistoryDirection_ ? batchHistoryModel_ : nullptr;
+    }
+    std::function<void(std::shared_ptr<const fs::ModelSnapshot>)> onBatchHistoryPreview;
     std::function<void()> onUpdated;
     std::function<void(std::shared_ptr<const fs::ModelSnapshot>)> onFirstFrame;
     std::function<void()> onStateChanged;
@@ -136,7 +143,8 @@ private:
     friend struct SaveConfirmationProbe;
     friend struct BackendExitProbe;
     friend struct BackendRecoveryProbe;
-    bool loadInput(const QString& file,bool recovered,const fs::ModelFileVersion* requiredVersion=nullptr);
+    bool loadInput(const QString& file,bool recovered,const QString& legacyEncoding,
+                   const fs::ModelFileVersion* requiredVersion=nullptr);
     bool currentRequest(const QString& method, QJsonObject fields = {});
     bool request(const QString& method, QJsonObject fields);
     void startProcess();
@@ -204,6 +212,13 @@ private:
     bool busy_ = false, healthy_ = false, canUndo_ = false, canRedo_ = false;
     bool modified_ = false, stopping_ = false;
     bool previewEnabled_ = false;
+    // One previous verified display for immediate batch undo/redo. The new
+    // publication must independently match its model, scene and geometry digests.
+    std::shared_ptr<const fs::ModelSnapshot> batchHistoryModel_;
+    std::shared_ptr<const Scene> batchHistoryScene_;
+    QString batchHistoryDirection_;
+    std::shared_ptr<const fs::ModelSnapshot> undoAfterMove_;
+    QByteArray batchHistorySections_,batchHistorySurface_;
     QByteArray sectionDigest_,surfaceDigest_;
     bool drawingUnchanged_=false;
     bool saveDestinationCommitted_ = false;
