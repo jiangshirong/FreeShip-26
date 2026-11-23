@@ -16,6 +16,10 @@ from pathlib import Path, PurePosixPath
 ROOT = Path(__file__).resolve().parents[2]
 SOURCE = ROOT / "FreeShip-Qt"
 VERSION = "0.1.21"
+FEED_BASE = "https://raw.githubusercontent.com/jiangshirong/FreeShip-26/refs/heads/build/macos-v0.1.21-20261123/macos-test-feed"
+UPDATE_PATCH = ROOT / ".github/patches/fs26-macos-updater.patch"
+UPDATE_FILES = ("CMakeLists.txt", "src/app/update_controller.cpp", "src/app/document_workspace.cpp",
+                *(f"src/app/languages/{lang}.json" for lang in ("de", "en", "es", "fr", "ja", "ru", "zh")))
 QT_VERSION = "6.8.3"
 MIN_MACOS = "15.0"
 SOURCE_ZIP_SHA256 = "de34d43f300b274d8f5825a0ce1994ec63cf24c3180b778c4813af4907e80993"
@@ -36,7 +40,8 @@ COMPATIBILITY = (
      b'"paths",QJsonArray{QJsonValue(QJsonArray{QJsonArray{0.1,2,3},QJsonArray{4,5,6}})}',
      "Apple Clang: use one JSON value to represent the inner path, not QJsonArray's copy constructor"),
 )
-PROGRAMS = ("FreeShipQt", "FreeShipDocumentService", "FreeShipNativeLinesplan", "FreeShipGeometryExport")
+PROGRAMS = ("FreeShipQt", "FreeShipDocumentService", "FreeShipNativeLinesplan", "FreeShipGeometryExport",
+            "FreeShipUpdater")
 LANGUAGES = ("de", "en", "es", "fr", "ja", "ru", "zh")
 MACHO_MAGICS = {bytes.fromhex(x) for x in ("feedface", "cefaedfe", "feedfacf", "cffaedfe", "cafebabe", "bebafeca", "cafebabf", "bfbafeca")}
 
@@ -103,6 +108,16 @@ def stage_source():
     entries = compatibility_overlay(workspace)
     dump(temp / "fs26-compatibility.json", entries)
     print(json.dumps(entries, indent=2), flush=True)
+    paths = [*(f"FreeShip-Qt/{name}" for name in UPDATE_FILES), "FreeShip-Tests/qt/update_about_tests.cpp"]
+    before = {name: digest(workspace / name) for name in paths}
+    run("git", "apply", "--check", "--whitespace=nowarn", UPDATE_PATCH, cwd=workspace)
+    run("git", "apply", "--whitespace=nowarn", UPDATE_PATCH, cwd=workspace)
+    overlay = [{"file": name, "before": before[name], "after": digest(workspace / name)} for name in paths]
+    require(all(r["before"] != r["after"] for r in overlay), "Incomplete Mac updater patch")
+    for name in ("macos_bundle_location.h", "macos_channel.h.in", "macos_updater.cpp", "macos_updater.cmake"):
+        path = workspace / "FreeShip-Qt/src/updater" / name
+        overlay.append({"file": path.relative_to(workspace).as_posix(), "after": digest(path)})
+    dump(temp / "fs26-macos-update-overlay.json", {"patch_sha256": digest(UPDATE_PATCH), "files": overlay})
 
 
 def put_resources(resources, commit, arch):
@@ -119,7 +134,8 @@ def put_resources(resources, commit, arch):
     lang_dir.mkdir()
     for lang in LANGUAGES:
         name = f"{lang}.json"
-        shutil.copyfile(SOURCE / "src/app/languages" / name, lang_dir / name)
+        patched = Path(os.environ["RUNNER_TEMP"]) / "fs26-source/FreeShip-Qt/src/app/languages"
+        shutil.copyfile(patched / name, lang_dir / name)
         require(json.loads((lang_dir / name).read_bytes())["id"] == lang, f"Language ID mismatch: {lang}")
     require((target / "Themes/StudioLight/icons/manifest.json").is_file(), "Missing StudioLight assets")
     dump(resources / "build-manifest.json", {
@@ -132,7 +148,8 @@ def put_resources(resources, commit, arch):
         "snapshot_manifest_sha256": MANIFEST_SHA256,
         "source_commit": commit,
         "apple_notarized": False,
-        "update_channel_configured": False,
+        "update_channel_configured": True,
+        "update_channel_url": f"{FEED_BASE}/{arch}/latest.json",
     })
     for name in ("COPYING", "NOTICE.md"):
         shutil.copyfile(SOURCE / name, resources / name)
@@ -215,6 +232,9 @@ def init_bundle(app, build, qt, temp, arch, commit):
     # Non-app helper processes may not resolve the main bundle's Resources.
     # Qt also searches beside an executable and appends the platforms suffix.
     (programs / "platforms").symlink_to("../PlugIns/platforms")
+    # Non-app updater helper must also discover the native Qt TLS backend.
+    require((contents / "PlugIns/tls/libqsecuretransportbackend.dylib").is_file(), "Missing bundled macOS TLS plugin")
+    (programs / "tls").symlink_to("../PlugIns/tls")
     return contents
 
 
@@ -366,24 +386,52 @@ def run_checks(build, contents, sample, evidence, temp):
     return results
 
 
-def archive_instructions(path, arch, commit):
+def image_instructions(path, arch, commit):
     chip = "Apple Silicon (M-series)" if arch == "arm64" else "Intel Mac"
     path.write_text(
-        f"FreeShip 26 {VERSION} — macOS 测试包 / test build\n"
-        f"{chip} · {arch} · macOS {MIN_MACOS} or newer (deployment target; newer versions not yet accepted)\n\n"
-        "在 Mac 上用归档实用工具解压，打开 FreeShip 26.app。可另复制附带的 FBM 示例进行测试。\n"
-        "此包只有临时签名，未经 Apple 公证。仅在确认来源可信的情况下打开；不要关闭系统安全保护。\n"
-        "不含应用内更新助手或更新通道，不附带 Windows 求解器或 Wine。请勿用它处理项目的唯一副本。\n\n"
-        "Extract on the Mac with Archive Utility, then open FreeShip 26.app. Test with a copy of the included FBM sample.\n"
-        "Ad hoc signed, not Apple notarized. Use only if you trust the source; don't disable system security.\n"
-        "No in-app updater, update channel, Windows solvers, or Wine. Test with copies, not unique originals.\n"
-        "If macOS offers a per-app override: https://support.apple.com/102445\n\n"
-        f"Source and licensing information: https://github.com/jiangshirong/FreeShip-26/tree/{commit}\n",
+        f"FreeShip 26 {VERSION} — macOS 测试版 / test build\n"
+        f"{chip} · {arch} · macOS {MIN_MACOS}+\n\n"
+        "打开 DMG，将 FreeShip 26 拖入「应用程序」，再从那里打开。不要直接在磁盘映像里运行。\n"
+        "「关于 → 检查更新」使用独立 macOS 测试通道；有新版时手动下载，确认后重启安装。\n"
+        "仅临时签名，未经 Apple 公证。只在确认来源可信时打开。可复制附带的 FBM 示例测试。\n\n"
+        "Open the DMG, drag FreeShip 26 to Applications and launch the installed app.\n"
+        "About → Check for Updates uses a separate macOS test feed. Downloads and installs require confirmation.\n"
+        "Ad hoc signed, not Apple notarized. Only open if you trust the source. Test with a copy of the sample.\n"
+        "Apple's guidance: https://support.apple.com/102445\n\n"
+        f"Source, license and packaging: https://github.com/jiangshirong/FreeShip-26/tree/{commit}\n",
         encoding="utf-8",
     )
 
 
+def export_image(stage, dmg, folder, arch):
+    stage.joinpath("Applications").symlink_to("/Applications", target_is_directory=True)
+    chip = "Apple Silicon" if arch == "arm64" else "Intel"
+    run("hdiutil", "create", "-fs", "HFS+", "-format", "UDZO", "-srcfolder", stage,
+        "-volname", f"FreeShip 26 {VERSION} ({chip})", dmg, timeout=240)
+    run("hdiutil", "verify", dmg, timeout=180)
+    mount = folder / "mounted-image"
+    mount.mkdir()
+    mount = mount.resolve()
+    run("hdiutil", "attach", "-readonly", "-nobrowse", "-noautoopen", "-mountpoint", mount, dmg, timeout=90)
+    try:
+        require(os.readlink(mount / "Applications") == "/Applications", "Wrong Applications link")
+        require({p.name for p in mount.iterdir() if not p.name.startswith(".")} ==
+                {"FreeShip 26.app", "Applications", "README.txt", "box-loading-conditions.fbm"}, "Unexpected DMG root items")
+        require(os.statvfs(mount).f_flag & os.ST_RDONLY, "DMG was not mounted read-only")
+        exported = folder / "Applications" / "FreeShip 26.app"
+        exported.parent.mkdir()
+        run("ditto", mount / exported.name, exported, timeout=120)
+        sample = exported.parent / "box-loading-conditions.fbm"
+        shutil.copy2(mount / sample.name, sample)
+    finally:
+        run("hdiutil", "detach", mount, timeout=45)
+    verify_signature(exported)
+    return exported, sample
+
+
 def package():
+    sys.modules.setdefault("macos_candidate", sys.modules[__name__])
+    from macos_updater_tests import distribution_test, production_checks
     record = verify_source()
     arch = os.environ["FS26_ARCH"]
     require(arch in ("arm64", "x86_64") and run("uname", "-m", capture=True) == arch, "Wrong native runner")
@@ -405,37 +453,43 @@ def package():
         dump(evidence / "macho-inventory.json", binaries)
         sample = payload / "box-loading-conditions.fbm"
         shutil.copyfile(SOURCE / "examples" / sample.name, sample)
-        archive_instructions(payload / "README.txt", arch, commit)
-        bundle_zip = delivery / f"{name}.zip"
-        run("ditto", "-c", "-k", "--sequesterRsrc", "--keepParent", payload, bundle_zip, timeout=240)
-        # Test the extracted deliverable, not just the staging tree. Removing
-        # the original Qt tree from the smoke environment is handled by the
-        # dependency audit: no Mach-O may reference its absolute paths.
-        extracted = folder / "extracted"
-        extracted.mkdir()
-        run("ditto", "-x", "-k", bundle_zip, extracted, timeout=240)
-        exported = extracted / name / app.name
-        verify_signature(exported)
-        checksum = digest(bundle_zip)
-        (evidence / "SHA256SUMS.txt").write_text(f"{checksum}  {bundle_zip.name}\n", encoding="ascii")
-        checks = run_checks(build, exported / "Contents", exported.parent / sample.name, evidence, folder)
-        status = "pass" if all(result["status"] == "pass" for result in checks.values()) else "fail"
-        dump(evidence / "verification.json", {
-            "status": status, "version": VERSION, "architecture": arch, "deployment_target": MIN_MACOS,
+        image_instructions(payload / "README.txt", arch, commit)
+        bundle_dmg = delivery / f"{name}.dmg"
+        exported, sample_copy = export_image(payload, bundle_dmg, folder, arch)
+        exported_binaries = list(macho_files(exported))
+        require(len(exported_binaries) == len(binaries), "Mach-O inventory changed inside the final image")
+        for path in exported_binaries:
+            require(run("xcrun", "lipo", "-archs", path, capture=True) == arch and
+                    digest(path) == digest(app / path.relative_to(exported)), f"DMG Mach-O mismatch: {path}")
+        require(not (exported / "Contents/MacOS/FreeShipUpdaterTest").exists(), "Test updater must never ship")
+        checksum = digest(bundle_dmg)
+        (evidence / "SHA256SUMS.txt").write_text(f"{checksum}  {bundle_dmg.name}\n", encoding="ascii")
+        checks = run_checks(build, exported / "Contents", sample_copy, evidence, folder)
+        receipts = {"status": "fail", "version": VERSION, "architecture": arch, "deployment_target": MIN_MACOS,
             "qt_version": QT_VERSION, "runner_macos": run("sw_vers", "-productVersion", capture=True),
             "runner_os_build": run("sw_vers", "-buildVersion", capture=True),
             "xcode": run("xcodebuild", "-version", capture=True), "git_commit": commit,
             "snapshot_version": record["version"], "frozen_source_files_verified": record["source_entries"],
             "frozen_zip_sha256": SOURCE_ZIP_SHA256, "frozen_manifest_sha256": MANIFEST_SHA256,
-            "package": bundle_zip.name, "package_bytes": bundle_zip.stat().st_size, "sha256": checksum,
+            "package": bundle_dmg.name, "package_bytes": bundle_dmg.stat().st_size, "sha256": checksum,
             "ci_compatibility_overlay": json.loads((tmp / "fs26-compatibility.json").read_bytes()),
+            "macos_updater_overlay": json.loads((tmp / "fs26-macos-update-overlay.json").read_bytes()),
             "mach_o_files_checked": len(binaries), "ad_hoc_signature_verification": "pass",
-            "developer_id_signed": False, "apple_notarized": False, "network_update_channel": False,
-            "languages_bundled": LANGUAGES, "checks": checks,
+            "developer_id_signed": False, "apple_notarized": False,
+            "update_channel_url": f"{FEED_BASE}/{arch}/latest.json", "update_channel_configured": True,
+            "dmg_readonly_mount_and_applications_link": "pass", "languages_bundled": LANGUAGES, "checks": checks,
             "finder_gatekeeper_acceptance": "not_run", "manual_macos_desktop_acceptance": "not_run",
-        })
-        require(status == "pass", "Package probes did not pass. See uploaded validation evidence.")
-        print(f"Verified {bundle_zip.name}: {checksum}", flush=True)
+        }
+        report = evidence / "verification.json"
+        dump(report, receipts)
+        if all(result["status"] == "pass" for result in checks.values()):
+            receipts["live_update_checks"] = production_checks(build, exported, evidence, folder)
+            dump(report, receipts)
+            receipts["update_install_checks"] = distribution_test(build, exported, bundle_dmg, evidence, folder, arch)
+            receipts["status"] = "pass"
+            dump(report, receipts)
+        require(receipts["status"] == "pass", "Package probes did not pass. See uploaded validation evidence.")
+        print(f"Verified {bundle_dmg.name}: {checksum}", flush=True)
 
 
 if __name__ == "__main__":

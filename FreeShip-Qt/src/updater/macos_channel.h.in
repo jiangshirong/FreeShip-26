@@ -1,0 +1,7 @@
+// Generated from the build's HTTPS prefix and the existing FreeShip release public key.
+#pragma once
+namespace fs26::macos_update {
+inline constexpr char feedBase[] = "@FS26_MACOS_FEED_BASE@";
+inline constexpr char keyXml[] = "@FS26_MACOS_KEY_XML@";
+inline constexpr char family[] = "@FS26_MACOS_FAMILY@";
+}
