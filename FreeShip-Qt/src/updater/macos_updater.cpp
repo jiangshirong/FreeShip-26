@@ -333,7 +333,7 @@ int main(int argc, char **argv) {
     QCoreApplication program(argc, argv);
     std::signal(SIGTERM, onStop); std::signal(SIGINT, onStop);
     QJsonObject report;
-    QString mode, reportPath, app;
+    QString mode, reportPath, app, stage = "arguments";
     qint64 parent = 0;
     bool relaunch = true, parentGone = false;
     int result = 1;
@@ -350,6 +350,7 @@ int main(int argc, char **argv) {
             } else fail(badManifest);
         }
         require(!mode.isEmpty() && !reportPath.isEmpty() && (mode != "--install" || (parent > 1 && parent <= INT_MAX)), badManifest);
+        stage = "bundle_location";
         app = containingApp(QCoreApplication::applicationDirPath());
         require(!app.isEmpty(), installFailure);
         bool fixtureRelaunch = true;
@@ -363,8 +364,10 @@ int main(int argc, char **argv) {
             // Only a normal application quit may release the installation.
             waitForExit(pid_t(parent)); parentGone = true;
         }
+        stage = "bundle_identity";
         const QString current = installedVersion(app);
         report["current_version"] = current;
+        stage = "channel_config";
         QString endpoint = QString::fromUtf8(feedBase) + "/" + arch + "/latest.json";
         QByteArray trustKey = releaseKey();
         QString cache = QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation) + "/FreeShip26/Updates/macos-" + arch +
@@ -385,6 +388,7 @@ int main(int argc, char **argv) {
                 QStringLiteral("另一个更新任务正在运行"));
         const QString image = cache + "/update.dmg", ready = cache + "/ready.json";
         if (mode == "--install") {
+            stage = "install";
             const auto r = parse(boundedRead(ready, maxManifest), trustKey, endpoint);
             require(compareVersions(r.version, current) > 0 && r.size > 0, QStringLiteral("待安装更新无效或已安装"));
             install(app, image, r, relaunch);
@@ -394,7 +398,9 @@ int main(int argc, char **argv) {
         } else {
             QNetworkAccessManager network;
             QByteArray bytes;
+            stage = "read_feed";
             get(network, address(endpoint), maxManifest, 7500, [&](const QByteArray &part) { bytes += part; });
+            stage = "verify_feed";
             const auto r = parse(bytes, trustKey, endpoint);
             report["version"] = r.version;
             const int comparison = compareVersions(r.version, current);
@@ -415,6 +421,7 @@ int main(int argc, char **argv) {
                     QElapsedTimer timer; timer.start();
                     qint64 received = 0, announced = -250;
                     QCryptographicHash hash(QCryptographicHash::Sha256);
+                    stage = "download";
                     get(network, address(r.url), r.size, 20 * 60 * 1000, [&](const QByteArray &part) {
                         require(file.write(part) == part.size(), QStringLiteral("无法保存更新文件"));
                         hash.addData(part); received += part.size();
@@ -437,6 +444,7 @@ int main(int argc, char **argv) {
         else {
             report["status"] = mode == "--install" ? "install_failed" : "error";
             report["error"] = QString::fromUtf8(e.what());
+            report["error_stage"] = stage;
         }
     }
     bool reportSaved = true;

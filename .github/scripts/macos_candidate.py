@@ -486,10 +486,23 @@ def package():
         report = evidence / "verification.json"
         dump(report, receipts)
         if all(result["status"] == "pass" for result in checks.values()):
-            receipts["live_update_checks"] = production_checks(build, exported, evidence, folder)
-            dump(report, receipts)
-            receipts["update_install_checks"] = distribution_test(build, exported, bundle_dmg, evidence, folder, arch)
-            receipts["status"] = "pass"
+            failures = {}
+            for key, probe, args in (
+                ("live_update_checks", production_checks, (build, exported, evidence, folder)),
+                ("update_install_checks", distribution_test, (build, exported, bundle_dmg, evidence, folder, arch)),
+            ):
+                try:
+                    receipts[key] = probe(*args)
+                    print(f"{key}: {json.dumps(receipts[key])}", flush=True)
+                except Exception as error:
+                    import traceback
+                    failures[key] = str(error)
+                    traceback.print_exc()
+                dump(report, receipts)
+            if failures:
+                receipts["failures"] = failures
+            else:
+                receipts["status"] = "pass"
             dump(report, receipts)
         require(receipts["status"] == "pass", "Package probes did not pass. See uploaded validation evidence.")
         print(f"Verified {bundle_dmg.name}: {checksum}", flush=True)

@@ -7,11 +7,12 @@
 
 namespace fs26::macos_update {
 inline QString containingApp(const QString &executableDir) {
-    const QDir bin(executableDir);
-    const QString app = QDir::cleanPath(bin.absoluteFilePath("../.."));
-    if (bin.dirName() != "MacOS" || QFileInfo(bin.absoluteFilePath("..")).fileName() != "Contents" ||
-        !app.endsWith(".app") || !QFileInfo(app + "/Contents/Info.plist").isFile()) return {};
-    return QFileInfo(app).canonicalFilePath();
+    if (executableDir.isEmpty()) return {};
+    QDir directory(executableDir);
+    if (directory.dirName() != "MacOS" || !directory.cdUp() || directory.dirName() != "Contents" ||
+        !directory.cdUp() || !directory.dirName().endsWith(".app") ||
+        !QFileInfo(directory.filePath("Contents/Info.plist")).isFile()) return {};
+    return directory.canonicalPath();
 }
 
 inline constexpr char installLocationError[] = "请先将 FreeShip 26 复制到可写的「应用程序」目录，再安装更新。";
