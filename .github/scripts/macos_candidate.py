@@ -31,6 +31,10 @@ COMPATIBILITY = (
      b'fs::PointMove{p["point_id"].toInt(),',
      b'fs::PointMove{static_cast<fs::EntityId>(p["point_id"].toInt()),',
      "Apple Clang: spell out the existing integer conversion in the startup probe"),
+    ("FreeShip-Tests/qt/fbm_codec_tests.cpp",
+     b'"paths",QJsonArray{QJsonArray{QJsonArray{0.1,2,3},QJsonArray{4,5,6}}}',
+     b'"paths",QJsonArray{QJsonValue(QJsonArray{QJsonArray{0.1,2,3},QJsonArray{4,5,6}})}',
+     "Apple Clang: use one JSON value to represent the inner path, not QJsonArray's copy constructor"),
 )
 PROGRAMS = ("FreeShipQt", "FreeShipDocumentService", "FreeShipNativeLinesplan", "FreeShipGeometryExport")
 LANGUAGES = ("de", "en", "es", "fr", "ja", "ru", "zh")
@@ -277,43 +281,64 @@ def run_checks(build, contents, sample, evidence, temp):
         path.mkdir()
         env[key] = str(path)
     (build / "languages").symlink_to(contents / "Resources/languages")
-    fbm_report = evidence / "fbm-codec.json"
-    run(build / "qt_document_codec_tests", "--output", fbm_report, "--model", sample, env=env, timeout=150)
-    ui_report_dir = evidence / "ui-language"
-    run(build / "qt_ui_language_tests", ui_report_dir, env={**env, "QT_QPA_PLATFORM": "offscreen"})
     results = {}
-    for key, path in (("fbm_codec", fbm_report), ("ui_language", ui_report_dir / "report.json")):
+
+    def verify(name, fn):
+        try:
+            results[name] = {"status": "pass", **fn()}
+        except (RuntimeError, OSError, ValueError, KeyError, subprocess.SubprocessError) as exc:
+            results[name] = {"status": "fail", "error": str(exc)}
+        print(f"{name}: {json.dumps(results[name], ensure_ascii=False)}", flush=True)
+
+    def checked_report(path):
         data = json.loads(path.read_bytes())
-        require(data.get("status") == "pass" and data.get("cases"), f"{key} did not pass")
-        results[key] = {"status": "pass", "cases": len(data["cases"])}
+        require(data.get("status") == "pass" and data.get("cases"), f"Test did not pass: {path.name}")
+        return {"cases": len(data["cases"])}
 
-    out = temp / "rpc-output"
-    out.mkdir()
-    docid = str(uuid.uuid4())
-    messages = [{"id": 1, "method": "load", "path": str(sample), "output": str(out),
-                 "document_id": docid, "native_linesplan": True}, {"id": 2, "method": "quit"}]
+    def fbm_codec():
+        path = evidence / "fbm-codec.json"
+        run(build / "qt_document_codec_tests", "--output", path, "--model", sample, env=env, timeout=150)
+        return checked_report(path)
+
+    def languages():
+        directory = evidence / "ui-language"
+        run(build / "qt_ui_language_tests", directory, env={**env, "QT_QPA_PLATFORM": "offscreen"})
+        return checked_report(directory / "report.json")
+
     programs = contents / "MacOS"
-    with (evidence / "document-service-stderr.txt").open("w", encoding="utf-8") as stderr:
-        output = run(programs / "FreeShipDocumentService", "--serve", capture=True, stderr=stderr,
-                     input="\n".join(json.dumps(r) for r in messages) + "\n", env=env, timeout=120)
-    responses = [json.loads(line) for line in output.splitlines() if line.strip()]
-    dump(evidence / "document-service.json", responses)
-    require(len(responses) == 2 and all(r.get("ok") is True for r in responses)
-            and responses[0].get("document_id") == docid and responses[0].get("document_engine") == "cpp-document"
-            and responses[0].get("adapter_requests") == 0 and responses[0].get("revision") == 1,
-            f"Packaged native sample-model load failed: {responses}")
-    results["packaged_native_model_load"] = {"status": "pass", "sample": sample.name}
 
-    # A Qt probe showing a window on the runner, not a Finder/Gatekeeper or
-    # manual mouse/keyboard test. Retain its evidence separately from acceptance.
-    window_report = evidence / "window-startup"
-    with (evidence / "window-startup-log.txt").open("w", encoding="utf-8") as log:
-        run(programs / "FreeShipQt", "--verify-window-startup", window_report,
-            env={**env, "QT_QPA_PLATFORM": "cocoa"}, cwd=temp, stdout=log, stderr=subprocess.STDOUT, timeout=75)
-    window = json.loads((window_report / "report.json").read_bytes())
-    require(any(c["id"] == "private-startup-observed" and c["status"] == "pass" for c in window["cases"]),
-            "Packaged Cocoa startup probe did not reach its event loop")
-    results["automated_cocoa_window_startup"] = {"status": "pass", "frames": len(window["frames"])}
+    def native_model_load():
+        out = temp / "rpc-output"
+        out.mkdir()
+        docid = str(uuid.uuid4())
+        messages = [{"id": 1, "method": "load", "path": str(sample), "output": str(out),
+                     "document_id": docid, "native_linesplan": True}, {"id": 2, "method": "quit"}]
+        with (evidence / "document-service-stderr.txt").open("w", encoding="utf-8") as stderr:
+            output = run(programs / "FreeShipDocumentService", "--serve", capture=True, stderr=stderr,
+                         input="\n".join(json.dumps(r) for r in messages) + "\n", env=env, timeout=120)
+        responses = [json.loads(line) for line in output.splitlines() if line.strip()]
+        dump(evidence / "document-service.json", responses)
+        require(len(responses) == 2 and all(r.get("ok") is True for r in responses)
+                and responses[0].get("document_id") == docid and responses[0].get("document_engine") == "cpp-document"
+                and responses[0].get("adapter_requests") == 0 and responses[0].get("revision") == 1,
+                f"Packaged native sample-model load failed: {responses}")
+        return {"sample": sample.name}
+
+    def cocoa_startup():
+        # Automated Qt event-loop probe, not a Finder/Gatekeeper or manual test.
+        window_report = evidence / "window-startup"
+        with (evidence / "window-startup-log.txt").open("w", encoding="utf-8") as log:
+            run(programs / "FreeShipQt", "--verify-window-startup", window_report,
+                env={**env, "QT_QPA_PLATFORM": "cocoa"}, cwd=temp, stdout=log, stderr=subprocess.STDOUT, timeout=75)
+        window = json.loads((window_report / "report.json").read_bytes())
+        require(any(c["id"] == "private-startup-observed" and c["status"] == "pass" for c in window["cases"]),
+                "Packaged Cocoa startup probe did not reach its event loop")
+        return {"frames": len(window["frames"])}
+
+    verify("fbm_codec", fbm_codec)
+    verify("ui_language", languages)
+    verify("packaged_native_model_load", native_model_load)
+    verify("automated_cocoa_window_startup", cocoa_startup)
     return results
 
 
@@ -370,8 +395,9 @@ def package():
         checksum = digest(bundle_zip)
         (evidence / "SHA256SUMS.txt").write_text(f"{checksum}  {bundle_zip.name}\n", encoding="ascii")
         checks = run_checks(build, exported / "Contents", exported.parent / sample.name, evidence, folder)
+        status = "pass" if all(result["status"] == "pass" for result in checks.values()) else "fail"
         dump(evidence / "verification.json", {
-            "status": "pass", "version": VERSION, "architecture": arch, "deployment_target": MIN_MACOS,
+            "status": status, "version": VERSION, "architecture": arch, "deployment_target": MIN_MACOS,
             "qt_version": QT_VERSION, "runner_macos": run("sw_vers", "-productVersion", capture=True),
             "runner_os_build": run("sw_vers", "-buildVersion", capture=True),
             "xcode": run("xcodebuild", "-version", capture=True), "git_commit": commit,
@@ -384,6 +410,7 @@ def package():
             "languages_bundled": LANGUAGES, "checks": checks,
             "finder_gatekeeper_acceptance": "not_run", "manual_macos_desktop_acceptance": "not_run",
         })
+        require(status == "pass", "Package probes did not pass. See uploaded validation evidence.")
         print(f"Verified {bundle_zip.name}: {checksum}", flush=True)
 
 
