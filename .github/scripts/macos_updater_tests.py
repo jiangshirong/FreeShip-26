@@ -125,7 +125,6 @@ def distribution_test(build, installed, dmg, evidence, temp, arch):
     value = plistlib.loads(plist_path.read_bytes())
     value["CFBundleVersion"] = value["CFBundleShortVersionString"] = original
     plist_path.write_bytes(plistlib.dumps(value))
-    initial_main_sha = digest(live / "Contents/MacOS/FreeShipQt")
     cache = temporary / "cache"
     test_config = live / "Contents/Resources/macos-update-fixture.json"
     key = temporary / "fixture-key.pem"
@@ -141,6 +140,7 @@ def distribution_test(build, installed, dmg, evidence, temp, arch):
         fixture = {"endpoint": endpoint, "public_key_der": base64.b64encode(public).decode(), "cache": str(cache), "relaunch": False}
         dump(test_config, fixture)
         run("codesign", "--force", "--sign", "-", live)
+        initial_main_sha = digest(live / "Contents/MacOS/FreeShipQt")
         version = lambda: json.loads(manifest_path.read_bytes())["release_version"]
         conf = json.loads((Path(__file__).resolve().parents[2] / "FreeShip-Qt/tools/updates/channel.json").read_bytes())
         payload = {"schema": "fs26-macos-dmg-v1", "channel": endpoint, "family": conf["family"], "arch": arch,
@@ -207,7 +207,8 @@ def distribution_test(build, installed, dmg, evidence, temp, arch):
             call("verified-download-reused", "--check", "ready")
             with (cache / "update.dmg").open("r+b") as f:
                 first = f.read(1); f.seek(0); f.write(bytes([first[0] ^ 1]))
-            install_attempt("modified-cache-cannot-install", "install_failed")
+            invalid = install_attempt("modified-cache-cannot-install", "install_failed")
+            assert_case(cases, "install-report-rejected-the-dmg-digest", invalid.get("error") == "更新安装包完整校验失败")
             assert_case(cases, "failed-install-preserved-old-app", version() == original and
                         digest(live / "Contents/MacOS/FreeShipQt") == initial_main_sha)
             verify_signature(live)

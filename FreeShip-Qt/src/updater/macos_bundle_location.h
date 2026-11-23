@@ -2,8 +2,10 @@
 #pragma once
 
 #include <QDir>
+#include <QFile>
 #include <QFileInfo>
-#include <QStorageInfo>
+#include <sys/statvfs.h>
+#include <unistd.h>
 
 namespace fs26::macos_update {
 inline QString containingApp(const QString &executableDir) {
@@ -19,9 +21,15 @@ inline constexpr char installLocationError[] = "请先将 FreeShip 26 复制到�
 
 inline bool writableInstall(const QString &app) {
     const QFileInfo bundle(app);
-    const QFileInfo parent(bundle.absolutePath());
-    const QStorageInfo volume(app);
-    return !app.isEmpty() && bundle.isDir() && !bundle.isSymLink() && bundle.isWritable() && parent.isWritable() &&
-        !app.startsWith("/Volumes/") && !app.contains("/AppTranslocation/") && volume.isValid() && !volume.isReadOnly();
+    if (app.isEmpty() || !bundle.isDir() || bundle.isSymLink() ||
+        app.startsWith("/Volumes/") || app.contains("/AppTranslocation/")) return false;
+    // APFS firmlinks (e.g. /Users and /Applications) resolve to the writable
+    // Data volume. Ask the OS about these paths directly, not the apparent
+    // mount-table prefix, which may be the read-only system root.
+    const auto path = QFile::encodeName(app);
+    const auto parent = QFile::encodeName(bundle.absolutePath());
+    struct statvfs volume{};
+    return statvfs(path.constData(), &volume) == 0 && !(volume.f_flag & ST_RDONLY) &&
+        access(path.constData(), W_OK | X_OK) == 0 && access(parent.constData(), W_OK | X_OK) == 0;
 }
 }
