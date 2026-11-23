@@ -49,7 +49,7 @@ jobs:
             --outputdir "$RUNNER_TEMP/qt" --archives qtbase qtsvg
           qt="$RUNNER_TEMP/qt/6.8.3/macos"
           test -x "$qt/bin/macdeployqt"
-          xcrun lipo -verify_arch "$FS26_ARCH" "$qt/lib/QtCore.framework/Versions/A/QtCore"
+          xcrun lipo "$qt/lib/QtCore.framework/Versions/A/QtCore" -verify_arch "$FS26_ARCH"
           echo "FS26_QT=$qt" >> "$GITHUB_ENV"
       - name: Compile FS26 and test programs
         run: |
