@@ -203,9 +203,18 @@ def init_bundle(app, build, qt, temp, arch, commit):
     # the actual data in Resources and provide local, bundle-contained aliases.
     for name in ("bridge", "languages", "build-manifest.json"):
         (programs / name).symlink_to(Path("../Resources") / name)
+    # macdeployqt's desktop allowlist deploys Cocoa, not offscreen. The
+    # document service invokes FreeShipNativeLinesplan, which requires it.
+    offscreen = contents / "PlugIns/platforms/libqoffscreen.dylib"
+    offscreen.parent.mkdir(parents=True)
+    shutil.copy2(qt / "plugins/platforms" / offscreen.name, offscreen)
+    additional_binaries = [*(programs / name for name in PROGRAMS[1:]), offscreen]
     run(qt / "bin/macdeployqt", app, "-no-strip", "-verbose=2",
-        *(f"-executable={programs / name}" for name in PROGRAMS[1:]), timeout=480)
-    require((contents / "PlugIns/platforms/libqcocoa.dylib").is_file(), "Missing bundled Qt Cocoa plugin")
+        *(f"-executable={path}" for path in additional_binaries), timeout=480)
+    require((offscreen.parent / "libqcocoa.dylib").is_file(), "Missing bundled Qt Cocoa plugin")
+    # Non-app helper processes may not resolve the main bundle's Resources.
+    # Qt also searches beside an executable and appends the platforms suffix.
+    (programs / "platforms").symlink_to("../PlugIns/platforms")
     return contents
 
 
@@ -307,6 +316,20 @@ def run_checks(build, contents, sample, evidence, temp):
 
     programs = contents / "MacOS"
 
+    def native_worker_boot():
+        # With no workload, this worker returns 3 after QGuiApplication has
+        # started. An abort/missing platform plugin is not that expected code.
+        with (evidence / "native-worker-startup.txt").open("w", encoding="utf-8") as log:
+            result = subprocess.run([programs / "FreeShipNativeLinesplan"],
+                                    env={**env, "QT_DEBUG_PLUGINS": "1"}, cwd=temp,
+                                    stdout=log, stderr=subprocess.STDOUT, timeout=45)
+        require(result.returncode == 3, f"Worker failed before entering its command handler: {result.returncode}")
+        text = (evidence / "native-worker-startup.txt").read_text(encoding="utf-8", errors="replace")
+        require(any(str(contents / "PlugIns/platforms/libqoffscreen.dylib") in line and "loaded library" in line
+                    or str(contents / "MacOS/platforms/libqoffscreen.dylib") in line and "loaded library" in line
+                    for line in text.splitlines()), "Worker did not load the packaged offscreen platform plugin")
+        return {"platform": "offscreen"}
+
     def native_model_load():
         out = temp / "rpc-output"
         out.mkdir()
@@ -337,6 +360,7 @@ def run_checks(build, contents, sample, evidence, temp):
 
     verify("fbm_codec", fbm_codec)
     verify("ui_language", languages)
+    verify("packaged_native_worker_boot", native_worker_boot)
     verify("packaged_native_model_load", native_model_load)
     verify("automated_cocoa_window_startup", cocoa_startup)
     return results
