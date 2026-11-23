@@ -53,7 +53,8 @@ jobs:
           echo "FS26_QT=$qt" >> "$GITHUB_ENV"
       - name: Compile FS26 and test programs
         run: |
-          cmake -S FreeShip-Qt -B "$RUNNER_TEMP/fs26-build" -G Ninja \
+          python .github/scripts/macos_candidate.py stage-source
+          cmake -S "$RUNNER_TEMP/fs26-source/FreeShip-Qt" -B "$RUNNER_TEMP/fs26-build" -G Ninja \
             -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="$FS26_QT" \
             -DCMAKE_OSX_ARCHITECTURES="$FS26_ARCH" -DCMAKE_OSX_DEPLOYMENT_TARGET=15.0 \
             -DCMAKE_MACOSX_BUNDLE=OFF -DFS26_FLATPAK=OFF

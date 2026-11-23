@@ -20,6 +20,14 @@ QT_VERSION = "6.8.3"
 MIN_MACOS = "15.0"
 SOURCE_ZIP_SHA256 = "de34d43f300b274d8f5825a0ce1994ec63cf24c3180b778c4813af4907e80993"
 MANIFEST_SHA256 = "d6ab6b5e9679ec825398f5196bf6a389ea325fa1622693b4fc33179c010cbaa7"
+# Only in a CI copy after the original bytes have been checked. Apple Clang
+# rejects copy-list-init of QPicture's explicit default-argument constructor.
+COMPATIBILITY = (
+    ("FreeShip-Qt/src/render/hull_view.cpp",
+     b"if(!std::isfinite(rasterRatio)||rasterRatio<=0)return {};",
+     b"if(!std::isfinite(rasterRatio)||rasterRatio<=0)return QPicture{};",
+     "Apple Clang: directly construct the same empty QPicture"),
+)
 PROGRAMS = ("FreeShipQt", "FreeShipDocumentService", "FreeShipNativeLinesplan", "FreeShipGeometryExport")
 LANGUAGES = ("de", "en", "es", "fr", "ja", "ru", "zh")
 MACHO_MAGICS = {bytes.fromhex(x) for x in ("feedface", "cefaedfe", "feedfacf", "cffaedfe", "cafebabe", "bebafeca", "cafebabf", "bfbafeca")}
@@ -60,6 +68,33 @@ def verify_source():
         require(digest(p) == sha, f"Frozen file mismatch: {name}")
     print(f"Verified {len(files)} frozen source files, manifest {MANIFEST_SHA256}", flush=True)
     return record
+
+
+def compatibility_overlay(source_root):
+    entries = []
+    for name, old, new, reason in COMPATIBILITY:
+        original = (ROOT / name).read_bytes()
+        require(original.count(old) == 1, f"Compatibility anchor mismatch: {name}")
+        patched = original.replace(old, new, 1)
+        target = source_root / name
+        require(target.read_bytes() == original, f"Staged source mismatch: {name}")
+        target.write_bytes(patched)
+        entries.append({"file": name, "before": hashlib.sha256(original).hexdigest(),
+                        "after": hashlib.sha256(patched).hexdigest(), "reason": reason,
+                        "original": old.decode(), "replacement": new.decode()})
+    return entries
+
+
+def stage_source():
+    verify_source()
+    temp = Path(os.environ["RUNNER_TEMP"])
+    workspace = temp / "fs26-source"
+    workspace.mkdir()
+    for name in ("FreeShip-Qt", "FreeShip-Tests"):
+        shutil.copytree(ROOT / name, workspace / name)
+    entries = compatibility_overlay(workspace)
+    dump(temp / "fs26-compatibility.json", entries)
+    print(json.dumps(entries, indent=2), flush=True)
 
 
 def put_resources(resources, commit, arch):
@@ -339,6 +374,7 @@ def package():
             "snapshot_version": record["version"], "frozen_source_files_verified": record["source_entries"],
             "frozen_zip_sha256": SOURCE_ZIP_SHA256, "frozen_manifest_sha256": MANIFEST_SHA256,
             "package": bundle_zip.name, "package_bytes": bundle_zip.stat().st_size, "sha256": checksum,
+            "ci_compatibility_overlay": json.loads((tmp / "fs26-compatibility.json").read_bytes()),
             "mach_o_files_checked": len(binaries), "ad_hoc_signature_verification": "pass",
             "developer_id_signed": False, "apple_notarized": False, "network_update_channel": False,
             "languages_bundled": LANGUAGES, "checks": checks,
@@ -348,6 +384,6 @@ def package():
 
 
 if __name__ == "__main__":
-    actions = {"verify-source": verify_source, "package": package}
-    require(len(sys.argv) == 2 and sys.argv[1] in actions, "Use verify-source or package")
+    actions = {"verify-source": verify_source, "stage-source": stage_source, "package": package}
+    require(len(sys.argv) == 2 and sys.argv[1] in actions, "Use verify-source, stage-source, or package")
     actions[sys.argv[1]]()
