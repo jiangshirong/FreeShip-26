@@ -1,0 +1,293 @@
+--- a/FreeShip-Qt/CMakeLists.txt
++++ b/FreeShip-Qt/CMakeLists.txt
+@@ -99,6 +99,8 @@
+     VERBATIM)
+   add_custom_target(freeship_updater ALL DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/FreeShipUpdater.exe")
+   add_dependencies(FreeShipQt freeship_updater)
++elseif(APPLE)
++  include(src/updater/macos_updater.cmake)
+ elseif(FS26_FLATPAK AND CMAKE_SYSTEM_NAME STREQUAL "Linux")
+   include(src/updater/flatpak_updater.cmake)
+ elseif(UNIX AND NOT APPLE)
+--- a/FreeShip-Qt/src/app/update_controller.cpp
++++ b/FreeShip-Qt/src/app/update_controller.cpp
+@@ -3,6 +3,9 @@
+ #include "studio_ui.h"
+ #include "ui_language.h"
+ #include "core/platform_process.h"
++#ifdef Q_OS_MACOS
++#include "updater/macos_bundle_location.h"
++#endif
+ #include <QAction>
+ #include <QApplication>
+ #include <QDialog>
+@@ -239,6 +242,17 @@
+ 
+     QString work()const{return QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation)+"/FreeShip26/UpdateUI";}
+     bool canCheck()const{return workflow||QFile::exists(helper);}
++    bool macosManualEntry()const{
++#ifdef Q_OS_MACOS
++        return !workflow&&canCheck();
++#else
++        return false;
++#endif
++    }
++    void syncEntry(QPushButton* button){
++        if(macosManualEntry())button->setText(uiText(hasUpdate()?"更新":"检查更新"));
++        button->setVisible(canCheck()&&(hasUpdate()||macosManualEntry()));
++    }
+     bool checkOnly()const{return self->property("update_check_only").toBool();}
+     bool hasUpdate()const{return state=="available"||state=="ready"||state=="downloading"||state=="paused"||state=="pausing";}
+     void syncProgress(){
+@@ -279,7 +293,7 @@
+         if(!checkOnly()){
+             if(state=="available")action="下载更新";
+             else if(state=="downloading"||state=="pausing")action="暂停";
+-            else if(state=="paused")action="继续下载";
++            else if(state=="paused")action=macosManualEntry()?"重新下载":"继续下载";
+             else if(state=="ready")action="重启并安装";
+         }
+         window->action->setText(uiText(action));
+@@ -299,7 +313,7 @@
+             }
+         }
+         entryButtons.removeIf([](const auto& button){return button.isNull();});
+-        for(const auto& button:entryButtons)button->setVisible(canCheck()&&hasUpdate());
++        for(const auto& button:entryButtons)syncEntry(button);
+         if(!window)return;
+         window->title->setText(version);
+         window->title->setVisible(!version.isEmpty());
+@@ -327,7 +341,7 @@
+             QObject::connect(window,&QDialog::finished,self,[this]{pause();});
+         }
+         window->show();window->raise();window->activateWindow();
+-        if((state.isEmpty()||state=="error"||state=="not_configured")&&!process)run("--check");
++        if((state.isEmpty()||state=="error"||state=="not_configured"||(macosManualEntry()&&state=="current"))&&!process)run("--check");
+         else sync();
+     }
+     void run(const QString& mode){
+@@ -385,6 +399,22 @@
+     void install(){
+         lastMode="--install";self->setProperty("update_requested_mode",lastMode);
+         if(workflow||!owner||checkOnly())return;
++#ifdef Q_OS_MACOS
++        using namespace fs26::macos_update;
++        if(!writableInstall(containingApp(QCoreApplication::applicationDirPath()))){
++            errorSource=QString::fromUtf8(installLocationError);showWindow();return;
++        }
++        auto* workspace=owner->window();
++        if(workspace==owner||!QFileInfo(helper).isExecutable()||!QDir().mkpath(work())){
++            errorSource=QStringLiteral("无法启动更新程序");showWindow();return;
++        }
++        // The workspace starts the helper only after the standard quit flow
++        // accepts every document; cancelling quit clears the request.
++        if(window)window->hide();
++        workspace->setProperty("fs26_macos_update_report",work()+"/install-result.json");
++        workspace->close();
++        return;
++#endif
+ #ifdef Q_OS_LINUX
+         if(flatpak){
+             // Use the normal workspace exit sequence (including running
+@@ -427,7 +457,7 @@
+     impl_->helper=fs::platform::siblingExecutable(impl_->flatpak?"FreeShipFlatpakUpdater":"FreeShipUpdater");impl_->sync();
+     // The signed report already contains all available locales. Re-render it
+     // and the dynamic transfer labels without touching the running updater.
+-    bindUiRefresh(this,[this]{if(impl_->window)impl_->sync();});
++    bindUiRefresh(this,[this]{if(impl_->window||impl_->macosManualEntry())impl_->sync();});
+ }
+ StudioUpdateController::~StudioUpdateController(){
+     if(auto* child=impl_->process.data()){
+@@ -457,7 +487,7 @@
+     button->setIcon(icon);
+     new UpdateButtonBadge(button);
+     impl_->entryButtons.append(button);
+-    button->setVisible(impl_->canCheck()&&impl_->hasUpdate());
++    impl_->syncEntry(button);
+     if(impl_->flatpak&&!impl_->workflow&&!impl_->process&&!impl_->hasUpdate())impl_->run("--check");
+     connect(button,&QPushButton::clicked,this,[this,button]{
+         if(auto* about=qobject_cast<QDialog*>(button->window());about&&about->objectName()=="FreeShipAbout")about->accept();
+@@ -530,7 +560,7 @@
+ void installStudioUpdates(QWidget* owner,QAction* about,bool workflow,const std::function<void(std::function<void()>)>& save){
+     about->setProperty("studio_update_badge",true);
+     auto* controller=new StudioUpdateController(owner,about,workflow,save);
+-#if defined(Q_OS_WIN)||defined(Q_OS_LINUX)
++#if defined(Q_OS_WIN)||defined(Q_OS_LINUX)||defined(Q_OS_MACOS)
+     controller->schedule();
+ #endif
+ }
+--- a/FreeShip-Qt/src/app/document_workspace.cpp
++++ b/FreeShip-Qt/src/app/document_workspace.cpp
+@@ -15,6 +15,10 @@
+ #include <QStyle>
+ #include <QTabBar>
+ #include <QTimer>
++#ifdef Q_OS_MACOS
++#include "core/platform_process.h"
++#include <QProcess>
++#endif
+ 
+ namespace {
+ class DocumentTabCloseButton final : public QAbstractButton {
+@@ -93,6 +97,9 @@
+     if(!pages_->count()||closing_)QTimer::singleShot(0,this,[this]{if(!pages_->count())close();else if(closing_)closeNext();});
+ }
+ void DocumentWorkspace::cancelled(){closing_=false;
++#ifdef Q_OS_MACOS
++    setProperty("fs26_macos_update_report",QVariant{});
++#endif
+ #ifdef Q_OS_LINUX
+     setProperty("fs26_restart_after_close",false);
+ #endif
+@@ -105,6 +112,17 @@
+ #ifdef Q_OS_LINUX
+     if(persistent_&&property("fs26_restart_after_close").toBool()){qApp->exit(75);return;}
+ #endif
++#ifdef Q_OS_MACOS
++    const auto report=property("fs26_macos_update_report").toString();
++    if(persistent_&&!report.isEmpty()){
++        setProperty("fs26_macos_update_report",QVariant{});
++        if(!QProcess::startDetached(fs::platform::siblingExecutable("FreeShipUpdater"),
++            {"--install","--parent",QString::number(QCoreApplication::applicationPid()),"--report",report})){
++            event->ignore();closing_=false;
++            auto* doc=addDocument();doc->startSession();doc->showError(uiText("无法启动更新程序"));return;
++        }
++    }
++#endif
+     if(persistent_)qApp->quit();return;}
+     event->ignore();if(!closing_){closing_=true;closeNext();}}
+ void DocumentWorkspace::dragEnterEvent(QDragEnterEvent* e){if(active())active()->dragEnterEvent(e);}
+--- a/FreeShip-Tests/qt/update_about_tests.cpp
++++ b/FreeShip-Tests/qt/update_about_tests.cpp
+@@ -122,9 +122,40 @@
+     return pass?0:1;
+ }
+ 
++#ifdef Q_OS_MACOS
++static int verifyMacosCheck(const QString& out){
++    QWidget owner;owner.resize(1040,600);owner.show();
++    QAction about(&owner);
++    StudioUpdateController controller(&owner,&about,false,[](std::function<void()>){ });
++    bool visible=false;
++    QTimer::singleShot(0,&owner,[&]{
++        auto* dialog=owner.findChild<QDialog*>("FreeShipAbout");
++        auto* button=dialog?dialog->findChild<QPushButton*>("AboutUpdateLatest"):nullptr;
++        visible=button&&button->isVisible()&&button->text()==uiText("检查更新");
++        if(visible)button->click();else if(dialog)dialog->reject();
++    });
++    QTimer::singleShot(2000,&owner,[&]{if(auto* dialog=owner.findChild<QDialog*>("FreeShipAbout"))dialog->reject();});
++    showFreeShipAbout(&owner);
++    QElapsedTimer wait;wait.start();
++    while(visible&&(controller.state().isEmpty()||controller.lastRequestedMode().isEmpty())&&wait.elapsed()<12000){
++        QCoreApplication::processEvents(QEventLoop::AllEvents,25);
++    }
++    const bool pass=visible&&controller.lastRequestedMode()=="--check"&&controller.state()=="current"&&
++        owner.findChild<QDialog*>("FreeShipUpdate")!=nullptr;
++    QFile report(out+"/report.json");
++    if(!report.open(QIODevice::WriteOnly))return 2;
++    report.write(QJsonDocument(QJsonObject{{"status",pass?"pass":"fail"},{"entry_visible",visible},
++        {"requested_mode",controller.lastRequestedMode()},{"state",controller.state()}}).toJson());
++    return pass?0:1;
++}
++#endif
++
+ int main(int argc,char** argv){
+     QApplication app(argc,argv);app.setProperty("studio_motion_enabled",false);applyStudioTheme();
+     const QString out=QString::fromLocal8Bit(argv[argc-1]);QDir().mkpath(out);QJsonArray cases;
++#ifdef Q_OS_MACOS
++    if(app.arguments().contains("--live-macos-check"))return verifyMacosCheck(out);
++#endif
+     if(app.arguments().contains("--live-download")||app.arguments().contains("--live-reopen"))
+         return verifyLiveDownload(app,out,app.arguments().contains("--live-reopen"));
+     if(app.arguments().contains("--english")&&!setUiLanguage("en").isEmpty())return 3;
+--- a/FreeShip-Qt/src/app/languages/en.json
++++ b/FreeShip-Qt/src/app/languages/en.json
+@@ -4,6 +4,10 @@
+   "id": "en",
+   "name": "English",
+   "messages": {
++    "检查更新": "Check for Updates",
++    "重新下载": "Download Again",
++    "此更新需要更高版本的 macOS。": "This update requires a newer version of macOS.",
++    "请先将 FreeShip 26 复制到可写的「应用程序」目录，再安装更新。": "Copy FreeShip 26 to a writable Applications folder before installing updates.",
+     "Invalid PDF scale": "Invalid PDF scale",
+     "Invalid point group lock metadata": "Invalid point group lock metadata",
+     "Converted model exceeds FBM size limit": "Converted model exceeds the FBM file size limit",
+--- a/FreeShip-Qt/src/app/languages/de.json
++++ b/FreeShip-Qt/src/app/languages/de.json
+@@ -4,6 +4,10 @@
+   "id": "de",
+   "name": "Deutsch",
+   "messages": {
++    "检查更新": "Nach Updates suchen",
++    "重新下载": "Erneut herunterladen",
++    "此更新需要更高版本的 macOS。": "Dieses Update erfordert eine neuere macOS-Version.",
++    "请先将 FreeShip 26 复制到可写的「应用程序」目录，再安装更新。": "Kopieren Sie FreeShip 26 vor dem Update in einen beschreibbaren Programme-Ordner.",
+     "Invalid PDF scale": "Ungültiger PDF-Maßstab",
+     "Invalid point group lock metadata": "Ungültige Sperrdaten einer Punktgruppe",
+     "Converted model exceeds FBM size limit": "Das konvertierte Modell überschreitet die FBM-Dateigrößengrenze",
+--- a/FreeShip-Qt/src/app/languages/es.json
++++ b/FreeShip-Qt/src/app/languages/es.json
+@@ -4,6 +4,10 @@
+   "id": "es",
+   "name": "Español",
+   "messages": {
++    "检查更新": "Buscar actualizaciones",
++    "重新下载": "Volver a descargar",
++    "此更新需要更高版本的 macOS。": "Esta actualización requiere una versión más reciente de macOS.",
++    "请先将 FreeShip 26 复制到可写的「应用程序」目录，再安装更新。": "Copia FreeShip 26 en una carpeta Aplicaciones con permisos de escritura antes de actualizar.",
+     "Invalid PDF scale": "La escala del PDF no es válida",
+     "Invalid point group lock metadata": "Los datos de bloqueo del grupo de puntos no son válidos",
+     "Converted model exceeds FBM size limit": "El modelo convertido supera el tamaño máximo de un archivo FBM",
+--- a/FreeShip-Qt/src/app/languages/fr.json
++++ b/FreeShip-Qt/src/app/languages/fr.json
+@@ -4,6 +4,10 @@
+   "id": "fr",
+   "name": "Français",
+   "messages": {
++    "检查更新": "Rechercher des mises à jour",
++    "重新下载": "Télécharger à nouveau",
++    "此更新需要更高版本的 macOS。": "Cette mise à jour nécessite une version plus récente de macOS.",
++    "请先将 FreeShip 26 复制到可写的「应用程序」目录，再安装更新。": "Avant la mise à jour, copiez FreeShip 26 dans un dossier Applications accessible en écriture.",
+     "Invalid PDF scale": "Échelle du PDF non valide",
+     "Invalid point group lock metadata": "Données de verrouillage du groupe de points non valides",
+     "Converted model exceeds FBM size limit": "Le modèle converti dépasse la taille maximale d’un fichier FBM",
+--- a/FreeShip-Qt/src/app/languages/ja.json
++++ b/FreeShip-Qt/src/app/languages/ja.json
+@@ -4,6 +4,10 @@
+   "id": "ja",
+   "name": "日本語",
+   "messages": {
++    "检查更新": "アップデートを確認",
++    "重新下载": "再ダウンロード",
++    "此更新需要更高版本的 macOS。": "このアップデートには、より新しいバージョンのmacOSが必要です。",
++    "请先将 FreeShip 26 复制到可写的「应用程序」目录，再安装更新。": "アップデートをインストールする前に、FreeShip 26を書き込み可能な「アプリケーション」フォルダにコピーしてください。",
+     "Invalid PDF scale": "PDF の出力縮尺が無効です",
+     "Invalid point group lock metadata": "点グループのロック情報が無効です",
+     "Converted model exceeds FBM size limit": "変換後のモデルが FBM ファイルのサイズ上限を超えています",
+--- a/FreeShip-Qt/src/app/languages/ru.json
++++ b/FreeShip-Qt/src/app/languages/ru.json
+@@ -4,6 +4,10 @@
+   "id": "ru",
+   "name": "Русский",
+   "messages": {
++    "检查更新": "Проверить обновления",
++    "重新下载": "Скачать заново",
++    "此更新需要更高版本的 macOS。": "Для этого обновления нужна более новая версия macOS.",
++    "请先将 FreeShip 26 复制到可写的「应用程序」目录，再安装更新。": "Перед обновлением скопируйте FreeShip 26 в папку «Программы», доступную для записи.",
+     "Invalid PDF scale": "Недопустимый масштаб PDF",
+     "Invalid point group lock metadata": "Недопустимые данные блокировки группы точек",
+     "Converted model exceeds FBM size limit": "Размер преобразованной модели превышает допустимый для FBM",
+--- a/FreeShip-Qt/src/app/languages/zh.json
++++ b/FreeShip-Qt/src/app/languages/zh.json
+@@ -4,6 +4,10 @@
+   "id": "zh",
+   "name": "简体中文",
+   "messages": {
++    "检查更新": "检查更新",
++    "重新下载": "重新下载",
++    "此更新需要更高版本的 macOS。": "此更新需要更高版本的 macOS。",
++    "请先将 FreeShip 26 复制到可写的「应用程序」目录，再安装更新。": "请先将 FreeShip 26 复制到可写的「应用程序」目录，再安装更新。",
+     "Invalid PDF scale": "PDF 出图比例无效",
+     "Invalid point group lock metadata": "点组锁定数据无效",
+     "Converted model exceeds FBM size limit": "转换后的船模超出 FBM 文件大小上限",

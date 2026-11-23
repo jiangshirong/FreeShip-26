@@ -21,6 +21,9 @@ struct RootFill {
 class LocalGeometry {
 public:
     LocalGeometry(const GeometryInput&, const QString& directory, const QByteArray& engine);
+    // Gesture-scoped evaluator; topology stays fixed while point coordinates change.
+    explicit LocalGeometry(const GeometryInput&);
+    void updatePreviewPoints(const GeometryInput&);
     const SubdivisionLevel& mesh() const;
     const std::vector<bool>& changedRoots() const { return program_.changedRoots; }
     bool active() const { return !program_.operations.empty(); }

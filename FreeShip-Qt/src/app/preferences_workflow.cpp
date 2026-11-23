@@ -51,7 +51,8 @@ QJsonObject actionEvidence(const QAction& action) {
         {"document_operation", action.property("document_operation").toString()},
         {"shortcut", action.shortcut().toString(QKeySequence::PortableText)},
         {"visible", action.isVisible()}, {"enabled", action.isEnabled()},
-        {"checkable", action.isCheckable()}, {"checked", action.isChecked()}};
+        {"checkable", action.isCheckable()}, {"checked", action.isChecked()},
+        {"has_icon", !action.icon().isNull()}};
     for(const char* key:{"file_operation","view_operation","overlay_kind","background_operation","focal_mm","shade_mode","coordinate_axis"}){
         const auto value=action.property(key);
         if(value.isValid())entry[key]=QJsonValue::fromVariant(value);
@@ -152,6 +153,8 @@ bool MainWindow::captureStudioMenus(bool includeViewports){
                 if(menu->isVisible())menus.append(menu);
             QJsonObject viewport{{"projection",int(view->projection())},{"filled",filled},
                 {"candidates",menus.size()},{"language",uiLanguage()}};
+            if(const auto* button=view->findChild<QToolButton*>("HullDisplayMode");button&&button->menu())
+                viewport["display_modes"]=menuEvidence(*button->menu());
             if(menus.size()==1){
                 auto* menu=menus.front();
                 viewport["entries"]=menuEvidence(*menu);
@@ -237,6 +240,10 @@ void MainWindow::preferencesStep(const QString& operation){
             return QJsonObject{{"panes",qobject_cast<QSplitter*>(centralWidget())->count()},{"frames",frames}};
         };
         int next=preferencesRequest_.value("next").toInt();auto observations=preferencesRequest_.value("observations").toArray();
+        if(operation=="begin"&&preferencesRequest_.value("observe_file_menu").toBool()){
+            QJsonArray entries;for(auto* action:primaryMenu_->actions())if(!action->isSeparator())entries.append(QJsonObject{{"operation",action->property("file_operation").toString()},{"ordinary_open",action==open_},{"text",action->text()}});
+            workflowArtifacts_["file_menu"]=entries;
+        }
         if(operation!="begin"){
             auto item=preferencesRequest_.value("dialog_observation").toObject();preferencesRequest_.remove("dialog_observation");
             item["operation"]=operation;item["active"]=preferences_;item["persisted"]=QJsonDocument::fromJson(bytes(preferencesStore_->filename())).object();
@@ -270,6 +277,7 @@ void MainWindow::preferencesStep(const QString& operation){
             QJsonArray captions;for(auto* a:findChildren<QAction*>())if(a->property("operation").isValid())captions.append(actionEvidence(*a));item["actions"]=captions;
             item["appearance"]=preferenceAppearance(preferences_);
             item["modified"]=session_.modified();item["undo"]=session_.canUndo();item["redo"]=session_.canRedo();item["toolbar_height"]=studioBar_->height();
+            item["document_count"]=documentWindows().size();
             item["export_start"]=preferenceFileLocation("export","example.dxf");item["open_start"]=preferenceFileLocation("open");
             if(session_.model()){
                 const auto model=session_.model();item["revision"]=double(model->revision);item["point_size"]=model->overlay.pointSize;item["font_size"]=model->overlay.fontSize;
@@ -496,3 +504,4 @@ void MainWindow::preferencesStep(const QString& operation){
         }catch(const std::exception& e){finishWorkflow(QString::fromUtf8(e.what()));}});
     }catch(const std::exception& e){finishWorkflow(QString::fromUtf8(e.what()));}
 }
+

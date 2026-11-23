@@ -898,6 +898,10 @@ class Builder {
     }
 };
 } // namespace
+QByteArray previewSectionDisplay(const DocumentInput& input,LocalGeometry& geometry){
+    geometry.updatePreviewPoints(input.geometry);Builder builder(input,geometry);
+    return builder.run({},{},{},true).sectionDisplay;
+}
 LinesplanOutput buildLinesplan(const DocumentInput &document,const QString& sectionCache,const QByteArray& engine,const DisplayReady& displayReady,bool displayOnly) {
     QElapsedTimer timer;timer.start();LocalGeometry geometry(document.geometry,sectionCache,engine);Builder builder(document,geometry);
     const auto subdivisionMs=timer.nsecsElapsed()/1e6;

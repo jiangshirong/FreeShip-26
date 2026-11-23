@@ -237,7 +237,6 @@ private:
     QPoint start_,pointer_;
 };
 
-constexpr double DensityFactor = 1000.0 * 0.3048 * 0.3048 * 0.3048 / 0.45359237;
 QColor displayColor(quint32 color) { return QColor(color & 255, (color >> 8) & 255, (color >> 16) & 255); }
 quint32 storedColor(QColor color) { return quint32(color.red()) | quint32(color.green()) << 8 | quint32(color.blue()) << 16; }
 class NumberEditor final : public QDoubleSpinBox {
@@ -254,12 +253,6 @@ protected:
 class ColorEditor final : public QPushButton {
 public:
     std::function<void()> onChanged;
-    explicit ColorEditor(QWidget* parent = nullptr) : QPushButton(parent) {
-        connect(this, &QPushButton::clicked, this, [this] {
-            const auto color = studioChooseColor(displayColor(property("colorValue").toUInt()), this, uiText("选择图层颜色"), QColorDialog::DontUseNativeDialog);
-            if (color.isValid()) setProperty("colorValue", storedColor(color));
-        });
-    }
 protected:
     bool event(QEvent* event) override {
         if (event->type() == QEvent::DynamicPropertyChange &&
@@ -282,7 +275,6 @@ QJsonObject layerValues(const fs::Layer& layer) {
 }
 
 struct LayerPanel::State {
-    struct Number { NumberEditor* widget = nullptr; double original = 0, draft = 0; bool edited = false; };
     std::shared_ptr<const fs::ModelSnapshot> snapshot;
     enum Kind { Insert, Remove, Replace };
     struct Change {
@@ -306,28 +298,24 @@ struct LayerPanel::State {
         before.append(op);after.clear();projectRow(op);
     }
     QHash<QString, QWidget*> editors;
-    QHash<QString, Number> numbers;
-    QHash<fs::EntityId, QJsonObject> drafts;
-    QJsonObject original;
+    QHash<QString, NumberEditor*> numbers;
     LayerList* list = nullptr;
     QToolButton* add=nullptr;
     QHash<fs::EntityId,QToolButton*> remove, visibility;
     QSet<fs::EntityId> occupied;
     fs::EntityId focusName=0;
     QSpinBox* transparency=nullptr;
+    QSlider* alphaSlider=nullptr;
     QCheckBox* controlNet=nullptr;
     QSet<fs::EntityId> hiddenControl;
     QLabel* measurements=nullptr;
     QHash<fs::EntityId,QPair<double,fs::Vec3>> measurementsByLayer;
-    bool alphaEdited=false;
     QWidget* properties = nullptr;
     ColorEditor* color = nullptr;
-    QCheckBox *hydro = nullptr, *symmetric = nullptr;
-    QPushButton* apply = nullptr;
+    QCheckBox* symmetric = nullptr;
     StudioMessage *error = nullptr, *empty = nullptr;
-    fs::EntityId selected = 0, pending = 0;
-    quint64 pendingRevision = 0;
-    bool loading = true, editingEnabled = true, symmetricExplicit = false;
+    fs::EntityId selected = 0;
+    bool loading = true, editingEnabled = true;
 };
 
 LayerPanel::LayerPanel(QWidget* parent) : QWidget(parent), state_(std::make_unique<State>()) {
@@ -352,21 +340,31 @@ LayerPanel::LayerPanel(QWidget* parent) : QWidget(parent), state_(std::make_uniq
         editor->setProperty("modelField", field); editor->setObjectName("layer_" + field); s.editors.insert(field, editor);
     };
     s.color = new ColorEditor; bind("color", s.color); form->addRow(uiText("颜色"), s.color);
-    s.transparency=new QSpinBox;s.transparency->setRange(0,100);s.transparency->setSuffix(" %");bind("alpha_blend",s.transparency);
+    s.color->setAutoDefault(false);
+    connect(s.color,&QPushButton::clicked,this,[this]{
+        auto& state=*state_;
+        if(!state.snapshot||!state.selected)return;
+        const auto document=state.snapshot->documentId;const auto layer=state.selected;
+        const auto color=studioChooseColor(displayColor(state.color->property("colorValue").toUInt()),state.color,uiText("选择图层颜色"),QColorDialog::DontUseNativeDialog);
+        if(color.isValid()&&state.snapshot&&state.snapshot->documentId==document&&state.selected==layer)
+            state.color->setProperty("colorValue",storedColor(color));
+    });
+    s.transparency=new QSpinBox;s.transparency->setRange(0,100);s.transparency->setSuffix(" %");s.transparency->setKeyboardTracking(false);bind("alpha_blend",s.transparency);
     auto* alphaRow=new QWidget;auto* alphaLayout=new QHBoxLayout(alphaRow);alphaLayout->setContentsMargins(0,0,0,0);
-    auto* alphaSlider=new QSlider(Qt::Horizontal);alphaSlider->setRange(0,100);alphaSlider->setAccessibleName(uiText("透明度"));
+    auto* alphaSlider=s.alphaSlider=new QSlider(Qt::Horizontal);alphaSlider->setRange(0,100);alphaSlider->setAccessibleName(uiText("透明度"));
     alphaLayout->addWidget(alphaSlider,1);alphaLayout->addWidget(s.transparency);form->addRow(uiText("透明度"),alphaRow);
     connect(alphaSlider,&QSlider::valueChanged,s.transparency,&QSpinBox::setValue);
     connect(s.transparency,&QSpinBox::valueChanged,alphaSlider,&QSlider::setValue);
-    connect(s.transparency,&QSpinBox::valueChanged,this,[this]{if(!state_->loading){state_->alphaEdited=true;updateEnabledState();}});
+    connect(s.transparency,&QSpinBox::valueChanged,this,[this]{if(!state_->alphaSlider->isSliderDown())submitTransparency();});
+    connect(alphaSlider,&QSlider::sliderReleased,this,&LayerPanel::submitTransparency);
     auto addCheck = [&](const QString& field, const QString& text) {
         auto* box = new QCheckBox(text); bind(field, box); form->addRow(box);
-        connect(box, &QCheckBox::toggled, this, [this] { if (!state_->loading) updateEnabledState(); });
+        connect(box, &QCheckBox::toggled, this, [this,field](bool checked) { submitProperty(field,checked); });
         return box;
     };
     s.symmetric = addCheck("symmetric", uiText("关于中纵剖面对称"));
     addCheck("developable", uiText("可展开曲面"));
-    s.hydro = addCheck("use_in_hydrostatics", uiText("参与静水力计算"));
+    addCheck("use_in_hydrostatics", uiText("参与静水力计算"));
     addCheck("use_for_intersections", uiText("生成交线"));
     addCheck("show_in_linesplan", uiText("在型线图中显示"));
     s.controlNet=new QCheckBox(uiText("显示此图层的控制网格"));bind("control_net_visible",s.controlNet);form->addRow(s.controlNet);
@@ -374,32 +372,18 @@ LayerPanel::LayerPanel(QWidget* parent) : QWidget(parent), state_(std::make_uniq
     for (const auto& field : {QString("thickness"), QString("material_density")}) {
         auto* number = new NumberEditor;
         number->setDecimals(12); number->setRange(0, 1e9); number->setSingleStep(0.01); number->setKeyboardTracking(false);
-        s.numbers.insert(field, {number, 0, 0, false}); bind(field, number);
+        s.numbers.insert(field, number); bind(field, number);
         form->addRow(field == "thickness" ? uiText("板厚") : uiText("材料密度"), number);
         connect(number, &QDoubleSpinBox::valueChanged, this, [this, field](double value) {
-            if (state_->loading) return;
-            state_->numbers[field].edited = true; state_->numbers[field].draft = value; updateEnabledState();
+            submitProperty(field,value);
         });
     }
-    s.color->onChanged = [this] { if (!state_->loading) updateEnabledState(); };
-    connect(s.symmetric, &QCheckBox::toggled, this, [this] {
-        if (state_->loading) return;
-        state_->symmetricExplicit = true; updateEnabledState();
-    });
-    connect(s.hydro, &QCheckBox::toggled, this, [this](bool enabled) {
-        auto& state = *state_;
-        if (state.loading || state.symmetricExplicit) return;
-        // The legacy core makes a newly hydrostatic layer symmetric. Keep the
-        // draft in step, while a deliberate symmetry choice takes precedence.
-        state.loading = true;
-        state.symmetric->setChecked(enabled && !state.original["use_in_hydrostatics"].toBool() ? true : state.original["symmetric"].toBool());
-        state.loading = false; updateEnabledState();
-    });
+    s.color->onChanged = [this] { submitProperty("color",double(state_->color->property("colorValue").toUInt())); };
     connect(s.list, &QListWidget::currentItemChanged, this, [this](QListWidgetItem* current) {
         auto& state = *state_;
         if (state.loading) return;
         state.list->stopNameEditing();
-        if (state.selected) state.drafts.insert(state.selected, changes());
+        commitText();
         state.selected = current ? current->data(Qt::UserRole).toULongLong() : 0;
         loadSelected();
         if(onSelectionChanged)onSelectionChanged();
@@ -409,7 +393,7 @@ LayerPanel::LayerPanel(QWidget* parent) : QWidget(parent), state_(std::make_uniq
     });
     s.list->onRename=[this](fs::EntityId id,const QString& text){
         auto& s=*state_;
-        if(!(s.editingEnabled||s.listAllowed)||s.pending||!s.layer(id))return;
+        if(!(s.editingEnabled||s.listAllowed)||!s.layer(id))return;
         const char* warning=text.contains(QChar(0))?"图层名称中不能包含空字符。":text.toUtf8().size()>65536?"图层名称过长。":nullptr;
         if(warning){s.error->setText(uiText(warning));s.error->show();return;}
         s.list->stopNameEditing(true);
@@ -426,10 +410,7 @@ LayerPanel::LayerPanel(QWidget* parent) : QWidget(parent), state_(std::make_uniq
             s.list->refreshName();
         }
         updateMeasurements();
-        if(s.error->isVisible())s.error->setText(validationError());
     });
-    s.apply = new QPushButton(uiText("应用")); s.apply->setObjectName("layer_apply");s.apply->setProperty("layer_action","apply"); layout->addWidget(s.apply);
-    connect(s.apply, &QPushButton::clicked, this, &LayerPanel::applyChanges);
     s.loading = false; updateEnabledState();
 }
 
@@ -439,7 +420,17 @@ void LayerPanel::editLayerName(fs::EntityId id){
     state_->focusName=id;
     updateEnabledState();
 }
-void LayerPanel::discardDrafts(){state_->focusName=0;const auto selected=state_->selected;state_->drafts.clear();state_->selected=0;state_->pending=0;setSnapshot(state_->snapshot);setSelectedLayerId(selected);}
+void LayerPanel::finishEditing(){
+    commitText();
+    state_->focusName=0;
+    state_->list->stopNameEditing();
+}
+void LayerPanel::commitText(){
+    auto& s=*state_;
+    if(s.loading||!(s.editingEnabled||s.listAllowed))return;
+    s.transparency->interpretText();
+    for(auto* number:s.numbers)number->interpretText();
+}
 QWidget* LayerPanel::fieldEditor(const QString& field) const { return state_->editors.value(field, nullptr); }
 fs::EntityId LayerPanel::selectedLayerId() const { return state_->selected; }
 
@@ -453,18 +444,7 @@ void LayerPanel::setSelectedLayerId(fs::EntityId id) {
 void LayerPanel::setSnapshot(std::shared_ptr<const fs::ModelSnapshot> snapshot,int historyStates,int highWater) {
     auto& s = *state_;
     const bool sameDocument = s.snapshot && snapshot && s.snapshot->documentId == snapshot->documentId;
-    if (sameDocument && s.selected) s.drafts.insert(s.selected, changes());
-    if (!sameDocument) { s.drafts.clear();s.hiddenControl.clear();s.selected = 0; s.pending = 0; }
-    if (sameDocument && s.pending && snapshot->revision > s.pendingRevision) {
-        s.drafts.remove(s.pending); s.pending = 0;
-    }
-    if (sameDocument && snapshot->units != s.snapshot->units) {
-        const bool imperial = snapshot->units == "imperial";
-        for (auto it = s.drafts.begin(); it != s.drafts.end(); ++it) {
-            if (it->contains("thickness")) it->insert("thickness", (*it)["thickness"].toDouble() * (imperial ? 1 / 25.4 : 25.4));
-            if (it->contains("material_density")) it->insert("material_density", (*it)["material_density"].toDouble() * (imperial ? DensityFactor : 1 / DensityFactor));
-        }
-    }
+    if (!sameDocument) { s.hiddenControl.clear();s.selected = 0;s.focusName=0; }
     if(snapshot!=s.snapshot){
         s.committedHigh=highWater;
         bool matched=false;
@@ -477,14 +457,16 @@ void LayerPanel::setSnapshot(std::shared_ptr<const fs::ModelSnapshot> snapshot,i
             for(int i=0;matched&&i<qMin(now.size(),old.size());++i)
                 matched=replacing?now[i].id==old[i].id:removing?now[i].id==old[i+(i>=op.index)].id:old[i].id==now[i+(i>=op.index)].id;
             if(matched&&!removing){const auto& actual=now[op.index];
-                matched=actual.visible==op.layer.visible&&(op.layer.defaultNameNumber?actual.defaultNameNumber.has_value():op.layer.name.isEmpty()?actual.defaultNameNumber.has_value():actual.name==op.layer.name);
+                matched=actual.visible==op.layer.visible
+                    &&(op.layer.defaultNameNumber||op.layer.name.isEmpty()?actual.defaultNameNumber.has_value():actual.name==op.layer.name)
+                    &&(!replacing||layerValues(actual)==layerValues(op.layer));
             }
         }
         if(matched){s.expected.removeFirst();s.snapshot=snapshot;
             if(!s.expected.isEmpty())return;
             if(historyStates>0&&s.before.size()>historyStates-1-s.after.size())s.before.remove(0,s.before.size()-qMax<qsizetype>(0,historyStates-1-s.after.size()));
             s.projectedHigh=highWater;s.projectedNumber=snapshot->lastLayerNumber;
-            s.rows=snapshot->layers;
+            s.rows=snapshot->layers;s.measurementsByLayer.clear();
             for(int i=0;i<s.rows.size();++i)if(s.list->item(i)->text()!=layerDisplayName(s.rows[i]))s.list->item(i)->setText(layerDisplayName(s.rows[i]));
             s.list->refreshName();updateEnabledState();return;
         }
@@ -499,46 +481,86 @@ void LayerPanel::setSnapshot(std::shared_ptr<const fs::ModelSnapshot> snapshot,i
 }
 
 bool LayerPanel::canDelete(fs::EntityId id)const{
-    const auto& s=*state_;return (s.editingEnabled||s.listAllowed)&&!s.pending&&s.rows.size()>1&&s.layer(id)&&!s.occupied.contains(id);
+    const auto& s=*state_;return (s.editingEnabled||s.listAllowed)&&s.rows.size()>1&&s.layer(id)&&!s.occupied.contains(id);
 }
 void LayerPanel::previewCreate(){
     auto& s=*state_;
-    if(!(s.editingEnabled||s.listAllowed)||s.pending||!onListCommand||!s.snapshot||!s.projectedHigh||s.projectedHigh>=2000000||s.projectedNumber==std::numeric_limits<int>::max())return;
+    if(!(s.editingEnabled||s.listAllowed)||!onListCommand||!s.snapshot||!s.projectedHigh||s.projectedHigh>=2000000||s.projectedNumber==std::numeric_limits<int>::max())return;
     fs::Layer layer;layer.id=s.projectedHigh+1;layer.defaultNameNumber=s.projectedNumber+1;layer.color=s.snapshot->newLayerColor;
     if(!onListCommand("manage_layers",{{"operation","create"},{"changes",QJsonObject{}},{"requested_new_id",double(layer.id)}}))return;
     ++s.projectedHigh;++s.projectedNumber;
-    if(s.selected)s.drafts.insert(s.selected,changes());
     const auto index=int(s.rows.size());s.record({layer,index,State::Insert});refreshRow(index,false);editLayerName(layer.id);
 }
 void LayerPanel::updateValueRow(int index){
     auto& s=*state_;const auto& layer=s.rows[index];auto* eye=s.visibility.value(layer.id);
     eye->setChecked(layer.visible);eye->setProperty("layer_visible",layer.visible);eye->setIcon(studioIcon(layer.visible?"LayerVisible":"LayerHidden"));
-    s.list->item(index)->setText(layerDisplayName(layer));s.list->refreshName();
+    s.list->item(index)->setText(layerDisplayName(layer));
+    s.list->item(index)->setData(LayerColorRole,displayColor(layer.color));s.list->refreshName();
 }
-void LayerPanel::previewValue(fs::EntityId id,const QJsonObject& value){
-    auto& s=*state_;const auto* current=s.layer(id);if(!current)return;
+bool LayerPanel::previewValue(fs::EntityId id,const QJsonObject& value){
+    auto& s=*state_;const auto* current=s.layer(id);if(!current)return false;
     const int index=int(current-s.rows.constData());auto next=*current;
     if(value.contains("visible"))next.visible=value["visible"].toBool();
-    else{next.name=value["name"].toString();next.defaultNameNumber.reset();}
-    if(onListCommand&&onListCommand("update_layer",{{"layer_id",double(id)},{"changes",value}}))s.record({next,index,State::Replace,*current});
+    if(value.contains("name")){
+        const auto name=value["name"].toString();
+        if(name==layerDisplayName(*current))return true;
+        next.name=name;next.defaultNameNumber.reset();
+    }
+    if(value.contains("color"))next.color=quint32(value["color"].toDouble());
+    if(value.contains("alpha_blend"))next.alphaBlend=value["alpha_blend"].toInt();
+    if(value.contains("developable"))next.developable=value["developable"].toBool();
+    if(value.contains("use_for_intersections"))next.useForIntersections=value["use_for_intersections"].toBool();
+    if(value.contains("show_in_linesplan"))next.showInLinesplan=value["show_in_linesplan"].toBool();
+    if(value.contains("use_in_hydrostatics")){
+        next.useInHydrostatics=value["use_in_hydrostatics"].toBool();
+        // Match the document's default when a layer starts contributing to hydrostatics.
+        if(next.useInHydrostatics&&!current->useInHydrostatics)next.symmetric=true;
+    }
+    if(value.contains("symmetric"))next.symmetric=value["symmetric"].toBool();
+    if(value.contains("thickness"))next.thickness=float(value["thickness"].toDouble());
+    if(value.contains("material_density"))next.materialDensity=float(value["material_density"].toDouble());
+    if(!value.contains("name")&&next.visible==current->visible&&layerValues(next)==layerValues(*current))return true;
+    const State::Change op{next,index,State::Replace,*current};
+    const bool sent=(s.editingEnabled||s.listAllowed)&&onListCommand
+        &&onListCommand("update_layer",{{"layer_id",double(id)},{"changes",value}});
+    if(sent)s.record(op);
     updateValueRow(index);
-    if(value.contains("visible")&&onVisibilityPreview)onVisibilityPreview();
+    if(sent&&value.contains("visible")&&onVisibilityPreview)onVisibilityPreview();
+    return sent;
+}
+void LayerPanel::submitProperty(const QString& field,const QJsonValue& value){
+    auto& s=*state_;
+    if(s.loading||!s.selected)return;
+    if(!previewValue(s.selected,{{field,value}})){loadSelected();return;}
+    if(field=="use_in_hydrostatics"){
+        const QSignalBlocker block(s.symmetric);
+        s.symmetric->setChecked(s.layer(s.selected)->symmetric);
+    }
+    updateMeasurements();
+}
+void LayerPanel::submitTransparency(){
+    const auto& s=*state_;
+    if(s.loading)return;
+    const auto* layer=s.layer(s.selected);
+    if(!layer||s.transparency->value()==qRound((255-layer->alphaBlend)*100./255))return;
+    submitProperty("alpha_blend",qRound(255*(100-s.transparency->value())/100.));
 }
 void LayerPanel::previewDelete(fs::EntityId id){
     auto& s=*state_;if(!canDelete(id)||!onListCommand)return;
     int index=int(s.layer(id)-s.rows.constData());State::Change op{s.rows.at(index),index,State::Remove};
     if(!onListCommand("manage_layers",{{"operation","delete"},{"layer_id",double(id)}}))return;
-    if(s.selected)s.drafts.insert(s.selected,changes());
     s.record(op);refreshRow(index,true);
 }
 bool LayerPanel::previewHistory(bool redo){
     auto& s=*state_;if(s.before.isEmpty()&&s.after.isEmpty()&&s.expected.isEmpty())return false;
     auto& from=redo?s.after:s.before;auto& to=redo?s.before:s.after;
     if(from.isEmpty()||!onListCommand||!onListCommand(redo?"redo":"undo",{}))return true;
-    if(s.selected)s.drafts.insert(s.selected,changes());
     const auto original=from.takeLast();to.append(original);const auto op=redo?original:original.inverse();
     s.projectRow(op);if(op.kind==State::Replace)updateValueRow(op.index);else refreshRow(op.index,op.kind==State::Remove);
-    if(op.kind==State::Replace&&op.previous.visible!=op.layer.visible&&onVisibilityPreview)onVisibilityPreview();
+    if(op.kind==State::Replace){
+        if(op.layer.id==s.selected&&layerValues(op.layer)!=layerValues(op.previous))loadSelected();
+        if(op.previous.visible!=op.layer.visible&&onVisibilityPreview)onVisibilityPreview();
+    }
     return true;
 }
 void LayerPanel::discardPredictions(){
@@ -628,9 +650,7 @@ void LayerPanel::rebuildRows(){
 void LayerPanel::setEditingEnabled(bool enabled,bool allowList) {
     state_->listAllowed=allowList;
     state_->editingEnabled = enabled;
-    // A failed request has no new snapshot; its draft stays available to fix.
     if(enabled){
-        state_->pending=0;
         // A failed request keeps the old snapshot and the old visibility.
         for(auto* button:state_->visibility){
             const bool committed=button->property("layer_visible").toBool();
@@ -643,65 +663,28 @@ void LayerPanel::setEditingEnabled(bool enabled,bool allowList) {
 void LayerPanel::loadSelected() {
     auto& s = *state_;
     const auto* layer = s.snapshot ? s.layer(s.selected) : nullptr;
-    s.loading = true; s.original = layer ? layerValues(*layer) : QJsonObject{};
-    const auto draft = s.drafts.value(s.selected);
-    auto value = [&s, &draft](const QString& key) { return draft.contains(key) ? draft[key] : s.original[key]; };
-    s.color->setProperty("colorValue", quint32(value("color").toDouble()));
-    s.alphaEdited=draft.contains("alpha_blend");s.transparency->setValue(qRound((255-value("alpha_blend").toInt(255))*100./255));
+    s.loading = true;
+    const auto values = layer ? layerValues(*layer) : QJsonObject{};
+    s.color->setProperty("colorValue", quint32(values["color"].toDouble()));
+    const auto percent=qRound((255-values["alpha_blend"].toInt(255))*100./255);
+    s.transparency->setValue(percent);s.alphaSlider->setValue(percent);
     s.controlNet->setChecked(!s.hiddenControl.contains(s.selected));
-    s.symmetricExplicit = draft.contains("symmetric");
     for (const auto key : {"symmetric", "developable", "use_in_hydrostatics", "use_for_intersections", "show_in_linesplan"})
-        static_cast<QCheckBox*>(s.editors[key])->setChecked(value(key).toBool());
-    if (layer && !s.symmetricExplicit && !layer->useInHydrostatics && s.hydro->isChecked()) s.symmetric->setChecked(true);
+        static_cast<QCheckBox*>(s.editors[key])->setChecked(values[key].toBool());
     const bool imperial = s.snapshot && s.snapshot->units == "imperial";
     for (auto it = s.numbers.begin(); it != s.numbers.end(); ++it) {
-        it->original = s.original[it.key()].toDouble(); it->edited = draft.contains(it.key());
-        // Keep the unrounded value even when the editor cannot display it.
-        // In particular a unit conversion must never silently clamp a draft.
-        it->draft = value(it.key()).toDouble(); it->widget->setValue(it->draft);
-        it->widget->setSuffix(it.key() == "thickness" ? (imperial ? " in" : " mm") : (imperial ? " lb/ft³" : " t/m³"));
+        it.value()->setValue(values[it.key()].toDouble());
+        it.value()->setSuffix(it.key() == "thickness" ? (imperial ? " in" : " mm") : (imperial ? " lb/ft³" : " t/m³"));
     }
     s.error->hide(); s.loading = false; updateEnabledState();
 }
 
-QJsonObject LayerPanel::changes() const {
-    const auto& s = *state_;
-    if (!s.snapshot || !s.layer(s.selected)) return {};
-    QJsonObject result;
-    const quint32 color = s.color->property("colorValue").toUInt();
-    if (color != quint32(s.original["color"].toDouble())) result.insert("color", double(color));
-    if(s.alphaEdited){int alpha=qRound(255*(100-s.transparency->value())/100.);if(alpha!=s.original.value("alpha_blend").toInt(255))result["alpha_blend"]=alpha;}
-    for (const auto field : {"developable", "use_in_hydrostatics", "use_for_intersections", "show_in_linesplan"}) {
-        const bool value = static_cast<QCheckBox*>(s.editors[field])->isChecked();
-        if (value != s.original[field].toBool()) result.insert(field, value);
-    }
-    const bool automaticSymmetry = !s.original["use_in_hydrostatics"].toBool() && s.hydro->isChecked();
-    const bool expectedSymmetry = automaticSymmetry ? true : s.original["symmetric"].toBool();
-    if (s.symmetricExplicit && s.symmetric->isChecked() != expectedSymmetry) result.insert("symmetric", s.symmetric->isChecked());
-    for (auto it = s.numbers.cbegin(); it != s.numbers.cend(); ++it) {
-        if (it->edited && float(it->draft) != float(it->original)) result.insert(it.key(), it->draft);
-    }
-    return result;
-}
-
-QString LayerPanel::validationError() const {
-    const auto& s = *state_;
-    if (!s.snapshot || !s.layer(s.selected)) return uiText("请先选择图层。");
-    if (s.color->property("colorValue").toULongLong() > 0xffffff) return uiText("颜色值无效。");
-    for (auto it = s.numbers.cbegin(); it != s.numbers.cend(); ++it) {
-        const double value = it->edited ? it->draft : it->original;
-        if (!std::isfinite(value) || value < 0 || value > 1e9) return uiText("板厚和材料密度必须是有效的非负数。");
-    }
-    return {};
-}
-
 void LayerPanel::updateEnabledState() {
     auto& s = *state_;
-    if (!s.apply) return;
     const bool selected = s.snapshot && s.layer(s.selected);
     s.empty->setVisible(!selected); s.list->setVisible(s.snapshot && !s.rows.isEmpty());
-    s.properties->setEnabled(selected && (s.editingEnabled||s.listAllowed) && !s.pending);
-    const bool editable=s.editingEnabled&&!s.pending;
+    s.properties->setEnabled(selected && (s.editingEnabled||s.listAllowed));
+    const bool editable=s.editingEnabled;
     s.list->setEnabled(editable||s.listAllowed);
     if(s.add)s.add->setEnabled((editable||s.listAllowed)&&s.projectedHigh>0&&s.projectedHigh<2000000&&s.projectedNumber<std::numeric_limits<int>::max()&&bool(onCreateLayer));
     for(auto it=s.remove.cbegin();it!=s.remove.cend();++it)
@@ -711,7 +694,6 @@ void LayerPanel::updateEnabledState() {
         if(s.selected==s.focusName&&s.list->currentItem()&&isVisible())s.list->editName(s.list->currentItem());
         s.focusName=0;
     }
-    s.apply->setEnabled(selected && s.editingEnabled && !s.pending && !changes().isEmpty());
     updateMeasurements();
 }
 
@@ -728,22 +710,9 @@ void LayerPanel::updateMeasurements(){
     }
     if(area>0){center.x/=area;center.y/=area;center.z/=area;}
     s.measurementsByLayer.insert(s.selected,{area,center});}
-    const auto edits=changes();auto val=[&](const QString& k){return edits.contains(k)?edits[k]:s.original[k];};
-    if(s.symmetric->isChecked()){area*=2;center.y=0;}
-    const bool imperial=s.snapshot->units=="imperial";const double weight=area*val("thickness").toDouble()*val("material_density").toDouble()/(imperial?12*2240.:1000.);
+    if(layer->symmetric){area*=2;center.y=0;}
+    const bool imperial=s.snapshot->units=="imperial";const double weight=area*layer->thickness*layer->materialDensity/(imperial?12*2240.:1000.);
     const QString unit=imperial?"ft":"m";
     s.measurements->setText(QString(uiText("面积：%1 %2²\n重量：%3 %4\n重心：%5, %6, %7 %2")).arg(area,0,'f',3).arg(unit).arg(weight,0,'f',3).arg(imperial?"long ton":"t").arg(center.x,0,'f',3).arg(center.y,0,'f',3).arg(center.z,0,'f',3));
     setProperty("layer_measurements",QJsonObject{{"area",area},{"weight",weight},{"center",QJsonArray{center.x,center.y,center.z}},{"units",unit}});
-}
-
-void LayerPanel::applyChanges() {
-    auto& s = *state_;
-    if (!s.editingEnabled || s.pending || !onLayerChanged) return;
-    for (auto it = s.numbers.begin(); it != s.numbers.end(); ++it) it->widget->interpretText();
-    const auto error = validationError(); s.error->setText(error); s.error->setVisible(!error.isEmpty());
-    if (!error.isEmpty()) return;
-    const auto edit = changes();
-    if (edit.isEmpty()) return;
-    s.drafts.insert(s.selected, edit); s.pending = s.selected; s.pendingRevision = s.snapshot->revision;
-    updateEnabledState(); onLayerChanged(s.selected, edit);
 }

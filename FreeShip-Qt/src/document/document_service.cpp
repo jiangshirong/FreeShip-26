@@ -1,6 +1,7 @@
 // GPL-2.0-or-later. Native document authority; legacy operations are a working
 // adapter, never the owner of the committed history or the user's saved file.
 #include "fbm_codec.h"
+#include "group_fixes.h"
 #include "core/platform_process.h"
 #include "preview_image.h"
 #include "point_edit.h"
@@ -109,6 +110,8 @@ struct State {
     std::shared_ptr<const Fbm> saved,engine;
     QJsonObject bindings;
     quint64 token=0;
+    enum class Edit { Other, Placement, BatchMove };
+    Edit edit=Edit::Other;
     quint64 memory()const{return quint64(saved->bytes().size())+(saved==engine?0:engine->bytes().size())+QJsonDocument(bindings).toJson(QJsonDocument::Compact).size()+quint64(engine->controlPoints().size()+(saved==engine?0:saved->controlPoints().size()))*sizeof(fs::document::FbmControlPoint);}
 };
 class Service {
@@ -194,14 +197,59 @@ class Service {
             adapter_.waitForReadyRead(100);
         }bad("模型运算超时，本次操作未提交。");
     }
+    // Only recent ends of point placements and batch moves are kept. The FBM pointer is weak:
+    // a pruned history state cannot be resurrected or mistaken for a new branch.
+    struct PointHistoryFrame {
+        std::weak_ptr<const Fbm> engine; QJsonObject bindings;
+        fs::document::PublicationFrame output; fs::ModelSnapshot snapshot; qsizetype bytes;
+    };
+    std::vector<PointHistoryFrame> pointHistoryFrames_;
+    static QJsonObject restoredBindings(QJsonObject b){
+        for(const auto *key:{"point_edges","point_anchors","point_lines","last_used_layer_id"})b.remove(key);
+        return b;
+    }
+    void rememberPointHistoryFrame(){
+        if(!publication_||!validatedPublication_||!publication_->canReuseMetadata()||
+           !publication_->canonicalHistoryLayer(publicationBindings_))return;
+        auto key=restoredBindings(publicationBindings_);
+        for(const auto &f:pointHistoryFrames_)if(f.engine.lock()==publicationSource_&&f.bindings==key)return;
+        const auto budget=qsizetype(std::min<quint64>(limit_,64*1024*1024));if(!budget)return;
+        fs::document::PublicationFrame retained=*publication_;auto bytes=retained.retainedBytes();
+        // Keep both ends of a dense drag when their raw display artifacts would
+        // evict each other. The FBM undo budget and geometry checks still apply.
+        if(bytes>budget/2&&bytes<=budget*8){retained=retained.packedForHistory();bytes=retained.retainedBytes();}
+        if(bytes>budget)return;
+        qsizetype sum=bytes;for(const auto &f:pointHistoryFrames_)sum+=f.bytes;
+        while(!pointHistoryFrames_.empty()&&(pointHistoryFrames_.size()>=4||sum>budget)){
+            sum-=pointHistoryFrames_.front().bytes;pointHistoryFrames_.erase(pointHistoryFrames_.begin());
+        }
+        pointHistoryFrames_.push_back({publicationSource_,std::move(key),std::move(retained),*validatedPublication_,bytes});
+    }
     QJsonObject published(const State& state,const QJsonObject& request,const QString &id,quint64 rev){
         const auto directory=output(request);QElapsedTimer clock;clock.start();
         const bool reuseValidated=publication_ && validatedPublication_ &&
             validatedPublication_->documentId==id && validatedPublication_->revision==revision_;
         const bool reused=publication_ && publicationSource_==state.engine && publicationBindings_==state.bindings;
+        const bool placing=request["method"]=="topology"&&request["operation"]=="add_point";
+        const bool batchMove=request["method"]=="move_points";
+        if((placing||batchMove)&&reuseValidated)rememberPointHistoryFrame();
+        const PointHistoryFrame *frame=nullptr;
+        const auto &method=request["method"];
+        const auto edit=method=="undo"&&index_>0?current().edit:
+            method=="redo"&&index_+1<history_.size()?history_[index_+1].edit:State::Edit::Other;
+        if(edit!=State::Edit::Other){
+            for(const auto &f:pointHistoryFrames_)if(f.engine.lock()==state.engine&&f.bindings==state.bindings&&f.snapshot.documentId==id){frame=&f;break;}
+        }
         std::optional<QJsonObject> metadata;
-        if(!reused) {
-            auto prepared=std::make_unique<fs::document::Publication>(*state.engine,state.bindings,publication_.get(),request["method"]=="load");
+        // Releasing the outgoing solver and large JSON trees can take a full
+        // frame. On a dense replay overlap that release with the private writes.
+        // The local future joins on every exit, including a failed transaction.
+        std::future<void> retired;
+        if(frame){if(publication_&&frame->snapshot.points.size()>=2048){
+                retired=std::async(std::launch::async,[old=std::move(publication_)]()mutable{old.reset();});
+            }else publication_.reset();publicationSource_.reset();publicationBindings_={};}
+        else if(!reused) {
+            auto prepared=std::make_unique<fs::document::Publication>(*state.engine,state.bindings,publication_.get(),request["method"]=="load"||batchMove);
             if(reuseValidated)metadata=prepared->metadataChanges(*publication_);
             publication_=std::move(prepared);publicationSource_=state.engine;publicationBindings_=state.bindings;
         }else if(reuseValidated&&publication_->canReuseMetadata())metadata=QJsonObject{};
@@ -230,11 +278,12 @@ class Service {
             std::cout.write(bytes.constData(),bytes.size());std::cout<<'\n'<<std::flush;
             delivered=true;
         };
-        auto result=metadataOnly?publication_->generateMetadata(stage.path(),*metadata,id,rev):publication_->generate(stage.path(),cache,id,rev,displayReady,request["method"]=="load"&&request["defer_drawing"].toBool());
+        auto result=frame?frame->output.replay(stage.path(),id,rev):metadataOnly?publication_->generateMetadata(stage.path(),*metadata,id,rev):publication_->generate(stage.path(),cache,id,rev,displayReady,request["method"]=="load"&&request["defer_drawing"].toBool());
         if(displayReady&&!delivered)displayReady(result);
         const double generatedMs=clock.nsecsElapsed()/1e6;
         fs::ModelSnapshot validated;
-        if(metadataOnly) {
+        if(frame){validated=frame->snapshot;validated.revision=rev;result[edit==State::Edit::BatchMove?"move_history_reused":"placement_history_reused"]=true;}
+        else if(metadataOnly) {
             // Exact model/input comparison permits only metadata differences.
             // All geometry bytes come from the private validated publication;
             // generateMetadata enforces the remaining scalar schema and limits.
@@ -266,10 +315,11 @@ class Service {
         synchronized_=false;
         result["adapter_operation"]="none";result["publication_reused"]=reused;
         result["publication_validate_ms"]=validatedMs-generatedMs;result["publication_commit_ms"]=clock.nsecsElapsed()/1e6-validatedMs;
-        result["mesh_reused"]=reused||publication_->meshReused();result["publication_prepare_ms"]=prepareMs;result["publication_ms"]=clock.nsecsElapsed()/1e6;
+        result["mesh_reused"]=frame||reused||publication_->meshReused();result["publication_prepare_ms"]=prepareMs;result["publication_ms"]=clock.nsecsElapsed()/1e6;
         // The transaction has already passed every checksum and parser. Reuse
         // that exact immutable result for the ensuing edit-specific ID checks.
         validatedPublication_=std::make_unique<fs::ModelSnapshot>(std::move(validated));validatedResponse_=result;
+        if(placing||batchMove)rememberPointHistoryFrame();
         return result;
     }
     std::shared_ptr<fs::document::Hydrostatics> availableHydro() {
@@ -327,18 +377,25 @@ class Service {
     }}
     State checkpoint(const QJsonObject& response,const QString& directory,const QString& id,quint64 revision){
         auto bytes=read(artifact(response,"state_file",directory));auto fbm=std::make_shared<Fbm>(Fbm::read(bytes));
+        auto bindings=json(read(artifact(response,"binding_file",directory),128*1024*1024));
         // Legacy workers do not know this native extension. Retain the current
         // complete input sets when importing their geometry-only checkpoint.
         if(!history_.empty()&&id==document_){
             const auto& source=*current().engine;
             for(const auto& block:source.inspect()["blocks"].toArray()){
                 if(block.toObject()["name"]=="calculation_parameters"){
-                    fbm=std::make_shared<Fbm>(fbm->withCalculationParameters(source.calculationParameters()));
+                    auto metadata=source.calculationParameters();
+                    if(metadata.contains(fs::document::GroupFixes::key)) {
+                        const auto old=current().bindings["points"].toArray(), next=bindings["points"].toArray();
+                        QHash<qint64,int> index;for(int i=0;i<next.size();++i)index.insert(next[i].toInteger(),i);
+                        std::vector<int> map;map.reserve(old.size());for(const auto& p:old)map.push_back(index.value(p.toInteger(),-1));
+                        auto fixes=fs::document::GroupFixes::read(metadata);fixes.remap(map);fixes.write(metadata);
+                    }
+                    fbm=std::make_shared<Fbm>(fbm->withCalculationParameters(metadata));
                     break;
                 }
             }
         }
-        auto bindings=json(read(artifact(response,"binding_file",directory),128*1024*1024));
         if(bindings["format"]!="FreeShipDocumentBindings"||integer(bindings["version"])!=1||bindings["document_id"]!=id||integer(bindings["revision"],1)!=revision)bad("Invalid document checkpoint identity");
         auto high=bindings["high_water"].toObject();
         for(const auto& k:Kinds){if(!bindings[k].isArray())bad("Missing document ID map");auto max=integer(high[k],0,2000000);QSet<quint64> seen;
@@ -403,7 +460,7 @@ public:
                 }
                 if(size_t(bindings["points"].toArray().size())!=engine->controlPoints().size())bad("Calculation point map mismatch");
                 stop();hydro_.reset();hydroSource_.reset();hydroBindings_={};publication_.reset();validatedPublication_.reset();validatedResponse_={};
-                document_=id;revision_=rev;history_={State{engine,engine,bindings,0}};index_=0;cleanToken_=0;nextToken_=0;
+                pointHistoryFrames_.clear();document_=id;revision_=rev;history_={State{engine,engine,bindings,0}};index_=0;cleanToken_=0;nextToken_=0;
                 highWater_=high;plateContext_=bindings["plate_context"].toObject();calculationCacheRevision_=integer(request["calculation_cache_revision"],1,rev);
                 result["ok"]=true;result["calculation_snapshot"]=true;result["calculation_cache_revision"]=double(calculationCacheRevision_);state(result);return result;
             }
@@ -429,17 +486,19 @@ public:
                 QJsonObject exchange;if(method=="import_model")exchange=json(read(text(request,"path"),128*1024*1024));
                 auto directory=output(request);
                 stop();QElapsedTimer contextTimer;contextTimer.start();
-                auto context=fs::document::documentContext(QCoreApplication::applicationDirPath()+"/bridge",
-                    original?fs::document::documentColors(*original):QJsonArray{},request["preferences"].toObject());
+                auto preferences=request["preferences"].toObject();
                 // FTM import already produced UTF-8 strings. Preserve them in its new binary document.
                 if(original&&loadedBytes!=original->bytes())original=std::make_shared<Fbm>(markUtf8(*original));
                 if(original){
                     const auto declared=original->calculationParameters().value(EncodingKey);
                     if(!declared.isUndefined()){
                         if(declared!="UTF-8")bad("Unsupported FBM text encoding marker");
-                        context["fbm_encoding"]="UTF-8";
+                        preferences["fbm_encoding"]="UTF-8";
                     }
-                }else context["fbm_encoding"]="UTF-8"; // New hull and whole-model exchange import.
+                }
+                auto context=fs::document::documentContext(QCoreApplication::applicationDirPath()+"/bridge",
+                    original?fs::document::documentColors(*original):QJsonArray{},preferences);
+                if(!original)context["fbm_encoding"]="UTF-8"; // New hull and whole-model exchange import.
                 const double contextMs=contextTimer.nsecsElapsed()/1e6;
                 QElapsedTimer createTimer;createTimer.start();
                 auto candidate=method=="load"?fs::document::loadDocument(*original,context):method=="new"?
@@ -464,7 +523,7 @@ public:
                 for(qsizetype i=0;i<model.points.size();++i){const auto &p=model.points[i];const auto &n=engine->controlPoints()[i];
                     if(p.id!=quint64(i+1)||p.position.x!=n.x||p.position.y!=n.y||p.position.z!=n.z||p.vertexType!=n.vertexType||p.locked!=n.locked)bad("Initial native control point changed");}
                 auto newLimit=integer(context["history_limit_bytes"],0,1024ULL*1024*1024*1024);
-                next.token=++nextToken_;history_.clear();history_.push_back(std::move(next));index_=0;document_=id;revision_=1;
+                next.token=++nextToken_;pointHistoryFrames_.clear();history_.clear();history_.push_back(std::move(next));index_=0;document_=id;revision_=1;
                 cleanToken_=method=="load"&&!request["recovered"].toBool()?current().token:0;limit_=newLimit;highWater_=current().bindings["high_water"].toObject();synchronized_=!native;result=response;
                 plateContext_=context["plate_context"].toObject();
                 result["creation_engine"]="cpp-document-create";result["creation_ms"]=createMs;result["adapter_operation"]=native?"none":"restore_document";
@@ -634,11 +693,11 @@ public:
                 auto target=method=="undo"?index_-1:index_+1;auto directory=output(request);
                 // Original undo reloads FBM and reconstructs each incident-edge
                 // list in file order. Live edit order is not a saved FBM field.
-                auto next=history_[target];next.bindings.remove("point_edges");next.bindings.remove("point_anchors");next.bindings.remove("point_lines");
+                auto next=history_[target];
                 // Layer traversal participates in Single-precision hydrostatic
                 // sums. Keep it with the snapshot so redo reproduces the same
                 // derived values, not a different accumulation order.
-                next.bindings.remove("last_used_layer_id");
+                next.bindings=restoredBindings(next.bindings);
                 auto response=restored(next,request,revision_+1,true);validateArtifacts(response,directory,document_,revision_+1,native);
                 history_[target]=std::move(next);index_=target;++revision_;result=response;
             }else if(method=="move_point"||method=="move_points"){
@@ -649,7 +708,7 @@ public:
                 const bool changed=edited->bytes()!=current().engine->bytes();
                 const double editMs=editTimer.nsecsElapsed()/1e6;
                 if(changed){
-                    State next{edited,edited,current().bindings,0};next.bindings["revision"]=double(revision_+1);
+                    State next{edited,edited,current().bindings,0};if(method=="move_points")next.edit=State::Edit::BatchMove;next.bindings["revision"]=double(revision_+1);
                     auto response=materialized(next,request);
                     auto model=validateArtifacts(response,directory,document_,revision_+1,native);
                     const auto ids=next.bindings["points"].toArray();QHash<quint64,qsizetype> indices;
@@ -743,7 +802,7 @@ public:
                 const double editMs=editTimer.nsecsElapsed()/1e6;
                 if(candidate.changed){
                     auto edited=std::make_shared<Fbm>(std::move(candidate.document));
-                    State next{edited,edited,candidate.bindings,0};next.bindings["revision"]=double(revision_+1);
+                    State next{edited,edited,candidate.bindings,0};if(method=="topology"&&request["operation"]=="add_point")next.edit=State::Edit::Placement;next.bindings["revision"]=double(revision_+1);
                     auto response=restored(next,request,revision_+1,true);
                     auto model=validateArtifacts(response,directory,document_,revision_+1,native);
                     if(auxiliary && method=="auxiliary") {
@@ -819,7 +878,10 @@ public:
                 if(!recoveryRoot_.isEmpty()&&method!="discard_recovery"){
                     if(!recovery_)recovery_=std::make_unique<fs::RecoveryLease>(recoveryRoot_,document_);
                     if(current().token==cleanToken_){recovery_->remove();recoveryRevision_=0;}
-                    else if(recoveryRevision_!=revision_){recovery_->checkpoint(current().saved->bytes(),revision_,recoverySource_);recoveryRevision_=revision_;}
+                    else if(recoveryRevision_!=revision_){
+                        recovery_->checkpoint(current().saved->bytes(),revision_,recoverySource_,current().bindings["fbm_encoding"].toString());
+                        recoveryRevision_=revision_;
+                    }
                     if(current().token!=cleanToken_)result["recovery_file"]=recovery_->path();
                 }
             }catch(const std::exception& e){result["recovery_error"]=QString::fromUtf8(e.what());}

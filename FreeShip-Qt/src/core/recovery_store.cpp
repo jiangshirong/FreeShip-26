@@ -34,14 +34,16 @@ QJsonObject header(QFile& f,const QString& id){
     const auto h=QJsonDocument::fromJson(raw,&parse).object();
     const auto rev=h["revision"].toDouble(-1),bytes=h["bytes"].toDouble(-1);
     const auto hash=h["sha256"].toString().toLatin1();
+    const auto encoding=h["text_encoding"];
     if(raw.size()!=n||parse.error!=QJsonParseError::NoError||h["format"]!="FreeShipRecovery"||h["version"]!=1||h["document_id"]!=id||
        !std::isfinite(rev)||rev<1||rev>9007199254740991.0||std::floor(rev)!=rev||bytes<1||bytes>MaxBytes||std::floor(bytes)!=bytes||
        f.size()-f.pos()!=qint64(bytes)||hash.size()!=64||QByteArray::fromHex(hash).toHex()!=hash||
        !h["source"].isString()||h["source"].toString().size()>32768||h["source"].toString().contains(QChar(0))||
+       (!encoding.isUndefined()&&(!encoding.isString()||encoding.toString().size()>64||encoding.toString().contains(QChar(0))))||
        !QDateTime::fromString(h["saved_utc"].toString(),Qt::ISODateWithMs).isValid())bad("恢复副本信息不完整或版本不支持。");
     return h;
 }
-RecoveryEntry entry(const QJsonObject& h){return {h["document_id"].toString(),h["source"].toString(),h["saved_utc"].toString(),{},quint64(h["revision"].toDouble()),qint64(h["bytes"].toDouble())};}
+RecoveryEntry entry(const QJsonObject& h){return {h["document_id"].toString(),h["source"].toString(),h["saved_utc"].toString(),{},quint64(h["revision"].toDouble()),qint64(h["bytes"].toDouble()),h["text_encoding"].toString()};}
 }
 QString defaultRecoveryRoot(){const auto root=QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation);return root.isEmpty()?QString{}:root+"/recovery";}
 RecoveryLease::RecoveryLease(const QString& root,const QString& id):id_(id){
@@ -54,11 +56,12 @@ RecoveryLease::RecoveryLease(const QString& root,const QString& id):id_(id){
 }
 RecoveryLease::~RecoveryLease()=default;
 QString RecoveryLease::path()const{return root_+'/'+id_+".fsr";}
-void RecoveryLease::checkpoint(const QByteArray& fbm,quint64 revision,const QString& source){
-    if(fbm.isEmpty()||fbm.size()>MaxBytes||revision<1||revision>9007199254740991ULL||source.size()>32768||source.contains(QChar(0)))bad("恢复数据超出允许范围。");
+void RecoveryLease::checkpoint(const QByteArray& fbm,quint64 revision,const QString& source,const QString& textEncoding){
+    if(fbm.isEmpty()||fbm.size()>MaxBytes||revision<1||revision>9007199254740991ULL||source.size()>32768||source.contains(QChar(0))||
+       textEncoding.size()>64||textEncoding.contains(QChar(0)))bad("恢复数据超出允许范围。");
     regular(path());
     const auto h=QJsonDocument(QJsonObject{{"format","FreeShipRecovery"},{"version",1},{"document_id",id_},{"revision",double(revision)},
-        {"source",source},{"saved_utc",QDateTime::currentDateTimeUtc().toString(Qt::ISODateWithMs)},
+        {"source",source},{"text_encoding",textEncoding},{"saved_utc",QDateTime::currentDateTimeUtc().toString(Qt::ISODateWithMs)},
         {"bytes",double(fbm.size())},{"sha256",QString::fromLatin1(QCryptographicHash::hash(fbm,QCryptographicHash::Sha256).toHex())}}).toJson(QJsonDocument::Compact);
     if(h.size()>65536)bad("恢复副本头部过长。");
     char size[4];qToLittleEndian<quint32>(quint32(h.size()),size);

@@ -123,6 +123,23 @@ void MainWindow::auditMenuInteraction(){
             states.append(QJsonObject{{"operation",kind.first},{"checked",checked},{"current_kind",selectionKind_==kind.second},
                 {"views",views},{"direct_toolbar_menu",path.size()==1&&path.front()==menu},{"checkable",action->isCheckable()}});
         }
+        auto* selectAll=findAction("select_all");auto* invert=findAction("invert_selection");
+        const bool commandsDirect=pathFor(selectAll)==QList<QMenu*>{menu}&&pathFor(invert)==QList<QMenu*>{menu};
+        bool allPointsSelected=false,complementSelected=false;
+        if(commandsDirect){
+            setSelectionKind(HullEntity::Edge);
+            popup({menu});click(menu,selectAll,false);
+            const auto all=selection_;
+            allPointsSelected=selectionKind_==HullEntity::Point&&findAction("select_point")->isChecked()&&all.size()==original->points.size();
+            if(!all.isEmpty()){
+                const auto id=*all.begin();selectPoints({id});auto complement=all;complement.remove(id);
+                popup({menu});click(menu,invert,false);
+                complementSelected=selectionKind_==HullEntity::Point&&selection_==complement;
+            }
+        }
+        workflowCase("point-commands-in-selection-menu",commandsDirect&&!selectAll->isCheckable()&&!invert->isCheckable());
+        workflowCase("select-all-points-from-edge-mode",allPointsSelected);
+        workflowCase("invert-one-selected-point",complementSelected);
         popup({menu});QApplication::processEvents();menu->grab().save(workflowOutput_+"/views/selection-menu.png");menu->hide();
         workflowArtifacts_["selection_modes"]=QJsonObject{{"owners",owners},{"states",states},{"entries",menu->actions().size()},
             {"icon",selector->icon().name()},{"model_unchanged",session_.model()==original&&session_.modified()==modified}};

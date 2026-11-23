@@ -27,15 +27,13 @@ void MainWindow::topologyStep(const QString& method){
     if(workflowFinished_)return;
     try {
         auto model=session_.model();
-        auto dialogAction=[this](QAction* action,bool accept,fs::Vec3 position=fs::Vec3{}) {
+        auto dialogAction=[this](QAction* action,bool accept) {
             if(!action->isEnabled())throw std::runtime_error("Production dialog action is disabled");
             bool handled=false;QString error;QTimer timer;timer.setSingleShot(true);
             connect(&timer,&QTimer::timeout,this,[&]{
                 auto* dialog=qobject_cast<QDialog*>(frontStudioDialog());
                 if(!dialog){error="Production modal dialog not found";return;}
                 if(!dialog->testAttribute(Qt::WA_DontShowOnScreen)){error="Verification dialog is not private";dialog->reject();return;}
-                const auto coordinates=dialog->findChildren<QDoubleSpinBox*>();
-                if(coordinates.size()==3){coordinates[0]->setValue(position.x);coordinates[1]->setValue(position.y);coordinates[2]->setValue(position.z);}
                 auto* buttons=dialog->findChild<QDialogButtonBox*>();
                 auto* button=buttons?buttons->button(accept?QDialogButtonBox::Ok:QDialogButtonBox::Cancel):nullptr;
                 if(!button && buttons)button=buttons->button(accept?QDialogButtonBox::Yes:QDialogButtonBox::No);
@@ -109,16 +107,16 @@ void MainWindow::topologyStep(const QString& method){
             captureWorkflow("reopened");workflowCase("reopened_topology_counts",model->points.size()==editingChanged_->points.size()&&model->edges.size()==editingChanged_->edges.size()&&model->faces.size()==editingChanged_->faces.size());
             workflowCase("reopened_scene_exact",read(session_.scenePath())==workflowMovedDigest_);
             editingChanged_=model;editingMoves_.clear();
-            dialogAction(addPoint_,false,newPosition(0));
+            placePoint_->trigger();placePoint_->trigger();
             workflowCase("new_point_cancel_preserves_document",session_.model()==model&&!session_.busy()&&!session_.modified());
-            dialogAction(addPoint_,true,newPosition(0));break;
+            placePoint_->trigger();views_[0]->onPointCreationRequested(newPosition(0));break;
         case 6:
-            rememberPoint();workflowCase("new_point_dialog_exact_coordinates",editingMoves_.back().position.x==float(newPosition(0).x)&&editingMoves_.back().position.y==float(newPosition(0).y)&&editingMoves_.back().position.z==float(newPosition(0).z));
-            dialogAction(addPoint_,true,newPosition(1));break;
+            rememberPoint();workflowCase("placement_callback_exact_coordinates",editingMoves_.back().position.x==float(newPosition(0).x)&&editingMoves_.back().position.y==float(newPosition(0).y)&&editingMoves_.back().position.z==float(newPosition(0).z));
+            views_[0]->onPointCreationRequested(newPosition(1));break;
         case 7:
-            rememberPoint();dialogAction(addPoint_,true,newPosition(2));break;
+            rememberPoint();views_[0]->onPointCreationRequested(newPosition(2));break;
         case 8: {
-            rememberPoint();setSelectionKind(HullEntity::Point);QSet<fs::EntityId> ordered;
+            rememberPoint();endPointPlacement();setSelectionKind(HullEntity::Point);QSet<fs::EntityId> ordered;
             for(const auto& p:editingMoves_){ordered.insert(p.id);selectPoints(ordered);}
             dialogAction(addFace_,true);break;
         }

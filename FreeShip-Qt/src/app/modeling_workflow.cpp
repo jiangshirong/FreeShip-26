@@ -1,5 +1,6 @@
 // Production-action observer. All inputs/files/settings are owned by FreeShip-Tests.
 #include "main_window.h"
+#include "point_coordinate_popup.h"
 #include <QAction>
 #include <QApplication>
 #include <QDialog>
@@ -130,6 +131,20 @@ void MainWindow::modelingStep(const QString& method){
             QApplication::sendEvent(views_.front(),&escape);
             QTimer::singleShot(0,this,[this]{modelingStep("local");});
             return;
+        }
+        if(op=="point_properties"){
+            if(!selected_||!views_[3]->onRepeatPointClick)throw std::runtime_error("No selected point for inline editor");
+            // Selection was applied above. Exercise its inline form; actual mouse
+            // press/release and hit testing are covered by verify-point-transform.
+            views_[3]->onRepeatPointClick(selected_);
+            auto* name=pointPopup_?pointPopup_->findChild<QLineEdit*>("PointName"):nullptr;
+            auto* type=pointPopup_?pointPopup_->findChild<QComboBox*>():nullptr;
+            if(!name||name->isHidden()||!type||!pointPropertiesPage_)throw std::runtime_error("Missing point property fields");
+            auto fields=command["fields"].toObject();if(fields.contains("name"))name->setText(fields["name"].toString());
+            if(fields.contains("vertex_type"))type->setCurrentIndex(fields["vertex_type"].toInt());
+            if(command["cancel"].toBool())pointPopup_->hide();
+            else if(auto* apply=pointPopup_->findChild<QPushButton*>())apply->click();
+            if(!session_.busy())QTimer::singleShot(0,this,[this]{modelingStep("local");});return;
         }
         QList<QAction*> matches;for(auto* action:findChildren<QAction*>())if(action->property("operation").toString()==op)matches.append(action);
         QJsonArray candidates;for(auto* action:matches)candidates.append(QJsonObject{{"text",action->text()},{"enabled",action->isEnabled()}});workflowArtifacts_[modelingPhase_+"_candidates"]=candidates;

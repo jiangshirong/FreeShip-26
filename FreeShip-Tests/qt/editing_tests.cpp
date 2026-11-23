@@ -69,6 +69,101 @@ static void pendingText(QDoubleSpinBox* spin,const QString& text) {
 }
 int main(int argc,char**argv) {
     QApplication app(argc,argv);
+    if(app.arguments().value(1)=="--point-transform") {
+        int failures=0;
+        auto check=[&](const char *name,bool ok){fprintf(stdout,"%s %s\n",ok?"PASS":"FAIL",name);if(!ok)++failures;};
+        // Use the production painter. An endpoint chord misses both arc crests by
+        // many screen pixels; checking the crests rules out a merely changed image.
+        {
+            HullView view;view.resize(640,420);view.setProjection(HullProjection::Profile);
+            auto hull=fixture();fs::AuxiliaryCurve curve;curve.id=9;curve.controls={1,2};
+            curve.spline={{{1,2,1},{3,2,3},{5,2,1}},{true,false,true}};hull->controlCurves={curve};
+            view.setSnapshot(hull);view.fit();view.finishPresentation();view.setGridVisible(false);view.setFillVisible(false);
+            auto patch=[&](fs::Vec3 p){return view.grab(QRect(view.project(p).toPoint()-QPoint(7,7),QSize(15,15))).toImage();};
+            auto differentAt=[&](fs::Vec3 p){auto overlay=view.dragSectionComparison();view.setDragSectionComparison({});auto off=patch(p);
+                view.setDragSectionComparison(overlay);return patch(p)!=off;};
+            fs::Section before;before.kind=2;before.paths={{{1,2,1},{5,2,1}}};before.splines={curve.spline};
+            auto after=before;after.splines[0].points[1].z=4.;
+            auto pairs=std::make_shared<QVector<DragSectionPair>>();pairs->append({before,after});view.setDragSectionComparison(pairs);
+            check("section-comparison-follows-both-spline-crests-not-chord",differentAt({3,2,3})&&differentAt({3,2,4})&&!differentAt({3,2,1}));
+            view.setDragSectionComparison(std::make_shared<QVector<DragSectionPair>>());
+            QVector<fs::PointMove> moved;for(const auto id:{1,2}){auto p=hull->point(id)->position;auto q=p;q.z+=1.;moved.append({fs::EntityId(id),q});}
+            view.setPendingPointMoves(moved);
+            check("visible-control-curve-compares-original-and-moved-arc",differentAt({3,2,3})&&differentAt({3,2,4}));
+            view.setDragSectionComparison({});check("released-preview-has-no-original-curve",!differentAt({3,2,3}));
+        }
+        HullView v;v.resize(780,520);v.setFillVisible(false);v.setProjection(HullProjection::Perspective);
+        auto m=fixture();m->points[1].position={2.3,3.2,4.0};m->points[2].position={2.5,3.2,4.};
+        m->points[5].position={2.05,3.01,4};m->edges[0].crease=false;v.setSnapshot(m);v.setSelectedPoints({1});v.finishPresentation();
+        QVector<fs::PointMove> moves,preview;int commits=0;v.onPointsMoved=[&](auto p){moves=p;++commits;};v.onTransformPreview=[&](const auto &p){preview=p;};
+        auto key=[&](int k){QKeyEvent e(QEvent::KeyPress,k,Qt::NoModifier);QApplication::sendEvent(&v,&e);};
+        QKeyEvent retired(QEvent::KeyPress,Qt::Key_G,Qt::NoModifier);QApplication::sendEvent(&v,&retired);
+        check("G-does-not-start-a-move",!retired.isAccepted() && preview.isEmpty() && commits==0);
+        auto input=[&]{for(int k:{Qt::Key_Y,Qt::Key_1,Qt::Key_0})key(k);};
+        input();key(Qt::Key_O);QHash<fs::EntityId,fs::Vec3> shown;for(auto p:preview)shown[p.id]=p.position;
+        check("unconnected-nearby-point-and-locked-point-stay",!shown.contains(6)&&!shown.contains(4));
+        check("weights-decay-with-connected-distance",shown.contains(2)&&shown.contains(3)&&shown[2].y>3.2&&shown[2].y-3.2>shown[3].y-3.2&&shown[2].y-3.2<.01);
+        QWheelEvent wheel({300,200},{300,200},{},{0,-720},Qt::NoButton,Qt::NoModifier,Qt::NoScrollPhase,false);QApplication::sendEvent(&v,&wheel);
+        check("wheel-shrinks-radius",preview.size()==1);key(Qt::Key_Escape);check("escape-retracts-preview",preview.isEmpty()&&commits==0);
+        input();key(Qt::Key_Return);check("metric-default-is-mm",moves.size()==1&&near(moves[0].position.y,3.01)&&commits==1);
+        for(auto axis:{Qt::Key_X,Qt::Key_Z}){key(axis);key(Qt::Key_Minus);key(Qt::Key_5);key(Qt::Key_Return);
+            const auto p=moves[0].position;check(axis==Qt::Key_X?"negative-longitudinal":"negative-vertical",near(p.x,axis==Qt::Key_X?1.995:2.)&&p.y==3&&near(p.z,axis==Qt::Key_Z?3.995:4.));}
+        auto a=m->points[0].position,b=a;b.y+=.001;QPointF dir=v.project(b)-v.project(a);dir/=std::hypot(dir.x(),dir.y());auto tip=v.project(a)+dir*43;
+        auto hover=[&](QPointF at){mouse(v,QEvent::MouseMove,at,Qt::NoButton,Qt::NoButton);};
+        for(bool filled:{false,true}){
+        v.setFillVisible(filled);
+        if(filled){
+            check("switch-to-filled-keeps-selection",v.selectedPoints()==QSet<fs::EntityId>{1});
+            v.setSelectedPoints({});click(v,v.projectControlPoint(1));
+            check("click-picks-point-on-filled-hull",v.selectedPoints()==QSet<fs::EntityId>{1});
+        }
+        for(int axis=0;axis<3;++axis){auto b=a;if(axis==0)b.x+=.001;else if(axis==1)b.y+=.001;else b.z+=.001;
+            auto vec=v.project(b)-v.project(a);vec/=std::hypot(vec.x(),vec.y());auto o=v.project(a);
+            const QRect patch((o+vec*72).toPoint()-QPoint(12,12),QSize(25,25));auto image=[&]{return v.grab(patch).toImage();};
+            QEvent leave(QEvent::Leave);QApplication::sendEvent(&v,&leave);const auto idle=image();
+            hover(o+vec*35);const auto hot=image();hover(o+vec*55);bool consistent=image()==hot;hover(o+vec*72);consistent&=image()==hot;
+            QApplication::sendEvent(&v,&leave);check(filled?(axis==0?"filled-hover-X":axis==1?"filled-hover-Y":"filled-hover-Z"):(axis==0?"hover-X":axis==1?"hover-Y":"hover-Z"),hot!=idle && consistent && image()==idle);
+        }
+        const int previous=commits;drag(v,tip,tip+dir*19);check(filled?"filled-perspective-handle-drag":"direct-perspective-handle-drag",commits==previous+1&&moves[0].position.y>a.y&&moves[0].position.x==a.x&&moves[0].position.z==a.z);
+        }
+        int before=commits;v.setFillVisible(false);
+        for(const auto projection:{HullProjection::Profile,HullProjection::Plan,HullProjection::Body}){
+            v.setProjection(projection);v.fit();v.finishPresentation();v.setSelectedPoints({});
+            auto origin=v.projectControlPoint(1);click(v,origin);
+            bool direct=v.selectedPoints()==QSet<fs::EntityId>{1};
+            for(int axis=1;axis<=3;++axis){
+                if((projection==HullProjection::Body&&axis==1)||(projection==HullProjection::Profile&&axis==2)||(projection==HullProjection::Plan&&axis==3))continue;
+                QPointF direction=axis==1?QPointF(1,0):axis==3||projection==HullProjection::Plan?QPointF(0,-1):QPointF(1,0);
+                const auto start=origin+direction*40;const int previous=commits;drag(v,start,start+direction*18);
+                const auto p=moves[0].position;direct &= commits==previous+1 && (axis==1?p.x>a.x:p.x==a.x) && (axis==2?p.y>a.y:p.y==a.y) && (axis==3?p.z>a.z:p.z==a.z);
+            }
+            check(projection==HullProjection::Profile?"select-drag-profile-XZ":projection==HullProjection::Plan?"select-drag-plan-XY":"select-drag-body-YZ",direct);
+        }
+        auto half=std::make_shared<fs::ModelSnapshot>(*m);half->bothSides=false;v.setSnapshot(half);v.fit();v.finishPresentation();v.setSelectedPoints({});
+        const auto stern=v.projectControlPoint(1);click(v,stern);before=commits;drag(v,stern-QPointF(40,0),stern-QPointF(58,0));
+        check("half-body-portward-arrow-increases-model-Y",commits==before+1&&moves[0].id==1&&moves[0].position.y>a.y&&moves[0].position.z==a.z);
+        v.setSnapshot(m);v.setProjection(HullProjection::Perspective);v.setSelectedPoints({1});
+        input();auto next=std::make_shared<fs::ModelSnapshot>(*m);next->revision++;v.setSnapshot(next);before=commits;key(Qt::Key_Return);check("new-revision-discards-preview",preview.isEmpty()&&commits==before);
+        v.setSelectedPoints({1,4});input();key(Qt::Key_Return);check("locked-group-atomic",commits==before);
+        auto mirror=fixture();mirror->bothSides=true;mirror->layers[0].symmetric=true;v.setSnapshot(mirror);v.setProjection(HullProjection::Plan);v.fit();v.finishPresentation();v.setSelectionKind(HullEntity::Edge);
+        auto left=v.project({4,-2,2});click(v,left);check("pick-visible-mirrored-edge",v.selectedEntities()==QSet<fs::EntityId>{1});
+        auto right=v.project({4,2,2});check("both-halves-resolve-to-one-edge",v.entityAt(right)==1 && v.entityAt(left)==1);
+        // A station is editing context, not geometry. Only a Shift-click may snap a point.
+        auto planes=fixture();planes->bothSides=true;
+        fs::ReferenceMarker ref;ref.visible=true;ref.spline.points={{4,2,1},{4,2,4}};ref.spline.knuckles={true,true};planes->markers={ref};
+        v.setSnapshot(planes);v.setProjection(HullProjection::Body);v.setSelectionKind(HullEntity::Point);v.setSelectedPoints({});v.fit();v.finishPresentation();v.setPointPlacement(true);
+        auto* station=v.findChild<QDoubleSpinBox*>("StationPlaneX");QVector<fs::Vec3> placed;
+        v.onPointCreationRequested=[&](fs::Vec3 p){placed.append(p);};
+        check("station-default-zero-metric",station&&station->value()==0&&station->suffix().trimmed()=="m");
+        if(station){station->setValue(4.);const auto nearRef=v.project({4,2,2})+QPointF(4,0);click(v,nearRef);click(v,nearRef,Qt::ShiftModifier);
+            check("station-snap-optional-and-keeps-x",placed.size()==2&&placed[0].x==4&&placed[1].x==4&&std::abs(placed[0].y-2)>.001&&near(placed[1].y,2)&&near(placed[1].z,2));
+            station->setValue(5.);click(v,nearRef,Qt::ShiftModifier);check("no-snap-to-reference-at-another-station",placed.size()==3&&placed.last().x==5&&near(placed.last().y,placed.first().y));
+            click(v,v.project({5,0,2})+QPointF(3,0),Qt::ShiftModifier);check("station-centerline-snap",placed.size()==4&&near(placed.last().y,0));
+            auto other=fixture();other->documentId="8dac5a3a-323d-4281-ac9a-fee97424c0f7";other->units="imperial";v.setSnapshot(other);v.setPointPlacement(true);
+            check("new-model-resets-station-and-units",station->value()==0&&station->suffix().trimmed()=="ft");
+        }
+        return failures?1:0;
+    }
     if(app.arguments().value(1)=="--encoding-labels") {
         auto m=fixture();m->textEncoding="cp1252";
         ProjectDialog project(*m);LayerPanel layers;layers.setSnapshot(m);layers.setSelectedLayerId(1);
@@ -266,27 +361,31 @@ int main(int argc,char**argv) {
         ProjectDialog split(defaults);editor<QCheckBox>(split.fieldEditor("use_default_split_section_location"))->setChecked(false);
         check("project-default-split-off-emits-current-midpoint",split.changes().contains("split_section_location")&&displayed(editor<QDoubleSpinBox>(split.fieldEditor("split_section_location")),m->length/2));
 
-        LayerPanel panel;panel.setSnapshot(m);panel.setSelectedLayerId(1);int requests=0;fs::EntityId target=0;QJsonObject changes;
-        panel.onLayerChanged=[&](fs::EntityId id,const QJsonObject& update){++requests;target=id;changes=update;};
-        check("layer-opening-does-not-round-model",panel.changes().isEmpty()&&m->layers[0].thickness==12.123456789);
-        panel.applyChanges();check("layer-no-op-apply-does-not-submit",requests==0);
+        LayerPanel panel;int requests=0;fs::EntityId target=0;QJsonObject changes;
+        panel.onListCommand=[&](const QString& method,QJsonObject fields){
+            if(method!="update_layer")return false;
+            ++requests;target=fs::EntityId(fields["layer_id"].toDouble());changes=fields["changes"].toObject();return true;
+        };
+        panel.setSnapshot(m);panel.setSelectedLayerId(1);
+        check("layer-opening-does-not-round-model",requests==0&&m->layers[0].thickness==12.123456789);
         editor<QDoubleSpinBox>(panel.fieldEditor("thickness"))->setValue(8.5);
-        panel.applyChanges();check("layer-explicit-apply-one-request",requests==1&&target==1&&changes.size()==1&&changes["thickness"].toDouble()==8.5);
-        check("layer-draft-does-not-mutate-snapshot",m->layers[0].name=="Hull A"&&m->layers[0].thickness==12.123456789);
+        check("layer-change-automatically-submits-one-field",requests==1&&target==1&&changes.size()==1&&changes["thickness"].toDouble()==8.5);
+        check("layer-preview-does-not-mutate-snapshot",m->layers[0].name=="Hull A"&&m->layers[0].thickness==12.123456789);
         auto updated=std::make_shared<fs::ModelSnapshot>(*m);updated->revision=2;updated->layers[0].thickness=8.5;
-        panel.setSnapshot(updated);check("layer-refresh-clears-draft-without-submit",requests==1&&panel.changes().isEmpty());
+        panel.setSnapshot(updated);check("layer-refresh-keeps-committed-value-without-submit",requests==1&&editor<QDoubleSpinBox>(panel.fieldEditor("thickness"))->value()==8.5);
         panel.setSelectedLayerId(2);check("layer-selection-does-not-submit",requests==1&&panel.selectedLayerId()==2);
-        editor<QDoubleSpinBox>(panel.fieldEditor("thickness"))->setValue(7.5);panel.setEditingEnabled(false);panel.applyChanges();
+        panel.setEditingEnabled(false);editor<QDoubleSpinBox>(panel.fieldEditor("thickness"))->setValue(7.5);
         check("layer-busy-panel-cannot-submit",requests==1);
-        LayerPanel hydro;hydro.setSnapshot(m);hydro.setSelectedLayerId(1);
+        LayerPanel hydro;hydro.setSnapshot(m);hydro.setSelectedLayerId(1);QJsonObject hydroChange;
+        hydro.onListCommand=[&](const QString&,QJsonObject fields){hydroChange=fields["changes"].toObject();return true;};
         editor<QCheckBox>(hydro.fieldEditor("use_in_hydrostatics"))->setChecked(true);
-        check("layer-hydro-displays-automatic-symmetry",editor<QCheckBox>(hydro.fieldEditor("symmetric"))->isChecked()&&hydro.changes().value("use_in_hydrostatics").toBool()&&!hydro.changes().contains("symmetric"));
+        check("layer-hydro-displays-automatic-symmetry",editor<QCheckBox>(hydro.fieldEditor("symmetric"))->isChecked()&&hydroChange.value("use_in_hydrostatics").toBool()&&!hydroChange.contains("symmetric"));
         editor<QCheckBox>(hydro.fieldEditor("symmetric"))->setChecked(false);
-        check("layer-explicit-symmetry-override-is-not-lost",hydro.changes().contains("symmetric")&&!hydro.changes().value("symmetric").toBool());
+        check("layer-explicit-symmetry-override-is-not-lost",hydroChange.contains("symmetric")&&!hydroChange.value("symmetric").toBool());
         LayerPanel typedLayer;typedLayer.setSnapshot(m);typedLayer.setSelectedLayerId(1);QJsonObject typedChange;
-        typedLayer.onLayerChanged=[&](fs::EntityId,const QJsonObject& update){typedChange=update;};
-        pendingText(editor<QDoubleSpinBox>(typedLayer.fieldEditor("thickness")),"4.75");typedLayer.applyChanges();
-        check("layer-apply-commits-pending-keyboard-text",typedChange["thickness"].toDouble()==4.75);
+        typedLayer.onListCommand=[&](const QString&,QJsonObject fields){typedChange=fields["changes"].toObject();return true;};
+        pendingText(editor<QDoubleSpinBox>(typedLayer.fieldEditor("thickness")),"4.75");typedLayer.setSelectedLayerId(2);
+        check("layer-switch-commits-pending-keyboard-text-on-original-layer",typedChange["thickness"].toDouble()==4.75);
         cases.append(QJsonObject{{"id","real-native-mouse-keyboard-focus-and-dialog-presentation"},{"status","not_run"}});
         cases.append(QJsonObject{{"id","property-dialog-and-selection-visual-acceptance"},{"status","review"}});
         report["status"]=failed?"fail":"partial";

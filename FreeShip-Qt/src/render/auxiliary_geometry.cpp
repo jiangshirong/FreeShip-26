@@ -30,6 +30,10 @@ QVector<Cubic> splineCubics(const SectionSpline& source){
 QVector<Cubic> splitBodyCubics(const QVector<Cubic>& input,double split){
     QVector<Cubic> result;
     for(const auto& c:input){
+        // A Bezier lies in its control hull. Most hull spans are entirely on
+        // one side, so their exact split-body projection needs no root search.
+        if(std::all_of(c.begin(),c.end(),[&](auto p){return p.x>=split;})){result.append(c);continue;}
+        if(std::all_of(c.begin(),c.end(),[&](auto p){return p.x<split;})){auto piece=c;for(auto& p:piece)p.y=-p.y;result.append(piece);continue;}
         // Split into monotone x intervals first, so tangencies and up to three
         // crossings are handled without a fixed sampling grid.
         double a=-c[0].x+3*c[1].x-3*c[2].x+c[3].x,b=2*(c[0].x-2*c[1].x+c[2].x),d=c[1].x-c[0].x;

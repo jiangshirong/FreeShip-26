@@ -7,7 +7,6 @@
 #include <memory>
 class QDialog;
 
-// Layer structure changes are immediate; property edits are applied separately.
 class LayerPanel final : public QWidget {
 public:
     explicit LayerPanel(QWidget* parent = nullptr);
@@ -25,22 +24,21 @@ public:
     std::function<void()> onMismatch;
     fs::EntityId selectedLayerId() const;
     void setSelectedLayerId(fs::EntityId id);
-    QJsonObject changes() const;
-    QString validationError() const;
     QWidget* fieldEditor(const QString& field) const;
-    void applyChanges();
+    void finishEditing();
     void editLayerName(fs::EntityId id);
     std::function<void()> onCreateLayer;
     std::function<void(fs::EntityId)> onDeleteLayer;
     std::function<void(fs::EntityId,int)> onMoveLayer;
-    void discardDrafts();
     std::function<void(fs::EntityId,bool)> onControlNetChanged;
     std::function<void()> onSelectionChanged;
-    std::function<void(fs::EntityId, const QJsonObject&)> onLayerChanged;
 private:
     struct State;
     std::unique_ptr<State> state_;
-    void previewValue(fs::EntityId id,const QJsonObject& value);
+    bool previewValue(fs::EntityId id,const QJsonObject& value);
+    void submitProperty(const QString& field,const QJsonValue& value);
+    void submitTransparency();
+    void commitText();
     void updateValueRow(int index);
     void rebuildRows();
     void refreshRow(int index,bool remove);

@@ -1,0 +1,119 @@
+name: FS26 0.1.21 macOS DMG (official update domain)
+on:
+  push:
+    branches: [build/macos-v0.1.21-domain-20261123]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: fs26-macos-021-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  macos:
+    if: github.ref == 'refs/heads/build/macos-v0.1.21-domain-20261123'
+    name: macOS 15 / ${{ matrix.arch }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: arm64
+            runner: macos-15
+          - arch: x86_64
+            runner: macos-15-intel
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 60
+    env:
+      FS26_ARCH: ${{ matrix.arch }}
+      DEVELOPER_DIR: /Applications/Xcode_16.4.app/Contents/Developer
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          persist-credentials: false
+      - name: Verify native runner and frozen source
+        run: |
+          test "$(uname -m)" = "$FS26_ARCH"
+          sw_vers
+          xcodebuild -version
+          python3 .github/scripts/macos_candidate.py verify-source
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+        with:
+          python-version: '3.12'
+      - name: Install Qt 6.8.3
+        run: |
+          python -m venv "$RUNNER_TEMP/aqt"
+          "$RUNNER_TEMP/aqt/bin/python" -m pip install --disable-pip-version-check 'aqtinstall==3.3.0'
+          "$RUNNER_TEMP/aqt/bin/aqt" install-qt mac desktop 6.8.3 clang_64 \
+            --outputdir "$RUNNER_TEMP/qt" --archives qtbase qtsvg
+          qt="$RUNNER_TEMP/qt/6.8.3/macos"
+          test -x "$qt/bin/macdeployqt"
+          xcrun lipo "$qt/lib/QtCore.framework/Versions/A/QtCore" -verify_arch "$FS26_ARCH"
+          echo "FS26_QT=$qt" >> "$GITHUB_ENV"
+      - name: Prepare CI compiler cache
+        id: ccache
+        run: |
+          if command -v ccache >/dev/null || HOMEBREW_NO_AUTO_UPDATE=1 brew install ccache; then
+            echo "launcher=$(command -v ccache)" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Restore compiler objects
+        if: steps.ccache.outputs.launcher != ''
+        uses: actions/cache/restore@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
+        with:
+          path: ~/.cache/fs26-macos-021-ccache
+          key: fs26-macos-021-${{ matrix.arch }}-${{ github.sha }}-${{ github.run_attempt }}
+          restore-keys: fs26-macos-021-${{ matrix.arch }}-
+      - name: Compile FS26 and test programs
+        id: compile
+        env:
+          FS26_CXX_LAUNCHER: ${{ steps.ccache.outputs.launcher }}
+          CCACHE_COMPILERCHECK: content
+          CCACHE_MAXSIZE: 400M
+        run: |
+          export CCACHE_DIR="$HOME/.cache/fs26-macos-021-ccache"
+          export CCACHE_BASEDIR="$RUNNER_TEMP"
+          python .github/scripts/macos_candidate.py stage-source
+          cmake -S "$RUNNER_TEMP/fs26-source/FreeShip-Qt" -B "$RUNNER_TEMP/fs26-build" -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="$FS26_QT" \
+            -DCMAKE_OSX_ARCHITECTURES="$FS26_ARCH" -DCMAKE_OSX_DEPLOYMENT_TARGET=15.0 \
+            -DCMAKE_MACOSX_BUNDLE=OFF -DFS26_FLATPAK=OFF -DFS26_MACOS_UPDATE_TESTS=ON \
+            -DCMAKE_CXX_COMPILER_LAUNCHER="$FS26_CXX_LAUNCHER"
+          cmake --build "$RUNNER_TEMP/fs26-build" --parallel 3 --target \
+            FreeShipQt FreeShipDocumentService FreeShipNativeLinesplan FreeShipGeometryExport \
+            FreeShipUpdaterTest qt_document_codec_tests qt_ui_language_tests qt_update_about_tests -- -k 0
+      - name: Save compiler objects for build retries
+        if: always() && steps.compile.outcome != 'skipped' && steps.ccache.outputs.launcher != ''
+        continue-on-error: true
+        uses: actions/cache/save@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
+        with:
+          path: ~/.cache/fs26-macos-021-ccache
+          key: fs26-macos-021-${{ matrix.arch }}-${{ github.sha }}-${{ github.run_attempt }}
+      - name: Create DMG and verify the shipped update flow
+        id: candidate
+        run: python .github/scripts/macos_candidate.py package
+      - name: Upload downloadable macOS DMG
+        id: dmg
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        with:
+          path: ${{ runner.temp }}/fs26-delivery/FreeShip-26-0.1.21-macos-${{ matrix.arch }}.dmg
+          archive: false
+          if-no-files-found: error
+          retention-days: 30
+      - name: Upload validation evidence
+        if: always()
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        with:
+          name: fs26-0.1.21-macos-${{ matrix.arch }}-dmg-verification
+          path: ${{ runner.temp }}/fs26-delivery/evidence/
+          if-no-files-found: ignore
+          retention-days: 30
+      - name: Record download and checksum
+        if: steps.dmg.outcome == 'success'
+        env:
+          DMG_URL: ${{ steps.dmg.outputs.artifact-url }}
+        run: |
+          echo "[$FS26_ARCH macOS DMG (official update domain)]($DMG_URL)" >> "$GITHUB_STEP_SUMMARY"
+          printf '\n```\n' >> "$GITHUB_STEP_SUMMARY"
+          cat "$RUNNER_TEMP/fs26-delivery/evidence/SHA256SUMS.txt" >> "$GITHUB_STEP_SUMMARY"
+          printf '```\n\nAd hoc signed only. Not notarized. Interactive desktop acceptance: not run.\n' >> "$GITHUB_STEP_SUMMARY"

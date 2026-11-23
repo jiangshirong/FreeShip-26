@@ -13,6 +13,9 @@ struct LinesplanOutput {
     QByteArray surfaceDisplay;
     QJsonObject diagnostics;
 };
+class LocalGeometry;
+// Same intersections and splines as a commit, on an existing in-memory subdivision.
+QByteArray previewSectionDisplay(const DocumentInput&,LocalGeometry&);
 using DisplayReady=std::function<void(const QByteArray&,const QByteArray&)>;
 LinesplanOutput buildLinesplan(const DocumentInput &document,const QString& sectionCache={},const QByteArray& engine={},const DisplayReady& displayReady={},bool displayOnly=false);
 } // namespace fs::native_geometry

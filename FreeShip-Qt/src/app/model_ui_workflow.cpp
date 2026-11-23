@@ -27,6 +27,7 @@
 #include <QMouseEvent>
 #include <QPushButton>
 #include <QSpinBox>
+#include <QSlider>
 #include <QSplitter>
 #include <QTabWidget>
 #include <QTimer>
@@ -43,7 +44,8 @@ QJsonObject referenceFrameEvidence(HullView& view){
         if(key!="reference:base:start"&&key!="reference:dwl:start")continue;
         const auto y=label["anchor"].toArray()[1].toDouble();
         const auto row=qRound(y*image.devicePixelRatio());int blue=0;
-        for(int x=image.width()/2-24;x<image.width()/2+24;++x){
+        // A coincident hull outline can cover the middle of the datum; inspect its visible span.
+        for(int x=0;x<image.width();++x){
             for(int dy=-1;dy<=1;++dy){
                 if(!image.rect().contains(x,row+dy))continue;
                 const auto color=image.pixelColor(x,row+dy);
@@ -219,19 +221,48 @@ void MainWindow::modelUiStep(){
             if(!alpha||!thickness||!density){workflowCases_.append(QJsonObject{{"name","layer_fields_unavailable"},{"status","not_run"}});finishWorkflow();return;}
             auto revision=m->revision;auto* control=qobject_cast<QCheckBox*>(layers_->fieldEditor("control_net_visible"));
             if(control){control->setChecked(false);workflowCase("layer-control-net-is-display-only",m->revision==revision&&hiddenControlLayers_.contains(id));control->setChecked(true);}
-            alpha->setValue(25);thickness->setValue(10);density->setValue(2);workflowArtifacts_["measurements"]=layers_->property("layer_measurements").toJsonObject();
-            layerDialog_->grab().save(workflowOutput_+"/layer-draft.png");QList<QPushButton*> apply;for(auto* b:layers_->findChildren<QPushButton*>())if(b->property("layer_action")=="apply"&&b->isEnabled())apply.append(b);
-            if(apply.size()!=1){workflowCases_.append(QJsonObject{{"name","layer_apply_unavailable"},{"status","not_run"}});finishWorkflow();return;}apply[0]->click();return;
+            workflowCase("layer-window-has-no-apply-button",!layers_->findChild<QPushButton*>("layer_apply"));
+            auto* slider=layers_->findChild<QSlider*>();
+            if(!slider)throw std::runtime_error("Layer transparency slider unavailable");
+            slider->setSliderDown(true);slider->setSliderPosition(10);slider->setSliderPosition(25);
+            workflowCase("slider-previews-values-without-submitting-while-held",alpha->value()==25&&!session_.busy());
+            slider->setSliderDown(false);
+            workflowCase("slider-release-starts-one-property-edit",session_.busy());
+            auto* text=thickness->findChild<QLineEdit*>();
+            if(!text)throw std::runtime_error("Thickness text editor unavailable");
+            text->setText(QStringLiteral("10"));key(thickness,Qt::Key_Return);
+            workflowCase("layer-enter-keeps-dialog-open",layerDialog_->isVisible());
+            auto* densityText=density->findChild<QLineEdit*>();
+            if(!densityText)throw std::runtime_error("Density text editor unavailable");
+            densityText->setText(QStringLiteral("2"));
+            layerDialog_->close(); // Closing with a complete value also leaves the editor.
+            workflowArtifacts_["measurements"]=layers_->property("layer_measurements").toJsonObject();
+            workflowArtifacts_["property_revision"]=double(revision+3);
+            return;
         }
         case 1:{
-            workflowCase("alpha-applied-by-production-control",m->layers.front().alphaBlend==191);captureWorkflow("alpha");
+            workflowCase("layer-changes-reach-document-without-apply",
+                m->revision==quint64(workflowArtifacts_["property_revision"].toDouble())&&m->layers.front().alphaBlend==191
+                &&m->layers.front().thickness==10&&m->layers.front().materialDensity==2);
+            openLayers();captureWorkflow("alpha");workflowStage_=27;layerHistory(false);return;
+        }
+        case 27:{
+            const auto* density=qobject_cast<QDoubleSpinBox*>(layers_->fieldEditor("material_density"));
+            workflowCase("undo-reverts-only-last-layer-property",m->layers.front().alphaBlend==191&&m->layers.front().thickness==10
+                &&m->layers.front().materialDensity==editingOriginal_->layers.front().materialDensity
+                &&density->value()==m->layers.front().materialDensity);
+            layerHistory(true);return;
+        }
+        case 28:{
+            workflowCase("redo-restores-layer-property-and-control",m->layers.front().materialDensity==2
+                &&qobject_cast<QDoubleSpinBox*>(layers_->fieldEditor("material_density"))->value()==2);
             auto* list=layers_->findChild<QListWidget*>("layer_list");
             auto* footer=list->itemWidget(list->item(list->count()-1));
             auto* add=footer->findChild<QToolButton*>();
             if(!add||!add->isEnabled())throw std::runtime_error("Layer add button unavailable");
             workflowCase("plus-follows-last-layer",list->count()==m->layers.size()+1&&add->geometry().left()==0&&add->icon().name()=="studio-add-one");
             if(m->layers.size()==1)workflowCase("last-layer-not-removable",!layerButton("delete",m->layers.front().id)->isEnabled());
-            QApplication::setActiveWindow(layerDialog_);add->setFocus();add->click();return;
+            workflowStage_=2;QApplication::setActiveWindow(layerDialog_);add->setFocus();add->click();return;
         }
         case 2:{
             const auto& added=m->layers.back();auto* name=layers_->findChild<QLineEdit*>("layer_inline_name");
@@ -281,14 +312,22 @@ void MainWindow::modelUiStep(){
             workflowCase("double-click-edits-name-in-row",name&&name->isVisible()&&name->parentWidget()==viewport&&name->geometry().contains(click));
             if(!name)throw std::runtime_error("Double-click did not open the layer-name editor");
             qobject_cast<QDoubleSpinBox*>(layers_->fieldEditor("thickness"))->setValue(8.5);
+            layers_->fieldEditor("color")->setProperty("colorValue",0x112233);
+            qobject_cast<QCheckBox*>(layers_->fieldEditor("developable"))->click();
             name->setText(QStringLiteral("Edited test layer"));
             workflowStage_=23;key(name,Qt::Key_Return);
             if(!session_.busy())throw std::runtime_error("Inline rename did not start a revision");
+            layers_->setSelectedLayerId(m->layers.front().id);
+            workflowCase("layer-switch-loads-the-other-layers-properties",
+                         qobject_cast<QDoubleSpinBox*>(layers_->fieldEditor("thickness"))->value()==10);
             return;
         }
         case 23:{
-            workflowCase("enter-renames-only-the-layer",m->layer(editingLayer_)&&m->layer(editingLayer_)->name=="Edited test layer"&&
-                         m->layer(editingLayer_)->thickness==0&&layers_->changes()["thickness"].toDouble()==8.5);
+            const auto* edited=m->layer(editingLayer_);
+            workflowCase("queued-properties-and-rename-stay-with-original-layer-after-switch",
+                edited&&edited->name=="Edited test layer"&&edited->thickness==8.5&&edited->color==0x112233
+                &&edited->developable&&m->layers.front().thickness==10);
+            layers_->setSelectedLayerId(editingLayer_);
             auto* eye=layerButton("visibility",editingLayer_);
             if(!eye||!eye->isEnabled())throw std::runtime_error("Layer visibility button unavailable");
             workflowCase("visible-layer-has-eye-icon",eye->icon().name()=="studio-menu:LayerVisible"&&eye->isChecked());
@@ -308,8 +347,8 @@ void MainWindow::modelUiStep(){
         case 24:{
             workflowCase("rapid-eye-changes-all-committed",m->revision==quint64(workflowArtifacts_["eye_burst_expected_revision"].toDouble())&&m->layers.front().visible==workflowArtifacts_["other_layer_visibility"].toBool());
             auto* eye=layerButton("visibility",editingLayer_);
-            workflowCase("eye-click-hides-layer-and-preserves-draft",eye&&!eye->isChecked()&&eye->icon().name()=="studio-menu:LayerHidden"&&
-                         !m->layer(editingLayer_)->visible&&m->layer(editingLayer_)->thickness==0&&layers_->changes()["thickness"].toDouble()==8.5);
+            workflowCase("eye-click-hides-layer-and-preserves-properties",eye&&!eye->isChecked()&&eye->icon().name()=="studio-menu:LayerHidden"&&
+                         !m->layer(editingLayer_)->visible&&m->layer(editingLayer_)->thickness==8.5);
             if(!eye||!eye->isEnabled())throw std::runtime_error("Hidden layer visibility button unavailable");
             workflowCase("hidden-eye-paints-only-icon",eyePaint(eye,false));
             layerDialog_->grab().save(workflowOutput_+"/layer-hidden-eye.png");
@@ -372,13 +411,14 @@ void MainWindow::modelUiStep(){
         case 6:session_.load(workflowOutput_+"/layers.fbm");return;
         case 7:{
             captureWorkflow("reopened");layerDialog_->close();
+            if(property("verify_layer_ui_only").toBool()){finishWorkflow();return;}
             if(auto* a=action("select_edge"))a->trigger();else return;
             if(auto* a=action("place_point"))a->trigger();else return;
             workflowCase("point-placement-switches-from-edge-selection",selectionKind_==HullEntity::Point&&placePoint_->isChecked());
             if(auto* a=action("select_point"))workflowCase("selection-menu-matches-point-placement",a->isChecked());else return;
             QApplication::processEvents(QEventLoop::ExcludeUserInputEvents);workflowArtifacts_["point_workspace_before"]=workspace();
             HullView* body=nullptr;for(auto* v:views_)if(v->projection()==HullProjection::Body)body=v;if(!body)throw std::runtime_error("Missing body view");
-            workflowOriginalPoint_={m->maximum.x,.75,1.25};workflowPoint_=m->points.size();auto pixel=body->project(workflowOriginalPoint_);
+            workflowOriginalPoint_={0,.75,1.25};workflowPoint_=m->points.size();auto screenPoint=workflowOriginalPoint_;if(!m->bothSides && screenPoint.x<=(m->useDefaultSplitSectionLocation?double(float(m->length*.5)):m->splitSectionLocation))screenPoint.y=-screenPoint.y;auto pixel=body->project(screenPoint);
             QMouseEvent press(QEvent::MouseButtonPress,pixel,pixel,Qt::LeftButton,Qt::LeftButton,Qt::NoModifier);QApplication::sendEvent(body,&press);
             QMouseEvent release(QEvent::MouseButtonRelease,pixel,pixel,Qt::LeftButton,Qt::NoButton,Qt::NoModifier);QApplication::sendEvent(body,&release);return;
         }
@@ -386,7 +426,7 @@ void MainWindow::modelUiStep(){
             workflowCase("view-click-adds-one-control-point",m->points.size()==qsizetype(workflowPoint_+1));
             workflowCase("placed-point-selected-in-all-views",selection_.size()==1&&std::all_of(views_.begin(),views_.end(),[this](auto* v){return v->selectedPoints()==selection_;}));
             workflowCase("placement-remains-active-after-click",placePoint_->isChecked()&&std::all_of(views_.begin(),views_.end(),[](auto* v){return v->pointPlacement()==(v->projection()!=HullProjection::Perspective);}));
-            if(selection_.size()==1){const auto* p=m->point(*selection_.begin());workflowCase("body-click-uses-model-max-x",p&&std::abs(p->position.x-workflowOriginalPoint_.x)<1e-6&&std::abs(p->position.y-.75)<1e-5&&std::abs(p->position.z-1.25)<1e-5);}
+            if(selection_.size()==1){const auto* p=m->point(*selection_.begin());workflowCase("body-click-uses-zero-x",p&&std::abs(p->position.x-workflowOriginalPoint_.x)<1e-6&&std::abs(p->position.y-.75)<1e-5&&std::abs(p->position.z-1.25)<1e-5);}
             workflowCase("creation-does-not-open-full-sidebar",inspector_->isHidden());
             workflowCase("creation-keeps-two-splitter-panes",qobject_cast<QSplitter*>(centralWidget())->count()==2);
             workflowCase("point-popup-preserves-four-view-layout",workspace()==workflowArtifacts_["point_workspace_before"].toArray());
@@ -396,6 +436,7 @@ void MainWindow::modelUiStep(){
             workflowCase("point-popup-avoids-created-point",pointPopup_->property("avoids_anchor").toBool());
             bool inputsReachable=true;
             for(auto* field:pointPopup_->findChildren<QDoubleSpinBox*>()){
+                if(!field->isVisible())continue;
                 auto* hit=pointPopup_->parentWidget()->childAt(field->mapTo(pointPopup_->parentWidget(),field->rect().center()));
                 inputsReachable&=hit&&(hit==field||field->isAncestorOf(hit));
             }
@@ -487,6 +528,28 @@ void MainWindow::modelUiStep(){
                 right["camera_yaw"].toDouble()<initial["camera_yaw"].toDouble()&&right["camera_pitch"]==initial["camera_pitch"]);
             workflowCase("perspective-ctrl-drag-down-increases-pitch",
                 down["camera_pitch"].toDouble()>right["camera_pitch"].toDouble()&&down["camera_yaw"]==right["camera_yaw"]);
+            const bool restoreMotion=down["motion_enabled"].toBool();
+            perspective->setAnimationsEnabled(false);
+            perspective->fit();
+            const QPointF probeDelta(16,12),anchor=perspective->rect().center();
+            const auto angles=[](const QJsonObject& before,const QJsonObject& after){
+                return QPointF(before["camera_yaw"].toDouble()-after["camera_yaw"].toDouble(),
+                    after["camera_pitch"].toDouble()-before["camera_pitch"].toDouble());
+            };
+            const auto sampleDrag=[&]{const auto before=perspective->interactionMotionEvidence();return angles(before,orbit(probeDelta));};
+            const auto sameAngles=[](QPointF a,QPointF b){return (a-b).manhattanLength()<1e-8;};
+            const auto fitted=sampleDrag();
+            perspective->zoomAt(anchor,2.);
+            const auto zoomed=sampleDrag();
+            perspective->zoomAt(anchor,2.);
+            const auto closeup=sampleDrag();
+            perspective->fit();
+            const auto refitted=sampleDrag();
+            perspective->zoomAt(anchor,.5);
+            const auto zoomedOut=sampleDrag();
+            perspective->fit();perspective->setAnimationsEnabled(restoreMotion);
+            workflowCase("perspective-zoom-dampens-orbit-on-both-axes",
+                fitted.x()>0&&fitted.y()>0&&sameAngles(zoomed,fitted/2.)&&sameAngles(closeup,fitted/4.)&&sameAngles(refitted,fitted)&&sameAngles(zoomedOut,fitted));
             selectPoints({});
             QContextMenuEvent menuEvent(QContextMenuEvent::Mouse,{50,50},{50,50});QApplication::sendEvent(view,&menuEvent);
             QJsonArray menuItems;QList<QAction*> saves;for(auto* a:view->findChildren<QAction*>())if(a->property("view_operation").isValid()){menuItems.append(QJsonObject{{"operation",a->property("view_operation").toString()},{"text",a->text()},{"enabled",a->isEnabled()}});if(a->property("view_operation")=="save_image")saves.append(a);}
@@ -689,6 +752,7 @@ void MainWindow::modelUiStep(){
             // Keep the coincident keel edge from covering the blue baseline in the captures.
             view->setControlNetVisible(false);
             workflowArtifacts_["datum_before"]=referenceFrameEvidence(*view);
+            view->grab().save(workflowOutput_+"/baseline-before.png");
             view->setControlNetVisible(true);
             dragControlPoint(*view,lowest->id,{0,42});
             if(!session_.busy()||!releasedCurvePositions_.contains(lowest->id))throw std::runtime_error("Bottom point drag was not submitted");

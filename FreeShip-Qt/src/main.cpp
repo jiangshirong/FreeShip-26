@@ -162,7 +162,7 @@ int main(int argc, char** argv) {
         verifyStudioWindowStartup(&window,arguments.last());
     } else if (arguments.size() == 4 && arguments[1] == "--verify-workflow") {
         QTimer::singleShot(0, &window, [&] { window.verifyWorkflow(arguments[2], arguments[3]); });
-    } else if (arguments.size() == 4 && arguments[1] == "--verify-editing") {
+    } else if (arguments.size() == 4 && (arguments[1] == "--verify-editing" || arguments[1] == "--verify-point-transform")) {
         QTimer::singleShot(0, &window, [&] { window.verifyEditing(arguments[2], arguments[3]); });
     } else if (arguments.size() == 4 && arguments[1] == "--verify-topology") {
         QTimer::singleShot(0, &window, [&] { window.verifyTopology(arguments[2], arguments[3]); });
@@ -174,8 +174,13 @@ int main(int argc, char** argv) {
         QTimer::singleShot(0, &window, [&] { window.verifyBackgrounds(arguments[2], arguments[3]); });
     } else if (arguments.size() == 4 && arguments[1] == "--verify-preferences") {
         QTimer::singleShot(0, &window, [&] { window.verifyPreferences(arguments[2], arguments[3]); });
-    } else if (arguments.size() == 4 && arguments[1] == "--verify-model-ui") {
+    } else if (arguments.size() == 4 && (arguments[1] == "--verify-model-ui" || arguments[1] == "--verify-layer-ui")) {
+        window.setProperty("verify_layer_ui_only", arguments[1] == "--verify-layer-ui");
         QTimer::singleShot(0, &window, [&] { window.verifyModelUi(arguments[2], arguments[3]); });
+    } else if (arguments.size()==6 && arguments[1]=="--verify-viewport-restart"){
+        window.setProperty("viewport_test_settings",arguments[3]);
+        window.setProperty("viewport_test_phase",arguments[4]);
+        QTimer::singleShot(0,&window,[&]{window.verifyViewport(arguments[2],arguments[5]);});
     } else if (arguments.size() == 4 && arguments[1] == "--verify-viewport") {
         QTimer::singleShot(0, &window, [&] { window.verifyViewport(arguments[2], arguments[3]); });
     } else if (arguments.size() == 4 && arguments[1] == "--verify-shading") {

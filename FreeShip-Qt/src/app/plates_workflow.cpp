@@ -2,7 +2,10 @@
 #include "studio_ui.h"
 #include "main_window.h"
 #include "plates_dialog.h"
-#include "pdf_scale_inputs.h"
+#include "pdf_preview_probe.h"
+#include <QSpinBox>
+#include <QDoubleSpinBox>
+#include <QMenu>
 #include "plate_assembly.h"
 #include "plate_depth_buffer.h"
 #include <QPainter>
@@ -28,6 +31,8 @@
 #include <QScrollArea>
 #include <QScrollBar>
 #include <QApplication>
+#include <QStyle>
+#include <QStyleOptionSpinBox>
 #include <QEventLoop>
 #include <algorithm>
 void MainWindow::verifyPlates(const QString& request,const QString& output){
@@ -288,14 +293,13 @@ void MainWindow::platesStep(const QString& operation){
                     sendMouse(QEvent::MouseButtonRelease,displaced,Qt::NoButton);
                     workflowCase("assembly.edge-drag-never-moves-plate",cleared()&&platesDialog_->seam_<0&&item->pos()==original);
                 }
-                auto* mirror=platesDialog_->mirror_;
                 const auto bottoms=layers->findItems("Bottom (SB)",Qt::MatchExactly);
                 if(!bottoms.isEmpty()){
                     layers->setCurrentItem(bottoms.front());
                     const int row=layers->currentRow();
                     auto* item=platesDialog_->items_[row];
                     auto& plate=platesDialog_->data_->plates[row];
-                    const double angle=plate.rotation;const bool flipped=mirror->isChecked();
+                    const double angle=plate.rotation;const bool flipped=plate.mirrored;
                     const QPointF localCenter(plate.bounds.center().x(),-plate.bounds.center().y());
                     const QPointF center=item->mapToScene(localCenter);
                     const auto offset=plate.offset;
@@ -326,7 +330,61 @@ void MainWindow::platesStep(const QString& operation){
                     workflowCase("assembly.presets-set-absolute-angle",buttons.size()==6&&exact);
                     platesDialog_->grab().save(workflowOutput_+"/views/rotation-presets.png");
                     plate.rotation=rotated;platesDialog_->placePlate(row);
-                    mirror->setChecked(!flipped);tap({2,2});
+                    const auto rightMouse=[&](QEvent::Type type,QPoint pos,Qt::MouseButtons held){
+                        QMouseEvent event(type,pos,sheet->viewport()->mapToGlobal(pos),type==QEvent::MouseMove?Qt::NoButton:Qt::RightButton,held,Qt::NoModifier);
+                        QApplication::sendEvent(sheet->viewport(),&event);
+                    };
+                    const auto activeMenu=[&]()->QMenu*{
+                        auto* menu=qobject_cast<QMenu*>(QApplication::activePopupWidget());
+                        return menu&&menu->objectName()=="PlateContextMenu"?menu:nullptr;
+                    };
+                    const auto flipAt=[&](QPoint pos,bool capture=false){
+                        rightMouse(QEvent::MouseButtonPress,pos,Qt::RightButton);
+                        rightMouse(QEvent::MouseButtonRelease,pos,Qt::NoButton);
+                        auto* menu=activeMenu();
+                        if(!menu)return false;
+                        const auto actions=menu->actions();
+                        const bool ok=actions.size()==1&&actions.front()->property("plate_operation")=="mirror";
+                        if(ok){
+                            if(capture)menu->grab().save(workflowOutput_+"/views/plate-mirror-menu.png");
+                            actions.front()->trigger();
+                        }
+                        menu->hide();return ok;
+                    };
+                    const auto transformBefore=item->transform();
+                    bool noOldControl=true;for(auto* field:platesDialog_->findChildren<QCheckBox*>())noOldControl&=field->property("plate_field")!="mirror";
+                    const bool selectedFlip=flipAt({2,2})&&plate.mirrored!=flipped&&item->transform()!=transformBefore;
+                    workflowCase("assembly.mirror-selected-plate",noOldControl&&selectedFlip&&plate.offset==offset&&plate.rotation==rotated);
+                    const bool restored=flipAt({2,2})&&plate.mirrored==flipped&&item->transform()==transformBefore;
+                    platesDialog_->fit();
+                    // Edge inspection clears the plate selection, unlike a blank
+                    // canvas click which may preserve the sidebar's current row.
+                    for(int y=2;y<sheet->viewport()->height()&&!cleared();y+=2){
+                        const QPoint at(sheet->viewport()->width()/2,y);
+                        if(platesDialog_->edgeAt(at).valid())tap(at);
+                    }
+                    const bool unselected=cleared();
+                    QPoint mirrorPoint(-1,-1);
+                    const auto area=sheet->mapFromScene(item->sceneBoundingRect()).boundingRect().intersected(sheet->viewport()->rect());
+                    for(int y=area.top();y<=area.bottom()&&mirrorPoint.x()<0;y+=3)
+                        for(int x=area.left();x<=area.right();x+=3)
+                            if(platesDialog_->plateAt({x,y})==row&&item->contains(item->mapFromScene(sheet->mapToScene(QPoint(x,y))))){mirrorPoint={x,y};break;}
+                    const bool directMenu=mirrorPoint.x()>=0&&flipAt(mirrorPoint,true);
+                    const bool directFlip=unselected&&directMenu&&plate.mirrored!=flipped&&layers->currentRow()==row;
+                    workflowCase("assembly.mirror-direct-hit",restored&&directFlip,
+                        QStringLiteral("restored=%1 unselected=%2 point=(%3,%4) menu=%5 row=%6 target=%7")
+                            .arg(restored).arg(unselected).arg(mirrorPoint.x()).arg(mirrorPoint.y()).arg(directMenu).arg(layers->currentRow()).arg(row));
+                    const auto cameraOrigin=sheet->mapToScene(QPoint());
+                    const bool mirrorBeforePan=plate.mirrored;
+                    rightMouse(QEvent::MouseButtonPress,{2,2},Qt::RightButton);
+                    rightMouse(QEvent::MouseMove,{44,35},Qt::RightButton);
+                    rightMouse(QEvent::MouseButtonRelease,{44,35},Qt::NoButton);
+                    const bool panned=sheet->mapToScene(QPoint())!=cameraOrigin;
+                    workflowCase("assembly.right-drag-pans-without-menu",panned&&!activeMenu()&&plate.mirrored==mirrorBeforePan);
+                    rightMouse(QEvent::MouseButtonPress,{44,35},Qt::RightButton);
+                    rightMouse(QEvent::MouseMove,{2,2},Qt::RightButton);
+                    rightMouse(QEvent::MouseButtonRelease,{2,2},Qt::NoButton);
+                    tap({2,2});
                     workflowCase("assembly.presets-dismissed",presets->isHidden());
                     bool foundTransformed=false;
                     for(int i=0;i<platesDialog_->seams_.size();++i){
@@ -342,7 +400,7 @@ void MainWindow::platesStep(const QString& operation){
                     }
                     workflowCase("assembly.transformed-sheet-pick",foundTransformed);
                     if(!bottoms.isEmpty())layers->setCurrentItem(bottoms.front());
-                    plate.rotation=angle;platesDialog_->placePlate(row);mirror->setChecked(flipped);locatePair();
+                    plate.rotation=angle;plate.mirrored=flipped;platesDialog_->placePlate(row);locatePair();
                 }
                 QTimer::singleShot(0,this,[this]{
                     auto* d=qobject_cast<QDialog*>(frontStudioDialog());
@@ -406,11 +464,13 @@ void MainWindow::platesStep(const QString& operation){
         workflowCase("plates.generated",!platesRequest_["expect_failure"].toBool());workflowArtifacts_["raw_plate_data"]=platesDialog_->result();
         // Exercise the export fixture at its historical placement; pointer rotation
         // and ordinary dragging are exercised by the interaction workflows.
-        auto& firstPlate=platesDialog_->data_->plates[0];
-        firstPlate.rotation=37;firstPlate.offset={1.25,-2.5};platesDialog_->placePlate(0);
-        for(auto*c:platesDialog_->findChildren<QCheckBox*>())if(c->property("plate_field")=="mirror")c->setChecked(true);
+        if(!platesRequest_["pdf_default_layout"].toBool()){
+            auto& firstPlate=platesDialog_->data_->plates[0];
+            firstPlate.rotation=37;firstPlate.offset={1.25,-2.5};firstPlate.mirrored=true;platesDialog_->placePlate(0);
+            const auto layout=platesDialog_->result()["layout"].toArray()[0].toObject();
+            workflowCase("plates.transform",layout["rotation"]==37&&layout["mirrored"].toBool());
+        }
         workflowArtifacts_["plate_data"]=platesDialog_->result();
-        workflowCase("plates.transform",platesDialog_->result()["layout"].toArray()[0].toObject()["rotation"]==37&&platesDialog_->result()["layout"].toArray()[0].toObject()["mirrored"].toBool());
         auto before=platesDialog_->result();for(auto*v:platesDialog_->findChildren<QGraphicsView*>()){v->scale(15,15);v->translate(350,-450);}
         workflowCase("plates.camera-readonly",platesDialog_->result()==before);
         platesDialog_->fit();platesDialog_->grab().save(workflowOutput_+"/views/plates.png");
@@ -434,23 +494,68 @@ void MainWindow::platesStep(const QString& operation){
         for(const auto* format:{"dxf","txt","json","png","pdf"}){auto path=workflowOutput_+"/plates."+format;auto error=platesDialog_->exportFile(path,format);workflowCase("plates.export."+QString(format),error.isEmpty()&&QFileInfo(path).size()>0,error);}
         // Printing at a declared physical scale is checked independently by the
         // PDF reader, including feet-to-mm conversion and page tiling.
-        auto* scale=platesDialog_->scale_;
-        workflowCase("plates.pdf-scale-fields",scale->numerator.value()==1&&scale->denominator.value()==0
-                     &&scale->numerator.isEnabled()&&scale->denominator.isEnabled());
-        scale->numerator.setValue(3);
-        scale->denominator.setValue(301);
-        workflowCase("plates.scaled-pdf",platesDialog_->exportFile(workflowOutput_+"/scaled.pdf","pdf").isEmpty());
-        scale->numerator.setValue(1);
-        scale->denominator.setValue(10);
+        QTimer::singleShot(0,this,[this]{
+            auto* dialog=frontStudioDialog();
+            if(!dialog||dialog->objectName()!="PlatePdfSettings"){
+                workflowCase("plates.pdf-scale-fields",false);return;
+            }
+            auto* fit=dialog->findChild<QCheckBox*>("PdfFitSinglePage");
+            auto* a=dialog->findChild<QDoubleSpinBox*>("PlatePdfNumerator");
+            auto* b=dialog->findChild<QDoubleSpinBox*>("PlatePdfDenominator");
+            const bool fitted=fit&&fit->isChecked()&&a&&b&&!a->isVisible()&&!b->isVisible();
+            auto* preview=dialog->findChild<QWidget*>("PdfFirstPagePreview");
+            if(fitted&&preview){
+                auto* buttons=dialog->findChild<QDialogButtonBox*>();
+                auto* warning=dialog->findChild<QLabel*>("PlatePdfWarning");
+                auto* ratio=dialog->findChild<QLabel*>("PlatePdfComputedRatio");
+                const bool preparing=buttons&&!buttons->button(QDialogButtonBox::Ok)->isEnabled();
+                fit->setChecked(false);
+                const auto step=[&](QStyle::SubControl arrow){
+                    QStyleOptionSpinBox option;option.initFrom(b);option.frame=b->hasFrame();
+                    option.buttonSymbols=b->buttonSymbols();
+                    const auto rect=b->style()->subControlRect(QStyle::CC_SpinBox,&option,arrow,b);
+                    if(rect.isEmpty()||!b->rect().contains(rect.center()))return false;
+                    const auto pos=rect.center();
+                    for(const auto eventType:{QEvent::MouseButtonPress,QEvent::MouseButtonRelease}){
+                        QMouseEvent event(eventType,pos,b->mapToGlobal(pos),Qt::LeftButton,
+                            eventType==QEvent::MouseButtonPress?Qt::LeftButton:Qt::NoButton,Qt::NoModifier);
+                        QApplication::sendEvent(b,&event);
+                    }
+                    return true;
+                };
+                const double saved=b->value();b->setValue(2.5);
+                const bool editWhilePreparing=preparing&&a->isVisible()&&a->isEnabled()&&b->isVisible()&&b->isEnabled()&&
+                    step(QStyle::SC_SpinBoxUp)&&b->value()==3.5&&step(QStyle::SC_SpinBoxDown)&&b->value()==2.5;
+                b->setValue(saved);
+                fit->setChecked(true);
+                workflowCase("plates.pdf-settings-responsive-before-preview",editWhilePreparing);
+                workflowCase("plates.pdf-warning-outside-preview",warning&&warning->isVisible()&&!preview->isAncestorOf(warning));
+                workflowCase("plates.pdf-fit-exposes-computed-ratio",ratio&&ratio->isVisible()&&!ratio->text().isEmpty());
+                if(ratio)workflowArtifacts_["plate_pdf_computed_ratio"]=ratio->locale().toDouble(ratio->text().section(':',1).trimmed());
+                QElapsedTimer wait;wait.start();
+                while(buttons&&!buttons->button(QDialogButtonBox::Ok)->isEnabled()&&wait.elapsed()<3000)waitForPdfPreview(10);
+                dialog->grab().save(workflowOutput_+"/plate-pdf-fit-settings.png");
+                b->setValue(150.5);a->setValue(1.5);
+                workflowCase("plates.pdf-scale-preview-animates",observePdfPreviewMotion(dialog,[&]{fit->setChecked(false);}));
+                dialog->grab().save(workflowOutput_+"/plate-pdf-fixed-settings.png");
+            }
+            const bool fixed=a&&b&&a->isVisible()&&b->isVisible()&&a->buttonSymbols()==QAbstractSpinBox::UpDownArrows&&b->buttonSymbols()==QAbstractSpinBox::UpDownArrows;
+            workflowCase("plates.pdf-scale-fields",fitted&&fixed&&preview&&preview->isVisible());
+            if(auto* box=dialog->findChild<QDialogButtonBox*>())box->button(QDialogButtonBox::Ok)->click();
+            if(dialog->isVisible())dialog->reject();
+        });
+        std::shared_ptr<PlatesDialog::PdfSheet> settings;
+        const bool accepted=platesDialog_->selectPdfSettings(settings);
+        workflowCase("plates.scaled-pdf",accepted&&platesDialog_->exportFile(workflowOutput_+"/scaled.pdf","pdf").isEmpty());
+        platesDialog_->pdfNumerator_=1;platesDialog_->pdfDenominator_=10;
         workflowCase("plates.tiled-pdf",platesDialog_->exportFile(workflowOutput_+"/tiled.pdf","pdf").isEmpty());
-        scale->numerator.setValue(1000);
-        scale->denominator.setValue(1);
+        platesDialog_->pdfNumerator_=1000;platesDialog_->pdfDenominator_=1;
         auto path=workflowOutput_+"/failed-print.pdf";
         QFile keep(path);keep.open(QIODevice::WriteOnly);keep.write("previous");keep.close();
         const auto oversizeError=platesDialog_->exportFile(path,"pdf");keep.open(QIODevice::ReadOnly);
         workflowCase("plates.excess-pages-preserve-file",!oversizeError.isEmpty()&&keep.readAll()=="previous");
         keep.close();
-        scale->denominator.setValue(0);
+        platesDialog_->pdfNumerator_=1;platesDialog_->pdfDenominator_=0;
         auto lists=platesDialog_->findChildren<QListWidget*>();if(lists.size()==1){
             auto*list=lists[0];list->item(0)->setCheckState(Qt::Unchecked);workflowArtifacts_["hidden_plate_data"]=platesDialog_->result();
             const auto error=platesDialog_->exportFile(workflowOutput_+"/hidden.dxf","dxf");

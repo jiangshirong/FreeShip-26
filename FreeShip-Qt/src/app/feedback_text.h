@@ -1,8 +1,17 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 #pragma once
 #include "ui_language.h"
+#include "document/fbm_text.h"
 #include <QString>
 #include <QStringList>
+
+// Translate the diagnostic template before inserting the encoding identifier.
+inline QString uiDiagnosticText(const QString& source){
+    const QLatin1String prefix(fs::document::FbmTextDiagnosticPrefix);
+    if(source.startsWith(prefix))
+        return QString(uiText("无法按 %1 编码无损转换 FBM 中的文字。")).arg(source.mid(prefix.size()));
+    return uiText(source);
+}
 
 // State-dependent feedback: omit empty diagnostics, retain meaningful outcomes.
 // Each optional sentence is translated as a whole, not assembled from fragments.

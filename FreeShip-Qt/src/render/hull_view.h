@@ -3,16 +3,20 @@
 #include "core/model_snapshot.h"
 #include "view_lighting.h"
 #include "surface_analysis.h"
+#include "drag_section_compare.h"
 #include <QImage>
+#include <QIcon>
 #include <QPicture>
 #include <QPointF>
 #include <QSet>
 #include <QWidget>
 #include <functional>
 #include <memory>
+#include <optional>
 #include <QJsonObject>
 
 class QMenu;
+class QToolButton;
 
 enum class HullProjection { Profile, Plan, Body, Perspective };
 namespace fs::curveEdit {class Motion;}
@@ -30,6 +34,14 @@ public:
                      const QSet<fs::EntityId>& visibilityChanges={});
     void setLayerVisibilityPreview(const QSet<fs::EntityId>& changes);
     void setDisplayPreview(std::shared_ptr<const fs::ModelSnapshot> presentation);
+    void setMoveSectionPreview(std::shared_ptr<const QVector<fs::Section>> sections);
+    std::shared_ptr<const QVector<fs::Section>> moveSectionPreview()const;
+    void setDragSectionComparison(DragSections pairs,DragShell shell={});
+    void retainReleasedCreases();
+    DragShell dragShellComparison()const;
+    DragSections dragSectionComparison()const;
+    fs::Vec3 pointMoveAnchor()const;
+    bool axisPointMove()const;
     void setPendingPointMoves(const QVector<fs::PointMove>& moves);
     void setPlateDiagnosticFaces(const QString& document, quint64 revision, QVector<QVector<fs::Vec3>> faces);
     bool curveEditMotionEnabled() const;
@@ -55,6 +67,11 @@ public:
     int focalLength()const;
     bool setLight(const HullLight& light);
     HullLight light()const;
+    QString displayModeKey()const;
+    void restoreDisplayMode(const QString& mode);
+    bool selectDisplayMode(const QString& mode);
+    void installDisplayModeButton(const std::function<QIcon(const QString&)>& icon);
+    void setDisplayModeButtonCorner(Qt::Corner corner);
     QJsonObject viewSettingsEvidence()const;
     // Deterministic probe of the production fallback, without changing settings.
     QImage softwareImage(qreal devicePixelRatio=1)const;
@@ -86,6 +103,8 @@ public:
     void setFlowPlacement(bool enabled);
     bool flowPlacement()const;
     void setPointPlacement(bool enabled);
+    void setPlacementUndoPreview(const QSet<fs::EntityId>& ids);
+    void setPendingPlacements(const QVector<fs::Vec3>& positions);
     bool pointPlacement()const;
     QPointF flowSource(QPointF screen)const;
     int backgroundView()const;
@@ -101,6 +120,7 @@ public:
     void panBy(QPointF delta);
     void zoomAt(QPointF anchor, double factor);
     QPointF project(const fs::Vec3& point) const;
+    std::optional<fs::Vec3> displayedControlPoint(fs::EntityId id)const;
     QPointF projectControlPoint(fs::EntityId id)const;
     QImage image(qreal devicePixelRatio = 1) const;
     // Immutable printer commands. Text/lines remain vector; only shaded fills
@@ -113,12 +133,15 @@ public:
     quint64 paintCount = 0;
     std::function<void()> onHullFrame;
     std::function<void()> onHullVisibleFrame;
-    std::function<void(fs::EntityId)> onPointSelected;
+    std::function<void(fs::EntityId)> onPointSelected,onRepeatPointClick;
     std::function<void(fs::EntityId, fs::Vec3)> onPointMoved;
     std::function<void(QSet<fs::EntityId>)> onSelectionChanged;
     std::function<void(QVector<fs::PointMove>)> onPointsMoved;
+    std::function<void(const QVector<fs::PointMove>&)> onTransformPreview;
+    std::function<void()> onPointMovePreviewChanged;
     std::function<void(QString)> onEditRejected;
     std::function<void(HullEntity,QSet<fs::EntityId>)> onEntitySelectionChanged;
+    std::function<void(HullEntity,fs::EntityId,QPoint)> onRepeatEntityClick;
     std::function<void(QString,QPointF)> onBackgroundAction;
     std::function<void(QJsonObject)> onBackgroundChanged;
     std::function<void(int,QPointF)> onFlowRequested;
@@ -126,7 +149,7 @@ public:
     std::function<void(fs::Vec3)> onPointCreationRequested;
     std::function<void()> onPointPlacementEnded;
     std::function<void(QString)> onViewAction;
-    std::function<void()> onViewSettingsChanged;
+    std::function<void(const QString&)> onViewSettingsChanged;
     std::function<bool(QMenu&)> onPopulateSelectionMenu;
     std::function<void(QMenu&)> onPopulateContextMenu;
     std::function<void()> onShowControlNet;
@@ -149,10 +172,20 @@ protected:
 private:
     struct State;
     std::unique_ptr<State> state_;
+    QToolButton* displayModeButton_=nullptr;
+    Qt::Corner displayModeCorner_=Qt::TopRightCorner;
+    void refreshDisplayModeButton();
+    void positionDisplayModeButton();
+    fs::EntityId repeatPoint_=0;
     QString projectionSourceKey() const;
     void draw(QPainter&, qreal devicePixelRatio,bool final=true,bool forceSoftware=false,int* verifySections=nullptr) const;
     void fitToViewport(bool resizing);
-    void cancelGesture();
+    bool showsTransformHandles()const;
+    bool canTransform()const;
+    bool beginTransform(int axis,QPointF origin,bool handle);
+    void rebuildInfluence();void previewTransform(QPointF cursor);void finishTransform();
+    QVector<fs::PointMove> transformMoves()const;void drawTransform(QPainter&)const;
+    void cancelGesture(bool committingPointMove=false);
     void selectWithLeftButton(QPointF position,bool additive);
     void notifySelectionChanged();
     void chooseCoordinateAxis(int axis);

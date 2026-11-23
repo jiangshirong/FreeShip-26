@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 #include "model_snapshot.h"
 #include "principal_dimensions.h"
+#include "snapshot_sha256.h"
 #include <QFile>
 #include <QJsonArray>
 #include <QJsonDocument>
@@ -474,7 +475,7 @@ ModelSnapshot ModelSnapshot::withMetadata(const QJsonObject &patch,const QString
         else invalid("unsupported metadata field");
     }
     result.revision=nextRevision;result.metadata_=metadata_.updated(patch,nextRevision);
-    result.sourceDigest_=QCryptographicHash::hash(result.metadata_.bytes(),QCryptographicHash::Sha256).toHex();return result;
+    result.sourceDigest_=snapshotSha256(result.metadata_.bytes());return result;
 }
 
 void ModelSnapshot::loadSectionDisplay(const QByteArray& data) {

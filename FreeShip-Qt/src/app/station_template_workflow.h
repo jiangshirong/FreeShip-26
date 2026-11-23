@@ -2,6 +2,7 @@
 // Hidden production-route probe for the companion isolated test suite.
 #pragma once
 #include "studio_ui.h"
+#include "pdf_preview_probe.h"
 #include "section_dialog.h"
 #include <QAbstractButton>
 #include <QAbstractItemView>
@@ -515,8 +516,8 @@ inline QJsonObject observeStationExport(SectionDialog& editor,const QString& fol
                 return;
             }
             auto* layout=settings->findChild<QComboBox*>("StationPdfLayout");
-            auto* numerator=settings->findChild<QSpinBox*>("StationPdfNumerator");
-            auto* denominator=settings->findChild<QSpinBox*>("StationPdfDenominator");
+            auto* numerator=settings->findChild<QDoubleSpinBox*>("StationPdfNumerator");
+            auto* denominator=settings->findChild<QDoubleSpinBox*>("StationPdfDenominator");
             auto* pages=settings->findChild<QLabel*>("StationPdfPageCount");
             auto* buttons=settings->findChild<QDialogButtonBox*>();
             if(!layout||layout->count()!=3||!numerator||!denominator||!pages||!buttons){settings->reject();return;}
@@ -552,6 +553,24 @@ inline QJsonObject observeStationExport(SectionDialog& editor,const QString& fol
             }
             layout->setCurrentIndex(tiledIndex);
             evidence["initial_a4_enabled"]=confirm->isEnabled();
+            if(cmd["preview_motion"].toBool()){
+                auto* fit=settings->findChild<QCheckBox*>("PdfFitSinglePage");
+                if(fit){
+                    const double original=denominator->value();
+                    denominator->setValue(50);
+                    evidence["fit_motion"]=observePdfPreviewMotion(settings,[&]{fit->setChecked(true);})&&
+                        !numerator->isVisible()&&!denominator->isVisible()&&pages->locale().toInt(pages->text())==cmd["indices"].toArray().size();
+                    settings->grab().save(prefix+"-pdf-fit-settings.png");
+                    layout->setCurrentIndex(2);
+                    auto* computed=settings->findChild<QLabel*>("StationPdfComputedRatio");
+                    evidence["whole_fit_available"]=fit->isEnabled()&&fit->isChecked()&&!numerator->isVisible()&&
+                        !denominator->isVisible()&&computed&&computed->isVisible()&&computed->text().contains(':');
+                    fit->setChecked(false);
+                    evidence["manual_ratio_restored"]=numerator->isVisible()&&denominator->isVisible()&&denominator->value()==50&&
+                        numerator->buttonSymbols()==QAbstractSpinBox::UpDownArrows&&denominator->buttonSymbols()==QAbstractSpinBox::UpDownArrows;
+                    denominator->setValue(original);layout->setCurrentIndex(tiledIndex);
+                }
+            }
             QJsonArray layouts,initialAllowed;
             for(int i=0;i<layout->count();++i){
                 layout->setCurrentIndex(i);
@@ -561,14 +580,27 @@ inline QJsonObject observeStationExport(SectionDialog& editor,const QString& fol
             }
             evidence["pdf_layouts"]=layouts;
             evidence["initial_allowed"]=initialAllowed;
-            numerator->setValue(cmd["numerator"].toInt(1));
-            denominator->setValue(cmd["scale"].toInt(1));
+            if(cmd["decimal_input"].toBool()){
+                for(auto* field:{numerator,denominator}){
+                    const auto key=field==numerator?"numerator":"scale";
+                    if(auto* editor=field->findChild<QLineEdit*>())editor->setText(field->locale().toString(cmd[key].toDouble(1),'f',3));
+                    field->interpretText();
+                }
+            }else{
+                numerator->setValue(cmd["numerator"].toDouble(1));
+                denominator->setValue(cmd["scale"].toDouble(1));
+            }
             layout->setCurrentIndex(tiledIndex);
             evidence["a4_enabled"]=confirm->isEnabled();
             layout->setCurrentIndex(targetIndex);
+            auto* fit=settings->findChild<QCheckBox*>("PdfFitSinglePage");
+            if(fit)fit->setChecked(cmd["fit_page"].toBool());
             evidence["pdf_layout"]=layout->currentText();
             evidence["page_count"]=pages->locale().toInt(pages->text());
-            if(cmd["capture"].toBool())settings->grab().save(prefix+"-pdf-settings.png");
+            if(cmd["capture"].toBool()||cmd["preview_motion"].toBool()){
+                waitForPdfPreview(340);
+                settings->grab().save(prefix+"-pdf-settings.png");
+            }
             accepted=exportPdf&&confirm->isEnabled();
             if(accepted) confirm->click();
             else buttons->button(QDialogButtonBox::Cancel)->click();

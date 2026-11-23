@@ -270,7 +270,7 @@ public:
         setObjectName("TutorialActionDemo");setFixedHeight(212);
         windowExample_->reset();
         for(auto& menu:menus_)menu=new tutorial::DemoPopup(this);
-        entries_[0]=menus_[0]->addAction(studioIcon("SelectAll"),uiText("全选"));
+        entries_[0]=menus_[0]->addAction(studioIcon("SelectAll"),uiText("全选点"));
         entries_[1]=menus_[1]->addAction(studioIcon("Layers"),uiText("图层属性"));
         entries_[1]->setProperty("studio_opens_dialog",true);
         entries_[2]=menus_[2]->addAction(studioIcon("Sections"),uiText("水线"));

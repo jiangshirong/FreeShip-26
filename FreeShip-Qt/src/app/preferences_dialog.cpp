@@ -245,8 +245,6 @@ PreferencesDialog::PreferencesDialog(QJsonObject values,QWidget* parent,const QS
     connect(quick,&QCheckBox::toggled,this,[this,first,second](bool enabled){draft_["quick_language_enabled"]=enabled;first->setEnabled(enabled);second->setEnabled(enabled);});
     auto* undo=new QSpinBox;undo->setRange(0,1048576);undo->setSuffix(" MB");undo->setValue(effective.value("undo_memory_mb").toInt());undo->setProperty("preference_field","undo_memory_mb");
     form->addRow(uiText("撤销内存上限"),undo);connect(undo,&QSpinBox::valueChanged,this,[this](int v){draft_["undo_memory_mb"]=v;});
-    auto* encoding=new QComboBox;encoding->setEditable(true);encoding->addItems({"cp1251","cp1252","cp936","UTF-8"});encoding->setCurrentText(effective.value("fbm_encoding").toString());encoding->setProperty("preference_field","fbm_encoding");
-    form->addRow(uiText("旧版 FBM 文字编码"),encoding);connect(encoding,&QComboBox::currentTextChanged,this,[this](const QString& s){draft_["fbm_encoding"]=s;});
     addPage(general,uiText("常规"));
     auto* directories=new QWidget;auto* paths=new QFormLayout(directories);paths->setSpacing(12);
     paths->setRowWrapPolicy(QFormLayout::WrapLongRows);
@@ -297,7 +295,6 @@ void PreferencesDialog::importLegacy(){
             const auto key=widget->property("preference_field").toString();const QSignalBlocker guard(widget);
             if(key.startsWith("directories.")){if(auto* edit=qobject_cast<QLineEdit*>(widget))edit->setText(draft_.value("directories").toObject()[key.mid(12)].toString());}
             else if(key=="undo_memory_mb"){if(auto* spin=qobject_cast<QSpinBox*>(widget))spin->setValue(effective[key].toInt());}
-            else if(key=="fbm_encoding"){if(auto* combo=qobject_cast<QComboBox*>(widget))combo->setCurrentText(effective[key].toString());}
         }
         buildGraphics();setProperty("preference_failure",QString{});error_->clear();QStringList notes;
         for(const auto& note:report["notes"].toArray())notes<<note.toString();
