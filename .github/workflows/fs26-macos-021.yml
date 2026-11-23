@@ -51,16 +51,44 @@ jobs:
           test -x "$qt/bin/macdeployqt"
           xcrun lipo "$qt/lib/QtCore.framework/Versions/A/QtCore" -verify_arch "$FS26_ARCH"
           echo "FS26_QT=$qt" >> "$GITHUB_ENV"
-      - name: Compile FS26 and test programs
+      - name: Prepare CI compiler cache
+        id: ccache
         run: |
+          if command -v ccache >/dev/null || HOMEBREW_NO_AUTO_UPDATE=1 brew install ccache; then
+            echo "launcher=$(command -v ccache)" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Restore compiler objects
+        if: steps.ccache.outputs.launcher != ''
+        uses: actions/cache/restore@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
+        with:
+          path: ~/.cache/fs26-macos-021-ccache
+          key: fs26-macos-021-${{ matrix.arch }}-${{ github.sha }}-${{ github.run_attempt }}
+          restore-keys: fs26-macos-021-${{ matrix.arch }}-
+      - name: Compile FS26 and test programs
+        id: compile
+        env:
+          FS26_CXX_LAUNCHER: ${{ steps.ccache.outputs.launcher }}
+          CCACHE_COMPILERCHECK: content
+          CCACHE_MAXSIZE: 400M
+        run: |
+          export CCACHE_DIR="$HOME/.cache/fs26-macos-021-ccache"
+          export CCACHE_BASEDIR="$RUNNER_TEMP"
           python .github/scripts/macos_candidate.py stage-source
           cmake -S "$RUNNER_TEMP/fs26-source/FreeShip-Qt" -B "$RUNNER_TEMP/fs26-build" -G Ninja \
             -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="$FS26_QT" \
             -DCMAKE_OSX_ARCHITECTURES="$FS26_ARCH" -DCMAKE_OSX_DEPLOYMENT_TARGET=15.0 \
-            -DCMAKE_MACOSX_BUNDLE=OFF -DFS26_FLATPAK=OFF
+            -DCMAKE_MACOSX_BUNDLE=OFF -DFS26_FLATPAK=OFF \
+            -DCMAKE_CXX_COMPILER_LAUNCHER="$FS26_CXX_LAUNCHER"
           cmake --build "$RUNNER_TEMP/fs26-build" --parallel 3 --target \
             FreeShipQt FreeShipDocumentService FreeShipNativeLinesplan FreeShipGeometryExport \
-            qt_document_codec_tests qt_ui_language_tests
+            qt_document_codec_tests qt_ui_language_tests -- -k 0
+      - name: Save compiler objects for build retries
+        if: always() && steps.compile.outcome != 'skipped' && steps.ccache.outputs.launcher != ''
+        continue-on-error: true
+        uses: actions/cache/save@668228422ae6a00e4ad889ee87cd7109ec5666a7 # v5.0.4
+        with:
+          path: ~/.cache/fs26-macos-021-ccache
+          key: fs26-macos-021-${{ matrix.arch }}-${{ github.sha }}-${{ github.run_attempt }}
       - name: Bundle, verify, and archive the macOS test package
         id: candidate
         run: python .github/scripts/macos_candidate.py package

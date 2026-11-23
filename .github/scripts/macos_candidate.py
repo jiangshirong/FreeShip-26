@@ -27,6 +27,10 @@ COMPATIBILITY = (
      b"if(!std::isfinite(rasterRatio)||rasterRatio<=0)return {};",
      b"if(!std::isfinite(rasterRatio)||rasterRatio<=0)return QPicture{};",
      "Apple Clang: directly construct the same empty QPicture"),
+    ("FreeShip-Qt/src/app/startup_workflow.cpp",
+     b'fs::PointMove{p["point_id"].toInt(),',
+     b'fs::PointMove{static_cast<fs::EntityId>(p["point_id"].toInt()),',
+     "Apple Clang: spell out the existing integer conversion in the startup probe"),
 )
 PROGRAMS = ("FreeShipQt", "FreeShipDocumentService", "FreeShipNativeLinesplan", "FreeShipGeometryExport")
 LANGUAGES = ("de", "en", "es", "fr", "ja", "ru", "zh")
