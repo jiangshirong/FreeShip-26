@@ -291,7 +291,10 @@ def audit_and_sign(app, contents, arch):
         require(match and tuple(map(int, match[1].split(".")[:2])) <= (15, 0), f"Unexpected deployment target: {build}")
         info.append({"file": path.relative_to(app).as_posix(), "arch": exact,
                      "min_macos": match[1], "dependencies": dependencies(path, contents)})
-        run("codesign", "--force", "--sign", "-", path, capture=True)
+        # Signing the bundle's primary executable seals the rest of the app,
+        # so first sign *all* nested Mach-Os, including FreeShipUpdater.
+        if path != contents / "MacOS" / PROGRAMS[0]:
+            run("codesign", "--force", "--sign", "-", path, capture=True)
     for framework in sorted((contents / "Frameworks").glob("*.framework")):
         run("codesign", "--force", "--sign", "-", framework, capture=True)
     run("codesign", "--force", "--sign", "-", app)
