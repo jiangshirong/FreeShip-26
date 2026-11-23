@@ -1,7 +1,7 @@
-name: FS26 0.1.21 macOS DMG and updater checks
+name: FS26 0.1.21 macOS DMG (official update domain)
 on:
   push:
-    branches: [build/macos-v0.1.21-20261123]
+    branches: [build/macos-v0.1.21-domain-20261123]
   workflow_dispatch:
 
 permissions:
@@ -13,7 +13,7 @@ concurrency:
 
 jobs:
   macos:
-    if: github.ref == 'refs/heads/build/macos-v0.1.21-20261123'
+    if: github.ref == 'refs/heads/build/macos-v0.1.21-domain-20261123'
     name: macOS 15 / ${{ matrix.arch }}
     strategy:
       fail-fast: false
@@ -27,7 +27,6 @@ jobs:
     timeout-minutes: 60
     env:
       FS26_ARCH: ${{ matrix.arch }}
-      FS26_MACOS_FEED_BASE: https://raw.githubusercontent.com/jiangshirong/FreeShip-26/refs/heads/build/macos-v0.1.21-20261123/macos-test-feed
       DEVELOPER_DIR: /Applications/Xcode_16.4.app/Contents/Developer
     steps:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
@@ -79,7 +78,6 @@ jobs:
             -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="$FS26_QT" \
             -DCMAKE_OSX_ARCHITECTURES="$FS26_ARCH" -DCMAKE_OSX_DEPLOYMENT_TARGET=15.0 \
             -DCMAKE_MACOSX_BUNDLE=OFF -DFS26_FLATPAK=OFF -DFS26_MACOS_UPDATE_TESTS=ON \
-            -DFS26_MACOS_FEED_BASE="$FS26_MACOS_FEED_BASE" \
             -DCMAKE_CXX_COMPILER_LAUNCHER="$FS26_CXX_LAUNCHER"
           cmake --build "$RUNNER_TEMP/fs26-build" --parallel 3 --target \
             FreeShipQt FreeShipDocumentService FreeShipNativeLinesplan FreeShipGeometryExport \
@@ -115,7 +113,7 @@ jobs:
         env:
           DMG_URL: ${{ steps.dmg.outputs.artifact-url }}
         run: |
-          echo "[$FS26_ARCH macOS test DMG]($DMG_URL)" >> "$GITHUB_STEP_SUMMARY"
+          echo "[$FS26_ARCH macOS DMG (official update domain)]($DMG_URL)" >> "$GITHUB_STEP_SUMMARY"
           printf '\n```\n' >> "$GITHUB_STEP_SUMMARY"
           cat "$RUNNER_TEMP/fs26-delivery/evidence/SHA256SUMS.txt" >> "$GITHUB_STEP_SUMMARY"
           printf '```\n\nAd hoc signed only. Not notarized. Interactive desktop acceptance: not run.\n' >> "$GITHUB_STEP_SUMMARY"

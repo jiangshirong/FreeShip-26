@@ -16,7 +16,8 @@ from pathlib import Path, PurePosixPath
 ROOT = Path(__file__).resolve().parents[2]
 SOURCE = ROOT / "FreeShip-Qt"
 VERSION = "0.1.21"
-FEED_BASE = "https://raw.githubusercontent.com/jiangshirong/FreeShip-26/refs/heads/build/macos-v0.1.21-20261123/macos-test-feed"
+CHANNEL = json.loads((SOURCE / "tools/updates/channel.json").read_bytes())
+FEED_BASE = CHANNEL["endpoint"].removesuffix("/latest.json") + "/macos"
 UPDATE_PATCH = ROOT / ".github/patches/fs26-macos-updater.patch"
 UPDATE_FILES = ("CMakeLists.txt", "src/app/update_controller.cpp", "src/app/document_workspace.cpp",
                 *(f"src/app/languages/{lang}.json" for lang in ("de", "en", "es", "fr", "ja", "ru", "zh")))
@@ -398,7 +399,8 @@ def image_instructions(path, arch, commit):
         "「关于 → 检查更新」使用独立 macOS 测试通道；有新版时手动下载，确认后重启安装。\n"
         "仅临时签名，未经 Apple 公证。只在确认来源可信时打开。可复制附带的 FBM 示例测试。\n\n"
         "Open the DMG, drag FreeShip 26 to Applications and launch the installed app.\n"
-        "About → Check for Updates uses a separate macOS test feed. Downloads and installs require confirmation.\n"
+        "About → Check for Updates uses the official update server for this Mac architecture.\n"
+        "Downloads and installs require confirmation.\n"
         "Ad hoc signed, not Apple notarized. Only open if you trust the source. Test with a copy of the sample.\n"
         "Apple's guidance: https://support.apple.com/102445\n\n"
         f"Source, license and packaging: https://github.com/jiangshirong/FreeShip-26/tree/{commit}\n",
@@ -464,7 +466,12 @@ def package():
         for path in exported_binaries:
             require(run("xcrun", "lipo", "-archs", path, capture=True) == arch and
                     digest(path) == digest(app / path.relative_to(exported)), f"DMG Mach-O mismatch: {path}")
-        require(not (exported / "Contents/MacOS/FreeShipUpdaterTest").exists(), "Test updater must never ship")
+        updater_dir = exported / "Contents/MacOS"
+        require(not (updater_dir / "FreeShipUpdaterTest").exists(), "Test updater must never ship")
+        updater_bytes = (updater_dir / "FreeShipUpdater").read_bytes()
+        require(FEED_BASE.encode("ascii") + b"\0" in updater_bytes
+                and b"raw.githubusercontent.com/jiangshirong/FreeShip-26" not in updater_bytes,
+                "Packaged updater does not use the official HTTPS feed")
         checksum = digest(bundle_dmg)
         (evidence / "SHA256SUMS.txt").write_text(f"{checksum}  {bundle_dmg.name}\n", encoding="ascii")
         checks = run_checks(build, exported / "Contents", sample_copy, evidence, folder)
@@ -480,6 +487,7 @@ def package():
             "mach_o_files_checked": len(binaries), "ad_hoc_signature_verification": "pass",
             "developer_id_signed": False, "apple_notarized": False,
             "update_channel_url": f"{FEED_BASE}/{arch}/latest.json", "update_channel_configured": True,
+            "compiled_update_domain_check": "pass",
             "dmg_readonly_mount_and_applications_link": "pass", "languages_bundled": LANGUAGES, "checks": checks,
             "finder_gatekeeper_acceptance": "not_run", "manual_macos_desktop_acceptance": "not_run",
         }
