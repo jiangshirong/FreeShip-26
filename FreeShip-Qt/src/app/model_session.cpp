@@ -1,6 +1,7 @@
 #include "model_session.h"
 #include "core/platform_process.h"
 #include "core/snapshot_sha256.h"
+#include "core/snapshot_surface.h"
 #include "calculation_scheduler.h"
 #include "ui_language.h"
 #include <QCoreApplication>
@@ -15,10 +16,13 @@
 #include <QUuid>
 #include <QStandardPaths>
 #include <QLocale>
+#include <QThread>
 #include <QThreadPool>
+#include <future>
 #include <algorithm>
 #include <cmath>
 #include <stdexcept>
+#include <utility>
 #ifdef Q_OS_WIN
 #ifndef NOMINMAX
 #define NOMINMAX
@@ -89,16 +93,41 @@ struct PreparedSnapshot {
     bool metadata=false,reusedFirstFrame=false,sameSections=false,sameSurface=false;
     double parseMs=0;
 };
+struct ModelSession::PendingMoveUndo {
+    QJsonObject receipt, candidatePaths;
+    QString output;
+    std::shared_ptr<PreparedSnapshot> prepared;
+    quint64 candidateRevision=0,restoredRevision=0;
+    void prepare(ModelSession* session,const std::shared_ptr<PendingMoveUndo>& self,
+        const QJsonObject& response,const QJsonObject& paths);
+};
 namespace {
+QJsonObject reportTimings(const QJsonObject& response){
+    QJsonObject timings;
+    for(auto it=response.begin();it!=response.end();++it)if(it.key().endsWith("_ms"))timings[it.key()]=it.value();
+    return timings;
+}
 PreparedSnapshot prepareSnapshot(const QJsonObject& response,const QJsonObject& paths,const QString& pendingDocument_,const QString& method_,
     std::shared_ptr<const fs::ModelSnapshot> model_,std::shared_ptr<const Scene> scene_,std::shared_ptr<fs::ModelSnapshot> firstFrame_,
-    const QByteArray& sectionDigest_,const QByteArray& surfaceDigest_,const QByteArray& firstFrameSections_,const QByteArray& firstFrameSurface_){
+    const QByteArray& sectionDigest_,const QByteArray& surfaceDigest_,const QByteArray& firstFrameSections_,const QByteArray& firstFrameSurface_,bool allowParallel=true){
     QElapsedTimer clock;clock.start();
     const auto path=[&](const char* key){return paths[key].toString();};
     const QString modelFile = path("model");
     const QString sceneFile = path("scene");
     const QString dxfFile = path("dxf");
     const bool deferred=response["drawing_deferred"].toBool();
+    const auto readDrawing=[&]() -> std::shared_ptr<const Scene> {
+        if(deferred)return {};
+        if(scene_&&!scene_->digest.isEmpty()){
+            QFile file(sceneFile);
+            if(artifactDigest(file)==scene_->digest)return scene_;
+        }
+        return std::make_shared<Scene>(Scene::load(sceneFile));
+    };
+    std::future<std::shared_ptr<const Scene>> drawingJob;
+    const bool pointEdit=method_=="move_point"||method_=="move_points"||response["point_placement"]==true;
+    const bool parallel=allowParallel&&pointEdit&&QThread::idealThreadCount()>=4&&QFileInfo(modelFile).size()>=2*1024*1024;
+    if(parallel&&!deferred)drawingJob=std::async(std::launch::async,readDrawing);
     const bool metadata=model_ && !model_->sourceDigest().isEmpty() && response["metadata_reused"]==true &&
         response["metadata_base_sha256"].toString().toLatin1()==model_->sourceDigest() && response["metadata_patch"].isObject();
     std::shared_ptr<fs::ModelSnapshot> nextModel;
@@ -120,19 +149,7 @@ PreparedSnapshot prepareSnapshot(const QJsonObject& response,const QJsonObject& 
         QFile actual(modelFile);QCryptographicHash hash(QCryptographicHash::Sha256);
         if(actual.size()>256LL*1024*1024||!actual.open(QIODevice::ReadOnly)||!hash.addData(&actual)||hash.result().toHex()!=nextModel->sourceDigest())
             error("模型增量与完整结果不一致。");
-    }else nextModel=std::make_shared<fs::ModelSnapshot>(fs::ModelSnapshot::load(modelFile));
-    std::shared_ptr<const Scene> nextScene;
-    if(!deferred&&scene_) {
-        QFile file(sceneFile);
-        if(!scene_->digest.isEmpty()&&artifactDigest(file)==scene_->digest)nextScene=scene_;
     }
-    if(!deferred&&!nextScene)nextScene=std::make_shared<Scene>(Scene::load(sceneFile));
-    if (nextModel->documentId != pendingDocument_ || nextModel->documentId != response.value("document_id").toString() ||
-        nextModel->revision != revision(response)) error("收到的图形与当前模型版本不一致。");
-    if (method_ != "load" && method_ != "new" && method_ != "import_model" && model_ && nextModel->revision < model_->revision)
-        error("计算组件返回了过期的模型。");
-    for (const QString key : {"can_undo", "can_redo", "modified"})
-        if (!response.value(key).isBool()) error("计算组件返回了不完整的操作状态。");
     QFile dxf(dxfFile);
     if (!deferred&&(!dxf.open(QIODevice::ReadOnly) || !dxf.seek(std::max<qint64>(0, dxf.size() - 128)) ||
         !dxf.readAll().trimmed().endsWith("EOF"))) error("DXF 结果不完整。");
@@ -140,39 +157,86 @@ PreparedSnapshot prepareSnapshot(const QJsonObject& response,const QJsonObject& 
     if (nativeReport.size()>1024*1024 || !nativeReport.open(QIODevice::ReadOnly)) error("无法核对型线图的生成结果。");
     const auto native=QJsonDocument::fromJson(nativeReport.readAll()).object();
     if (native["status"]!="pass" || native["engine"]!="cpp-native" ||
-        native["document_id"]!=nextModel->documentId || revision(native)!=nextModel->revision ||
-        native["drawing_deferred"].toBool()!=deferred ||
-        (!deferred&&native["scene_sha256"].toString().toLatin1()!=nextScene->digest))
+        native["document_id"]!=pendingDocument_ || revision(native)!=revision(response) ||
+        native["drawing_deferred"].toBool()!=deferred)
         error("型线图与当前模型版本不一致。");
     QCryptographicHash dxfHash(QCryptographicHash::Sha256);
     if (!deferred&&(!dxf.seek(0) || !dxfHash.addData(&dxf) || native["dxf_sha256"].toString().toLatin1()!=dxfHash.result().toHex()))
         error("型线图导出结果校验失败。");
+    const auto readSurface=[&]{
+        QFile file(path("surface"));
+        if(file.size()>256LL*1024*1024||!file.open(QIODevice::ReadOnly))error("无法读取船体曲面。");
+        auto bytes=file.readAll();
+        const auto hash=fs::snapshotSha256(bytes);
+        if(!native["surface_display"].toBool()||native["surface_sha256"].toString().toLatin1()!=hash)
+            error("船体曲面结果校验失败。");
+        return std::pair{std::move(bytes),hash};
+    };
+    std::future<std::pair<QByteArray,QByteArray>> surfaceJob;
+    if(parallel)surfaceJob=std::async(std::launch::async,readSurface);
     QFile sectionFile(path("sections"));
     if(sectionFile.size()>256LL*1024*1024||!sectionFile.open(QIODevice::ReadOnly))error("无法读取剖面线。");
     const auto sectionData=sectionFile.readAll();
     const auto sectionsHash=fs::snapshotSha256(sectionData);
     if(native["sections_sha256"].toString().toLatin1()!=sectionsHash)
         error("剖面线结果校验失败。");
+    const auto [surfaceData,surfaceHash]=surfaceJob.valid()?surfaceJob.get():readSurface();
+    std::optional<fs::SnapshotSurface> decodedSurface;
+    if(!nextModel&&pointEdit&&surfaceData.size()>=1024*1024&&surfaceData.size()<=64LL*1024*1024&&
+       surfaceHash!=surfaceDigest_){
+        // The worker's surface and the snapshot carry the same large arrays.
+        // Reuse the decode only after matching the actual serialized arrays.
+        decodedSurface=fs::SnapshotSurface::parse(surfaceData);
+        nextModel=std::make_shared<fs::ModelSnapshot>(fs::ModelSnapshot::fromBytes(boundedBytes(modelFile),&*decodedSurface));
+    }
+    if(!nextModel)nextModel=std::make_shared<fs::ModelSnapshot>(fs::ModelSnapshot::load(modelFile));
+    auto nextScene=drawingJob.valid()?drawingJob.get():readDrawing();
+    if(!deferred&&native["scene_sha256"].toString().toLatin1()!=nextScene->digest)
+        error("型线图与当前模型版本不一致。");
+    if (nextModel->documentId != pendingDocument_ || nextModel->documentId != response.value("document_id").toString() ||
+        nextModel->revision != revision(response)) error("收到的图形与当前模型版本不一致。");
+    if (method_ != "load" && method_ != "new" && method_ != "import_model" && model_ && nextModel->revision < model_->revision)
+        error("计算组件返回了过期的模型。");
     if(reusedFirstFrame&&sectionsHash!=firstFrameSections_){
         nextModel=std::make_shared<fs::ModelSnapshot>(*nextModel);reusedFirstFrame=false;
     }
     const bool sameSections=metadata&&sectionsHash==sectionDigest_;
     if(!sameSections&&!(reusedFirstFrame&&sectionsHash==firstFrameSections_))nextModel->loadSectionDisplay(sectionData);
-    QFile surfaceFile(path("surface"));
-    if(surfaceFile.size()>256LL*1024*1024||!surfaceFile.open(QIODevice::ReadOnly))error("无法读取船体曲面。");
-    const auto surfaceData=surfaceFile.readAll();
-    const auto surfaceHash=fs::snapshotSha256(surfaceData);
-    if(!native["surface_display"].toBool()||native["surface_sha256"].toString().toLatin1()!=surfaceHash)
-        error("船体曲面结果校验失败。");
     if(reusedFirstFrame&&surfaceHash!=firstFrameSurface_){
         nextModel=std::make_shared<fs::ModelSnapshot>(*nextModel);reusedFirstFrame=false;
     }
     const bool sameSurface=model_&&surfaceHash==surfaceDigest_&&nextModel->reuseSurfaceDisplay(*model_);
-    if(!sameSurface&&!(reusedFirstFrame&&surfaceHash==firstFrameSurface_))nextModel->loadSurfaceDisplay(surfaceData);
+    if(!sameSurface&&!(reusedFirstFrame&&surfaceHash==firstFrameSurface_)){
+        if(decodedSurface)nextModel->loadDecodedSurfaceDisplay(*decodedSurface);
+        else nextModel->loadSurfaceDisplay(surfaceData);
+    }
 
     return {nextModel,nextScene,modelFile,sceneFile,dxfFile,sectionsHash,surfaceHash,sectionData,surfaceData,method_=="load"?boundedBytes(modelFile):QByteArray{},
         metadata,reusedFirstFrame,sameSections,sameSurface,clock.nsecsElapsed()/1e6};
 }
+}
+
+void ModelSession::PendingMoveUndo::prepare(ModelSession* session,const std::shared_ptr<PendingMoveUndo>& self,
+                                            const QJsonObject& response,const QJsonObject& paths){
+    qsizetype bytes=0;
+    for(const auto& path:paths)bytes+=QFileInfo(path.toString()).size();
+    if(bytes>64LL*1024*1024||QThread::idealThreadCount()<4||session->parsingPool_.activeThreadCount())return;
+    const auto document=session->pendingDocument_;
+    const auto before=session->undoAfterMove_;
+    const auto scene=session->scene_;
+    const auto sections=session->sectionDigest_,surface=session->surfaceDigest_;
+    candidatePaths=paths;candidateRevision=revision(response);
+    session->parsingPool_.start([session,self,response,paths,document,before,scene,sections,surface]{
+        std::shared_ptr<PreparedSnapshot> prepared;
+        try{prepared=std::make_shared<PreparedSnapshot>(prepareSnapshot(response,paths,document,"move_points",
+            before,scene,nullptr,sections,surface,{},{}));}
+        catch(const std::exception&){return;}
+        QMetaObject::invokeMethod(session,[session,self,prepared]{
+            if(session->stopping_)return;
+            self->prepared=prepared;
+            session->keepPreparedMoveForRedo(*self);
+        },Qt::QueuedConnection);
+    });
 }
 
 ModelSession::ModelSession(QObject* parent) : QObject(parent) {
@@ -626,9 +690,10 @@ bool ModelSession::editAdvanced(const QString& operation,QJsonObject fields){fie
 bool ModelSession::editModeling(const QString& operation,QJsonObject fields){fields.insert("operation",operation);return currentRequest("modeling",fields);}
 bool ModelSession::inspectModeling(){return currentRequest("inspect_modeling");}
 bool ModelSession::hydroDefaults(){return currentRequest("hydro_defaults");}
-bool ModelSession::developPlates(){
+bool ModelSession::developPlates(const QJsonValue& layerIds){
     if(busy_)return false;
-    try{if(refreshCalculationSnapshot("develop_plates",{}))return true;return currentRequest("develop_plates");}
+    QJsonObject fields;if(!layerIds.isUndefined())fields["layer_ids"]=layerIds;
+    try{if(refreshCalculationSnapshot("develop_plates",fields))return true;return currentRequest("develop_plates",fields);}
     catch(const std::exception& e){if(onError)onError(QString::fromUtf8(e.what()));return false;}
 }
 bool ModelSession::cadPatches(){return currentRequest("cad_iges");}
@@ -753,6 +818,8 @@ bool ModelSession::request(const QString& method, QJsonObject fields) {
         fields.insert("native_linesplan", true);
         fields.insert("first_frame",method=="load"&&!model_&&!property("disable_first_frame").toBool()&&!property("startup_cache_candidate").toBool());
         fields.insert("defer_drawing",method=="load"&&!model_&&property("defer_startup_drawing").toBool());
+        if(method=="move_points"&&QThread::idealThreadCount()>=4&&QFileInfo(modelPath_).size()>=2*1024*1024)
+            fields["prepare_point_publication"]=true;
         if(!linesCacheRoot_.isNull())fields["lines_cache_root"]=linesCacheRoot_;
         if(method=="load" || method=="new" || method=="import_model"){
             if(!fields.contains("preferences"))fields.insert("preferences",preferences_);
@@ -768,7 +835,7 @@ bool ModelSession::request(const QString& method, QJsonObject fields) {
         if(calculationSession_&&(method=="hydrostatics"||method=="performance"||method=="develop_plates")){
             calculationScheduler_->submit(this,[this,line,method]{try{sendRequestLine(line,method);}catch(const std::exception& e){fail(QString::fromUtf8(e.what()),true);}},[this]{notifyState();});
         }else sendRequestLine(line,method);
-        if(busy_ && !sectionPreviewActive_ && !layerPreviewActive_ && onBatchHistoryPreview)
+        if(busy_ && !pendingMoveUndo_ && !sectionPreviewActive_ && !layerPreviewActive_ && onBatchHistoryPreview)
             if(auto target=batchHistoryTarget(method))onBatchHistoryPreview(std::move(target));
         return true;
     } catch (const std::exception& ex) {
@@ -845,9 +912,11 @@ void ModelSession::readState(const QJsonObject& response) {
 }
 
 void ModelSession::publishSnapshot(const QJsonObject& response,std::shared_ptr<PreparedSnapshot> prepared) {
+    for (const QString key : {"can_undo", "can_redo", "modified"})
+        if (!response.value(key).isBool()) error("计算组件返回了不完整的操作状态。");
     QElapsedTimer clock;clock.start();
-    lastLoadTimings_={};
-    for(auto it=response.begin();it!=response.end();++it)if(it.key().endsWith("_ms"))lastLoadTimings_[it.key()]=it.value();
+    lastLoadTimings_=reportTimings(response);
+    const auto rollback=method_=="undo"?pendingMoveUndo_:nullptr;
     if(!prepared){
         QJsonObject paths;for(const char* key:{"model","scene","dxf","sections","surface","native_report"})
             if(!response["drawing_deferred"].toBool()||(QByteArray(key)!="scene"&&QByteArray(key)!="dxf"))paths[key]=artifact(response,key);
@@ -869,7 +938,8 @@ void ModelSession::publishSnapshot(const QJsonObject& response,std::shared_ptr<P
     drawingUnchanged_=reusedFirstFrame||(metadata&&sameSections&&sameSurface&&nextScene==scene_);
     const bool replay=response["move_history_reused"].toBool();
     if(replay)drawingUnchanged_=false; // A verified historical frame differs from the current view.
-    if((method_=="move_points"||replay)&&model_&&model_->documentId==nextModel->documentId&&
+    if(!rollback&&(method_=="move_point"||method_=="move_points"||replay)&&model_&&
+       nextModel->revision>model_->revision&&model_->documentId==nextModel->documentId&&
        !model_->isCachedPreview()&&!model_->sourceDigest().isEmpty()&&
        QFileInfo(modelPath_).size()+QFileInfo(scenePath_).size()+QFileInfo(QFileInfo(modelPath_).dir(),"surface.json").size()+QFileInfo(QFileInfo(modelPath_).dir(),"sections.json").size()<=64LL*1024*1024){
         batchHistoryDirection_=method_=="undo"?"redo":"undo";
@@ -904,10 +974,60 @@ void ModelSession::publishSnapshot(const QJsonObject& response,std::shared_ptr<P
     }
     readState(response);
     healthy_ = true;
+    if(rollback){
+        // Release the optimistic old drawing only after the restored files
+        // have passed the regular publication checks.
+        rollback->restoredRevision=model_->revision;
+        undoAfterMove_.reset();pendingMoveUndo_.reset();
+        keepPreparedMoveForRedo(*rollback);
+    }
     if (onUpdated) onUpdated();
     lastLoadTimings_["ui_publish_ms"]=clock.nsecsElapsed()/1e6;
+    if(method_=="move_points"&&property("batch_move_latency_probe").toBool())setProperty("batch_move_load_timings",lastLoadTimings_);
 }
 
+void ModelSession::submitQueuedMoveUndo(const QJsonObject& move,const QJsonObject& paths){
+    auto pending=std::move(pendingMoveUndo_);
+    const bool preparing=pending&&pending->candidateRevision==revision(move)&&pending->candidatePaths==paths;
+    if(!preparing)pending=std::make_shared<PendingMoveUndo>();
+    pending->receipt=move;pending->output=outputDir_;pendingMoveUndo_=pending;
+    const auto document=pendingDocument_;
+    if(property("batch_move_latency_probe").toBool()){
+        auto timings=reportTimings(move);timings["ui_parse_ms"]=0;timings["ui_publish_ms"]=0;
+        timings["ui_move_skipped_for_undo"]=true;
+        timings["ui_move_preparse_started"]=preparing;
+        timings["ui_move_preparse_ready"]=bool(pending->prepared);
+        setProperty("batch_move_load_timings",timings);
+    }
+    // The service has committed and validated this exact move. Advance with
+    // its acknowledgement, without replacing the drawing just to undo it.
+    busy_=false;
+    if(!request("undo",{{"expected_document_id",document},{"expected_revision",move["revision"]}}))return;
+    // Optional parsing never gates undo. Older services can still prepare
+    // after acknowledgement, and redo can always load its authoritative files.
+    if(!preparing)pending->prepare(this,pending,move,paths);
+}
+void ModelSession::keepPreparedMoveForRedo(const PendingMoveUndo& pending){
+    if(!pending.prepared||!canRedo()||!pending.restoredRevision||model_->revision!=pending.restoredRevision||
+       model_->documentId!=pending.prepared->model->documentId)return;
+    batchHistoryDirection_="redo";
+    batchHistoryModel_=pending.prepared->model;batchHistoryScene_=pending.prepared->scene;
+    batchHistorySections_=pending.prepared->sectionsHash;batchHistorySurface_=pending.prepared->surfaceHash;
+}
+void ModelSession::recoverRejectedMoveUndo(const QJsonObject& response){
+    auto pending=std::move(pendingMoveUndo_);
+    const auto issue=response.value("error").toString("模型操作失败。");
+    if(response["document_id"]!=pending->receipt["document_id"]||response["revision"]!=pending->receipt["revision"]){
+        fail(issue,true);return;
+    }
+    // Undo did not commit. Restore the accepted move and report the error
+    // after validating its files, so UI and document authority agree again.
+    undoAfterMove_.reset();moveUndoRejection_=issue;
+    method_="move_points";outputDir_=pending->output;pendingId_=qint64(pending->receipt["id"].toDouble());
+    setProperty("publication_background",false);
+    if(pending->prepared){publishSnapshot(pending->receipt,pending->prepared);completePublication();}
+    else receive(pending->receipt);
+}
 void ModelSession::receive(const QJsonObject& response) {
     // A timed-out acknowledgement may arrive after its successful retry. It
     // belongs to a completed request and must never overwrite newer UI state.
@@ -916,11 +1036,25 @@ void ModelSession::receive(const QJsonObject& response) {
         error("计算组件返回了不对应当前操作的响应。");
     if (!response.value("ok").isBool()) error("计算组件返回了无效的操作结果。");
     if (!response.value("ok").toBool()) {
+        if(method_=="undo"&&pendingMoveUndo_){recoverRejectedMoveUndo(response);return;}
         fail(response.value("error").toString("模型操作失败。"));
         return;
     }
     if (response.value("document_id").toString() != pendingDocument_)
         error("计算组件返回了另一个文档的结果。");
+    if(response["point_publication_candidate"].toBool()){
+        if(method_!="move_points"||!undoAfterMove_||pendingMoveUndo_||revision(response)!=undoAfterMove_->revision+1)return;
+        // Never show this drawing or change history from a provisional notice.
+        // If even one file is unavailable, wait for the authoritative reply.
+        try{
+            QJsonObject paths;
+            for(const auto* key:{"model","scene","dxf","sections","surface","native_report"})paths[key]=artifact(response,key);
+            auto pending=std::make_shared<PendingMoveUndo>();
+            pending->prepare(this,pending,response,paths);
+            if(pending->candidateRevision)pendingMoveUndo_=std::move(pending);
+        }catch(const std::exception&){/* Optional, final reply is checked separately. */}
+        return;
+    }
     if(response["hydro_progress"].toBool()){
         if(method_!="hydrostatics"||!model_||revision(response)!=model_->revision)error("Invalid calculation progress identity");
         const auto done=response["completed"].toInt(-1),total=response["total"].toInt(-1);
@@ -943,7 +1077,7 @@ void ModelSession::receive(const QJsonObject& response) {
         }
         if(!next.isEmpty()){
             busy_=false;method_.clear();
-            if(next=="hydrostatics")calculateHydrostatics(fields);else if(next=="develop_plates")developPlates();else calculatePerformance(fields);
+            if(next=="hydrostatics")calculateHydrostatics(fields);else if(next=="develop_plates")developPlates(fields.value("layer_ids"));else calculatePerformance(fields);
         }else finish("calculation_ready");return;
     }
     if(response["first_frame"].toBool()) {
@@ -1129,19 +1263,38 @@ void ModelSession::receive(const QJsonObject& response) {
         finish("save");
         return;
     }
-    if(method_=="move_points"||method_=="manage_layers"||method_=="update_layer"||method_=="load"||method_=="snapshot"||method_=="sections"||method_=="undo"||method_=="redo"){
+    if(method_=="move_point"||method_=="move_points"||(method_=="topology"&&response["point_placement"]==true)||method_=="manage_layers"||method_=="update_layer"||method_=="load"||method_=="snapshot"||method_=="sections"||method_=="undo"||method_=="redo"){
         QJsonObject paths;for(const char* key:{"model","scene","dxf","sections","surface","native_report"})
             if(!response["drawing_deferred"].toBool()||(QByteArray(key)!="scene"&&QByteArray(key)!="dxf"))paths[key]=artifact(response,key);
+        if(method_=="move_points"&&undoAfterMove_&&response["document_engine"]=="cpp-document"&&
+           revision(response)==undoAfterMove_->revision+1&&response["can_undo"]==true&&
+           response["modified"].isBool()&&response["can_redo"].isBool()){
+            submitQueuedMoveUndo(response,paths);return;
+        }
+        if(method_=="move_points")pendingMoveUndo_.reset();
         const auto document=pendingDocument_,method=method_;const auto request=pendingId_,generation=++parseGeneration_;
-        const auto history=response["move_history_reused"].toBool()&&batchHistoryModel_&&batchHistoryModel_->documentId==document?batchHistoryModel_:nullptr;
-        const auto model=model_;const auto scene=history?batchHistoryScene_:scene_;
+        const bool rollback=method_=="undo"&&pendingMoveUndo_;
+        if(rollback&&(revision(response)!=revision(pendingMoveUndo_->receipt)+1||response["can_redo"]!=true))
+            error("批量移动的撤销结果与当前模型版本不一致。");
+        const auto replay=response["move_history_reused"].toBool()?batchHistoryTarget(method):nullptr;
+        const auto history=rollback?undoAfterMove_:(replay&&replay->documentId==document?replay:nullptr);
+        const auto model=model_;const auto scene=history&&!rollback?batchHistoryScene_:scene_;
         const auto first=method_=="snapshot"?std::const_pointer_cast<fs::ModelSnapshot>(model_):firstFrame_;
         const auto sections=sectionDigest_,surface=surfaceDigest_;
-        const auto firstSections=history?batchHistorySections_:method_=="snapshot"?sectionDigest_:firstFrameSections_,firstSurface=history?batchHistorySurface_:method_=="snapshot"?surfaceDigest_:firstFrameSurface_;
+        const auto firstSections=rollback||method_=="snapshot"?sections:history?batchHistorySections_:firstFrameSections_;
+        const auto firstSurface=rollback||method_=="snapshot"?surface:history?batchHistorySurface_:firstFrameSurface_;
         parsing_=true;setProperty("publication_background",true);
         parsingPool_.start([this,response,paths,document,method,request,generation,model,scene,history,first,sections,surface,firstSections,firstSurface]{
             std::shared_ptr<PreparedSnapshot> prepared;QString issue;
-            try{prepared=std::make_shared<PreparedSnapshot>(prepareSnapshot(response,paths,document,method,model,scene,history?std::make_shared<fs::ModelSnapshot>(history->withMetadata({},document,revision(response))):first,sections,surface,firstSections,firstSurface));}
+            try{
+                auto predicted=first;
+                if(history){
+                    const auto value=response["history_layer_number"];
+                    const std::optional<int> layer=value.isDouble()?std::optional<int>{value.toInt(-2)}:std::nullopt;
+                    predicted=std::make_shared<fs::ModelSnapshot>(history->withMetadata({},document,revision(response),layer));
+                }
+                prepared=std::make_shared<PreparedSnapshot>(prepareSnapshot(response,paths,document,method,model,scene,predicted,sections,surface,firstSections,firstSurface));
+            }
             catch(const std::exception& ex){issue=QString::fromUtf8(ex.what());}
             QMetaObject::invokeMethod(this,[this,response,request,generation,prepared,issue]{
                 if(stopping_||!busy_||pendingId_!=request||parseGeneration_!=generation)return;
@@ -1214,7 +1367,10 @@ void ModelSession::finish(const QString& operation) {
         return;
     }
     notifyState();
-    if (onCompleted) onCompleted(completed);
+    if(!moveUndoRejection_.isEmpty()){
+        const auto issue=std::exchange(moveUndoRejection_,QString{});
+        if(onError)onError(uiText(issue));
+    }else if (onCompleted) onCompleted(completed);
     if(!calculationRecords_.isEmpty())QTimer::singleShot(0,this,[this]{drainCalculationRecords();});
 }
 
@@ -1261,7 +1417,7 @@ void ModelSession::completeCalculationRecord(bool recorded,const QString& issue)
 }
 
 void ModelSession::fail(const QString& message, bool lostBackend) {
-    undoAfterMove_.reset();batchHistoryDirection_.clear();
+    undoAfterMove_.reset();pendingMoveUndo_.reset();moveUndoRejection_.clear();batchHistoryDirection_.clear();
     ++parseGeneration_;parsing_=false;
     if(firstFrame_){firstFrame_.reset();if(onFirstFrame)onFirstFrame({});}
     editorQueue_.clear();
@@ -1312,7 +1468,7 @@ void ModelSession::discardOldArtifacts() {
         // source model can become a cleanup target.
         if (folder.isSymLink() || path.isEmpty() ||
             !path.startsWith(root + '/', Qt::CaseInsensitive) ||
-            path == retained || path == currentInputDir_ || path == pendingInputDir_||path==QFileInfo(calculationState_).absolutePath()||path==outputDir_) continue;
+            (path == retained || retained.startsWith(path+'/',Qt::CaseInsensitive)) || path == currentInputDir_ || path == pendingInputDir_||path==QFileInfo(calculationState_).absolutePath()||path==outputDir_) continue;
         QDir(path).removeRecursively();
     }
 }

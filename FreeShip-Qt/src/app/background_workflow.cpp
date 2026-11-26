@@ -73,6 +73,14 @@ void MainWindow::backgroundStep(const QString& method){
                 }
                 if(!first)return;
                 if(auto* message=qobject_cast<QMessageBox*>(dialog)){message->button(accept?QMessageBox::Yes:QMessageBox::No)->click();return;}
+                const auto operation=dialog->property("background_operation").toString();
+                if(operation=="alpha"||operation=="tolerance"){
+                    auto* field=dialog->findChild<QSpinBox*>();
+                    workflowCase("appearance-editor-has-no-confirmation-buttons",field&&!dialog->findChild<QDialogButtonBox*>());
+                    if(field&&accept&&values.contains(operation))field->setValue(values[operation].toInt());
+                    dialog->close();
+                    return;
+                }
                 for(auto* field:dialog->findChildren<QDoubleSpinBox*>()){const auto key=field->property("background_field").toString();if(values.contains(key))field->setValue(values[key].toDouble());}
                 for(auto* field:dialog->findChildren<QSpinBox*>()){const auto key=field->property("background_field").toString();if(values.contains(key))field->setValue(values[key].toInt());}
                 auto* box=dialog->findChild<QDialogButtonBox*>();auto* button=box?box->button(accept?QDialogButtonBox::Ok:QDialogButtonBox::Cancel):nullptr;
@@ -120,7 +128,7 @@ void MainWindow::backgroundStep(const QString& method){
         case 7:{
             capture("calibrated");workflowCase("reference_coordinate_doubles_scale",b&&b->scale==double(float(editingChanged_->background(1)->scale*2)));
             auto* a=action("alpha");if(!a)return;dialogs([&]{a->trigger();},false,{{"alpha",96}});
-            workflowCase("cancel_blending_preserves_model",session_.model()==model&&!session_.busy());
+            workflowCase("closing_unchanged_blending_preserves_model",session_.model()==model&&!session_.busy());
             dialogs([&]{a->trigger();},true,{{"alpha",96}});break;
         }
         case 8:{

@@ -28,11 +28,12 @@
 #include "publication.h"
 #include "preferences.h"
 #include "core/model_snapshot.h"
+#include "core/snapshot_sha256.h"
+#include "core/snapshot_surface.h"
 #include "core/recovery_store.h"
 #include "core/model_file_save.h"
 #include "scene.h"
 #include <QCoreApplication>
-#include <QCryptographicHash>
 #include <QDir>
 #include <QElapsedTimer>
 #include <QFile>
@@ -43,6 +44,8 @@
 #include <QSaveFile>
 #include <QSet>
 #include <QTemporaryDir>
+#include <QThread>
+#include <algorithm>
 #include <QUuid>
 #include <cmath>
 #include <cstdio>
@@ -105,7 +108,7 @@ QString artifact(const QJsonObject& response,const QString& key,const QString& d
     QFileInfo info(text(response,key));auto path=info.canonicalFilePath();auto root=QFileInfo(directory).canonicalFilePath();
     if(path.isEmpty()||root.isEmpty()||!info.isFile()||info.isSymLink()||!path.startsWith(root+'/',Qt::CaseInsensitive))bad("Adapter artifact outside transaction: "+key);return path;
 }
-QString digest(const QByteArray& bytes){return QString::fromLatin1(QCryptographicHash::hash(bytes,QCryptographicHash::Sha256).toHex());}
+QString digest(const QByteArray& bytes){return QString::fromLatin1(fs::snapshotSha256(bytes));}
 struct State {
     std::shared_ptr<const Fbm> saved,engine;
     QJsonObject bindings;
@@ -127,6 +130,8 @@ class Service {
     quint64 calculationCacheRevision_=0;
     QString document_;
     QJsonObject highWater_;
+    std::shared_ptr<fs::document::Hydrostatics> scopedHydro_;
+    QJsonValue scopeIds_;
     QJsonObject plateContext_;
     std::shared_ptr<const Fbm> preparedSave_,preparedSaveBase_;
     quint64 preparedSaveRevision_=0;
@@ -208,19 +213,31 @@ class Service {
         for(const auto *key:{"point_edges","point_anchors","point_lines","last_used_layer_id"})b.remove(key);
         return b;
     }
+    bool touchPointHistoryFrame(const std::shared_ptr<const Fbm>& source,const QJsonObject& bindings,const QString& id){
+        // A replay drops the live Publication, so the base of the next move
+        // may only exist here. Keep that verified frame ahead of older edits.
+        pointHistoryFrames_.erase(std::remove_if(pointHistoryFrames_.begin(),pointHistoryFrames_.end(),
+            [](const auto& frame){return frame.engine.expired();}),pointHistoryFrames_.end());
+        const auto key=restoredBindings(bindings);
+        const auto found=std::find_if(pointHistoryFrames_.begin(),pointHistoryFrames_.end(),[&](const auto& frame){
+            return frame.engine.lock()==source&&frame.bindings==key&&frame.snapshot.documentId==id;
+        });
+        if(found==pointHistoryFrames_.end())return false;
+        std::rotate(found,found+1,pointHistoryFrames_.end());
+        return true;
+    }
     void rememberPointHistoryFrame(){
-        if(!publication_||!validatedPublication_||!publication_->canReuseMetadata()||
-           !publication_->canonicalHistoryLayer(publicationBindings_))return;
+        if(!publication_||!validatedPublication_||!publication_->canReuseMetadata())return;
+        if(touchPointHistoryFrame(publicationSource_,publicationBindings_,validatedPublication_->documentId))return;
         auto key=restoredBindings(publicationBindings_);
-        for(const auto &f:pointHistoryFrames_)if(f.engine.lock()==publicationSource_&&f.bindings==key)return;
         const auto budget=qsizetype(std::min<quint64>(limit_,64*1024*1024));if(!budget)return;
         fs::document::PublicationFrame retained=*publication_;auto bytes=retained.retainedBytes();
         // Keep both ends of a dense drag when their raw display artifacts would
         // evict each other. The FBM undo budget and geometry checks still apply.
         if(bytes>budget/2&&bytes<=budget*8){retained=retained.packedForHistory();bytes=retained.retainedBytes();}
         if(bytes>budget)return;
-        qsizetype sum=bytes;for(const auto &f:pointHistoryFrames_)sum+=f.bytes;
-        while(!pointHistoryFrames_.empty()&&(pointHistoryFrames_.size()>=4||sum>budget)){
+        qsizetype sum=0;for(const auto &f:pointHistoryFrames_)sum+=f.bytes;
+        while(!pointHistoryFrames_.empty()&&(pointHistoryFrames_.size()>=4||sum>budget-bytes)){
             sum-=pointHistoryFrames_.front().bytes;pointHistoryFrames_.erase(pointHistoryFrames_.begin());
         }
         pointHistoryFrames_.push_back({publicationSource_,std::move(key),std::move(retained),*validatedPublication_,bytes});
@@ -231,8 +248,13 @@ class Service {
             validatedPublication_->documentId==id && validatedPublication_->revision==revision_;
         const bool reused=publication_ && publicationSource_==state.engine && publicationBindings_==state.bindings;
         const bool placing=request["method"]=="topology"&&request["operation"]=="add_point";
-        const bool batchMove=request["method"]=="move_points";
-        if((placing||batchMove)&&reuseValidated)rememberPointHistoryFrame();
+        const bool pointMove=request["method"]=="move_point"||request["method"]=="move_points";
+        const bool pointEdit=placing||pointMove;
+        const bool changedPointEdit=pointEdit&&rev>revision_;
+        if(changedPointEdit&&!history_.empty()){
+            if(reuseValidated&&publicationSource_==current().engine)rememberPointHistoryFrame();
+            else touchPointHistoryFrame(current().engine,current().bindings,id);
+        }
         const PointHistoryFrame *frame=nullptr;
         const auto &method=request["method"];
         const auto edit=method=="undo"&&index_>0?current().edit:
@@ -249,7 +271,8 @@ class Service {
                 retired=std::async(std::launch::async,[old=std::move(publication_)]()mutable{old.reset();});
             }else publication_.reset();publicationSource_.reset();publicationBindings_={};}
         else if(!reused) {
-            auto prepared=std::make_unique<fs::document::Publication>(*state.engine,state.bindings,publication_.get(),request["method"]=="load"||batchMove);
+            auto prepared=std::make_unique<fs::document::Publication>(*state.engine,state.bindings,publication_.get(),
+                request["method"]=="load"||pointEdit,placing);
             if(reuseValidated)metadata=prepared->metadataChanges(*publication_);
             publication_=std::move(prepared);publicationSource_=state.engine;publicationBindings_=state.bindings;
         }else if(reuseValidated&&publication_->canReuseMetadata())metadata=QJsonObject{};
@@ -278,11 +301,30 @@ class Service {
             std::cout.write(bytes.constData(),bytes.size());std::cout<<'\n'<<std::flush;
             delivered=true;
         };
-        auto result=frame?frame->output.replay(stage.path(),id,rev):metadataOnly?publication_->generateMetadata(stage.path(),*metadata,id,rev):publication_->generate(stage.path(),cache,id,rev,displayReady,request["method"]=="load"&&request["defer_drawing"].toBool());
+        QJsonObject batchTimings;
+        auto* timing=pointEdit?&batchTimings:nullptr;
+        std::unique_ptr<fs::SnapshotSurface> parsedSurface;
+        auto result=frame?frame->output.replay(stage.path(),id,rev):metadataOnly?publication_->generateMetadata(stage.path(),*metadata,id,rev):publication_->generate(stage.path(),cache,id,rev,displayReady,request["method"]=="load"&&request["defer_drawing"].toBool(),timing,pointEdit?&parsedSurface:nullptr);
         if(displayReady&&!delivered)displayReady(result);
         const double generatedMs=clock.nsecsElapsed()/1e6;
+        // This is a hint to parse bytes, not a document acknowledgement. Only
+        // changed batch moves can request it. Keep the same immutable paths if
+        // the transaction succeeds, so a background reader never races rename.
+        const bool prepareMove=request["method"]=="move_points" && rev>revision_ && request["prepare_point_publication"]==true &&
+            QThread::idealThreadCount()>=4 && QFileInfo(result["model"].toString()).size()>=2*1024*1024;
+        if(prepareMove){
+            QJsonObject notice{{"id",request["id"]},{"ok",true},{"point_publication_candidate",true},
+                {"document_id",id},{"revision",qint64(rev)}};
+            for(const auto* key:{"model","scene","dxf","sections","surface","native_report"})notice[key]=result[key];
+            const auto bytes=QJsonDocument(notice).toJson(QJsonDocument::Compact);
+            std::cout.write(bytes.constData(),bytes.size());std::cout<<'\n'<<std::flush;
+        }
         fs::ModelSnapshot validated;
-        if(frame){validated=frame->snapshot;validated.revision=rev;result[edit==State::Edit::BatchMove?"move_history_reused":"placement_history_reused"]=true;}
+        if(frame){
+            validated=frame->snapshot;validated.revision=rev;
+            validated.lastLayerNumber=result["history_layer_number"].toInt(-1);
+            result[edit==State::Edit::BatchMove?"move_history_reused":"placement_history_reused"]=true;
+        }
         else if(metadataOnly) {
             // Exact model/input comparison permits only metadata differences.
             // All geometry bytes come from the private validated publication;
@@ -295,8 +337,10 @@ class Service {
             if(metadata->contains("save_preview"))validated.savePreview=(*metadata)["save_preview"].toBool();
             if(metadata->contains("generate_auxiliary_reports"))validated.generateAuxiliaryReports=(*metadata)["generate_auxiliary_reports"].toBool();
         } else {
-            validated=validateArtifacts(result,stage.path(),id,rev,true);
+            validated=validateArtifacts(result,stage.path(),id,rev,true,pointEdit,timing,parsedSurface.get());
+            const double parsedMs=clock.nsecsElapsed()/1e6;
             if(!result["drawing_deferred"].toBool())publication_->retainValidatedArtifacts(stage.path());
+            if(timing)batchTimings["publication_retain_ms"]=clock.nsecsElapsed()/1e6-parsedMs;
         }
         const double validatedMs=clock.nsecsElapsed()/1e6;
         const QStringList keys{"scene","dxf","model","native_report","sections","surface"};
@@ -308,8 +352,10 @@ class Service {
             if(QFileInfo::exists(to)){write(to,read(from));return;}
             if(!QFile::rename(from,to))bad("Cannot publish validated artifact: "+to);
         };
-        for(const auto &key:keys){if(result[key].toString().isEmpty())continue;const auto from=result[key].toString(),to=directory+'/'+QFileInfo(from).fileName();promote(from,to);result[key]=to;}
-        promote(stage.filePath("native-input.json"),directory+"/native-input.json");
+        if(!prepareMove){
+            for(const auto &key:keys){if(result[key].toString().isEmpty())continue;const auto from=result[key].toString(),to=directory+'/'+QFileInfo(from).fileName();promote(from,to);result[key]=to;}
+            promote(stage.filePath("native-input.json"),directory+"/native-input.json");
+        }
         // An old adapter, if still alive for diagnostics, no longer represents
         // the committed revision after a native publication.
         synchronized_=false;
@@ -318,8 +364,16 @@ class Service {
         result["mesh_reused"]=frame||reused||publication_->meshReused();result["publication_prepare_ms"]=prepareMs;result["publication_ms"]=clock.nsecsElapsed()/1e6;
         // The transaction has already passed every checksum and parser. Reuse
         // that exact immutable result for the ensuing edit-specific ID checks.
-        validatedPublication_=std::make_unique<fs::ModelSnapshot>(std::move(validated));validatedResponse_=result;
-        if(placing||batchMove)rememberPointHistoryFrame();
+        validatedPublication_=std::make_unique<fs::ModelSnapshot>(std::move(validated));
+        if(changedPointEdit){
+            const double start=clock.nsecsElapsed()/1e6;
+            rememberPointHistoryFrame();
+            if(timing)batchTimings["publication_history_frame_ms"]=clock.nsecsElapsed()/1e6-start;
+        }
+        for(auto it=batchTimings.constBegin();it!=batchTimings.constEnd();++it)result[it.key()]=it.value();
+        // The caller's validation must still be able to recognise the exact receipt.
+        validatedResponse_=result;
+        if(prepareMove)stage.setAutoRemove(false); // Owned by the request workspace after validation.
         return result;
     }
     std::shared_ptr<fs::document::Hydrostatics> availableHydro() {
@@ -404,18 +458,53 @@ class Service {
         if(size_t(bindings["points"].toArray().size())!=fbm->controlPoints().size())bad("FBM/control point identity count mismatch");
         return {fbm,fbm,bindings,0};
     }
-    fs::ModelSnapshot validateArtifacts(const QJsonObject& r,const QString& directory,const QString& id,quint64 rev,bool native){
+    fs::ModelSnapshot validateArtifacts(const QJsonObject& r,const QString& directory,const QString& id,quint64 rev,bool native,bool batchMove=false,QJsonObject* timing=nullptr,
+                                        const fs::SnapshotSurface* parsedSurface=nullptr){
         if(native && validatedPublication_ && r==validatedResponse_ && validatedPublication_->documentId==id && validatedPublication_->revision==rev)
             return *validatedPublication_;
-        auto model=fs::ModelSnapshot::load(artifact(r,"model",directory));if(model.documentId!=id||model.revision!=rev)bad("Invalid model snapshot identity");
-        const bool deferred=r["drawing_deferred"].toBool();Scene scene;QByteArray dxf;
-        if(!deferred){scene=Scene::load(artifact(r,"scene",directory),false);dxf=read(artifact(r,"dxf",directory));if(!dxf.trimmed().endsWith("EOF"))bad("Incomplete DXF");}
-        if(native){auto report=json(read(artifact(r,"native_report",directory),1024*1024));auto sections=read(artifact(r,"sections",directory),256*1024*1024);
-            if(report["status"]!="pass"||report["engine"]!="cpp-native"||report["document_id"]!=id||integer(report["revision"],1)!=rev||(!deferred&&(report["scene_sha256"].toString().toLatin1()!=scene.digest||report["dxf_sha256"]!=digest(dxf)))||report["sections_sha256"]!=digest(sections))bad("Invalid computed document artifacts");
-            model.loadSectionDisplay(sections);
+        const auto modelPath=artifact(r,"model",directory);
+        const bool deferred=r["drawing_deferred"].toBool();
+        const bool parallel=batchMove&&QThread::idealThreadCount()>=4&&QFileInfo(modelPath).size()>=2*1024*1024;
+        QElapsedTimer part;
+        if(timing)part.start();
+        const auto mark=[&](const char* name){if(timing){timing->insert(QLatin1String(name),part.nsecsElapsed()/1e6);part.restart();}};
+        const auto drawing=[&]{
+            const auto scene=Scene::load(artifact(r,"scene",directory),false);
+            const auto dxf=read(artifact(r,"dxf",directory));
+            if(!dxf.trimmed().endsWith("EOF"))bad("Incomplete DXF");
+            return std::pair{scene.digest,native?digest(dxf):QString{}};
+        };
+        // The scene/DXF and the surface checksum are independent of the
+        // control graph. Join both lanes before accepting a publication.
+        std::future<std::pair<QByteArray,QString>> drawingJob;
+        if(parallel&&!deferred)drawingJob=std::async(std::launch::async,drawing);
+        auto model=parsedSurface?fs::ModelSnapshot::fromBytes(read(modelPath,256*1024*1024),parsedSurface):fs::ModelSnapshot::load(modelPath);
+        if(model.documentId!=id||model.revision!=rev)bad("Invalid model snapshot identity");
+        mark("publication_validate_model_ms");
+        const auto report=native?json(read(artifact(r,"native_report",directory),1024*1024)):QJsonObject{};
+        const auto checkedSurface=[&]{
             auto surface=read(artifact(r,"surface",directory),256*1024*1024);
             if(!report["surface_display"].toBool()||report["surface_sha256"]!=digest(surface))bad("Invalid surface display artifact");
-            model.verifySurfaceDisplay(surface);
+            return surface;
+        };
+        std::future<QByteArray> surfaceJob;
+        if(parallel&&native)surfaceJob=std::async(std::launch::async,checkedSurface);
+        if(!deferred){
+            const auto [scene,dxf]=drawingJob.valid()?drawingJob.get():drawing();
+            if(native&&(report["scene_sha256"].toString().toLatin1()!=scene||report["dxf_sha256"]!=dxf))bad("Invalid computed document artifacts");
+        }
+        mark("publication_validate_drawing_wait_ms");
+        if(native){
+            const auto sections=read(artifact(r,"sections",directory),256*1024*1024);
+            if(report["status"]!="pass"||report["engine"]!="cpp-native"||report["document_id"]!=id||integer(report["revision"],1)!=rev||report["sections_sha256"]!=digest(sections))bad("Invalid computed document artifacts");
+            model.loadSectionDisplay(sections);
+            mark("publication_validate_sections_ms");
+            const auto bytes=surfaceJob.valid()?surfaceJob.get():checkedSurface();
+            if(parsedSurface){
+                if(bytes!=parsedSurface->bytes())bad("Surface changed during publication");
+                model.verifyDecodedSurfaceDisplay(parsedSurface->object());
+            }else model.verifySurfaceDisplay(bytes);
+            mark("publication_validate_surface_ms");
         }
         return model;
     }
@@ -459,7 +548,7 @@ public:
                     for(const auto& value:bindings[kind].toArray()){const auto key=integer(value,1,limit);if(seen.contains(key))bad("Duplicate calculation ID");seen.insert(key);}
                 }
                 if(size_t(bindings["points"].toArray().size())!=engine->controlPoints().size())bad("Calculation point map mismatch");
-                stop();hydro_.reset();hydroSource_.reset();hydroBindings_={};publication_.reset();validatedPublication_.reset();validatedResponse_={};
+                stop();scopedHydro_.reset();scopeIds_={};hydro_.reset();hydroSource_.reset();hydroBindings_={};publication_.reset();validatedPublication_.reset();validatedResponse_={};
                 pointHistoryFrames_.clear();document_=id;revision_=rev;history_={State{engine,engine,bindings,0}};index_=0;cleanToken_=0;nextToken_=0;
                 highWater_=high;plateContext_=bindings["plate_context"].toObject();calculationCacheRevision_=integer(request["calculation_cache_revision"],1,rev);
                 result["ok"]=true;result["calculation_snapshot"]=true;result["calculation_cache_revision"]=double(calculationCacheRevision_);state(result);return result;
@@ -617,13 +706,26 @@ public:
             else if(method=="document_status"){
                 result["fbm"]=current().saved->inspect();result["fbm_sha256"]=digest(current().saved->bytes());
             }else if(method=="hydrostatics"||method=="hydro_defaults"){
-                bool reused=hydro_ && hydro_->updateCompatibleSource(*current().engine,current().bindings);
+                const bool scoped=method=="hydrostatics"&&request.contains("layer_ids");
+                auto solver=hydro_;
+                bool reused=false;
+                if(scoped){
+                    const auto ids=request.value("layer_ids");
+                    reused=scopedHydro_&&scopeIds_==ids&&scopedHydro_->updateCompatibleSource(*current().engine,current().bindings);
+                    if(!reused){
+                        scopedHydro_=std::make_shared<fs::document::Hydrostatics>(*current().engine,current().bindings,ids);
+                        scopeIds_=ids;
+                    }
+                    solver=scopedHydro_;
+                }else{
+                reused=hydro_ && hydro_->updateCompatibleSource(*current().engine,current().bindings);
                 if(!reused && publication_) {
                     auto shared=publication_->hydrostatics();
                     if(shared->updateCompatibleSource(*current().engine,current().bindings)){hydro_=std::move(shared);reused=true;}
                 }
                 if(!reused)hydro_=std::make_shared<fs::document::Hydrostatics>(*current().engine,current().bindings);
-                hydroSource_=current().engine;hydroBindings_=current().bindings;
+                hydroSource_=current().engine;hydroBindings_=current().bindings;solver=hydro_;
+                }
                 if(method=="hydro_defaults"){
                     auto defaults=hydro_->defaults(current().bindings["fbm_encoding"].toString());
                     for(const auto* mode:{"single","table","cross"}){
@@ -641,7 +743,8 @@ public:
                             {"document_id",document_},{"revision",double(revision_)},{"completed",completed},{"total",total}}).toJson(QJsonDocument::Compact);
                         std::cout.write(notice.constData(),notice.size());std::cout<<'\n'<<std::flush;
                     };
-                    auto report=hydro_->calculate(request,directory+"/cancel.flag",progress);
+                    auto report=solver->calculate(request,directory+"/cancel.flag",progress);
+                    if(scoped)report["layer_ids"]=request["layer_ids"];
                     report["document_id"]=document_;report["revision"]=double(revision_);report["mesh_reused"]=reused;
                     const auto filename=directory+"/hydro.json";write(filename,QJsonDocument(report).toJson(QJsonDocument::Compact));result["hydro"]=filename;
                 }
@@ -683,10 +786,13 @@ public:
                 result["cad"]=filename;result["analysis_engine"]="cpp-cad";
             }else if(method=="develop_plates"){
                 const auto directory=output(request);
-                auto report=fs::document::developPlates(*current().engine,current().bindings,plateContext_,directory+"/cancel.flag");
+                const bool profile=request["profile_stages"].toBool();
+                QJsonObject timings;
+                auto report=fs::document::developPlates(*current().engine,current().bindings,plateContext_,directory+"/cancel.flag",profile?&timings:nullptr,request.value("layer_ids"));
                 report["document_id"]=document_;report["revision"]=double(revision_);
                 const auto filename=directory+"/plates.json";write(filename,QJsonDocument(report).toJson(QJsonDocument::Compact));
                 result["plates"]=filename;result["analysis_engine"]="cpp-plates";
+                if(profile)result["plate_stage_ms"]=timings;
             }else if(method=="undo"||method=="redo"){
                 if(revision_==MaxInteger)bad("Revision limit reached");
                 if((method=="undo"&&index_==0)||(method=="redo"&&index_+1>=history_.size()))bad("No "+method+" state available");
@@ -708,7 +814,7 @@ public:
                 const bool changed=edited->bytes()!=current().engine->bytes();
                 const double editMs=editTimer.nsecsElapsed()/1e6;
                 if(changed){
-                    State next{edited,edited,current().bindings,0};if(method=="move_points")next.edit=State::Edit::BatchMove;next.bindings["revision"]=double(revision_+1);
+                    State next{edited,edited,current().bindings,0};next.edit=State::Edit::BatchMove;next.bindings["revision"]=double(revision_+1);
                     auto response=materialized(next,request);
                     auto model=validateArtifacts(response,directory,document_,revision_+1,native);
                     const auto ids=next.bindings["points"].toArray();QHash<quint64,qsizetype> indices;
@@ -839,6 +945,7 @@ public:
                 }
                 result["edit_engine"]=analysis?"cpp-analysis-settings":background?"cpp-background":auxiliary?"cpp-auxiliary":project?"cpp-project":definitions?"cpp-definitions":lackenby?"cpp-lackenby":transform?"cpp-transforms":attributes?"cpp-attributes":faceTools?"cpp-face-tools":"cpp-topology";
                 result["fbm_write_engine"]=analysis?"cpp-analysis-settings-writer":background?"cpp-background-writer":auxiliary?"cpp-auxiliary-writer":project?"cpp-project-writer":definitions?"cpp-definition-writer":lackenby?"cpp-coordinate-writer":transform?"cpp-transform-writer":attributes?"cpp-attribute-writer":"cpp-control-net-writer";
+                if(method=="topology"&&operation=="add_point")result["point_placement"]=true;
                 result[analysis?"analysis_edit_ms":background?"background_edit_ms":auxiliary?"auxiliary_edit_ms":project?"project_edit_ms":definitions?"definition_edit_ms":lackenby?"lackenby_edit_ms":transform?"transform_edit_ms":attributes?"attribute_edit_ms":faceTools?"face_tools_edit_ms":"topology_edit_ms"]=editMs;result["adapter_operation"]=native?"none":candidate.changed?"restore_document":"snapshot";
             }else if(method=="snapshot" && native){
                 result=snapshot(request);

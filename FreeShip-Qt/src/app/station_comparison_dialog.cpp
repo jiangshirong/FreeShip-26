@@ -266,7 +266,11 @@ StationComparisonDialog::StationComparisonDialog(std::shared_ptr<const fs::Model
         chipPanel->setSizePolicy(policy);
         chips_=new StudioFlowLayout;chipPanel->setLayout(chips_);
         sourceBar->addWidget(chipPanel,1);
-        browse_=new QPushButton(uiText("从文件选择船模…"));browse_->setObjectName("ComparisonBrowse");
+        browse_=new QPushButton;browse_->setObjectName("ComparisonBrowse");
+        const auto refreshBrowse=[button=browse_]{
+            setStudioFormatButton(button,"FBM",uiText("从文件选择船模…"));
+        };
+        refreshBrowse();bindUiRefresh(browse_,refreshBrowse);
         sourceBar->addWidget(browse_,0,Qt::AlignTop);browse_->setEnabled(false);
         connect(browse_,&QPushButton::clicked,this,[this]{
             const auto files=studioOpenFiles(this,uiText("打开船模"),{},QString(uiText("船模文件"))+" (*.fbm)");

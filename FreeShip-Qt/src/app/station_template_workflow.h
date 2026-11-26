@@ -15,6 +15,7 @@
 #include <QEventLoop>
 #include <QFileDialog>
 #include <QHeaderView>
+#include <QHelpEvent>
 #include <QJsonArray>
 #include <QKeyEvent>
 #include <QLabel>
@@ -304,14 +305,19 @@ inline QJsonObject observeStationExport(SectionDialog& editor,const QString& fol
     launch->click();
     auto* dialog=editor.findChild<QDialog*>("StationTemplates");
     if(!dialog) throw std::runtime_error("Station export dialog did not open");
+    if(cmd["measure_station_shell"].toBool())dialog->setProperty("measure_station_shell",true);
     dialog->findChild<QComboBox*>("FrameContourType")->setCurrentIndex(cmd.contains("kit")?2:cmd["thickness"].toDouble()>0?1:0);
     QJsonObject evidence;
-    if(cmd.contains("kit")){
-        const auto kit=cmd["kit"].toObject();
-        const auto positions=kit["positions"].toArray();
-        dialog->findChild<QDoubleSpinBox*>("KitStock")->setValue(kit["KitStock"].toDouble());
-        auto* grid=dialog->findChild<QTableWidget*>("KitStations");
-        auto* add=dialog->findChild<QToolButton*>("KitAddStation");
+    if(cmd.contains("kit")||cmd.contains("mould")){
+        const bool kit=cmd.contains("kit");
+        const auto key=kit?QStringLiteral("kit"):QStringLiteral("mould");
+        const auto edits=cmd[key].toObject();
+        const auto positions=edits["positions"].toArray();
+        const auto prefix=kit?QStringLiteral("Kit"):QStringLiteral("Mould");
+        if(kit)dialog->findChild<QDoubleSpinBox*>("KitStock")->setValue(edits["KitStock"].toDouble());
+        auto* grid=dialog->findChild<QTableWidget*>(prefix+"Stations");
+        auto* add=dialog->findChild<QToolButton*>(prefix+"AddStation");
+        if(!grid||!add||!grid->isVisibleTo(dialog))throw std::runtime_error("Missing active station table");
         const auto captureStations=[grid]{
             QJsonArray rows;
             for(int row=0;row<grid->rowCount();++row){
@@ -321,9 +327,9 @@ inline QJsonObject observeStationExport(SectionDialog& editor,const QString& fol
             }
             return rows;
         };
-        evidence["kit_stations_before"]=captureStations();
-        const auto removeAt=[grid](int row)->QToolButton*{
-            for(auto* button:grid->findChildren<QToolButton*>("KitRemoveStation")){
+        evidence[key+"_stations_before"]=captureStations();
+        const auto removeAt=[grid,prefix](int row)->QToolButton*{
+            for(auto* button:grid->findChildren<QToolButton*>(prefix+"RemoveStation")){
                 const auto index=grid->indexAt(button->geometry().center());
                 if(button->isVisibleTo(grid)&&index.row()==row&&index.column()==0)return button;
             }
@@ -356,13 +362,23 @@ inline QJsonObject observeStationExport(SectionDialog& editor,const QString& fol
             if(grid->rowCount()!=count+1)throw std::runtime_error("Station insertion failed");
             commit(row,x);
         };
-        if(kit.contains("remove_row"))remove(kit["remove_row"].toInt());
-        if(kit.contains("insert_x"))insert(kit["insert_row"].toInt(),kit["insert_x"].toDouble());
-        if(kit.contains("positions")){
+        if(edits.contains("remove_row"))remove(edits["remove_row"].toInt());
+        if(edits.contains("insert_x"))insert(edits["insert_row"].toInt(),edits["insert_x"].toDouble());
+        if(edits.contains("positions")){
             while(grid->rowCount()>0)remove(grid->rowCount()-1);
             for(const auto x:positions)insert(grid->rowCount(),x.toDouble());
         }
-        evidence["kit_stations_after"]=captureStations();
+        const auto beforeSwitch=captureStations();
+        evidence[key+"_stations_after"]=beforeSwitch;
+        if(edits["check_switch"].toBool()){
+            auto* mode=dialog->findChild<QComboBox*>("FrameContourType");
+            auto* other=dialog->findChild<QTableWidget*>(kit?"MouldStations":"KitStations");
+            const int count=other->rowCount();
+            mode->setCurrentIndex(kit?1:2);
+            const bool switched=other->isVisibleTo(dialog)&&!grid->isVisibleTo(dialog);
+            mode->setCurrentIndex(kit?2:1);
+            evidence["station_tables_keep_separate_edits"]=switched&&other->rowCount()==count&&captureStations()==beforeSwitch;
+        }
     }
     if(cmd.contains("layer")) dialog->findChild<QComboBox*>("FrameLayer")->setCurrentIndex(cmd["layer"].toInt()+1);
     QElapsedTimer previewElapsed;
@@ -375,6 +391,7 @@ inline QJsonObject observeStationExport(SectionDialog& editor,const QString& fol
     auto status=[&]()->QLabel*{for(auto* l:dialog->findChildren<QLabel*>())if(l->property("studio_message_busy").isValid())return l;return nullptr;};
     wait([&]{return status()&&!status()->property("studio_message_busy").toBool();});
     evidence["preview_elapsed_ms"]=double(previewElapsed.elapsed());
+    if(cmd["measure_station_shell"].toBool())evidence["shell_profile"]=dialog->property("station_shell_profile").toJsonArray();
     if(cmd["exercise_preview_motion"].toBool()){
         const auto oldMotion=qApp->property("studio_motion_enabled");
         qApp->setProperty("studio_motion_enabled",true);
@@ -427,6 +444,24 @@ inline QJsonObject observeStationExport(SectionDialog& editor,const QString& fol
     const bool enabled=dialog->findChild<QAbstractButton*>("FrameDxf")->isEnabled();evidence["export_enabled"]=enabled;
     evidence["pdf_enabled"]=dialog->findChild<QAbstractButton*>("FramePdf")->isEnabled();
     if(cmd["capture_warning"].toBool()){
+        const auto mode=dialog->findChild<QComboBox*>("FrameContourType")->currentIndex();
+        auto* grid=dialog->findChild<QTableWidget*>(mode==2?"KitStations":"MouldStations");
+        QJsonArray states;
+        if(grid&&grid->isVisibleTo(dialog))for(int row=0;row<grid->rowCount();++row){
+            auto* cell=grid->item(row,2);
+            const auto reason=cell->toolTip();
+            QString hover;
+            if(!reason.isEmpty()){
+                const auto point=grid->visualItemRect(cell).center();
+                QHelpEvent help(QEvent::ToolTip,point,grid->viewport()->mapToGlobal(point));
+                QApplication::sendEvent(grid->viewport(),&help);
+                hover=QToolTip::isVisible()?QToolTip::text():QString{};
+                QToolTip::hideText();
+            }
+            states.append(QJsonObject{{"number",grid->item(row,0)->text().toInt()},
+                {"warning",!cell->icon().isNull()},{"reason",reason},{"hover",hover}});
+        }
+        evidence["station_status"]=states;
         auto* preview=dialog->findChild<QWidget*>("StationTemplatePreview");
         const auto image=preview->grab().toImage();
         int diagnosticPixels=0,outlinePixels=0;

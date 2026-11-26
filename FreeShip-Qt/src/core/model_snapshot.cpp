@@ -2,6 +2,7 @@
 #include "model_snapshot.h"
 #include "principal_dimensions.h"
 #include "snapshot_sha256.h"
+#include "snapshot_surface.h"
 #include <QFile>
 #include <QJsonArray>
 #include <QJsonDocument>
@@ -92,24 +93,37 @@ QJsonObject surfaceGeometry(const QJsonObject& root) {
 }
 }
 
+static void checkDecodedSurface(const QJsonObject& root,const QJsonObject& expected) {
+    if (root["format"]!="FreeShipSurfaceDisplay" || root["version"]!=1 ||
+        !root["triangles"].isArray() || !root["surface_normals"].isArray() || !root["control_curves"].isArray() ||
+        surfaceGeometry(root)!=expected)
+        invalid("native surface geometry does not match snapshot");
+}
 static QJsonObject checkedSurfaceDisplay(const QByteArray& data,const QJsonObject& expected) {
     if(data.size()>maxSnapshotBytes)invalid("surface display exceeds file size limit");
     QJsonParseError error;
     const auto doc=QJsonDocument::fromJson(data,&error);
     const auto root=doc.object();
-    if (error.error!=QJsonParseError::NoError || !doc.isObject() ||
-        root["format"]!="FreeShipSurfaceDisplay" || root["version"]!=1 ||
-        !root["triangles"].isArray() || !root["surface_normals"].isArray() || !root["control_curves"].isArray() ||
-        surfaceGeometry(root)!=expected)
+    if (error.error!=QJsonParseError::NoError || !doc.isObject())
         invalid("native surface geometry does not match snapshot");
+    checkDecodedSurface(root,expected);
     return root;
 }
 void ModelSnapshot::verifySurfaceDisplay(const QByteArray& data) const {
     checkedSurfaceDisplay(data,surfaceGeometry_);
 }
+void ModelSnapshot::verifyDecodedSurfaceDisplay(const QJsonObject& root) const {
+    checkDecodedSurface(root,surfaceGeometry_);
+}
 
 void ModelSnapshot::loadSurfaceDisplay(const QByteArray& data) {
-    const auto root=checkedSurfaceDisplay(data,surfaceGeometry_);
+    applySurfaceTopology(checkedSurfaceDisplay(data,surfaceGeometry_));
+}
+void ModelSnapshot::loadDecodedSurfaceDisplay(const SnapshotSurface& display) {
+    const auto& root=display.object();checkDecodedSurface(root,surfaceGeometry_);
+    applySurfaceTopology(root);
+}
+void ModelSnapshot::applySurfaceTopology(const QJsonObject& root) {
     if(!root.contains("analysis_topology")){surfaceTopology.reset();return;}
     const auto topology=object(root["analysis_topology"],"analysis_topology");
     auto result=std::make_shared<SurfaceTopology>();
@@ -176,13 +190,15 @@ ModelSnapshot ModelSnapshot::load(const QString& filename) {
     if (file.error() != QFile::NoError) invalid("cannot read " + filename + ": " + file.errorString());
     return fromBytes(data);
 }
-ModelSnapshot ModelSnapshot::fromBytes(const QByteArray& data) {
+ModelSnapshot ModelSnapshot::fromBytes(const QByteArray& data,const SnapshotSurface* alreadyDecoded) {
     if(data.size()<2||data.size()>maxSnapshotBytes)invalid("file size is outside the supported range");
-    QJsonParseError error;
-    const auto json = QJsonDocument::fromJson(data, &error);
-    if (error.error != QJsonParseError::NoError || !json.isObject())
-        invalid("JSON parse failed: " + error.errorString());
-    const auto root = json.object();
+    const auto root=[&]{
+        if(alreadyDecoded)if(auto decoded=alreadyDecoded->decodeModel(data))return *decoded;
+        QJsonParseError error;
+        const auto json=QJsonDocument::fromJson(data,&error);
+        if(error.error!=QJsonParseError::NoError||!json.isObject())invalid("JSON parse failed: "+error.errorString());
+        return json.object();
+    }();
     if (string(root["format"], "format") != "FreeShipModelSnapshot" || integer(root["version"], "version") != 1)
         invalid("unsupported format or version");
     ModelSnapshot result;
@@ -221,6 +237,11 @@ ModelSnapshot ModelSnapshot::fromBytes(const QByteArray& data) {
     result.waterlineZ = number(settings["waterline_z"], "settings.waterline_z");
     result.shadeUnderwater = boolean(settings["shade_underwater"], "settings.shade_underwater");
     result.underwaterColor = static_cast<quint32>(integer(settings["underwater_color"], "settings.underwater_color", 0, 0xffffff));
+    const auto underwaterDisplay=root["underwater_display"].toObject();
+    if(underwaterDisplay.contains("shade"))
+        result.underwaterShadeOverride=boolean(underwaterDisplay["shade"],"underwater_display.shade");
+    if(underwaterDisplay.contains("color"))
+        result.underwaterColorOverride=quint32(integer(underwaterDisplay["color"],"underwater_display.color",0,0xffffff));
     if(settings.contains("underwater_color_alpha"))result.underwaterColorAlpha=integer(settings["underwater_color_alpha"],"settings.underwater_color_alpha",0,255);
     if(settings.contains("generate_auxiliary_reports"))result.generateAuxiliaryReports=boolean(settings["generate_auxiliary_reports"],"settings.generate_auxiliary_reports");
     const auto pointArray = array(root["control_points"], "control_points", 1000000);
@@ -388,7 +409,7 @@ ModelSnapshot ModelSnapshot::fromBytes(const QByteArray& data) {
         overlay.gridFontColor=quint32(integer(o["grid_font_color"],"overlay.grid_font_color",0,0xffffff));
         overlay.hydroColor=quint32(integer(o["hydro_color"],"overlay.hydro_color",0,0xffffff));
         overlay.pointSize=int(integer(o["point_size"],"overlay.point_size",1,100));
-        overlay.fontSize=int(integer(o["font_size"],"overlay.font_size",1,100));
+        overlay.fontSize=int(integer(o["font_size"],"overlay.font_size",1,200));
         auto h=object(o["hydro"],"overlay.hydro");overlay.hydroAvailable=boolean(h["available"],"hydro.available");QSet<QString> keys;
         for(auto item:array(h["markers"],"hydro.markers",32)){
             auto m=object(item,"hydro.marker");auto key=string(m["key"],"hydro.key");
@@ -404,9 +425,107 @@ ModelSnapshot ModelSnapshot::fromBytes(const QByteArray& data) {
     }
     result.validate();
     if(data.size()<=64LL*1024*1024) {
-        result.metadata_=SnapshotMetadata::capture(data,root["settings"].toObject(),result.name);result.sourceDigest_=QCryptographicHash::hash(data,QCryptographicHash::Sha256).toHex();
+        result.metadata_=SnapshotMetadata::capture(data,root["settings"].toObject(),result.name);result.sourceDigest_=snapshotSha256(data);
     }
     return result;
+}
+
+namespace {
+constexpr std::array<const char*,2> displayArrayNames{"surface_normals","triangles"};
+}
+std::optional<SnapshotSurface::Spans> SnapshotSurface::displayArrays(QByteArrayView bytes) {
+    // Both producers use compact JSON. Other encodings simply take the full
+    // JSON parser/serializer path. Only accept named, top-level arrays.
+    if(bytes.size()<2||bytes.front()!='{'||bytes.back()!='}')return {};
+    Spans found{{{-1,-1},{-1,-1}}};
+    const auto* data=bytes.data();
+    const auto* end=data+bytes.size()-1;
+    const auto quote=[&](const char*& p){
+        while(p<end){
+            if(*p=='"'){++p;return true;}
+            if(*p=='\\'){++p;if(p==end)return false;}
+            ++p;
+        }
+        return false;
+    };
+    for(auto p=data+1;p<end;){
+        if(*p++!='"')return {};
+        const auto* keyStart=p;
+        if(!quote(p))return {};
+        const QByteArrayView key(keyStart,p-keyStart-1);
+        if(key.contains('\\'))return {};
+        if(p==end||*p++!=':')return {};
+        const auto* value=p;
+        int nested=0;
+        for(;p<end;){
+            const char c=*p;
+            if(nested==0&&c==',')break;
+            ++p;
+            if(c=='"'){if(!quote(p))return {};}
+            else if(c=='['||c=='{')++nested;
+            else if(c==']'||c=='}'){if(--nested<0)return {};}
+        }
+        if(nested!=0||value==p)return {};
+        for(size_t i=0;i<found.size();++i)if(key==QByteArrayView(displayArrayNames[i])){
+            if(found[i].first!=-1||*value!='['||p[-1]!=']')return {};
+            found[i]={value-data,p-value};
+        }
+        if(p<end)++p;
+    }
+    if(found[0].first<0||found[1].first<0)return {};
+    return found;
+}
+QByteArray SnapshotSurface::splice(QByteArrayView document,const Spans& fields,const std::array<QByteArrayView,2>& values) {
+    const auto size=document.size()-fields[0].second-fields[1].second+values[0].size()+values[1].size();
+    if(size>maxSnapshotBytes)invalid("file size is outside the supported range");
+    QByteArray out;out.reserve(size);qsizetype start=0;
+    const size_t first=fields[0].first<fields[1].first?0:1;
+    for(size_t i:{first,1-first}){
+        const auto [pos,length]=fields[i];
+        out.append(document.data()+start,pos-start);
+        out.append(values[i].data(),values[i].size());
+        start=pos+length;
+    }
+    out.append(document.data()+start,document.size()-start);
+    return out;
+}
+SnapshotSurface SnapshotSurface::parse(QByteArray bytes) {
+    if(bytes.size()>maxSnapshotBytes)invalid("surface display exceeds file size limit");
+    QJsonParseError error;
+    const auto document=QJsonDocument::fromJson(bytes,&error);
+    if(error.error!=QJsonParseError::NoError||!document.isObject())invalid("surface display JSON");
+    SnapshotSurface result;
+    result.object_=document.object();result.arrays_=displayArrays(bytes);result.bytes_=std::move(bytes);
+    return result;
+}
+QByteArray SnapshotSurface::encodeModel(const QJsonObject& model) const {
+    if(arrays_&&model[displayArrayNames[0]]==object_[displayArrayNames[0]]&&
+       model[displayArrayNames[1]]==object_[displayArrayNames[1]]){
+        auto scaffold=model;
+        for(const char* name:displayArrayNames)scaffold[name]=QJsonArray{};
+        const auto bytes=QJsonDocument(scaffold).toJson(QJsonDocument::Compact);
+        if(const auto fields=displayArrays(bytes)){
+            std::array<QByteArrayView,2> values;
+            for(size_t i=0;i<values.size();++i){const auto [pos,size]=arrays_->at(i);values[i]=QByteArrayView(bytes_).sliced(pos,size);}
+            return splice(bytes,*fields,values);
+        }
+    }
+    return QJsonDocument(model).toJson(QJsonDocument::Compact);
+}
+std::optional<QJsonObject> SnapshotSurface::decodeModel(const QByteArray& bytes) const {
+    if(!arrays_)return {};
+    const auto fields=displayArrays(bytes);
+    if(!fields)return {};
+    for(size_t i=0;i<fields->size();++i){
+        const auto [pos,size]=fields->at(i);
+        const auto [source,sourceSize]=arrays_->at(i);
+        if(QByteArrayView(bytes).sliced(pos,size)!=QByteArrayView(bytes_).sliced(source,sourceSize))return {};
+    }
+    auto doc=QJsonDocument::fromJson(splice(bytes,*fields,{QByteArrayView("[]"),QByteArrayView("[]")}));
+    if(!doc.isObject())return {};
+    auto model=doc.object();
+    for(const char* name:displayArrayNames)model[name]=object_[name];
+    return model;
 }
 
 
@@ -461,7 +580,8 @@ ModelSnapshot ModelSnapshot::fromDisplayCache(const QByteArray& bytes,const QStr
     model.validate();model.cachedPreview_=true;model.metadata_={};model.surfaceGeometry_={};return model;
 }
 
-ModelSnapshot ModelSnapshot::withMetadata(const QJsonObject &patch,const QString &document,quint64 nextRevision) const {
+ModelSnapshot ModelSnapshot::withMetadata(const QJsonObject &patch,const QString &document,quint64 nextRevision,
+                                          std::optional<int> historyLayer) const {
     if(metadata_.empty()||document!=documentId||!nextRevision||nextRevision>maxJsonInteger)invalid("metadata base identity");
     ModelSnapshot result=*this;
     for(auto it=patch.begin();it!=patch.end();++it) {
@@ -474,7 +594,8 @@ ModelSnapshot ModelSnapshot::withMetadata(const QJsonObject &patch,const QString
         else if(k=="generate_auxiliary_reports")result.generateAuxiliaryReports=boolean(v,k);
         else invalid("unsupported metadata field");
     }
-    result.revision=nextRevision;result.metadata_=metadata_.updated(patch,nextRevision);
+    if(historyLayer){if(!patch.isEmpty()||*historyLayer< -1)invalid("invalid history layer");result.lastLayerNumber=*historyLayer;}
+    result.revision=nextRevision;result.metadata_=metadata_.updated(patch,nextRevision,historyLayer);
     result.sourceDigest_=snapshotSha256(result.metadata_.bytes());return result;
 }
 

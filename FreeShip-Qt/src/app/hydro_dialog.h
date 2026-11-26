@@ -10,6 +10,7 @@ namespace report {class Browser;struct PdfTableLayout;}
 namespace loadingEditor {class Workspace;}
 class StudioMessage;
 class QStackedWidget;class QButtonGroup;
+class CalculationLayers;
 class HydroDialog final:public QDialog {
 public:
     HydroDialog(ModelSession& session,const QString& mode,const QJsonObject& defaults,bool hidden,QWidget* parent);
@@ -29,6 +30,7 @@ public:
 protected:
     void changeEvent(QEvent*) override;
 private:
+    CalculationLayers* layerChoice_=nullptr;
     QJsonObject loadingBook_;loadingEditor::Workspace* loadingEditor_=nullptr;QTableWidget* comparison_=nullptr;
     bool useLoadingBook_=false;
     QMap<QString,QWidget*> loadingFields_;

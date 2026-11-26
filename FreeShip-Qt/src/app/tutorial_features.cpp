@@ -37,12 +37,12 @@ constexpr int framesPerStep=3*framesPerSecond;
 const QList<Chapter> chapters{
     {"自动识别折痕","creases","CreaseEdge","导入 OBJ 时，勾选「自动识别折痕」，就能自动识别折痕边。",
      {"导入船体网格","看两个面交界的折角","辨认会保留的尖角"}},
-    {"光顺重建船型","rebuild","Wireframe","导入 OBJ 时，可选「光顺重建船型」。",
-     {"导入原始网格","重建整艘船面","对照重建前后"}},
+    {"拟合船体曲面","rebuild","Wireframe","从 OBJ 网格建立控制网格，调整控制点，让细分后的船面贴合原网格。",
+     {"在原网格上取样","建立初始控制网","细分并拟合船面"}},
     {"比较船模","compare","LinesPlan","用「比较船模」查看微调船型后，吃水和排水量变了多少。",
      {"复制船模","只修改副本","固定吃水","固定装载","比较吃水变化"}},
-    {"导出横剖面图","templates","ExportFile","在「剖面线」窗口可导出船体横剖线、造模样板轮廓或插接模架。",
-     {"船体横剖线","造模样板轮廓","插接模架","按站号插合","沿横板铺外板","A4 拼页",
+    {"导出横剖面图","templates","ExportFile","在「剖面线」窗口可导出船体横剖线、造模样板或插接模架。",
+     {"船体横剖线","造模样板","插接模架","按站号插合","沿横板铺外板","A4 拼页",
       "无需裁剪","剪下第 2 页的裁切边","对齐十字并贴合"}},
     {"横剖线对照","reference","Sections","导入参考曲线，与当前船模的横剖线对照。",
      {"导入参考线","从船模剖出横剖线","查看最大偏差"}},
@@ -285,21 +285,12 @@ private:
                 {{uiText("已设为折痕"),QColor("#734a24"),QPen(QColor("#efad54"),2.2)}});
         }
         if(clip_=="rebuild"){
-            const auto spread=step==2?ease((t-.05)/.87):0.;
-            const auto fitted=step==0?0.:step==1?ease((t-.06)/.86):1.;
-            const qreal rebuiltX=320.+165.*spread;
-            const qreal comparisonWidth=std::min(270.,rebuiltX-155.-12.);
-            painter.setPen(QColor("#315e7b"));
-            if(step<2){
-                painter.setOpacity(1.-ease(fitted/.48));
-                label(320.-165.*fitted,232,270,30,uiText("原始 OBJ 网格"));
-            }else{
-                painter.setOpacity(ease((spread-.45)/.55));
-                label(155,232,comparisonWidth,30,uiText("原始 OBJ 网格"));
-            }
+            const char* const stages[]={"原始 OBJ 网格","建立初始控制网","细分并拟合船面"};
             painter.setPen(QColor("#08796f"));
-            painter.setOpacity(step==1?ease((fitted-.48)/.52):fitted);
-            label(rebuiltX,232,step==2?comparisonWidth:270.,30,uiText("重建后的船面"));
+            label(216,232,280,34,uiText(stages[step]));
+            painter.setOpacity(step==0?ease(t/.45):1.);
+            painter.setPen(QColor("#315e7b"));
+            label(527,232,180,34,uiText(step==2?"重建前后剖面对照":"剖面取样示意"));
         }
         if(clip_=="reference"){
             const auto section=step==1?ease((t-.12)/.53):0.;
@@ -331,7 +322,7 @@ private:
             };
             switch(part){
                 case 0: caption(516,25,230,uiText("横剖线","tutorial.section"));break;
-                case 1: caption(320,26,500,uiText("造模样板轮廓"));break;
+                case 1: caption(320,26,500,uiText("造模样板"));break;
                 case 2: caption(320,25,500,uiText("插接模架"));break;
                 case 5:
                     caption(320,26,610,uiText("A4 拼页有「无需裁剪」和「需裁剪」两种方式。"));

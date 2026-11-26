@@ -1,3 +1,4 @@
+#include "calculation_layers.h"
 #include "app/ui_language.h"
 #include "preferences_store.h"
 #include "plates_dialog.h"
@@ -244,7 +245,8 @@ PlatesDialog::PlatesDialog(ModelSession& session,bool hidden,QWidget* parent):QD
     tools->addWidget(rotationPresets_);rotationPresets_->hide();tools->addStretch();
     connect(this,&QDialog::finished,rotationPresets_,&QWidget::hide);
     auto* splitter=new QSplitter(this);layout->addWidget(splitter,1);
-    auto* sidebar=new QWidget;auto* side=new QVBoxLayout(sidebar);list_=new QListWidget;list_->setMinimumHeight(110);side->addWidget(list_,1);
+    auto* sidebar=new QWidget;auto* side=new QVBoxLayout(sidebar);list_=new QListWidget;list_->setMinimumHeight(110);layerChoice_=new CalculationLayers(CalculationLayers::Plates);layerChoice_->setMaximumHeight(230);
+    side->addWidget(layerChoice_);side->addWidget(list_,1);list_->hide();
     auto toggle=[&](QString text,QString field,bool checked){auto*c=new QCheckBox(text);c->setChecked(checked);c->setProperty("plate_display",field);side->addWidget(c);connect(c,&QCheckBox::toggled,this,[this]{updateItems();});return c;};
     fill_=toggle(uiText("填色"),"fill",true);submerged_=toggle(uiText("水下着色"),"submerged",true);interior_=toggle(uiText("内部边"),"interior",false);errors_=toggle(uiText("边长误差：红色伸长，蓝色缩短"),"errors",false);
     names_=toggle(uiText("板片名称"),"names",true);dimensions_=toggle(uiText("角点坐标（当前布局）"),"dimensions",false);boxes_=toggle(uiText("包围框"),"boxes",false);
@@ -262,7 +264,7 @@ PlatesDialog::PlatesDialog(ModelSession& session,bool hidden,QWidget* parent):QD
     metrics_->setStyleSheet("QTableWidget#PlateMetrics{background:#ffffff;border:1px solid #d8e2dc;border-radius:6px;color:#24463d} QTableWidget#PlateMetrics::item{border:0;border-bottom:1px solid #edf1ee;padding:5px 7px;} QTableWidget#PlateMetrics QHeaderView::section{background:#eef3f0;border:0;padding:6px;color:#365e50;}");
     metrics_->hide();side->addWidget(metrics_);
     diagnosticNote_=new StudioMessage(StudioMessageRole::Warning);diagnosticNote_->hide();side->addWidget(diagnosticNote_);
-    plateNote_=new StudioMessage(StudioMessageRole::Explanation,uiText("仅展开已勾选“可展开曲面”的图层。展开误差不等于材料成形余量。"));side->addWidget(plateNote_);
+    plateNote_=new StudioMessage(StudioMessageRole::Explanation,uiText("展开误差不等于材料成形余量。"));side->addWidget(plateNote_);
     auto* scroll=new QScrollArea;scroll->setWidgetResizable(true);scroll->setWidget(sidebar);scroll->setMinimumWidth(360);splitter->addWidget(scroll);
     scene_=new PlateScene(this);view_=new PlateView(scene_,this);view_->setTransformationAnchor(QGraphicsView::NoAnchor);view_->setRenderHints(QPainter::Antialiasing|QPainter::TextAntialiasing);splitter->addWidget(view_);splitter->setSizes({400,900});
     status_=new StudioMessage(StudioMessageRole::Feedback);status_->enableMathNotation();status_->setObjectName("PlateStatus");layout->addWidget(status_);
@@ -427,13 +429,27 @@ PlatesDialog::PlatesDialog(ModelSession& session,bool hidden,QWidget* parent):QD
     };
     connect(list_,&QListWidget::currentRowChanged,this,&PlatesDialog::select);
     connect(list_,&QListWidget::itemChanged,this,[this](QListWidgetItem* item){if(updating_||!data_)return;data_->plates[list_->row(item)].visible=item->checkState()==Qt::Checked;if(item==list_->currentItem()&&item->checkState()!=Qt::Checked)rotationPresets_->hide();updateItems();refreshDiagnosticFaces();});
+    layerChoice_->changed=[this]{
+        const QSignalBlocker block(list_);
+        static_cast<PlateView*>(view_)->cancelRotation();
+        scene_->clear();items_.clear();list_->clear();list_->hide();data_.reset();resultModel_.reset();metrics_->hide();
+        refreshDiagnosticFaces();
+        generateIfNeeded();
+    };
     refreshState();
 }
 void PlatesDialog::generateIfNeeded(){
     if(session_.busy()||(hasResult()&&failure_.isEmpty()&&session_.calculationSnapshotCurrent()))return;
     failure_.clear();
+    layerChoice_->setModel(session_.model());
+    const auto ids=layerChoice_->selected();
+    if(ids.isEmpty()){
+        status_->setMessage(uiText("没有可展开的板片。请确认所选图层含有曲面。"),StudioMessageRole::Explanation);
+        refreshState();
+        return;
+    }
     status_->setMessage(uiText("正在生成展开图…"),StudioMessageRole::Feedback,true);
-    session_.developPlates();
+    session_.developPlates(ids);
     refreshState();
 }
 void PlatesDialog::previewAssembly(){
@@ -445,6 +461,7 @@ void PlatesDialog::previewAssembly(){
 void PlatesDialog::reject(){if(session_.isCalculationSession()){QDialog::reject();return;}if(session_.busy()){session_.cancelPlates();status_->setMessage(uiText("正在取消…"),StudioMessageRole::Feedback,true);return;}QDialog::reject();}
 void PlatesDialog::refreshState(){
     const bool idle=!session_.busy(),result=data_&&!data_->plates.isEmpty();
+    layerChoice_->setModel(session_.model());layerChoice_->setEnabled(idle);
     const bool selected=result&&list_->currentRow()>=0&&list_->currentRow()<data_->plates.size();
     if(!idle||!selected)rotationPresets_->hide();
     if(session_.calculationQueued())status_->setMessage(uiText("排队中")+QString(" · %1").arg(session_.calculationQueuePosition()),StudioMessageRole::Feedback);
@@ -458,7 +475,7 @@ void PlatesDialog::refreshState(){
         if(!field.isEmpty())widget->setEnabled(idle&&result);
         if(widget->property("plate_display").isValid())widget->setEnabled(idle&&result);
     }
-    fontSize_->setEnabled(idle&&result);list_->setEnabled(idle&&result);
+    fontSize_->setEnabled(idle&&result);list_->setEnabled(idle&&result);list_->setVisible(result);
 }
 void PlatesDialog::showFailure(const QString& text){failure_=text;status_->setMessage(uiText(text),StudioMessageRole::Warning);refreshState();}
 void PlatesDialog::receive(const QJsonObject& object){
@@ -592,7 +609,7 @@ void PlatesDialog::select(int row){
     if(p.collapsedTriangles)warnings.append(uiText("展开图中有三角面退化。"));
     if(p.overlapArea>0)warnings.append(uiText("展开图中有区域重叠。"));
     diagnosticNote_->setText(warnings.join('\n'));diagnosticNote_->setVisible(!warnings.isEmpty());
-    plateNote_->setText(QString(uiText("仅展开已勾选“可展开曲面”的图层。展开误差不等于材料成形余量。"))+"\n\n"+uiText("边长误差为展开长度减原长度。")+(p.joinedMirror?"\n"+QString(uiText("本板含对称的两半；DXF 分别保留两侧闭合轮廓。")):QString{}));updating_=false;refreshState();refreshDiagnosticFaces();
+    plateNote_->setText(QString(uiText("展开误差不等于材料成形余量。"))+"\n\n"+uiText("边长误差为展开长度减原长度。")+(p.joinedMirror?"\n"+QString(uiText("本板含对称的两半；DXF 分别保留两侧闭合轮廓。")):QString{}));updating_=false;refreshState();refreshDiagnosticFaces();
 }
 void PlatesDialog::positionChanged(int row){
     if(updating_||!data_||row<0||row>=data_->plates.size())return;

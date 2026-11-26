@@ -11,6 +11,7 @@
 #include "shortcuts_dialog.h"
 #include "preferences_dialog.h"
 #include "layer_panel.h"
+#include "calculation_layers.h"
 #include "light_dialog.h"
 #include <QGroupBox>
 #include "plates_dialog.h"
@@ -59,7 +60,9 @@
 #include <QTabBar>
 #include <QKeyEvent>
 #include <QMouseEvent>
+#include <QToolTip>
 #include <QWheelEvent>
+#include <cmath>
 #include <QFileDialog>
 #include <QScreen>
 #include <QEventLoop>
@@ -98,7 +101,14 @@ private:
 #endif
 // Only the explicitly requested hidden startup probe can kill its own service.
 // This is an actual QProcess exit, not a simulated successful recovery reply.
-struct BackendExitProbe {static void terminate(ModelSession& s){s.process_.kill();}};
+struct BackendExitProbe {
+    static void terminate(ModelSession& s){s.process_.kill();}
+    static bool blockQueuedUndo(ModelSession& s){
+        // Give the future undo transaction a directory where it must write a
+        // file. This is the test session's private workspace, never a model path.
+        return QDir().mkpath(s.workspace_->filePath("request-"+QString::number(s.nextId_+2)+"/model.json"));
+    }
+};
 void MainWindow::verifyDocumentWindows(const QString& request,const QString& output){
     workflowOutput_=output;workflowTimer_.start();QFile input(request);
     if(!input.open(QIODevice::ReadOnly)){finishWorkflow("Missing request");return;}
@@ -244,7 +254,8 @@ void MainWindow::verifyStartup(const QString& request,const QString& output){
     QDir().mkpath(workflowOutput_);QFile file(request);
     if(!file.open(QIODevice::ReadOnly)){finishWorkflow("Cannot read startup request");return;}
     const auto config=QJsonDocument::fromJson(file.readAll()).object();
-    if(config["measure_first_frame"].toBool()||config["observe_restore_notice"].toBool()) {
+    const bool observeEntrance=config["observe_open_entrance"].toBool();
+    if(observeEntrance||config["measure_first_frame"].toBool()||config["observe_restore_notice"].toBool()) {
 #ifdef Q_OS_WIN
         wchar_t name[256]{};DWORD bytes=0;
         if(!GetUserObjectInformationW(GetThreadDesktop(GetCurrentThreadId()),UOI_NAME,name,sizeof(name),&bytes)||
@@ -257,11 +268,33 @@ void MainWindow::verifyStartup(const QString& request,const QString& output){
             const auto language=config["language"].toString("en");
             if(!setUiLanguage(language).isEmpty()){finishWorkflow("Notice language unavailable: "+language);return;}
             showNormal();resize(980,700);
+        }else if(observeEntrance){
+            const auto settings=config["settings_file"].toString();
+            if(!settings.isEmpty())loadPreferences(settings);
+            auto* host=window();
+            host->showNormal();host->resize(920,650);
+            setProperty("observe_open_entrance",true);
+            setProperty("resize_on_open_entrance",config["resize_on_open_entrance"].toBool());
         }else show();
     }
     session_.setProperty("disable_first_frame",config["disable_first_frame"].toBool());
     session_.setProperty("disable_startup_cache",config["disable_startup_cache"].toBool());
     session_.setProperty("defer_startup_drawing",config["defer_drawing"].toBool(config["measure_first_frame"].toBool()));
+    setProperty("disable_drag_preparation",config["disable_drag_preparation"].toBool());
+    setProperty("disable_drag_original_preparation",config["disable_drag_original_preparation"].toBool());
+    if(observeEntrance&&config["rebuild_opening_frame"].toBool()){
+        const auto show=session_.onFirstFrame;
+        session_.onFirstFrame=[this,show](std::shared_ptr<const fs::ModelSnapshot> model){
+            if(show)show(model);
+            if(!model)return;
+            // Exercise the renderer's full publication path for the same
+            // opening revision, independently of whether this file hits cache.
+            const auto rebuilt=std::make_shared<fs::ModelSnapshot>(*model);
+            const auto presentation=withDisplayDefaults(rebuilt);
+            for(auto* view:views_)view->setSnapshot(rebuilt,presentation,false);
+            setProperty("rebuilt_opening_frame",true);
+        };
+    }
     if(config["abort_after_first_frame"].toBool()){
         const auto show=session_.onFirstFrame;
         session_.onFirstFrame=[this,show](std::shared_ptr<const fs::ModelSnapshot> model){
@@ -275,6 +308,22 @@ void MainWindow::verifyStartup(const QString& request,const QString& output){
         if(!property("first_visible_hull_ms").isValid())setProperty("first_visible_hull_ms",now);
         auto times=property("view_first_visible_ms").toJsonObject();const auto key=QString::number(int(view->projection()));
         if(!times.contains(key)){times[key]=now;setProperty("view_first_visible_ms",times);}
+        if(!property("observe_open_entrance").toBool()||!view->presentationActive())return;
+        auto evidence=property("open_entrance_frames").toJsonObject();
+        auto sample=evidence[key].toObject();
+        if(sample.isEmpty())sample["first_ms"]=now;
+        sample["last_ms"]=now;
+        sample["count"]=sample["count"].toInt()+1;
+        evidence[key]=sample;setProperty("open_entrance_frames",evidence);
+        if(property("resize_on_open_entrance").toBool()&&!property("open_entrance_resize").isValid()){
+            setProperty("open_entrance_resize",true);
+            QTimer::singleShot(0,this,[this,view]{
+                const auto sizeBefore=view->size();
+                auto* host=window();
+                host->resize(host->width()-100,host->height()-70);
+                setProperty("open_entrance_resize_applied",view->size()!=sizeBefore);
+            });
+        }
     };
     fileHistory_=std::make_unique<FileHistory>(config["history_file"].toString());
     if(config.contains("recovery_root"))session_.setRecoveryRoot(config["recovery_root"].toString());
@@ -285,8 +334,17 @@ void MainWindow::verifyStartup(const QString& request,const QString& output){
     startupStep("begin");
 }
 void MainWindow::startupStep(const QString& completedOperation,const QString& error){
+    const auto completedAt=workflowTimer_.nsecsElapsed();
     QString operation=completedOperation;
     if(workflowFinished_)return;
+    if(operation=="redo"&&property("history_wait_for_paints").toBool()){
+        if(!property("history_ready_ns").isValid())setProperty("history_ready_ns",completedAt);
+        if(property("history_paints").toJsonObject().size()<int(views_.size())&&
+           completedAt-property("history_ready_ns").toLongLong()<2500000000LL){
+            QTimer::singleShot(8,this,[this,operation,error]{startupStep(operation,error);});return;
+        }
+        setProperty("history_wait_for_paints",QVariant());
+    }
     if(property("probe_edit_during_close").toBool()&&startupClosing_&&operation!="close"&&operation!="error")return;
     if(operation=="snapshot"&&property("deferred_startup_probe").toBool()){
         setProperty("deferred_startup_probe",false);operation="load";
@@ -297,6 +355,19 @@ void MainWindow::startupStep(const QString& completedOperation,const QString& er
         evidence["reopen_reused_scene"]=session_.scene()==scene&&!session_.busy();
         evidence["view_geometry_reused"]=session_.drawingUnchanged();
         setProperty("deferred_drawing_evidence",evidence);linesDialog_->hide();
+    }
+    if(operation=="load"&&session_.ready()&&property("observe_open_entrance").toBool()){
+        const auto capture=[this,operation,error]{
+            QJsonArray active;
+            for(auto* view:views_)if(view->presentationActive())active.append(int(view->projection()));
+            workflowArtifacts_["open_entrance"]=QJsonObject{
+                {"views",property("open_entrance_frames").toJsonObject()},
+                {"resized",property("open_entrance_resize_applied").toBool()},
+                {"rebuilt_first_frame",property("rebuilt_opening_frame").toBool()},{"still_active",active}};
+            startupStep(operation,error);
+        };
+        QTimer::singleShot(3000,this,[this,capture]{setProperty("observe_open_entrance",false);capture();});
+        return;
     }
     if(operation=="load"&&session_.ready()&&!property("startup_ready_ms").isValid())setProperty("startup_ready_ms",workflowTimer_.elapsed());
     if(operation=="load"&&session_.ready()&&!property("first_hull_frame_ms").isValid()&&property("frame_probe_waits").toInt()<60){
@@ -317,11 +388,27 @@ void MainWindow::startupStep(const QString& completedOperation,const QString& er
         QJsonArray actions;for(auto* action:recentMenu_->actions())actions.append(QJsonObject{{"text",action->text()},{"path",action->data().toString()},{"enabled",action->isEnabled()},{"operation",action->property("file_operation").toString()}});
         QJsonObject item{{"operation",operation},{"error",error},{"source",session_.sourcePath()},{"ready",session_.ready()},{"modified",session_.modified()},
             {"last",fileHistory_->read().last},{"recent",recent},{"actions",actions},{"status_text",statusBar()->currentMessage()}};
+        if(property("batch_release_ns").isValid()){
+            item["release_to_ready_ms"]=(completedAt-property("batch_release_ns").toLongLong())/1e6;
+            item["batch_move_timings"]=session_.property("batch_move_load_timings").toJsonObject();
+            setProperty("batch_release_ns",QVariant());
+        }
         if(property("undo_wrong_frame").isValid()){item["undo_wrong_frame"]=property("undo_wrong_frame").toBool();setProperty("undo_wrong_frame",QVariant());}
         if(property("shell_probe").isValid()){item["shell_probe"]=property("shell_probe").toJsonObject();setProperty("shell_probe",QVariant());}
+        if(property("drag_preview_profile").isValid()){
+            item["drag_preview_profile"]=property("drag_preview_profile").toJsonArray();setProperty("drag_preview_profile",QVariant());
+            item["drag_preview_raster_matches"]=property("drag_preview_raster_matches").toJsonArray();setProperty("drag_preview_raster_matches",QVariant());
+            item["drag_preparation_at_start"]=property("drag_preparation_at_start").toJsonObject();setProperty("drag_preparation_at_start",QVariant());
+            item["drag_grab_raster_key"]=property("drag_grab_raster_key").toJsonObject();setProperty("drag_grab_raster_key",QVariant());
+        }
+        for(const char* key:{"drag_cancel_probe","drag_pan_probe"})if(property(key).isValid()){
+            item[key]=property(key).toJsonObject();setProperty(key,QVariant());
+        }
         if(property("drag_samples").isValid()){item["drag_four_view_ms"]=property("drag_samples").toJsonArray();setProperty("drag_samples",QVariant());}
         if(property("history_paints").isValid()){
-            item["key_to_ready_ms"]=(workflowTimer_.nsecsElapsed()-property("history_key_start_ns").toLongLong())/1e6;
+            const auto ready=property("history_ready_ns");
+            item["key_to_ready_ms"]=((ready.isValid()?ready.toLongLong():completedAt)-property("history_key_start_ns").toLongLong())/1e6;
+            setProperty("history_ready_ns",QVariant());
             item["history_view_ms"]=property("history_paints").toJsonObject();setProperty("history_paints",QVariant());
             for(auto* view:views_)view->onHullVisibleFrame={};
         }
@@ -359,6 +446,11 @@ void MainWindow::startupStep(const QString& completedOperation,const QString& er
             ModelSession::atomicCopy(session_.lastBackupPath(),saved);item["backup_snapshot"]=saved;
         }
         if(session_.model()){
+            if(const auto* p=session_.model()->point(property("batch_frame_sample_id").toULongLong()))
+                item["batch_frame_sample"]=QJsonObject{{"id",double(p->id)},{"p",QJsonArray{p->position.x,p->position.y,p->position.z}}};
+            item["view_matches_model"]=std::all_of(views_.begin(),views_.end(),[&](auto* view){
+                return view->snapshot()&&view->snapshot()->sameDrawing(*session_.model());
+            });
             QFile native(QFileInfo(session_.modelPath()).dir().filePath("native-report.json"));
             if(native.open(QIODevice::ReadOnly))item["native_report"]=QJsonDocument::fromJson(native.readAll()).object();
             const auto target=workflowOutput_+"/model-"+QString::number(startupCommand_)+".json";
@@ -630,7 +722,7 @@ void MainWindow::startupStep(const QString& completedOperation,const QString& er
         else if(kind=="menu_interaction_check")auditMenuInteraction();
         else if(kind=="object_lifetime_check")auditObjectLifetime();
         else if(kind=="view_reactivation_check")auditViewReactivation();
-        else if(kind=="view_grid_resize_check")auditViewGridResize(command.value("frame_timing").toBool());
+        else if(kind=="view_grid_resize_check")auditViewGridResize(command["frame_timing"].toBool(),command["shaded"].toBool());
         else if(kind=="dependency_fixture"){
             // Private startup verification only: real document operations,
             // without global input or changes to a user's model.
@@ -716,10 +808,20 @@ void MainWindow::startupStep(const QString& completedOperation,const QString& er
                     int markerInk=0;for(int y=markerRect.top();y<=markerRect.bottom();++y)for(int x=markerRect.left();x<=markerRect.right();++x){
                         const auto c=rendered.pixelColor(x,y);if(c.lightness()<210)++markerInk;
                     }
+                    const auto help=action->property("studio_menu_help").toString();
+                    QString shownHelp;
+                    if(!help.isEmpty()){
+                        const auto point=QPoint(rect.right()-39,rect.center().y());
+                        QMouseEvent move(QEvent::MouseMove,point,menu->mapToGlobal(point),
+                                         Qt::NoButton,Qt::NoButton,Qt::NoModifier);
+                        QApplication::sendEvent(menu,&move);
+                        if(QToolTip::isVisible())shownHelp=QToolTip::text();
+                        QEvent leave(QEvent::Leave);QApplication::sendEvent(menu,&leave);
+                    }
                     rows.append(QJsonObject{{"text",action->text()},{"caption",studioMenuCaption(action->text())},
                         {"opens_dialog",studioMenuOpensDialog(action)},{"icon",action->icon().name()},{"icon_present",!action->icon().isNull()},{"icon_green_pixels",green},{"icon_blue_pixels",blue},
                         {"explicit_dialog",action->property("studio_opens_dialog").isValid()&&action->property("studio_opens_dialog").toBool()},
-                        {"icon_ink_width",inkBounds.width()/scale},{"marker_ink_pixels",markerInk},
+                        {"icon_ink_width",inkBounds.width()/scale},{"marker_ink_pixels",markerInk},{"shown_help",shownHelp},
                         {"checkable",action->isCheckable()},
                         {"checked",action->isChecked()},{"enabled",action->isEnabled()},{"submenu",bool(action->menu())},
                         {"separator",action->isSeparator()},{"y",rect.y()},{"height",rect.height()},
@@ -1056,6 +1158,10 @@ void MainWindow::startupStep(const QString& completedOperation,const QString& er
                 QApplication::sendEvent(view,&release);
             };
             setSelectionKind(HullEntity::Point);
+            QAction* controlNet=nullptr;
+            for(auto* item:findChildren<QAction*>()){
+                if(item->property("viewPreference")=="control_net"){controlNet=item;break;}
+            }
             for(auto* view:{views_[0],perspective}){
                 view->setControlNetVisible(true);view->setFillVisible(false);view->fit();
                 // Start at a blank margin and enclose visible points. Compare
@@ -1066,6 +1172,16 @@ void MainWindow::startupStep(const QString& completedOperation,const QString& er
                 drag(view,from,to,Qt::NoModifier);
                 workflowCase(view==perspective?"shortcut.perspective-left-box-selects":"shortcut.orthographic-left-box-selects",
                     view->project(reference)==before&&!view->selectedPoints().isEmpty());
+                const auto expected=view->selectedPoints();
+                const auto name=view==perspective?QString("shortcut.perspective"):QString("shortcut.orthographic");
+                if(controlNet){
+                    controlNet->setChecked(false);
+                    drag(view,from,from+QPointF(8,8),Qt::NoModifier);
+                    workflowCase(name+"-empty-box-keeps-control-net-hidden",!controlNet->isChecked()&&view->selectedPoints().isEmpty());
+                    drag(view,from,to,Qt::NoModifier);
+                }
+                workflowCase(name+"-box-reveals-selected-control-points",controlNet&&controlNet->isChecked()&&
+                    !expected.isEmpty()&&view->selectedPoints()==expected);
             }
             const QPointF from(1,1),to=from+QPointF(60,20);
             const auto beforeDrag=perspective->project(reference);
@@ -1447,6 +1563,21 @@ void MainWindow::startupStep(const QString& completedOperation,const QString& er
             }
         }
         else if(kind=="open")openModel(path);
+        else if(kind=="open_document")openDocument(path);
+        else if(kind=="toggle_lines_layer"){
+            linesDialog_->setAttribute(Qt::WA_DontShowOnScreen);
+            linesAction_->trigger();
+            QSet<fs::EntityId> occupied;
+            for(const auto& face:session_.model()->faces)occupied.insert(face.layer);
+            for(auto* check:linesLayers_->findChildren<QCheckBox*>()){
+                const auto id=check->property("calculation_layer_id").toULongLong();
+                if(!check->isChecked()||!check->isEnabled()||!occupied.contains(id))continue;
+                workflowArtifacts_["hidden_lines_layer"]=qint64(id);
+                check->click();
+                break;
+            }
+            if(!session_.busy()){finishWorkflow("Could not change the lines-plan layer from the left panel");return;}
+        }
         else if(kind=="lines_window_check"){
             qApp->setQuitOnLastWindowClosed(false);
             linesDialog_->setAttribute(Qt::WA_DontShowOnScreen);
@@ -1461,6 +1592,16 @@ void MainWindow::startupStep(const QString& completedOperation,const QString& er
             linesAction_->trigger();QApplication::processEvents();
             workflowCase("lines-independent-window",linesDialog_->isWindow()&&linesDialog_->isVisible()&&!linesDialog_->isModal()&&lines_->window()==linesDialog_);
             workflowCase("lines-close-button",bool(linesDialog_->windowFlags()&Qt::WindowCloseButtonHint));
+            const auto layerChecks=linesLayers_->findChildren<QCheckBox*>();
+            bool defaultsMatch=layerChecks.size()==model->layers.size();
+            for(auto* check:layerChecks){
+                const auto* layer=model->layer(check->property("calculation_layer_id").toULongLong());
+                defaultsMatch &= layer&&check->isChecked()==layer->showInLinesplan;
+            }
+            workflowCase("lines-layer-panel-matches-document",linesLayers_->isVisible()&&defaultsMatch);
+            workflowCase("lines-layer-panel-left-of-drawing",linesLayers_->geometry().right()<lines_->geometry().left());
+            const auto layersPicture=workflowOutput_+"/lines-layer-panel.png";
+            if(linesDialog_->grab().save(layersPicture))workflowArtifacts_["lines_layer_panel"]=layersPicture;
             workflowCase("four-views-remain-central",tabs_->count()==1&&tabs_->currentIndex()==tab&&views_.front()->isVisibleTo(tabs_));
             auto* original=linesDialog_;linesAction_->trigger();
             workflowCase("lines-open-reuses-window",linesDialog_==original&&findChildren<QDialog*>("LinesPlanWindow").size()==1);
@@ -1637,10 +1778,13 @@ void MainWindow::startupStep(const QString& completedOperation,const QString& er
                     workflowArtifacts_["project_fields"]=fields;
                 }
                 const auto changes=command["changes"].toObject();
+                bool align=false;
+                workflowCase("project-no-confirm-footer",dialog->findChildren<QDialogButtonBox*>().isEmpty());
                 for(auto it=changes.begin();it!=changes.end();++it){
                     QList<QWidget*> found;for(auto* field:dialog->findChildren<QWidget*>())if(field->property("modelField")==it.key())found.append(field);
                     if(found.size()!=1){workflowCases_.append(QJsonObject{{"name","project_field_unavailable"},{"status","not_run"}});dialog->reject();return;}
-                    if(auto* box=qobject_cast<QCheckBox*>(found[0]);box&&it.value().isBool())box->setChecked(it.value().toBool());
+                    if(it.key()=="align_to_baseline"&&it.value().isBool()&&qobject_cast<QPushButton*>(found[0]))align=it.value().toBool();
+                    else if(auto* box=qobject_cast<QCheckBox*>(found[0]);box&&it.value().isBool())box->setChecked(it.value().toBool());
                     else if(auto* box=qobject_cast<QLineEdit*>(found[0]);box&&it.value().isString())box->setText(it.value().toString());
                     else if(auto* box=qobject_cast<QComboBox*>(found[0]);box&&it.value().isDouble()&&it.value().toDouble()==it.value().toInt()&&it.value().toInt()>=0&&it.value().toInt()<box->count())box->setCurrentIndex(it.value().toInt());
                     else if(auto* box=qobject_cast<QDoubleSpinBox*>(found[0]);box&&!box->isReadOnly()&&it.value().isDouble()&&it.value().toDouble()>=box->minimum()&&it.value().toDouble()<=box->maximum())box->setValue(it.value().toDouble());
@@ -1669,7 +1813,31 @@ void MainWindow::startupStep(const QString& completedOperation,const QString& er
                 }
                 if(command["expect_invalid"].toBool()){
                     workflowCase("project-invalid-rejected",!dialog->validationError().isEmpty());dialog->reject();
-                }else if(command["cancel"].toBool())dialog->reject();else dialog->accept();
+                }else if(command["cancel"].toBool()){
+                    // Some probes need to observe a temporary draft without writing the fixture.
+                    dialog->refreshSnapshot(*session_.model());dialog->reject();
+                }else if(command["observe_live"].toBool()){
+                    // Let the same timer that applies actual field edits publish
+                    // the result; verify that it does so while the dialog stays open.
+                    dialog->setProperty("project_probe_live",true);
+                    auto* poll=new QTimer(dialog);poll->setInterval(10);
+                    const auto before=session_.model()->revision;
+                    connect(poll,&QTimer::timeout,dialog,[this,dialog,before]{
+                        if(session_.busy()||session_.model()->revision==before)return;
+                        workflowCase("project-applied-with-window-open",dialog->isVisible()&&dialog->changes().isEmpty());
+                        dialog->reject();
+                    });
+                    poll->start();
+                    auto* author=qobject_cast<QLineEdit*>(dialog->fieldEditor("created_by"));
+                    if(author)QMetaObject::invokeMethod(author,"editingFinished",Qt::DirectConnection);
+                    QTimer::singleShot(15000,dialog,[this,dialog]{
+                        workflowCase("project-applied-with-window-open",false,"Timed out waiting for a settings edit");
+                        dialog->reject();
+                    });
+                }else{
+                    if(align)qobject_cast<QPushButton*>(dialog->fieldEditor("align_to_baseline"))->click();
+                    dialog->reject();
+                }
             });
             actions[0]->trigger();
         }
@@ -1705,11 +1873,64 @@ void MainWindow::startupStep(const QString& completedOperation,const QString& er
                 workflowCases_.append(QJsonObject{{"name","save_action_unavailable"},{"status","not_run"}});finishWorkflow();return;
             }found[0]->trigger();
         }
+        else if(kind=="drag_pan_probe"){
+            auto* view=views_[3];view->finishPresentation();
+            const auto model=session_.model();if(!model){finishWorkflow("No model to pan");return;}
+            const auto origin=view->project({0,0,0});
+            QJsonArray frames;bool exact=true;
+            for(int n=0;n<24;++n){
+                const QPointF delta(n%2?-8:8,0);const auto before=view->project({0,0,0});
+                QElapsedTimer clock;QEventLoop loop;QTimer deadline;double elapsed=-1;
+                view->onHullVisibleFrame=[&]{elapsed=clock.nsecsElapsed()/1e6;loop.quit();};
+                const auto preparation=dragPreparationState();
+                clock.start();view->panBy(delta);
+                deadline.setSingleShot(true);connect(&deadline,&QTimer::timeout,&loop,&QEventLoop::quit);deadline.start(2000);
+                if(elapsed<0)loop.exec();view->onHullVisibleFrame={};
+                const auto after=view->project({0,0,0});
+                exact&=elapsed>=0&&QLineF(after-before,delta).length()<.01&&!view->dragShellComparison();
+                frames.append(QJsonObject{{"ms",elapsed},{"phase",preparation["phase"]}});
+                // Let the delayed preparation begin during the pan replay.
+                QEventLoop pacing;QTimer::singleShot(12,&pacing,&QEventLoop::quit);pacing.exec();
+            }
+            setProperty("drag_pan_probe",QJsonObject{{"exact",exact&&QLineF(origin,view->project({0,0,0})).length()<.01&&model==session_.model()}, {"frames",frames}});
+        }
         else if(kind=="batch_move_selection"){
             const auto m=session_.model();if(!m){finishWorkflow("No model to move");return;}
             QSet<fs::EntityId> ids;int index=0;for(const auto& p:m->points)if(!p.locked&&p.batchMovable&&(index++%std::max(1,command["stride"].toInt(1)))==0)ids.insert(p.id);
-            auto* view=views_[0];view->setControlNetVisible(true);view->finishPresentation();selectPoints(ids);view->grab();
+            const int profileCount=std::clamp(command["profile_drag"].toInt(),0,128);
+            if(profileCount&&command["wait_drag_preparation"].toBool()){
+                QEventLoop wait;QTimer poll;poll.setInterval(10);connect(&poll,&QTimer::timeout,&wait,[this,&wait]{
+                    const auto phase=dragPreparationState()["phase"].toString();
+                    if(phase=="ready"||phase=="unavailable")wait.quit();
+                });
+                if(dragPreparationState()["phase"]!="ready"){
+                    QTimer::singleShot(5000,&wait,&QEventLoop::quit);poll.start();wait.exec();
+                }
+                if(dragPreparationState()["phase"]!="ready"){finishWorkflow("Drag preparation did not become ready");return;}
+            }
+            auto* view=views_[0];view->setControlNetVisible(true);view->finishPresentation();
+            if(profileCount)for(auto* canvas:views_){canvas->finishPresentation();canvas->measureDragPaint=true;}
+            selectPoints(ids);
+            if(profileCount&&command["wait_drag_original"].toBool()){
+                QEventLoop wait;QTimer poll;poll.setInterval(10);
+                connect(&poll,&QTimer::timeout,&wait,[this,&wait]{
+                    const auto phase=dragPreparationState()["original_phase"].toString();
+                    if(phase=="ready"||phase=="unavailable")wait.quit();
+                });
+                if(dragPreparationState()["original_phase"]!="ready"){
+                    QTimer::singleShot(6000,&wait,&QEventLoop::quit);poll.start();wait.exec();
+                }
+                if(dragPreparationState()["original_phase"]!="ready"){finishWorkflow("Original curve painting did not become ready");return;}
+            }
+            int crop=0;
+            if(profileCount&&command["grab_at_fractional_origin"].toBool()){
+                const auto windowX=view->mapTo(view->window(),QPoint{}).x()*view->devicePixelRatioF();
+                if(std::abs(windowX-std::round(windowX))<1e-6)crop=1;
+            }
+            if(crop)view->grab(view->rect().adjusted(crop,0,0,0));else view->grab();
+            if(profileCount)setProperty("drag_grab_raster_key",view->dragPaintTimings.value("paint_raster_key").toObject());
             if(selection_.size()<2){finishWorkflow("No batch selection");return;}
+            if(profileCount&&command["pan_before_drag_original"].toBool())views_.back()->panBy(QPointF(37,0));
             fs::Vec3 center{};for(const auto& p:m->points)if(selection_.contains(p.id)){
                 center.x+=p.position.x;center.y+=p.position.y;center.z+=p.position.z;}
             center={center.x/selection_.size(),center.y/selection_.size(),center.z/selection_.size()};
@@ -1721,15 +1942,62 @@ void MainWindow::startupStep(const QString& completedOperation,const QString& er
             if(command["verify_shell"].toBool()){
                 using Key=QPair<fs::EntityId,fs::EntityId>;QSet<Key> expected,focus;
                 for(const auto& f:m->faces){const auto* l=m->layer(f.layer);if(!l||!l->visible||f.points.isEmpty())continue;auto a=f.points.back();for(auto b:f.points){Key k{std::min(a,b),std::max(a,b)};expected.insert(k);if(ids.contains(a)||ids.contains(b))focus.insert(k);a=b;}}
-                QJsonArray ms,paintTimes;bool exact=true;int knots=0;
-                for(int j=0;j<5;++j){const auto old=view->dragShellComparison();QEventLoop loop;QElapsedTimer t;QSet<HullView*> painted;
-                    for(auto* v:views_)v->onHullVisibleFrame=[&,v]{auto layer=v->dragShellComparison();if(layer&&layer!=old){painted.insert(v);if(painted.size()==4)loop.quit();}};
-                    t.start();mouse(QEvent::MouseMove,at+QPointF(10+j,0));QTimer deadline;deadline.setSingleShot(true);connect(&deadline,&QTimer::timeout,&loop,&QEventLoop::quit);deadline.start(12000);if(painted.size()!=4)loop.exec();ms.append(t.nsecsElapsed()/1e6);
-                    double renderMs=0;for(auto* v:views_){v->onHullVisibleFrame={};renderMs+=v->lastPaintMs;}paintTimes.append(renderMs);auto layer=view->dragShellComparison();if(!layer||painted.size()!=4){finishWorkflow("Missing full shell frame");return;}
+                const int comparisonSamples=profileCount?profileCount:5;
+                QJsonArray ms,paintTimes,profile;bool exact=true;int knots=0;
+                if(profileCount){
+                    setProperty("measure_drag_preview",true);
+                    setProperty("use_synchronous_drag_raster",command["synchronous_drag_raster"].toBool());
+                }
+                for(int j=0;j<comparisonSamples;++j){const auto old=view->dragShellComparison();QEventLoop loop;QElapsedTimer t;QSet<HullView*> painted;
+                    double completed=-1;
+                    std::array<QJsonObject,4> viewPhases;
+                    std::array<double,4> viewMs{};
+                    for(size_t i=0;i<views_.size();++i){
+                        auto* v=views_[i];v->onHullVisibleFrame=[&,v,i]{
+                            const auto layer=v->dragShellComparison();
+                            if(!layer||layer==old||painted.contains(v)||
+                               (profileCount&&!v->dragPaintTimings.value("comparison_painted").toBool()))return;
+                            painted.insert(v);viewMs[i]=v->lastPaintMs;
+                            if(profileCount){viewPhases[i]=v->dragPaintTimings;viewPhases[i].insert("paint_ms",v->lastPaintMs);}
+                            if(painted.size()==4){completed=t.nsecsElapsed()/1e6;loop.quit();}
+                        };
+                    }
+                    if(!j&&profileCount)setProperty("drag_preparation_at_start",dragPreparationState());
+                    const auto location=at+QPointF(10+j,0);
+                    t.start();mouse(QEvent::MouseMove,location);QTimer deadline;deadline.setSingleShot(true);connect(&deadline,&QTimer::timeout,&loop,&QEventLoop::quit);deadline.start(12000);if(painted.size()!=4)loop.exec();ms.append(completed);
+                    QJsonArray phases;double renderMs=0;
+                    for(size_t i=0;i<views_.size();++i){views_[i]->onHullVisibleFrame={};renderMs+=viewMs[i];if(profileCount)phases.append(viewPhases[i]);}
+                    paintTimes.append(renderMs);auto layer=view->dragShellComparison();
+                    if(!layer||painted.size()!=4){finishWorkflow("Missing full shell frame");return;}
+                    if(profileCount)end=location;
+                    if(profileCount)profile.append(QJsonObject{{"complete_ms",ms.at(ms.size()-1)},{"geometry",property("drag_geometry_timings").toJsonObject()},{"views",phases}});
                     QSet<Key> found,lit;for(const auto& e:*layer){Key k{std::min(e.a,e.b),std::max(e.a,e.b)};found.insert(k);if(!e.context)lit.insert(k);exact&=e.after.points.size()>=2;knots=e.after.points.size();}
                     exact&=found==expected&&lit==focus&&found.size()==layer->size();
                 }
+                if(profileCount){
+                    setProperty("measure_drag_preview",QVariant());setProperty("drag_geometry_timings",QVariant());
+                    setProperty("use_synchronous_drag_raster",QVariant());
+                    QJsonArray rasterMatches;
+                    for(auto* v:views_){v->measureDragPaint=false;rasterMatches.append(v->verifyDragRaster());}
+                    setProperty("drag_preview_profile",profile);
+                    setProperty("drag_preview_raster_matches",rasterMatches);
+                }
                 setProperty("shell_probe",QJsonObject{{"complete",exact},{"edges",expected.size()},{"highlighted",focus.size()},{"knots_per_edge",knots},{"four_view_ms",ms},{"paint_ms",paintTimes}});
+            }
+            if(command["cancel_drag"].toBool()){
+                const auto sample=*std::min_element(ids.cbegin(),ids.cend());const auto p=m->point(sample)->position;
+                const bool hadPreview=view->dragShellComparison()&&view->displayedControlPoint(sample)&&view->displayedControlPoint(sample)->x!=p.x;
+                QKeyEvent escape(QEvent::KeyPress,Qt::Key_Escape,Qt::NoModifier);QApplication::sendEvent(view,&escape);
+                mouse(QEvent::MouseButtonRelease,end);
+                const bool restored=std::all_of(views_.begin(),views_.end(),[&](auto* canvas){
+                    const auto point=canvas->displayedControlPoint(sample);
+                    return point&&point->x==p.x&&point->y==p.y&&point->z==p.z&&!canvas->dragShellComparison()&&
+                        !canvas->dragSectionComparison()&&!canvas->moveSectionPreview();
+                });
+                setProperty("drag_cancel_probe",QJsonObject{{"had_preview",hadPreview},{"restored",restored},
+                    {"unchanged",m==session_.model()&&session_.ready()&&!session_.busy()}});
+                if(session_.busy()){finishWorkflow("Cancelled drag submitted a model edit");return;}
+                startupStep("idle");return;
             }
             if(samples>0){QJsonArray times;
                 for(int j=0;j<samples;++j){QEventLoop loop;QElapsedTimer t;QSet<HullView*> painted;double elapsed=-1;
@@ -1739,7 +2007,14 @@ void MainWindow::startupStep(const QString& completedOperation,const QString& er
                     if(elapsed<0)loop.exec();for(auto* canvas:views_)canvas->onHullVisibleFrame={};times.append(elapsed);
                     if(elapsed<0){finishWorkflow("Missing drag frame");return;}
                 }setProperty("drag_samples",times);
-            }else mouse(QEvent::MouseMove,to);
+            }else if(!profileCount)mouse(QEvent::MouseMove,to);
+            session_.setProperty("batch_move_latency_probe",true);
+            session_.setProperty("batch_move_load_timings",QVariant());
+            if(command["reject_queued_undo"].toBool()&&(!command["immediate_undo"].toBool()||!BackendExitProbe::blockQueuedUndo(session_))){
+                finishWorkflow("Cannot create the undo write failure fixture");return;
+            }
+            if(command["record_frame_sample"].toBool())setProperty("batch_frame_sample_id",qulonglong(*std::min_element(ids.cbegin(),ids.cend())));
+            setProperty("batch_release_ns",workflowTimer_.nsecsElapsed());
             mouse(QEvent::MouseButtonRelease,end);
             if(!session_.busy()){finishWorkflow("Batch axis drag did not submit");return;}
             if(command["immediate_undo"].toBool()){
@@ -1756,6 +2031,25 @@ void MainWindow::startupStep(const QString& completedOperation,const QString& er
                 if(!session_.waitingForMoveUndo()){finishWorkflow("Immediate undo was dropped");return;}
             }
         }
+        else if(kind=="rejected_batch_then_undo"){
+            QVector<fs::PointMove> repeated;
+            if(auto model=session_.model())for(const auto& p:model->points)if(!p.locked&&p.batchMovable){
+                auto moved=p.position;moved.x+=.125;repeated={{p.id,moved},{p.id,moved}};break;
+            }
+            if(repeated.isEmpty()||!session_.movePoints(repeated)||!session_.undo()){
+                finishWorkflow("Rejected batch fixture could not submit");return;
+            }
+        }
+        else if(kind=="unchanged_batch_then_undo"){
+            QVector<fs::PointMove> unchanged;
+            if(auto model=session_.model())for(const auto& p:model->points){
+                if(!p.locked&&p.batchMovable)unchanged.append({p.id,p.position});
+                if(unchanged.size()==2)break;
+            }
+            if(unchanged.size()!=2||!session_.movePoints(unchanged)||!session_.undo()){
+                finishWorkflow("Unchanged batch probe could not submit");return;
+            }
+        }
         else if(kind=="move"){
             if(!session_.model()){finishWorkflow("No model to edit");return;}
             const fs::ControlPoint* chosen=nullptr;
@@ -1767,10 +2061,24 @@ void MainWindow::startupStep(const QString& completedOperation,const QString& er
         else if(kind=="history_key"){
             const bool redo=command["redo"].toBool();auto* action=redo?redo_:undo_;
             auto expected=session_.batchHistoryTarget(redo?"redo":"undo");
-            if(!expected||!action->isEnabled()){finishWorkflow("Missing history shortcut or target");return;}
-            auto clock=std::make_shared<QElapsedTimer>();setProperty("history_paints",QJsonObject{});
-            for(int i=0;i<int(views_.size());++i){auto* view=views_[i];view->onHullVisibleFrame=[this,i,view,expected,clock]{
-                if(!view->snapshot()||!view->snapshot()->sameDrawing(*expected))return;
+            QJsonObject sample;
+            if(redo&&command["verify_prior_batch_move"].toBool()){
+                sample=startupObservations_.at(startupObservations_.size()-3).toObject()["batch_frame_sample"].toObject();
+                if(sample.isEmpty()||sample==startupObservations_.last().toObject()["batch_frame_sample"].toObject()){
+                    finishWorkflow("Independent redo frame sample is missing or unchanged");return;
+                }
+                setProperty("history_wait_for_paints",true);
+            }
+            if(!action->isEnabled()||(!expected&&sample.isEmpty()&&command["verify_frame"].toBool(true))){finishWorkflow("Missing history shortcut or target");return;}
+            auto clock=std::make_shared<QElapsedTimer>();
+            if(expected||!sample.isEmpty())setProperty("history_paints",QJsonObject{});
+            if(expected||!sample.isEmpty())for(int i=0;i<int(views_.size());++i){auto* view=views_[i];view->onHullVisibleFrame=[this,i,view,expected,clock,sample]{
+                if(expected&&(!view->snapshot()||!view->snapshot()->sameDrawing(*expected)))return;
+                if(!sample.isEmpty()){
+                    const auto id=fs::EntityId(sample["id"].toDouble());const auto p=sample["p"].toArray();
+                    const auto at=view->displayedControlPoint(id);
+                    if(!at||at->x!=p[0].toDouble()||at->y!=p[1].toDouble()||at->z!=p[2].toDouble())return;
+                }
                 auto times=property("history_paints").toJsonObject();auto key=QString::number(i);
                 if(!times.contains(key)){times[key]=clock->nsecsElapsed()/1e6;setProperty("history_paints",times);}
             };}

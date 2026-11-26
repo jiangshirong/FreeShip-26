@@ -2,6 +2,7 @@
 // FreeMichletOutputDlg.SaveToFile and FreeAddMassOutputDlg.SaveToFile.
 // Martijn van Engeland, Timoshenko V.F., Mark Malakanov; FreeShip 26 adaptation.
 #include "grid_export.h"
+#include "layer_scope.h"
 #include <QTextStream>
 #include <QIODevice>
 #include <QJsonArray>
@@ -80,7 +81,16 @@ std::vector<double> breadths(const std::vector<ng::SectionCurve>& curves,float z
 }
 }
 std::vector<double> sectionBreadths(const std::vector<ng::SectionCurve>& curves,float z){return breadths(curves,z);}
-ghs::Result build(const ng::DocumentInput& input,const ModelSnapshot& m,const QString& format,const QString& units,const QJsonObject& o,QJsonObject* preview){
+ghs::Result build(const ng::DocumentInput& source,const ModelSnapshot& m,const QString& format,const QString& units,const QJsonObject& o,QJsonObject* preview){
+    std::optional<ng::DocumentInput> scoped;
+    fs::LayerScope selected;
+    if(format=="addmass"&&o.contains("layer_ids")){
+        QJsonArray ids;for(const auto& layer:m.layers)ids.append(qint64(layer.id));
+        selected=fs::readLayerScope(o.value("layer_ids"),ids);
+        scoped=source;fs::setHydroLayerFlags(scoped->geometry,ids,selected);
+    }
+    const auto& input=scoped?*scoped:source;
+    const auto included=[&](fs::EntityId id){return selected?selected->contains(id):m.layer(id)->useInHydrostatics;};
     if(input.documentId!=m.documentId||input.revision!=m.revision||input.imperial!=(m.units=="imperial"))bad("导出几何与当前工程版本不一致。");
     const double metres=input.imperial?.3048:1.,scale=metres/unit(units);
     ng::SubdivisionSurface surface(input.geometry);const auto& mesh=surface.level(input.geometry.desiredLevel);ng::SectionIndex index(surface.input(),mesh);
@@ -106,11 +116,11 @@ ghs::Result build(const ng::DocumentInput& input,const ModelSnapshot& m,const QS
         const double centre=mode=="catamaran"?double(float(.5*separation/metres)):0;
         for(const auto& f:input.geometry.faces){const auto& l=input.geometry.layers.at(f.layer);if(!l.useInHydrostatics)continue;if(!l.symmetric)bad("当前入口要求对称单体半船；不能用单个半宽表表示非对称或多体船。");for(auto p:f.points)if(input.geometry.points.at(p).position.y<0)bad("当前入口要求 Y≥0 的半船控制网。");}
         const int nx=count(o,"stations",format=="michlet"?31:21,format=="michlet"?81:45),nz=count(o,"waterlines",format=="michlet"?21:11,format=="michlet"?81:25);
-        double bottom=std::numeric_limits<double>::infinity();for(const auto& t:m.triangles)if(m.layer(t.layer)->useInHydrostatics)for(auto p:t.vertices)bottom=std::min(bottom,p.z);
+        double bottom=std::numeric_limits<double>::infinity();for(const auto& t:m.triangles)if(included(t.layer))for(auto p:t.vertices)bottom=std::min(bottom,p.z);
         if(!std::isfinite(bottom))bad("没有参与静水力的曲面。");const double draft=option(o,"draft",m.draft*metres,1e-6,1e7)/metres,wl=bottom+draft;
         if(mode=="catamaran")validateDemihull(mesh,centre);
         double xmin=std::numeric_limits<double>::infinity(),xmax=-xmin,beam=0,volume=0,ymin=xmin;
-        for(const auto& t:m.triangles)if(m.layer(t.layer)->useInHydrostatics){std::vector<Vec3> polygon;for(int i=0;i<3;++i){auto a=t.vertices[i],b=t.vertices[(i+1)%3];if(a.z<=wl)polygon.push_back(a);if((a.z<wl&&b.z>wl)||(a.z>wl&&b.z<wl)){double f=(wl-a.z)/(b.z-a.z);polygon.push_back({a.x+f*(b.x-a.x),a.y+f*(b.y-a.y),wl});}}
+        for(const auto& t:m.triangles)if(included(t.layer)){std::vector<Vec3> polygon;for(int i=0;i<3;++i){auto a=t.vertices[i],b=t.vertices[(i+1)%3];if(a.z<=wl)polygon.push_back(a);if((a.z<wl&&b.z>wl)||(a.z>wl&&b.z<wl)){double f=(wl-a.z)/(b.z-a.z);polygon.push_back({a.x+f*(b.x-a.x),a.y+f*(b.y-a.y),wl});}}
             for(auto p:polygon){xmin=std::min(xmin,p.x);xmax=std::max(xmax,p.x);ymin=std::min(ymin,p.y);beam=std::max(beam,2*(p.y-centre));}
             for(size_t i=2;i<polygon.size();++i){auto a=polygon[0],b=polygon[i-1],c=polygon[i];a.z-=wl;b.z-=wl;c.z-=wl;volume+=(a.x*(b.y*c.z-b.z*c.y)+a.y*(b.z*c.x-b.x*c.z)+a.z*(b.x*c.y-b.y*c.x))/3.;}
         }

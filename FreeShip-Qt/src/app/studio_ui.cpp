@@ -38,6 +38,7 @@
 #include <QLayout>
 #include <QMessageBox>
 #include <QMouseEvent>
+#include <QToolTip>
 #include <QPointer>
 #include <QPainter>
 #include <QPainterPath>
@@ -133,6 +134,7 @@ private:
 
 constexpr int MenuTextInset = 35;
 constexpr int MenuStatusGutter = 29;
+constexpr int MenuHelpWidth = 20;
 constexpr int MenuRowHeight = 32;
 constexpr int MenuGroupGap = 12;
 constexpr QSize FormatIconSize(44, 24);
@@ -546,7 +548,53 @@ bool isMenuRow(const QStyleOptionMenuItem* item, const QWidget* widget) {
          item->menuItemType == QStyleOptionMenuItem::SubMenu);
 }
 
+QRect menuHelpRect(const QRect& row,Qt::LayoutDirection direction) {
+    return QStyle::visualRect(direction,row,
+        QRect(row.right()-MenuStatusGutter-MenuHelpWidth+1,row.top(),MenuHelpWidth,row.height()));
+}
+
 class StudioMenuStyle final : public QProxyStyle {
+    QPointer<QMenu> helpMenu_, helpPressedMenu_;
+    QPointer<QAction> helpAction_;
+
+    void clearMenuHelp(QMenu* menu) {
+        if(helpMenu_!=menu)return;
+        if(helpAction_&&QToolTip::text()==helpAction_->property("studio_menu_help").toString())QToolTip::hideText();
+        helpMenu_.clear();
+        helpAction_.clear();
+    }
+
+    bool handleMenuHelp(QMenu* menu,QEvent* event) {
+        const auto type=event->type();
+        if(type==QEvent::Leave||type==QEvent::Hide){
+            clearMenuHelp(menu);
+            if(type==QEvent::Hide)helpPressedMenu_.clear();
+            return false;
+        }
+        const bool toolTip=type==QEvent::ToolTip;
+        const bool press=type==QEvent::MouseButtonPress||type==QEvent::MouseButtonDblClick;
+        const bool release=type==QEvent::MouseButtonRelease;
+        if(!toolTip&&!press&&!release&&type!=QEvent::MouseMove)return false;
+        const auto* mouse=toolTip?nullptr:static_cast<QMouseEvent*>(event);
+        const auto position=toolTip?static_cast<QHelpEvent*>(event)->pos():mouse->position().toPoint();
+        auto* action=menu->actionAt(position);
+        const auto text=action?action->property("studio_menu_help").toString():QString{};
+        const auto area=text.isEmpty()?QRect{}:menuHelpRect(menu->actionGeometry(action),menu->layoutDirection());
+        const bool onHelp=area.contains(position);
+        if(!onHelp)clearMenuHelp(menu);
+        else if(helpAction_!=action||!QToolTip::isVisible()||QToolTip::text()!=text){
+            helpMenu_=menu;
+            helpAction_=action;
+            QToolTip::showText(menu->mapToGlobal(area.bottomRight()),text,menu,area);
+        }
+        if(release&&helpPressedMenu_==menu&&mouse->button()==Qt::LeftButton){
+            helpPressedMenu_.clear();
+            return true;
+        }
+        if(press&&onHelp&&mouse->button()==Qt::LeftButton)helpPressedMenu_=menu;
+        return toolTip||((press||release)&&onHelp);
+    }
+
 public:
     using QProxyStyle::QProxyStyle;
     int pixelMetric(PixelMetric metric,const QStyleOption* option=nullptr,const QWidget* widget=nullptr)const override{
@@ -621,6 +669,8 @@ public:
                     popup->setGeometry(left,geometry.top(),width,geometry.height());
                 }
         }
+        if(auto* menu=qobject_cast<QMenu*>(watched);menu&&menu->property("studio_menu_has_help").toBool())
+            if(handleMenuHelp(menu,event))return true;
         if(auto* menu=qobject_cast<QMenu*>(watched);menu&&
            (event->type()==QEvent::MouseButtonPress||event->type()==QEvent::MouseButtonRelease)){
             const auto* mouse=static_cast<QMouseEvent*>(event);
@@ -691,7 +741,8 @@ public:
         if(type==CT_MenuItem&&item&&qobject_cast<const QMenu*>(widget)&&item->menuItemType==QStyleOptionMenuItem::Separator)
             return {size.width(),MenuGroupGap};
         if (type != CT_MenuItem || !isMenuRow(item, widget)) return size;
-        return {std::max(140, item->fontMetrics.horizontalAdvance(studioMenuCaption(item->text)) + menuTextInset(widget) + MenuStatusGutter),
+        const int help=widget->property("studio_menu_has_help").toBool()?MenuHelpWidth:0;
+        return {std::max(140, item->fontMetrics.horizontalAdvance(studioMenuCaption(item->text)) + menuTextInset(widget) + MenuStatusGutter+help),
                 std::max(size.height(), MenuRowHeight)};
     }
 
@@ -798,10 +849,24 @@ public:
         if (item->menuItemType == QStyleOptionMenuItem::DefaultItem) font.setBold(true);
         painter->setFont(font);
         const auto caption=studioMenuCaption(item->text);
-        auto label = row.adjusted(menuTextInset(widget), 0, -MenuStatusGutter, 0);
+        const bool hasHelp=action&&!action->property("studio_menu_help").toString().isEmpty();
+        auto label = row.adjusted(menuTextInset(widget), 0, -MenuStatusGutter-(hasHelp?MenuHelpWidth:0), 0);
         const auto alignment = visualAlignment(item->direction, Qt::AlignLeft | Qt::AlignVCenter);
         const int mnemonic = styleHint(SH_UnderlineShortcut, item, widget) ? Qt::TextShowMnemonic : Qt::TextHideMnemonic;
         notation::draw(*painter,visual(label),int(alignment)|mnemonic,caption);
+
+        if(hasHelp){
+            const auto center=menuHelpRect(row,item->direction).center();
+            const QRect icon(center.x()-7,center.y()-7,14,14);
+            auto helpFont=font;
+            helpFont.setPixelSize(11);
+            helpFont.setBold(true);
+            painter->setFont(helpFont);
+            painter->setPen(QColor("#245c4b"));
+            painter->setBrush(QColor("#f7faf7"));
+            painter->drawEllipse(QRectF(icon).adjusted(.5,.5,-.5,-.5));
+            painter->drawText(icon,Qt::AlignCenter,QStringLiteral("?"));
+        }
 
         const QPointF mark = visual(QRect(row.right() - 25, row.top(), 23, row.height())).center();
         if (submenu) {

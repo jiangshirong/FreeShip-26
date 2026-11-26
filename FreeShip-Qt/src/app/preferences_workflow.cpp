@@ -4,6 +4,7 @@
 #include <QTextEdit>
 #include <QSplitter>
 #include "preferences_dialog.h"
+#include "document/preferences.h"
 #include "exchange_dialog.h"
 #include "report_message_probe.h"
 #include "studio_ui.h"
@@ -12,9 +13,11 @@
 #include <QApplication>
 #include <QComboBox>
 #include <QCheckBox>
+#include <QColorDialog>
 #include <QContextMenuEvent>
 #include <QDoubleSpinBox>
 #include <QEventLoop>
+#include <QElapsedTimer>
 #include <QDir>
 #include <QFile>
 #include <QFileInfo>
@@ -378,6 +381,21 @@ void MainWindow::preferencesStep(const QString& operation){
             QTimer::singleShot(0,this,[this,command]{try{
                 if(!preferencesDialog_)throw std::runtime_error("Preferences callback did not open a dialog");
                 auto* dialog=preferencesDialog_;auto fields=command.value("fields").toObject();QJsonArray discovered;
+                const auto settle=[this]{
+                    QEventLoop wait;QTimer poll;QElapsedTimer elapsed;elapsed.start();
+                    connect(&poll,&QTimer::timeout,&wait,[&]{if(!preferencesPending_||elapsed.elapsed()>15000)wait.quit();});
+                    poll.start(10);wait.exec();
+                    if(preferencesPending_)throw std::runtime_error("Automatic preference publication did not settle");
+                };
+                const auto chooseColor=[this](QPushButton* button,const QColor& color){
+                    if(!color.isValid()||!button||!button->isEnabled())throw std::runtime_error("Preference color control is unavailable");
+                    QTimer::singleShot(0,this,[this,color]{
+                        if(auto* picker=qobject_cast<QColorDialog*>(frontStudioDialog())){
+                            picker->setCurrentColor(color);picker->accept();
+                        }else finishWorkflow("Missing preference color picker");
+                    });
+                    button->click();
+                };
                 QJsonArray imports;
                 for(const auto& file:command.value("legacy_imports").toArray()){
                     QList<QPushButton*> buttons;for(auto* b:dialog->findChildren<QPushButton*>())if(b->property("preference_action")=="import_legacy")buttons.append(b);
@@ -394,15 +412,24 @@ void MainWindow::preferencesStep(const QString& operation){
                     });
                     buttons.front()->click();
                     if(!handled)throw std::runtime_error("Import callback did not open the reviewed file dialog");
+                    settle();
                     const auto message=dialog->property("preference_failure").toString();QString statusText,role;
                     for(auto* label:dialog->findChildren<QLabel*>())if(label->property("preference_error").toBool()){statusText=label->text();role=label->property("studio_message_role").toString();}
                     QJsonArray reportMessages;QString summaryText;
                     for(auto* text:dialog->findChildren<QTextEdit*>())if(text->property("preference_import_summary").toBool()){reportMessages=reportMessageProbe(text);summaryText=text->toPlainText();}
                     imports.append(QJsonObject{{"report_messages",reportMessages},{"summary_text",summaryText},{"file",file},{"draft",dialog->values()},{"report",dialog->property("preference_import_report").toJsonObject()},{"message",message},{"status_text",statusText},{"message_role",role},{"persisted",QJsonDocument::fromJson(bytes(preferencesStore_->filename())).object()}});
                 }
-                for(auto* object:dialog->findChildren<QWidget*>())if(object->property("preference_field").isValid()){
+                QJsonObject colorGroups;
+                QString colorGroup;
+                for(auto* object:dialog->findChildren<QWidget*>()){
+                    if(object->property("preference_color_group").isValid())
+                        colorGroup=object->property("preference_color_group").toString();
+                    if(!object->property("preference_field").isValid())continue;
                     QJsonObject field{{"field",object->property("preference_field").toString()},{"type",object->metaObject()->className()}};
-                    if(object->property("color").isValid())field["color"]=object->property("color").value<QColor>().name();
+                    if(object->property("color").isValid()){
+                        field["color"]=object->property("color").value<QColor>().name();
+                        colorGroups[field["field"].toString()]=colorGroup;
+                    }
                     if(auto* spin=qobject_cast<QSpinBox*>(object))field["value"]=spin->value();
                     if(auto* edit=qobject_cast<QLineEdit*>(object)){
                         field["value"]=edit->text();
@@ -411,7 +438,7 @@ void MainWindow::preferencesStep(const QString& operation){
                     }
                     if(auto* combo=qobject_cast<QComboBox*>(object)){
                         field["value"]=object->property("preference_choice_id").toBool()?combo->currentData().toString():combo->currentText();
-                        if(object->property("preference_choice_id").toBool()){
+                        if(object->property("preference_choice_id").toBool()||field["field"]=="theme"){
                             QJsonArray choices;for(int i=0;i<combo->count();++i)choices.append(QJsonObject{{"id",combo->itemData(i).toString()},{"text",combo->itemText(i)}});field["choices"]=choices;
                         }
                     }
@@ -465,7 +492,10 @@ void MainWindow::preferencesStep(const QString& operation){
                     QList<QWidget*> found;for(auto* w:dialog->findChildren<QWidget*>())if(w->property("preference_field").toString()==it.key())found.append(w);
                     if(found.size()!=1){workflowCases_.append(QJsonObject{{"name","preference_field_unavailable:"+it.key()},{"status","not_run"}});dialog->reject();finishWorkflow();return;}
                     auto* w=found.front();if(auto* s=qobject_cast<QSpinBox*>(w))s->setValue(it.value().toInt());
-                    else if(auto* e=qobject_cast<QLineEdit*>(w))e->setText(it.value().toString());
+                    else if(auto* e=qobject_cast<QLineEdit*>(w)){
+                        e->setText(it.value().toString());
+                        QMetaObject::invokeMethod(e,"editingFinished",Qt::DirectConnection);
+                    }
                     else if(auto* c=qobject_cast<QComboBox*>(w)){
                         if(w->property("preference_choice_id").toBool()){
                             const int i=c->findData(it.value().toString());if(i<0)throw std::runtime_error("Requested language choice unavailable");c->setCurrentIndex(i);
@@ -473,6 +503,9 @@ void MainWindow::preferencesStep(const QString& operation){
                         if(it.key()=="theme")QMetaObject::invokeMethod(c,"activated",Qt::DirectConnection,Q_ARG(int,c->currentIndex()));
                     }
                     else if(auto* c=qobject_cast<QCheckBox*>(w))c->setChecked(it.value().toBool());
+                    else if(auto* button=qobject_cast<QPushButton*>(w);button&&it.key()=="underwater_display.color"){
+                        chooseColor(button,QColor(it.value().toString()));
+                    }
                     else throw std::runtime_error("Unreviewed preference field adapter");
                 }
                 dialog->grab().save(workflowOutput_+"/dialog-"+QString::number(preferencesRequest_.value("next").toInt())+".png");
@@ -489,16 +522,177 @@ void MainWindow::preferencesStep(const QString& operation){
                     blocked.write("blocked");
                 }
                 if(command.contains("concurrent_write")){QFile f(preferencesStore_->filename());if(!f.open(QIODevice::WriteOnly))throw std::runtime_error("Cannot inject concurrent preference write");f.write(QJsonDocument(command.value("concurrent_write").toObject()).toJson());}
-                const auto action=command.value("action").toString("apply");QList<QPushButton*> buttons;
-                for(auto* b:dialog->findChildren<QPushButton*>())if(b->property("preference_action")==action)buttons.append(b);
-                if(buttons.size()!=1){workflowCases_.append(QJsonObject{{"name","preference_button_unavailable"},{"status","not_run"}});dialog->reject();finishWorkflow();return;}
-                buttons[0]->click();const auto message=dialog->property("preference_failure").toString();QString statusText,role;
+                const auto action=command.value("action").toString("apply");
+                bool confirmation=false;
+                for(auto* button:dialog->findChildren<QPushButton*>()){
+                    const auto operation=button->property("preference_action").toString();
+                    confirmation|=operation=="apply"||operation=="cancel";
+                    if(action=="reset_graphics"&&operation==action)button->click();
+                }
+                settle();
+                if(command["verify_control_edge_colors"].toBool()){
+                    auto* tabs=dialog->findChild<QTabWidget*>();
+                    const auto sheets=dialog->findChildren<QScrollArea*>();
+                    QScrollArea* graphics=nullptr;
+                    QList<QPushButton*> buttons;
+                    for(auto* sheet:sheets){
+                        for(auto* button:sheet->findChildren<QPushButton*>())
+                            if(button->property("color").isValid())buttons.append(button);
+                        if(!buttons.isEmpty()){graphics=sheet;break;}
+                    }
+                    if(!graphics)throw std::runtime_error("Graphics swatches are unavailable");
+                    const int originalTab=tabs->currentIndex();
+                    const auto originalSize=dialog->size();
+                    tabs->setCurrentWidget(graphics);
+                    const auto gridColumns=[&](int width){
+                        dialog->resize(width,originalSize.height());
+                        QApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+                        QSet<int> columns;
+                        for(auto* button:buttons)
+                            columns.insert(button->parentWidget()->mapTo(graphics->widget(),QPoint{}).x());
+                        return columns.size();
+                    };
+                    const auto narrowColumns=gridColumns(580),wideColumns=gridColumns(960);
+                    workflowCase("preferences.swatches-wrap-in-columns",narrowColumns>=2&&wideColumns>narrowColumns,
+                        QStringLiteral("Columns at narrow and wide sizes: %1, %2").arg(narrowColumns).arg(wideColumns));
+                    workflowCase("preferences.swatch-buttons-display-only-color",std::all_of(buttons.cbegin(),buttons.cend(),[](const auto* button){
+                        return button->text().isEmpty()&&!button->icon().isNull()&&!button->accessibleName().isEmpty();
+                    }));
+                    const bool swatchesFollowLabels=std::all_of(buttons.cbegin(),buttons.cend(),[](const QPushButton* button){
+                        const auto* label=button->parentWidget()->findChild<QLabel*>();
+                        if(!label||label->buddy()!=button)return false;
+                        const int gap=button->x()-label->geometry().right()-1;
+                        return gap>=0&&gap<=8&&label->width()==label->sizeHint().width();
+                    });
+                    workflowCase("preferences.swatches-follow-their-own-labels",swatchesFollowLabels);
+                    const auto frames=graphics->findChildren<QFrame*>("PreferenceColorGroup");
+                    QSet<QString> frameStyles,groupNames;
+                    for(const auto* frame:frames){
+                        frameStyles.insert(frame->styleSheet());
+                        for(const auto* label:frame->findChildren<QLabel*>())
+                            if(label->property("preference_color_group").isValid())
+                                groupNames.insert(label->property("preference_color_group").toString());
+                    }
+                    const bool swatchesFramed=std::all_of(buttons.cbegin(),buttons.cend(),[&](const auto* button){
+                        return std::count_if(frames.cbegin(),frames.cend(),[&](const auto* frame){return frame->isAncestorOf(button);})==1;
+                    });
+                    workflowCase("preferences.color-groups-have-distinct-frames",
+                                 frames.size()==5&&frameStyles.size()==5&&groupNames.size()==5&&swatchesFramed);
+                    graphics->widget()->grab().save(workflowOutput_+"/graphics-color-grid.png");
+                    dialog->resize(originalSize);
+                    tabs->setCurrentIndex(originalTab);
+                    HullView view;
+                    view.resize(500,300);
+                    view.setAnimationsEnabled(false);
+                    view.setStudioAppearance(true);
+                    view.setProjection(HullProjection::Profile);
+                    auto model=std::make_shared<fs::ModelSnapshot>();
+                    model->documentId="control-edge-color";
+                    model->bothSides=false;
+                    model->layers.append(fs::Layer{1,"Shell"});
+                    for(int z=0;z<2;++z)for(int x=0;x<3;++x)
+                        model->points.append(fs::ControlPoint{fs::EntityId(1+x+3*z),{double(x),0,double(z)}});
+                    model->faces={{1,1,{1,2,5,4}},{2,1,{2,3,6,5}}};
+                    model->edges={{1,1,4},{2,2,5,true},{3,3,6},{4,1,2},{5,2,3},{6,4,5},{7,5,6}};
+                    view.setSnapshot(model);view.selectDisplayMode("wireframe");view.setControlNetVisible(true);
+                    view.fit();view.finishPresentation();
+                    const QColor unified("#8426e5");
+                    view.setGraphicPreferences({{"edgecolor",int(unified.rgb()&0xffffff)},{"creaseedgecolor",0xff2727}});
+                    const auto distanceToColor=[&](const QImage& image,double x,QColor expected){
+                        const auto point=view.project({x,0,.5}).toPoint();
+                        int closest=3*255;
+                        for(int dy=-14;dy<=14;++dy)for(int dx=-2;dx<=2;++dx){
+                            const auto color=image.pixelColor(point+QPoint(dx,dy));
+                            closest=std::min(closest,std::abs(color.red()-expected.red())+
+                                std::abs(color.green()-expected.green())+std::abs(color.blue()-expected.blue()));
+                        }
+                        return closest;
+                    };
+                    const auto ordinary=view.image();
+                    ordinary.save(workflowOutput_+"/unified-control-edges.png");
+                    const int ordinaryDistance=distanceToColor(ordinary,0,unified);
+                    const int creaseDistance=distanceToColor(ordinary,1,unified);
+                    workflowCase("preferences.control-edges-share-color",
+                        ordinaryDistance<140&&creaseDistance<140,
+                        QStringLiteral("RGB distance to swatch at each edge after antialiasing: %1, %2")
+                            .arg(ordinaryDistance).arg(creaseDistance));
+                    view.selectDisplayMode("inspect_lines");
+                    const auto inspection=view.image();
+                    workflowCase("preferences.line-inspection-keeps-classification-colors",
+                        distanceToColor(inspection,0,QColor("#14699e"))<85&&
+                        distanceToColor(inspection,1,QColor("#ac4a00"))<85);
+                }
+                if(command["verify_graphics_history"].toBool()){
+                    const auto field=[dialog](const char* key){
+                        for(auto* widget:dialog->findChildren<QWidget*>())
+                            if(widget->property("preference_field")==key)return widget;
+                        return static_cast<QWidget*>(nullptr);
+                    };
+                    auto* tab=dialog->findChild<QTabWidget*>();
+                    auto* swatch=field("graphic.viewportcolor");
+                    for(int i=0;i<tab->count();++i)if(tab->widget(i)->isAncestorOf(swatch))tab->setCurrentIndex(i);
+                    QApplication::setActiveWindow(dialog);
+                    const auto pressHistory=[&](bool redo){
+                        auto* button=field("graphic.viewportcolor");
+                        button->setFocus();
+                        const auto modifiers=redo?(Qt::ControlModifier|Qt::ShiftModifier):Qt::KeyboardModifiers(Qt::ControlModifier);
+                        QKeyEvent press(QEvent::KeyPress,Qt::Key_Z,modifiers,QStringLiteral("z"));
+                        QApplication::sendEvent(button,&press);
+                        settle();
+                    };
+                    const auto matches=[&](const QJsonObject& values){
+                        const auto file=QJsonDocument::fromJson(bytes(preferencesStore_->filename())).object();
+                        const auto graphic=effectivePreferences(values)["graphic"].toObject();
+                        const QColor color=QColor::fromRgb(fs::document::resolvedPreferenceColors(graphic)["viewportcolor"].toInt());
+                        return preferences_==values&&dialog->values()==values&&file["values"]==values&&
+                               field("graphic.viewportcolor")->property("color").value<QColor>()==color;
+                    };
+                    const auto original=dialog->values();
+                    const bool modified=session_.modified(),canUndo=session_.canUndo(),canRedo=session_.canRedo();
+                    chooseColor(qobject_cast<QPushButton*>(swatch),QColor("#730CB7"));settle();
+                    const auto edited=preferences_;
+                    workflowCase("preferences.color-applied-before-undo",edited!=original&&matches(edited));
+                    pressHistory(false);
+                    workflowCase("preferences.color-undo-restores-settings-and-swatch",matches(original));
+                    pressHistory(true);
+                    workflowCase("preferences.color-redo-restores-settings-and-swatch",matches(edited));
+                    auto* size=qobject_cast<QSpinBox*>(field("graphic.pointsize"));
+                    const int pointSize=size->value()+1;size->setValue(pointSize);settle();
+                    pressHistory(false);
+                    workflowCase("preferences.color-undo-keeps-later-point-size",
+                        preferences_.value("graphic").toObject()["pointsize"]==pointSize&&
+                        preferences_.value("graphic").toObject().value("viewportcolor")==
+                            original.value("graphic").toObject().value("viewportcolor"));
+                    pressHistory(true);
+                    const auto beforeReset=preferences_;
+                    for(auto* button:dialog->findChildren<QPushButton*>())
+                        if(button->property("preference_action")=="reset_graphics"){button->click();break;}
+                    settle();
+                    pressHistory(false);
+                    workflowCase("preferences.graphics-reset-undo",matches(beforeReset));
+                    auto* theme=qobject_cast<QComboBox*>(field("theme"));
+                    if(theme->count()>1){
+                        theme->setCurrentIndex(1);
+                        QMetaObject::invokeMethod(theme,"activated",Qt::DirectConnection,Q_ARG(int,1));
+                        settle();
+                        const auto preset=preferences_;
+                        pressHistory(false);
+                        workflowCase("preferences.palette-preset-undo",preset.contains("theme")&&matches(beforeReset));
+                        pressHistory(true);
+                        workflowCase("preferences.palette-preset-redo",matches(preset));
+                    }
+                    workflowCase("preferences.graphics-history-preserves-document-history",
+                        session_.modified()==modified&&session_.canUndo()==canUndo&&session_.canRedo()==canRedo);
+                }
+                workflowCase("preferences-autosave-keeps-window-open",dialog->isVisible()&&!confirmation);
+                const auto message=dialog->property("preference_failure").toString();QString statusText,role;
                 for(auto* label:dialog->findChildren<QLabel*>())if(label->property("preference_error").toBool()){statusText=label->text();role=label->property("studio_message_role").toString();}
-                preferencesRequest_["dialog_observation"]=QJsonObject{{"fields",discovered},{"message",message},{"status_text",statusText},{"message_role",role},{"draft",dialog->values()},{"imports",imports}};
+                preferencesRequest_["dialog_observation"]=QJsonObject{{"fields",discovered},{"color_groups",colorGroups},{"message",message},{"status_text",statusText},{"message_role",role},{"draft",dialog->values()},{"imports",imports}};
                 QFile evidence(workflowOutput_+"/dialog-"+QString::number(preferencesRequest_.value("next").toInt())+".json");
                 if(evidence.open(QIODevice::WriteOnly))evidence.write(QJsonDocument(preferencesRequest_.value("dialog_observation").toObject()).toJson());
-                if(action=="apply"&&!command.value("reject_after_apply").toBool()&&!preferencesPending_&&dialog->result()!=QDialog::Accepted){workflowCase("preferences_apply_completed",false,message);dialog->reject();}
-                if(command.value("reject_after_apply").toBool()||action=="reset_graphics")dialog->reject();
+                if(action=="apply"&&!command.value("reject_after_apply").toBool()&&!message.isEmpty())
+                    workflowCase("preferences_apply_completed",false,message);
+                dialog->close();
             }catch(const std::exception& e){if(preferencesDialog_){preferencesDialog_->setBusy(false);preferencesDialog_->reject();}finishWorkflow(QString::fromUtf8(e.what()));}});
             actions[0]->trigger();
         }catch(const std::exception& e){finishWorkflow(QString::fromUtf8(e.what()));}});

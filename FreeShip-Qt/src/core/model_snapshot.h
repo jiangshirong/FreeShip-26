@@ -68,6 +68,7 @@ struct OverlayData {
 };
 // Independent of widgets and renderer state. IDs identify editable source
 // entities; triangle vertices are derived display geometry, never edit targets.
+class SnapshotSurface;
 class ModelSnapshot {
 public:
     int lastLayerNumber=-1,newLayerColor=0;
@@ -93,6 +94,8 @@ public:
     double curvatureScale=1;
     quint32 curvatureColor=0xff00ff;
     quint32 underwaterColor=0;
+    std::optional<bool> underwaterShadeOverride;
+    std::optional<quint32> underwaterColorOverride;
     int underwaterColorAlpha=255;
     bool generateAuxiliaryReports=false;
     QVector<ControlPoint> points;
@@ -112,9 +115,15 @@ public:
     const BackgroundImage* background(int view)const;
     void loadSectionDisplay(const QByteArray& data);
     void verifySurfaceDisplay(const QByteArray& data) const;
+    // For a publication that already parsed the exact checksum-verified bytes.
+    void verifyDecodedSurfaceDisplay(const QJsonObject& root) const;
     void loadSurfaceDisplay(const QByteArray& data);
+    void loadDecodedSurfaceDisplay(const SnapshotSurface& display);
+private:
+    void applySurfaceTopology(const QJsonObject& root);
+public:
     static ModelSnapshot load(const QString& filename);
-    static ModelSnapshot fromBytes(const QByteArray& data);
+    static ModelSnapshot fromBytes(const QByteArray& data,const SnapshotSurface* alreadyDecoded=nullptr);
     QByteArray displayCache(const QByteArray& canonicalModel) const;
     static ModelSnapshot fromDisplayCache(const QByteArray& data,const QString& document);
     bool isCachedPreview() const {return cachedPreview_;}
@@ -123,7 +132,8 @@ public:
     }
     // A checked metadata-only successor retains all validated geometry. The
     // canonical document hash lets the client verify the complete new file.
-    ModelSnapshot withMetadata(const QJsonObject &patch,const QString &document,quint64 nextRevision) const;
+    ModelSnapshot withMetadata(const QJsonObject &patch,const QString &document,quint64 nextRevision,
+                               std::optional<int> historyLayer={}) const;
     QByteArray sourceDigest() const {return sourceDigest_;}
     bool sameDrawing(const ModelSnapshot &other) const {return drawingIdentity_==other.drawingIdentity_;}
     bool reuseSurfaceDisplay(const ModelSnapshot &previous) {

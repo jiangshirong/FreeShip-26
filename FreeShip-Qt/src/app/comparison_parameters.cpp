@@ -21,7 +21,11 @@
 #include <QTemporaryDir>
 #include <QThreadPool>
 #include <QVBoxLayout>
+#include <algorithm>
+#include <atomic>
 #include <cmath>
+#include <mutex>
+#include <vector>
 
 namespace {
 enum Column { StatusColumn, ModelColumn, FirstMetricColumn };
@@ -35,6 +39,16 @@ constexpr Metric metrics[]={
     {"wetted_area_m2","湿表面积","m²"},{"cp","棱形系数",""},{"lcb_m","浮心 X","m"}
 };
 }
+
+struct ComparisonParameters::Solvers {
+    struct Hull {
+        // Only one request at a time may use this hull's numerical caches.
+        std::mutex mutex;
+        std::unique_ptr<fs::document::Hydrostatics> solver;
+    };
+    explicit Solvers(size_t count):hulls(count){}
+    std::vector<Hull> hulls;
+};
 
 ComparisonParameters::ComparisonParameters(QString currentName,double designDraftM,QWidget* parent):QWidget(parent){
     auto* layout=new QVBoxLayout(this);auto* fields=new QGridLayout;layout->addLayout(fields);
@@ -105,6 +119,7 @@ void ComparisonParameters::invalidate(){
 }
 void ComparisonParameters::setModels(QVector<ComparisonHull> hulls,bool pending){
     hulls_=std::move(hulls);pending_=pending;
+    solvers_=std::make_shared<Solvers>(size_t(hulls_.size()));
     table_->setRowCount(hulls_.size());invalidate();
     for(int row=0;row<hulls_.size();++row){
         const auto& label=hulls_[row].label;
@@ -161,18 +176,37 @@ void ComparisonParameters::calculate(){
         calculate_->setEnabled(true);
     });
     watcher->setFuture(promise->future());
-    QThreadPool::globalInstance()->start([promise,dir,input,hulls=hulls_]{
-        promise->start();const auto cancel=dir->filePath("cancel");
-        auto side=[&](const ComparisonHull& hull)->QJsonObject{
-            if(!hull.model)return {{"error",hull.error}};
-            try{return fs::document::Hydrostatics::comparison(*hull.model,input,cancel);}
-            catch(const std::exception& e){return {{"error",QString::fromUtf8(e.what())}};}
-        };
-        Result result;
-        for(const auto& hull:hulls){
-            if(QFile::exists(cancel))break;
-            result.append(side(hull));
-        }
-        promise->addResult(std::move(result));promise->finish();
-    });
+    auto* pool=QThreadPool::globalInstance();
+    const int workers=std::clamp(pool->maxThreadCount(),1,2);
+    auto remaining=std::make_shared<std::atomic_int>(workers);
+    auto rows=std::make_shared<std::vector<QJsonObject>>(size_t(hulls_.size()));
+    const auto cancel=dir->filePath("cancel");
+    promise->start();
+    for(int worker=0;worker<workers;++worker){
+        pool->start([promise,dir,input,hulls=hulls_,solvers=solvers_,rows,remaining,workers,worker,cancel]{
+            for(qsizetype row=worker;row<hulls.size();row+=workers){
+                auto& state=solvers->hulls[size_t(row)];
+                const std::lock_guard lock(state.mutex);
+                if(QFile::exists(cancel))break;
+                const auto& hull=hulls[row];
+                auto& result=(*rows)[size_t(row)];
+                if(!hull.model){
+                    result={{"error",hull.error}};
+                    continue;
+                }
+                try {
+                    if(!state.solver)state.solver=std::make_unique<fs::document::Hydrostatics>(*hull.model);
+                    result=state.solver->comparison(input,cancel);
+                }catch(const std::exception& e){
+                    result={{"error",QString::fromUtf8(e.what())}};
+                }
+            }
+            if(remaining->fetch_sub(1)==1){
+                Result result;
+                result.reserve(qsizetype(rows->size()));
+                for(auto& row:*rows)result.append(std::move(row));
+                promise->addResult(std::move(result));promise->finish();
+            }
+        });
+    }
 }

@@ -286,6 +286,13 @@ QJsonObject preferenceValues(const QString &directory, const QJsonObject &overri
             graphic[it.key()]=checkedInteger(it.value(),INT_MIN,INT_MAX);
         }
     }
+    if(overrides.contains("underwater_display")){
+        const auto choice=overrides["underwater_display"];
+        if(!choice.isObject())invalid("图形设置无效。");
+        const auto fields=choice.toObject();
+        if(fields.contains("shade")&&!fields["shade"].isBool())invalid("图形设置无效。");
+        if(fields.contains("color"))checkedInteger(fields["color"],0,0xffffff);
+    }
     const int point=graphic["pointsize"], font=graphic["fontsize"], alpha=graphic["underwatercoloralpha"];
     if (point<1 || point>100 || font<1 || font>200 || alpha<0 || alpha>255 || undo>1048576) invalid("点大小、字号、透明度或撤销内存超出支持范围。");
     encodeFbmText("FreeShip",encoding); // Reject unsupported encodings before adopting a document.
@@ -425,6 +432,8 @@ QJsonObject documentContext(const QString &directory, const QJsonArray &requeste
         {"control_curve_color",rgb(graphic["controlcurvecolor"])},{"marker_color",rgb(graphic["markercolor"])},
         {"normal_color",overrides.contains("theme") || overrides["graphic"].toObject().contains("normalcolor") ? rgb(graphic["normalcolor"]) : 0xc0c0c0},{"grid_font_color",rgb(graphic["gridfontcolor"])},
         {"hydro_color",rgb(graphic["hydrostaticsfontcolor"])},{"point_size",point},{"font_size",font}};
+    if(const auto underwater=overrides["underwater_display"].toObject();!underwater.isEmpty())
+        presentation["underwater_display"]=underwater;
     QJsonArray palette, sections;
     for(auto c:DxfPalette)palette.append(c);
     for(const QString name:{"station","buttock","waterline","diagonal"}) {

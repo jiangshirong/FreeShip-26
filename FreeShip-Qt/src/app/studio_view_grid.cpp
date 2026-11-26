@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 #include "studio_view_grid.h"
+#include "render/hull_view.h"
 #include <QEvent>
 #include <QDynamicPropertyChangeEvent>
 #include <QGridLayout>
@@ -21,10 +22,15 @@ public:
         setMouseTracking(true);setAttribute(Qt::WA_NoSystemBackground);hide();
     }
     std::function<void(QPoint)> onDrag;
+    std::function<void(bool)> onTracking;
 protected:
+    bool event(QEvent* e)override{
+        if(e->type()==QEvent::UngrabMouse)stopTracking();
+        return QWidget::event(e);
+    }
     void mousePressEvent(QMouseEvent* e)override{
         if(e->button()!=Qt::LeftButton){e->ignore();return;}
-        dragging_=true;update();e->accept();
+        dragging_=true;if(onTracking)onTracking(true);update();e->accept();
     }
     void mouseMoveEvent(QMouseEvent* e)override{
         if(dragging_&&(e->buttons()&Qt::LeftButton)){
@@ -33,11 +39,14 @@ protected:
         }QWidget::mouseMoveEvent(e);
     }
     void mouseReleaseEvent(QMouseEvent* e)override{
-        if(e->button()==Qt::LeftButton){dragging_=false;update();e->accept();return;}e->ignore();
+        if(e->button()==Qt::LeftButton){
+            if(dragging_&&onDrag)onDrag(parentWidget()->mapFromGlobal(e->globalPosition().toPoint()));
+            stopTracking();e->accept();return;
+        }e->ignore();
     }
     void enterEvent(QEnterEvent* e)override{hover_=true;update();QWidget::enterEvent(e);}
     void leaveEvent(QEvent* e)override{hover_=false;update();QWidget::leaveEvent(e);}
-    void hideEvent(QHideEvent* e)override{dragging_=false;hover_=false;QWidget::hideEvent(e);}
+    void hideEvent(QHideEvent* e)override{stopTracking();hover_=false;QWidget::hideEvent(e);}
     void paintEvent(QPaintEvent*)override{
         // The layout gap already marks the seam. Paint feedback only while
         // interacting with it, so the hit areas don't add a second cross.
@@ -49,16 +58,33 @@ protected:
         if(axes_&2)p.drawLine(0,height()/2,width(),height()/2);
     }
 private:
+    void stopTracking(){
+        if(!dragging_)return;
+        dragging_=false;
+        if(onTracking)onTracking(false);
+        update();
+    }
     int axes_;bool dragging_=false,hover_=false;
 };
 class GridController final:public QObject {
 public:
     GridController(QGridLayout* grid,const QList<QWidget*>& frames):QObject(grid),grid_(grid),owner_(grid->parentWidget()){
         owner_->installEventFilter(this);grid->setSpacing(6);
-        for(auto* frame:frames)frame->installEventFilter(this);
+        for(auto* frame:frames){
+            frame->installEventFilter(this);
+            for(auto* widget:frame->findChildren<QWidget*>(QString{},Qt::FindDirectChildrenOnly))
+                if(auto* view=dynamic_cast<HullView*>(widget)){
+                    view->setProperty("studio_view_divider_preview",true);
+                    views_.append(view);
+                }
+        }
         for(int i=0;i<3;++i){
             const int axes=i+1;auto* handle=new Divider(owner_,axes);handles_[i]=handle;
             handle->onDrag=[this,axes](QPoint point){drag(axes,point);};
+            handle->onTracking=[controller=QPointer<GridController>(this)](bool tracking){
+                if(controller)for(const auto& view:controller->views_)
+                    if(view&&(!tracking||view->isVisible()))view->setViewDividerDragging(tracking);
+            };
         }
         shape(4);
     }
@@ -135,6 +161,7 @@ private:
             if(overlay->isVisible()&&overlay->property("studio_overlay").toBool())overlay->raise();
     }
     QGridLayout* grid_;QPointer<QWidget> owner_;Divider* handles_[3]{};
+    QList<QPointer<HullView>> views_;
     double left_=.5,top_=.5;int rows_=2,columns_=2;bool queued_=false;
 };
 GridController* controller(QGridLayout* grid){for(auto* child:grid->children())if(auto* c=dynamic_cast<GridController*>(child))return c;return nullptr;}

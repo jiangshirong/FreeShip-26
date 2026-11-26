@@ -16,9 +16,10 @@ struct ComparisonConditions {
 };
 class Hydrostatics {
 public:
-    explicit Hydrostatics(const Fbm &source,const QJsonObject &bindings={});
+    explicit Hydrostatics(const Fbm &source,const QJsonObject &bindings={},const QJsonValue& layerIds=QJsonValue::Undefined);
     ~Hydrostatics();
-    static QJsonObject comparison(const Fbm&,const ComparisonConditions&,const QString& cancelFile);
+    // Use a dedicated solver per comparison hull. The job owns it while solving.
+    QJsonObject comparison(const ComparisonConditions&,const QString& cancelFile);
     QJsonObject calculate(const QJsonObject &request, const QString &cancelFile,
                           const std::function<void(int,int)> &progress={});
     QJsonObject defaults(const QString &encoding);

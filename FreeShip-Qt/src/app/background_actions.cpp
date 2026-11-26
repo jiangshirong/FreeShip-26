@@ -14,8 +14,10 @@
 #include <QMessageBox>
 #include <QPushButton>
 #include <QSaveFile>
+#include <QSignalBlocker>
 #include <QSpinBox>
 #include <QStatusBar>
+#include <QTimer>
 #include <QVBoxLayout>
 namespace {
 void buttons(QDialog& dialog,QVBoxLayout& layout){
@@ -67,10 +69,38 @@ void MainWindow::backgroundAction(HullView* view,const QString& operation,QPoint
     }
     if(operation=="alpha"||operation=="tolerance"){
         QDialog dialog(this);dialog.setWindowTitle(operation=="alpha"?uiText("背景图片混合"):uiText("透明色容差"));dialog.setProperty("background_operation",operation);
+        setStudioWindowIcon(&dialog,"BackgroundImage");
         QVBoxLayout layout(&dialog);auto* form=new QFormLayout;layout.addLayout(form);QSpinBox value;
-        value.setRange(0,255);value.setValue(operation=="alpha"?image->alpha:image->tolerance);value.setProperty("background_field",operation);
-        form->addRow(operation=="alpha"?uiText("不透明度（0–255）"):uiText("颜色容差（0–255）"),&value);buttons(dialog,layout);
-        if(runStudioDialog(dialog)==QDialog::Accepted&&current())session_.editBackground(view->backgroundView(),"update",{{"changes",QJsonObject{{operation,value.value()}}}});return;
+        const auto readValue=[&](const fs::BackgroundImage& current){return operation=="alpha"?current.alpha:current.tolerance;};
+        const auto digest=image->digest;
+        const int projection=view->backgroundView();
+        const auto boundImage=[&]() -> const fs::BackgroundImage* {
+            const auto model=session_.model();
+            const auto* latest=model&&model->documentId==original->documentId?model->background(projection):nullptr;
+            return latest&&latest->digest==digest?latest:nullptr;
+        };
+        value.setRange(0,255);value.setValue(readValue(*image));value.setKeyboardTracking(false);
+        value.setProperty("background_field",operation);
+        form->addRow(operation=="alpha"?uiText("不透明度（0–255）"):uiText("颜色容差（0–255）"),&value);
+        connect(&value,&QSpinBox::valueChanged,&dialog,[&](int next){
+            const auto* latest=boundImage();
+            if(latest&&!session_.busy()&&readValue(*latest)!=next){
+                session_.editBackground(projection,"update",{{"changes",QJsonObject{{operation,next}}}});
+                value.setEnabled(!session_.busy());
+            }
+        });
+        QTimer refresh(&dialog);
+        connect(&refresh,&QTimer::timeout,&dialog,[&]{
+            const auto* latest=boundImage();
+            if(!latest){dialog.reject();return;}
+            const bool idle=!session_.busy();
+            if(idle&&value.value()!=readValue(*latest)){
+                const QSignalBlocker block(&value);value.setValue(readValue(*latest));
+            }
+            value.setEnabled(idle);
+        });
+        refresh.start(40);
+        runStudioDialog(dialog);return;
     }
     if(operation=="export"){
         QFileDialog dialog(this,uiText("保存背景图片"),preferenceFileLocation("export",QFileInfo(session_.sourcePath()).path()));dialog.setProperty("background_operation","export_file");

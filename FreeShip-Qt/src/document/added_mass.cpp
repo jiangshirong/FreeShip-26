@@ -118,6 +118,7 @@ QJsonObject addedMass(const Fbm& source,const QJsonObject& request,const QString
     input.documentId=request["expected_document_id"].toString();input.revision=quint64(request["expected_revision"].toDouble());
     if(!model)bad("当前工程几何尚未就绪，请重新打开船模。");
     auto options=values;options["panel_type"]=values["panel_type"].toInt()+1;options["object_type"]=values["object_type"].toInt()+1;
+    if(request.contains("layer_ids"))options["layer_ids"]=request["layer_ids"];
     auto grid=grid::build(input,*model,"addmass","m",options);check();
     QDir().mkpath(output+"/solver-files");write(output+"/solver-files/INA",grid.data);
     QTemporaryDir temp(QDir::tempPath()+"/fs-addmass-XXXXXX");if(!temp.isValid())bad("无法建立计算临时目录。");QString work=temp.path();
@@ -146,7 +147,7 @@ QJsonObject addedMass(const Fbm& source,const QJsonObject& request,const QString
     const auto raw=read(work+"/OUTA");auto parsed=parseAddedMass(raw,values);QJsonArray warnings=parsed["warnings"].toArray(),tables=parsed["tables"].toArray();
     QJsonObject empirical{{"status","not_applicable"}};
     const int type=values["object_type"].toInt();if(type==2||type==3){
-        const double metres=settings.imperial?.3048:1.;if(!prepared||!prepared->updateCompatibleSource(source,bindings))prepared=std::make_shared<Hydrostatics>(source,bindings);auto result=prepared->calculate({{"mode","single"},{"draft",values["draft"].toDouble()/metres},{"heel",0},{"trim",0}},output+"/cancel.flag");auto rows=result["rows"].toArray();
+        const double metres=settings.imperial?.3048:1.;if(request.contains("layer_ids")||!prepared||!prepared->updateCompatibleSource(source,bindings))prepared=std::make_shared<Hydrostatics>(source,bindings,request.value("layer_ids"));auto result=prepared->calculate({{"mode","single"},{"draft",values["draft"].toDouble()/metres},{"heel",0},{"trim",0}},output+"/cancel.flag");auto rows=result["rows"].toArray();
         if(!rows.isEmpty()&&rows[0].toObject()["status"]=="ok"){
             auto h=rows[0].toObject();const double denominator=h["lwl"].toDouble()*h["bwl"].toDouble()*(values["draft"].toDouble()/metres);
             if(denominator<=0)bad("无法取得经验公式的方形系数。");

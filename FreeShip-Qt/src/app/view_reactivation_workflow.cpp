@@ -63,10 +63,300 @@ void MainWindow::auditViewReactivation(){
     workflowArtifacts_["view_layout_lifecycle"]=samples;
 }
 
-void MainWindow::auditViewGridResize(bool frameTiming){
+void MainWindow::auditViewGridResize(bool frameTiming,bool shaded){
     const auto wait=[](int ms){QEventLoop loop;QTimer::singleShot(ms,&loop,&QEventLoop::quit);loop.exec();};
     auto* canvas=viewGrid_->parentWidget();const auto original=session_.model();const bool modified=session_.modified();
     QJsonArray samples;QDir().mkpath(workflowOutput_+"/views");
+    if(shaded){
+        if(!original)throw std::runtime_error("Shaded divider replay requires a model");
+        showStudioMainWindow(this);
+        tabs_->setCurrentIndex(0);
+        for(auto* view:views_)view->finishPresentation();
+        wait(280);
+        QWidget* handle=nullptr;
+        for(auto* child:canvas->findChildren<QWidget*>(QString{},Qt::FindDirectChildrenOnly))
+            if(child->property("studio_view_divider_axis")=="xy"&&child->isVisible())handle=child;
+        if(!handle)throw std::runtime_error("Shaded divider replay requires visible four-view layout");
+        const auto send=[&](QEvent::Type type,QPoint at,Qt::MouseButton button,Qt::MouseButtons buttons){
+            QMouseEvent event(type,handle->mapFrom(canvas,at),canvas->mapToGlobal(at),button,buttons,Qt::NoModifier);
+            QApplication::sendEvent(handle,&event);
+        };
+        const auto renders=[&]{
+            int total=0;for(auto* view:views_)total+=view->viewSettingsEvidence()["fill_renders"].toInt();
+            return total;
+        };
+        const auto anchors=[&]{
+            QVector<QPointF> pixels;for(auto* view:views_)pixels<<view->project(original->minimum)<<view->project(original->maximum);
+            return pixels;
+        };
+        const std::array<QString,4> modes{"fill","shade_1","shade_2","shade_3"};
+        QJsonObject modesEvidence;
+        for(const auto& mode:modes){
+            for(auto* view:views_){
+                if(!view->selectDisplayMode(mode))throw std::runtime_error("Display mode unavailable");
+                view->fit();
+            }
+            wait(280);
+            const QPoint start=handle->geometry().center();
+            const int shadeBefore=renders();
+            const QPoint excursion(std::max(12,canvas->width()/13),std::max(8,canvas->height()/16));
+            send(QEvent::MouseButtonPress,start,Qt::LeftButton,Qt::LeftButton);
+            QJsonArray timings;
+            bool complete=true,tracks=true;
+            QPoint at=start;
+            for(int step=1;step<=24;++step){
+                at=start+(step<=12?excursion*step/12:excursion-excursion*(step-12)/18);
+                std::array<quint64,4> paints;
+                for(int j=0;j<4;++j)paints[j]=views_[j]->paintCount;
+                QElapsedTimer elapsed;elapsed.start();
+                send(QEvent::MouseMove,at,Qt::NoButton,Qt::LeftButton);
+                QApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+                timings.append(elapsed.nsecsElapsed()/1e6);
+                for(int j=0;j<4;++j)complete&=paints[j]!=views_[j]->paintCount;
+                tracks&=(handle->geometry().center()-at).manhattanLength()<=4;
+            }
+            const auto beforeRelease=anchors();
+            const int duringRenders=renders()-shadeBefore;
+            QElapsedTimer release;release.start();
+            send(QEvent::MouseButtonRelease,at,Qt::LeftButton,Qt::NoButton);
+            QApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+            const double releaseMs=release.nsecsElapsed()/1e6;
+            const bool sameProjection=beforeRelease==anchors();
+            QJsonArray finalImages,legends;
+            for(int j=0;j<4;++j){
+                auto* view=views_[j];
+                const auto path=workflowOutput_+"/views/shaded-divider-"+mode+"-"+QString::number(j)+".png";
+                legends.append(view->viewSettingsEvidence()["shade_legend"]);
+                if(!view->image(view->devicePixelRatioF()).save(path))throw std::runtime_error("Cannot capture settled shade");
+                finalImages.append(path);
+            }
+            modesEvidence[mode]=QJsonObject{{"frame_ms",timings},{"fill_renders",duringRenders},
+                {"release_ms",releaseMs},{"final_images",finalImages},{"legends",legends}};
+            workflowCase("shaded-divider."+mode+".layout",complete&&tracks&&sameProjection);
+        }
+        workflowCase("shaded-divider.document-unmodified",session_.model()==original&&session_.modified()==modified);
+        workflowArtifacts_["shaded_divider"]=QJsonObject{{"modes",modesEvidence},
+            {"control_faces",int(original->faces.size())},{"triangles",int(original->triangles.size())},
+            {"dpr",views_[0]->devicePixelRatioF()}};
+        return;
+    }
+    if(exchangeWorkflow_){
+        if(!original)throw std::runtime_error("The viewport measurement requires an imported model");
+        showStudioMainWindow(this);
+        tabs_->setCurrentIndex(0);
+        for(auto* view:views_)view->finishPresentation();
+        wait(250);
+        QWidget* handle=nullptr;
+        for(auto* child:canvas->findChildren<QWidget*>(QString{},Qt::FindDirectChildrenOnly))
+            if(child->property("studio_view_divider_axis")=="xy"&&child->isVisible())handle=child;
+        workflowCase("dense-viewport.center-handle",handle!=nullptr);
+        if(!handle)return;
+        const auto send=[&](QEvent::Type type,QPoint at,Qt::MouseButton button,Qt::MouseButtons buttons){
+            QMouseEvent event(type,handle->mapFrom(canvas,at),canvas->mapToGlobal(at),button,buttons,Qt::NoModifier);
+            QApplication::sendEvent(handle,&event);
+        };
+        QJsonObject metrics{{"faces",int(original->faces.size())},{"edges",int(original->edges.size())},
+                            {"points",int(original->points.size())},{"render_triangles",int(original->triangles.size())},
+                            {"show_normals",original->showNormals},{"surface_normals",int(original->surfaceNormals.size())},
+                            {"dpr",views_[0]->devicePixelRatioF()}};
+        QJsonArray modes;
+        for(auto* view:views_)modes.append(view->displayModeKey());
+        metrics["initial_display_modes"]=modes;
+        const QPoint start=handle->geometry().center();
+        const auto anchors=[&]{QVector<QPointF> points;for(auto* view:views_)points<<view->project(original->minimum)<<view->project(original->maximum);return points;};
+        send(QEvent::MouseButtonPress,start,Qt::LeftButton,Qt::LeftButton);
+        QJsonArray frames;
+        bool layoutFollows=true,allPaint=true;
+        QPoint at=start;
+        for(int i=1;i<=20;++i){
+            at=start+QPoint(canvas->width()*i/200,canvas->height()*i/220);
+            std::array<quint64,4> counts;
+            for(int j=0;j<4;++j)counts[j]=views_[j]->paintCount;
+            QElapsedTimer elapsed;elapsed.start();
+            send(QEvent::MouseMove,at,Qt::NoButton,Qt::LeftButton);
+            const double eventMs=elapsed.nsecsElapsed()/1e6;
+            QApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+            const double frameMs=elapsed.nsecsElapsed()/1e6;
+            QJsonArray paints;
+            for(int j=0;j<4;++j){
+                auto* view=views_[j];const bool painted=counts[j]!=view->paintCount;
+                allPaint&=painted;paints.append(painted?view->lastPaintMs:-1.);
+            }
+            layoutFollows&=(handle->geometry().center()-at).manhattanLength()<=4;
+            frames.append(QJsonObject{{"event_ms",eventMs},{"frame_ms",frameMs},{"view_ms",paints}});
+        }
+        const auto beforeRelease=anchors();
+        QElapsedTimer release;release.start();
+        send(QEvent::MouseButtonRelease,at,Qt::LeftButton,Qt::NoButton);
+        QApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+        metrics["divider_release_ms"]=release.nsecsElapsed()/1e6;
+        workflowCase("dense-viewport.divider-follows-cursor",layoutFollows);
+        workflowCase("dense-viewport.all-four-views-paint",allPaint);
+        workflowCase("dense-viewport.release-keeps-projection",anchors()==beforeRelease);
+        metrics["divider_frames"]=frames;
+        grab().save(workflowOutput_+"/views/dense-divider-final.png");
+
+        setSelectionKind(HullEntity::Edge);
+        auto* view=views_[1];
+        view->selectDisplayMode("inspect_lines");
+        QSet<fs::EntityId> edges;
+        for(const auto& edge:original->edges)if(edge.id%8!=0)edges.insert(edge.id);
+        const auto paint=[&]{
+            QElapsedTimer elapsed;elapsed.start();view->repaint();
+            return elapsed.nsecsElapsed()/1e6;
+        };
+        QJsonArray unselected, selected, selectedAll;
+        for(int i=0;i<12;++i)unselected.append(paint());
+        QElapsedTimer select;select.start();
+        selectEntities(HullEntity::Edge,edges);
+        metrics["selection_event_ms"]=select.nsecsElapsed()/1e6;
+        QApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+        metrics["selection_commit_ms"]=select.nsecsElapsed()/1e6;
+        metrics["selected_edges"]=view->selectedEntities().size();
+        workflowCase("dense-viewport.complete-edge-selection",edges.size()>1000&&view->selectedEntities()==edges);
+        for(int i=0;i<12;++i)selected.append(paint());
+        for(int i=0;i<12;++i){
+            QElapsedTimer elapsed;elapsed.start();
+            for(auto* viewport:views_)viewport->update();
+            QApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+            selectedAll.append(elapsed.nsecsElapsed()/1e6);
+        }
+        metrics["no_selection_paint_ms"]=unselected;
+        metrics["selected_paint_ms"]=selected;
+        metrics["selected_four_view_ms"]=selectedAll;
+        view->grab().save(workflowOutput_+"/views/dense-selected-edges.png");
+        auto* plan=views_[2];
+        plan->selectDisplayMode("inspect_lines");
+        selectEntities(HullEntity::Edge,edges);
+        QApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+        workflowCase("dense-viewport.plan-keeps-selection",plan->selectedEntities()==edges);
+        plan->grab().save(workflowOutput_+"/views/dense-selected-plan.png");
+
+        setSelectionKind(HullEntity::Face);
+        QSet<fs::EntityId> faces;
+        for(const auto& face:original->faces)if(face.id%8!=0)faces.insert(face.id);
+        const auto facePan=[&](HullView* viewport,const QString& mode){
+            viewport->selectDisplayMode(mode);
+            viewport->fit();
+            wait(280);
+            selectEntities(HullEntity::Face,faces);
+            const auto sendToView=[&](QEvent::Type type,QPoint p,Qt::MouseButton button,Qt::MouseButtons buttons){
+                QMouseEvent event(type,p,viewport->mapToGlobal(p),button,buttons,Qt::NoModifier);
+                QApplication::sendEvent(viewport,&event);
+            };
+            const auto hasSelectionInk=[](const QImage& image){
+                const auto ink=QColor("#1455b0").rgb();
+                for(int y=0;y<image.height();++y)for(int x=0;x<image.width();++x)
+                    if(image.pixel(x,y)==ink)return true;
+                return false;
+            };
+            const auto before=viewport->grab().toImage();
+            const auto fillRenders=viewport->overlayEvidence()["fill_renders"].toInt();
+            const auto anchor=viewport->project(original->minimum);
+            const auto start=viewport->rect().center();
+            sendToView(QEvent::MouseButtonPress,start,Qt::RightButton,Qt::RightButton);
+            QJsonArray times;
+            bool follows=true,paints=true;
+            for(int i=1;i<=48;++i){
+                const auto displacement=QPoint(3*i,i/2);
+                const auto count=viewport->paintCount;
+                QElapsedTimer elapsed;elapsed.start();
+                sendToView(QEvent::MouseMove,start+displacement,Qt::NoButton,Qt::RightButton);
+                viewport->repaint();
+                times.append(elapsed.nsecsElapsed()/1e6);
+                paints&=viewport->paintCount!=count;
+                follows&=QLineF(viewport->project(original->minimum),anchor+displacement).length()<.01;
+            }
+            sendToView(QEvent::MouseButtonRelease,start+QPoint(144,24),Qt::RightButton,Qt::NoButton);
+            const auto after=viewport->grab().toImage();
+            metrics[mode+"_fill_renders_during_pan"]=viewport->overlayEvidence()["fill_renders"].toInt()-fillRenders;
+            before.save(workflowOutput_+"/views/dense-face-"+mode+"-before.png");
+            after.save(workflowOutput_+"/views/dense-face-"+mode+"-after.png");
+            workflowCase("dense-viewport."+mode+".face-pan",paints&&follows&&faces.size()>1000&&
+                         viewport->selectedEntities()==faces&&hasSelectionInk(before)&&hasSelectionInk(after));
+            return times;
+        };
+        metrics["selected_faces"]=faces.size();
+        metrics["selected_face_pan_inspection_ms"]=facePan(views_[0],"inspect_faces");
+        metrics["selected_face_pan_fill_ms"]=facePan(views_[3],"fill");
+        // Reproduce the mixed view modes and large existing selection from the user's screenshot.
+        for(auto* viewport:views_)viewport->selectDisplayMode("wireframe");
+        setSelectionKind(HullEntity::Point);
+        auto* faceView=views_[0];
+        faceView->selectDisplayMode("inspect_faces");
+        for(auto* viewport:views_)viewport->fit();
+        wait(300);
+        selectEntities(HullEntity::Face,faces);
+        QApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+        const auto sendStroke=[&](QEvent::Type type,QPoint at,Qt::MouseButton button,Qt::MouseButtons buttons){
+            QMouseEvent event(type,at,faceView->mapToGlobal(at),button,buttons,Qt::ControlModifier);
+            QApplication::sendEvent(faceView,&event);
+        };
+        const QPoint origin(30,35),lineEnd(130,35);
+        sendStroke(QEvent::MouseButtonPress,origin,Qt::LeftButton,Qt::LeftButton);
+        QJsonArray strokeFrames;
+        QPoint last=lineEnd;
+        bool strokePainted=true,selectionHeld=true;
+        for(int i=0;i<24;++i){
+            if(i>0)last=QPoint(faceView->width()*(5+i*3)/78,
+                               faceView->height()*(i%2?2:5)/7);
+            const auto count=faceView->paintCount;
+            QElapsedTimer elapsed;elapsed.start();
+            sendStroke(QEvent::MouseMove,last,Qt::NoButton,Qt::LeftButton);
+            const auto callback=elapsed.nsecsElapsed()/1e6;
+            faceView->repaint();
+            strokeFrames.append(QJsonObject{{"event_ms",callback},{"frame_ms",elapsed.nsecsElapsed()/1e6}});
+            strokePainted&=count!=faceView->paintCount;
+            selectionHeld&=faceView->selectedEntities()==faces;
+            if(i==0){
+                const auto image=faceView->grab().toImage();
+                const auto dpr=image.devicePixelRatio();
+                int blue=0;
+                for(int y=qRound(33*dpr);y<=qRound(37*dpr);++y)
+                    for(int x=qRound(35*dpr);x<qRound(125*dpr);++x){
+                        const auto rgb=image.pixel(x,y);blue+=qBlue(rgb)>qRed(rgb)+45&&qGreen(rgb)<150;
+                    }
+                workflowCase("dense-viewport.stroke-line-drawn-in-first-frame",blue>20);
+            }
+        }
+        faceView->grab().save(workflowOutput_+"/views/dense-face-stroke.png");
+        sendStroke(QEvent::MouseButtonRelease,last,Qt::LeftButton,Qt::NoButton);
+        const auto afterStroke=faceView->selectedEntities();
+        workflowCase("dense-viewport.stroke-preview-and-commit",strokePainted&&selectionHeld&&afterStroke.size()>faces.size()&&
+                     (faces-afterStroke).isEmpty());
+        metrics["face_stroke_frames"]=strokeFrames;
+        metrics["face_stroke_added"]=afterStroke.size()-faces.size();
+        QApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+
+        const auto dividerStart=handle->geometry().center();
+        auto dividerEnd=dividerStart;
+        send(QEvent::MouseButtonPress,dividerStart,Qt::LeftButton,Qt::LeftButton);
+        QJsonArray faceDivider;
+        bool selectionResizeTracks=true,selectionResizePaints=true;
+        for(int i=1;i<=24;++i){
+            dividerEnd=dividerStart-QPoint(i*3,i*2);
+            std::array<quint64,4> counts;
+            for(int j=0;j<4;++j)counts[j]=views_[j]->paintCount;
+            QElapsedTimer elapsed;elapsed.start();
+            send(QEvent::MouseMove,dividerEnd,Qt::NoButton,Qt::LeftButton);
+            const auto callback=elapsed.nsecsElapsed()/1e6;
+            QApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+            faceDivider.append(QJsonObject{{"event_ms",callback},{"frame_ms",elapsed.nsecsElapsed()/1e6}});
+            selectionResizeTracks&=(handle->geometry().center()-dividerEnd).manhattanLength()<=4;
+            for(int j=0;j<4;++j)selectionResizePaints&=views_[j]->paintCount!=counts[j];
+        }
+        const auto selectedAnchors=anchors();
+        QElapsedTimer settle;settle.start();
+        send(QEvent::MouseButtonRelease,dividerEnd,Qt::LeftButton,Qt::NoButton);
+        QApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+        metrics["selected_faces_divider_release_ms"]=settle.nsecsElapsed()/1e6;
+        metrics["selected_faces_divider_frames"]=faceDivider;
+        workflowCase("dense-viewport.selected-faces-divider-tracks-and-keeps-selection",
+                     selectionResizeTracks&&selectionResizePaints&&anchors()==selectedAnchors&&faceView->selectedEntities()==afterStroke);
+        workflowCase("dense-viewport.document-unmodified",session_.model()==original&&session_.modified()==modified);
+        workflowArtifacts_["dense_viewport"]=metrics;
+        return;
+    }
     const auto ratio=[&]{const auto cell=viewGrid_->cellRect(0,0);return QPointF(
         double(cell.width())/std::max(1,canvas->width()-viewGrid_->spacing()),
         double(cell.height())/std::max(1,canvas->height()-viewGrid_->spacing()));};

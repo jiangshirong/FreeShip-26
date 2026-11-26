@@ -280,12 +280,50 @@ void MainWindow::viewportStep(){
                 missingImage.pixelColor(at(2,.5).toPoint()).lightness()<190);
             view->setSnapshot(sample);view->finishPresentation();view->fit();
             workflowCase("restored-face-replaces-white-cell",view->image().pixelColor(at(1.5,.5).toPoint())==QColor("#b5d7dd"));
+            {
+                auto overlap=std::make_shared<fs::ModelSnapshot>(*sample);
+                overlap->points.append({{21,{.25,1,.2}},{22,{1.75,1,.2}},
+                                        {23,{1.75,1,.8}},{24,{.25,1,.8}}});
+                overlap->faces.append({103,1,{21,22,23,24}});
+                overlap->edges.append({{21,21,22},{22,22,23},{23,23,24},{24,24,21}});
+                view->setSnapshot(overlap);view->finishPresentation();view->fit();
+                const QPoint seam=at(1,.5).toPoint();
+                view->setControlNetVisible(false);
+                const auto withoutNet=view->image();
+                view->setControlNetVisible(true);
+                const auto withNet=view->image();
+                const auto darkest=[&](const QImage& image){
+                    return std::min(image.pixelColor(seam).lightness(),image.pixelColor(seam-QPoint(1,0)).lightness());
+                };
+                workflowCase("inspect-faces-net-shows-covered-control-edge",
+                    withoutNet.pixelColor(seam)==QColor("#b5d7dd")&&darkest(withNet)+55<darkest(withoutNet));
+                withNet.save(workflowOutput_+"/inspect_faces-covered-edge.png");
+                view->setSnapshot(sample);view->finishPresentation();view->fit();
+            }
             // Do not count legend swatches: inspect the middle of each actual edge.
             auto nearColor=[&](const QImage& image,double x,double z,QColor color){const QPoint pt=at(x,z).toPoint();
                 for(int dx=-2;dx<=2;++dx)for(int dy=-9;dy<=9;++dy){const auto c=image.pixelColor(pt+QPoint(dx,dy));
                     if(abs(c.red()-color.red())+abs(c.green()-color.green())+abs(c.blue()-color.blue())<70)return true;}return false;};
             if(!view->selectDisplayMode("inspect_lines"))return;
             const auto linesImage=view->image();workflowCase("edge-types-visible-on-geometry",nearColor(linesImage,0,.5,QColor("#14699e"))&&nearColor(linesImage,3,.5,QColor("#a12677"))&&nearColor(linesImage,1,.5,QColor("#ac4a00")));
+            for(const auto& mode:{QStringLiteral("inspect_faces"),QStringLiteral("inspect_lines")}){
+                view->selectDisplayMode("wireframe");
+                view->setSelectionKind(HullEntity::Point);
+                view->setSelectedPoints({1});
+                view->setControlNetVisible(false);
+                view->selectDisplayMode(mode);
+                const auto withoutNet=view->image();
+                workflowCase(mode+"-keeps-selected-point-with-net-off",
+                    view->selectedPoints()==QSet<fs::EntityId>{1}&&nearColor(withoutNet,0,0,QColor("#e06519")));
+                view->setControlNetVisible(true);
+                const auto withNet=view->image();
+                const auto target=at(1,1).toPoint();
+                const QRect area(target-QPoint(3,3),QSize(7,7));
+                workflowCase(mode+"-shows-unselected-net-points",
+                    withNet.copy(area)!=withoutNet.copy(area)&&nearColor(withNet,0,0,QColor("#e06519")));
+                withNet.save(workflowOutput_+"/"+mode+"-control-points.png");
+                view->setSelectedPoints({});
+            }
             const auto mouse=[&](QEvent::Type type,QPointF point){QMouseEvent e(type,point,point,type==QEvent::MouseMove?Qt::NoButton:Qt::LeftButton,type==QEvent::MouseButtonRelease?Qt::NoButton:Qt::LeftButton,Qt::NoModifier);QApplication::sendEvent(view,&e);};
             const auto sweep=[&](HullEntity kind,QSet<fs::EntityId> expected){view->selectDisplayMode(kind==HullEntity::Face?"inspect_faces":"inspect_lines");
                 if(view->selectionKind()!=kind)return false;

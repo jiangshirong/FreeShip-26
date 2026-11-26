@@ -128,7 +128,10 @@ void MainWindow::editPreferences(){
         storedPreferences_=preferencesStore_->read();
         // Verification uses its private settings and must not read legacy user QSettings.
         const auto solverDefault=workflow_?QString{}:PerformanceDialog::defaultSolverDirectory();
-        PreferencesDialog dialog(storedPreferences_,this,solverDefault);preferencesDialog_=&dialog;
+        QJsonObject underwaterDefaults;
+        if(const auto model=session_.model())
+            underwaterDefaults={{"shade",model->shadeUnderwater},{"color",qint64(model->underwaterColor)}};
+        PreferencesDialog dialog(storedPreferences_,this,solverDefault,underwaterDefaults);preferencesDialog_=&dialog;
         dialog.setAttribute(Qt::WA_DontShowOnScreen,workflow_);
         dialog.onApply=[this](const QJsonObject& values){applyPreferences(values);};
         runStudioDialog(dialog);preferencesDialog_=nullptr;
@@ -137,6 +140,7 @@ void MainWindow::editPreferences(){
 }
 void MainWindow::applyPreferences(const QJsonObject& values){
     if(!preferencesDialog_||preferencesPending_)return;
+    if(values==storedPreferences_){preferencesDialog_->saved();return;}
     const auto error=validatePreferences(values);if(!error.isEmpty()){preferencesDialog_->showFailure(error);return;}
     const auto languageError=checkUiLanguage(values.value("ui_language").toString("zh"));
     if(!languageError.isEmpty()){preferencesDialog_->showFailure(languageError);return;}
@@ -169,5 +173,5 @@ void MainWindow::preferencesFinished(const QString& error){
     preferences_=pendingPreferences_;storedPreferences_=preferences_;
     session_.setPreferences(nativePreferenceOptions(preferences_),preferences_.value("directories").toObject()["temporary"].toString());
     updatePreferenceAppearance();updateState();showStatusMessage(uiText("偏好设置已保存。"));
-    if(preferencesDialog_){preferencesDialog_->setBusy(false);preferencesDialog_->accept();}
+    if(preferencesDialog_)preferencesDialog_->saved();
 }

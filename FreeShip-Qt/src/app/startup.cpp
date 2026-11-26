@@ -103,11 +103,11 @@ void MainWindow::startSession(const QString& explicitFile,const std::function<vo
     bool revealed=false;
     const auto revealFor=[&](const QString& path){
         if(!reveal||revealed)return;
-        startupFile_=path;
+        documentPathHint_=path;
         updateDocumentTitle();
         revealed=true;
         reveal();
-        startupFile_.clear();
+        documentPathHint_.clear();
     };
     if(!explicitFile.isEmpty()){
         revealFor(QFileInfo(explicitFile).absoluteFilePath());

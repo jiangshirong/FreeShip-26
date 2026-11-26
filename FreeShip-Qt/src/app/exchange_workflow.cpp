@@ -1,7 +1,10 @@
 // GPL-2.0-or-later. Actual application callbacks in hidden Windows widgets.
 #include "main_window.h"
+#include "document_workspace.h"
 #include "ui_language.h"
 #include "exchange_dialog.h"
+#include "obj_import_layer_tree.h"
+#include "studio_ui.h"
 #include "exchange_save_probe.h"
 #include <QApplication>
 #include "grid_preview_panel.h"
@@ -19,19 +22,51 @@
 #include <QLayout>
 #include <QLineEdit>
 #include <QMessageBox>
+#include <QMouseEvent>
+#include <QEventLoop>
+#include <QElapsedTimer>
 #include <QPushButton>
 #include <QSpinBox>
+#include <QTabBar>
 #include <QTabWidget>
 #include <QThread>
 #include <QToolButton>
 
 void MainWindow::openExchange(bool importing,const QString& format){
+    if(exchangeDialog_){exchangeDialog_->raise();exchangeDialog_->activateWindow();return;}
     if(session_.busy()||(!importing&&!session_.ready()))return;
+    std::unique_ptr<MainWindow> pending;
     ExchangeDialog dialog(session_,importing,format,this);exchangeDialog_=&dialog;
+    MainWindow* result=this;
+    QString importedPath;
+    if(importing&&workspace_&&(format=="stl"||format=="obj")){
+        dialog.importInNewTab=[this,&dialog,&pending,&importedPath](const QJsonObject& data,const QString& path){
+            importedPath=QFileInfo(path).absoluteFilePath();
+            if(!session_.model()&&!session_.busy())return session_.importModel(data,false);
+            // Build in an independent session before showing a new tab.
+            pending=std::make_unique<MainWindow>(workspace_,persistentWindow_);
+            pending->setWindowFlags(Qt::Widget);
+            pending->exchangeDialog_=&dialog;
+            return pending->session_.importModel(data,false);
+        };
+    }
+    const bool checkTabs=exchangeWorkflow_&&workspace_&&dialog.importInNewTab;
+    const auto original=checkTabs?session_.model():nullptr;
+    const auto originalPath=checkTabs?session_.sourcePath():QString{};
+    const bool originalDirty=checkTabs&&session_.modified(),originalUndo=checkTabs&&session_.canUndo();
+    const auto originalTabs=checkTabs?workspace_->documents():QList<MainWindow*>{};
     if(exchangeWorkflow_){auto command=exchangeRequest_["commands"].toArray()[exchangeIndex_].toObject();if(command.contains("confirm_overwrite"))dialog.confirmOverwrite=[command](const QString& path){return QFileInfo(path).absoluteFilePath()==QFileInfo(command["path"].toString()).absoluteFilePath()&&command["confirm_overwrite"].toBool();};}
     if(!importing&&format=="part"&&selectionKind_==HullEntity::Face)dialog.faceIds=selection_.values();
     dialog.beforeImport=[this](std::function<void()> next){if(exchangeWorkflow_)next();else withSavedChanges(std::move(next));};
-    dialog.exec();exchangeDialog_=nullptr;
+    runStudioDialog(dialog);exchangeDialog_=nullptr;
+    if(pending)pending->exchangeDialog_=nullptr;
+    if(dialog.succeeded()&&dialog.importInNewTab){
+        if(pending)result=pending.release();
+        result->documentPathHint_=importedPath;
+        result->updateDocumentTitle();
+        if(result!=this)workspace_->addDocument(result);
+        else result->activateDocument();
+    }
     if(exchangeWorkflow_){
         const auto command=exchangeRequest_["commands"].toArray()[exchangeIndex_].toObject();const auto key=command["name"].toString();bool expectFailure=command["expect_failure"].toBool();
         const bool declined=(command.contains("confirm_zero_faces")&&!command["confirm_zero_faces"].toBool())||
@@ -41,9 +76,27 @@ void MainWindow::openExchange(bool importing,const QString& format){
         else workflowCase(key+".completed",expectFailure?!dialog.failure().isEmpty():dialog.succeeded(),dialog.failure());
         if(dialog.printHull())workflowArtifacts_[key+"_shell_final"]=dialog.printHull()->evidence();
         if(!dialog.objFitEvidence().isEmpty())workflowArtifacts_[key+"_obj_fit"]=dialog.objFitEvidence();
-        if(session_.ready())captureWorkflow(key);
+        const auto& imported=result->session_;
+        if(imported.ready())captureWorkflow(key,result);
         workflowArtifacts_[key+"_error"]=dialog.failure();
-        if(importing&&!expectFailure&&!declined&&format!="part"&&format!="waves")workflowCase(key+".new-unsaved-document",session_.modified()&&!session_.canUndo()&&session_.sourcePath().isEmpty());
+        if(importing&&dialog.succeeded()&&format!="part"&&format!="waves")workflowCase(key+".new-unsaved-document",imported.modified()&&!imported.canUndo()&&imported.sourcePath().isEmpty());
+        if(checkTabs){
+            const auto tabs=workspace_->documents();
+            if(dialog.succeeded()){
+                workflowCase(key+".new-tab-active",tabs.size()==originalTabs.size()+(original?1:0)&&workspace_->active()==result&&
+                    (original?result!=this:result==this));
+                workflowCase(key+".tab-uses-source-filename",workspace_->tabBar()->tabText(workspace_->tabBar()->currentIndex())==
+                    QFileInfo(importedPath).fileName().replace('&',"&&")+" *");
+            }else{
+                workflowCase(key+".no-tab-on-failure-or-cancel",tabs==originalTabs&&workspace_->active()==this);
+            }
+            if(original){
+                activateDocument();
+                workflowCase(key+".original-tab-and-edits-retained",workspace_->active()==this&&isVisible()&&
+                    tabs.mid(0,originalTabs.size())==originalTabs&&session_.model()==original&&session_.sourcePath()==originalPath&&
+                    session_.modified()==originalDirty&&session_.canUndo()==originalUndo);
+            }
+        }
         ++exchangeIndex_;QTimer::singleShot(0,this,[this]{exchangeStep("advance");});
     }
 }
@@ -56,13 +109,23 @@ void MainWindow::verifyExchange(const QString& request,const QString& output){
         const auto error=setUiLanguage(exchangeRequest_["language"].toString());
         if(!error.isEmpty()){finishWorkflow(error);return;}
     }
+    if(workspace_){workspace_->resize(1000,720);workspace_->show();}
     ensurePolished();if(centralWidget()->layout())centralWidget()->layout()->activate();
     QTimer::singleShot(300000,this,[this]{if(!workflowFinished_)finishWorkflow("Exchange workflow timed out");});
     if(exchangeRequest_["model"].toString().isEmpty())exchangeStep("start");else session_.load(exchangeRequest_["model"].toString());
 }
 void MainWindow::exchangeStep(const QString& method){
-    if(workflowFinished_||method=="import_model"||method=="append_model"||method=="cad_iges")return;
-    if(method=="load"&&exchangeIndex_==0&&!workflowArtifacts_.contains("original_model"))captureWorkflow("original");
+    if(workflowFinished_||method=="append_model"||method=="cad_iges"||method=="import_model")return;
+    if(method=="load"&&exchangeIndex_==0&&!workflowArtifacts_.contains("original_model")){
+        captureWorkflow("original");
+        if(workspace_&&exchangeRequest_["edit_original_before_import"].toBool()){
+            if(session_.model()->layers.isEmpty()||!session_.updateLayer(session_.model()->layers.front().id,{{"name","QA original tab edit"}}))
+                finishWorkflow("Could not edit the original tab");
+            return;
+        }
+    }else if(workspace_&&method=="update_layer"){
+        workflowCase("original-edited-before-import",session_.modified()&&session_.canUndo());
+    }
     else if(method=="save"||method=="load"||method=="undo"||method=="redo"){
         const auto c=exchangeRequest_["commands"].toArray()[exchangeIndex_].toObject();captureWorkflow(c["name"].toString());++exchangeIndex_;
     }
@@ -74,6 +137,12 @@ void MainWindow::exchangeStep(const QString& method){
     }
     if(action=="reopen"){
         if(!session_.load(c["path"].toString()))finishWorkflow(key+": reopen request did not start");
+        return;
+    }
+    if(action=="measure_dense_viewport"){
+        auditViewGridResize(false);
+        ++exchangeIndex_;
+        QTimer::singleShot(0,this,[this]{exchangeStep("advance");});
         return;
     }
     if(action=="undo"){session_.undo();return;}if(action=="redo"){session_.redo();return;}
@@ -111,47 +180,110 @@ void MainWindow::exchangeStep(const QString& method){
         }
         if(*previewStage==0){
         connect(d,&QDialog::finished,timer,[timer]{timer->stop();timer->deleteLater();});
+        if(c["cancel_before_submit"].toBool()){d->reject();return;}
         bool hasPath=false;
+        auto* layers=dynamic_cast<ObjImportLayerTree*>(d->findChild<QTreeWidget*>("ObjImportLayers"));
+        const bool layersBeforeSelection=layers&&layers->topLevelItemCount()>0;
         for(auto*w:d->findChildren<QLineEdit*>())if(w->property("exchange_field")=="path"){hasPath=true;w->setText(c["path"].toString());}
         workflowCase(key+".path-field-only-on-import",hasPath==(c["method"]=="import"));
         for(auto*w:d->findChildren<QLineEdit*>()){auto key=w->property("exchange_number").toString();auto refs=options["references"].toObject();if(refs.contains(key))w->setText(refs[key].isString()?refs[key].toString():QString::number(refs[key].toDouble(),'g',17));}
         for(auto*w:d->findChildren<QCheckBox*>()){auto field=w->property("exchange_field").toString();if(options.contains(field))w->setChecked(options[field].toBool());}
         for(auto*w:d->findChildren<QComboBox*>()){auto field=w->property("exchange_field").toString();if(options.contains(field))w->setCurrentIndex(w->findData(options[field].toString()));}
-        if(options["obj_import_mode"]=="fit"){
-            QToolButton *relative=nullptr,*manual=nullptr;
-            QLineEdit* value=nullptr;
-            for(auto* button:d->findChildren<QToolButton*>()){
-                const auto mode=button->property("obj_tolerance_mode").toString();
-                if(mode=="relative")relative=button;
-                if(mode=="manual")manual=button;
+        QStringList modes;
+        const auto requestedMode=options["obj_import_mode"].toString(options["control_net"].toBool()?"control":"mesh");
+        for(auto* card:d->findChildren<QToolButton*>("ObjModeCard")){
+            const auto mode=card->property("obj_import_mode").toString();
+            if(card->isVisible()&&!card->icon().isNull())modes.append(mode);
+            if(mode==requestedMode)card->click();
+        }
+        if(layers&&hasPath){
+            QElapsedTimer wait;wait.start();
+            while(!layers->isEnabled()&&wait.elapsed()<8000){
+                QEventLoop loop;
+                QTimer::singleShot(15,&loop,&QEventLoop::quit);
+                loop.exec(QEventLoop::ExcludeUserInputEvents);
             }
-            for(auto* edit:d->findChildren<QLineEdit*>())
-                if(edit->property("obj_tolerance_value").toBool())value=edit;
-            if(relative&&manual&&value){
-                const auto tolerance=options["references"].toObject()["obj_tolerance_mm"];
-                if(!tolerance.isUndefined())
-                    value->setText(tolerance.isString()?tolerance.toString():QString::number(tolerance.toDouble(),'g',17));
-                if(c["check_obj_tolerance_toggle"].toBool()){
-                    workflowCase(key+".relative-default",relative->isChecked()&&!manual->isChecked()&&
-                                 !value->isVisible()&&!value->isEnabled());
-                    const int slotWidth=manual->width();
-                    manual->click();
-                    workflowCase(key+".manual-enables-input",manual->isChecked()&&!relative->isChecked()&&
-                                 value->isVisible()&&value->isEnabled()&&!value->isReadOnly());
-                    workflowCase(key+".manual-fills-slot",value->width()>=96&&value->width()==slotWidth);
-                    relative->click();
-                    workflowCase(key+".relative-disables-input",relative->isChecked()&&!manual->isChecked()&&
-                                 !value->isVisible()&&!value->isEnabled());
+        }
+        if(c["check_mesh_import_modes"].toBool()){
+            bool referenceAxes=false;
+            for(auto* combo:d->findChildren<QComboBox*>()){
+                const auto field=combo->property("exchange_field").toString();
+                if(field=="reference_axes"&&combo->isVisible())referenceAxes=true;
+            }
+            const QStringList expected=c["format"]=="obj"?QStringList{"mesh","control","fit"}:QStringList{};
+            workflowCase(key+".editable-import-only",modes==expected&&!referenceAxes,modes.join(", "));
+        }
+        if(c["check_obj_layer_options"].toBool()){
+            workflowCase(key+".layer-options-after-file",layers&&!layersBeforeSelection&&layers->isVisible()&&
+                         layers->topLevelItemCount()==1&&layers->topLevelItem(0)->childCount()==3);
+        }
+        if(c["split_to_default_layer"].toBool()&&layers&&layers->topLevelItemCount()==1&&layers->topLevelItem(0)->childCount()>1){
+            auto* initial=layers->topLevelItem(0);
+            auto* group=initial->child(1);
+            layers->moveGroup(group);
+            workflowArtifacts_[key+"_tree_labels"]=QJsonArray{initial->text(0),group->parent()->text(0)};
+            d->grab().save(workflowOutput_+"/views/"+key+"-layers.png");
+        }
+        if(layers&&layers->topLevelItemCount()&&(options["obj_layer_mode"]=="groups"||options["obj_layer_assignments"].isObject())){
+            const auto assignments=options["obj_layer_assignments"].toObject();
+            QHash<QString,QTreeWidgetItem*> destinations;
+            auto* initial=layers->topLevelItem(0);
+            destinations.insert(initial->text(0),initial);
+            QList<QTreeWidgetItem*> groups;
+            for(int i=0;i<initial->childCount();++i)groups.append(initial->child(i));
+            for(auto* group:groups){
+                const auto name=group->text(0);
+                const auto destination=assignments.value(name).toString(assignments.isEmpty()?name:initial->text(0));
+                auto* target=destinations.value(destination,nullptr);
+                layers->moveGroup(group,target);
+                if(!target){
+                    group->parent()->setText(0,destination);
+                    destinations.insert(destination,group->parent());
                 }
-                const auto fallback=options["references"].toObject().contains("obj_tolerance_mm")?"manual":"relative";
-                if(options["obj_tolerance_mode"].toString(fallback)=="manual")manual->click();
+            }
+            if(c["check_obj_layer_options"].toBool())
+                d->grab().save(workflowOutput_+"/views/"+key+"-layers.png");
+        }
+        if(options["obj_import_mode"]=="fit"){
+            auto* relative=d->findChild<QToolButton*>("ObjToleranceAuto");
+            auto* value=d->findChild<QLineEdit*>("ObjToleranceValue");
+            if(relative&&value){
+                const auto selectManual=[value]{
+                    const auto point=value->rect().center();
+                    for(const auto type:{QEvent::MouseButtonPress,QEvent::MouseButtonRelease}){
+                        QMouseEvent mouse(type,point,value->mapToGlobal(point),Qt::LeftButton,
+                            type==QEvent::MouseButtonPress?Qt::LeftButton:Qt::NoButton,Qt::NoModifier);
+                        QApplication::sendEvent(value,&mouse);
+                    }
+                };
+                const auto tolerance=options["references"].toObject().value("obj_tolerance_mm");
+                if(c["check_obj_tolerance_toggle"].toBool()){
+                    QElapsedTimer wait;wait.start();
+                    while(value->text().isEmpty()&&wait.elapsed()<3500){
+                        QEventLoop loop;QTimer::singleShot(20,&loop,&QEventLoop::quit);loop.exec(QEventLoop::ExcludeUserInputEvents);
+                    }
+                    const auto displayed=value->text();
+                    workflowArtifacts_[key+"_displayed_tolerance"]=displayed.toDouble();
+                    workflowCase(key+".relative-default",relative->isChecked()&&value->isVisible()&&value->isReadOnly()&&displayed.toDouble()>0);
+                    d->grab().save(workflowOutput_+"/views/"+key+"-automatic.png");
+                    selectManual();
+                    workflowCase(key+".manual-enables-input",!relative->isChecked()&&value->isVisible()&&value->isEnabled()&&
+                                 !value->isReadOnly()&&value->text()==displayed);
+                    value->setText("2.5");
+                    QEventLoop loop;QTimer::singleShot(210,&loop,&QEventLoop::quit);loop.exec(QEventLoop::ExcludeUserInputEvents);
+                    d->grab().save(workflowOutput_+"/views/"+key+"-manual.png");
+                    relative->click();
+                    workflowCase(key+".relative-restores-automatic-value",relative->isChecked()&&value->isVisible()&&
+                                 value->isReadOnly()&&value->text()==displayed);
+                }
+                const auto fallback=tolerance.isUndefined()?"relative":"manual";
+                if(options["obj_tolerance_mode"].toString(fallback)=="manual"){
+                    selectManual();
+                    value->setText(tolerance.isUndefined()?QString{}:tolerance.isString()?tolerance.toString():QString::number(tolerance.toDouble(),'g',17));
+                }
             }else if(c["check_obj_tolerance_toggle"].toBool()){
                 workflowCases_.append(QJsonObject{{"name",key+".tolerance-toggle"},{"status","not_run"}});
             }
-        }
-        if(options["control_net"].toBool()&&!options.contains("obj_import_mode")){
-            for(auto* w:d->findChildren<QComboBox*>())
-                if(w->property("exchange_field")=="obj_import_mode")w->setCurrentIndex(w->findData("control"));
         }
         for(auto*w:d->findChildren<QComboBox*>()){auto key=w->property("exchange_parameter").toString();auto refs=options["references"].toObject();if(refs.contains(key))w->setCurrentIndex(w->findData(refs[key].toVariant()));}
         for(auto*w:d->findChildren<QSpinBox*>()){auto field=w->property("exchange_count").toString();if(options.contains(field))w->setValue(options[field].toInt());}

@@ -20,6 +20,8 @@ int main(int argc,char**argv){
             o.reconstructObj=options["reconstruct_obj"].toBool();
             o.objToleranceMm=options["obj_tolerance_mm"].toDouble();
             o.inferObjCreases=options["obj_infer_creases"].toBool(true);
+            if(options["obj_layer_mode"]=="single")o.objLayerMode=fs::exchange::ObjLayerMode::Single;
+            if(options["obj_layer_mode"]=="groups")o.objLayerMode=fs::exchange::ObjLayerMode::ByGroup;
             o.textEncoding=options["text_encoding"].toString("cp1252");for(auto v:options["face_ids"].toArray())o.faceIds.append(v.toInteger());
             o.columns=options["columns"].toInt(0);o.rows=options["rows"].toInt(10);o.intermediateBulkheads=options["intermediate_bulkheads"].toBool(true);
             if(r["method"]=="ghs_curve"||r["method"]=="waterline"){

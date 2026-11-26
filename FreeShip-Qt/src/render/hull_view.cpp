@@ -84,9 +84,28 @@ const QColor controlSelectionKeyline("#F6FAFF");
 const QColor controlFaceSelectionFill(78,146,239,46);
 constexpr qreal controlEdgeSelectionWidth=2.6;
 constexpr qreal controlFaceSelectionWidth=1.8;
+constexpr qsizetype tiledFaceThreshold=256;
 bool usesControlSelectionInk(HullEntity kind){return kind==HullEntity::Edge||kind==HullEntity::Face;}
 QPen controlSelectionPen(const QColor& color,qreal width){
     return {color,width,Qt::SolidLine,Qt::RoundCap,Qt::RoundJoin};
+}
+QImage selectionStrokeImage(const QImage& border,const QImage& ink,qreal dpr){
+    QImage pixels(border.size(),QImage::Format_ARGB32_Premultiplied);
+    if(pixels.isNull())return pixels;
+    QRgb blue[256],halo[256];
+    for(int i=0;i<256;++i){
+        blue[i]=qPremultiply(qRgba(controlSelectionInk.red(),controlSelectionInk.green(),controlSelectionInk.blue(),i));
+        halo[i]=qPremultiply(qRgba(controlSelectionKeyline.red(),controlSelectionKeyline.green(),controlSelectionKeyline.blue(),i));
+    }
+    for(int y=0;y<pixels.height();++y){
+        auto* out=reinterpret_cast<QRgb*>(pixels.scanLine(y));
+        const auto* borders=border.constScanLine(y);
+        const auto* inks=ink.constScanLine(y);
+        for(int x=0;x<pixels.width();++x)
+            out[x]=blue[inks[x]]+halo[(borders[x]*(255-inks[x])+127)/255];
+    }
+    pixels.setDevicePixelRatio(dpr);
+    return pixels;
 }
 // Screen display only. Bound each replaced span's deviation from its chord.
 // Chunking also caps worst-case work on noisy/self-intersecting paths.
@@ -204,6 +223,8 @@ struct DisplayEdge { fs::EntityId a, b; bool crease, mirror; fs::EntityId id; qs
 struct DisplayFace {fs::EntityId id;QVector<int> points;bool mirror;};
 struct DisplayCurve {fs::EntityId id;bool flow;QColor color;QVector<fs::presentation::Cubic> cubics;fs::Vec3 source;bool hasSource=false;bool marker=false,visible=true;};
 struct DisplayData {
+    bool hasShadedSurface=false;
+    mutable quint8 gaussianClasses=0,developableClasses=0;
     // A metadata-only successor can keep this display alive after its original
     // model is replaced. Keep the cache key's owner alive too; otherwise a new
     // geometry allocation could reuse that address and hit stale display data.
@@ -262,7 +283,7 @@ const QVector<DisplayFace>& emptyControlCells(const DisplayData& data){
     const auto consider=[&](const QVector<int>& ring){
         const auto c=center(ring);
         fs::Vec3 normal{};
-        bool canMirror=true,hasSupport=false;
+        bool canMirror=true,hasSupport=false,hasSteepSupport=false,hasOutwardSupport=false;
         for(int i=0;i<ring.size();++i){
             const int a=ring[i],b=ring[(i+1)%ring.size()];
             const auto pair=key(a,b);
@@ -275,10 +296,19 @@ const QVector<DisplayFace>& emptyControlCells(const DisplayData& data){
             if(edge->faceCount==1){
                 hasSupport=true;canMirror &= edge->mirror;
                 const auto other=occupiedSide.constFind(pair);
-                if(other==occupiedSide.cend() ||
-                   dot(inside,cross(along,subtract(*other,position(a))))>=0)return;
+                if(other==occupiedSide.cend())return;
+                const auto occupied=cross(along,subtract(*other,position(a)));
+                const double alignment=dot(inside,occupied);
+                const double supportThreshold=.25*dot(inside,inside)*dot(occupied,occupied);
+                // A near-perpendicular neighbour can be the hull side below
+                // a missing deck cell. A neighbour facing into the cell in
+                // its plane is still evidence that this is an outer boundary.
+                if(alignment>=0&&alignment*alignment>=supportThreshold)return;
+                hasSteepSupport|=alignment>=0;
+                hasOutwardSupport|=alignment<0&&alignment*alignment>=supportThreshold;
             }
         }
+        if(hasSteepSupport&&!hasOutwardSupport)return;
         result.append({0,ring,hasSupport && canMirror});
     };
     QSet<int> visited;
@@ -328,10 +358,20 @@ void prepareAnalysis(const DisplayData& data,const fs::ModelSnapshot& snapshot){
     if(data.analysis)return;
     auto analysis=analyzeSurface(snapshot);QVector<SurfaceShadeTriangle> shades;shades.reserve(data.mesh.triangles.size());
     for(const auto& t:data.mesh.triangles){const auto& source=analysis->triangles.at(t.sourceTriangle);SurfaceShadeTriangle shade;
+        const auto area=cross(subtract(t.vertices[1],t.vertices[0]),subtract(t.vertices[2],t.vertices[0]));
+        const bool contributes=t.color.alpha()!=0&&dot(area,area)>0;
         for(int j=0;j<3;++j){auto original=t.vertices[j];if(t.reflected)original.y=-original.y;const auto w=weights(original,snapshot.triangles[t.sourceTriangle].vertices);const double f[]{w.x,w.y,w.z};auto& v=shade[j];double g[3]{},d[3]{};
             for(int k=0;k<3;++k){const auto& s=source[k];v.normal.x+=f[k]*s.normal.x;v.normal.y+=f[k]*s.normal.y;v.normal.z+=f[k]*s.normal.z;
+                if(f[k]>1e-9){
+                    v.gaussianClasses|=s.gaussianClasses;
+                    v.developableClasses|=s.developableClasses;
+                }
                 g[0]+=f[k]*s.gaussian.red();g[1]+=f[k]*s.gaussian.green();g[2]+=f[k]*s.gaussian.blue();d[0]+=f[k]*s.developable.red();d[1]+=f[k]*s.developable.green();d[2]+=f[k]*s.developable.blue();}
             if(t.reflected)v.normal.y=-v.normal.y;auto color=[](double* rgb){return QColor(qBound(0,qRound(rgb[0]),255),qBound(0,qRound(rgb[1]),255),qBound(0,qRound(rgb[2]),255));};v.gaussian=color(g);v.developable=color(d);
+            if(contributes){
+                data.gaussianClasses|=v.gaussianClasses;
+                data.developableClasses|=v.developableClasses;
+            }
         }shades.append(shade);
     }
     data.shading=std::move(shades);data.analysis=std::move(analysis);
@@ -368,6 +408,10 @@ std::shared_ptr<const DisplayData> displayData(std::shared_ptr<const fs::ModelSn
     }
     }
     auto& mesh=result->mesh;
+    mesh.shadeUnderwater=snapshot.underwaterShadeOverride.value_or(snapshot.shadeUnderwater);
+    mesh.waterlineZ=snapshot.waterlineZ;
+    mesh.underwaterColor=sourceColor(snapshot.underwaterColorOverride.value_or(snapshot.underwaterColor));
+    mesh.underwaterAlpha=snapshot.underwaterColorAlpha;
     mesh.minimum={std::numeric_limits<double>::max(),std::numeric_limits<double>::max(),
                   std::numeric_limits<double>::max()};
     mesh.maximum={-mesh.minimum.x,-mesh.minimum.y,-mesh.minimum.z};
@@ -386,7 +430,9 @@ std::shared_ptr<const DisplayData> displayData(std::shared_ptr<const fs::ModelSn
         if (norm>0) { normal.x/=norm;normal.y/=norm;normal.z/=norm; }
         else normal={0,0,1};
         HullRenderTriangle t{vertices,normal,color};t.sourceTriangle=source;t.reflected=reflected;
-        t.useUnderwater=layers.value(snapshot.triangles[source].layer)->useInHydrostatics;
+        const auto& layer=*layers.value(snapshot.triangles[source].layer);
+        t.useUnderwater=layer.useInHydrostatics;
+        result->hasShadedSurface|=color.alpha()!=0&&norm>0;
         mesh.triangles.append(t);
         for (const auto& point:vertices) include(point);
     };
@@ -478,12 +524,186 @@ std::shared_ptr<const DisplayData> displayData(std::shared_ptr<const fs::ModelSn
     mesh.extent=std::max({mesh.maximum.x-mesh.minimum.x,mesh.maximum.y-mesh.minimum.y,
                          mesh.maximum.z-mesh.minimum.z});
     if (mesh.extent<=0) mesh.extent=std::max({snapshot.length,snapshot.beam,snapshot.draft,1.0});
-    mesh.shadeUnderwater=snapshot.shadeUnderwater;
-    mesh.waterlineZ=snapshot.waterlineZ;
-    mesh.underwaterColor=sourceColor(snapshot.underwaterColor);
-    mesh.underwaterAlpha=snapshot.underwaterColorAlpha;
     cache[key]=result;
     return result;
+}
+}
+
+// A value-only camera and raster key. Worker jobs own copies and never touch a
+// widget, QPixmap, or mutable view state. Recheck the destination at paint time.
+namespace {
+struct DragRasterKey {
+    quint64 camera=0;
+    QSize pixels;
+    qreal dpr=1;
+    QPointF phase;
+    bool operator==(const DragRasterKey& other)const{
+        return camera==other.camera&&pixels==other.pixels&&dpr==other.dpr&&phase==other.phase;
+    }
+    bool usable()const{return !pixels.isEmpty()&&qint64(pixels.width())*pixels.height()<=4*1024*1024;}
+    QJsonObject evidence()const{
+        return {{"camera",double(camera)},{"pixels",QJsonArray{pixels.width(),pixels.height()}},
+                {"dpr",dpr},{"phase",QJsonArray{phase.x(),phase.y()}}};
+    }
+};
+DragRasterKey dragRasterKey(quint64 camera,QSize size,qreal dpr,QPointF deviceOrigin){
+    return {camera,{qCeil(size.width()*dpr)+1,qCeil(size.height()*dpr)+1},dpr,pixelPhase(deviceOrigin)};
+}
+DragRasterKey windowDragRasterKey(const QWidget& view,quint64 camera){
+    const auto dpr=view.devicePixelRatioF();
+    return dragRasterKey(camera,view.size(),dpr,QPointF(view.mapTo(view.window(),QPoint{}))*dpr);
+}
+struct DragRasterCamera {
+    fs::Vec3 center,right,up,depth;
+    QPointF offset;
+    double scale,extent,distanceFactor,splitX;
+    bool perspective,split,mirror;
+    QPointF point(fs::Vec3 p)const{
+        const auto r=subtract(p,center);
+        const double w=perspective?1-(dot(r,depth)/extent)/distanceFactor:1.;
+        const double inverse=1/qMax(w,1e-6);
+        return {offset.x()+scale*dot(r,right)*inverse,offset.y()-scale*dot(r,up)*inverse};
+    }
+    QPointF physicalPoint(fs::Vec3 p,const DragRasterKey& key)const{
+        const auto r=subtract(p,center);
+        const double w=perspective?std::max(1e-6,1-dot(r,depth)/(extent*distanceFactor)):1.;
+        return (offset+QPointF(dot(r,right),-dot(r,up))*(scale/w))*key.dpr+key.phase;
+    }
+    QPainterPath projectCurve(const QVector<fs::presentation::Cubic>& world,bool symmetric)const{
+        using namespace fs::presentation;
+        const auto spans=split?splitBodyCubics(world,splitX):world;
+        auto path=projectCubics(spans,[this](auto p){return point(p);},perspective);
+        if(symmetric&&mirror)path.addPath(projectCubics(spans,[this](auto p){return point(mirrored(p));},perspective));
+        return path;
+    }
+};
+QThreadPool& resizeRenderPool(){
+    struct Pool : QThreadPool {
+        Pool(){setMaxThreadCount(std::clamp(QThread::idealThreadCount()-1,1,4));}
+    };
+    static Pool pool;
+    return pool;
+}
+QVector<QLineF> projectCreases(const QVector<fs::presentation::Segment>& creases,
+                              const DragRasterCamera& camera,const QRectF& clip){
+    QVector<QLineF> lines;
+    lines.reserve(creases.size());
+    for(const auto& segment:creases){
+        const QLineF line(camera.point(segment[0]),camera.point(segment[1]));
+        if(line.length()>=1.&&clip.intersects(QRectF(line.p1(),line.p2()).normalized().adjusted(-1,-1,1,1)))
+            lines.append(line);
+    }
+    return lines;
+}
+QPen dragOriginalPen(){QPen pen(QColor(150,100,67,205),1.6,Qt::DashLine,Qt::RoundCap);pen.setDashPattern({4.,4.});return pen;}
+QPen dragCurrentPen(){return QPen(QColor(19,115,107),2.,Qt::SolidLine,Qt::RoundCap,Qt::RoundJoin);}
+}
+struct HullView::DragShellRaster {
+    DragShell source;
+    DragRasterKey key;
+    QImage context,current,original;
+    QVector<QPainterPath> contextPaths,currentPaths,originalPaths;
+    QSet<QPair<fs::EntityId,fs::EntityId>> edges;
+    QJsonObject timings;
+    bool complete()const{return !context.isNull()&&!current.isNull()&&!original.isNull();}
+};
+namespace {
+std::shared_ptr<const HullView::DragShellRaster> bakeDragShell(const DragShell& shell,const DragRasterCamera& camera,
+    const DragRasterKey& key,const HullView::DragRasterLayer& previous,bool timed,bool inWorker,
+    const HullView::DragRasterLayer& prepared={},bool originalOnly=false,const std::atomic_bool* cancelled=nullptr){
+    using namespace fs::presentation;
+    auto frame=std::make_shared<HullView::DragShellRaster>();
+    frame->source=shell;frame->key=key;
+    const auto dpr=key.dpr;
+    const auto phase=key.phase;
+    const auto shellPixels=key.pixels;
+    const bool raster=key.usable();
+    const auto original=dragOriginalPen(),current=dragCurrentPen();
+    QElapsedTimer stage;
+    if(timed)stage.start();
+    const auto mark=[&](const char* name){if(timed){frame->timings.insert(QLatin1String(name),stage.nsecsElapsed()/1e6);stage.start();}};
+    const bool sameView=raster&&previous&&previous->complete()&&previous->key==key&&previous->source->size()==shell->size();
+    bool keep[3]={sameView,sameView,sameView};
+    // A speculative image holds its original cubic arrays alive. Check the
+    // exact gesture edge set and identity of the focused, immutable curves.
+    bool usePrepared=raster&&prepared&&!prepared->original.isNull()&&prepared->key==key&&prepared->source->size()==shell->size();
+    if(!originalOnly)frame->edges.reserve(shell->size());
+    for(qsizetype i=0;!originalOnly&&i<shell->size();++i){
+        const auto& e=shell->at(i);frame->edges.insert({std::min(e.a,e.b),std::max(e.a,e.b)});
+        if(usePrepared){
+            const auto& saved=prepared->source->at(i);
+            usePrepared=e.a==saved.a&&e.b==saved.b&&e.context==saved.context&&
+                (e.context||(e.symmetric==saved.symmetric&&e.beforeCubics.constData()==saved.beforeCubics.constData()));
+        }
+        if(!keep[0]&&!keep[1]&&!keep[2])continue;
+        const auto& old=previous->source->at(i);
+        if(e.context!=old.context||e.symmetric!=old.symmetric){std::fill_n(keep,3,false);continue;}
+        keep[e.context?0:1]&=e.afterCubics.constData()==old.afterCubics.constData();
+        if(!e.context)keep[2]&=e.beforeCubics.constData()==old.beforeCubics.constData();
+    }
+    if(keep[0])frame->context=previous->context;
+    if(keep[1])frame->current=previous->current;
+    if(keep[2])frame->original=previous->original;
+    else if(usePrepared){frame->original=prepared->original;keep[2]=true;}
+    if(timed)frame->timings["prepainted_original"]=usePrepared;
+    const auto stopped=[&]{return cancelled&&cancelled->load(std::memory_order_relaxed);};
+    mark("shell_cache_check_ms");
+    auto bake=[&](int layer,QImage& image,QVector<QPainterPath>& fallback){if(keep[layer]&&!image.isNull())return;
+        image=raster?QImage(shellPixels,QImage::Format_ARGB32_Premultiplied):QImage{};
+        if(layer==1&&!image.isNull()){
+            // The current trace is opaque and solid: stroke all projected edges once
+            // into one coverage buffer rather than constructing a QPainter stroker for each.
+            QImage mask(shellPixels,QImage::Format_Grayscale8);
+            if(!mask.isNull()){
+                mask.fill(0);
+                // In diagnostic mode batch the same segments before stroking, so
+                // timing calls do not perturb each individual cubic or pixel.
+                QVector<QLineF> strokes;
+                if(timed)strokes.reserve(shell->size()*4);
+                for(const auto& e:*shell){if(e.context)continue;const auto cubics=camera.split?splitBodyCubics(e.afterCubics,camera.splitX):e.afterCubics;
+                    for(bool mirror:{false,true}){if(mirror&&(!e.symmetric||!camera.mirror))continue;
+                        auto projectKnot=[&](fs::Vec3 p){return camera.physicalPoint(mirror?mirrored(p):p,key);};
+                        auto mid=[](fs::Vec3 a,fs::Vec3 b){return fs::Vec3{(a.x+b.x)*.5,(a.y+b.y)*.5,(a.z+b.z)*.5};};
+                        auto strokeCubic=[&](auto&& self,const fs::presentation::Cubic& c,QPointF a,QPointF b,int depth)->void{
+                            const auto ab=b-a;const double len=QPointF::dotProduct(ab,ab);
+                            auto flat=[&](QPointF p){auto ap=p-a;const double t=len>0?std::clamp(QPointF::dotProduct(ap,ab)/len,0.,1.):0.;const auto diff=ap-t*ab;return QPointF::dotProduct(diff,diff)<=.04;};
+                            if(depth==24||(flat(projectKnot(c[1]))&&flat(projectKnot(c[2])))){
+                                if(timed)strokes.append(QLineF(a,b));else shellStroke(mask,a,b,dpr);
+                                return;
+                            }
+                            auto x=mid(c[0],c[1]),y=mid(c[1],c[2]),z=mid(c[2],c[3]),l=mid(x,y),r=mid(y,z),m=mid(l,r);auto pm=projectKnot(m);
+                            self(self,{c[0],x,l,m},a,pm,depth+1);self(self,{m,r,z,c[3]},pm,b,depth+1);
+                        };
+                        for(const auto& c:cubics)strokeCubic(strokeCubic,c,projectKnot(c[0]),projectKnot(c[3]),0);}}
+
+                mark("shell_projection_ms");
+                if(timed)for(const auto& line:std::as_const(strokes))shellStroke(mask,line.p1(),line.p2(),dpr);
+                mark("shell_stroke_ms");
+                if(timed)frame->timings.insert("segments",strokes.size());
+                QRgb table[256];for(int a=0;a<256;++a)table[a]=qPremultiply(qRgba(19,115,107,a));
+                for(int y=0;y<image.height();++y){auto* dst=reinterpret_cast<QRgb*>(image.scanLine(y));const auto* src=mask.constScanLine(y);for(int x=0;x<image.width();++x)dst[x]=table[src[x]];}
+                image.setDevicePixelRatio(dpr);return;
+            }
+        }
+        QVector<QPainterPath> paths;paths.reserve(shell->size());
+        for(const auto& e:*shell){
+            if(stopped())return;
+            if(e.context==(layer==0))paths.append(camera.projectCurve(layer==2?e.beforeCubics:e.afterCubics,e.symmetric));
+        }
+        if(image.isNull()){fallback+=paths;return;}
+        image.setDevicePixelRatio(dpr);image.fill(Qt::transparent);QPainter ink(&image);ink.setRenderHint(QPainter::Antialiasing);ink.translate(phase/dpr);
+        auto stroke=[&](QPen pen){ink.setPen(pen);for(const auto& p:paths){if(stopped())return;ink.drawPath(p);}};
+        if(layer==0){stroke(QPen(QColor(255,255,255,155),2.4));stroke(QPen(QColor(79,100,118),1.25));}
+        else stroke(layer==1?current:original);
+    };
+    if(!originalOnly){
+        bake(0,frame->context,frame->contextPaths);mark("context_layer_ms");
+        bake(1,frame->current,frame->currentPaths);mark("current_layer_remainder_ms");
+    }
+    bake(2,frame->original,frame->originalPaths);mark("original_layer_ms");
+    if(stopped())return {};
+    if(timed)frame->timings.insert("background_raster",inWorker);
+    return frame;
 }
 }
 
@@ -495,6 +715,13 @@ struct HullView::State {
     QSet<fs::EntityId> selection;
     HullEntity kind=HullEntity::Point, globalKind=HullEntity::Point;
     QSet<fs::EntityId> entities, entityPoints;
+    struct EdgeSelectionLayer {
+        std::weak_ptr<const DisplayData> source;
+        QSet<fs::EntityId> ids;
+        DragRasterKey target{};
+        QImage pixels;
+    };
+    mutable EdgeSelectionLayer edgeSelectionLayer;
     const QSet<fs::EntityId>& transformPoints()const{return kind==HullEntity::Point?selection:entityPoints;}
     QString plateDiagnosticDocument;
     quint64 plateDiagnosticRevision=0;
@@ -591,14 +818,29 @@ struct HullView::State {
     double cameraDistanceFactor()const{return 3.*focalLength/50.;}
     quint64 cameraRevision=0;
     mutable quint64 fillRevision=std::numeric_limits<quint64>::max();
+    mutable quint64 fillResizeRevision=std::numeric_limits<quint64>::max();
+    mutable double fillScale=1;
     mutable QSize fillSize;
     mutable qreal fillDpr=0;
     mutable QImage fillImage;
+    mutable qreal fillSampleDpr=1;
+    mutable QJsonArray shadeLegendEvidence;
+    mutable QPointF fillOrigin;
+    mutable QSize fillMargin{0,0};
     // Keep the renderer with the camera. An edit changes vertices, not the GL
     // context, shaders or framebuffer; analysis attributes belong to each mesh.
     mutable std::unique_ptr<HullGpu> gpu;
     mutable std::weak_ptr<const DisplayData> gpuMesh;
     QPointF offset;
+    struct ViewFrame {
+        std::weak_ptr<const fs::ModelSnapshot> source;
+        QImage pixels;
+        QPointF offset,phase;
+        double scale=1;
+        quint64 revision=0;
+    } viewFrame;
+    bool dividerDragging=false,shadedDividerDragging=false;
+    bool denseResizePreview()const{return display&&display->faces.size()>=2048;}
     // Resize is delivered to the four widgets before their paints. Paint independent
     // section layers concurrently, in the exact new camera, not a stretched old image.
     struct ResizeLayer {
@@ -609,6 +851,90 @@ struct HullView::State {
         std::array<bool,4> visible{};
         std::weak_ptr<const fs::ModelSnapshot> source;
     } resizeLayer;
+    struct ResizeWire {
+        struct Raster {
+            QImage creases,net;
+            QVector<QPointF> points;
+            QVector<QLineF> obstacles;
+            bool creasesVisible=false,netVisible=false;
+        };
+        std::shared_future<Raster> rendered;
+        std::weak_ptr<const DisplayData> source;
+        DragRasterKey key{};
+        QColor creaseColor,edgeColor;
+    } resizeWire;
+    void scheduleWire(QSize size,qreal dpr,QPointF phase){
+        resizeWire={};
+        if(!display||display->surfaceCreases.size()+display->mirroredSurfaceCreases.size()<6000||
+           !studio||fillVisible||inspection!=Inspection::Off||entrance.active()||compareShell||releasedCreases)return;
+        const auto key=dragRasterKey(cameraRevision,size,dpr,phase);
+        if(!key.usable())return;
+        const auto creaseColor=preferred("creasecolor",Qt::black);
+        const auto edgeColor=preferred("edgecolor",QColor(102,133,125));
+        const bool drawNet=controlNetVisible&&gesture==Gesture::None&&pendingPointPositions.isEmpty();
+        auto task=std::make_shared<std::packaged_task<ResizeWire::Raster()>>(
+            [data=display,camera=dragCamera(),size,key,creaseColor,edgeColor,drawNet]{
+                ResizeWire::Raster result;
+                const QRectF viewport(QRect(QPoint{},size));
+                const auto layer=[&](auto paint){
+                    QImage pixels(key.pixels,QImage::Format_ARGB32_Premultiplied);
+                    if(pixels.isNull())return pixels;
+                    pixels.setDevicePixelRatio(key.dpr);
+                    pixels.fill(Qt::transparent);
+                    QPainter painter(&pixels);
+                    painter.setRenderHint(QPainter::Antialiasing);
+                    painter.translate(key.phase/key.dpr);
+                    paint(painter);
+                    painter.end();
+                    return pixels;
+                };
+                result.creases=layer([&](QPainter& painter){
+                    const auto clip=viewport.adjusted(-1,-1,1,1);
+                    auto lines=projectCreases(data->surfaceCreases,camera,clip);
+                    if(camera.mirror)lines+=projectCreases(data->mirroredSurfaceCreases,camera,clip);
+                    result.creasesVisible=!lines.isEmpty();
+                    painter.setPen(QPen(creaseColor,1));
+                    painter.drawLines(lines);
+                });
+                if(drawNet)result.net=layer([&](QPainter& painter){
+                    const auto clip=viewport.adjusted(-8,-8,8,8);
+                    result.points.reserve(data->points.size());
+                    for(const auto& point:data->points)result.points.append(camera.point(camera.split?
+                        fs::presentation::bodyPoint(point.position,camera.splitX):point.position));
+                    QVector<QLineF> edges,mirrors;
+                    edges.reserve(data->edges.size());
+                    result.obstacles.reserve(data->edges.size());
+                    for(const auto& edge:data->edges){
+                        const auto visible=[&](const QLineF& segment){
+                            return clip.intersects(QRectF(segment.p1(),segment.p2()).normalized().adjusted(-1,-1,1,1));
+                        };
+                        const auto append=[&](QLineF line){
+                            result.obstacles.append(line);
+                            if(visible(line))edges.append(line);
+                        };
+                        const auto a=data->points[edge.ia].position,b=data->points[edge.ib].position;
+                        if(camera.split){
+                            for(const auto& segment:fs::presentation::bodySegments(a,b,camera.splitX))
+                                append(QLineF(camera.point(segment[0]),camera.point(segment[1])));
+                        }else append(QLineF(result.points[edge.ia],result.points[edge.ib]));
+                        if(edge.mirror&&(a.y!=0||b.y!=0)){
+                            const QLineF reflected(camera.point(mirrored(a)),camera.point(mirrored(b)));
+                            if(visible(reflected))mirrors.append(reflected);
+                        }
+                    }
+                    const auto containsLine=[](const QVector<QLineF>& lines){
+                        return std::any_of(lines.begin(),lines.end(),[](const auto& line){return line.length()>=1.;});
+                    };
+                    result.netVisible=containsLine(edges)||containsLine(mirrors);
+                    painter.setPen(QPen(QColor(91,112,127,145),0.8,Qt::DashLine));painter.drawLines(mirrors);
+                    painter.setPen(QPen(edgeColor,1.3));painter.drawLines(edges);
+                });
+                return result;
+            });
+        auto future=task->get_future().share();
+        if(resizeRenderPool().tryStart([task]{(*task)();}))
+            resizeWire={std::move(future),display,key,creaseColor,edgeColor};
+    }
     bool layerMatches(QSize size,qreal dpr) const {
         return resizeLayer.image.valid() && resizeLayer.revision==cameraRevision &&
             resizeLayer.source.lock()==snapshot && resizeLayer.size==size && resizeLayer.dpr==dpr &&
@@ -652,9 +978,7 @@ struct HullView::State {
             painter.end();return image;
         });
         auto future=task->get_future().share();
-        struct SectionPool : QThreadPool {SectionPool(){setMaxThreadCount(std::clamp(QThread::idealThreadCount()-1,1,4));}};
-        static SectionPool pool;
-        if(pool.tryStart([task]{(*task)();}))
+        if(resizeRenderPool().tryStart([task]{(*task)();}))
             resizeLayer={std::move(future),cameraRevision,size,dpr,phase,gridVisible,fillVisible,sectionVisible,snapshot};
     }
     struct CameraPose {double scale=1,extent=1;QPointF offset;fs::Vec3 center;};
@@ -712,10 +1036,15 @@ struct HullView::State {
     std::shared_ptr<const QVector<fs::Section>> previewSections;
     DragSections compareSections;DragShell compareShell;
     std::optional<QVector<fs::presentation::Segment>> releasedCreases;
-    struct ShellPaintCache {
-        DragShell source; quint64 camera=0; QSize size; qreal dpr=0; QPointF phase;
-        QImage context, current, original; QSet<QPair<fs::EntityId,fs::EntityId>> edges;
-    } shellPaint;
+    std::shared_ptr<const DragShellRaster> shellPaint;
+    std::optional<DragRasterKey> observedDragTarget;
+    DragRasterCamera dragCamera()const{
+        fs::Vec3 right,up,depth;basis(right,up,depth);
+        const bool split=splitBody();
+        return {cameraCenter,right,up,depth,offset,scale,cameraExtent,cameraDistanceFactor(),
+                split?fs::presentation::splitLocation(*snapshot):0.,projection==HullProjection::Perspective,
+                split,snapshot->bothSides&&projection!=HullProjection::Profile};
+    }
 
     fs::Vec3 dragDelta;
     bool precise=false,soft=false,fromHandle=false;int axis=0,hoverAxis=0;
@@ -732,6 +1061,13 @@ struct HullView::State {
     struct ProjectedFace {fs::EntityId id;QPolygonF polygon;QRectF bounds;double depth;};
     QVector<ProjectedFace> strokeFaces;
     QVector<QPair<fs::EntityId,QLineF>> strokeEdges;
+    QHash<fs::EntityId,QVector<qsizetype>> strokeFaceParts;
+    struct StrokePaint {
+        DragRasterKey key{};
+        QImage fill,border,ink,outline;
+        QSet<fs::EntityId> painted;
+    };
+    mutable StrokePaint strokePaint;
     QVector<QVector<fs::Vec3>> faceParts(const DisplayFace& face)const{
         QVector<fs::Vec3> pts;bool offCenter=false;
         for(auto i:face.points){auto p=displayedPosition(display->points[i]);pts.append(p);offCenter|=p.y!=0;}
@@ -747,6 +1083,11 @@ struct HullView::State {
             QPolygonF poly;double depth=0;for(auto p:part){auto q=projectPoint(p);poly.append(q.pixel);depth+=q.depth;}
             if(poly.size()>=3)strokeFaces.append({face.id,poly,poly.boundingRect(),depth/poly.size()});
         }
+        // The nearest face has the smallest projected depth. Preserve the
+        // original polygon order when two faces lie at the same depth.
+        std::stable_sort(strokeFaces.begin(),strokeFaces.end(),[](const auto& a,const auto& b){return a.depth<b.depth;});
+        if(display->faces.size()>=tiledFaceThreshold)
+            for(qsizetype i=0;i<strokeFaces.size();++i)strokeFaceParts[strokeFaces[i].id].append(i);
     }
     void extendStroke(QPointF pixel){
         QLineF line(stroke.last(),pixel);if(line.isNull())return;stroke.append(pixel);
@@ -764,10 +1105,60 @@ struct HullView::State {
             for(int i=0;i<face.polygon.size();++i){QPointF x;if(line.intersects({face.polygon[i],face.polygon[(i+1)%face.polygon.size()]},&x)==QLineF::BoundedIntersection)
                 cuts.append(std::clamp(QPointF::dotProduct(x-line.p1(),d)/n,0.,1.));}}
         std::sort(cuts.begin(),cuts.end());for(int i=1;i<cuts.size();++i){if(cuts[i]<=cuts[i-1])continue;
-            auto p=line.pointAt((cuts[i]+cuts[i-1])*.5);const ProjectedFace* front=nullptr;
-            for(auto* f:candidates)if((!front||f->depth<front->depth)&&f->bounds.contains(p)&&f->polygon.containsPoint(p,Qt::OddEvenFill))front=f;
-            if(front)boxPreview.insert(front->id);
+            auto p=line.pointAt((cuts[i]+cuts[i-1])*.5);
+            for(const auto* f:candidates)if(f->bounds.contains(p)&&f->polygon.containsPoint(p,Qt::OddEvenFill)){
+                boxPreview.insert(f->id);
+                break;
+            }
         }
+    }
+    bool drawStrokeFaces(QPainter& painter,const QSet<fs::EntityId>& ids,QSize size,qreal dpr)const{
+        if(strokeFaceParts.isEmpty())return false;
+        const auto key=dragRasterKey(cameraRevision,size,dpr,painter.deviceTransform().map(QPointF{}));
+        if(!key.usable())return false;
+        auto& layer=strokePaint;
+        if(!(layer.key==key)||layer.fill.isNull()){
+            layer={};
+            layer.key=key;
+            layer.fill=QImage(key.pixels,QImage::Format_ARGB32_Premultiplied);
+            layer.border=QImage(key.pixels,QImage::Format_Grayscale8);
+            layer.ink=QImage(key.pixels,QImage::Format_Grayscale8);
+            if(layer.fill.isNull()||layer.border.isNull()||layer.ink.isNull()){layer={};return false;}
+            layer.fill.setDevicePixelRatio(dpr);
+            layer.fill.fill(Qt::transparent);
+            layer.border.fill(0);
+            layer.ink.fill(0);
+        }
+        if(layer.painted.size()!=ids.size()){
+            QPainter target(&layer.fill);
+            target.setRenderHint(QPainter::Antialiasing);
+            target.translate(key.phase/dpr);
+            target.setPen(Qt::NoPen);
+            target.setBrush(controlFaceSelectionFill);
+            // A stroke only adds hits. Update the raster for new faces and
+            // retain the already drawn marks while the pointer moves.
+            for(auto id:ids)if(!layer.painted.contains(id)){
+                const auto parts=strokeFaceParts.constFind(id);
+                if(parts==strokeFaceParts.cend())continue;
+                for(auto index:*parts){
+                    const auto& polygon=strokeFaces[index].polygon;
+                    target.drawPolygon(polygon);
+                    auto a=polygon.back()*dpr+key.phase;
+                    for(const auto& vertex:polygon){
+                        const auto b=vertex*dpr+key.phase;
+                        shellStroke(layer.border,a,b,(controlFaceSelectionWidth+1.8)*dpr/2);
+                        shellStroke(layer.ink,a,b,controlFaceSelectionWidth*dpr/2);
+                        a=b;
+                    }
+                }
+            }
+            target.end();
+            layer.painted=ids;
+            layer.outline=selectionStrokeImage(layer.border,layer.ink,dpr);
+        }
+        painter.drawImage(-key.phase/dpr,layer.fill);
+        painter.drawImage(-key.phase/dpr,layer.outline);
+        return true;
     }
     QString blockedReason;
     bool moved=false,lastRightDragged=false;
@@ -789,11 +1180,80 @@ struct HullView::State {
         if(edge.mirror && (a.y!=0 || b.y!=0))spans.append(fs::presentation::Segment{mirrored(a),mirrored(b)});
         return spans;
     }
+    void drawSelectedEdges(QPainter& painter,const QSet<fs::EntityId>& ids,bool final,bool stroking,
+                           QSize size,qreal dpr) const {
+        const auto keyline=controlSelectionPen(controlSelectionKeyline,controlEdgeSelectionWidth+1.8);
+        const auto ink=controlSelectionPen(controlSelectionInk,controlEdgeSelectionWidth);
+        if(final||ids.size()<256){
+            QPainterPath outline;
+            for(const auto& edge:display->edges)if(ids.contains(edge.id))
+                for(const auto& span:selectableEdgeSpans(edge)){
+                    outline.moveTo(projectPoint(span[0]).pixel);
+                    outline.lineTo(projectPoint(span[1]).pixel);
+                }
+            painter.strokePath(outline,keyline);
+            painter.strokePath(outline,ink);
+            return;
+        }
+        const auto selectedLines=[&]{
+            QVector<Projected> points,mirrors;
+            projectInspectionPoints(false,points,mirrors);
+            QVector<QLineF> lines;
+            lines.reserve(ids.size());
+            for(const auto& edge:display->edges)if(ids.contains(edge.id)){
+                if(points.isEmpty()){
+                    for(const auto& span:selectableEdgeSpans(edge))
+                        lines.append(QLineF(projectPoint(span[0]).pixel,projectPoint(span[1]).pixel));
+                }else{
+                    lines.append(QLineF(points[edge.ia].pixel,points[edge.ib].pixel));
+                    if(edge.mirror&&!mirrors.isEmpty()&&
+                        (displayedPosition(display->points[edge.ia]).y!=0||displayedPosition(display->points[edge.ib]).y!=0))
+                        lines.append(QLineF(mirrors[edge.ia].pixel,mirrors[edge.ib].pixel));
+                }
+            }
+            return lines;
+        };
+        const auto key=dragRasterKey(cameraRevision,size,dpr,painter.deviceTransform().map(QPointF{}));
+        const bool live=stroking||gesture==Gesture::Move||!pendingPointPositions.isEmpty();
+        auto& layer=edgeSelectionLayer;
+        if(!live&&!layer.pixels.isNull()&&layer.target==key&&layer.source.lock()==display&&layer.ids==ids){
+            painter.drawImage(-key.phase/dpr,layer.pixels);
+            return;
+        }
+        const auto lines=selectedLines();
+        QImage pixels;
+        if(key.usable()){
+            QImage border(key.pixels,QImage::Format_Grayscale8),inkMask(key.pixels,QImage::Format_Grayscale8);
+            if(!border.isNull()&&!inkMask.isNull()){
+                // Each pass uses the union of all strokes. Shared vertices retain
+                // a single pale outline below the blue ink, including during lasso selection.
+                border.fill(0);
+                inkMask.fill(0);
+                for(const auto& line:lines){
+                    const auto a=line.p1()*dpr+key.phase,b=line.p2()*dpr+key.phase;
+                    shellStroke(border,a,b,keyline.widthF()*dpr/2);
+                    shellStroke(inkMask,a,b,ink.widthF()*dpr/2);
+                }
+                pixels=selectionStrokeImage(border,inkMask,dpr);
+            }
+        }
+        if(pixels.isNull()){
+            painter.setPen(keyline);
+            painter.drawLines(lines);
+            painter.setPen(ink);
+            painter.drawLines(lines);
+        }else{
+            painter.drawImage(-key.phase/dpr,pixels);
+            if(!live)layer={display,ids,key,std::move(pixels)};
+        }
+    }
     QVector<QVector<fs::Vec3>> controlPolygons(const QVector<fs::Vec3>& p)const{
         return splitBody()?fs::presentation::bodyPolygons(p,fs::presentation::splitLocation(*snapshot)):QVector<QVector<fs::Vec3>>{p};
     }
     struct Projected { QPointF pixel;double depth,reciprocalW; };
-    struct FacePatch { QPolygonF polygon; QRectF bounds; double depth=0; bool empty=false; };
+    struct FacePatch { QPolygonF polygon; QRectF bounds; double depth=0; bool empty=false; fs::EntityId id=0; bool mirror=false; };
+    bool faceOrientationPreview=false;
+    QSet<fs::EntityId> orientationConflicts, orientationFlipped;
     void projectInspectionPoints(bool final,QVector<Projected>& pixels,QVector<Projected>& reflected)const{
         if(!splitBody()){
             pixels.reserve(display->points.size());
@@ -811,10 +1271,12 @@ struct HullView::State {
         projectInspectionPoints(final,pixels,reflected);
         QVector<FacePatch> patches;
         patches.reserve(display->faces.size());
-        auto collect=[&](const auto& vertices,auto projectVertex,bool empty){
+        auto collect=[&](const auto& vertices,auto projectVertex,bool empty,fs::EntityId id,bool mirror=false){
             if(vertices.size()<3)return;
             FacePatch patch;
             patch.empty=empty;
+            patch.id=id;
+            patch.mirror=mirror;
             patch.polygon.reserve(vertices.size());
             for(const auto& vertex:vertices){
                 const auto projected=projectVertex(vertex);
@@ -828,11 +1290,11 @@ struct HullView::State {
         auto appendFace=[&](const DisplayFace& face,bool empty){
             if(splitBody()){
                 for(const auto& part:faceParts(face))
-                    collect(part,[&](auto p){return projectPoint(p);},empty);
+                    collect(part,[&](auto p){return projectPoint(p);},empty,face.id);
             }else{
-                collect(face.points,[&](int i){return pixels[i];},empty);
+                collect(face.points,[&](int i){return pixels[i];},empty,face.id);
                 if(face.mirror && !reflected.isEmpty())
-                    collect(face.points,[&](int i){return reflected[i];},empty);
+                    collect(face.points,[&](int i){return reflected[i];},empty,face.id,true);
             }
         };
         for(const auto& cell:emptyControlCells(*display))appendFace(cell,true);
@@ -842,15 +1304,55 @@ struct HullView::State {
         });
         return patches;
     }
-    struct FaceTileCache {
+    void drawFaceOrientation(QPainter& painter) const {
+        painter.setRenderHint(QPainter::Antialiasing);
+        const QPen outline(QColor("#314b60"));
+        for(const auto& patch:projectFacePatches(true)){
+            if(patch.empty){
+                painter.setPen(outline);
+                paintFacePatch(painter,patch);
+                continue;
+            }
+            double area=0;
+            QPointF previous=patch.polygon.back();
+            for(const auto& point:patch.polygon){
+                area+=previous.x()*point.y()-point.x()*previous.y();
+                previous=point;
+            }
+            const bool front=patch.mirror?area>0:area<0;
+            painter.setBrush(front?QColor("#578cca"):QColor("#c7584f"));
+            painter.setPen(orientationFlipped.contains(patch.id)?QPen(QColor("#0b604f"),3):outline);
+            painter.drawPolygon(patch.polygon);
+        }
+        if(orientationConflicts.isEmpty())return;
+        QVector<QLineF> lines;
+        for(const auto& edge:display->edges){
+            if(!orientationConflicts.contains(edge.id))continue;
+            const auto& a=display->points[edge.ia].position;
+            const auto& b=display->points[edge.ib].position;
+            lines.append({projectPoint(a).pixel,projectPoint(b).pixel});
+            if(edge.mirror&&snapshot->bothSides)
+                lines.append({projectPoint(mirrored(a)).pixel,projectPoint(mirrored(b)).pixel});
+        }
+        painter.setPen(QPen(QColor("#573409"),5));painter.drawLines(lines);
+        painter.setPen(QPen(QColor("#ffbd54"),3));painter.drawLines(lines);
+    }
+    template<class Patch>
+    struct PanTileCache {
         std::weak_ptr<const DisplayData> display;
         quint64 camera=0;
         qreal dpr=0;
         QPointF origin;
-        QVector<FacePatch> patches;
+        QVector<Patch> patches;
         QHash<QPoint,QPixmap> tiles;
     };
-    mutable FaceTileCache faceTiles;
+    using FaceTileCache=PanTileCache<FacePatch>;
+    mutable FaceTileCache faceTiles,selectedFaceTiles;
+    mutable QSet<fs::EntityId> tiledFaceSelection;
+    struct NormalStroke {QLineF line;QRectF bounds;};
+    mutable PanTileCache<NormalStroke> normalTiles;
+    mutable std::weak_ptr<const fs::ModelSnapshot> normalTileSnapshot;
+    mutable QSet<fs::EntityId> tiledNormalSelection;
     mutable quint64 faceProjectionBuilds=0;
     static QColor faceFill(){return QColor(181,215,221);}
     static QColor faceStroke(){return QColor(53,86,100);}
@@ -858,12 +1360,8 @@ struct HullView::State {
         painter.setBrush(patch.empty?QColor(Qt::white):faceFill());
         painter.drawPolygon(patch.polygon);
     }
-    void drawFaceTiles(QPainter& painter,QRect viewport,qreal dpr)const{
-        auto& cache=faceTiles;
-        if(cache.display.lock()!=display || cache.camera!=cameraRevision || cache.dpr!=dpr){
-            cache={display,cameraRevision,dpr,offset,projectFacePatches(false),{}};
-            ++faceProjectionBuilds;
-        }
+    template<class Patch,class PaintTile>
+    void drawPanTiles(QPainter& painter,QRect viewport,qreal dpr,PanTileCache<Patch>& cache,PaintTile paintTile)const{
         // Work in device pixels so neighbouring tiles meet even at fractional DPI.
         constexpr int side=256;
         const QPoint shift=((offset-cache.origin)*dpr).toPoint();
@@ -879,15 +1377,165 @@ struct HullView::State {
             if(found==cache.tiles.end()){
                 QPixmap image(side,side);image.setDevicePixelRatio(dpr);image.fill(Qt::transparent);
                 QPainter target(&image);target.setRenderHint(QPainter::Antialiasing);
-                target.setPen(QPen(faceStroke(),1.5,Qt::SolidLine,Qt::RoundCap,Qt::RoundJoin));
                 target.translate(-origin);
-                const QRectF bounds(origin,QSizeF(side/dpr,side/dpr));
-                for(const auto& patch:std::as_const(cache.patches))
-                    if(bounds.intersects(patch.bounds))paintFacePatch(target,patch);
+                paintTile(target,QRectF(origin,QSizeF(side/dpr,side/dpr)));
                 target.end();found=cache.tiles.insert(tile,std::move(image));
             }
             painter.drawPixmap(origin+QPointF(shift)/dpr,found.value());
         }
+    }
+    void drawFaceTiles(QPainter& painter,QRect viewport,qreal dpr)const{
+        auto& cache=faceTiles;
+        if(cache.display.lock()!=display || cache.camera!=cameraRevision || cache.dpr!=dpr){
+            cache={display,cameraRevision,dpr,offset,projectFacePatches(false),{}};
+            ++faceProjectionBuilds;
+        }
+        drawPanTiles(painter,viewport,dpr,cache,[&](QPainter& target,const QRectF& bounds){
+            target.setPen(QPen(faceStroke(),1.5,Qt::SolidLine,Qt::RoundCap,Qt::RoundJoin));
+            for(const auto& patch:std::as_const(cache.patches))
+                if(bounds.intersects(patch.bounds))paintFacePatch(target,patch);
+        });
+    }
+    template<class Visitor>
+    void visitSelectedFacePolygons(const QSet<fs::EntityId>& ids,Visitor visit)const{
+        for(const auto& face:display->faces)if(ids.contains(face.id))
+            for(const auto& part:faceParts(face)){
+                QPolygonF polygon;
+                polygon.reserve(part.size());
+                for(const auto& point:part)polygon.append(projectPoint(point).pixel);
+                if(!polygon.isEmpty())visit(std::move(polygon));
+            }
+    }
+    template<class Polygons>
+    static void paintSelectedFaces(QPainter& painter,Polygons polygons){
+        QPainterPath outline;
+        painter.setPen(Qt::NoPen);
+        painter.setBrush(controlFaceSelectionFill);
+        polygons([&](const QPolygonF& polygon){
+            painter.drawPolygon(polygon);
+            outline.addPolygon(polygon);
+            outline.closeSubpath();
+        });
+        painter.strokePath(outline,controlSelectionPen(controlSelectionKeyline,controlFaceSelectionWidth+1.8));
+        painter.strokePath(outline,controlSelectionPen(controlSelectionInk,controlFaceSelectionWidth));
+    }
+    void drawSelectedFaces(QPainter& painter,const QSet<fs::EntityId>& ids,bool final,bool stroking,
+                           QRect viewport,qreal dpr)const{
+        const auto paintDirect=[&](const auto& selection){
+            paintSelectedFaces(painter,[&](auto emitPolygon){visitSelectedFacePolygons(selection,emitPolygon);});
+        };
+        if(!final&&stroking){
+            if(strokeAdditive&&!entities.isEmpty()&&!strokeFaceParts.isEmpty()){
+                // The existing selection already has its own cached ink.
+                // Only the additional faces belong to this gesture's raster.
+                drawSelectedFaces(painter,entities,false,false,viewport,dpr);
+                const auto added=ids-entities;
+                if(!added.isEmpty()&&!drawStrokeFaces(painter,added,viewport.size(),dpr))paintDirect(added);
+                return;
+            }
+            if(drawStrokeFaces(painter,ids,viewport.size(),dpr))return;
+        }
+        const bool live=stroking||gesture==Gesture::Move||gesture==Gesture::Rotate||
+                        cameraMotion.active||!pendingPointPositions.isEmpty();
+        if(final||live||ids.size()<tiledFaceThreshold){
+            paintDirect(ids);
+            return;
+        }
+
+        // Store the projected overlay at one camera origin. A pan only changes
+        // its translation, and exposed tiles reuse the same projected polygons.
+        auto& cache=selectedFaceTiles;
+        if(cache.display.lock()!=display||cache.camera!=cameraRevision||cache.dpr!=dpr||tiledFaceSelection!=ids){
+            QVector<FacePatch> patches;
+            patches.reserve(ids.size());
+            visitSelectedFacePolygons(ids,[&](QPolygonF polygon){
+                const auto bounds=polygon.boundingRect().adjusted(-3,-3,3,3);
+                patches.append({std::move(polygon),bounds});
+            });
+            cache={display,cameraRevision,dpr,offset,std::move(patches),{}};
+            tiledFaceSelection=ids;
+        }
+        drawPanTiles(painter,viewport,dpr,cache,[&](QPainter& target,const QRectF& bounds){
+            const QSize size(qRound(bounds.width()*dpr),qRound(bounds.height()*dpr));
+            QImage border(size,QImage::Format_Grayscale8),ink(size,QImage::Format_Grayscale8);
+            if(border.isNull()||ink.isNull()){
+                paintSelectedFaces(target,[&](auto emitPolygon){
+                    for(const auto& patch:std::as_const(cache.patches))
+                        if(bounds.intersects(patch.bounds))emitPolygon(patch.polygon);
+                });
+                return;
+            }
+            border.fill(0);
+            ink.fill(0);
+            target.setPen(Qt::NoPen);
+            target.setBrush(controlFaceSelectionFill);
+            for(const auto& patch:std::as_const(cache.patches))if(bounds.intersects(patch.bounds)){
+                target.drawPolygon(patch.polygon);
+                auto a=(patch.polygon.back()-bounds.topLeft())*dpr;
+                for(const auto& vertex:patch.polygon){
+                    const auto b=(vertex-bounds.topLeft())*dpr;
+                    shellStroke(border,a,b,(controlFaceSelectionWidth+1.8)*dpr/2);
+                    shellStroke(ink,a,b,controlFaceSelectionWidth*dpr/2);
+                    a=b;
+                }
+            }
+            target.drawImage(bounds.topLeft(),selectionStrokeImage(border,ink,dpr));
+        });
+    }
+    template<class Visitor>
+    void visitSelectedNormalStrokes(Visitor add)const{
+        QSet<fs::EntityId> symmetric;
+        if(snapshot->bothSides&&projection!=HullProjection::Profile)
+            for(const auto& face:snapshot->faces)
+                if(snapshot->layer(face.layer)->symmetric)symmetric.insert(face.id);
+        const double length=display->mesh.extent*.025;
+        for(const auto& normal:snapshot->surfaceNormals){
+            if(!entities.contains(normal.face))continue;
+            const auto center=normal.position,n=normal.direction;
+            const fs::Vec3 tip{center.x+n.x*length,center.y+n.y*length,center.z+n.z*length};
+            auto spans=controlSegments(center,tip);
+            if(symmetric.contains(normal.face))spans.append({mirrored(center),mirrored(tip)});
+            for(const auto& span:spans){
+                const QLineF line(projectPoint(span[0]).pixel,projectPoint(span[1]).pixel);
+                add(line);
+                const double size=line.length();
+                if(size>4){
+                    const auto u=(line.p2()-line.p1())/size;
+                    const QPointF v(-u.y(),u.x());
+                    add(QLineF(line.p2(),line.p2()-u*5+v*2));
+                    add(QLineF(line.p2(),line.p2()-u*5-v*2));
+                }
+            }
+        }
+    }
+    void drawSelectedNormals(QPainter& painter,QRect viewport,qreal dpr,bool final)const{
+        const QPen pen(sourceColor(snapshot->normalColor),1);
+        if(final||entities.size()<tiledFaceThreshold||cameraMotion.active||
+           (gesture!=Gesture::None&&gesture!=Gesture::Pan&&gesture!=Gesture::Stroke)){
+            painter.save();
+            painter.setPen(pen);
+            visitSelectedNormalStrokes([&](const QLineF& line){painter.drawLine(line);});
+            painter.restore();
+            return;
+        }
+        auto& cache=normalTiles;
+        if(cache.display.lock()!=display||normalTileSnapshot.lock()!=snapshot||cache.camera!=cameraRevision||
+           cache.dpr!=dpr||tiledNormalSelection!=entities){
+            QVector<NormalStroke> strokes;
+            visitSelectedNormalStrokes([&](const QLineF& line){
+                strokes.append({line,QRectF(line.p1(),line.p2()).normalized().adjusted(-1,-1,1,1)});
+            });
+            cache={display,cameraRevision,dpr,offset,std::move(strokes),{}};
+            normalTileSnapshot=snapshot;
+            tiledNormalSelection=entities;
+        }
+        drawPanTiles(painter,viewport,dpr,cache,[&](QPainter& target,const QRectF& bounds){
+            QVector<QLineF> lines;
+            for(const auto& stroke:std::as_const(cache.patches))
+                if(bounds.intersects(stroke.bounds))lines.append(stroke.line);
+            target.setPen(pen);
+            target.drawLines(lines);
+        });
     }
     struct InspectionLayer {
         QPixmap pixels;
@@ -969,20 +1617,46 @@ struct HullView::State {
             prepareCurvePaths(final);for(int i=0;i<display->curves.size();++i){const auto& c=display->curves[i];if(!curveVisible(c))continue;
                 painter.setPen(pen(c.marker?12:c.flow?11:10));painter.drawPath(curvePathTransform.map(curvePaths[i].path));}
         }
+        QVector<LegendKey> items;
+        for(int k=0;k<int(std::size(keys));++k)if(used[k])
+            items.append({uiText(keys[k].text),keys[k].color,faces?0.:widths[k],keys[k].style});
+        painter.restore();
+        drawLegend(painter,viewport,final,items);
+    }
+    struct LegendKey {
+        QString text;
+        QColor color;
+        qreal lineWidth=0;
+        Qt::PenStyle style=Qt::SolidLine;
+        QGradientStops ramp;
+    };
+    void drawLegend(QPainter& painter,QRect viewport,bool final,const QVector<LegendKey>& items)const{
+        if(items.isEmpty())return;
+        painter.save();painter.setClipRect(viewport,Qt::IntersectClip);
+        painter.setRenderHint(QPainter::Antialiasing);
         const auto fm=painter.fontMetrics();const int row=fm.height()+6;
         constexpr int gap=4;
         struct Label {int k;int width;QString text;};
         QVector<Label> labels;
-        for(int k=0;k<int(std::size(keys));++k)if(used[k]){
-            const QString text=uiText(keys[k].text);
-            labels.append({k,fm.horizontalAdvance(text)+53,text});
-        }
+        for(int k=0;k<items.size();++k)
+            labels.append({k,fm.horizontalAdvance(items[k].text)+53,items[k].text});
         const auto paintLabel=[&](const Label& label,QRect box,bool wrapped=false){
-            const int k=label.k;
+            const auto& item=items[label.k];
             painter.fillRect(box,QColor(255,255,255,235));
             const QPoint center(box.x()+3,box.y()+box.height()/2);
-            if(faces){painter.setPen(faceBorder);painter.setBrush(keys[k].color);painter.drawRect(QRect(center-QPoint(0,5),QSize(37,10)));}
-            else{painter.setPen(pen(k));painter.drawLine(center,center+QPoint(40,0));}
+            if(item.lineWidth==0){
+                painter.setPen(faceStroke());
+                if(item.ramp.isEmpty())painter.setBrush(item.color);
+                else{
+                    QLinearGradient gradient(center,center+QPoint(37,0));
+                    gradient.setStops(item.ramp);
+                    painter.setBrush(gradient);
+                }
+                painter.drawRect(QRect(center-QPoint(0,5),QSize(37,10)));
+            }else{
+                painter.setPen(QPen(item.color,item.lineWidth,item.style,Qt::FlatCap,Qt::RoundJoin));
+                painter.drawLine(center,center+QPoint(40,0));
+            }
             painter.setPen(QColor("#283845"));
             painter.drawText(box.adjusted(47,0,-(wrapped?6:0),0),Qt::AlignVCenter|Qt::AlignLeft|
                 (wrapped?Qt::TextWrapAnywhere:0),label.text);
@@ -1025,6 +1699,51 @@ struct HullView::State {
             for(int i=0;i<labels.size();++i)paintLabel(labels[i],QRect(positions[i],QSize(labels[i].width,row)));
         }
         painter.restore();
+    }
+    void drawShadeLegend(QPainter& painter,QRect viewport,bool final)const{
+        shadeLegendEvidence={};
+        if(!display||!display->analysis||!display->hasShadedSurface||!fillVisible||
+           inspection!=Inspection::Off||faceOrientationPreview)return;
+        QVector<LegendKey> items;
+        const auto add=[&](QString text,QColor color){
+            items.append({text,color});
+            shadeLegendEvidence.append(QJsonObject{{"text",text},{"color",color.name()}});
+        };
+        const auto addCurvature=[&](ShadeClass kind,QString text,int sign){
+            if(!(display->gaussianClasses&shadeBit(kind)))return;
+            add(text,gaussianColor(sign,-1,1));
+            auto& ramp=items.last().ramp;
+            for(int i=0;i<=12;++i)ramp.append({i/12.,gaussianColor(sign*i/12.,-1,1)});
+        };
+        switch(shadeMode){
+        case HullShade::Flat:
+            return;
+        case HullShade::Gaussian:
+            addCurvature(ShadeClass::Positive,uiText("正曲率"),1);
+            if(display->gaussianClasses&shadeBit(ShadeClass::NearZero))
+                add(uiText("曲率接近零"),gaussianColor(0,-1,1));
+            addCurvature(ShadeClass::Negative,uiText("负曲率"),-1);
+            if(display->gaussianClasses&shadeBit(ShadeClass::Unknown))
+                add(uiText("无法评估"),developableDisplayColor(ShadeClass::Unknown));
+            break;
+        case HullShade::Developable: {
+            const auto category=[&](ShadeClass kind,QString text){
+                if(display->developableClasses&shadeBit(kind))add(text,developableDisplayColor(kind));
+            };
+            category(ShadeClass::NearZero,uiText("角亏接近零"));
+            category(ShadeClass::Nonzero,uiText("角亏非零"));
+            category(ShadeClass::Unknown,uiText("无法评估"));
+            break;
+        }
+        case HullShade::Zebra: {
+            // Reflection bands may trade places as the camera moves. Their
+            // two-color palette belongs to the mode for any nonempty hull.
+            const auto colors=style();
+            add(uiText("斑马纹底色"),colors.zebraLight);
+            add(uiText("斑马纹条带"),colors.zebra);
+            break;
+        }}
+        drawLegend(painter,viewport,final,items);
     }
     bool curveVisible(const DisplayCurve& c)const{return snapshot&&c.visible&&(c.marker?snapshot->showMarkers:c.flow?snapshot->showFlowlines&&!fillVisible:snapshot->showControlCurves);}
     void reuseCurvePaths(quint64 previousRevision){
@@ -1118,6 +1837,24 @@ struct HullView::State {
         return qMin(qMax(1,viewport.width()-horizontal)/span.width(),
                     qMax(1,viewport.height()-(studio?112:72))/span.height());
     }
+    bool drawDividerFill(QPainter& painter,QRect viewport,qreal dpr,bool forceSoftware) const {
+        if(!shadedDividerDragging||fillImage.isNull()||fillResizeRevision!=cameraRevision||
+           fillLightRevision!=lightRevision||fillDpr!=dpr||fillSoftware!=forceSoftware)
+            return false;
+        const double ratio=scale/fillScale;
+        const QPointF margin(qRound(fillMargin.width()*dpr)/dpr,qRound(fillMargin.height()*dpr)/dpr);
+        const QRectF target(offset-(fillOrigin+margin)*ratio,fillImage.deviceIndependentSize()*ratio);
+        // Resizing leaves the camera orientation and perspective depths intact.
+        // Rebuild if a zoomed or panned boat reveals pixels outside the old image.
+        const auto needed=projectedMeshBounds().adjusted(-2,-2,2,2).intersected(QRectF(viewport));
+        if(!needed.isEmpty()&&!target.contains(needed))return false;
+        painter.save();
+        painter.setRenderHint(QPainter::SmoothPixmapTransform);
+        painter.drawImage(target,fillImage);
+        painter.restore();
+        paintedHull=!display->mesh.triangles.isEmpty();
+        return true;
+    }
     void prepareAnimatedSections(const fs::curveEdit::Motion& motion,qreal dpr)const{
         const bool gridMasksSections=gridVisible&&snapshot->overlay.present;
         if(animatedSections.camera==cameraRevision&&animatedSections.dpr==dpr&&
@@ -1172,15 +1909,15 @@ struct HullView::State {
             fs::presentation::updateHorizontalReferences(animatedOverlay.geometry,*snapshot,int(projection),font,project,*frame);
         return animatedOverlay.geometry;
     }
-    QMatrix4x4 camera(QSize size) const {
+    QMatrix4x4 camera(QSize size,QPointF margin={}) const {
         fs::Vec3 right,up,depth;
         basis(right,up,depth);
         const double extent=display?display->mesh.extent:1;
         const auto origin=display?subtract(display->mesh.center,cameraCenter):fs::Vec3{};
         const double sx=2*scale*extent/qMax(1,size.width());
         const double sy=2*scale*extent/qMax(1,size.height());
-        const double tx=2*offset.x()/qMax(1,size.width())-1;
-        const double ty=1-2*offset.y()/qMax(1,size.height());
+        const double tx=2*(offset.x()+margin.x())/qMax(1,size.width())-1;
+        const double ty=1-2*(offset.y()+margin.y())/qMax(1,size.height());
         const double perspective=projection==HullProjection::Perspective?-extent/(cameraDistanceFactor()*cameraExtent):0;
         const fs::Vec3 w={perspective*depth.x,perspective*depth.y,perspective*depth.z};
         const double w0=projection==HullProjection::Perspective?1-dot(origin,depth)/(cameraDistanceFactor()*cameraExtent):1;
@@ -1214,6 +1951,7 @@ struct HullView::State {
     HullStyle style()const{
         HullStyle result;result.mode=shadeMode;result.perspective=projection==HullProjection::Perspective;
         fs::Vec3 right,up,depth;basis(right,up,depth);result.direction=depth;result.zebra=preferred("zebracolor",Qt::black);
+        if(qGray(result.zebra.rgb())>=140)result.zebraLight=QColor(30,44,49);
         if(display){const auto center=subtract(cameraCenter,display->mesh.center);const double extent=display->mesh.extent,distance=cameraDistanceFactor()*cameraExtent;
             result.eye={(center.x+distance*depth.x)/extent,(center.y+distance*depth.y)/extent,(center.z+distance*depth.z)/extent};}
         return result;
@@ -1229,6 +1967,105 @@ struct HullView::State {
             if(pending!=pendingPointPositions.cend())return pending.value();
         }
         return gesture==Gesture::Move && moved && (precise?weights.contains(point.id):selection.contains(point.id))?movedPosition(point.position,point.id):point.position;
+    }
+    void drawControlPointMarkers(QPainter& painter,QRect viewport,const QVector<QPointF>& projected,
+                                 bool final,bool showNet)const{
+        const QRectF clip=QRectF(viewport).adjusted(-8,-8,8,8);
+        const auto pointPixel=[&](int index){
+            if(!projected.isEmpty())return projected[index];
+            return projectPoint(controlPosition(displayedPosition(display->points[index],final))).pixel;
+        };
+        painter.save();painter.setRenderHint(QPainter::Antialiasing,true);
+        QVector<QPointF> points;
+        QVector<QRectF> locked;
+        if(showNet)points.reserve(display->points.size());
+        const auto& selectedIds=gesture==Gesture::Box?boxPreview:selection;
+        // The opaque selection halo covers small base markers completely. Keep
+        // larger markers (and all export paths) and draw selection in its usual order.
+        const bool smallMarkers=!studio||!snapshot->overlay.present||snapshot->overlay.pointSize<=3;
+        painter.setPen(Qt::NoPen);
+        if(showNet)for (const auto& point:display->points) {
+            if(!final&&smallMarkers&&!point.locked&&selectedIds.contains(point.id))continue;
+            if(!final&&undoingPlacements.contains(point.id))continue;
+            const auto pixel=pointPixel(int(&point-display->points.constData()));
+            if (!clip.contains(pixel)) continue;
+            if(!final&&!entrance.pointVisible(pixel.x()))continue;
+            if(studio&&snapshot->overlay.present){
+                QColor base=point.locked?QColor(128,128,128):point.leak?preferred("leakpointcolor",QColor(0,255,153)):point.vertexType==1?preferred("creasepointcolor",QColor(98,77,50)):point.vertexType==2?preferred("dartpointcolor",QColor(Qt::magenta)):point.vertexType==3?preferred("cornerpointcolor",QColor(82,65,58)):preferred("regularpointcolor",QColor(49,93,85));
+                if(!final)base=entrance.pointColor(point.id,base);
+                const int radius=std::clamp(snapshot->overlay.pointSize,1,100);
+                const QRectF marker(pixel-QPointF(radius,radius),QSizeF(radius*2+1,radius*2+1));
+                if(point.locked)painter.fillRect(marker,base);
+                else{painter.setBrush(base);painter.drawEllipse(marker);}
+                continue;
+            }
+            if (point.locked) locked.append(QRectF(pixel-QPointF(2.5,2.5),QSizeF(5,5)));
+            else points.append(pixel);
+        }
+        painter.setPen(QPen(QColor(245,249,252),5.5,Qt::SolidLine,Qt::RoundCap));painter.drawPoints(points);
+        painter.setPen(QPen(studio?QColor(49,93,85):QColor(12,75,134),3.2,Qt::SolidLine,Qt::RoundCap));painter.drawPoints(points);
+        painter.setPen(QPen(QColor(69,77,84),1));painter.setBrush(QColor(236,239,242));painter.drawRects(locked);
+        QVector<QPointF> selected;
+        QVector<QRectF> selectedLocked;
+        selected.reserve(selectedIds.size());
+        for (auto id:selectedIds) {
+            if(!final&&undoingPlacements.contains(id))continue;
+            const auto found=display->pointIndices.constFind(id);
+            if (found==display->pointIndices.cend()) continue;
+            const auto& point=display->points[found.value()];
+            const auto pixel=pointPixel(found.value());
+            if (!clip.contains(pixel)) continue;
+            if(!final&&!entrance.pointVisible(pixel.x()))continue;
+            if (point.locked) selectedLocked.append(QRectF(pixel-QPointF(4,4),QSizeF(8,8)));
+            else selected.append(pixel);
+        }
+        const QColor selectedColor=preferred("selectcolor",QColor(224,101,25));
+        if(!final&&selected.size()>=64){
+            // Rasterise each opaque marker once per display scale. Keep the two
+            // passes separate so overlapping points have the usual shared halo.
+            auto dots=[&](auto& cache,QColor color,int diameter){
+                const qreal ratio=painter.device()->devicePixelRatioF();
+                if(cache.dpr!=ratio||cache.color!=color){
+                    int side=qCeil((diameter+2)*ratio);cache.image=QPixmap(side,side);cache.image.setDevicePixelRatio(ratio);cache.image.fill(Qt::transparent);
+                    QPainter stamp(&cache.image);stamp.setRenderHint(QPainter::Antialiasing);stamp.setPen(Qt::NoPen);stamp.setBrush(color);
+                    const qreal half=side/(2*ratio);stamp.drawEllipse(QPointF(half,half),diameter*.5,diameter*.5);cache.dpr=ratio;cache.color=color;
+                }
+                const auto half=cache.image.deviceIndependentSize()*.5;
+                for(auto p:selected)painter.drawPixmap(p-QPointF(half.width(),half.height()),cache.image);
+            };dots(haloStamp,Qt::white,11);dots(selectedStamp,selectedColor,8);
+        }else{
+            painter.setPen(QPen(QColor(255,255,255),11,Qt::SolidLine,Qt::RoundCap));painter.drawPoints(selected);
+            painter.setPen(QPen(selectedColor,8,Qt::SolidLine,Qt::RoundCap));painter.drawPoints(selected);
+        }
+        painter.setPen(QPen(QColor(255,255,255),2));painter.setBrush(preferred("selectcolor",QColor(224,101,25)));
+        painter.drawRects(selectedLocked);
+        painter.restore();
+    }
+    void drawInspectionControlEdges(QPainter& painter,bool final)const{
+        QVector<Projected> pixels,reflected;
+        projectInspectionPoints(final,pixels,reflected);
+        QVector<QLineF> wires;
+        wires.reserve(display->edges.size());
+        for(const auto& edge:display->edges){
+            if(splitBody()){
+                const auto a=displayedPosition(display->points[edge.ia],final);
+                const auto b=displayedPosition(display->points[edge.ib],final);
+                for(const auto& span:controlSegments(a,b))
+                    wires.append({projectPoint(span[0]).pixel,projectPoint(span[1]).pixel});
+            }else{
+                const QLineF line(pixels[edge.ia].pixel,pixels[edge.ib].pixel);
+                wires.append(line);
+                if(edge.mirror&&!reflected.isEmpty()){
+                    const QLineF mirror(reflected[edge.ia].pixel,reflected[edge.ib].pixel);
+                    if(mirror!=line)wires.append(mirror);
+                }
+            }
+        }
+        painter.save();
+        painter.setRenderHint(QPainter::Antialiasing,true);
+        painter.setPen(QPen(faceStroke(),1.3,Qt::SolidLine,Qt::RoundCap));
+        painter.drawLines(wires);
+        painter.restore();
     }
     fs::curveEdit::PointPositions curvePreviewPositions()const{
         auto points=pendingPointPositions;
@@ -1269,7 +2106,7 @@ struct HullView::State {
         return best;
     }
 
-    QImage softwareImage(QSize logical,qreal dpr) const {
+    QImage softwareImage(QSize logical,qreal dpr,QPointF margin={}) const {
         const QSize physical(qMax(1,qRound(logical.width()*dpr)),qMax(1,qRound(logical.height()*dpr)));
         QImage image(physical,QImage::Format_ARGB32_Premultiplied);
         image.fill(Qt::transparent);
@@ -1286,7 +2123,7 @@ struct HullView::State {
             const auto p0=projectPoint(triangle.vertices[0]);
             const auto p1=projectPoint(triangle.vertices[1]);
             const auto p2=projectPoint(triangle.vertices[2]);
-            const QPointF a=p0.pixel*dpr,b=p1.pixel*dpr,c=p2.pixel*dpr;
+            const QPointF a=(p0.pixel+margin)*dpr,b=(p1.pixel+margin)*dpr,c=(p2.pixel+margin)*dpr;
             if (std::max({a.x(),b.x(),c.x()})<0 || std::min({a.x(),b.x(),c.x()})>=physical.width() ||
                 std::max({a.y(),b.y(),c.y()})<0 || std::min({a.y(),b.y(),c.y()})>=physical.height()) continue;
             const double denominator=(b.y()-c.y())*(a.x()-c.x())+(c.x()-b.x())*(a.y()-c.y());
@@ -1296,7 +2133,7 @@ struct HullView::State {
             const int minY=int(qBound(0.0,std::floor(std::min({a.y(),b.y(),c.y()})),double(physical.height()-1)));
             const int maxY=int(qBound(0.0,std::ceil(std::max({a.y(),b.y(),c.y()})),double(physical.height()-1)));
             fs::Vec3 center{};for(const auto& p:triangle.vertices){center.x+=(p.x-mesh.center.x)/(3*mesh.extent);center.y+=(p.y-mesh.center.y)/(3*mesh.extent);center.z+=(p.z-mesh.center.z)/(3*mesh.extent);}
-            const double light=shadeMode==HullShade::Gaussian?1:illumination.factor(triangle.normal,center);
+            const double light=shadeMode==HullShade::Flat?illumination.factor(triangle.normal,center):1;
             std::array<QColor,3> colors;double stripe[3]{};
             if(shadeMode!=HullShade::Flat)for(int k=0;k<3;++k){const auto& v=display->shading[index][k];
                 colors[k]=shadeMode==HullShade::Gaussian?v.gaussian:v.developable;
@@ -1329,15 +2166,25 @@ struct HullView::State {
                     if (z>depthRow[x]) continue;
                     if(alpha==255)depthRow[x]=z;
                     const double height=(u*z0+v*z1+w*z2)/(u*p0.reciprocalW+v*p1.reciprocalW+w*p2.reciprocalW);
-                    QRgb rgb=mesh.shadeUnderwater && height<mesh.waterlineZ?underwater:color;
+                    const bool submerged=mesh.shadeUnderwater&&height<mesh.waterlineZ;
+                    QRgb rgb=submerged?underwater:color;
                     if(shadeMode!=HullShade::Flat){
                         const double reciprocal=u*p0.reciprocalW+v*p1.reciprocalW+w*p2.reciprocalW;
                         const double bary[]{u*p0.reciprocalW/reciprocal,v*p1.reciprocalW/reciprocal,w*p2.reciprocalW/reciprocal};
-                        if(shadeMode==HullShade::Zebra){const double value=bary[0]*stripe[0]+bary[1]*stripe[1]+bary[2]*stripe[2];rgb=(int(std::floor(value/.02))%2)?lit(appearance.zebra):color;}
-                        else{double red=0,green=0,blue=0;for(int k=0;k<3;++k){red+=bary[k]*colors[k].red();green+=bary[k]*colors[k].green();blue+=bary[k]*colors[k].blue();}
-                            rgb=qRgb(qBound(0,qRound(red*light),255),qBound(0,qRound(green*light),255),qBound(0,qRound(blue*light),255));}
+                        if(shadeMode==HullShade::Zebra){
+                            const double value=bary[0]*stripe[0]+bary[1]*stripe[1]+bary[2]*stripe[2];
+                            const bool dark=int(std::floor(value*50+.5))%2;
+                            rgb=(dark?appearance.zebra:appearance.zebraLight).rgb();
+                        }else{
+                            double red=0,green=0,blue=0;
+                            for(int k=0;k<3;++k){
+                                red+=bary[k]*colors[k].red();green+=bary[k]*colors[k].green();blue+=bary[k]*colors[k].blue();
+                            }
+                            rgb=qRgb(qBound(0,qRound(red),255),qBound(0,qRound(green),255),qBound(0,qRound(blue),255));
+                        }
                     }
-                    if(alpha==255)scan[x]=rgb;else fragments.push_back({size_t(y)*size_t(physical.width())+size_t(x),z,rgb,alpha});
+                    if(alpha==255)scan[x]=rgb;
+                    else fragments.push_back({size_t(y)*size_t(physical.width())+size_t(x),z,rgb,alpha});
                 }
             }
         }
@@ -1386,6 +2233,10 @@ void HullView::setSnapshot(std::shared_ptr<const fs::ModelSnapshot> snapshot,
     state_->visibilityChanges=visibilityChanges;
     const bool sameDocument=snapshot && state_->committedSnapshot && snapshot->documentId==state_->committedSnapshot->documentId;
     const bool sameUnits=snapshot && state_->committedSnapshot && snapshot->units==state_->committedSnapshot->units;
+    // The document service can replace its first frame with rebuilt geometry
+    // for the same revision while the opening animation is still playing.
+    const bool openingPublication=sameDocument&&sameUnits&&state_->entrance.active()&&
+        snapshot->revision==state_->committedSnapshot->revision;
     if(state_->stationEditor && (!sameDocument||!sameUnits)){
         state_->stationEditor->reset();if(snapshot)state_->stationEditor->setUnits(snapshot->units);
         if(!sameDocument)state_->stationEditor->hide();
@@ -1393,9 +2244,16 @@ void HullView::setSnapshot(std::shared_ptr<const fs::ModelSnapshot> snapshot,
     if(!sameDocument){state_->cameraMotion.active=false;state_->hovered=0;state_->hoverMotion.clear();state_->emphasized.clear();state_->announcedSelection.clear();state_->interactionDriver->stop();}
     if(drawingUnchanged&&sameDocument&&sameUnits&&snapshot->sameDrawing(*state_->committedSnapshot)) {
         const bool completePreview=state_->committedSnapshot->isCachedPreview()&&!snapshot->isCachedPreview();
+        const auto& previous=*state_->committedSnapshot;
+        const bool waterStyleChanged=
+            snapshot->underwaterShadeOverride.value_or(snapshot->shadeUnderwater)!=
+                previous.underwaterShadeOverride.value_or(previous.shadeUnderwater)||
+            snapshot->underwaterColorOverride.value_or(snapshot->underwaterColor)!=
+                previous.underwaterColorOverride.value_or(previous.underwaterColor)||
+            snapshot->underwaterColorAlpha!=previous.underwaterColorAlpha;
         state_->committedSnapshot=std::move(snapshot);
         state_->snapshot=presentation?std::move(presentation):state_->committedSnapshot;
-        if(completePreview||maskChanged){state_->rebuildDisplay();++state_->cameraRevision;}
+        if(completePreview||maskChanged||waterStyleChanged){state_->rebuildDisplay();++state_->cameraRevision;}
         state_->pendingPointPositions.clear();
         refreshDisplayModeButton();
         update();return;
@@ -1421,12 +2279,40 @@ void HullView::setSnapshot(std::shared_ptr<const fs::ModelSnapshot> snapshot,
     if(!sameDocument&&state_->snapshot){
         state_->gridVisible=state_->gridOverride.value_or(state_->snapshot->overlay.grid);
         state_->hydroVisible=state_->hydroOverride.value_or(state_->snapshot->overlay.hydro);
-        if(state_->studio&&state_->snapshot->overlay.present)restartPresentation();
-    }else finishPresentation();
+        if(state_->studio&&state_->display&&
+           (state_->snapshot->overlay.present||!state_->display->edges.isEmpty()))restartPresentation();
+    }else if(!openingPublication)finishPresentation();
     refreshDisplayModeButton();
     update();
 }
 std::shared_ptr<const fs::ModelSnapshot> HullView::snapshot() const { return state_->committedSnapshot; }
+QSet<fs::EntityId> HullView::selectedMissingFace(const QSet<fs::EntityId>& selection) const {
+    if(!state_->display)return {};
+    const auto& display=*state_->display;
+    const auto offCenter=[](const DisplayPoint& point){return std::abs(point.position.y)>1e-4;};
+    QSet<fs::EntityId> sidePoints;
+    for(const auto& point:display.points)
+        if(selection.contains(point.id)&&offCenter(point))sidePoints.insert(point.id);
+    QSet<fs::EntityId> result;
+    for(const auto& cell:emptyControlCells(display)){
+        QSet<fs::EntityId> boundary;
+        for(auto index:cell.points){
+            const auto& point=display.points[index];
+            if(!selection.contains(point.id))break;
+            boundary.insert(point.id);
+        }
+        if(boundary.size()!=cell.points.size()||!boundary.contains(sidePoints))continue;
+        if(!result.isEmpty()&&result!=boundary)return {};
+        result=std::move(boundary);
+    }
+    return result;
+}
+void HullView::setFaceOrientationPreview(QSet<fs::EntityId> conflicts,QSet<fs::EntityId> flipped){
+    state_->faceOrientationPreview=true;
+    state_->orientationConflicts=std::move(conflicts);
+    state_->orientationFlipped=std::move(flipped);
+    update();
+}
 void HullView::setPlateDiagnosticFaces(const QString& document, quint64 revision, QVector<QVector<fs::Vec3>> faces){
     if(faces.isEmpty()&&state_->plateDiagnosticFaces.isEmpty())return;
     state_->plateDiagnosticDocument=document;
@@ -1436,7 +2322,31 @@ void HullView::setPlateDiagnosticFaces(const QString& document, quint64 revision
 }
 std::shared_ptr<const QVector<fs::Section>> HullView::moveSectionPreview()const{return state_->previewSections;}
 void HullView::setMoveSectionPreview(std::shared_ptr<const QVector<fs::Section>> sections){if(!sections)setDragSectionComparison({});if(state_->previewSections!=sections){state_->previewSections=std::move(sections);update();}}
-void HullView::setDragSectionComparison(DragSections pairs,DragShell shell){if(state_->compareSections!=pairs||state_->compareShell!=shell){state_->compareSections=std::move(pairs);state_->compareShell=std::move(shell);if(!state_->compareShell)state_->shellPaint={};update();}}
+void HullView::setDragSectionComparison(DragSections pairs,DragShell shell,std::shared_ptr<const DragShellRaster> raster){
+    if(raster&&raster->source==shell&&raster->complete())state_->shellPaint=std::move(raster);
+    if(state_->compareSections!=pairs||state_->compareShell!=shell){
+        state_->compareSections=std::move(pairs);state_->compareShell=std::move(shell);
+        if(!state_->compareShell)state_->shellPaint.reset();
+        update();
+    }
+}
+HullView::DragRasterJob HullView::dragRasterJob(bool originalOnly)const{
+    if(!isVisible()||!state_->snapshot||state_->inspection!=State::Inspection::Off)return {};
+    // QWidget::grab/render can paint to a different pixel origin. Capture the
+    // live window target; draw() still checks its actual device transform.
+    const auto key=windowDragRasterKey(*this,state_->cameraRevision);
+    if(!key.usable())return {};
+    return [camera=state_->dragCamera(),key,previous=originalOnly?DragRasterLayer{}:state_->shellPaint,
+            timed=measureDragPaint&&!originalOnly,originalOnly](const DragShell& shell,const DragRasterLayer& original,const std::atomic_bool* cancelled){
+        return bakeDragShell(shell,camera,key,previous,timed,true,original,originalOnly,cancelled);
+    };
+}
+bool HullView::verifyDragRaster()const{
+    const auto prepared=state_->shellPaint;
+    if(!prepared||prepared->source!=state_->compareShell||prepared->key.camera!=state_->cameraRevision||!prepared->complete())return false;
+    const auto reference=bakeDragShell(prepared->source,state_->dragCamera(),prepared->key,{},false,false);
+    return reference->context==prepared->context&&reference->current==prepared->current&&reference->original==prepared->original&&reference->edges==prepared->edges;
+}
 // Preserve the last displayed subdivision knots in model space. The normal
 // wireframe uses straight segments between these same knots, not cubic strokes.
 void HullView::retainReleasedCreases(){
@@ -1527,7 +2437,7 @@ QSet<fs::EntityId> HullView::selectedPoints() const { return state_->selection; 
 void HullView::setSelectionKind(HullEntity kind) {
     state_->globalKind=kind;
     kind=state_->inspection==State::Inspection::Faces?HullEntity::Face:state_->inspection==State::Inspection::Lines?HullEntity::Edge:kind;
-    updateInteractionHover(0);cancelGesture();state_->kind=kind;state_->entities.clear();state_->entityPoints.clear();state_->emphasized.clear();update();
+    updateInteractionHover(0);cancelGesture();state_->kind=kind;state_->entities.clear();state_->entityPoints.clear();state_->edgeSelectionLayer={};state_->selectedFaceTiles={};state_->tiledFaceSelection.clear();state_->normalTiles={};state_->tiledNormalSelection.clear();state_->emphasized.clear();update();
 }
 HullEntity HullView::selectionKind() const{return state_->kind;}
 QSet<fs::EntityId> HullView::selectedEntities() const{return state_->entities;}
@@ -1541,7 +2451,15 @@ void HullView::setSelectedEntities(QSet<fs::EntityId> ids) {
         if(state_->display&&(state_->kind==HullEntity::Curve||state_->kind==HullEntity::Flowline))
             for(const auto& curve:state_->display->curves)if(!curve.marker&&curve.flow==(state_->kind==HullEntity::Flowline)&&state_->curveVisible(curve)&&ids.contains(curve.id))valid.insert(curve.id);
     }
-    const auto previous=state_->entities;state_->entities=std::move(valid);emphasizeSelection(previous,state_->entities,state_->kind);update();
+    const auto previous=state_->entities;state_->entities=std::move(valid);
+    if(state_->kind!=HullEntity::Edge||state_->entities.size()<256)state_->edgeSelectionLayer={};
+    if(state_->kind!=HullEntity::Face||state_->entities.size()<tiledFaceThreshold){
+        state_->selectedFaceTiles={};
+        state_->tiledFaceSelection.clear();
+        state_->normalTiles={};
+        state_->tiledNormalSelection.clear();
+    }
+    emphasizeSelection(previous,state_->entities,state_->kind);update();
 }
 void HullView::setStudioAppearance(bool enabled){
     state_->studio=enabled;
@@ -1678,7 +2596,8 @@ QJsonObject HullView::viewSettingsEvidence()const{
     return {{"focal_mm",state_->focalLength},{"camera_distance_extents",state_->cameraDistanceFactor()},
         {"light_direction",QJsonArray{light.direction.x,light.direction.y,light.direction.z}},{"ambient",light.ambient},{"intensity",light.intensity},{"lighting_enabled",light.enabled},
         {"face_projection_builds",double(state_->faceProjectionBuilds)},{"fill_renders",double(state_->fillBuilds)},{"gpu",state_->usedGpu},{"camera_revision",double(state_->cameraRevision)},{"curve_path_builds",state_->curvePathBuilds},
-        {"shade_mode",int(state_->shadeMode)},{"analysis_built",state_->display&&bool(state_->display->analysis)}};
+        {"shade_mode",int(state_->shadeMode)},{"analysis_built",state_->display&&bool(state_->display->analysis)},
+        {"shade_legend",state_->shadeLegendEvidence},{"shade_sample_dpr",state_->fillSampleDpr}};
 }
 void HullView::setControlNetVisible(bool enabled){if(!enabled&&state_->precise)cancelGesture();state_->controlNetVisible=enabled;update();}
 void HullView::setLayerVisibilityPreview(const QSet<fs::EntityId>& changes){
@@ -1978,8 +2897,14 @@ void HullView::fitToViewport(bool resizing) {
     const auto velocity=state_->cameraMotion.active?state_->cameraMotion.velocity:State::CameraVelocity{};
     const bool animate=isVisible()&&state_->display&&!state_->fitted&&state_->animations&&hullMotionEnabled();
     state_->cameraMotion.active=false;
-    finishPresentation();
-    if(resizing)state_->labels.viewportResized();else state_->labels.clear();
+    if(resizing){
+        // Opening a document can resize the viewport after its first paint.
+        // Keep the reveal clock running and reproject it to the new size.
+        state_->labels.viewportResized();
+    }else{
+        finishPresentation();
+        state_->labels.clear();
+    }
     ++state_->cameraRevision;
     if (!state_->display) {
         state_->scale=state_->orbitFitScale=1;state_->offset=QPointF(width()/2.0,height()/2.0);
@@ -2006,6 +2931,9 @@ void HullView::panBy(QPointF delta) {
     const auto previousRevision=state_->cameraRevision;
     state_->offset+=delta;state_->fitted=false;++state_->cameraRevision;state_->reuseCurvePaths(previousRevision);
     if(state_->faceTiles.camera==previousRevision)state_->faceTiles.camera=state_->cameraRevision;
+    if(state_->selectedFaceTiles.camera==previousRevision)state_->selectedFaceTiles.camera=state_->cameraRevision;
+    if(state_->normalTiles.camera==previousRevision)state_->normalTiles.camera=state_->cameraRevision;
+    if(!state_->fillMargin.isEmpty()&&state_->fillRevision==previousRevision)state_->fillRevision=state_->cameraRevision;
     update();
 }
 void HullView::zoomAt(QPointF anchor,double factor) {
@@ -2081,8 +3009,9 @@ int HullView::verifyResizeSectionPixels() const {
     tmp.setDevicePixelRatio(dpr);QPainter painter(&tmp);painter.translate(state_->resizeLayer.phase/dpr);int result=-1;
     draw(painter,dpr,false,false,&result);return result;
 }
-void HullView::draw(QPainter& painter,qreal dpr,bool final,bool forceSoftware,int* verifySections) const {
+void HullView::draw(QPainter& painter,qreal dpr,bool final,bool forceSoftware,int* verifySections,bool deferFaceLegend) const {
     painter.fillRect(rect(),state_->studio?state_->preferred("viewportcolor",QColor(232,239,236)):Background);
+    if(state_->faceOrientationPreview&&state_->display){state_->drawFaceOrientation(painter);return;}
     const auto* backgroundData=!final&&state_->backgroundPreviewing?&state_->backgroundPreview:background();
     if(backgroundData&&backgroundData->visible){
         painter.save();painter.setClipRect(rect());painter.setOpacity(backgroundData->alpha/255.0);
@@ -2095,29 +3024,21 @@ void HullView::draw(QPainter& painter,qreal dpr,bool final,bool forceSoftware,in
         }painter.restore();
     }
     const auto& data=state_->display;
+    state_->shadeLegendEvidence={};
     if (data) {
         const auto snapshot=state_->snapshot;
         if(state_->inspection!=State::Inspection::Off){
-            state_->paintInspection(painter,rect(),dpr,final);
-            if(state_->kind==HullEntity::Point && !state_->selection.isEmpty()){
-                painter.save();
-                painter.setRenderHint(QPainter::Antialiasing);
-                painter.setPen(Qt::NoPen);
-                painter.setBrush(controlSelectionInk);
-                for(auto id:state_->selection){
-                    auto index=data->pointIndices.constFind(id);
-                    if(index==data->pointIndices.cend())continue;
-                    const auto& point=data->points[*index];
-                    const auto pos=project(state_->controlPosition(state_->displayedPosition(point,final)));
-                    if(point.locked)painter.drawRect(QRectF(pos-QPointF(3.5,3.5),QSizeF(7,7)));
-                    else painter.drawEllipse(pos,3.5,3.5);
-                }
-                painter.restore();
-            }
+            if(deferFaceLegend&&state_->inspection==State::Inspection::Faces)
+                state_->drawFaceTiles(painter,rect(),dpr);
+            else state_->paintInspection(painter,rect(),dpr,final);
+            if(state_->controlNetVisible&&state_->inspection==State::Inspection::Faces)
+                state_->drawInspectionControlEdges(painter,final);
+            if(state_->controlNetVisible||!state_->selection.isEmpty())
+                state_->drawControlPointMarkers(painter,rect(),{},final,state_->controlNetVisible);
             state_->paintedHull=!data->faces.isEmpty();
         }
         else {
-        if (state_->fillVisible) {
+        if (state_->fillVisible && (final || !state_->drawDividerFill(painter,rect(),dpr,forceSoftware))) {
         QScopedValueRollback<HullShade> restoreShade(state_->shadeMode);
         if(state_->shadeMode!=HullShade::Flat){
             if(state_->snapshot->surfaceTopology)prepareAnalysis(*data,*state_->snapshot);
@@ -2128,20 +3049,53 @@ void HullView::draw(QPainter& painter,qreal dpr,bool final,bool forceSoftware,in
             else state_->gpu=std::make_unique<HullGpu>(data->mesh);
             state_->gpuMesh=data;
         }
-        if (state_->fillImage.isNull() || state_->fillRevision!=state_->cameraRevision ||
-            state_->fillSize!=size() || state_->fillDpr!=dpr || state_->fillLightRevision!=state_->lightRevision || state_->fillSoftware!=forceSoftware) {
+        // Panning translates the same shaded triangles without changing depth
+        // or illumination. Include a margin so small moves can reveal new pixels.
+        const QSize panMargin(160,96);
+        const QSize paddedSize=size()+2*panMargin;
+        const bool paddedInteraction=state_->shadedDividerDragging||
+            (state_->kind==HullEntity::Face&&state_->entities.size()>=tiledFaceThreshold);
+        const bool canPad=!final&&paddedInteraction&&
+            !state_->cameraMotion.active&&(state_->gesture==State::Gesture::None||state_->gesture==State::Gesture::Pan)&&
+            double(paddedSize.width())*paddedSize.height()*dpr*dpr<=16e6;
+        const QSize padding=canPad?panMargin:QSize(0,0);
+        const QPointF margin(qRound(padding.width()*dpr)/dpr,qRound(padding.height()*dpr)/dpr);
+        QPointF shift=canPad?state_->offset-state_->fillOrigin:QPointF{};
+        const QSize rasterSize=size()+2*padding;
+        // Supersample small, settled frames for crisp hull outlines and
+        // reflection stripes. Keep dense and interactive frames within budget.
+        const bool settled=final||(!state_->dividerDragging&&!state_->shadedDividerDragging&&!state_->cameraMotion.active&&
+            state_->gesture==State::Gesture::None&&!state_->entrance.active());
+        const double physicalPixels=double(rasterSize.width())*rasterSize.height()*dpr*dpr;
+        const double oversampling=settled&&data->mesh.triangles.size()<=160000&&physicalPixels>0?
+            std::clamp(std::sqrt(2080000./physicalPixels),1.,2.):1.;
+        const qreal sampleDpr=oversampling*dpr;
+        if (state_->fillImage.isNull() || state_->fillRevision!=state_->cameraRevision || state_->fillMargin!=padding ||
+            (canPad&&(std::abs(shift.x())>padding.width()-1||std::abs(shift.y())>padding.height()-1)) ||
+            state_->fillSize!=size() || state_->fillDpr!=dpr || state_->fillSampleDpr!=sampleDpr ||
+            state_->fillLightRevision!=state_->lightRevision || state_->fillSoftware!=forceSoftware) {
             QImage fill;
             // Keep extreme close-up coordinates in double precision on the CPU.
             if (!forceSoftware && !data->translucent && state_->gpuMesh.lock()==data && state_->gpu && state_->gpu->ready() && state_->scale*data->mesh.extent<1e6)
-                if(state_->shadeMode==HullShade::Flat||state_->gpu->setAnalysis(data->shading))fill=state_->gpu->render(size(),dpr,state_->camera(size()),state_->lighting(),state_->style());
+                if(state_->shadeMode==HullShade::Flat||state_->gpu->setAnalysis(data->shading))
+                    fill=state_->gpu->render(rasterSize,sampleDpr,state_->camera(rasterSize,margin),state_->lighting(),state_->style());
             state_->usedGpu=!fill.isNull();
-            if (fill.isNull()) fill=state_->softwareImage(size(),dpr);
+            if(fill.isNull())fill=state_->softwareImage(rasterSize,sampleDpr,margin);
+            if(sampleDpr!=dpr&&!fill.isNull()){
+                const QSize pixels(qRound(rasterSize.width()*dpr),qRound(rasterSize.height()*dpr));
+                fill=fill.scaled(pixels,Qt::IgnoreAspectRatio,Qt::SmoothTransformation);
+                fill.setDevicePixelRatio(dpr);
+            }
             state_->fillImage=std::move(fill);
+            state_->fillSampleDpr=sampleDpr;
             state_->fillRevision=state_->cameraRevision;
+            state_->fillResizeRevision=state_->cameraRevision;
+            state_->fillScale=state_->scale;
             state_->fillLightRevision=state_->lightRevision;state_->fillSoftware=forceSoftware;++state_->fillBuilds;
-            state_->fillSize=size();state_->fillDpr=dpr;
+            state_->fillSize=size();state_->fillDpr=dpr;state_->fillMargin=padding;
+            state_->fillOrigin=state_->offset;shift={};
         }
-        painter.drawImage(QPoint(0,0),state_->fillImage);
+        painter.drawImage(QPointF((shift*dpr).toPoint())/dpr-margin,state_->fillImage);
         if(!state_->fillImage.isNull()&&!data->mesh.triangles.isEmpty())state_->paintedHull=true;
         }
 
@@ -2320,6 +3274,10 @@ void HullView::draw(QPainter& painter,qreal dpr,bool final,bool forceSoftware,in
         painter.restore();
         // Paint comparison geometry above the straight control cage, below its handles.
         QVector<QPainterPath> beforePaths,afterPaths,contextPaths;
+        const bool timed=!final&&measureDragPaint&&state_->compareShell;
+        QElapsedTimer stage;
+        if(timed)stage.start();
+        const auto mark=[&](const char* key){if(timed){dragPaintTimings.insert(QLatin1String(key),stage.nsecsElapsed()/1e6);stage.start();}};
         const bool comparing=!final&&!preview&&snapshot;
         const auto sectionsToDraw=state_->compareSections;
         if(comparing&&sectionsToDraw){
@@ -2344,80 +3302,42 @@ void HullView::draw(QPainter& painter,qreal dpr,bool final,bool forceSoftware,in
             };
             for(const auto& pair:*sectionsToDraw){if(state_->compareSections)collect(pair.before,beforePaths);collect(pair.after,afterPaths);}
         }
+        mark("comparison_sections_ms");
         const auto shell=comparing?state_->compareShell:DragShell{};
-        auto& cache=state_->shellPaint;
-        const auto phase=pixelPhase(painter.deviceTransform().map(QPointF{}));
-        const QSize shellPixels(qCeil(width()*dpr)+1,qCeil(height()*dpr)+1);
-        const bool raster=shell&&!shellPixels.isEmpty()&&qint64(shellPixels.width())*shellPixels.height()<=4*1024*1024;
-        QPen original(QColor(150,100,67,205),1.6,Qt::DashLine,Qt::RoundCap);original.setDashPattern({4.,4.});
-        const QPen current(QColor(19,115,107),2.,Qt::SolidLine,Qt::RoundCap,Qt::RoundJoin);
+        const auto key=dragRasterKey(state_->cameraRevision,size(),dpr,painter.deviceTransform().map(QPointF{}));
+        const auto phase=key.phase;
+        const auto original=dragOriginalPen(),current=dragCurrentPen();
+        std::shared_ptr<const DragShellRaster> cache;
         if(shell){
-            const bool sameView=raster&&cache.camera==state_->cameraRevision&&cache.dpr==dpr&&cache.size==shellPixels&&cache.phase==phase;
-            if(!sameView||cache.source!=shell){
-                bool keep[3]={sameView,sameView,sameView};
-                cache.edges.clear();cache.edges.reserve(shell->size());
-                if(!cache.source||cache.source->size()!=shell->size())std::fill_n(keep,3,false);
-                for(qsizetype k=0;k<shell->size();++k){const auto& e=shell->at(k);cache.edges.insert({std::min(e.a,e.b),std::max(e.a,e.b)});
-                    if(keep[0]||keep[1]||keep[2]){const auto& old=cache.source->at(k);
-                        if(e.context!=old.context||e.symmetric!=old.symmetric){std::fill_n(keep,3,false);continue;}
-                        keep[e.context?0:1]&=e.afterCubics.constData()==old.afterCubics.constData();
-                        if(!e.context)keep[2]&=e.beforeCubics.constData()==old.beforeCubics.constData();}}
-                auto bake=[&](int layer,QImage& image,QVector<QPainterPath>& fallback){if(keep[layer]&&!image.isNull())return;
-                    image=raster?QImage(shellPixels,QImage::Format_ARGB32_Premultiplied):QImage{};
-                    if(layer==1&&!image.isNull()){
-                        // The current trace is opaque and solid: stroke all projected edges once
-                        // into one coverage buffer rather than constructing a QPainter stroker for each.
-                        QImage mask(shellPixels,QImage::Format_Grayscale8);
-                        if(!mask.isNull()){
-                            mask.fill(0);const bool split=state_->splitBody();const double splitX=split?splitLocation(*snapshot):0.;
-                            fs::Vec3 right,up,depth;state_->basis(right,up,depth);const bool perspective=state_->projection==HullProjection::Perspective;
-                            const auto pix=[&](fs::Vec3 p){auto r=subtract(p,state_->cameraCenter);const double w=perspective?std::max(1e-6,1-dot(r,depth)/(state_->cameraExtent*state_->cameraDistanceFactor())):1.;
-                                return (state_->offset+QPointF(dot(r,right),-dot(r,up))*(state_->scale/w))*dpr+phase;};
-                            for(const auto& e:*shell){if(e.context)continue;const auto cubics=split?splitBodyCubics(e.afterCubics,splitX):e.afterCubics;
-                                for(bool mirror:{false,true}){if(mirror&&(!e.symmetric||!snapshot->bothSides||state_->projection==HullProjection::Profile))continue;
-                                    auto projectKnot=[&](fs::Vec3 p){return pix(mirror?mirrored(p):p);};
-                                    auto mid=[](fs::Vec3 a,fs::Vec3 b){return fs::Vec3{(a.x+b.x)*.5,(a.y+b.y)*.5,(a.z+b.z)*.5};};
-                                    auto strokeCubic=[&](auto&& self,const fs::presentation::Cubic& c,QPointF a,QPointF b,int depth)->void{
-                                        const auto ab=b-a;const double len=QPointF::dotProduct(ab,ab);
-                                        auto flat=[&](QPointF p){auto ap=p-a;const double t=len>0?std::clamp(QPointF::dotProduct(ap,ab)/len,0.,1.):0.;const auto diff=ap-t*ab;return QPointF::dotProduct(diff,diff)<=.04;};
-                                        if(depth==24||(flat(projectKnot(c[1]))&&flat(projectKnot(c[2])))){shellStroke(mask,a,b,dpr);return;}
-                                        auto x=mid(c[0],c[1]),y=mid(c[1],c[2]),z=mid(c[2],c[3]),l=mid(x,y),r=mid(y,z),m=mid(l,r);auto pm=projectKnot(m);
-                                        self(self,{c[0],x,l,m},a,pm,depth+1);self(self,{m,r,z,c[3]},pm,b,depth+1);
-                                    };
-                                    for(const auto& c:cubics)strokeCubic(strokeCubic,c,projectKnot(c[0]),projectKnot(c[3]),0);}}
-
-                            QRgb table[256];for(int a=0;a<256;++a)table[a]=qPremultiply(qRgba(19,115,107,a));
-                            for(int y=0;y<image.height();++y){auto* dst=reinterpret_cast<QRgb*>(image.scanLine(y));const auto* src=mask.constScanLine(y);for(int x=0;x<image.width();++x)dst[x]=table[src[x]];}
-                            image.setDevicePixelRatio(dpr);return;
-                        }
-                    }
-                    QVector<QPainterPath> paths;paths.reserve(shell->size());
-                    for(const auto& e:*shell)if(e.context==(layer==0))paths.append(state_->projectEditCurve(layer==2?e.beforeCubics:e.afterCubics,e.symmetric));
-                    if(image.isNull()){fallback+=paths;return;}
-                    image.setDevicePixelRatio(dpr);image.fill(Qt::transparent);QPainter ink(&image);ink.setRenderHint(QPainter::Antialiasing);ink.translate(phase/dpr);
-                    auto stroke=[&](QPen pen){ink.setPen(pen);for(const auto& p:paths)ink.drawPath(p);};
-                    if(layer==0){stroke(QPen(QColor(255,255,255,155),2.4));stroke(QPen(QColor(79,100,118),1.25));}
-                    else stroke(layer==1?current:original);
-                };
-                bake(0,cache.context,contextPaths);bake(1,cache.current,afterPaths);bake(2,cache.original,beforePaths);
-                cache.source=(raster&&!cache.context.isNull()&&!cache.current.isNull()&&!cache.original.isNull())?shell:DragShell{};
-                cache.camera=state_->cameraRevision;cache.size=shellPixels;cache.dpr=dpr;cache.phase=phase;
+            cache=state_->shellPaint;
+            if(timed&&cache)dragPaintTimings.insert("prepared_raster_key",cache->key.evidence());
+            if(!cache||cache->source!=shell||!(cache->key==key)||!cache->complete()){
+                cache=bakeDragShell(shell,state_->dragCamera(),key,cache,timed,false);
+                // Captures at another origin use a scratch layer, without
+                // evicting the window's three reusable layers mid-gesture.
+                if(cache->complete()&&key==windowDragRasterKey(*this,state_->cameraRevision))state_->shellPaint=cache;
             }
+            if(timed)for(auto it=cache->timings.begin();it!=cache->timings.end();++it)dragPaintTimings.insert(it.key(),it.value());
         }
+        mark("shell_prepare_on_gui_ms");
         const auto drawComparison=[&]{
             if(!shell&&beforePaths.isEmpty()&&afterPaths.isEmpty()&&contextPaths.isEmpty())return;
             painter.save();painter.setBrush(Qt::NoBrush);
-            if(shell&&!cache.context.isNull())painter.drawImage(-phase/dpr,cache.context);
+            if(cache&&!cache->context.isNull())painter.drawImage(-phase/dpr,cache->context);
+            if(cache)contextPaths+=cache->contextPaths;
             if(!contextPaths.isEmpty()){
                 painter.setPen(QPen(QColor(255,255,255,155),2.4));for(const auto& path:contextPaths)painter.drawPath(path);
                 painter.setPen(QPen(QColor(79,100,118),1.25));for(const auto& path:contextPaths)painter.drawPath(path);
             }
             if(shell&&!shell->isEmpty())state_->paintedHull=true;
-            if(shell&&!cache.current.isNull())painter.drawImage(-phase/dpr,cache.current);
+            if(timed&&cache)dragPaintTimings.insert("comparison_painted",true);
+            if(cache&&!cache->current.isNull())painter.drawImage(-phase/dpr,cache->current);
             painter.setPen(current);
             for(const auto& path:afterPaths)painter.drawPath(path);
-            if(shell&&!cache.original.isNull())painter.drawImage(-phase/dpr,cache.original);
+            if(cache)for(const auto& path:cache->currentPaths)painter.drawPath(path);
+            if(cache&&!cache->original.isNull())painter.drawImage(-phase/dpr,cache->original);
             painter.setPen(original);for(const auto& path:beforePaths)painter.drawPath(path);
+            if(cache)for(const auto& path:cache->originalPaths)painter.drawPath(path);
             painter.restore();
         };
         if(!preview){
@@ -2487,40 +3407,38 @@ void HullView::draw(QPainter& painter,qreal dpr,bool final,bool forceSoftware,in
                 }
             }
         }
-        if(snapshot&&snapshot->showNormals&&!preview&&state_->kind==HullEntity::Face&&!state_->entities.isEmpty()){
-            painter.save();painter.setPen(QPen(sourceColor(snapshot->normalColor),1));
-            QSet<fs::EntityId> symmetric;for(const auto& f:snapshot->faces)if(snapshot->layer(f.layer)->symmetric)symmetric.insert(f.id);
-            for(const auto& normal:snapshot->surfaceNormals){
-                if(!state_->entities.contains(normal.face))continue;
-                const auto center=normal.position,n=normal.direction;const double scale=data->mesh.extent*.025;
-                fs::Vec3 tip{center.x+n.x*scale,center.y+n.y*scale,center.z+n.z*scale};
-                auto spans=state_->controlSegments(center,tip);
-                if(snapshot->bothSides&&state_->projection!=HullProjection::Profile&&symmetric.contains(normal.face))spans.append({mirrored(center),mirrored(tip)});
-                for(const auto& span:spans){
-                    QLineF line(project(span[0]),project(span[1]));painter.drawLine(line);const auto d=line.p2()-line.p1();const double size=std::hypot(d.x(),d.y());
-                    if(size>4){auto u=d/size;QPointF v(-u.y(),u.x());painter.drawLine(line.p2(),line.p2()-u*5+v*2);painter.drawLine(line.p2(),line.p2()-u*5-v*2);}
-                }
+        if(snapshot&&snapshot->showNormals&&!preview&&state_->kind==HullEntity::Face&&!state_->entities.isEmpty())
+            state_->drawSelectedNormals(painter,rect(),dpr,final);
+        const auto color=state_->preferred("creasecolor",Qt::black);
+        const auto& resize=state_->resizeWire;
+        const State::ResizeWire::Raster* wire=nullptr;
+        QPointF wireOrigin;
+        if(!final&&!shellFocus&&!preview&&!state_->fillVisible&&!state_->releasedCreases&&
+           resize.rendered.valid()&&resize.source.lock()==data&&resize.creaseColor==color){
+            const auto key=dragRasterKey(state_->cameraRevision,size(),dpr,painter.deviceTransform().map(QPointF{}));
+            if(resize.key==key){
+                wire=&resize.rendered.get();
+                wireOrigin=-key.phase/dpr;
             }
-            painter.restore();
         }
         if (!state_->fillVisible && !preview) {
-            QVector<QLineF> lines;
-            const QRectF clip = QRectF(rect()).adjusted(-1,-1,1,1);
-            const auto addCreases = [&](const auto& segments) {
-                for (const auto& segment : segments) {
-                    const QLineF line(project(segment[0]), project(segment[1]));
-                    if (line.length() >= 1. && clip.intersects(
-                            QRectF(line.p1(), line.p2()).normalized().adjusted(-1,-1,1,1)))
-                        lines.append(line);
+            bool painted=false;
+            if(wire&&!wire->creases.isNull()){
+                painter.drawImage(wireOrigin,wire->creases);
+                state_->paintedHull|=wire->creasesVisible;
+                painted=true;
+            }
+            if(!painted){
+                const auto camera=state_->dragCamera();
+                const QRectF clip=QRectF(rect()).adjusted(-1,-1,1,1);
+                const bool released=!final&&state_->releasedCreases.has_value();
+                auto lines=projectCreases(released?*state_->releasedCreases:data->surfaceCreases,camera,clip);
+                if(!released&&camera.mirror)lines+=projectCreases(data->mirroredSurfaceCreases,camera,clip);
+                if(!lines.isEmpty()){
+                    painter.save();if(shellFocus)painter.setOpacity(.27);painter.setPen(QPen(color,1));
+                    painter.drawLines(lines);painter.restore();
+                    state_->paintedHull=true;
                 }
-            };
-            if(!final&&state_->releasedCreases)addCreases(*state_->releasedCreases);
-            else {addCreases(data->surfaceCreases);
-                if(state_->projection!=HullProjection::Profile)addCreases(data->mirroredSurfaceCreases);}
-            if (!lines.isEmpty()) {
-                painter.save();if(shellFocus)painter.setOpacity(.27);painter.setPen(QPen(state_->preferred("creasecolor", Qt::black), 1));
-                painter.drawLines(lines);painter.restore();
-                state_->paintedHull = true;
             }
         }
         // The annotation collision pass uses the same unmirrored screen edges and
@@ -2529,17 +3447,26 @@ void HullView::draw(QPainter& painter,qreal dpr,bool final,bool forceSoftware,in
         QVector<QPointF> labelPoints;
         const bool collectObstacles=state_->controlNetVisible&&!preview&&snapshot&&snapshot->overlay.present&&
             (final||state_->entrance.textOpacity(false)>0);
+        mark("auxiliary_curves_ms");
         if(!state_->controlNetVisible)drawComparison();
-        if(collectObstacles)labelEdges.reserve(data->edges.size());
         if(state_->controlNetVisible) {
+        const QRectF clip=QRectF(rect()).adjusted(-8,-8,8,8);
+        const auto edgeColor=state_->studio?state_->preferred("edgecolor",QColor(102,133,125)):QColor(18,74,123);
+        if(wire&&!wire->net.isNull()&&!cache&&state_->gesture==State::Gesture::None&&state_->pendingPointPositions.isEmpty()&&
+           resize.edgeColor==edgeColor){
+            labelPoints=wire->points;
+            if(collectObstacles)labelEdges=wire->obstacles;
+            painter.drawImage(wireOrigin,wire->net);
+            state_->paintedHull|=wire->netVisible;
+        }else{
+        if(collectObstacles)labelEdges.reserve(data->edges.size());
         QVector<QLineF> edges,creases,mirrors;
         labelPoints.reserve(data->points.size());
         for(const auto& point:data->points)labelPoints.append(project(state_->controlPosition(state_->displayedPosition(point,final))));
         edges.reserve(data->edges.size());creases.reserve(data->edges.size()/3);
-        const QRectF clip=QRectF(rect()).adjusted(-8,-8,8,8);
         for (const auto& edge:data->edges) {
             // The corresponding subdivided edge is already visible in both poses.
-            if(shell&&cache.edges.contains({std::min(edge.a,edge.b),std::max(edge.a,edge.b)}))continue;
+            if(cache&&cache->edges.contains({std::min(edge.a,edge.b),std::max(edge.a,edge.b)}))continue;
             auto a=state_->displayedPosition(data->points[edge.ia],final);
             auto b=state_->displayedPosition(data->points[edge.ib],final);
             if(preview){auto span=std::max(1e-6,snapshot->maximum.x-snapshot->minimum.x);auto t=std::clamp(state_->entrance.previewFraction()*1.6-((a.x+b.x)*.5-snapshot->minimum.x)/span*.6,0.,1.);t=1-(1-t)*(1-t);if(t<=0)continue;b={a.x+(b.x-a.x)*t,a.y+(b.y-a.y)*t,a.z+(b.z-a.z)*t};}
@@ -2561,73 +3488,15 @@ void HullView::draw(QPainter& painter,qreal dpr,bool final,bool forceSoftware,in
         const auto hasVisibleLine=[](const QVector<QLineF>& lines){return std::any_of(lines.begin(),lines.end(),[](const auto& line){return line.length()>=1.;});};
         state_->paintedHull|=hasVisibleLine(edges)||hasVisibleLine(creases)||hasVisibleLine(mirrors);
         if(!state_->studio){painter.setPen(QPen(QColor(255,255,255,155),2.5));painter.drawLines(edges);painter.drawLines(creases);}
-        painter.setPen(QPen(state_->studio?state_->preferred("edgecolor",QColor(102,133,125)):QColor(18,74,123),state_->studio?1.3:0.95));painter.drawLines(edges);
-        painter.setPen(QPen(state_->studio?state_->preferred("creaseedgecolor",QColor(160,67,34)):QColor(13,39,64),1.3));painter.drawLines(creases);
-        painter.restore();drawComparison();
-        QVector<QPointF> points;
-        QVector<QRectF> locked;
-        points.reserve(data->points.size());
-        const auto& selection=state_->gesture==State::Gesture::Box?state_->boxPreview:state_->selection;
-        // The opaque selection halo covers small base markers completely. Keep
-        // larger markers (and all export paths) and draw selection in its usual order.
-        const bool smallMarkers=!state_->studio||!snapshot->overlay.present||snapshot->overlay.pointSize<=3;
-        painter.setPen(Qt::NoPen);
-        for (const auto& point:data->points) {
-            if(!final&&smallMarkers&&!point.locked&&selection.contains(point.id))continue;
-            if(!final&&state_->undoingPlacements.contains(point.id))continue;
-            const auto pixel=labelPoints[&point-data->points.constData()];
-            if (!clip.contains(pixel)) continue;
-            if(!final&&!state_->entrance.pointVisible(pixel.x()))continue;
-            if(state_->studio&&snapshot->overlay.present){
-                QColor base=point.locked?QColor(128,128,128):point.leak?state_->preferred("leakpointcolor",QColor(0,255,153)):point.vertexType==1?state_->preferred("creasepointcolor",QColor(98,77,50)):point.vertexType==2?state_->preferred("dartpointcolor",QColor(Qt::magenta)):point.vertexType==3?state_->preferred("cornerpointcolor",QColor(82,65,58)):state_->preferred("regularpointcolor",QColor(49,93,85));
-                if(!final)base=state_->entrance.pointColor(point.id,base);
-                const int radius=std::clamp(snapshot->overlay.pointSize,1,100);
-                const QRectF marker(pixel-QPointF(radius,radius),QSizeF(radius*2+1,radius*2+1));
-                if(point.locked)painter.fillRect(marker,base);
-                else{painter.setBrush(base);painter.drawEllipse(marker);}
-                continue;
-            }
-            if (point.locked) locked.append(QRectF(pixel-QPointF(2.5,2.5),QSizeF(5,5)));
-            else points.append(pixel);
+        painter.setPen(QPen(edgeColor,state_->studio?1.3:0.95));painter.drawLines(edges);
+        if(!state_->studio)painter.setPen(QPen(edgeColor,1.3));
+        painter.drawLines(creases);
+        painter.restore();
         }
-        painter.setPen(QPen(QColor(245,249,252),5.5,Qt::SolidLine,Qt::RoundCap));painter.drawPoints(points);
-        painter.setPen(QPen(state_->studio?QColor(49,93,85):QColor(12,75,134),3.2,Qt::SolidLine,Qt::RoundCap));painter.drawPoints(points);
-        painter.setPen(QPen(QColor(69,77,84),1));painter.setBrush(QColor(236,239,242));painter.drawRects(locked);
-        QVector<QPointF> selected;
-        QVector<QRectF> selectedLocked;
-        selected.reserve(selection.size());
-        for (auto id:selection) {
-            if(!final&&state_->undoingPlacements.contains(id))continue;
-            const auto found=data->pointIndices.constFind(id);
-            if (found==data->pointIndices.cend()) continue;
-            const auto& point=data->points[found.value()];
-            const auto pixel=labelPoints[found.value()];
-            if (!clip.contains(pixel)) continue;
-            if(!final&&!state_->entrance.pointVisible(pixel.x()))continue;
-            if (point.locked) selectedLocked.append(QRectF(pixel-QPointF(4,4),QSizeF(8,8)));
-            else selected.append(pixel);
+        drawComparison();
+        state_->drawControlPointMarkers(painter,rect(),labelPoints,final,true);
         }
-        const QColor selectedColor=state_->preferred("selectcolor",QColor(224,101,25));
-        if(!final&&selected.size()>=64){
-            // Rasterise each opaque marker once per display scale. Keep the two
-            // passes separate so overlapping points have the usual shared halo.
-            auto dots=[&](auto& cache,QColor color,int diameter){
-                const qreal ratio=painter.device()->devicePixelRatioF();
-                if(cache.dpr!=ratio||cache.color!=color){
-                    int side=qCeil((diameter+2)*ratio);cache.image=QPixmap(side,side);cache.image.setDevicePixelRatio(ratio);cache.image.fill(Qt::transparent);
-                    QPainter stamp(&cache.image);stamp.setRenderHint(QPainter::Antialiasing);stamp.setPen(Qt::NoPen);stamp.setBrush(color);
-                    const qreal half=side/(2*ratio);stamp.drawEllipse(QPointF(half,half),diameter*.5,diameter*.5);cache.dpr=ratio;cache.color=color;
-                }
-                const auto half=cache.image.deviceIndependentSize()*.5;
-                for(auto p:selected)painter.drawPixmap(p-QPointF(half.width(),half.height()),cache.image);
-            };dots(state_->haloStamp,Qt::white,11);dots(state_->selectedStamp,selectedColor,8);
-        }else{
-            painter.setPen(QPen(QColor(255,255,255),11,Qt::SolidLine,Qt::RoundCap));painter.drawPoints(selected);
-            painter.setPen(QPen(selectedColor,8,Qt::SolidLine,Qt::RoundCap));painter.drawPoints(selected);
-        }
-        painter.setPen(QPen(QColor(255,255,255),2));painter.setBrush(state_->preferred("selectcolor",QColor(224,101,25)));
-        painter.drawRects(selectedLocked);
-        }
+        mark("control_net_and_composition_ms");
         if(!preview&&snapshot&&snapshot->overlay.present){
             LabelLayout exportLayout;auto& layout=final?exportLayout:state_->labels;
             layout.begin(QRectF(rect()).adjusted(3,3,-3,-3),state_->frameTime,!final&&state_->animations);
@@ -2685,25 +3554,9 @@ void HullView::draw(QPainter& painter,qreal dpr,bool final,bool forceSoftware,in
         const auto& selectedInk=stroking?state_->boxPreview:state_->entities;
         if(!selectedInk.isEmpty()&&usesControlSelectionInk(state_->kind)){
             painter.save();painter.setRenderHint(QPainter::Antialiasing,true);
-            QPainterPath outline;
-            const bool faceMode=state_->kind==HullEntity::Face;
-            if(!faceMode){
-                for(const auto& edge:data->edges)if(selectedInk.contains(edge.id))
-                    for(const auto& span:state_->selectableEdgeSpans(edge)){
-                        outline.moveTo(project(span[0]));outline.lineTo(project(span[1]));
-                    }
-            }else{
-                painter.setPen(Qt::NoPen);painter.setBrush(controlFaceSelectionFill);
-                for(const auto& face:data->faces)if(selectedInk.contains(face.id)){
-                    for(const auto& p:state_->faceParts(face)){
-                        QPolygonF polygon;for(auto point:p)polygon.append(project(point));
-                        painter.drawPolygon(polygon);outline.addPolygon(polygon);outline.closeSubpath();
-                    }
-                }
-            }
-            const auto width=faceMode?controlFaceSelectionWidth:controlEdgeSelectionWidth;
-            painter.strokePath(outline,controlSelectionPen(controlSelectionKeyline,width+1.8));
-            painter.strokePath(outline,controlSelectionPen(controlSelectionInk,width));
+            if(state_->kind==HullEntity::Edge){
+                state_->drawSelectedEdges(painter,selectedInk,final,stroking,size(),dpr);
+            }else state_->drawSelectedFaces(painter,selectedInk,final,stroking,rect(),dpr);
             painter.restore();
         }
         if(!final&&!state_->plateDiagnosticFaces.isEmpty()&&snapshot->documentId==state_->plateDiagnosticDocument&&
@@ -2772,6 +3625,7 @@ void HullView::draw(QPainter& painter,qreal dpr,bool final,bool forceSoftware,in
         state_->evidence.insert("projection_title_available_width",titleRect.width());
         state_->evidence.insert("projection_title_rect",QJsonArray{titleRect.x(),titleRect.y(),titleRect.width(),titleRect.height()});
     }
+    if(!deferFaceLegend)state_->drawShadeLegend(painter,rect(),final);
     painter.setPen(QColor(215,222,228));painter.setBrush(Qt::NoBrush);
     painter.drawRect(rect().adjusted(0,0,-1,-1));
 }
@@ -2779,20 +3633,91 @@ void HullView::draw(QPainter& painter,qreal dpr,bool final,bool forceSoftware,in
 void HullView::paintEvent(QPaintEvent*) {
     QElapsedTimer timer;timer.start();state_->frameTime=state_->clock.elapsed();state_->entrance.beginFrame(state_->frameTime,width());
     state_->paintedHull=false;
-    QPainter painter(this);draw(painter,devicePixelRatioF(),false);drawTransform(painter);
-    for(const auto &pending:state_->pendingPlacements){const auto at=project(state_->controlPosition(pending));painter.save();painter.setRenderHint(QPainter::Antialiasing);painter.setPen(QPen(Qt::white,2));painter.setBrush(QColor(27,126,106));painter.drawEllipse(at,4.5,4.5);painter.restore();}
+    QPainter painter(this);
+    const auto dpr=devicePixelRatioF();
+    auto& frame=state_->viewFrame;
+    if(state_->dividerDragging&&frame.source.lock()==state_->snapshot&&!frame.pixels.isNull()&&
+       frame.pixels.devicePixelRatio()==dpr){
+        const double ratio=state_->scale/frame.scale;
+        const auto start=state_->offset-(frame.offset+frame.phase/dpr)*ratio;
+        painter.fillRect(rect(),state_->studio?state_->preferred("viewportcolor",QColor(232,239,236)):Background);
+        painter.setRenderHint(QPainter::SmoothPixmapTransform);
+        painter.drawImage(QRectF(start,QSizeF(frame.pixels.size())*(ratio/dpr)),frame.pixels);
+        if(state_->inspection==State::Inspection::Faces)state_->drawInspection(painter,rect(),false,true);
+        else state_->drawShadeLegend(painter,rect(),false);
+        painter.setPen(QColor(215,222,228));painter.setBrush(Qt::NoBrush);
+        painter.drawRect(rect().adjusted(0,0,-1,-1));
+        state_->entrance.endFrame();
+        lastPaintMs=timer.nsecsElapsed()/1e6;++paintCount;
+        return;
+    }
+    if(measureDragPaint)dragPaintTimings={{"paint_raster_key",dragRasterKey(state_->cameraRevision,size(),dpr,
+        painter.deviceTransform().map(QPointF{})).evidence()}};
+    const bool capture=property("studio_view_divider_preview").toBool()&&state_->denseResizePreview()&&!measureDragPaint&&
+                       (state_->gesture==State::Gesture::None||state_->gesture==State::Gesture::Pan)&&
+                       !state_->entrance.active()&&!state_->cameraMotion.active&&!state_->precise&&
+                       !state_->previewSections&&state_->pendingPointPositions.isEmpty();
+    const auto drawFrame=[&](QPainter& target,bool deferLegend){
+        draw(target,dpr,false,false,nullptr,deferLegend);drawTransform(target);
+        for(const auto& pending:state_->pendingPlacements){
+            const auto at=project(state_->controlPosition(pending));
+            target.save();target.setRenderHint(QPainter::Antialiasing);target.setPen(QPen(Qt::white,2));
+            target.setBrush(QColor(27,126,106));target.drawEllipse(at,4.5,4.5);target.restore();
+        }
+    };
+    const auto key=dragRasterKey(state_->cameraRevision,size(),dpr,painter.deviceTransform().map(QPointF{}));
+    if(capture&&key.usable()){
+        if(frame.pixels.size()!=key.pixels)frame.pixels=QImage(key.pixels,QImage::Format_ARGB32_Premultiplied);
+        if(!frame.pixels.isNull()){
+            frame.pixels.setDevicePixelRatio(dpr);frame.pixels.fill(Qt::transparent);
+            QPainter target(&frame.pixels);target.setFont(painter.font());target.translate(key.phase/dpr);
+            drawFrame(target,true);target.end();
+            frame.source=state_->snapshot;frame.offset=state_->offset;frame.phase=key.phase;
+            frame.scale=state_->scale;frame.revision=state_->cameraRevision;
+            painter.drawImage(-key.phase/dpr,frame.pixels);
+            if(state_->inspection==State::Inspection::Faces)state_->drawInspection(painter,rect(),false,true);
+            else state_->drawShadeLegend(painter,rect(),false);
+        }else drawFrame(painter,false);
+    }else{
+        if(!state_->dividerDragging)frame={};
+        drawFrame(painter,false);
+    }
     state_->entrance.endFrame();
     if(!state_->entrance.active())state_->entranceSections.pixels={};
     if(state_->curveEditMotion&&!state_->curveEditMotion->active())setCurveEditMotion({});
     if((state_->entrance.active()||state_->labels.animating())&&!state_->entrance.frozen()){
         if(!state_->timer.isActive())state_->timer.start();
     }else state_->timer.stop();
+    if(onDragRasterTargetChanged){
+        const auto target=state_->snapshot&&state_->inspection==State::Inspection::Off
+            ?std::optional{windowDragRasterKey(*this,state_->cameraRevision)}:std::nullopt;
+        if(!(target==state_->observedDragTarget)){
+            state_->observedDragTarget=target;onDragRasterTargetChanged();
+        }
+    }
     lastPaintMs=timer.nsecsElapsed()/1e6;++paintCount;
     if(state_->snapshot&&(!state_->entrance.preview()||state_->entrance.lineFraction()>0)&&onHullFrame)onHullFrame();
     if(state_->paintedHull&&onHullVisibleFrame)onHullVisibleFrame();
 }
+void HullView::setViewDividerDragging(bool dragging){
+    if(dragging){
+        state_->dividerDragging=state_->denseResizePreview();
+        state_->shadedDividerDragging=state_->fillVisible&&state_->display&&
+            !state_->display->mesh.triangles.isEmpty()&&!state_->entrance.active()&&!state_->cameraMotion.active;
+        if(state_->fillRevision==state_->cameraRevision)state_->fillResizeRevision=state_->cameraRevision;
+        if(state_->viewFrame.revision!=state_->cameraRevision)state_->viewFrame={};
+    }else if(state_->dividerDragging||state_->shadedDividerDragging){
+        state_->dividerDragging=state_->shadedDividerDragging=false;
+        const auto dpr=devicePixelRatioF();
+        const auto phase=pixelPhase(QPointF(mapTo(window(),QPoint()))*dpr);
+        state_->scheduleWire(size(),dpr,phase);
+        state_->scheduleSections(size(),dpr,phase);
+        update();
+    }
+}
 void HullView::resizeEvent(QResizeEvent* event) {
     positionDisplayModeButton();
+    const auto previousRevision=state_->cameraRevision;
     if (state_->fitted) fitToViewport(true);
     else if(event->oldSize().isValid()){
         state_->labels.viewportResized();
@@ -2816,9 +3741,13 @@ void HullView::resizeEvent(QResizeEvent* event) {
         }
         state_->applyCamera(pose);
     }
-    if(isVisible()){
+    if(state_->shadedDividerDragging&&state_->fillResizeRevision==previousRevision)
+        state_->fillResizeRevision=state_->cameraRevision;
+    if(isVisible()&&!state_->dividerDragging){
         const auto dpr=devicePixelRatioF();
-        state_->scheduleSections(size(),dpr,pixelPhase(QPointF(mapTo(window(),QPoint()))*dpr));
+        const auto phase=pixelPhase(QPointF(mapTo(window(),QPoint()))*dpr);
+        state_->scheduleWire(size(),dpr,phase);
+        state_->scheduleSections(size(),dpr,phase);
     }
     QWidget::resizeEvent(event);
 }
@@ -2833,6 +3762,7 @@ void HullView::cancelGesture(bool committingPointMove) {
     state_->backgroundStart={};state_->backgroundPreview={};
     state_->dragStarts.clear();state_->dragDelta={};state_->blockedReason.clear();
     state_->boxBase.clear();state_->boxPreview.clear();state_->stroke.clear();state_->strokeFaces.clear();state_->strokeEdges.clear();
+    state_->strokeFaceParts.clear();state_->strokePaint={};
     if(restorePointPreview&&onPointMovePreviewChanged)onPointMovePreviewChanged();
     unsetCursor();update();
 }
@@ -3106,11 +4036,15 @@ void HullView::mouseReleaseEvent(QMouseEvent* event) {
         if (!anyChanged) moves.clear();
     }
     if(state_->gesture==State::Gesture::Stroke&&event->button()==Qt::LeftButton){
-        const bool drag=state_->moved,add=state_->strokeAdditive;const auto start=state_->press;auto ids=state_->boxPreview;cancelGesture();
+        const bool drag=state_->moved,add=state_->strokeAdditive;
+        if(drag)state_->extendStroke(event->position());
+        const auto start=state_->press;auto ids=state_->boxPreview;cancelGesture();
         if(drag){setSelectedEntities(std::move(ids));if(onEntitySelectionChanged)onEntitySelectionChanged(state_->kind,state_->entities);}
         else selectWithLeftButton(start,add);event->accept();return;
     }
     const bool select=state_->gesture==State::Gesture::Box;
+    const bool revealSelection=select&&state_->moved&&!state_->controlNetVisible&&
+        state_->boxPreview.size()>state_->boxBase.size();
     const auto acceptedBackgroundPreview=state_->backgroundPreview;
     const bool openClickMenu=event->button()==Qt::RightButton && state_->contextMenuOnRelease &&
                              state_->gesture==State::Gesture::Pan && !state_->moved;
@@ -3132,7 +4066,10 @@ void HullView::mouseReleaseEvent(QMouseEvent* event) {
         // failed request re-enables editing and clears it without changing data.
         state_->backgroundPreview=acceptedBackgroundPreview;state_->backgroundPreviewing=true;onBackgroundChanged(backgroundChanges);
     }
-    if (select) notifySelectionChanged();
+    if (select) {
+        if(revealSelection&&onShowControlNet)onShowControlNet();
+        notifySelectionChanged();
+    }
     if (!moves.isEmpty()) {
         if (onPointsMoved) onPointsMoved(std::move(moves));
         else if (moves.size()==1 && onPointMoved) onPointMoved(moves[0].id,moves[0].position);

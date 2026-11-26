@@ -2,9 +2,80 @@
 #include <QHash>
 #include <QRegularExpression>
 #include <QSet>
+#include <algorithm>
 #include <cmath>
 #include <stdexcept>
 namespace fs {
+QVector<EntityId> faceBoundaryOrder(const ModelSnapshot& model,const QSet<EntityId>& selection){
+    if(selection.size()<3)return {};
+    using Edge=QPair<EntityId,EntityId>;
+    const auto edgeKey=[](EntityId a,EntityId b){return qMakePair(std::min(a,b),std::max(a,b));};
+    struct IncidentFace { int count=0; int direction=0; };
+    QHash<Edge,IncidentFace> candidates;
+    for(const auto& edge:model.edges)
+        if(selection.contains(edge.a)&&selection.contains(edge.b))candidates.insert(edgeKey(edge.a,edge.b),{});
+    if(candidates.size()<3)return {};
+
+    for(const auto& face:model.faces)for(qsizetype i=0;i<face.points.size();++i){
+        const auto a=face.points[i],b=face.points[(i+1)%face.points.size()];
+        auto edge=candidates.find(edgeKey(a,b));
+        if(edge!=candidates.end()){
+            ++edge->count;
+            edge->direction=a<b?1:-1;
+        }
+    }
+    const auto closedLoop=[&](bool supportedOnly){
+        QHash<EntityId,QVector<EntityId>> neighbors;
+        for(auto edge=candidates.cbegin();edge!=candidates.cend();++edge){
+            if(edge->count>1||(supportedOnly&&edge->count==0))continue;
+            const auto [a,b]=edge.key();
+            neighbors[a].append(b);
+            neighbors[b].append(a);
+        }
+        if(neighbors.size()<3||(!supportedOnly&&neighbors.size()!=selection.size()))return QVector<EntityId>{};
+        if(std::any_of(neighbors.cbegin(),neighbors.cend(),[](const auto& adjacent){return adjacent.size()!=2;}))
+            return QVector<EntityId>{};
+
+        const auto first=*std::min_element(neighbors.keyBegin(),neighbors.keyEnd());
+        const auto& firstNeighbors=neighbors.constFind(first).value();
+        QVector<EntityId> ordered{first};
+        ordered.reserve(neighbors.size());
+        auto previous=first;
+        auto current=std::min(firstNeighbors[0],firstNeighbors[1]);
+        while(current!=first&&ordered.size()<neighbors.size()){
+            ordered.append(current);
+            const auto& next=neighbors.constFind(current).value();
+            const auto following=next[0]==previous?next[1]:next[0];
+            previous=current;
+            current=following;
+        }
+        if(current!=first||ordered.size()!=neighbors.size())return QVector<EntityId>{};
+        return ordered;
+    };
+    auto ordered=closedLoop(false);
+    if(ordered.isEmpty()&&std::none_of(model.points.cbegin(),model.points.cend(),[&](const auto& point){
+        return selection.contains(point.id)&&std::abs(point.position.y)>1e-4;
+    })){
+        // A centre-plane contour can also contain loose grid dividers. Use
+        // the hull's own supported boundary when it closes as one loop.
+        ordered=closedLoop(true);
+    }
+    if(ordered.isEmpty())return {};
+
+    // The new face traverses shared edges opposite to their existing face.
+    int winding=0;
+    for(qsizetype i=0;i<ordered.size();++i){
+        const auto a=ordered[i],b=ordered[(i+1)%ordered.size()];
+        const int direction=candidates.value(edgeKey(a,b)).direction;
+        if(!direction)continue;
+        const int wanted=direction==(a<b?1:-1)?-1:1;
+        if(winding&&winding!=wanted)return {};
+        winding=wanted;
+    }
+    if(winding<0)std::reverse(ordered.begin()+1,ordered.end());
+    return ordered;
+}
+
 QVector<ModelIssue> inspectModel(const ModelSnapshot& m){
     QVector<ModelIssue> result;QHash<QString,QVector<std::pair<EntityId,int>>> incident;QSet<EntityId> owned;
     QHash<EntityId,Vec3> points;for(const auto& p:m.points)points[p.id]=p.position;

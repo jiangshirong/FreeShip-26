@@ -14,6 +14,7 @@
 #include "exchange_text.h"
 #include <QtEndian>
 #include <algorithm>
+#include <array>
 #include <cmath>
 #include <cstring>
 #include <map>
@@ -58,18 +59,19 @@ void edges(Document& d,bool crease){
 // Ear clipping preserves a planar concave polygon. Self intersections and
 // zero-area ears are rejected; no convex fan that fills an absent region.
 QVector<QVector<EntityId>> triangulate(const QVector<EntityId>& ids,const ModelSnapshot& m,bool fitQuad=false){
+    const auto position=[&](EntityId id){return m.points[id-1].position;};
     if(ids.size()<3||ids.size()>maxCorners)bad("面的顶点数须为 3–4096。");
     QSet<EntityId> seen;Vec3 normal{};
     for(int i=0;i<ids.size();++i){auto id=ids[i];if(id<1||id>EntityId(m.points.size())||seen.contains(id))bad("面含重复或越界的顶点。");seen.insert(id);}
-    const auto origin=m.points[ids[0]-1].position;double scale=0;
-    for(int i=1;i+1<ids.size();++i){auto n=cross(sub(m.points[ids[i]-1].position,origin),sub(m.points[ids[i+1]-1].position,origin));normal.x+=n.x;normal.y+=n.y;normal.z+=n.z;}
+    const auto origin=position(ids[0]);double scale=0;
+    for(int i=1;i+1<ids.size();++i){auto n=cross(sub(position(ids[i]),origin),sub(position(ids[i+1]),origin));normal.x+=n.x;normal.y+=n.y;normal.z+=n.z;}
     if(dot(normal,normal)==0)bad("面退化或自相交。");
     normal=unit(normal);
-    for(auto id:ids){auto v=sub(m.points[id-1].position,origin);scale=std::max(scale,std::sqrt(dot(v,v)));}
+    for(auto id:ids){auto v=sub(position(id),origin);scale=std::max(scale,std::sqrt(dot(v,v)));}
     if(!fitQuad||ids.size()!=4)
-        for(auto id:ids)if(std::abs(dot(sub(m.points[id-1].position,origin),normal))>scale*2e-6)bad("多边形不共面；请先在来源软件中三角化。");
+        for(auto id:ids)if(std::abs(dot(sub(position(id),origin),normal))>scale*2e-6)bad("多边形不共面；请先在来源软件中三角化。");
     int drop=std::abs(normal.x)>std::abs(normal.y)?0:1;if(std::abs(normal.z)>(drop==0?std::abs(normal.x):std::abs(normal.y)))drop=2;
-    QVector<std::array<double,2>> p;for(auto id:ids){auto v=sub(m.points[id-1].position,origin);p.append(drop==0?std::array<double,2>{v.y,v.z}:drop==1?std::array<double,2>{v.z,v.x}:std::array<double,2>{v.x,v.y});}
+    QVector<std::array<double,2>> p;for(auto id:ids){auto v=sub(position(id),origin);p.append(drop==0?std::array<double,2>{v.y,v.z}:drop==1?std::array<double,2>{v.z,v.x}:std::array<double,2>{v.x,v.y});}
     auto area=[&](int a,int b,int c){return (p[b][0]-p[a][0])*(p[c][1]-p[a][1])-(p[b][1]-p[a][1])*(p[c][0]-p[a][0]);};
     double total=0;for(int i=0;i<p.size();++i)total+=p[i][0]*p[(i+1)%p.size()][1]-p[(i+1)%p.size()][0]*p[i][1];double sign=total>0?1:-1;
     auto on=[&](int a,int b,int c){return area(a,b,c)==0&&p[c][0]>=std::min(p[a][0],p[b][0])&&p[c][0]<=std::max(p[a][0],p[b][0])&&p[c][1]>=std::min(p[a][1],p[b][1])&&p[c][1]<=std::max(p[a][1],p[b][1]);};
@@ -147,6 +149,18 @@ void assignObjCreases(ModelSnapshot& m, const QHash<quint64,std::array<ObjEdgeAp
     }
 }
 
+struct ObjSourceGroup {
+    bool freeShipNames;
+    QString object,group;
+    bool update(const QString& keyword,const QStringList& values){
+        if(keyword=="o")object=values.join(' ');
+        else if(keyword=="g")group=freeShipNames?values.join(' '):values.value(0);
+        else return false;
+        return true;
+    }
+    QString name()const{return !group.isEmpty()?group:!object.isEmpty()?object:QStringLiteral("OBJ");}
+};
+
 Document obj(const QByteArray& bytes,const Options& options,const std::atomic_bool* cancel=nullptr,
              bool objFeatures=true){
     Options o=options;
@@ -157,6 +171,15 @@ Document obj(const QByteArray& bytes,const Options& options,const std::atomic_bo
     QString group="OBJ",object,smoothing;
     QHash<QString,EntityId> groups;
     QVector<Vec3> normals;
+    QHash<QString,EntityId> assignedLayers;
+    if(o.objLayerMode==ObjLayerMode::Assigned){
+        if(o.objAssignedLayers.size()>1000)bad("图层过多。");
+        for(const auto& assignment:o.objAssignedLayers){
+            const auto id=EntityId(m.layers.size()+1);
+            m.layers.append(layer(assignment.name,id,o.symmetric));
+            for(const auto& name:assignment.groups)assignedLayers.insert(name,id);
+        }
+    }
     QVector<ObjFaceAppearance> faceAppearance;
     QHash<quint64,std::array<ObjEdgeAppearance,2>> edgeAppearance;
     QVector<std::array<int,3>> creaseRecords;
@@ -164,6 +187,9 @@ Document obj(const QByteArray& bytes,const Options& options,const std::atomic_bo
     int uvs=0;
     QSet<QVector<EntityId>> polygons;
     const auto lines=decodeExchangeText(bytes).split('\n');
+    // FreeShip 26 writes the full layer name, including spaces, after g.
+    const bool freeShipGroupNames=lines.first().startsWith("# FreeShip 26 units=");
+    ObjSourceGroup sourceGroup{freeShipGroupNames,{},{}};
     for(int row=0;row<lines.size();++row){
         if(cancel && row%1024==0 && cancel->load(std::memory_order_relaxed))bad("已取消船型重建。");
         const auto text=lines[row].trimmed();
@@ -184,10 +210,15 @@ Document obj(const QByteArray& bytes,const Options& options,const std::atomic_bo
             if(line.isEmpty())continue;
             auto w=words(line);
             const auto k=w.takeFirst();
+        if(o.objLayerMode==ObjLayerMode::Assigned&&sourceGroup.update(k,w))continue;
             if(k=="v"){if(w.size()!=3&&w.size()!=4)bad("顶点须有三个坐标及可选齐次分量。");double div=w.size()==4?number(w[3]):1;if(div==0)bad("齐次分量不能为零。");addPoint(d,imported({number(w[0])/div,number(w[1])/div,number(w[2])/div},o),o.controlNet?0:3);}
             else if(k=="vn"){sizeIs(w,3);normals.append(unit({number(w[0]),number(w[1]),number(w[2])}));}
             else if(k=="vt"){if(w.isEmpty()||w.size()>3)bad("纹理坐标字段数不正确。");for(const auto& n:w)number(n);++uvs;appearance=true;}
-            else if(k=="g")group=w.join(' ');
+            else if(k=="g"){
+                // A control face can belong to one layer. For overlapping OBJ
+                // groups use the first name without duplicating the face.
+                group=o.objLayerMode==ObjLayerMode::ByGroup&&!freeShipGroupNames?w.value(0):w.join(' ');
+            }
             else if(k=="o")object=w.join(' ');
             else if(k=="usemtl"||k=="mtllib")appearance=true;
             else if(k=="s"){
@@ -215,9 +246,21 @@ Document obj(const QByteArray& bytes,const Options& options,const std::atomic_bo
                     }
                     if(readCreases)cornerNormals.append(normal);
                 }
-                QString name=object.isEmpty()?group:(group.isEmpty()||group=="OBJ"?object:object+" / "+group);if(name.isEmpty())name="OBJ";
+                QString name="OBJ";
+                if(o.objLayerMode==ObjLayerMode::ByGroup&&!group.isEmpty())name=group;
+                if(o.objLayerMode==ObjLayerMode::ObjectAndGroup){
+                    const auto sourceName=object.isEmpty()?group:(group.isEmpty()||group=="OBJ"?object:object+" / "+group);
+                    if(!sourceName.isEmpty())name=sourceName;
+                }
                 auto sorted=ids;std::sort(sorted.begin(),sorted.end());if(polygons.contains(sorted))bad("存在重复的面。");polygons.insert(sorted);
-                if(!groups.contains(name)){if(m.layers.size()>=1000)bad("图层过多。");groups[name]=m.layers.size()+1;m.layers.append(layer(name,groups[name],o.symmetric));}
+                EntityId layerId=0;
+                if(o.objLayerMode==ObjLayerMode::Assigned){
+                    layerId=assignedLayers.value(sourceGroup.name());
+                    if(!layerId)bad("OBJ 的组已更改，请重新选择文件。");
+                }else{
+                    if(!groups.contains(name)){if(m.layers.size()>=1000)bad("图层过多。");groups[name]=m.layers.size()+1;m.layers.append(layer(name,groups[name],o.symmetric));}
+                    layerId=groups[name];
+                }
                 if(readCreases){
                     const int face=faceAppearance.size();
                     Vec3 normal{};
@@ -236,7 +279,7 @@ Document obj(const QByteArray& bytes,const Options& options,const std::atomic_bo
                         if(ids[i]>ids[j])std::swap(side.normalA,side.normalB);
                     }
                 }
-                if(o.controlNet)addFace(d,ids,groups[name]);else for(auto tri:triangulate(ids,m))addFace(d,tri,groups[name]);
+                if(o.controlNet)addFace(d,ids,layerId);else for(auto tri:triangulate(ids,m))addFace(d,tri,layerId);
             }else bad("暂不支持 OBJ 记录："+k+"。请导出多边形网格。");
         }catch(const std::exception& e){bad(QString("OBJ 第 %1 行：%2").arg(row+1).arg(QString::fromUtf8(e.what())));}
     }
@@ -448,8 +491,55 @@ QJsonObject Document::bridgeData()const{
     if(!stations.isEmpty()){QJsonArray positions;for(double v:stations)positions.append(v);result["stations"]=positions;}
     return result;
 }
+namespace {
+QByteArray exchangeBytes(const QString& path){
+    QFile file(path);if(!file.open(QIODevice::ReadOnly)||file.size()<1||file.size()>maxBytes)bad("无法读取文件，或文件大于 128 MiB。");auto bytes=file.readAll();if(file.error()!=QFile::NoError)bad("文件读取不完整。");return bytes;
+}
+}
+QStringList objLayerSources(const QString& path,const std::atomic_bool* cancel){
+    const QString input=decodeExchangeText(exchangeBytes(path));
+    ObjSourceGroup sourceGroup{input.startsWith("# FreeShip 26 units="),{},{}};
+    QStringList names;
+    QSet<QString> seen;
+    qsizetype start=0;
+    while(start<input.size()){
+        if(cancel&&cancel->load(std::memory_order_relaxed))return {};
+        const auto newline=input.indexOf('\n',start);
+        auto line=QStringView(input).mid(start,newline<0?-1:newline-start).trimmed();
+        start=newline<0?input.size():newline+1;
+        if(line.isEmpty()||!QStringLiteral("fog").contains(line.front()))continue;
+        const auto hash=line.indexOf('#');
+        if(hash>=0)line=line.left(hash);
+        auto tokens=words(line.trimmed().toString());
+        if(tokens.isEmpty())continue;
+        const auto keyword=tokens.takeFirst();
+        if(keyword!="f"){sourceGroup.update(keyword,tokens);continue;}
+        const auto name=sourceGroup.name();
+        if(!seen.contains(name)){seen.insert(name);names.append(name);}
+    }
+    return names;
+}
+double objAutomaticToleranceMm(const QString& path,Options options,const std::atomic_bool* cancel){
+    options.controlNet=true;options.reconstructObj=false;
+    options.objLayerMode=ObjLayerMode::Single;
+    const auto model=obj(exchangeBytes(path),options,cancel,false).model;
+    Vec3 low{},high{};bool any=false;
+    for(qsizetype i=0;i<model.faces.size();++i){
+        if(cancel&&i%1024==0&&cancel->load(std::memory_order_relaxed))bad("已取消船型重建。");
+        for(const auto& tri:triangulate(model.faces[i].points,model,true))for(auto id:tri){
+            const auto p=model.points[id-1].position;
+            if(!any){low=high=p;any=true;}
+            low={std::min(low.x,p.x),std::min(low.y,p.y),std::min(low.z,p.z)};
+            high={std::max(high.x,p.x),std::max(high.y,p.y),std::max(high.z,p.z)};
+        }
+    }
+    const auto span=std::hypot(high.x-low.x,high.y-low.y,high.z-low.z);
+    if(!any||!std::isfinite(span)||span<=0)bad("OBJ 船壳尺寸无效。");
+    return .001*(model.units=="imperial"?304.8:1000.)*span;
+}
+
 Document read(const QString& path,const QString& format,const Options& options,const std::atomic_bool* cancel){
-    QFile file(path);if(!file.open(QIODevice::ReadOnly)||file.size()<1||file.size()>maxBytes)bad("无法读取文件，或文件大于 128 MiB。");auto bytes=file.readAll();if(file.error()!=QFile::NoError)bad("文件读取不完整。");
+    const auto bytes=exchangeBytes(path);
     Document d;if(format=="obj")d=obj(bytes,options,cancel);else if(format=="stl")d=stl(bytes,options);else if(format=="fef")d=fef(bytes);else if(format=="polycad")d=polycad(bytes,options);else if(format=="part")d=part(bytes,options);else if(format=="vrml")d=vrml(bytes,options);else if(format=="waves")d=waves(bytes);
     else if(format=="chines"||format=="carene"||format=="hull"||format=="surface")d=readCurveFile(bytes,format,options);else bad("不支持的导入格式。");return d;
 }

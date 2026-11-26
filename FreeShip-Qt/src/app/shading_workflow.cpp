@@ -11,6 +11,7 @@
 #include <QJsonDocument>
 #include <QMenu>
 #include <QTimer>
+#include <QToolButton>
 #include <algorithm>
 #include <iterator>
 
@@ -37,7 +38,14 @@ void MainWindow::shadingStep(){
         HullView* perspective=nullptr;for(auto* view:views_)if(view->projection()==HullProjection::Perspective)perspective=view;
         if(!perspective){missing("perspective-view");return;}
         for(int mode:{1,2,3}){
-            for(auto* view:views_){auto* root=menu(view);auto* action=discover(root,"shade_mode",mode);if(!action)return;action->trigger();root->hide();workflowCase(QString("mode-%1-projection-%2").arg(mode).arg(int(view->projection())),view->shadeMode()==HullShade(mode));view->image().save(workflowOutput_+QString("/mode-%1-view-%2.png").arg(mode).arg(int(view->projection())));}
+            for(auto* view:views_){
+                auto* button=view->findChild<QToolButton*>("HullDisplayMode");
+                auto* action=discover(button?button->menu():nullptr,"shade_mode",mode);
+                if(!action)return;
+                action->trigger();
+                workflowCase(QString("mode-%1-projection-%2").arg(mode).arg(int(view->projection())),view->shadeMode()==HullShade(mode));
+                view->image().save(workflowOutput_+QString("/mode-%1-view-%2.png").arg(mode).arg(int(view->projection())));
+            }
             auto* root=menu(perspective);auto* save=discover(root,"view_operation","save_image");if(!save)return;const auto path=workflowOutput_+QString("/mode-%1-export.png").arg(mode);const auto expected=perspective->image();
             // Poll like the viewport workflow: the hidden modal dialog may register after the first nested event pass.
             bool handled=false;QTimer picker;picker.setInterval(10);QElapsedTimer deadline;deadline.start();

@@ -14,6 +14,8 @@
 #include "preferences_store.h"
 #include <QFormLayout>
 #include <QHeaderView>
+#include <QHelpEvent>
+#include <QHBoxLayout>
 #include <QLabel>
 #include <QLineEdit>
 #include <QListWidget>
@@ -25,9 +27,11 @@
 #include <QSpinBox>
 #include <QTableWidget>
 #include <QTimer>
+#include <QToolTip>
 #include <QVBoxLayout>
 #include <algorithm>
 #include <cmath>
+#include <utility>
 
 namespace {
 class ModelingNumber final : public QDoubleSpinBox {
@@ -41,8 +45,91 @@ protected:
         return text;
     }
 };
+class CheckMenuTips final : public QObject {
+public:
+    CheckMenuTips(QMenu* menu,std::function<void()> refresh)
+        : QObject(menu), menu_(menu), refresh_(std::move(refresh)) {
+        menu_->installEventFilter(this);
+        connect(menu_,&QMenu::aboutToShow,this,[this]{refresh_();});
+    }
+protected:
+    bool eventFilter(QObject* watched,QEvent* event) override {
+        if(event->type()!=QEvent::ToolTip)return QObject::eventFilter(watched,event);
+        const auto* help=static_cast<QHelpEvent*>(event);
+        auto* action=menu_->actionAt(help->pos());
+        if(!action||!action->property("model_check_targets").toBool())return QObject::eventFilter(watched,event);
+        refresh_();
+        if(action->isEnabled())return QObject::eventFilter(watched,event);
+        QToolTip::showText(help->globalPos(),action->toolTip(),menu_,menu_->actionGeometry(action));
+        return true;
+    }
+private:
+    QMenu* menu_;
+    std::function<void()> refresh_;
+};
 QJsonArray array(const QVector<fs::EntityId>& ids){QJsonArray a;for(auto id:ids)a.append(double(id));return a;}
 QJsonArray array(const QSet<fs::EntityId>& ids){auto list=ids.values();std::sort(list.begin(),list.end());return array(list);}
+void ensureSelectionView(const std::array<HullView*,4>& views,HullEntity kind){
+    const auto visible=[](const HullView* view){return view->isVisibleTo(view->window());};
+    if(std::any_of(views.begin(),views.end(),[&](const HullView* view){return visible(view)&&view->selectionKind()==kind;}))return;
+    const auto view=std::find_if(views.begin(),views.end(),visible);
+    if(view!=views.end()){
+        (*view)->restoreDisplayMode("wireframe");
+        (*view)->setSelectionKind(kind);
+    }
+}
+QSet<fs::EntityId> orientationConflicts(const fs::ModelSnapshot& model){
+    for(const auto& issue:fs::inspectModel(model))
+        if(issue.code=="winding")return {issue.ids.begin(),issue.ids.end()};
+    return {};
+}
+QSet<fs::EntityId> checkSelectionTargets(const fs::ModelSnapshot& model,const QString& operation,
+        const QSet<fs::EntityId>& hidden,const QSet<fs::EntityId>& visibilityChanges){
+    QSet<fs::EntityId> ids;
+    if(operation=="select_points_without_faces"){
+        ids.reserve(model.points.size());
+        for(const auto& point:model.points)ids.insert(point.id);
+        for(const auto& face:model.faces)for(auto point:face.points)ids.remove(point);
+        return ids;
+    }
+    QSet<fs::EntityId> visible;
+    for(const auto& layer:model.layers)
+        if(layer.visible!=visibilityChanges.contains(layer.id)&&!hidden.contains(layer.id))visible.insert(layer.id);
+    if(operation=="select_leaks"){
+        QSet<fs::EntityId> leaks;
+        for(const auto& point:model.points)if(point.leak)leaks.insert(point.id);
+        if(leaks.isEmpty())return ids;
+        for(const auto& face:model.faces)if(visible.contains(face.layer))
+            for(auto point:face.points)if(leaks.contains(point))ids.insert(point);
+        return ids;
+    }
+    constexpr double centerlineTolerance=1e-7;
+    QSet<fs::EntityId> negative,positive;
+    for(const auto& point:model.points){
+        if(point.position.y < -centerlineTolerance)negative.insert(point.id);
+        if(point.position.y > centerlineTolerance)positive.insert(point.id);
+    }
+    if(negative.isEmpty())return ids;
+    for(const auto& face:model.faces){
+        if(!visible.contains(face.layer))continue;
+        const auto& points=face.points;
+        if(std::any_of(points.cbegin(),points.cend(),[&](auto id){return negative.contains(id);}) &&
+           std::none_of(points.cbegin(),points.cend(),[&](auto id){return positive.contains(id);}))ids.insert(face.id);
+    }
+    return ids;
+}
+QSet<fs::EntityId> hiddenLayers(const fs::ModelSnapshot& model){
+    QSet<fs::EntityId> result;
+    for(const auto& layer:model.layers)if(!layer.visible)result.insert(layer.id);
+    return result;
+}
+QLabel* orientationLegend(const QString& color,const QString& name,QWidget* parent){
+    auto* label=new QLabel(parent);
+    const auto swatch=color=="#ffffff"?QStringLiteral("<span style='color:#314b60;background-color:#ffffff'>□</span>"):
+        QStringLiteral("<span style='color:%1'>■</span>").arg(color);
+    label->setText(swatch+" "+name.toHtmlEscaped());
+    return label;
+}
 void buttons(QDialog& dialog,QVBoxLayout* layout){
     auto* b=new QDialogButtonBox(QDialogButtonBox::Ok|QDialogButtonBox::Cancel);
     b->button(QDialogButtonBox::Ok)->setText(uiText("确定"));b->button(QDialogButtonBox::Cancel)->setText(uiText("取消"));
@@ -50,10 +137,10 @@ void buttons(QDialog& dialog,QVBoxLayout* layout){
 }
 }
 
-void MainWindow::buildModelingActions(QMenu* point,QMenu* edge,QMenu* face,QMenu* layer,QMenu* view,QList<QAction*>& transforms,QMenu* checks){
+void MainWindow::buildModelingActions(QMenu* point,QMenu* edge,QMenu* face,QMenu* view,QList<QAction*>& transforms,QMenu* checks){
     auto add=[this](QMenu* menu,const QString& title,const QString& icon,const QString& op,const QString& kind={},int count=0){
         auto* a=new QAction(studioIcon(icon),title,this);a->setProperty("operation",op);a->setProperty("selection_kind",kind);a->setProperty("minimum_selection",count);
-        const QStringList direct{"collapse_points","collapse_edges","connect_points","split_edges","flip_faces","assemble_faces","clear_constraints","unlock_all","clear_selection","select_leaks"};
+        const QStringList direct{"collapse_points","collapse_edges","connect_points","split_edges","flip_faces","assemble_faces","auto_group_layers","clear_constraints","unlock_all","clear_selection","select_leaks","select_points_without_faces","select_negative_faces"};
         a->setProperty("studio_opens_dialog",!direct.contains(op));
         if(menu)menu->addAction(a);
         addAction(a);modelingActions_.append(a);connect(a,&QAction::triggered,this,[this,op]{modelingAction(op);});return a;
@@ -74,17 +161,51 @@ void MainWindow::buildModelingActions(QMenu* point,QMenu* edge,QMenu* face,QMenu
     add(point,uiText("建立点组…"),"Point","create_group","point",2);add(point,uiText("管理点组…"),"Point","point_groups");
     add(point,uiText("用平面插入控制点…"),"SplitSection","insert_plane");
     add(point,uiText("插入图层交点…"),"Sections","intersect_layers");
-    add(checks,uiText("选择漏点"),"Point","select_leaks");
-    add(checks,uiText("清理无面控制点…"),"DeleteSelected","remove_unused");
-    add(checks,uiText("删除负舷的面…"),"DeleteSelected","delete_negative");
+    const std::array entries{
+        std::pair{add(checks,uiText("选择漏点"),"Point","select_leaks"),"没有可选择的漏点。"},
+        std::pair{add(checks,uiText("选择无面点"),"Point","select_points_without_faces"),"没有可选择的无面点。"},
+        std::pair{add(checks,uiText("选择负舷的面"),"Face","select_negative_faces"),"没有可选择的负舷面。"},
+        std::pair{add(checks,uiText("修复相邻面朝向…"),"InvertFace","repair_normals"),"未发现相邻面朝向冲突。"}
+    };
+    for(const auto& [action,reason]:entries){action->setProperty("model_check_targets",true);action->setEnabled(false);}
+    new CheckMenuTips(checks,[this,entries,checked=std::weak_ptr<const fs::ModelSnapshot>{},available=std::array<bool,4>{},
+                             hidden=QSet<fs::EntityId>{},visibility=QSet<fs::EntityId>{}]() mutable {
+        const auto model=session_.model();
+        if(session_.busy()||!session_.ready()){
+            const QString reason=session_.busy()?uiText("请等待模型更新完成。"):
+                model?uiText("当前船模暂不可用。"):uiText("请先打开船模。");
+            for(const auto& [action,unused]:entries){action->setEnabled(false);action->setToolTip(reason);}
+            return;
+        }
+        const auto projected=layers_->projectedVisibilityChanges();
+        const bool changed=checked.lock()!=model;
+        if(changed||hidden!=hiddenControlLayers_||visibility!=projected){
+            checked=model;
+            hidden=hiddenControlLayers_;
+            visibility=projected;
+            for(size_t i=0;i+1<entries.size();++i)
+                available[i]=!checkSelectionTargets(*model,entries[i].first->property("operation").toString(),hidden,visibility).isEmpty();
+            if(changed)available.back()=!orientationConflicts(*model).isEmpty();
+        }
+        for(size_t i=0;i<entries.size();++i){
+            const auto& [action,reason]=entries[i];
+            action->setEnabled(available[i]);
+            action->setToolTip(available[i]?QString{}:uiText(reason));
+        }
+    });
     edge->addSeparator();add(edge,uiText("连接所选控制点"),"Edge","connect_points","point",2);
     splitEdge_=add(edge,uiText("拆分所选边"),"SplitEdge","split_edges","edge",1);
     add(edge,uiText("合并相邻面"),"Collapse","collapse_edges","edge",1);
     add(edge,uiText("控制曲线名称…"),"NewCurve","rename_control","curve",1);
     face->addSeparator();add(face,uiText("翻转所选面的朝向"),"InvertFace","flip_faces","face",1);
-    add(face,uiText("组装面片"),"Face","assemble_faces");
     add(face,uiText("添加网格面板…"),"Grid","grid_panel");add(face,uiText("添加圆柱…"),"Face","cylinder");
-    add(layer,uiText("按折痕自动分组…"),"LayerAutoGroup","auto_group_layers");
+    toolsMenu_->setProperty("studio_menu_has_help",true);
+    auto* autoGroup=add(toolsMenu_,uiText("按折痕自动分组"),"LayerAutoGroup","auto_group_layers","face",1);
+    bindUiText(autoGroup,"text","按折痕自动分组");
+    bindUiText(autoGroup,"studio_menu_help","沿非折痕边把相连的面归入一个图层");
+    auto* assemble=add(toolsMenu_,uiText("按曲面片分图层"),"Face","assemble_faces","face",1);
+    bindUiText(assemble,"text","按曲面片分图层");
+    bindUiText(assemble,"studio_menu_help","把能排成行列的相邻四边面归入一个图层");
     transforms.append(add(nullptr,uiText("绕船中旋转…"),"RotateCW","rotate_midship","transform",1));
     transforms.append(add(nullptr,uiText("Lackenby 船型变换…"),"Transform","lackenby"));
     add(view,uiText("导入参考曲线…"),"OpenFile","add_markers");
@@ -98,13 +219,13 @@ void MainWindow::updateModelingActions(){
     for(auto* a:modelingActions_){const auto op=a->property("operation").toString(),kind=a->property("selection_kind").toString();const int minimum=a->property("minimum_selection").toInt();
         int count=kind=="transform"?transformPoints().size():kind=="point"?selection_.size():entitySelection_.size();
         bool enabled=idle&&(op=="new"||ready)&&(kind.isEmpty()||kind=="transform"||kind==selectedKind)&&count>=minimum;
+        if(a->property("model_check_targets").toBool()){if(!enabled)a->setEnabled(false);continue;}
         if(op=="rename_control")enabled=enabled&&count==1;
         if(ready&&op=="point_groups")enabled=enabled&&!session_.model()->pointGroups.isEmpty();
         if(ready&&op=="delete_markers")enabled=enabled&&!session_.model()->markers.isEmpty();
         if(ready){
             const auto& model=*session_.model();
             if(op=="unlock_all")enabled=enabled&&std::any_of(model.points.cbegin(),model.points.cend(),[](const auto& point){return point.locked;});
-            if(op=="select_leaks")enabled=enabled&&std::any_of(model.points.cbegin(),model.points.cend(),[](const auto& point){return point.leak;});
             if(op=="clear_constraints")enabled=enabled&&std::any_of(model.points.cbegin(),model.points.cend(),[this](const auto& point){return selection_.contains(point.id)&&(point.anchor||point.lineA||point.lineB);});
             if(op=="select_all"||op=="invert_selection")enabled=enabled&&!model.points.isEmpty();
         }
@@ -116,15 +237,29 @@ void MainWindow::modelingAction(const QString& op){
     if(session_.busy()||(op!="new"&&!session_.ready()))return;endFlowline();const auto m=session_.model();
     if(op=="new"){modelingDialog("new");return;}
     if(op=="point_groups"){pointGroupsDialog();return;}
+    if(op=="repair_normals"){faceOrientationDialog();return;}
     if(op=="lackenby"){session_.inspectModeling();return;}
     if(op=="rotate_midship"){advancedDialog(op);return;}
     if(op=="clear_selection"){selectEntities(selectionKind_,{});selectPoints({});return;}
-    if(op=="select_leaks"){setSelectionKind(HullEntity::Point);QSet<fs::EntityId> ids;for(const auto& p:m->points)if(p.leak)ids.insert(p.id);selectPoints(ids);return;}
+    if(op=="select_leaks"||op=="select_points_without_faces"||op=="select_negative_faces"){
+        auto ids=checkSelectionTargets(*m,op,hiddenControlLayers_,layers_->projectedVisibilityChanges());
+        if(ids.isEmpty())return;
+        const auto kind=op=="select_negative_faces"?HullEntity::Face:HullEntity::Point;
+        setSelectionKind(kind);
+        ensureSelectionView(views_,kind);
+        if(kind==HullEntity::Point){
+            if(views_.front()->onShowControlNet)views_.front()->onShowControlNet();
+            pointSelectionHasBatchOrder_=true;
+            selectPoints(std::move(ids));
+        }else selectEntities(kind,std::move(ids));
+        return;
+    }
     if(op=="select_all"||op=="invert_selection"){
         if(selectionKind_!=HullEntity::Point)setSelectionKind(HullEntity::Point);
         QSet<fs::EntityId> ids;
         for(const auto& p:m->points)ids.insert(p.id);
         if(op=="invert_selection")ids.subtract(selection_);
+        pointSelectionHasBatchOrder_=true;
         selectPoints(ids);return;
     }
     if(op=="add_markers"){
@@ -146,7 +281,11 @@ void MainWindow::modelingAction(const QString& op){
         }
         return;
     }
-    if(op=="assemble_faces"){session_.editModeling(op,{});return;}
+    if(op=="auto_group_layers"||op=="assemble_faces"){
+        if(selectionKind_==HullEntity::Face&&!entitySelection_.isEmpty())
+            session_.editModeling(op,{{"ids",array(entitySelection_)}});
+        return;
+    }
     const QStringList immediate{"collapse_points","collapse_edges","connect_points","split_edges","flip_faces","clear_constraints","unlock_all"};
     if(immediate.contains(op)){
         QJsonObject fields;if(op!="unlock_all")fields["ids"]=op=="connect_points"?array(selectionOrder_):selectionKind_==HullEntity::Point?array(selection_):array(entitySelection_);
@@ -199,16 +338,12 @@ void MainWindow::modelingDialog(const QString& op,const QJsonObject& initial){
         num("displacement",m->units=="metric"?uiText("目标排水量 (t)"):uiText("目标排水量 (long ton)"),initial["displacement"].toDouble(),0.000001);
         num("lcb",uiText("目标浮心纵坐标"),initial["lcb"].toDouble());integer("iterations",uiText("最大迭代次数"),30,1,100);
         layerList=new QListWidget;layerList->setProperty("field","layer_ids");for(const auto& l:m->layers){auto* item=new QListWidgetItem(layerDisplayName(l),layerList);item->setData(Qt::UserRole,double(l.id));item->setCheckState(l.visible?Qt::Checked:Qt::Unchecked);}form->addRow(uiText("参与变换的图层"),layerList);
-    }else if(op=="remove_unused")note(uiText("删除所有不属于任何面的控制点，包括独立控制线上的点。"));
-    else if(op=="delete_negative")note(uiText("删除全部顶点位于 Y ≤ 0 一侧的面，包括中心面，以及负舷未被面使用的点。跨过中心面的面保持完整。"));
-    else if(op=="delete_markers")note(uiText("删除模型中的全部参考曲线。"));
-    else if(op=="auto_group_layers"){
-        note(uiText("沿非折痕边连接的面归入同一组。已选面时处理所选面，否则处理可见图层。"));
-        if(selectionKind_==HullEntity::Face&&!entitySelection_.isEmpty())request["ids"]=array(entitySelection_);
-    }else if(op=="repair_normals")note(uiText("开放曲面需确认外侧方向。"));
+    }else if(op=="delete_markers")note(uiText("删除模型中的全部参考曲线。"));
     else if(op=="delete_group"){request["index"]=initial["index"];note(uiText("解除这个点组。组内的控制点和曲面会保留。"));}
     else return;
-    layout->addLayout(form);buttons(dialog,layout);if(runStudioDialog(dialog)!=QDialog::Accepted)return;
+    if(form->rowCount()>0)layout->addLayout(form);
+    else delete form;
+    buttons(dialog,layout);if(runStudioDialog(dialog)!=QDialog::Accepted)return;
     if(op!="new"&&(!session_.ready()||session_.busy()||session_.model()!=m)){showError(uiText("船模已更改，请重新打开此窗口。"));return;}
     for(auto it=fields.begin();it!=fields.end();++it){QWidget* w=it.value();QJsonValue v;
         if(auto* n=qobject_cast<QDoubleSpinBox*>(w))v=n->value();else if(auto* n=qobject_cast<QSpinBox*>(w))v=n->value();
@@ -240,14 +375,134 @@ void MainWindow::pointGroupsDialog(){
 
 void MainWindow::modelCheckDialog(){
     const auto m=session_.model();if(!m||session_.busy())return;const auto issues=fs::inspectModel(*m);
-    QDialog dialog(this);setStudioWindowIcon(&dialog,"ModelCheck");dialog.setWindowTitle(uiText("模型检查"));dialog.setProperty("modeling_operation","model_check");dialog.setAttribute(Qt::WA_DontShowOnScreen,workflow_);
+    QDialog dialog(this);setStudioWindowIcon(&dialog,"ModelCheck");dialog.setWindowTitle(uiText("拓扑检查报告"));dialog.setProperty("modeling_operation","model_check");dialog.setAttribute(Qt::WA_DontShowOnScreen,workflow_);
     auto* layout=new QVBoxLayout(&dialog);auto* label=new StudioMessage(StudioMessageRole::Feedback,issues.isEmpty()?uiText("未发现本检查覆盖的拓扑问题。"):QString{});layout->addWidget(label);
     auto* list=new QListWidget;for(const auto& issue:issues)list->addItem(issue.message);layout->addWidget(list);
-    auto* b=new QDialogButtonBox;auto* locate=b->addButton(uiText("定位"),QDialogButtonBox::ActionRole);locate->setProperty("check_action","locate");
-    connect(locate,&QPushButton::clicked,&dialog,[this,list,issues]{int i=list->currentRow();if(i<0)return;const auto& issue=issues[i];
-        const auto kind=issue.kind=="point"?HullEntity::Point:issue.kind=="edge"?HullEntity::Edge:HullEntity::Face;setSelectionKind(kind);
-        QSet<fs::EntityId> ids(issue.ids.begin(),issue.ids.end());if(kind==HullEntity::Point)selectPoints(ids);else selectEntities(kind,ids);});
-    auto* repair=b->addButton(uiText("修复相邻面朝向…"),QDialogButtonBox::ActionRole);repair->setProperty("check_action","repair_normals");
-    bool fix=false;connect(repair,&QPushButton::clicked,&dialog,[&]{fix=true;dialog.accept();});layout->addWidget(b);
-    dialog.resize(600,380);runStudioDialog(dialog);if(fix)modelingDialog("repair_normals");
+    auto* b=new QDialogButtonBox(&dialog);auto* locate=b->addButton(uiText("定位"),QDialogButtonBox::ActionRole);locate->setProperty("check_action","locate");
+    const auto targets=[this,&issues,m](int row){
+        if(row<0||row>=issues.size())return QSet<fs::EntityId>{};
+        const auto& issue=issues[row];
+        if(issue.code=="leaks"||issue.code=="unused"){
+            const auto command=issue.code=="leaks"?"select_leaks":"select_points_without_faces";
+            return checkSelectionTargets(*m,command,hiddenControlLayers_,layers_->projectedVisibilityChanges());
+        }
+        return QSet<fs::EntityId>(issue.ids.begin(),issue.ids.end());
+    };
+    b->setVisible(!issues.isEmpty());
+    if(!issues.isEmpty())list->setCurrentRow(0);
+    locate->setEnabled(!targets(list->currentRow()).isEmpty());
+    connect(list,&QListWidget::currentRowChanged,locate,[locate,targets](int row){locate->setEnabled(!targets(row).isEmpty());});
+    connect(locate,&QPushButton::clicked,&dialog,[this,&dialog,list,locate,m,&issues,targets]{
+        const int row=list->currentRow();
+        if(!session_.ready()||session_.busy()||session_.model()!=m){
+            showError(uiText("船模已更改，请重新打开此窗口。"));
+            return;
+        }
+        auto ids=targets(row);
+        if(ids.isEmpty()){locate->setEnabled(false);return;}
+        const auto& issue=issues[row];
+        const auto kind=issue.kind=="point"?HullEntity::Point:issue.kind=="edge"?HullEntity::Edge:HullEntity::Face;
+        activateDocument();
+        setSelectionKind(kind);
+        ensureSelectionView(views_,kind);
+        if(kind==HullEntity::Point){
+            if(views_.front()->onShowControlNet)views_.front()->onShowControlNet();
+            pointSelectionHasBatchOrder_=true;
+            selectPoints(std::move(ids));
+        }else selectEntities(kind,std::move(ids));
+        dialog.accept();
+    });
+    layout->addWidget(b);
+    dialog.resize(600,380);runStudioDialog(dialog);
+}
+
+void MainWindow::faceOrientationDialog(){
+    if(faceOrientationWindow_){faceOrientationWindow_->raise();faceOrientationWindow_->activateWindow();return;}
+    const auto before=session_.model();
+    if(!before||session_.busy())return;
+    const auto conflicts=orientationConflicts(*before);
+    if(conflicts.isEmpty())return;
+
+    auto* dialog=new QDialog(this);
+    faceOrientationWindow_=dialog;
+    connect(dialog,&QDialog::finished,this,[this,dialog]{if(faceOrientationWindow_==dialog)faceOrientationWindow_.clear();});
+    dialog->setAttribute(Qt::WA_DeleteOnClose);
+    dialog->setAttribute(Qt::WA_DontShowOnScreen,workflow_);
+    dialog->setProperty("modeling_operation","repair_normals");
+    setStudioWindowIcon(dialog,"InvertFace");
+    dialog->setWindowTitle(uiText("修复相邻面朝向"));
+    auto* layout=new QVBoxLayout(dialog);
+    auto* summary=new StudioMessage(StudioMessageRole::Feedback,QString(uiText("%1 条接缝的面朝向不一致")).arg(conflicts.size()),dialog);
+    summary->setObjectName("FaceOrientationSummary");
+    layout->addWidget(summary);
+
+    auto* preview=new HullView(dialog);
+    preview->setObjectName("FaceOrientationPreview");
+    preview->setStudioAppearance(true);
+    preview->setAnimationsEnabled(false);
+    preview->setEditingEnabled(false);
+    preview->setProjection(HullProjection::Perspective);
+    preview->setSnapshot(before,{},false,hiddenLayers(*before));
+    preview->setFaceOrientationPreview(conflicts);
+    preview->setMinimumSize(350,210);
+    layout->addWidget(preview,1);
+
+    auto* legend=new QHBoxLayout;
+    legend->addWidget(orientationLegend("#578cca",uiText("正面"),dialog));
+    legend->addWidget(orientationLegend("#c7584f",uiText("背面"),dialog));
+    legend->addWidget(orientationLegend("#ffffff",uiText("无控制面"),dialog));
+    auto* seam=orientationLegend("#e39016",uiText("朝向冲突"),dialog);
+    auto* changed=orientationLegend("#0b604f",uiText("已翻转"),dialog);
+    legend->addWidget(seam);legend->addWidget(changed);legend->addStretch();
+    changed->hide();
+    layout->addLayout(legend);
+    auto* footer=new QHBoxLayout;
+    auto* note=new QLabel(uiText("请检查曲面的外侧方向。"),dialog);
+    note->setWordWrap(true);
+    footer->addWidget(note,1);
+    auto* apply=new QPushButton(uiText("修复"),dialog);
+    apply->setObjectName("FaceOrientationApply");
+    footer->addWidget(apply);
+    layout->addLayout(footer);
+    dialog->resize(640,460);
+
+    connect(apply,&QPushButton::clicked,dialog,[this,dialog,summary,preview,seam,changed,apply,before,conflicts]{
+        if(session_.busy()){
+            summary->setMessage(uiText("请等待模型更新完成。"),StudioMessageRole::Warning);
+            return;
+        }
+        if(!session_.ready()||session_.model()!=before){
+            apply->setEnabled(false);
+            summary->setMessage(uiText("船模已更改，请重新打开此窗口。"),StudioMessageRole::Warning);
+            return;
+        }
+        apply->setEnabled(false);
+        summary->setMessage(uiText("正在修复面朝向…"),StudioMessageRole::Feedback,true);
+        faceRepairResult_=[this,window=QPointer<QDialog>(dialog),summary,preview,seam,changed,apply,before,count=conflicts.size()](bool success){
+            if(!window)return;
+            if(!success){
+                apply->setEnabled(true);
+                summary->setMessage(uiText("面朝向修复失败。"),StudioMessageRole::Warning);
+                return;
+            }
+            const auto after=session_.model();
+            QHash<fs::EntityId,const fs::ControlFace*> previous;
+            for(const auto& face:before->faces)previous.insert(face.id,&face);
+            QSet<fs::EntityId> flipped;
+            for(const auto& face:after->faces)
+                if(const auto* old=previous.value(face.id);old&&old->points!=face.points)flipped.insert(face.id);
+            const auto remaining=orientationConflicts(*after);
+            preview->setSnapshot(after,{},false,hiddenLayers(*after));
+            preview->setFaceOrientationPreview(remaining,flipped);
+            seam->setVisible(!remaining.isEmpty());
+            changed->setVisible(!flipped.isEmpty());
+            summary->setMessage(QString(uiText("翻转了 %1 个面，朝向冲突 %2 → %3")).arg(flipped.size()).arg(count).arg(remaining.size()),StudioMessageRole::Feedback);
+            window->setProperty("face_orientation_repaired",true);
+            QTimer::singleShot(3500,preview,[preview,changed,remaining]{preview->setFaceOrientationPreview(remaining);changed->hide();});
+        };
+        if(!session_.editModeling("repair_normals"))
+            if(auto done=std::exchange(faceRepairResult_,{}))done(false);
+    });
+    showStudioDialog(*dialog);
+    preview->fit();
 }

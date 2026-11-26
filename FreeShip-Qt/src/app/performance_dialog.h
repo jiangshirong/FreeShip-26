@@ -8,6 +8,7 @@ struct CalculationChartState;
 class QLabel;class StudioMessage;class QPushButton;class QTableView;class QPlainTextEdit;class QTabWidget;class QComboBox;class QLineEdit;class QScrollArea;class QProcess;class QGridLayout;class QVBoxLayout;
 namespace report {class Browser;}
 class GridPreviewPanel;
+class CalculationLayers;
 class PerformanceDialog final:public QDialog {
 public:
     PerformanceDialog(ModelSession& session,const QJsonObject& schema,bool hidden,QWidget* parent);
@@ -33,6 +34,7 @@ protected:
     void changeEvent(QEvent*) override;
     bool eventFilter(QObject*,QEvent*) override;
 private:
+    CalculationLayers* layerChoice_=nullptr;
     void calculate();void setParameters(const QJsonObject& schema);void renderSeries();void refreshChoices();void refreshAccelerationStopControls();void openDatabaseViewer();void arrangeAdditional();void refreshWindLabels();void refreshParameterLanguage();
     void refreshResultLanguage();
     QString completionMessage_;

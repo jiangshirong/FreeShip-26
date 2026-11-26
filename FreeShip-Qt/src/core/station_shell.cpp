@@ -1,14 +1,25 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 #include "station_shell.h"
 #include <clipper2/clipper.engine.h>
+#include <QScopeGuard>
 #include <algorithm>
+#include <chrono>
 #include <cmath>
+#include <future>
 #include <limits>
 #include <stdexcept>
+#include <thread>
 
 namespace fs::frames {
 namespace {
 namespace clip = Clipper2Lib;
+using Clock=std::chrono::steady_clock;
+struct ShellPhase {
+    double* value;
+    Clock::time_point start;
+    explicit ShellPhase(double* output):value(output),start(output?Clock::now():Clock::time_point{}){}
+    ~ShellPhase(){if(value)*value=std::chrono::duration<double,std::milli>(Clock::now()-start).count();}
+};
 constexpr double grid = 10000.;       // integer units per mm
 constexpr double envelopeError = .02; // mm in the actual station plane
 clip::Point64 integerPoint(QPointF point) {
@@ -81,6 +92,18 @@ clip::Path64 sectionOfShell(const ShellTriangle& tri,double x,double t) {
     return band;
 }
 
+// Limit the extra work across concurrent previews, including requests that
+// are still winding down after cancellation. Leave cores for the editor.
+std::atomic_uint unionWorkers{0};
+bool reserveUnionWorker() {
+    static const unsigned limit=std::clamp(std::thread::hardware_concurrency(),2u,5u)-2;
+    auto active=unionWorkers.load(std::memory_order_relaxed);
+    while(active<limit) {
+        if(unionWorkers.compare_exchange_weak(active,active+1,std::memory_order_relaxed))return true;
+    }
+    return false;
+}
+
 clip::Paths64 unionBands(clip::Paths64 bands,const std::atomic_bool& cancelled) {
     constexpr size_t batchSize=64;
     if(cancelled.load())return {};
@@ -88,8 +111,27 @@ clip::Paths64 unionBands(clip::Paths64 bands,const std::atomic_bool& cancelled) 
         const auto middle=bands.begin()+bands.size()/2;
         clip::Paths64 second(std::make_move_iterator(middle),std::make_move_iterator(bands.end()));
         bands.erase(middle,bands.end());
+        // Preserve the split tree and left-before-right input to Clipper.
+        // Changing the partition can change rounded intersections.
+        const auto mergeRight=[&]{return unionBands(std::move(second),cancelled);};
+        std::future<clip::Paths64> worker;
+        if(second.size()>=2*batchSize && !cancelled.load() && reserveUnionWorker()) {
+            try {
+                worker=std::async(std::launch::async,[&]{
+                    const auto release=qScopeGuard([]{unionWorkers.fetch_sub(1,std::memory_order_relaxed);});
+                    return mergeRight();
+                });
+            } catch(const std::system_error&) {
+                unionWorkers.fetch_sub(1,std::memory_order_relaxed);
+            } catch(...) {
+                unionWorkers.fetch_sub(1,std::memory_order_relaxed);
+                throw;
+            }
+        }
+        // The async future joins on destruction, including if the left merge
+        // throws, before its referenced inputs go out of scope.
         bands=unionBands(std::move(bands),cancelled);
-        auto right=unionBands(std::move(second),cancelled);
+        auto right=worker.valid()?worker.get():mergeRight();
         bands.insert(bands.end(),std::make_move_iterator(right.begin()),std::make_move_iterator(right.end()));
     }
     if(cancelled.load()||bands.size()<=1)return bands;
@@ -102,23 +144,32 @@ clip::Paths64 unionBands(clip::Paths64 bands,const std::atomic_bool& cancelled) 
 }
 }
 QList<QPolygonF> innerContours(const QList<QPolygonF>& exterior,const std::vector<ShellTriangle>& nearby,
-                              double x,double t,const std::atomic_bool& cancelled) {
+                              double x,double t,const std::atomic_bool& cancelled,ShellContourProfile* profile) {
     clip::Paths64 bands;
     size_t vertices=0;
-    for(const auto& triangle:nearby) {
-        if(cancelled.load()) return {};
-        auto band=sectionOfShell(triangle,x,t);
-        const double area=clip::Area(band);
-        if(area==0) continue;
-        if(area<0) std::reverse(band.begin(),band.end());
-        vertices+=band.size();
-        if(vertices>5000000) throw std::runtime_error("该站板厚包络过于复杂，请单独选择船壳图层。");
-        bands.push_back(std::move(band));
+    if(profile)profile->triangles=nearby.size();
+    {
+        ShellPhase elapsed(profile?&profile->envelopeMs:nullptr);
+        for(const auto& triangle:nearby) {
+            if(cancelled.load()) return {};
+            auto band=sectionOfShell(triangle,x,t);
+            const double area=clip::Area(band);
+            if(area==0) continue;
+            if(area<0) std::reverse(band.begin(),band.end());
+            vertices+=band.size();
+            if(vertices>5000000) throw std::runtime_error("该站板厚包络过于复杂，请单独选择船壳图层。");
+            bands.push_back(std::move(band));
+        }
     }
+    if(profile){profile->bands=bands.size();profile->vertices=vertices;}
     // Merge groups of overlapping bands before the final difference. With a
     // large thickness, a single sweep over all interior edges is expensive.
-    if(bands.size()>128)bands=unionBands(std::move(bands),cancelled);
+    {
+        ShellPhase elapsed(profile?&profile->unionMs:nullptr);
+        if(bands.size()>128)bands=unionBands(std::move(bands),cancelled);
+    }
     if(cancelled.load())return {};
+    ShellPhase elapsed(profile?&profile->differenceMs:nullptr);
     QList<QPolygonF> result;
     for(const auto& outline:exterior) {
         clip::Path64 subject;

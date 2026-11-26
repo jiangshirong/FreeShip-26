@@ -1,3 +1,4 @@
+#include "calculation_layers.h"
 #include "app/ui_language.h"
 #include "preferences_store.h"
 #include "hydro_dialog.h"
@@ -540,7 +541,9 @@ HydroDialog::HydroDialog(ModelSession& session,const QString& mode,const QJsonOb
         scroll->setWidget(content);applyStudioScrollbars(scroll);
         return scroll;
     };
-    const auto withCriteria=[](QWidget* inputs,QVBoxLayout*& criteriaHost){
+    layerChoice_=new CalculationLayers(CalculationLayers::Hydro);
+    layerChoice_->setModel(m);
+    const auto withCriteria=[](QWidget* inputs,QVBoxLayout*& criteriaHost,QVBoxLayout*& layerHost,bool criteria){
         auto* canvas=new QWidget;
         auto* columns=new QHBoxLayout(canvas);
         columns->setContentsMargins(0,0,0,0);columns->setSpacing(14);
@@ -548,12 +551,17 @@ HydroDialog::HydroDialog(ModelSession& session,const QString& mode,const QJsonOb
         auto* slot=new QWidget;
         criteriaHost=new QVBoxLayout(slot);
         criteriaHost->setContentsMargins(0,0,0,0);
-        columns->addWidget(slot,1);
+        if(criteria)columns->addWidget(slot,1);else{slot->setParent(canvas);slot->hide();}
+        auto* right=new QWidget;right->setMinimumWidth(180);right->setMaximumWidth(270);
+        layerHost=new QVBoxLayout(right);layerHost->setContentsMargins(0,0,0,0);
+        columns->addWidget(right,1);
         return canvas;
     };
     configureStudioNumericForms(parameters);
     QVBoxLayout *manualCriteria=nullptr,*namedCriteria=nullptr;
-    parameterPage_=parameterScroll(loadingParameters?withCriteria(parameters,manualCriteria):parameters);
+    QVBoxLayout *manualLayers=nullptr,*namedLayers=nullptr;
+    parameterPage_=parameterScroll(withCriteria(parameters,manualCriteria,manualLayers,bool(loadingParameters)));
+    manualLayers->addWidget(layerChoice_);
     parameterPage_->setProperty("calculation_page","general");
     tabs_=loadingParameters?new StabilityTabs:new QTabWidget;layout->addWidget(tabs_,1);
     tabs_->addTab(parameterPage_,uiText("参数表"));
@@ -564,9 +572,10 @@ HydroDialog::HydroDialog(ModelSession& session,const QString& mode,const QJsonOb
         loadingPage_->setProperty("calculation_page","loading_parameters");
         auto* namedLayout=new QVBoxLayout(loadingPage_);
         namedLayout->setContentsMargins(0,0,0,0);
-        namedLayout->addWidget(parameterScroll(withCriteria(loadingParameters,namedCriteria)),1);
+        namedLayout->addWidget(parameterScroll(withCriteria(loadingParameters,namedCriteria,namedLayers,true)),1);
         namedLayout->addWidget(loadingNotice_);
         auto* criterionHost=useLoadingBook_?namedCriteria:manualCriteria;
+        (useLoadingBook_?namedLayers:manualLayers)->addWidget(layerChoice_);
         criterionHost->addWidget(loadingEditor_->criteriaPanel());
         loadingEditor_->criteriaPanel()->show();
         tabs_->addTab(loadingPage_,uiText("参数表（装载工况）"));
@@ -652,7 +661,7 @@ HydroDialog::HydroDialog(ModelSession& session,const QString& mode,const QJsonOb
     status_=new StudioMessage(StudioMessageRole::Feedback);status_->enableMathNotation();status_->setObjectName("HydroStatus");layout->addWidget(status_);
     auto edited=[this]{if(!result_.isEmpty()&&!session_.busy())status_->setMessage(uiText("参数已更改，结果待更新。"),StudioMessageRole::Warning);};
     if(loadingPage_){
-        connect(tabs_,&QTabWidget::currentChanged,this,[this,left,loadingLayout,controlsPanel,manualCriteria,namedCriteria,edited](int index){
+        connect(tabs_,&QTabWidget::currentChanged,this,[this,left,loadingLayout,controlsPanel,manualCriteria,namedCriteria,manualLayers,namedLayers,edited](int index){
             auto* page=tabs_->widget(index);
             if(page!=parameterPage_&&page!=loadingPage_)return;
             const bool use=page==loadingPage_;
@@ -662,12 +671,17 @@ HydroDialog::HydroDialog(ModelSession& session,const QString& mode,const QJsonOb
             auto* target=use?loadingLayout:left;
             target->insertWidget(1,controlsPanel);
             controlsPanel->show();
+            (use?namedLayers:manualLayers)->addWidget(layerChoice_);layerChoice_->show();
             auto* criterionHost=use?namedCriteria:manualCriteria;
             criterionHost->addWidget(loadingEditor_->criteriaPanel());
             loadingEditor_->criteriaPanel()->show();
             refreshState();edited();
         });
     }
+    layerChoice_->changed=[this]{
+        if(!result_.isEmpty())status_->setMessage(uiText("参数已更改，结果待更新。"),StudioMessageRole::Warning);
+        refreshState();
+    };
     const auto watchFields=[this,edited](const QMap<QString,QWidget*>& fields,bool loading){
         const auto changed=[this,edited,loading]{
             if(useLoadingBook_!=loading)return;
@@ -782,7 +796,7 @@ QJsonObject HydroDialog::inputs()const{
     if(name.isEmpty())name=QFileInfo(session_.sourcePath()).completeBaseName();
     if(name.isEmpty())name=uiText("未命名船模");
     auto out=fieldValues(useLoadingBook_?loadingFields_:fields_);
-    out["mode"]=mode_;out["model_name"]=name;
+    out["mode"]=mode_;out["model_name"]=name;out["layer_ids"]=layerChoice_->selected();
     if(loadingPage_)out["use_loading_book"]=useLoadingBook_;
     if(useLoadingBook_)out["loading_book"]=loadingBook_;
     else if(!loadingBook_["criteria"].toArray().isEmpty())out["gz_criteria"]=loadingBook_["criteria"];
@@ -800,7 +814,7 @@ QJsonObject HydroDialog::savedInputs()const{
 }
 void HydroDialog::calculate(const QString& report){
     if(report.isEmpty()&&!refreshInputValidity())return;
-    try{auto request=report.isEmpty()?inputs():QJsonObject{{"mode","auxiliary"},{"report",report}};
+    try{auto request=report.isEmpty()?inputs():QJsonObject{{"mode","auxiliary"},{"report",report},{"layer_ids",layerChoice_->selected()}};
         if(report.isEmpty()&&mode_=="single")request["include_auxiliary"]=true;
         if(session_.calculateHydrostatics(request)){setProperty("hydro_finished",false);setProperty("hydro_cancelled",false);setProperty("hydro_error",QString{});status_->setMessage(uiText("正在计算…"),StudioMessageRole::Feedback,true);refreshState();}}
     catch(const std::exception& ex){showFailure(QString::fromUtf8(ex.what()));}
@@ -873,7 +887,7 @@ bool HydroDialog::refreshInputValidity(){
             }
         }
     }
-    return calculationInput::update(active,errors,hints,pending)&&!editingList&&(!loadingEditor_||loadingEditor_->criteriaValid());
+    return calculationInput::update(active,errors,hints,pending)&&!editingList&&(!loadingEditor_||loadingEditor_->criteriaValid())&&!layerChoice_->selected().isEmpty();
 }
 void HydroDialog::translateLoadingInputs(){
     static_cast<QCheckBox*>(fields_.value("free_trim"))->setText(uiText("求解自由纵倾平衡"));
@@ -917,6 +931,7 @@ void HydroDialog::refreshLoadingSummary(){
 }
 void HydroDialog::refreshState(){
     const bool busy=session_.busy();for(auto* w:fields_)w->setEnabled(!busy);
+    layerChoice_->setModel(session_.model());layerChoice_->setEnabled(!busy);
     for(auto* field:loadingFields_)field->setEnabled(!busy);
     if(loadingEditor_)loadingEditor_->setEnabled(!busy);
     run_->setEnabled(!busy&&refreshInputValidity());

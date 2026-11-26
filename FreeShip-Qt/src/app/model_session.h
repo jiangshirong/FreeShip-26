@@ -63,7 +63,7 @@ public:
     bool savePerformanceSettings(QJsonObject fields);
     bool recordingPerformanceParameters()const{return !pendingPerformance_.isEmpty();}
     void cancelPerformance();
-    bool developPlates();
+    bool developPlates(const QJsonValue& layerIds=QJsonValue::Undefined);
     bool cadPatches();
     void cancelCad();
     void cancelPlates();
@@ -150,6 +150,10 @@ private:
     void startProcess();
     void readOutput();
     void receive(const QJsonObject& response);
+    void submitQueuedMoveUndo(const QJsonObject& move,const QJsonObject& paths);
+    struct PendingMoveUndo;
+    void keepPreparedMoveForRedo(const PendingMoveUndo& pending);
+    void recoverRejectedMoveUndo(const QJsonObject& response);
     void completePerformance(const QJsonObject& data,bool defaults);
     void publishSnapshot(const QJsonObject& response,std::shared_ptr<PreparedSnapshot> prepared={});
     void completePublication();
@@ -218,6 +222,8 @@ private:
     std::shared_ptr<const Scene> batchHistoryScene_;
     QString batchHistoryDirection_;
     std::shared_ptr<const fs::ModelSnapshot> undoAfterMove_;
+    std::shared_ptr<PendingMoveUndo> pendingMoveUndo_;
+    QString moveUndoRejection_;
     QByteArray batchHistorySections_,batchHistorySurface_;
     QByteArray sectionDigest_,surfaceDigest_;
     bool drawingUnchanged_=false;

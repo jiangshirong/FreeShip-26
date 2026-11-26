@@ -44,6 +44,7 @@ public:
     QImage render(QSize logicalSize, qreal dpr, const QMatrix4x4& camera,
                   const HullLighting& lighting,const HullStyle& style={});
 private:
+    HullGpu();
     QOpenGLContext context_;
     QOffscreenSurface surface_;
     QOpenGLBuffer buffer_;

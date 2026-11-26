@@ -358,6 +358,18 @@ int main(int argc, char **argv) {
             ensure(readNames(grouped.document,encoding).contains(expected),"Auto-group suffix used raw ASCII in a different encoding");
             const auto assembled=editFaceTools(source,bindings,QJsonObject{{"method","modeling"},{"operation","assemble_faces"}});
             ensure(readNames(assembled.document,encoding)==QStringList{"Patch 1-1","Patch 1-2"},"Patch name encoding changed");
+            const QJsonArray expectedAssignments{QJsonArray{102},QJsonArray{101}};
+            for (const auto *operation:{"auto_group_layers","assemble_faces"}) {
+                const auto selected=editFaceTools(source,bindings,QJsonObject{
+                    {"method","modeling"},{"operation",operation},{"ids",QJsonArray{101}}});
+                ensure(selected.changed&&selected.bindings["layer_faces"].toArray()==expectedAssignments,
+                       "Face grouping changed the layer of an unselected face");
+                bool rejected=false;
+                try {
+                    editFaceTools(source,bindings,QJsonObject{{"method","modeling"},{"operation",operation},{"ids",QJsonArray{}}});
+                } catch (const std::invalid_argument &) { rejected=true; }
+                ensure(rejected,"Face grouping accepted an empty explicit selection");
+            }
         }
         return QJsonObject{};
     });

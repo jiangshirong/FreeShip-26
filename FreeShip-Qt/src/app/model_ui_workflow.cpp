@@ -313,7 +313,7 @@ void MainWindow::modelUiStep(){
             if(!name)throw std::runtime_error("Double-click did not open the layer-name editor");
             qobject_cast<QDoubleSpinBox*>(layers_->fieldEditor("thickness"))->setValue(8.5);
             layers_->fieldEditor("color")->setProperty("colorValue",0x112233);
-            qobject_cast<QCheckBox*>(layers_->fieldEditor("developable"))->click();
+            workflowCase("layer-calculation-flags-removed",!layers_->fieldEditor("developable")&&!layers_->fieldEditor("use_in_hydrostatics"));
             name->setText(QStringLiteral("Edited test layer"));
             workflowStage_=23;key(name,Qt::Key_Return);
             if(!session_.busy())throw std::runtime_error("Inline rename did not start a revision");
@@ -326,7 +326,7 @@ void MainWindow::modelUiStep(){
             const auto* edited=m->layer(editingLayer_);
             workflowCase("queued-properties-and-rename-stay-with-original-layer-after-switch",
                 edited&&edited->name=="Edited test layer"&&edited->thickness==8.5&&edited->color==0x112233
-                &&edited->developable&&m->layers.front().thickness==10);
+                &&m->layers.front().thickness==10);
             layers_->setSelectedLayerId(editingLayer_);
             auto* eye=layerButton("visibility",editingLayer_);
             if(!eye||!eye->isEnabled())throw std::runtime_error("Layer visibility button unavailable");

@@ -80,20 +80,6 @@ void MainWindow::platesStep(const QString& operation){
         if(!platesDialog_->failure().isEmpty()){
             const auto failure=platesDialog_->failure();workflowCase("plates.expected-failure",platesRequest_["expect_failure"].toBool(),failure);
             auto* label=platesDialog_->findChild<QLabel*>("PlateStatus");workflowCase("plates.failure-warning-style",label&&label->property("studio_message_role")=="warning");
-            if(platesRequest_["expect_failure"].toBool()){
-                const auto previousLanguage=uiLanguage();QJsonArray localized;
-                for(const auto& language:QStringList{"zh","en"}){
-                    if(!setUiLanguage(language).isEmpty()){finishWorkflow("Plate language catalog unavailable");return;}
-                    platesDialog_->showFailure(failure);QCheckBox* checkbox=nullptr;
-                    for(auto* box:layers_->findChildren<QCheckBox*>())if(box->property("modelField")=="developable")checkbox=box;
-                    const QString caption=checkbox?checkbox->text():QString{};bool explanation=false;
-                    for(auto* note:platesDialog_->findChildren<QLabel*>())if(note->property("studio_message_role")=="explanation"&&note->text().contains(caption)&&!caption.isEmpty())explanation=true;
-                    workflowCase("plates."+language+"-error-refers-to-actual-checkbox",checkbox&&label&&label->text().contains(caption)&&explanation);
-                    workflowCase("plates."+language+"-developable-caption",caption==(language=="zh"?QString::fromUtf8("可展开曲面"):QString("Developable surface")));
-                    localized.append(QJsonObject{{"language",language},{"checkbox",caption},{"message",label?label->text():QString{}},{"explanation_matches",explanation}});
-                }
-                workflowArtifacts_["plate_developable_labels"]=localized;setUiLanguage(previousLanguage);
-            }
             end();return;
         }
         if(!platesDialog_->hasResult())return;

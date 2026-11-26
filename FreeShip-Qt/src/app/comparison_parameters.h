@@ -25,6 +25,8 @@ private:
     void invalidate();
     void calculate();
     QVector<ComparisonHull> hulls_;
+    struct Solvers;
+    std::shared_ptr<Solvers> solvers_;
     std::shared_ptr<QTemporaryDir> job_;
     QComboBox* mode_;
     QDoubleSpinBox *draft_,*trim_,*density_,*mass_,*lcg_,*tcg_,*kg_;

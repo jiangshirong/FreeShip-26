@@ -419,8 +419,7 @@ void MainWindow::editingStep(const QString& method) {
             editor<QPlainTextEdit>(dialog.fieldEditor("comment"))->setPlainText("Qt M2 comment");
             editor<QDoubleSpinBox>(dialog.fieldEditor("draft"))->setValue(model->draft + 0.125);
             if (!dialog.validationError().isEmpty()) throw std::runtime_error(dialog.validationError().toUtf8().constData());
-            dialog.accept();
-            workflowCase("project_dialog_accepted", dialog.result() == QDialog::Accepted);
+            workflowCase("project_dialog_validated", dialog.validationError().isEmpty());
             if (!session_.updateProject(dialog.changes())) throw std::runtime_error("Project command was not submitted");
             break;
         }
@@ -435,7 +434,6 @@ void MainWindow::editingStep(const QString& method) {
             const int next = units->findData(model->units == "metric" ? "imperial" : "metric");
             if (next < 0) throw std::runtime_error("Missing alternate unit choice");
             units->setCurrentIndex(next);
-            dialog.accept();
             workflowCase("units_only_patch", dialog.changes().size() == 1 && dialog.changes().contains("units"));
             if (!session_.updateProject(dialog.changes())) throw std::runtime_error("Unit command was not submitted");
             break;

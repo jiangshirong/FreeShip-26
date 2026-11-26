@@ -47,7 +47,7 @@ void PreferencesStore::save(const QJsonObject &values){
     observed_=hash(bytes);envelope_=root;
 }
 QJsonObject nativePreferenceOptions(const QJsonObject &values){
-    QJsonObject out;for(const QString key:{"theme","fbm_encoding","undo_memory_mb","graphic"})if(values.contains(key))out[key]=values[key];return out;
+    QJsonObject out;for(const QString key:{"theme","fbm_encoding","undo_memory_mb","graphic","underwater_display"})if(values.contains(key))out[key]=values[key];return out;
 }
 QJsonObject effectivePreferences(const QJsonObject &values){
     auto result=fs::document::preferenceValues(resources(),nativePreferenceOptions(values));
@@ -56,7 +56,7 @@ QJsonObject effectivePreferences(const QJsonObject &values){
     // explicitly selected. The old bridge's unused control colors were not the
     // colors actually painted by the Qt renderer.
     if(!values.contains("theme")){
-        const QJsonObject displayed{{"viewportcolor",0xecefe8},{"edgecolor",0x7d8566},{"creaseedgecolor",0x2243a0},
+        const QJsonObject displayed{{"viewportcolor",0xecefe8},{"edgecolor",0x7d8566},
             {"regularpointcolor",0x555d31},{"creasepointcolor",0x324d62},{"cornerpointcolor",0x3a4152},
             {"dartpointcolor",0xff00ff},{"leakpointcolor",0x99ff00},{"selectcolor",0x1965e0},{"normalcolor",0xc0c0c0}};
         const auto explicitFields=values["graphic"].toObject();

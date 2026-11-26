@@ -140,7 +140,8 @@ int main(int argc, char** argv) {
     // save may temporarily hide every window without ending the event loop.
     std::unique_ptr<MainWindow> probe;
     std::unique_ptr<DocumentWorkspace> workspace;
-    if(!verification || arguments.value(1)=="--verify-document-windows"){
+    if(!verification || arguments.value(1)=="--verify-document-windows"||arguments.value(1)=="--verify-exchange-tabs"||
+       arguments.value(1)=="--verify-startup-tabs"){
         app.setQuitOnLastWindowClosed(false);workspace=std::make_unique<DocumentWorkspace>(!verification);
     }else probe=std::make_unique<MainWindow>(nullptr,false);
     MainWindow& window=workspace ? *workspace->addDocument() : *probe;
@@ -185,7 +186,7 @@ int main(int argc, char** argv) {
         QTimer::singleShot(0, &window, [&] { window.verifyViewport(arguments[2], arguments[3]); });
     } else if (arguments.size() == 4 && arguments[1] == "--verify-shading") {
         QTimer::singleShot(0, &window, [&] { window.verifyShading(arguments[2], arguments[3]); });
-    } else if (arguments.size() == 4 && arguments[1] == "--verify-startup") {
+    } else if (arguments.size() == 4 && (arguments[1] == "--verify-startup" || arguments[1] == "--verify-startup-tabs")) {
         QTimer::singleShot(0, &window, [&] { window.verifyStartup(arguments[2], arguments[3]); });
     } else if (arguments.size() == 4 && arguments[1] == "--verify-display") {
         QTimer::singleShot(0, &window, [&] { window.verifyDisplay(arguments[2], arguments[3]); });
@@ -197,7 +198,7 @@ int main(int argc, char** argv) {
         QTimer::singleShot(0, &window, [&] { window.verifyPerformance(arguments[2], arguments[3]); });
     } else if (arguments.size() == 4 && arguments[1] == "--verify-plates") {
         QTimer::singleShot(0, &window, [&] { window.verifyPlates(arguments[2], arguments[3]); });
-    } else if (arguments.size() == 4 && arguments[1] == "--verify-exchange") {
+    } else if (arguments.size() == 4 && (arguments[1] == "--verify-exchange" || arguments[1] == "--verify-exchange-tabs")) {
         QTimer::singleShot(0, &window, [&] { window.verifyExchange(arguments[2], arguments[3]); });
     } else if (arguments.size() == 4 && arguments[1] == "--verify-modeling") {
         QTimer::singleShot(0, &window, [&] { window.verifyModeling(arguments[2], arguments[3]); });

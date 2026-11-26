@@ -40,6 +40,7 @@ struct Layer {
     QByteArray name,fields;
     int stableId=0;
     std::vector<int> faces;
+    bool keepWhenEmpty=false;
     bool visible() const {return fields[8]!=0;}
     int internalId() const {return qFromLittleEndian<qint32>(fields.constData());}
 };
@@ -59,6 +60,22 @@ class Faces {
     int edge(int a,int b) const {return edgeLookup_.value(pairKey(a,b),-1);}
     bool crease(int e) const {return net_.edges[size_t(e)].crease;}
     int layerOf(int f) const {return std::max(0,net_.faces[size_t(f)].layer);}
+    std::vector<int> selectedFaces(const QJsonObject &request) {
+        if (!request["ids"].isArray()) bad("Invalid face selection");
+        const auto ids=request["ids"].toArray();
+        if (ids.isEmpty() || ids.size()>100000) bad("Invalid face selection size");
+        std::vector<int> selected;
+        selected.reserve(size_t(ids.size()));
+        QSet<int> seen;
+        for (auto value:ids) {
+            const int id=integer(value);
+            if (!faceLookup_.contains(id) || seen.contains(id)) bad("Unknown or duplicate face ID");
+            seen.insert(id);
+            selected.push_back(faceLookup_[id]);
+        }
+        for (auto &layer:layers_) layer.keepWhenEmpty=layer.faces.empty();
+        return selected;
+    }
     QByteArray faceBlock(const std::vector<int> *mapping=nullptr) const {
         Reader reader{source_.blockBytes("control_faces")};const int count=reader.readInt();
         if (size_t(count)!=net_.faces.size()) bad("Face block cardinality changed");
@@ -100,10 +117,11 @@ class Faces {
         int count=0;for (int f:pointFaces_[size_t(point)]) if (component[size_t(f)]) ++count;
         return count==2;
     }
-    int faceAt(int a,int b,int c,int d) const {
+    int faceAt(int a,int b,int c,int d,const std::vector<bool> &component,const std::vector<bool> &remaining) const {
         for (int f:pointFaces_[size_t(a)]) {
+            if (!component[size_t(f)] || remaining[size_t(f)]) continue;
             const auto &p=net_.faces[size_t(f)].points;
-            if (contains(p,b) && contains(p,c) && contains(p,d)) return f;
+            if (p.size()==4 && contains(p,b) && contains(p,c) && contains(p,d)) return f;
         }
         return -1;
     }
@@ -210,7 +228,7 @@ class Faces {
                 if (p.size()!=4) {result.push_back({chosen});continue;}
                 Grid grid{{p[1],p[0]},{p[2],p[3]}};grow(grid,remaining,check,left);std::vector<int> patch;
                 for (size_t row=1;row<grid.size();++row) for (size_t col=1;col<grid[row].size();++col) {
-                    const int f=faceAt(grid[row-1][col],grid[row-1][col-1],grid[row][col-1],grid[row][col]);
+                    const int f=faceAt(grid[row-1][col],grid[row-1][col-1],grid[row][col-1],grid[row][col],check,remaining);
                     if (f>=0) patch.push_back(f);
                 }
                 result.push_back(std::move(patch));
@@ -256,9 +274,7 @@ public:
     void autoGroup(const QJsonObject &request) {
         std::vector<bool> chosen(net_.faces.size(),false),visited(net_.faces.size(),false);
         if (request.contains("ids")) {
-            if (!request["ids"].isArray()) bad("Invalid face selection");
-            const auto ids=request["ids"].toArray();if (ids.isEmpty() || ids.size()>100000) bad("Invalid face selection size");QSet<int> seen;
-            for (auto value:ids) {const int id=integer(value);if (!faceLookup_.contains(id) || seen.contains(id)) bad("Unknown or duplicate face ID");seen.insert(id);chosen[size_t(faceLookup_[id])]=true;}
+            for (int face:selectedFaces(request)) chosen[size_t(face)]=true;
         } else for (size_t i=0;i<net_.faces.size();++i) chosen[i]=layers_[size_t(layerOf(int(i)))].visible();
         for (int seed:stableOrder_) if (chosen[size_t(seed)] && !visited[size_t(seed)]) {
             std::vector<int> queue{seed};visited[size_t(seed)]=true;
@@ -272,13 +288,24 @@ public:
             const int target=addLayer(original,encodeFbmText(name+' '+QString::number(faceIds_[size_t(seed)]),encoding));for (int f:queue) move(f,target);changed_=true;
         }
     }
-    void assemble() {
+    void assemble(const QJsonObject &request) {
         const size_t count=layers_.size();
+        const bool hasSelection=request.contains("ids");
+        std::vector<bool> selected(hasSelection ? net_.faces.size() : 0,false);
+        if (hasSelection) for (int face:selectedFaces(request)) selected[size_t(face)]=true;
         // Reuse global-index bitmaps and clear only the touched component.
         // Many isolated faces/layers must not repeatedly clear O(all faces).
         std::vector<bool> todo(net_.faces.size(),false),check(net_.faces.size(),false),remaining(net_.faces.size(),false);
-        for (size_t layer=0;layer<count;++layer) if (layers_[layer].visible()) {
-            const auto assembled=patches(layers_[layer].faces,todo,check,remaining);
+        std::vector<int> filtered;
+        for (size_t layer=0;layer<count;++layer) if (hasSelection || layers_[layer].visible()) {
+            const auto &layerFaces=layers_[layer].faces;
+            if (hasSelection) {
+                filtered.clear();
+                for (int face:layerFaces) if (selected[size_t(face)]) filtered.push_back(face);
+            }
+            const auto &input=hasSelection ? filtered : layerFaces;
+            if (input.empty()) continue;
+            const auto assembled=patches(input,todo,check,remaining);
             for (size_t i=0;i<assembled.size();++i) {
                 int target=-1;
                 for (int f:assembled[i]) {if (target<0) target=addLayer(layerOf(f),encodeFbmText("Patch "+QString::number(layer+1)+'-'+QString::number(i+1),bindings_["fbm_encoding"].toString()));move(f,target);changed_=true;}
@@ -309,7 +336,7 @@ public:
         if (!changed_) return {source_,bindings_,false};
         if (geometry_) return {source_.withBlocks({{"control_faces",faceBlock()}},true),bindings_,true};
         std::vector<int> mapping(layers_.size(),-1);QByteArray layerBytes;QJsonArray layerIds,layerFaces;int count=0;
-        for (size_t i=0;i<layers_.size();++i) if (!layers_[i].faces.empty()) mapping[i]=count++;
+        for (size_t i=0;i<layers_.size();++i) if (!layers_[i].faces.empty()||layers_[i].keepWhenEmpty) mapping[i]=count++;
         if (!count) bad("Face grouping produced no nonempty layers");
         put(layerBytes,count);
         for (size_t i=0;i<layers_.size();++i) if (mapping[i]>=0) {
@@ -330,6 +357,6 @@ bool nativeFaceToolsCommand(const QJsonObject &request) {
 TopologyEdit editFaceTools(const Fbm &source,const QJsonObject &bindings,const QJsonObject &request) {
     if (!nativeFaceToolsCommand(request)) bad("Unsupported native face tool");
     Faces faces(source,bindings);const auto operation=request["operation"].toString();
-    if (operation=="auto_group_layers") faces.autoGroup(request);else if (operation=="assemble_faces") faces.assemble();else faces.repair();return faces.finish();
+    if (operation=="auto_group_layers") faces.autoGroup(request);else if (operation=="assemble_faces") faces.assemble(request);else faces.repair();return faces.finish();
 }
 }

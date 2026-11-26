@@ -3,6 +3,7 @@
 #include "core/model_snapshot.h"
 #include "core/station_sheets.h"
 #include <QDialog>
+#include <QHash>
 class QListWidget;
 class QComboBox;
 class QCheckBox;
@@ -20,10 +21,17 @@ public:
                           QString fileBase,const QSet<int>& selected,QWidget* parent);
     ~StationTemplateDialog() override;
 private:
+    struct StationTable {
+        QWidget* panel=nullptr;
+        RowActionsTable* rows=nullptr;
+        QToolButton* add=nullptr;
+        int nextOrder=0;
+    };
     void schedule(bool animate=false);
     void generate();
-    void insertKitStation(int row,double x,int order,bool fromModel);
-    void updateKitStationActions();
+    void createStationTable(StationTable& table,const QString& name,const QList<const fs::Section*>& stations);
+    void insertStation(StationTable& table,int row,double x,int order,bool fromModel);
+    void updateStationActions(StationTable& table);
     void updateStationWarnings();
     void refresh(bool animate=false);
     void configurePdf();
@@ -37,11 +45,9 @@ private:
     QComboBox *type_,*layer_;
     QDoubleSpinBox* thickness_;
     QCheckBox* cap_;
-    QWidget *kitSettings_,*kitStationPanel_;
-    RowActionsTable* kitStations_;
+    QWidget* kitSettings_;
+    StationTable mould_,kit_;
     QDoubleSpinBox* stock_;
-    QToolButton* addKitStation_;
-    int nextKitSectionOrder_=0;
     StationPreview* preview_;
     StationStatus* message_;
     QPushButton *pdf_,*dxf_;
@@ -49,7 +55,10 @@ private:
     fs::frames::PdfScale pdfScale_;
     QTimer* timer_;
     std::shared_ptr<std::atomic_bool> cancel_;
+    struct GeometryCache;
+    std::shared_ptr<GeometryCache> geometryCache_;
     QList<fs::frames::Station> sheets_;
+    QHash<int,QString> stationWarnings_;
     bool pending_=true,writing_=false,animatePreview_=false;
 };
 

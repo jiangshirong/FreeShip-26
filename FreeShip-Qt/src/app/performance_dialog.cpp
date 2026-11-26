@@ -1,3 +1,4 @@
+#include "calculation_layers.h"
 #include "feedback_text.h"
 #include "core/platform_process.h"
 #include "app/ui_language.h"
@@ -460,7 +461,18 @@ PerformanceDialog::PerformanceDialog(ModelSession& session,const QJsonObject& sc
     cancel_=button(uiText("取消计算"),"cancel");cancel_->setIcon(studioIcon("Cancel"));toolbar->addWidget(run_);toolbar->addWidget(cancel_);
     left->setMinimumWidth(300);split->addWidget(left);
     split->addWidget(additional_);split->setChildrenCollapsible(false);
-    split->setSizes({560,640});
+    if(method_=="addmass"){
+        layerChoice_=new CalculationLayers(CalculationLayers::Hydro);
+        layerChoice_->setModel(session_.model());layerChoice_->setMinimumWidth(180);layerChoice_->setMaximumWidth(270);
+        split->addWidget(layerChoice_);
+        split->setStretchFactor(0,1);
+        split->setSizes({980,0,240});
+        layerChoice_->changed=[this]{
+            if(preview_)preview_->invalidate();
+            if(!result_.isEmpty())status_->setMessage(uiText("参数已更改，结果待更新。"),StudioMessageRole::Warning);
+            refreshState();
+        };
+    }else split->setSizes({560,640});
     if(method_=="propeller4"){
         databaseButton_=button(uiText("数据库查看器…"),"database_viewer");form->addWidget(databaseButton_);
         connect(databaseButton_,&QPushButton::clicked,this,&PerformanceDialog::openDatabaseViewer);
@@ -507,7 +519,7 @@ PerformanceDialog::PerformanceDialog(ModelSession& session,const QJsonObject& sc
     setParameters(schema);
     if(method_=="maneuver")tabs_->setTabVisible(tabs_->indexOf(tablePage),false);
     if(method_=="maneuver"||method_=="addmass")tabs_->setTabVisible(tabs_->indexOf(plot_),false);
-    if(method_=="addmass"){preview_=new GridPreviewPanel(session_,"addmass",[this]{auto values=inputs()["values"].toObject();values["object_type"]=values["object_type"].toInt()+1;values["panel_type"]=values["panel_type"].toInt()+1;return values;});addPage(preview_,"preview","型值预览");
+    if(method_=="addmass"){preview_=new GridPreviewPanel(session_,"addmass",[this]{const auto request=inputs();auto values=request["values"].toObject();values["layer_ids"]=request["layer_ids"];values["object_type"]=values["object_type"].toInt()+1;values["panel_type"]=values["panel_type"].toInt()+1;return values;});addPage(preview_,"preview","型值预览");
         for(auto* field:fields_){if(auto* n=qobject_cast<QDoubleSpinBox*>(field))connect(n,qOverload<double>(&QDoubleSpinBox::valueChanged),preview_,[this]{preview_->invalidate();});else if(auto* c=qobject_cast<QComboBox*>(field))connect(c,qOverload<int>(&QComboBox::currentIndexChanged),preview_,[this]{preview_->invalidate();});}}
     refreshState();
 }
@@ -556,7 +568,7 @@ void PerformanceDialog::setParameters(const QJsonObject& schema){
     for(auto v:schema["fields"].toArray()){
         const auto f=v.toObject();const auto key=f["key"].toString(),group=f["group"].toString();
         const bool extra=pageMap[key]=="additional";const auto groupKey=(extra?"additional/":"general/")+group;
-        if(!groups.contains(groupKey)){auto* box=new QGroupBox(uiText(group));auto* rows=new QGridLayout(box);rows->setVerticalSpacing(12);rows->setHorizontalSpacing(16);rows->setColumnStretch(0,1);groups[groupKey]=rows;
+        if(!groups.contains(groupKey)){auto* box=new QGroupBox(uiText(group));auto* rows=new QGridLayout(box);rows->setVerticalSpacing(12);rows->setHorizontalSpacing(16);rows->setColumnStretch(method_=="addmass"?3:0,1);groups[groupKey]=rows;
             if(extra){additionalColumnLayouts_[0]->insertWidget(additionalColumnLayouts_[0]->count()-1,box);additionalGroups_.append(box);hasAdditional=true;}else layout->addWidget(box);}
         QWidget* widget=nullptr;const auto kind=f["kind"].toString();
         if(kind=="number"){
@@ -698,13 +710,15 @@ QJsonObject PerformanceDialog::inputs()const{
     QJsonObject values;for(auto it=fields_.begin();it!=fields_.end();++it){auto* w=it.value();if(auto* n=qobject_cast<QDoubleSpinBox*>(w))values[it.key()]=n->property("performance_exact_value").toDouble();else if(auto* n=qobject_cast<QCheckBox*>(w))values[it.key()]=n->isChecked();else if(auto* n=qobject_cast<QComboBox*>(w))values[it.key()]=n->currentIndex();}
     QJsonObject request{{"calculator",method_},{"values",values},{"solver_directory",solverDirectory_.trimmed()},{"report_language",uiLanguage()}};
     if(developmentSample_)request["development_sample"]=true;
+    if(layerChoice_)request["layer_ids"]=layerChoice_->selected();
     return request;
 }
 void PerformanceDialog::calculate(){
-    if(!refreshInputValidity())return;
+    if(!refreshInputValidity()||(layerChoice_&&layerChoice_->selected().isEmpty()))return;
     if(session_.calculatePerformance(inputs())){setProperty("performance_finished",false);setProperty("performance_error",QString{});status_->setMessage(uiText("正在计算…"),StudioMessageRole::Feedback,true);refreshState();}
 }
 bool PerformanceDialog::refreshInputValidity(){
+    const bool layersValid=!layerChoice_||!layerChoice_->selected().isEmpty();
     QMap<QString,double> numbers;
     QMap<QString,QString> errors;
     QMap<QString,QString> hints;
@@ -753,10 +767,12 @@ bool PerformanceDialog::refreshInputValidity(){
         }else ++it;
     }
     const bool valid=calculationInput::update(fields_,errors,hints,pending);
-    return valid&&!choicesPending_;
+    return layersValid&&valid&&!choicesPending_;
 }
 void PerformanceDialog::refreshState(){
-    const bool busy=session_.busy()||preparingResult_;parameters_->setEnabled(!busy);additional_->setEnabled(!busy);run_->setEnabled(!busy&&refreshInputValidity());cancel_->setEnabled(busy&&!session_.recordingPerformanceParameters());
+    const bool busy=session_.busy()||preparingResult_;
+    if(layerChoice_){layerChoice_->setModel(session_.model());layerChoice_->setEnabled(!busy);}
+    parameters_->setEnabled(!busy);additional_->setEnabled(!busy);run_->setEnabled(!busy&&refreshInputValidity());cancel_->setEnabled(busy&&!session_.recordingPerformanceParameters());
     if(databaseButton_)databaseButton_->setEnabled(!busy&&!databaseViewer_);
     if(sampleButton_)sampleButton_->setEnabled(!busy&&!choicesPending_);
     for(auto* b:exports_)b->setEnabled(!busy&&!result_.isEmpty());
@@ -996,7 +1012,7 @@ QString PerformanceDialog::exportReport(const QString& path,const QString& forma
 }
 QString PerformanceDialog::saveParameters(const QString& path)const{
     if(session_.busy())return uiText("请等待当前操作结束。");
-    auto data=inputs();data.remove("solver_directory");data.remove("report_language");data.remove("development_sample");data["format"]="FreeShipPerformanceParameters";data["version"]=1;data["units"]=session_.model()->units;
+    auto data=inputs();data.remove("layer_ids");data.remove("solver_directory");data.remove("report_language");data.remove("development_sample");data["format"]="FreeShipPerformanceParameters";data["version"]=1;data["units"]=session_.model()->units;
     if(method_=="acceleration")data["engine_inertia_convention"]=QJsonObject{{"unit","kg*m^2"},{"basis","per_propeller_shaft"}};
     QSaveFile f(path);const auto bytes=QJsonDocument(data).toJson();if(!f.open(QIODevice::WriteOnly)||f.write(bytes)!=bytes.size()||!f.commit())return uiText("无法保存参数文件。");return {};
 }

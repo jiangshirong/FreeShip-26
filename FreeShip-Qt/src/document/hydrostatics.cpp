@@ -3,6 +3,7 @@
 // and FreeSubdivisionLayer. The bounded equilibrium solver follows the 2026
 // HydrostaticsEngine adapter, not the original unchecked Balance routine.
 #include "hydrostatics.h"
+#include "core/layer_scope.h"
 #include "core/loading_cases.h"
 #include "geometry_input.h"
 #include "fbm_text.h"
@@ -171,7 +172,15 @@ struct Hydrostatics::Impl {
     std::map<QByteArray,QJsonArray> crossResults;
     std::map<std::pair<std::array<float,4>,std::array<float,4>>,double> auxiliaryAreas;
     std::vector<std::vector<size_t>> layerFaces;
-    explicit Impl(const Fbm &source,const QJsonObject &bindings):settings(source),input(documentGeometry(source)),surface(input),mesh(surface.level(input.desiredLevel)),index(input,mesh) {
+    bool scoped=false;
+    static native_geometry::GeometryInput scopedGeometry(const Fbm& source,const QJsonObject& bindings,const QJsonValue& ids){
+        auto geometry=documentGeometry(source);
+        const auto keys=bindings["layers"].toArray();
+        fs::setHydroLayerFlags(geometry,keys,fs::readLayerScope(ids,keys));
+        return geometry;
+    }
+    explicit Impl(const Fbm &source,const QJsonObject &bindings,const QJsonValue& selection)
+        :settings(source),input(scopedGeometry(source,bindings,selection)),surface(input),mesh(surface.level(input.desiredLevel)),index(input,mesh),scoped(!selection.isUndefined()) {
         meshSource=meshInputs(source);meshOrder=orderInputs(bindings);
         encoding=bindings.value("fbm_encoding").toString("cp1252");
         layerNamePrefix=bindings.value("layer_name_prefix").toString("Layer");
@@ -891,6 +900,7 @@ struct Hydrostatics::Impl {
             "# layer child area weight x y z xmin xmax (coordinates: model origin)"};
         QJsonArray layers;size_t detailCount=0;qsizetype textSize=0;
         if(includeWeights)for(size_t l=0;l<input.layers.size();++l){
+            if(scoped&&!input.layers[l].useInHydrostatics)continue;
             const auto& layer=input.layers[l];QJsonArray entries;double totalArea=0,totalWeight=0,cx=0,cy=0,cz=0;
             for(const auto f:layerFaces[l]){const auto& face=mesh.faces[f];job.check();
                 if(++detailCount>250000)bad("重量明细超过 250000 个面的大小上限，未截断输出；主静水力报告仍可查看。");
@@ -1052,10 +1062,10 @@ struct Hydrostatics::Impl {
     }
 };
 
-Hydrostatics::Hydrostatics(const Fbm &source,const QJsonObject &bindings) {QElapsedTimer timer;timer.start();impl_=std::make_unique<Impl>(source,bindings);impl_->buildMs=timer.nsecsElapsed()/1e6;}
+Hydrostatics::Hydrostatics(const Fbm &source,const QJsonObject &bindings,const QJsonValue& ids) {QElapsedTimer timer;timer.start();impl_=std::make_unique<Impl>(source,bindings,ids);impl_->buildMs=timer.nsecsElapsed()/1e6;}
 Hydrostatics::~Hydrostatics()=default;
-QJsonObject Hydrostatics::comparison(const Fbm& source,const ComparisonConditions& in,const QString& cancelFile) {
-    Impl h(source,{});
+QJsonObject Hydrostatics::comparison(const ComparisonConditions& in,const QString& cancelFile) {
+    auto& h=*impl_;
     auto& s=h.settings.geometry;
     const double unit=s.imperial?.3048:1.;
     const double massUnit=s.imperial?1016.0469088:1000.;
@@ -1063,6 +1073,7 @@ QJsonObject Hydrostatics::comparison(const Fbm& source,const ComparisonCondition
     try {
         Job job(cancelFile);
         if(h.faces.empty() || s.length<=0)bad("没有有效的船体几何。");
+        job.check();
         double ymin=h.minimum.y,ymax=h.maximum.y;
         for(const auto f:h.faces)if(h.input.layers[h.mesh.faces[f].layer].symmetric)
             for(const auto p:h.mesh.faces[f].points){
@@ -1071,9 +1082,14 @@ QJsonObject Hydrostatics::comparison(const Fbm& source,const ComparisonCondition
             }
         values["length_m"]=(double(h.maximum.x)-h.minimum.x)*unit;
         values["beam_m"]=(ymax-ymin)*unit;
-        s.appendage=1;
-        s.actualCoefficients=true;
-        s.density=float(in.densityKgM3*unit*unit*unit/(s.imperial?.45359237:1000.));
+        const auto density=float(in.densityKgM3*unit*unit*unit/(s.imperial?.45359237:1000.));
+        if(s.density!=density||s.appendage!=1||!s.actualCoefficients){
+            h.singleResults.clear();
+            h.balanceVolumes.clear();
+            s.appendage=1;
+            s.actualCoefficients=true;
+            s.density=density;
+        }
         h.prepare(job);
         double draft=in.draftM/unit,trim=in.trimM/unit,heel=0;
         auto draftAt=[&](const QJsonArray& plane,double x){

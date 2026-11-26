@@ -11,6 +11,7 @@ class DocumentWorkspace final : public QMainWindow {
 public:
     explicit DocumentWorkspace(bool persistent);
     MainWindow* addDocument();
+    void addDocument(MainWindow* doc);
     MainWindow* active() const;
     void activate(MainWindow* doc);
     void accepted(MainWindow* doc);

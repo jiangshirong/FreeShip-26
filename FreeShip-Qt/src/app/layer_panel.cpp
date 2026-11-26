@@ -1,4 +1,5 @@
 #include "studio_ui.h"
+#include "studio_help_hint.h"
 #include "app/ui_language.h"
 #include "layer_panel.h"
 #include <QCheckBox>
@@ -8,6 +9,7 @@
 #include <QDynamicPropertyChangeEvent>
 #include <QFormLayout>
 #include <QHash>
+#include <QHBoxLayout>
 #include <QLabel>
 #include <QLineEdit>
 #include <QListWidget>
@@ -35,7 +37,8 @@
 QDialog* createLayerPropertiesDialog(QWidget* parent,LayerPanel*& panel){
     auto* dialog=new QDialog(parent);
     setStudioWindowIcon(dialog,"Layers");
-    dialog->setWindowTitle(uiText("图层属性"));
+    dialog->setWindowTitle(uiText("图层","collection"));
+    bindUiText(dialog,"windowTitle","图层","collection");
     dialog->resize(800,727);
     dialog->setMinimumSize(650,480);
     auto* layout=new QVBoxLayout(dialog);
@@ -357,16 +360,29 @@ LayerPanel::LayerPanel(QWidget* parent) : QWidget(parent), state_(std::make_uniq
     connect(s.transparency,&QSpinBox::valueChanged,alphaSlider,&QSlider::setValue);
     connect(s.transparency,&QSpinBox::valueChanged,this,[this]{if(!state_->alphaSlider->isSliderDown())submitTransparency();});
     connect(alphaSlider,&QSlider::sliderReleased,this,&LayerPanel::submitTransparency);
-    auto addCheck = [&](const QString& field, const QString& text) {
-        auto* box = new QCheckBox(text); bind(field, box); form->addRow(box);
+    auto addCheck = [&](const QString& field, const QString& text, const QString& tip) {
+        auto* row = new QWidget;
+        auto* layout = new QHBoxLayout(row);
+        layout->setContentsMargins(0, 0, 0, 0);
+        layout->setSpacing(6);
+        auto* box = new QCheckBox(row);
+        bind(field, box);
+        bindUiText(box, "text", text);
+        bindUiText(box, "accessibleDescription", tip);
+        auto* hint = new StudioHelpHint(row, 22);
+        hint->setObjectName("layer_" + field + "_help");
+        hint->setFocusPolicy(Qt::NoFocus);
+        bindUiText(hint, "accessibleName", text);
+        bindUiText(hint, "toolTip", tip);
+        layout->addWidget(box);
+        layout->addWidget(hint);
+        layout->addStretch();
+        form->addRow(row);
         connect(box, &QCheckBox::toggled, this, [this,field](bool checked) { submitProperty(field,checked); });
         return box;
     };
-    s.symmetric = addCheck("symmetric", uiText("关于中纵剖面对称"));
-    addCheck("developable", uiText("可展开曲面"));
-    addCheck("use_in_hydrostatics", uiText("参与静水力计算"));
-    addCheck("use_for_intersections", uiText("生成交线"));
-    addCheck("show_in_linesplan", uiText("在型线图中显示"));
+    s.symmetric = addCheck("symmetric", "对称", "以船体中纵剖面为镜面补出另一舷");
+    addCheck("use_for_intersections", "参与剖切", "参与生成横剖线、纵剖线、水线和斜剖线");
     s.controlNet=new QCheckBox(uiText("显示此图层的控制网格"));bind("control_net_visible",s.controlNet);form->addRow(s.controlNet);
     connect(s.controlNet,&QCheckBox::toggled,this,[this](bool show){auto& s=*state_;if(s.loading||!s.selected)return;if(show)s.hiddenControl.remove(s.selected);else s.hiddenControl.insert(s.selected);if(onControlNetChanged)onControlNetChanged(s.selected,show);});
     for (const auto& field : {QString("thickness"), QString("material_density")}) {
@@ -669,7 +685,7 @@ void LayerPanel::loadSelected() {
     const auto percent=qRound((255-values["alpha_blend"].toInt(255))*100./255);
     s.transparency->setValue(percent);s.alphaSlider->setValue(percent);
     s.controlNet->setChecked(!s.hiddenControl.contains(s.selected));
-    for (const auto key : {"symmetric", "developable", "use_in_hydrostatics", "use_for_intersections", "show_in_linesplan"})
+    for (const auto key : {"symmetric", "use_for_intersections"})
         static_cast<QCheckBox*>(s.editors[key])->setChecked(values[key].toBool());
     const bool imperial = s.snapshot && s.snapshot->units == "imperial";
     for (auto it = s.numbers.begin(); it != s.numbers.end(); ++it) {

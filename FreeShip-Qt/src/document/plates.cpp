@@ -2,6 +2,7 @@
 // IntersectPlane and FreeSubdivisionLayer.Unroll (Martijn van Engeland, 2005;
 // Timoshenko V.F., Mark Malakanov). See docs/migration/NATIVE-PLATES.md.
 #include "plates.h"
+#include "core/layer_scope.h"
 #include "geometry_input.h"
 #include "fbm_text.h"
 #include "native/sections.h"
@@ -31,10 +32,22 @@ constexpr Index Missing=std::numeric_limits<Index>::max();
 Key key(Index a,Index b) { return std::minmax(a,b); }
 struct Job {
     QString cancel; QElapsedTimer timer;
-    explicit Job(QString path):cancel(std::move(path)) { timer.start();check(); }
+    QJsonObject* timings;
+    explicit Job(QString path,QJsonObject* profile):cancel(std::move(path)),timings(profile) { timer.start();check(); }
     void check() const {
         if(QFileInfo::exists(cancel))bad("板材展开已取消。");
         if(timer.elapsed()>90000)bad("板材展开超过 90 秒，已停止；请分图层展开。");
+    }
+};
+struct PlateStage {
+    const Job& job;
+    const char* name;
+    qint64 start;
+    PlateStage(const Job& job,const char* name)
+        :job(job),name(name),start(job.timings ? job.timer.nsecsElapsed() : 0) {}
+    ~PlateStage() {
+        if(job.timings)
+            (*job.timings)[name]=job.timings->value(name).toDouble()+(job.timer.nsecsElapsed()-start)/1e6;
     }
 };
 double finite(double x) { if(!std::isfinite(x))bad("展开结果不是有限数，请检查曲面。");return x; }
@@ -110,7 +123,9 @@ struct Style {
             Read r{source.blockBytes("project_settings")};r.string();r.string();r.real();r.real();draft=r.real();
             r.flag();r.real();r.real();shade=r.flag();underwater=r.integer();units=r.integer();
         }
-        underwater=rgb(underwater);
+        const auto underwaterDisplay=bindings["presentation_context"].toObject()["underwater_display"].toObject();
+        shade=underwaterDisplay["shade"].toBool(shade);
+        underwater=rgb(underwaterDisplay["color"].toInt(underwater));
         int group=0;
         for(const char *name:{"stations","buttocks","waterlines","diagonals"}) {
             const auto style=context["sections"].toArray().at(group++).toObject();
@@ -181,6 +196,7 @@ struct Patch {
         }
     }
     Trial process(Index seed,Job &job) const {
+        PlateStage measure(job,"unroll_trials_ms");
         Trial t;t.uv.resize(original.size());std::vector<bool> done(original.size()),visited(faces.size());
         bool first=true,orientation=false;
         auto triangle=[&](Index a,Index b,Index c,Index face) {
@@ -245,17 +261,21 @@ struct Patch {
             if(trial.errorFace!=Missing && seeds.size()<25 && std::find(seeds.begin(),seeds.end(),trial.errorFace)==seeds.end())seeds.push_back(trial.errorFace);
             if(i==0 || trial.normalized<best.normalized)best=std::move(trial);
         }
-        rawBounds();float opt=0,bestArea=0;
-        for(int i=0;i<=180;++i) {
-            if((i&15)==0)job.check();
-            rotation(float(i)/2);auto [a,b]=extents();const float area=(b.x-a.x)*(b.y-a.y);
-            if(i==0 || area<bestArea) {bestArea=area;opt=angle;}
+        {
+            PlateStage measure(job,"rotation_search_ms");
+            rawBounds();float opt=0,bestArea=0;
+            for(int i=0;i<=180;++i) {
+                if((i&15)==0)job.check();
+                rotation(float(i)/2);auto [a,b]=extents();const float area=(b.x-a.x)*(b.y-a.y);
+                if(i==0 || area<bestArea) {bestArea=area;opt=angle;}
+            }
+            rotation(opt);auto [a,b]=extents();if(b.x-a.x<b.y-a.y)rotation(angle-90);
         }
-        rotation(opt);auto [a,b]=extents();if(b.x-a.x<b.y-a.y)rotation(angle-90);
         if(symmetric)joinMirror();
         diagnose(job);
     }
     void diagnose(Job& job) {
+        PlateStage measure(job,"overlap_diagnostics_ms");
         using namespace Clipper2Lib;
         const double span=std::max(double(hi.x)-lo.x,double(hi.y)-lo.y);
         const double scale=span>0?1e8/span:1.;
@@ -288,10 +308,13 @@ struct Patch {
         }
         flipped=positiveArea>=negativeArea?negative:positive;
         if(triangles.empty())return;
-        Clipper64 clip;
-        clip.AddSubject(triangles);
         Paths64 covered;
-        if(!clip.Execute(ClipType::Union,FillRule::NonZero,covered))bad("无法检查展开板片重叠。");
+        {
+            PlateStage measureUnion(job,"overlap_union_ms");
+            Clipper64 clip;
+            clip.AddSubject(triangles);
+            if(!clip.Execute(ClipType::Union,FillRule::NonZero,covered))bad("无法检查展开板片重叠。");
+        }
         job.check();
         const double difference=total-std::abs(Area(covered));
         if(difference>std::max(16.,total*1e-7))overlapArea=finite(difference/(scale*scale));
@@ -354,6 +377,7 @@ struct Patch {
         QJsonArray out;for(auto &rows:output)for(auto row:rows)out.append(row);return out;
     }
     QJsonObject snapshot(const QString &name,const QJsonObject &nameFields,int color,int dxf,const Style &style,Job &job) const {
+        PlateStage measure(job,"result_and_section_curves_ms");
         QJsonArray pts,orig,es,fs,corners,boundaryIds,worstFaces;const auto n=original.size();
         for(int side=0;side<=int(joined);++side) {
             const auto offset=side*n;
@@ -387,9 +411,16 @@ struct Patch {
 };
 }
 
-QJsonObject developPlates(const Fbm &source,const QJsonObject &bindings,const QJsonObject &context,const QString &cancelFile) {
-    Job job(cancelFile);const auto input=documentGeometry(source);Style style(source,bindings,context);
-    SubdivisionSurface surface(input);const auto &mesh=surface.level(input.desiredLevel);job.check();
+QJsonObject developPlates(const Fbm &source,const QJsonObject &bindings,const QJsonObject &context,const QString &cancelFile,QJsonObject* timings,const QJsonValue& layerIds) {
+    Job job(cancelFile,timings);const auto input=documentGeometry(source);Style style(source,bindings,context);
+    const auto layerKeys=bindings["layers"].toArray();
+    const auto selected=fs::readLayerScope(layerIds,layerKeys);
+    SubdivisionSurface surface(input);
+    const auto &mesh=[&]() -> const SubdivisionLevel& {
+        PlateStage measure(job,"subdivision_ms");
+        return surface.level(input.desiredLevel);
+    }();
+    job.check();
     std::map<Key,Index> meshEdges;for(Index e=0;e<mesh.edges.size();++e)meshEdges.emplace(key(mesh.edges[e].points[0],mesh.edges[e].points[1]),e);
     const auto regions=plateRegions(input);
     std::vector<std::vector<Index>> children(input.faces.size());
@@ -399,7 +430,7 @@ QJsonObject developPlates(const Fbm &source,const QJsonObject &bindings,const QJ
     const auto orders=bindings["layer_faces"].toArray(),ids=bindings["faces"].toArray();std::map<qint64,Index> byId;
     for(qsizetype i=0;i<ids.size();++i)byId.emplace(ids[i].toInteger(),Index(i));
     for(Index l=0;l<input.layers.size();++l) {
-        const auto &layer=input.layers[l];if(!layer.developable)continue;job.check();
+        const auto &layer=input.layers[l];if(selected?!selected->contains(quint64(layerKeys.at(qsizetype(l)).toInteger())):!layer.developable)continue;job.check();
         std::vector<Index> order;
         if(l<Index(orders.size()))for(auto id:orders[qsizetype(l)].toArray())order.push_back(byId.at(id.toInteger()));
         else for(Index f=0;f<input.faces.size();++f)if(input.faces[f].layer==l)order.push_back(f);
@@ -428,7 +459,7 @@ QJsonObject developPlates(const Fbm &source,const QJsonObject &bindings,const QJ
             } else plates.append(patch.snapshot(name,nameFields,color,dxf,style,job));
         }
     }
-    if(plates.isEmpty())bad("没有可展开的板片。请在图层属性中勾选“可展开曲面”，并确认图层含有曲面。");
+    if(plates.isEmpty())bad("没有可展开的板片。请确认所选图层含有曲面。");
     job.check();return {{"schema",1},{"units",style.units},{"waterline",finite(float(style.draft+keel))},
         {"underwater_color",style.underwater},{"shade_submerged",style.shade},{"plates",plates},{"analysis_engine","cpp-plates"},{"calculation_ms",job.timer.nsecsElapsed()/1e6}};
 }

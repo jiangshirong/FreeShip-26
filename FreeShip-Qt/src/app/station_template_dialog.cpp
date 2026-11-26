@@ -10,6 +10,7 @@
 #include "render/label_layout.h"
 #include <QCheckBox>
 #include <QComboBox>
+#include <QCryptographicHash>
 #include <QDialogButtonBox>
 #include <QDoubleSpinBox>
 #include <QFileDialog>
@@ -18,6 +19,7 @@
 #include <QHeaderView>
 #include <QHash>
 #include <QHBoxLayout>
+#include <QJsonArray>
 #include <QJsonDocument>
 #include <QLabel>
 #include <QListView>
@@ -38,6 +40,7 @@
 #include <algorithm>
 #include <charconv>
 #include <cmath>
+#include <mutex>
 #include <stdexcept>
 
 namespace frames=fs::frames;
@@ -68,7 +71,7 @@ private:
     QString shownTip_;
 };
 
-constexpr int maximumKitStations=200;
+constexpr int maximumStations=200;
 constexpr double maximumStationCoordinate=1e8;
 constexpr int modelStationRole=Qt::UserRole+1;
 class StationCoordinateEditor final : public QStyledItemDelegate {
@@ -81,7 +84,7 @@ public:
     }
     QWidget* createEditor(QWidget* parent,const QStyleOptionViewItem&,const QModelIndex&) const override {
         auto* editor=new QDoubleSpinBox(parent);
-        editor->setObjectName("KitStationCoordinate");
+        editor->setObjectName("StationCoordinate");
         editor->setRange(-maximumStationCoordinate,maximumStationCoordinate);
         editor->setDecimals(2);
         editor->setFrame(false);
@@ -101,7 +104,7 @@ public:
     QTableWidgetItem* clone()const override{return new StationCoordinateItem(*this);}
 };
 
-struct TaskResult { QList<frames::Station> sheets; QString error; };
+struct TaskResult { QList<frames::Station> sheets; QString error; QHash<int,QString> stationWarnings; };
 template<typename Work,typename Done>
 void background(QObject* owner,Work work,Done done) {
     auto promise=std::make_shared<QPromise<TaskResult>>();
@@ -118,6 +121,30 @@ void background(QObject* owner,Work work,Done done) {
     });
 }
 }
+
+
+// All entry points in an export window are tied to the same model revision.
+struct StationTemplateDialog::GeometryCache {
+    struct StationPosition {
+        int order;
+        double x;
+        bool fromModel;
+        bool operator==(const StationPosition& other) const {
+            return order==other.order&&x==other.x&&fromModel==other.fromModel;
+        }
+    };
+    struct Cut {
+        frames::Options options;
+        QList<StationPosition> positions;
+        QList<frames::Station> sheets;
+    };
+    std::mutex mutex;
+    std::optional<fs::native_geometry::DocumentInput> input;
+    int layer=-1;
+    bool shell=false;
+    std::unique_ptr<frames::StationGeometry> geometry;
+    QList<Cut> recentCuts;
+};
 
 class StationStatus final : public QLabel {
 public:
@@ -379,7 +406,7 @@ StationTemplateDialog::StationTemplateDialog(std::shared_ptr<const fs::ModelSnap
     auto* root=new QVBoxLayout(this);
     auto* settings=new QHBoxLayout;root->addLayout(settings);
     type_=new QComboBox;type_->setObjectName("FrameContourType");
-    addUiItem(type_,"船体横剖线");addUiItem(type_,"造模样板轮廓");addUiItem(type_,"插接模架");
+    addUiItem(type_,"船体横剖线");addUiItem(type_,"造模样板");addUiItem(type_,"插接模架");
     settings->addWidget(type_);
     settings->addWidget(new QLabel(uiText("图层")));
     layer_=new QComboBox;layer_->setObjectName("FrameLayer");addUiItem(layer_,"参与剖切的图层",-1);
@@ -394,7 +421,6 @@ StationTemplateDialog::StationTemplateDialog(std::shared_ptr<const fs::ModelSnap
     auto* kit=new QHBoxLayout(kitSettings_);
     kit->setContentsMargins(0,0,0,0);
     root->addWidget(kitSettings_);
-    const double unit=model_->units=="imperial"?304.8:1000.;
     kit->addWidget(new QLabel(uiText("模架板厚 (mm)")));
     stock_=new QDoubleSpinBox;
     stock_->setObjectName("KitStock");
@@ -409,7 +435,7 @@ StationTemplateDialog::StationTemplateDialog(std::shared_ptr<const fs::ModelSnap
     QList<const fs::Section*> modelStations;
     for(const auto& s:model_->sections) if(s.kind==1) {
         modelStations.append(&s);
-        nextKitSectionOrder_=std::max(nextKitSectionOrder_,s.index+1);
+        kit_.nextOrder=std::max(kit_.nextOrder,s.index+1);
         // FBM station positions have single precision. Display their shortest
         // round-tripping decimal so 2.9 m is also recognisable in the station list.
         char digits[48];
@@ -422,50 +448,23 @@ StationTemplateDialog::StationTemplateDialog(std::shared_ptr<const fs::ModelSnap
         if(checked && first<0) first=stations_->count()-1;
     }
     stations_->setCurrentRow(first);
-    kitStationPanel_=new QWidget;
-    kitStationPanel_->setMaximumWidth(310);
-    auto* stationLayout=new QVBoxLayout(kitStationPanel_);
-    stationLayout->setContentsMargins(0,0,0,0);
-    kitStations_=new RowActionsTable(2,true);
-    kitStations_->setObjectName("KitStations");
-    const auto stationHeaders=[this]{
-        kitStations_->setHorizontalHeaderLabels({uiText("站"),QStringLiteral("X (mm)")});
-        kitStations_->horizontalHeaderItem(0)->setTextAlignment(Qt::AlignLeft|Qt::AlignVCenter);
-    };
-    stationHeaders();bindUiRefresh(kitStations_,stationHeaders);
-    kitStations_->verticalHeader()->hide();
-    kitStations_->setSelectionMode(QAbstractItemView::SingleSelection);
-    kitStations_->setSelectionBehavior(QAbstractItemView::SelectItems);
-    kitStations_->horizontalHeader()->setHighlightSections(false);
-    kitStations_->setEditTriggers(QAbstractItemView::EditKeyPressed|QAbstractItemView::AnyKeyPressed);
-    kitStations_->setItemDelegateForColumn(1,new StationCoordinateEditor(kitStations_));
-    addKitStation_=kitStations_->addHeaderButton("添加站位");
-    addKitStation_->setObjectName("KitAddStation");
-    applyStudioScrollbars(kitStations_);
-    configureStudioDataTable(kitStations_);
-    auto* kitHeader=kitStations_->horizontalHeader();
-    const auto fitStationPanel=[this,kitHeader]{
-        const int scrollbar=kitStations_->verticalScrollBar()->maximum()>0?
-            kitStations_->verticalScrollBar()->sizeHint().width():0;
-        const int width=std::clamp(kitHeader->length()+2*kitStations_->frameWidth()+scrollbar,100,310);
-        if(kitStationPanel_->width()!=width)kitStationPanel_->setFixedWidth(width);
-    };
-    connect(kitHeader,&QHeaderView::sectionResized,kitStationPanel_,fitStationPanel);
-    connect(kitStations_->verticalScrollBar(),&QScrollBar::rangeChanged,kitStationPanel_,fitStationPanel);
-    stationLayout->addWidget(kitStations_,1);
     std::stable_sort(modelStations.begin(),modelStations.end(),[](const auto* a,const auto* b){
         return a->distance<b->distance;
     });
+    QList<const fs::Section*> mouldStations;
     for(const auto* station:modelStations)
-        insertKitStation(kitStations_->rowCount(),station->distance*unit,station->index,true);
-    updateKitStationActions();
-    if(kitStations_->rowCount()>0)kitStations_->setCurrentCell(0,1);
-    middle->addWidget(kitStationPanel_);
+        if(selected.isEmpty()||selected.contains(station->index))mouldStations.append(station);
+    mould_.nextOrder=kit_.nextOrder;
+    createStationTable(mould_,QStringLiteral("Mould"),mouldStations);
+    createStationTable(kit_,QStringLiteral("Kit"),modelStations);
+    middle->addWidget(mould_.panel);
+    middle->addWidget(kit_.panel);
     auto updateType=[this,thicknessLabel]{
         const int mode=type_->currentIndex();
         const bool kit=mode==2;
-        stations_->setVisible(!kit);
-        kitStationPanel_->setVisible(kit);
+        stations_->setVisible(mode==0);
+        mould_.panel->setVisible(mode==1);
+        kit_.panel->setVisible(kit);
         kitSettings_->setVisible(kit);
         thicknessLabel->setVisible(mode!=0);thickness_->setVisible(mode!=0);cap_->setVisible(mode!=0);
     };
@@ -491,40 +490,78 @@ StationTemplateDialog::StationTemplateDialog(std::shared_ptr<const fs::ModelSnap
     connect(thickness_,&QDoubleSpinBox::valueChanged,this,[this]{schedule(true);});
     connect(cap_,&QCheckBox::toggled,this,[this]{schedule(true);});
     connect(stock_,&QDoubleSpinBox::valueChanged,this,[this]{schedule(true);});
-    connect(kitStations_,&QTableWidget::itemChanged,this,[this]{schedule();});
-    connect(kitStations_,&QTableWidget::currentCellChanged,this,[this]{refresh();});
-    connect(kitStations_,&QTableWidget::cellClicked,this,[this](int row,int column){
-        auto* item=kitStations_->item(row,column);
-        if(item && item->flags().testFlag(Qt::ItemIsEditable))kitStations_->editItem(item);
-    });
-    connect(addKitStation_,&QToolButton::clicked,this,[this,unit]{
-        const int row=kitStations_->currentRow()+1;
-        const auto xAt=[this](int i){return kitStations_->item(i,1)->data(Qt::EditRole).toDouble();};
-        const double left=row>0?xAt(row-1):model_->minimum.x*unit;
-        const double right=row<kitStations_->rowCount()?xAt(row):model_->maximum.x*unit;
-        {
-            const QSignalBlocker block(kitStations_);
-            insertKitStation(row,(left+right)/2,nextKitSectionOrder_++,false);
-            updateKitStationActions();
-        }
-        kitStations_->setCurrentCell(row,1);
-        kitStations_->editItem(kitStations_->item(row,1));
-        schedule();
-    });
     connect(pdf_,&QPushButton::clicked,this,&StationTemplateDialog::configurePdf);
-    bindUiRefresh(this,[this]{refresh();});
+    bindUiRefresh(this,[this]{updateStationWarnings();refresh();});
     connect(dxf_,&QPushButton::clicked,this,[this]{save(false);});
     schedule();
 }
 StationTemplateDialog::~StationTemplateDialog(){if(cancel_) cancel_->store(true);}
-void StationTemplateDialog::insertKitStation(int row,double x,int order,bool fromModel) {
-    kitStations_->insertRow(row);
+void StationTemplateDialog::createStationTable(StationTable& table,const QString& name,
+                                               const QList<const fs::Section*>& stations) {
+    table.panel=new QWidget;
+    auto* layout=new QVBoxLayout(table.panel);
+    layout->setContentsMargins(0,0,0,0);
+    auto* rows=table.rows=new RowActionsTable(3,true);
+    rows->setObjectName(name+QStringLiteral("Stations"));
+    const auto headers=[rows]{
+        rows->setHorizontalHeaderLabels({uiText("站"),QStringLiteral("X (mm)"),uiText("状态")});
+        rows->horizontalHeaderItem(0)->setTextAlignment(Qt::AlignLeft|Qt::AlignVCenter);
+    };
+    headers();bindUiRefresh(rows,headers);
+    rows->verticalHeader()->hide();
+    rows->setSelectionMode(QAbstractItemView::SingleSelection);
+    rows->setSelectionBehavior(QAbstractItemView::SelectItems);
+    rows->horizontalHeader()->setHighlightSections(false);
+    rows->setEditTriggers(QAbstractItemView::EditKeyPressed|QAbstractItemView::AnyKeyPressed);
+    rows->setItemDelegateForColumn(1,new StationCoordinateEditor(rows));
+    table.add=rows->addHeaderButton("添加站位");
+    table.add->setObjectName(name+QStringLiteral("AddStation"));
+    applyStudioScrollbars(rows);
+    configureStudioDataTable(rows);
+    auto* header=rows->horizontalHeader();
+    const auto fitPanel=[panel=table.panel,rows,header]{
+        const int scrollbar=rows->verticalScrollBar()->maximum()>0?rows->verticalScrollBar()->sizeHint().width():0;
+        const int width=std::clamp(header->length()+2*rows->frameWidth()+scrollbar,100,310);
+        if(panel->width()!=width)panel->setFixedWidth(width);
+    };
+    connect(header,&QHeaderView::sectionResized,table.panel,fitPanel);
+    connect(rows->verticalScrollBar(),&QScrollBar::rangeChanged,table.panel,fitPanel);
+    layout->addWidget(rows,1);
+    const double unit=model_->units=="imperial"?304.8:1000.;
+    for(const auto* station:stations)
+        insertStation(table,rows->rowCount(),station->distance*unit,station->index,true);
+    updateStationActions(table);
+    if(rows->rowCount()>0)rows->setCurrentCell(0,1);
+    connect(rows,&QTableWidget::itemChanged,this,[this](QTableWidgetItem* item){if(item->column()==1)schedule();});
+    connect(rows,&QTableWidget::currentCellChanged,this,[this]{refresh();});
+    connect(rows,&QTableWidget::cellClicked,this,[rows](int row,int column){
+        auto* item=rows->item(row,column);
+        if(item&&item->flags().testFlag(Qt::ItemIsEditable))rows->editItem(item);
+    });
+    connect(table.add,&QToolButton::clicked,this,[this,&table,rows,unit]{
+        const int row=rows->currentRow()+1;
+        const auto xAt=[rows](int i){return rows->item(i,1)->data(Qt::EditRole).toDouble();};
+        const double left=row>0?xAt(row-1):model_->minimum.x*unit;
+        const double right=row<rows->rowCount()?xAt(row):model_->maximum.x*unit;
+        {
+            const QSignalBlocker block(rows);
+            insertStation(table,row,(left+right)/2,table.nextOrder++,false);
+            updateStationActions(table);
+        }
+        rows->setCurrentCell(row,1);
+        rows->editItem(rows->item(row,1));
+        schedule();
+    });
+}
+void StationTemplateDialog::insertStation(StationTable& table,int row,double x,int order,bool fromModel) {
+    auto* rows=table.rows;
+    rows->insertRow(row);
     auto* number=new QTableWidgetItem(QString::number(order+1));
     number->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
     number->setTextAlignment(Qt::AlignCenter);
     number->setData(Qt::UserRole,order);
     number->setData(modelStationRole,fromModel);
-    kitStations_->setItem(row,0,number);
+    rows->setItem(row,0,number);
     auto* coordinate=new StationCoordinateItem;
     if(fromModel){
         coordinate->setFlags(coordinate->flags()&~Qt::ItemIsEditable);
@@ -534,122 +571,202 @@ void StationTemplateDialog::insertKitStation(int row,double x,int order,bool fro
     }
     coordinate->setData(Qt::EditRole,x);
     coordinate->setTextAlignment(Qt::AlignRight|Qt::AlignVCenter);
-    kitStations_->setItem(row,1,coordinate);
+    rows->setItem(row,1,coordinate);
+    auto* status=new QTableWidgetItem;
+    status->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
+    status->setTextAlignment(Qt::AlignCenter);
+    rows->setItem(row,2,status);
 }
-void StationTemplateDialog::updateKitStationActions() {
-    kitStations_->clearRowButtons();
-    const int count=kitStations_->rowCount();
+void StationTemplateDialog::updateStationActions(StationTable& table) {
+    auto* rows=table.rows;
+    rows->clearRowButtons();
+    const int count=rows->rowCount();
+    const QString name=rows->objectName().chopped(QStringLiteral("Stations").size());
     for(int row=0;row<count;++row){
-        auto* remove=RowActionsTable::actionButton("DeleteOne","删除站位",kitStations_->viewport());
-        remove->setObjectName("KitRemoveStation");
-        kitStations_->appendRowButton(remove);
-        connect(remove,&QToolButton::clicked,this,[this,row]{
+        auto* remove=RowActionsTable::actionButton("DeleteOne","删除站位",rows->viewport());
+        remove->setObjectName(name+QStringLiteral("RemoveStation"));
+        rows->appendRowButton(remove);
+        connect(remove,&QToolButton::clicked,this,[this,&table,rows,row]{
             {
-                const QSignalBlocker block(kitStations_);
-                kitStations_->removeRow(row);
-                updateKitStationActions();
+                const QSignalBlocker block(rows);
+                rows->removeRow(row);
+                updateStationActions(table);
             }
-            if(kitStations_->rowCount()>0)kitStations_->setCurrentCell(std::min(row,kitStations_->rowCount()-1),1);
+            if(rows->rowCount()>0)rows->setCurrentCell(std::min(row,rows->rowCount()-1),1);
             schedule();
         });
     }
-    kitStations_->placeButtons();
-    addKitStation_->setEnabled(count<maximumKitStations);
+    rows->placeButtons();
+    table.add->setEnabled(count<maximumStations);
 }
 void StationTemplateDialog::schedule(bool animate) {
     if(cancel_) cancel_->store(true);
-    cancel_=std::make_shared<std::atomic_bool>(false);sheets_.clear();error_.clear();pending_=true;
+    cancel_=std::make_shared<std::atomic_bool>(false);sheets_.clear();error_.clear();stationWarnings_.clear();pending_=true;
     animatePreview_=animate;
     updateStationWarnings();
     refresh();timer_->start(80);
 }
 void StationTemplateDialog::generate() {
     frames::Options options;
-    const bool kit=type_->currentIndex()==2;
-    if(!kit){
+    const int mode=type_->currentIndex();
+    const bool kit=mode==2;
+    const auto* rows=mode==0?nullptr:kit?kit_.rows:mould_.rows;
+    QList<GeometryCache::StationPosition> positions;
+    if(!rows){
         for(int i=0;i<stations_->count();++i) if(stations_->item(i)->checkState()==Qt::Checked)
             options.indices.insert(stations_->item(i)->data(Qt::UserRole).toInt());
-        if(options.indices.isEmpty()){pending_=false;refresh();return;}
-    }else if(kitStations_->rowCount()==0){
-        pending_=false;
-        refresh();
-        return;
-    }
-    options.layer=layer_->currentData().toInt();
-    options.thickness=type_->currentIndex()?thickness_->value():0;
-    options.closeSheer=cap_->isChecked();
-    struct KitStation { int order; double x; bool fromModel; };
-    QList<KitStation> positions;
-    bool ordered=true;
-    if(kit){
-        for(int row=0;row<kitStations_->rowCount();++row){
-            const auto* number=kitStations_->item(row,0);
-            const double x=kitStations_->item(row,1)->data(Qt::EditRole).toDouble();
-            if(!positions.isEmpty()&&x<=positions.back().x)ordered=false;
+    }else{
+        for(int row=0;row<rows->rowCount();++row){
+            const auto* number=rows->item(row,0);
             const int order=number->data(Qt::UserRole).toInt();
+            const double x=rows->item(row,1)->data(Qt::EditRole).toDouble();
             positions.append({order,x,number->data(modelStationRole).toBool()});
             options.indices.insert(order);
         }
     }
+    if(options.indices.isEmpty()){pending_=false;refresh();return;}
+    options.layer=layer_->currentData().toInt();
+    options.thickness=mode?thickness_->value():0;
+    options.closeSheer=cap_->isChecked();
+    options.measureShell=property("measure_station_shell").toBool();
     const auto token=cancel_;
-    background(this,[token,options,kit,positions,ordered,stock=stock_->value(),path=inputPath_,id=model_->documentId,revision=model_->revision,imperial=model_->units=="imperial"](TaskResult& result) {
-        QFile f(path);
-        if(!f.open(QIODevice::ReadOnly)||f.size()>256*1024*1024) throw std::runtime_error("无法读取当前船模几何。");
-        auto input=fs::native_geometry::DocumentInput::read(QJsonDocument::fromJson(f.readAll()).object());
-        if(input.documentId!=id || input.revision!=revision || input.imperial!=imperial)
-            throw std::runtime_error("船模版本已更改，请重新打开实尺图。");
-        if(kit){
-            QHash<int,fs::native_geometry::SectionInput> original;
-            for(const auto& section:input.sections)if(section.kind==1)original.insert(section.order,section);
-            input.sections.clear();
-            for(const auto& station:positions){
-                if(station.fromModel){
-                    const auto section=original.constFind(station.order);
-                    if(section==original.cend())throw std::runtime_error("所选横剖站已更改，请重新选择。");
-                    input.sections.push_back(section.value());
-                }else{
-                    const float x=float(station.x/(imperial?304.8:1000.));
-                    input.sections.push_back({1,station.order,fs::native_geometry::Plane(1,0,0,-x)});
+    if(!geometryCache_)geometryCache_=std::make_shared<GeometryCache>();
+    background(this,[token,options,kit,positions,stock=stock_->value(),cache=geometryCache_,
+                     path=inputPath_,id=model_->documentId,revision=model_->revision,
+                     imperial=model_->units=="imperial"](TaskResult& result) {
+        {
+            const std::lock_guard lock(cache->mutex);
+            if(token->load())return;
+            if(!cache->input){
+                QFile f(path);
+                if(!f.open(QIODevice::ReadOnly)||f.size()>256*1024*1024)
+                    throw std::runtime_error("无法读取当前船模几何。");
+                auto input=fs::native_geometry::DocumentInput::read(QJsonDocument::fromJson(f.readAll()).object());
+                if(input.documentId!=id || input.revision!=revision || input.imperial!=imperial)
+                    throw std::runtime_error("船模版本已更改，请重新打开实尺图。");
+                cache->input=std::move(input);
+            }
+            const auto& input=*cache->input;
+            const auto existing=std::find_if(cache->recentCuts.cbegin(),cache->recentCuts.cend(),
+                [&](const auto& cut){return cut.options==options&&cut.positions==positions;});
+            if(!options.measureShell&&existing!=cache->recentCuts.cend()){
+                result.sheets=existing->sheets;
+            }else{
+                const bool shell=options.thickness>0;
+                if(!cache->geometry||cache->layer!=options.layer||cache->shell!=shell){
+                    cache->geometry=std::make_unique<frames::StationGeometry>(input,options.layer,shell);
+                    cache->layer=options.layer;
+                    cache->shell=shell;
+                }
+                if(token->load())return;
+                std::vector<fs::native_geometry::SectionInput> customSections;
+                if(!positions.isEmpty()){
+                    QHash<int,fs::native_geometry::SectionInput> original;
+                    for(const auto& section:input.sections)if(section.kind==1)original.insert(section.order,section);
+                    for(const auto& station:positions){
+                        if(station.fromModel){
+                            const auto section=original.constFind(station.order);
+                            if(section==original.cend())throw std::runtime_error("所选横剖站已更改，请重新选择。");
+                            customSections.push_back(section.value());
+                        }else{
+                            const float x=float(station.x/(imperial?304.8:1000.));
+                            customSections.push_back({1,station.order,fs::native_geometry::Plane(1,0,0,-x)});
+                        }
+                    }
+                }
+                result.sheets=cache->geometry->cut(positions.isEmpty()?input.sections:customSections,options,*token);
+                if(!options.measureShell&&!token->load()){
+                    cache->recentCuts.prepend({options,positions,result.sheets});
+                    if(cache->recentCuts.size()>4)cache->recentCuts.removeLast();
                 }
             }
         }
-        result.sheets=frames::sectionTemplates(input,options,*token);
         if(!kit||token->load())return;
-        if(!ordered){
+        for(int i=1;i<positions.size();++i){
+            const auto& previous=positions[i-1];
+            const auto& current=positions[i];
+            if(current.x>previous.x)continue;
             result.error=QStringLiteral("站位 X 坐标必须从上到下依次增大。");
-            return;
+            result.stationWarnings.insert(previous.order+1,result.error);
+            result.stationWarnings.insert(current.order+1,result.error);
         }
+        if(!result.error.isEmpty())return;
         if(result.sheets.size()<2){
             result.error=QStringLiteral("至少需要两个站位。可用表头的加号添加站位。");
             return;
         }
         if(std::any_of(result.sheets.cbegin(),result.sheets.cend(),[](const auto& station){return !station.error.isEmpty();}))return;
-        result.sheets=frames::interlockFrames(result.sheets,stock);
-    },[this,token](TaskResult result){
+        try {
+            result.sheets=frames::interlockFrames(result.sheets,stock);
+        }catch(const frames::StationAssemblyError& e){
+            result.stationWarnings.insert(e.number,e.reason);
+            if(e.adjacent)result.stationWarnings.insert(e.adjacent,e.reason);
+        }
+    },[this,token,measure=options.measureShell](TaskResult result){
         if(token!=cancel_) return;
-        sheets_=std::move(result.sheets);error_=std::move(result.error);pending_=false;
+        if(measure){
+            const auto polygons=[](const QList<QPolygonF>& list){
+                QJsonArray output;
+                for(const auto& polygon:list){QJsonArray path;for(auto p:polygon)path.append(QJsonArray{p.x(),p.y()});output.append(path);}
+                return output;
+            };
+            QJsonArray sample;
+            for(const auto& s:result.sheets){
+                if(!s.shellProfile)continue;
+                const auto& p=*s.shellProfile;
+                const QJsonObject geometry{{"outline",polygons(s.outlines)},{"diagnostic",polygons(s.diagnosticOutlines)},
+                    {"shell",polygons(s.shellReference)},{"error",s.error}};
+                const auto fingerprint=QCryptographicHash::hash(QJsonDocument(geometry).toJson(QJsonDocument::Compact),QCryptographicHash::Sha256).toHex();
+                sample.append(QJsonObject{{"station",s.number},{"x",s.x},{"error",s.error},{"geometry_sha256",QString::fromLatin1(fingerprint)},
+                    {"triangles",double(p.triangles)},{"bands",double(p.bands)},{"vertices",double(p.vertices)},
+                    {"envelope_ms",p.envelopeMs},{"union_ms",p.unionMs},{"difference_ms",p.differenceMs}});
+            }
+            setProperty("station_shell_profile",sample);
+        }
+        sheets_=std::move(result.sheets);error_=std::move(result.error);
+        stationWarnings_=std::move(result.stationWarnings);pending_=false;
         updateStationWarnings();refresh(animatePreview_);
     });
 }
 void StationTemplateDialog::updateStationWarnings() {
-    const QSignalBlocker block(stations_);
-    QHash<int,QString> errors;
-    if(type_->currentIndex()!=2)
-        for(const auto& s:sheets_) if(!s.error.isEmpty()) errors.insert(s.number-1,uiText(s.error));
+    const int mode=type_->currentIndex();
+    auto warnings=stationWarnings_;
+    for(const auto& sheet:sheets_)
+        if(!sheet.error.isEmpty())warnings.insert(sheet.number,sheet.error);
     const auto icon=style()->standardIcon(QStyle::SP_MessageBoxWarning);
-    for(int i=0;i<stations_->count();++i) {
-        auto* item=stations_->item(i);
-        const auto reason=errors.value(item->data(Qt::UserRole).toInt());
-        if(item->toolTip()==reason) continue;
-        item->setToolTip(reason);item->setIcon(reason.isEmpty()?QIcon{}:icon);
+    {
+        const QSignalBlocker block(stations_);
+        for(int i=0;i<stations_->count();++i) {
+            auto* item=stations_->item(i);
+            const auto reason=mode==0?uiText(warnings.value(item->data(Qt::UserRole).toInt()+1)):QString{};
+            if(item->toolTip()==reason)continue;
+            item->setToolTip(reason);
+            item->setIcon(reason.isEmpty()?QIcon{}:icon);
+        }
+    }
+    for(auto* rows:{mould_.rows,kit_.rows}){
+        const QSignalBlocker block(rows);
+        for(int row=0;row<rows->rowCount();++row){
+            const int number=rows->item(row,0)->data(Qt::UserRole).toInt()+1;
+            auto* status=rows->item(row,2);
+            const auto reason=warnings.value(number);
+            const bool active=(mode==1&&rows==mould_.rows)||(mode==2&&rows==kit_.rows);
+            const auto tip=active&&!reason.isEmpty()?uiText(reason):QString{};
+            if(status->toolTip()==tip)continue;
+            status->setToolTip(tip);
+            status->setData(Qt::AccessibleTextRole,tip);
+            status->setIcon(tip.isEmpty()?QIcon{}:icon);
+        }
     }
 }
 void StationTemplateDialog::refresh(bool animate) {
-    const auto* row=stations_->currentItem();
-    const bool kit=type_->currentIndex()==2;
-    const auto* kitNumber=kitStations_->item(kitStations_->currentRow(),0);
-    const int current=kit?(kitNumber?kitNumber->data(Qt::UserRole).toInt()+1:0):
-                      (row?row->data(Qt::UserRole).toInt()+1:0);
+    const int mode=type_->currentIndex();
+    const bool kit=mode==2;
+    const auto* rows=mode==0?nullptr:kit?kit_.rows:mould_.rows;
+    const auto* row=rows?rows->item(rows->currentRow(),0):nullptr;
+    const auto* listed=stations_->currentItem();
+    const int current=rows?(row?row->data(Qt::UserRole).toInt()+1:0):
+        (listed?listed->data(Qt::UserRole).toInt()+1:0);
     const frames::Station *shown=nullptr,*spine=nullptr,*failed=nullptr;
     for(const auto& s:sheets_) {
         if(s.number==current) shown=&s;
@@ -657,7 +774,7 @@ void StationTemplateDialog::refresh(bool animate) {
         if(!s.error.isEmpty() && (!failed || s.number==current)) failed=&s;
     }
     if(!pending_)preview_->display(shown,spine,animate);
-    const bool valid=!pending_&&!sheets_.isEmpty()&&!failed&&error_.isEmpty();
+    const bool valid=!pending_&&!sheets_.isEmpty()&&!failed&&error_.isEmpty()&&stationWarnings_.isEmpty();
     const bool ready=valid&&!writing_;
     const bool wholeFits=sheets_.size()<=frames::maximumPdfPages;
     dxf_->setEnabled(ready);pdf_->setEnabled(ready&&wholeFits);
@@ -667,7 +784,16 @@ void StationTemplateDialog::refresh(bool animate) {
     else if(pending_) status=uiText("正在生成横剖断面…");
     else if(!error_.isEmpty()) {status=uiText(error_);warning=true;}
     else if(failed) {status=QString(uiText("站 %1：%2")).arg(failed->number).arg(uiText(failed->error));warning=true;}
-    else if(sheets_.isEmpty()) status=kit?uiText("至少需要两个站位。可用表头的加号添加站位。"):uiText("请选择横剖站。");
+    else if(!stationWarnings_.isEmpty()){
+        const auto found=stationWarnings_.contains(current)?current:*std::min_element(stationWarnings_.keyBegin(),stationWarnings_.keyEnd());
+        status=QString(uiText("站 %1：%2")).arg(found).arg(uiText(stationWarnings_.value(found)));
+        warning=true;
+    }
+    else if(sheets_.isEmpty()){
+        if(kit)status=uiText("至少需要两个站位。可用表头的加号添加站位。");
+        else if(rows)status=uiText("可用表头的加号添加站位。");
+        else status=uiText("请选择横剖站。");
+    }
     else if(!wholeFits) {status=uiText("PDF 超过 500 页，请减少所选站位。");warning=true;}
     message_->setMessage(status,warning?StudioMessageRole::Warning:StudioMessageRole::Feedback,pending_||writing_);
 }
@@ -780,14 +906,14 @@ void StationTemplateDialog::writeSelection(bool pdf,frames::PdfLayout layout,fra
     }
     const double t=type_->currentIndex()?thickness_->value():0;
     const auto labels=sheetLabels(layout);
-    writing_=true;kitSettings_->setEnabled(false);kitStationPanel_->setEnabled(false);type_->setEnabled(false);layer_->setEnabled(false);thickness_->setEnabled(false);cap_->setEnabled(false);stations_->setEnabled(false);
+    writing_=true;kitSettings_->setEnabled(false);kit_.panel->setEnabled(false);mould_.panel->setEnabled(false);type_->setEnabled(false);layer_->setEnabled(false);thickness_->setEnabled(false);cap_->setEnabled(false);stations_->setEnabled(false);
     refresh();
     auto token=cancel_;
     background(this,[sheets=sheets_,path,labels,t,pdf,layout,scale,token](TaskResult&){
         if(pdf) frames::writePdf(path,sheets,labels,layout,scale,*token);
         else frames::writeDxf(path,sheets,t,*token);
     },[this,path](TaskResult result){
-        writing_=false;kitSettings_->setEnabled(true);kitStationPanel_->setEnabled(true);type_->setEnabled(true);layer_->setEnabled(true);thickness_->setEnabled(true);cap_->setEnabled(true);stations_->setEnabled(true);
+        writing_=false;kitSettings_->setEnabled(true);kit_.panel->setEnabled(true);mould_.panel->setEnabled(true);type_->setEnabled(true);layer_->setEnabled(true);thickness_->setEnabled(true);cap_->setEnabled(true);stations_->setEnabled(true);
         refresh();
         const bool ok=result.error.isEmpty();
         message_->setMessage(ok?QString(uiText("已保存：%1")).arg(QDir::toNativeSeparators(path)):uiText(result.error),

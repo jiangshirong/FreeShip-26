@@ -1,3 +1,4 @@
+#include <QToolButton>
 // Production-widget audit. Only explicitly requested private startup probes run it.
 #include "studio_ui.h"
 #include "ui_language.h"
@@ -10,6 +11,7 @@
 #include "performance_dialog.h"
 #include "hydro_dialog.h"
 #include "plates_dialog.h"
+#include "calculation_layers.h"
 #include "section_dialog.h"
 #include "station_template_dialog.h"
 #include "project_dialog.h"
@@ -39,9 +41,11 @@
 #include <QLabel>
 #include <QPushButton>
 #include <QTimer>
+#include <QToolButton>
 #include <QToolTip>
 #include <QWheelEvent>
 #include <QAbstractItemView>
+#include <algorithm>
 #include <stdexcept>
 
 void MainWindow::auditCloseControls(){
@@ -77,6 +81,41 @@ void MainWindow::auditCloseControls(){
         if(qobject_cast<QMessageBox*>(dialog)&&
             (scope=="confirmation"||scope.startsWith("message-")))
             workflowCase("short-message-default-width-"+scope,dialog->width()>=400);
+        if(scope.startsWith("hydro-")||scope=="calculation-addmass"||scope=="plates"){
+            auto* panel=dynamic_cast<CalculationLayers*>(dialog->findChild<QFrame*>("CalculationLayerSelection"));
+            const auto checksOnPage=panel?panel->findChildren<QCheckBox*>():QList<QCheckBox*>{};
+            QSet<qulonglong> listed;
+            for(auto* check:checksOnPage)if(check->isVisible()&&!check->text().isEmpty())
+                listed.insert(check->property("calculation_layer_id").toULongLong());
+            workflowCase("selection-layers-"+scope,panel&&panel->isVisible()&&listed.size()==original->layers.size()&&
+                !listed.contains(0)&&panel->findChildren<QPushButton*>().isEmpty()&&panel->findChildren<QToolButton*>().isEmpty());
+            QSet<fs::EntityId> occupied;
+            for(const auto& face:original->faces)occupied.insert(face.layer);
+            for(auto* check:checksOnPage){
+                if(occupied.contains(check->property("calculation_layer_id").toULongLong()))continue;
+                const auto before=panel->selected();
+                const bool wasChecked=check->isChecked();
+                check->click();
+                const bool toggled=check->isChecked()!=wasChecked&&panel->selected()==before;
+                check->click();
+                workflowCase("empty-layer-checkbox-"+scope,toggled&&check->isChecked()==wasChecked&&
+                    panel->selected()==before&&check->toolTip().contains(uiText("无控制面")));
+                break;
+            }
+            if(scope!="plates")for(auto* check:checksOnPage)
+                if(check->isEnabled()&&occupied.contains(check->property("calculation_layer_id").toULongLong())){
+                const auto request=[&]{
+                    if(auto* hydro=dynamic_cast<HydroDialog*>(dialog))return hydro->inputs();
+                    return dynamic_cast<PerformanceDialog*>(dialog)->inputs();
+                };
+                const auto before=request()["layer_ids"].toArray();
+                check->click();const auto after=request()["layer_ids"].toArray();
+                check->click();
+                workflowCase("selection-changes-solver-request-"+scope,after!=before&&request()["layer_ids"].toArray()==before);
+                break;
+            }
+            dialog->grab().save(workflowOutput_+"/views/"+scope+"-layer-selection.png");
+        }
         const bool nonModal=dialog->windowModality()==Qt::NonModal&&!QApplication::activeModalWidget();
         if(scope=="modeling-grid-panel"){
             QComboBox* plane=nullptr;
@@ -435,7 +474,31 @@ void MainWindow::auditCloseControls(){
         observe(layerDialog_,"layers",true);observe(linesDialog_,"lines-plan");
         const bool oldWorkflow=workflow_;workflow_=true;
         modal("point-groups",[this]{pointGroupsDialog();});
-        modal("modeling-auto-group-layers",[this]{modelingDialog("auto_group_layers");},true);
+        layerProperties_->trigger();
+        auto checkLayerHint = [&](const QString& field, const QString& label, const QString& tip) {
+            const auto* box = layerDialog_->findChild<QCheckBox*>(field);
+            auto* hint = layerDialog_->findChild<QToolButton*>(field + "_help");
+            const bool beside = box && hint && box->parentWidget() == hint->parentWidget() &&
+                                box->geometry().right() < hint->geometry().left();
+            bool shown = false;
+            if (hint && hint->isVisible()) {
+                const auto point = hint->rect().center();
+                QEnterEvent enter(point, hint->mapTo(layerDialog_, point), hint->mapToGlobal(point));
+                QApplication::sendEvent(hint, &enter);
+                shown = QToolTip::isVisible() && QToolTip::text() == tip;
+                QEvent leave(QEvent::Leave);
+                QApplication::sendEvent(hint, &leave);
+            }
+            workflowCase("hover-help-" + field, beside && box->text() == label && hint->text() == "?" && shown);
+        };
+        checkLayerHint("layer_symmetric", uiText("对称"), uiText("以船体中纵剖面为镜面补出另一舷"));
+        checkLayerHint("layer_use_for_intersections", uiText("参与剖切"), uiText("参与生成横剖线、纵剖线、水线和斜剖线"));
+        const auto layerButtons=layerDialog_->findChildren<QPushButton*>();
+        workflowCase("layer-properties-has-no-auto-group-button",layerDialog_->isVisible()&&
+            std::none_of(layerButtons.cbegin(),layerButtons.cend(),[](auto* button){
+                return button->property("layer_action")=="auto_group_layers"||button->text()==uiText("按折痕自动分组");
+            }));
+        layerDialog_->close();
         QAction* gridPanel=nullptr;
         for(auto* action:modelingActions_)if(action->property("operation")=="grid_panel")gridPanel=action;
         if(gridPanel&&gridPanel->isEnabled())modal("modeling-grid-panel",[gridPanel]{gridPanel->trigger();});

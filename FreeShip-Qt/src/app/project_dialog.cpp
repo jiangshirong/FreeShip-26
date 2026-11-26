@@ -3,11 +3,10 @@
 #include "studio_ui.h"
 #include "core/principal_dimensions.h"
 #include <QCheckBox>
-#include <QColorDialog>
 #include <QComboBox>
-#include <QDialogButtonBox>
 #include <QDoubleSpinBox>
 #include <QDynamicPropertyChangeEvent>
+#include <QTimer>
 #include <QFormLayout>
 #include <QGroupBox>
 #include <QHash>
@@ -35,8 +34,8 @@ QJsonObject projectValues(const fs::ModelSnapshot& snapshot){
         {"units",snapshot.units},{"length",snapshot.length},{"beam",snapshot.beam},{"draft",snapshot.draft},{"water_density",snapshot.waterDensity},
         {"appendage_coefficient",snapshot.appendageCoefficient},{"split_section_location",snapshot.splitSectionLocation},
         {"use_default_split_section_location",snapshot.useDefaultSplitSectionLocation},{"simplify_intersections",snapshot.simplifyIntersections},
-        {"precision",snapshot.precision},{"save_preview",snapshot.savePreview},{"shade_underwater",snapshot.shadeUnderwater},
-        {"underwater_color",double(snapshot.underwaterColor)},{"coefficient_basis",snapshot.coefficientBasis},{"underwater_color_alpha",snapshot.underwaterColorAlpha}};
+        {"precision",snapshot.precision},{"save_preview",snapshot.savePreview},
+        {"coefficient_basis",snapshot.coefficientBasis},{"underwater_color_alpha",snapshot.underwaterColorAlpha}};
     for(size_t i=0;i<HydroFields.size();++i)values[HydroFields[i]]=snapshot.hydroFeatures[i];
     values["principal_dimensions"]=snapshot.principalDimensions;
     values["has_perpendiculars"]=snapshot.principalDimensions.contains("aft_perpendicular_m");
@@ -49,8 +48,6 @@ double factor(Quantity quantity, const QString& units) {
     if (units != "imperial") return 1;
     return quantity == Quantity::Length ? 1 / Foot : quantity == Quantity::Density ? DensityFactor : 1;
 }
-QColor displayColor(quint32 color) { return QColor(color & 255, (color >> 8) & 255, (color >> 16) & 255); }
-quint32 storedColor(QColor color) { return quint32(color.red()) | quint32(color.green()) << 8 | quint32(color.blue()) << 16; }
 class NumberEditor final : public QDoubleSpinBox {
 protected:
     QString textFromValue(double value) const override {
@@ -62,26 +59,7 @@ protected:
         return text;
     }
 };
-class ColorEditor final : public QPushButton {
-public:
-    explicit ColorEditor(QWidget* parent = nullptr) : QPushButton(parent) {
-        connect(this, &QPushButton::clicked, this, [this] {
-            const auto color = studioChooseColor(displayColor(property("colorValue").toUInt()), this, uiText("选择颜色"), QColorDialog::DontUseNativeDialog);
-            if (color.isValid()) setProperty("colorValue", storedColor(color));
-        });
-    }
-protected:
-    bool event(QEvent* event) override {
-        if (event->type() == QEvent::DynamicPropertyChange &&
-            static_cast<QDynamicPropertyChangeEvent*>(event)->propertyName() == "colorValue") {
-            const auto color = displayColor(property("colorValue").toUInt());
-            setText(color.name().toUpper());
-            setStyleSheet(QString("QPushButton { background-color: %1; color: %2; padding: 5px; }")
-                .arg(color.name(), color.lightness() > 140 ? "#18212b" : "white"));
-        }
-        return QPushButton::event(event);
-    }
-};
+
 }
 
 struct ProjectDialog::State {
@@ -92,19 +70,20 @@ struct ProjectDialog::State {
         bool edited = false;
     };
     QJsonObject original;
+    QString document;
+    quint64 revision=0;
     QHash<QString, QWidget*> editors;
     QHash<QString, QString> displayedText;
     QHash<QString, Number> numbers;
     QHash<QString, QWidget*> numberLabels;
     QString initialUnits, units;
     QComboBox *unitBox = nullptr, *precision = nullptr, *coefficientBasis = nullptr;
-    QCheckBox *defaultSplit = nullptr, *shade = nullptr;
+    QCheckBox* defaultSplit = nullptr;
     QCheckBox *perpendiculars = nullptr, *depth = nullptr;
-    ColorEditor* color = nullptr;
     QSpinBox* underwaterOpacity = nullptr;
     StudioMessage* error = nullptr;
     QTabWidget* tabs = nullptr;
-    QDialogButtonBox* buttons = nullptr;
+    QTimer* apply = nullptr;
     StudioMessage* waiting = nullptr;
     bool editingEnabled = true;
     bool loading = true, splitWasDefault = true, manualSplitInitialized = false;
@@ -119,17 +98,8 @@ ProjectDialog::ProjectDialog(const fs::ModelSnapshot& snapshot, QWidget* parent)
 
     auto& s = *state_;
     s.initialUnits = s.units = snapshot.units;
-    s.original=projectValues(snapshot);
+    s.original=projectValues(snapshot);s.document=snapshot.documentId;s.revision=snapshot.revision;
     auto* layout = new QVBoxLayout(this);
-    auto* buttons = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
-    s.buttons=buttons;
-    buttons->button(QDialogButtonBox::Ok)->setText(uiText("确定"));
-    buttons->button(QDialogButtonBox::Ok)->setIcon(studioIcon("Confirm"));
-    buttons->button(QDialogButtonBox::Ok)->setDefault(true);
-    buttons->button(QDialogButtonBox::Cancel)->setText(uiText("取消"));
-    buttons->button(QDialogButtonBox::Cancel)->setIcon(studioIcon("Cancel"));
-    connect(buttons, &QDialogButtonBox::accepted, this, &ProjectDialog::accept);
-    connect(buttons, &QDialogButtonBox::rejected, this, &QDialog::reject);
     auto* tabs = new QTabWidget;
     s.tabs=tabs;
     layout->addWidget(tabs, 1);
@@ -239,54 +209,61 @@ ProjectDialog::ProjectDialog(const fs::ModelSnapshot& snapshot, QWidget* parent)
     s.splitWasDefault = snapshot.useDefaultSplitSectionLocation;
     s.manualSplitInitialized = !snapshot.useDefaultSplitSectionLocation;
     addNumber(dimensions, "split_section_location", uiText("横剖视图分界位置"), Quantity::Length, -1e9);
-    auto* alignBaseline=addCheck(dimensions,"align_to_baseline",uiText("确认时将船底移至基线（Z = 0）"));
-    auto* baselineNote=new StudioMessage(StudioMessageRole::Explanation,uiText("整体平移船体、参考曲线和剖面，吃水保持不变。含锁定点或约束点时须先解除限制。"));
-    baselineNote->setWordWrap(true);baselineNote->setObjectName("BaselineOperationNotice");
-    baselineNote->setVisible(alignBaseline->isChecked());
-    connect(alignBaseline,&QCheckBox::toggled,baselineNote,&QWidget::setVisible);dimensions->addRow(baselineNote);
+    auto* alignBaseline=new QPushButton(studioIcon("Move"),uiText("将船底移至基线（Z = 0）"));
+    alignBaseline->setAutoDefault(false);
+    alignBaseline->setToolTip(uiText("整体平移船体、参考曲线和剖面，吃水保持不变。含锁定点或约束点时须先解除限制。"));
+    bind("align_to_baseline",alignBaseline);dimensions->addRow(alignBaseline);
+    connect(alignBaseline,&QPushButton::clicked,this,[this]{applyChanges(true);});
     addCheck(general, "simplify_intersections", uiText("简化交线"));
     addCheck(general, "save_preview", uiText("保存预览图片"));
-    s.shade = addCheck(general, "shade_underwater", uiText("水下部分着色"));
-    s.color = new ColorEditor; s.color->setProperty("colorValue", snapshot.underwaterColor);
-    bind("underwater_color", s.color); general->addRow(uiText("水下颜色"), s.color);
-    connect(s.shade, &QCheckBox::toggled, s.color, &QWidget::setEnabled);
-    s.color->setEnabled(snapshot.shadeUnderwater);
     s.underwaterOpacity=new QSpinBox;
     s.underwaterOpacity->setRange(0,100);s.underwaterOpacity->setSuffix(" %");
     s.underwaterOpacity->setValue(snapshot.underwaterColorAlpha*100/255);
     s.underwaterOpacity->setToolTip(uiText("0% 使用图层颜色，100% 使用水下颜色。船体透明度由图层设置控制。"));
     bind("underwater_opacity_percent",s.underwaterOpacity);general->addRow(uiText("水下不透明度"),s.underwaterOpacity);
-    connect(s.shade,&QCheckBox::toggled,s.underwaterOpacity,&QWidget::setEnabled);
-    s.underwaterOpacity->setEnabled(snapshot.shadeUnderwater);
     connect(s.unitBox, &QComboBox::currentIndexChanged, this, [this] { switchUnits(state_->unitBox->currentData().toString()); });
     connect(s.defaultSplit, &QCheckBox::toggled, this, &ProjectDialog::updateSplitState);
     s.error = new StudioMessage(StudioMessageRole::Warning);s.error->setObjectName("ProjectWarning");layout->addWidget(s.error);
     s.waiting=new StudioMessage(StudioMessageRole::Feedback,uiText("正在应用上一项修改"));s.waiting->hide();layout->addWidget(s.waiting);
-    layout->addWidget(buttons);
+    s.apply=new QTimer(this);s.apply->setSingleShot(true);
+    connect(s.apply,&QTimer::timeout,this,[this]{applyChanges();});
+    const auto queue=[this]{scheduleApply();};
+    for(auto* widget:s.editors){
+        if(auto* box=qobject_cast<QCheckBox*>(widget))connect(box,&QCheckBox::toggled,this,queue);
+        else if(auto* combo=qobject_cast<QComboBox*>(widget))connect(combo,&QComboBox::currentIndexChanged,this,queue);
+        else if(auto* number=qobject_cast<QDoubleSpinBox*>(widget);number&&!number->isReadOnly())
+            connect(number,&QDoubleSpinBox::valueChanged,this,queue);
+        else if(auto* number=qobject_cast<QSpinBox*>(widget))connect(number,&QSpinBox::valueChanged,this,queue);
+        else if(auto* line=qobject_cast<QLineEdit*>(widget)){
+            connect(line,&QLineEdit::editingFinished,this,queue);
+        }else if(auto* text=qobject_cast<QPlainTextEdit*>(widget)){
+            text->installEventFilter(this);
+        }
+    }
+    s.underwaterOpacity->setKeyboardTracking(false);
     s.loading = false;
     switchUnits(s.units);
 }
 
 ProjectDialog::~ProjectDialog() = default;
-void ProjectDialog::changeEvent(QEvent* event) {
-    QDialog::changeEvent(event);
-    if(event->type()!=QEvent::FontChange && event->type()!=QEvent::StyleChange)return;
-    // The Windows button-box style can retain its initial width after an
-    // inherited font change. Keep the original icons and make room for text.
-    if(auto* buttons=findChild<QDialogButtonBox*>())for(auto* button:buttons->buttons()) {
-        const int icon=button->icon().isNull()?0:button->iconSize().width()+6;
-        button->setMinimumSize(button->fontMetrics().horizontalAdvance(button->text())+icon+20,
-            std::max(button->fontMetrics().height(),button->iconSize().height())+10);
-    }
+bool ProjectDialog::eventFilter(QObject* watched,QEvent* event){
+    if(watched==state_->editors.value("comment")&&event->type()==QEvent::FocusOut)scheduleApply();
+    return QDialog::eventFilter(watched,event);
+}
+void ProjectDialog::scheduleApply(){
+    auto& s=*state_;
+    if(onApply&&!s.loading&&s.editingEnabled)s.apply->start(0);
 }
 QWidget* ProjectDialog::fieldEditor(const QString& field) const { return state_->editors.value(field, nullptr); }
 void ProjectDialog::setEditingEnabled(bool enabled){
-    auto& s=*state_;s.editingEnabled=enabled;s.tabs->setEnabled(enabled);s.buttons->button(QDialogButtonBox::Ok)->setEnabled(enabled);
+    auto& s=*state_;s.editingEnabled=enabled;if(!enabled)s.apply->stop();s.tabs->setEnabled(enabled);
     s.waiting->setVisible(!enabled);setProperty("project_waiting",!enabled);
     updatePrincipalState();
 }
+bool ProjectDialog::matchesDocument(const fs::ModelSnapshot& snapshot)const{return snapshot.documentId==state_->document;}
+bool ProjectDialog::matchesRevision(const fs::ModelSnapshot& snapshot)const{return matchesDocument(snapshot)&&snapshot.revision==state_->revision;}
 void ProjectDialog::refreshSnapshot(const fs::ModelSnapshot& snapshot){
-    auto& s=*state_;s.loading=true;s.original=projectValues(snapshot);s.initialUnits=s.units=snapshot.units;
+    auto& s=*state_;s.apply->stop();s.loading=true;s.original=projectValues(snapshot);s.document=snapshot.documentId;s.revision=snapshot.revision;s.initialUnits=s.units=snapshot.units;
     for(const auto& key:QStringList{"name","designer","created_by","comment"}){
         auto* editor=s.editors[key];const QSignalBlocker block(editor);const auto value=s.original[key].toString();
         if(auto* line=qobject_cast<QLineEdit*>(editor))line->setText(value);
@@ -298,8 +275,7 @@ void ProjectDialog::refreshSnapshot(const fs::ModelSnapshot& snapshot){
     {const QSignalBlocker block(s.unitBox);s.unitBox->setCurrentIndex(s.unitBox->findData(s.units));}
     {const QSignalBlocker block(s.precision);s.precision->setCurrentIndex(snapshot.precision);}
     {const QSignalBlocker block(s.coefficientBasis);s.coefficientBasis->setCurrentIndex(snapshot.coefficientBasis);}
-    s.color->setProperty("colorValue",snapshot.underwaterColor);s.underwaterOpacity->setValue(snapshot.underwaterColorAlpha*100/255);
-    s.color->setEnabled(snapshot.shadeUnderwater);s.underwaterOpacity->setEnabled(snapshot.shadeUnderwater);
+    s.underwaterOpacity->setValue(snapshot.underwaterColorAlpha*100/255);
     s.splitWasDefault=snapshot.useDefaultSplitSectionLocation;s.manualSplitInitialized=!s.splitWasDefault;s.error->hide();
     s.loading=false;switchUnits(s.units);
 }
@@ -389,7 +365,6 @@ QJsonObject ProjectDialog::changes() const {
     const auto comment = static_cast<QPlainTextEdit*>(s.editors["comment"])->toPlainText();
     if (comment != s.displayedText["comment"]) result.insert("comment", comment);
     if (s.units != s.initialUnits) result.insert("units", s.units);
-    if(static_cast<QCheckBox*>(s.editors["align_to_baseline"])->isChecked())result["align_to_baseline"]=true;
     for (auto it = s.numbers.cbegin(); it != s.numbers.cend(); ++it) {
         const auto& n = it.value();
         if(it.key()=="aft_perpendicular"||it.key()=="forward_perpendicular"||it.key()=="length_between_perpendiculars"||it.key()=="moulded_depth")continue;
@@ -401,7 +376,7 @@ QJsonObject ProjectDialog::changes() const {
         const double expected = n.original * factor(n.quantity, s.units) / factor(n.quantity, s.initialUnits);
         if (needsManualSplit || float(value) != float(expected)) result.insert(it.key(), value);
     }
-    for (const auto field : {"use_default_split_section_location", "simplify_intersections", "shade_underwater", "save_preview"}) {
+    for (const auto field : {"use_default_split_section_location", "simplify_intersections", "save_preview"}) {
         const bool value = static_cast<QCheckBox*>(s.editors[field])->isChecked();
         if (value != s.original[field].toBool()) result.insert(field, value);
     }
@@ -411,12 +386,10 @@ QJsonObject ProjectDialog::changes() const {
         const bool value=static_cast<QCheckBox*>(s.editors[field])->isChecked();
         if(value!=s.original[field].toBool())result[field]=value;
     }
-    const quint32 color = s.color->property("colorValue").toUInt();
     // Display uses integer percentages, but an untouched value must retain all
     // eight bits of the FBM value (e.g. 234 must not become 232).
     if(s.underwaterOpacity->value()!=s.original["underwater_color_alpha"].toInt()*100/255)
         result["underwater_color_alpha"]=s.underwaterOpacity->value()*255/100;
-    if (color != quint32(s.original["underwater_color"].toDouble())) result.insert("underwater_color", double(color));
     const auto principal=principalDimensions();if(principal!=s.original["principal_dimensions"].toObject())result["principal_dimensions"]=principal;
     return result;
 }
@@ -441,14 +414,25 @@ QString ProjectDialog::validationError() const {
             n.original * factor(n.quantity, s.units) / factor(n.quantity, s.initialUnits);
         if (!std::isfinite(value) || std::abs(value) > 1e9 || (it.key() != "split_section_location" && value < 0)) return uiText("数值超出可用范围。");
     }
-    if (s.color->property("colorValue").toULongLong() > 0xffffff) return uiText("颜色值无效。");
     return {};
 }
 
-void ProjectDialog::accept() {
-    if(!state_->editingEnabled)return;
-    for (auto it = state_->numbers.begin(); it != state_->numbers.end(); ++it) it->widget->interpretText();
-    const auto error = validationError();
-    state_->error->setText(error); state_->error->setVisible(!error.isEmpty());
-    if (error.isEmpty()) QDialog::accept();
+void ProjectDialog::applyChanges(bool alignBaseline){
+    auto& s=*state_;
+    s.apply->stop();
+    if(!onApply||!s.editingEnabled)return;
+    for(auto& number:s.numbers)number.widget->interpretText();
+    s.underwaterOpacity->interpretText();
+    s.apply->stop();
+    const auto error=validationError();
+    s.error->setMessage(error,StudioMessageRole::Warning);
+    if(!error.isEmpty())return;
+    auto patch=changes();
+    if(alignBaseline)patch["align_to_baseline"]=true;
+    if(!patch.isEmpty())onApply(patch);
+}
+
+void ProjectDialog::reject(){
+    applyChanges();
+    QDialog::reject();
 }

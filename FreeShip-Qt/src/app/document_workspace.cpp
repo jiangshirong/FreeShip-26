@@ -67,7 +67,12 @@ DocumentWorkspace::DocumentWorkspace(bool persistent):tabs_(new QTabBar),pages_(
     auto* closeTab=new QShortcut(QKeySequence("Ctrl+W"),this);connect(closeTab,&QShortcut::activated,this,[this]{if(active())active()->close();});
 }
 MainWindow* DocumentWorkspace::addDocument(){
-    auto* doc=new MainWindow(this,persistent_);doc->setWindowFlags(Qt::Widget);doc->setAttribute(Qt::WA_DeleteOnClose);
+    auto* doc=new MainWindow(this,persistent_);
+    addDocument(doc);
+    return doc;
+}
+void DocumentWorkspace::addDocument(MainWindow* doc){
+    doc->setWindowFlags(Qt::Widget);doc->setAttribute(Qt::WA_DeleteOnClose);
     pages_->addWidget(doc);
     const int index=tabs_->addTab(QString{});
     const auto side=static_cast<QTabBar::ButtonPosition>(tabs_->style()->styleHint(QStyle::SH_TabBar_CloseButtonPosition,nullptr,tabs_));
@@ -77,7 +82,7 @@ MainWindow* DocumentWorkspace::addDocument(){
         const int i=pages_->indexOf(doc);
         if(i>=0)emit tabs_->tabCloseRequested(i);
     });
-    connect(doc,&QWidget::windowTitleChanged,this,[this,doc]{refresh(doc);});refresh(doc);activate(doc);return doc;
+    connect(doc,&QWidget::windowTitleChanged,this,[this,doc]{refresh(doc);});refresh(doc);activate(doc);
 }
 void DocumentWorkspace::refresh(MainWindow* doc){
     const int i=pages_->indexOf(doc);if(i<0)return;

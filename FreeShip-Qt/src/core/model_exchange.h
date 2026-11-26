@@ -7,6 +7,13 @@
 #include <optional>
 
 namespace fs::exchange {
+enum class ObjLayerMode { ObjectAndGroup, Single, ByGroup, Assigned };
+
+struct ObjAssignedLayer {
+    QString name;
+    QStringList groups;
+};
+
 struct Options {
     // OBJ/STL have no standard length unit. These are explicit file units.
     QString units="m";
@@ -19,6 +26,8 @@ struct Options {
     bool intermediateBulkheads=true;
     QString textEncoding="cp1252";
     QVector<EntityId> faceIds; // Empty: all faces in the chosen layer visibility scope.
+    ObjLayerMode objLayerMode=ObjLayerMode::ObjectAndGroup;
+    QVector<ObjAssignedLayer> objAssignedLayers;
 };
 struct ObjFitReport {
     double toleranceMm=0, maximumMm=0, rmsMm=0;
@@ -39,6 +48,8 @@ struct Document {
 };
 Document read(const QString& path,const QString& format,const Options& options={},
               const std::atomic_bool* cancel=nullptr);
+double objAutomaticToleranceMm(const QString& path,Options options,const std::atomic_bool* cancel=nullptr);
+QStringList objLayerSources(const QString& path,const std::atomic_bool* cancel=nullptr);
 // Uses the complete original-side subdivision snapshot, independent of camera,
 // animation, display symmetry and GPU caches. FEF always stores the control net.
 void write(const QString& path,const QString& format,const ModelSnapshot& model,

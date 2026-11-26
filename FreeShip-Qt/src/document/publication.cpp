@@ -4,6 +4,7 @@
 #include "publication.h"
 #include "group_fixes.h"
 #include "core/platform_process.h"
+#include "core/snapshot_surface.h"
 #include "geometry_input.h"
 #include "fbm_text.h"
 #include "hydrostatics.h"
@@ -12,11 +13,13 @@
 #include <QDir>
 #include <QElapsedTimer>
 #include <QFile>
+#include <QFileInfo>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QProcess>
 #include <QSaveFile>
 #include <QScopeGuard>
+#include <QThread>
 #include <QtEndian>
 #include <algorithm>
 #include <cmath>
@@ -46,10 +49,15 @@ void save(const QString &name,const QByteArray &bytes) {
     if(!f.open(QIODevice::WriteOnly) || f.write(bytes)!=bytes.size() || !f.commit())bad("Cannot write publication artifact");
 }
 void save(const QString &name,const QJsonObject &object) {save(name,QJsonDocument(object).toJson(QJsonDocument::Compact));}
-QJsonObject readJson(const QString &name,qint64 limit=Fbm::MaximumBytes) {
+QByteArray readBytes(const QString &name,qint64 limit) {
     QFile f(name);if(!f.open(QIODevice::ReadOnly) || f.size()>limit)bad("Cannot read publication artifact");
-    QJsonParseError error;const auto doc=QJsonDocument::fromJson(f.readAll(),&error);
-    if(f.error()!=QFile::NoError || error.error!=QJsonParseError::NoError || !doc.isObject())bad("Invalid publication JSON");return doc.object();
+    auto bytes=f.readAll();if(f.error()!=QFile::NoError||bytes.size()>limit)bad("Cannot read publication artifact");
+    return bytes;
+}
+QJsonObject readJson(const QString &name,qint64 limit=Fbm::MaximumBytes) {
+    QJsonParseError error;const auto doc=QJsonDocument::fromJson(readBytes(name,limit),&error);
+    if(error.error!=QJsonParseError::NoError || !doc.isObject())bad("Invalid publication JSON");
+    return doc.object();
 }
 int resolved(int raw,const QJsonObject &bindings) {
     if(raw>=0 && raw<=0xffffff)return raw;
@@ -87,7 +95,7 @@ QJsonObject spline(Reader &r) {
 }
 }
 
-Publication::Publication(const Fbm &source,const QJsonObject &bindings,const Publication* previous,bool parallelPresentation) {
+Publication::Publication(const Fbm &source,const QJsonObject &bindings,const Publication* previous,bool parallelPresentation,bool placement) {
     const auto context=bindings["presentation_context"].toObject();
     if(!context["colors"].isObject() || !context["texts"].isObject())bad("Missing document presentation context");
     const auto encoding=bindings["fbm_encoding"].toString();const auto net=source.controlNet();
@@ -146,16 +154,35 @@ Publication::Publication(const Fbm &source,const QJsonObject &bindings,const Pub
 
     QJsonArray points,edges,faces,layers,curves,gPoints,gEdges,gFaces,gLayers,gCurves;
     std::vector<bool> attached(net.points.size(),false),leak(net.points.size(),false),restricted(net.points.size(),false);
-    std::map<std::pair<int,int>,size_t> edgeIndex;std::vector<int> hydroFaceCount(net.edges.size(),0);
+    struct FaceCounts { int original=0, mirrored=0; };
+    std::map<std::pair<int,int>,size_t> edgeIndex;
+    std::vector<FaceCounts> hydroFaceCounts(net.edges.size());
+    const auto onCenterline=[&](int p){return std::abs(net.points[p].value.y)<=1e-4;};
     for(size_t i=0;i<net.edges.size();++i) {const auto &e=net.edges[i];edgeIndex.emplace(std::minmax(e.a,e.b),i);attached[e.a]=attached[e.b]=true;}
-    for(const auto &f:net.faces)for(size_t i=0;i<f.points.size();++i) {
-        const int a=f.points[i],b=f.points[(i+1)%f.points.size()];attached[a]=true;
-        if(geometry.layers[f.layer<0?0:size_t(f.layer)].useInHydrostatics) {
-            const auto e=edgeIndex.find(std::minmax(a,b));if(e==edgeIndex.end())bad("Missing face edge");++hydroFaceCount[e->second];
+    for(const auto &f:net.faces) {
+        const auto &layer=geometry.layers[f.layer<0?0:size_t(f.layer)];
+        const bool mirror=layer.useInHydrostatics&&layer.symmetric&&
+            std::any_of(f.points.begin(),f.points.end(),[&](int p){return !onCenterline(p);});
+        for(size_t i=0;i<f.points.size();++i) {
+            const int a=f.points[i],b=f.points[(i+1)%f.points.size()];
+            attached[a]=true;
+            if(!layer.useInHydrostatics)continue;
+            const auto edge=edgeIndex.find(std::minmax(a,b));
+            if(edge==edgeIndex.end())bad("Missing face edge");
+            auto &counts=hydroFaceCounts[edge->second];
+            ++counts.original;
+            counts.mirrored+=mirror;
         }
     }
-    for(size_t i=0;i<net.edges.size();++i)if(hydroFaceCount[i]==1) {
-        const auto &e=net.edges[i];for(int p:{e.a,e.b})if(std::abs(net.points[p].value.y)>1e-4)leak[p]=true;
+    for(size_t i=0;i<net.edges.size();++i) {
+        const auto &edge=net.edges[i];
+        const auto &counts=hydroFaceCounts[i];
+        // Reflected faces share a centerline edge. Off the centerline, the
+        // original and reflected edges can have different face counts.
+        const bool open=onCenterline(edge.a)&&onCenterline(edge.b)
+            ? counts.original+counts.mirrored==1
+            : counts.original==1||counts.mirrored==1;
+        if(open)leak[edge.a]=leak[edge.b]=true;
     }
     for(size_t i=0;i<net.points.size();++i) {
         const auto &p=net.points[i].value;
@@ -267,7 +294,10 @@ Publication::Publication(const Fbm &source,const QJsonObject &bindings,const Pub
         for(qsizetype i=input.size();i>0;--i)sectionInput.prepend(input[i-1]);
     }
     model_["point_groups"]=groups;model_["markers"]=markers;model_["backgrounds"]=backgrounds;model_["flowlines"]=flows;model_["sections"]=sections;
-    auto inputColors=context["colors"].toObject();inputColors["underwater"]=color(underwater,bindings);
+    const auto underwaterDisplay=context["underwater_display"].toObject();
+    if(!underwaterDisplay.isEmpty())model_["underwater_display"]=underwaterDisplay;
+    auto inputColors=context["colors"].toObject();
+    inputColors["underwater"]=color(underwaterDisplay["color"].toInt(underwater),bindings);
     QJsonArray layerFaces=bindings["layer_faces"].toArray();
     if(layerFaces.isEmpty())for(qsizetype l=0;l<layerIds.size();++l) {
         QJsonArray ids;for(size_t i=0;i<geometry.faces.size();++i)if(geometry.faces[i].layer==size_t(l))ids.append(faceIds[qsizetype(i)]);layerFaces.append(ids);
@@ -277,32 +307,61 @@ Publication::Publication(const Fbm &source,const QJsonObject &bindings,const Pub
             {"precision",source.precision()},{"desired_level",int(geometry.desiredLevel)},
             {"points",gPoints},{"edges",gEdges},{"faces",gFaces},{"layers",gLayers},{"curves",gCurves}}},
         {"settings",QJsonObject{{"draft",settings.draft},{"split",settings.split},{"crease_split",annotations["crease_split"]},
-            {"imperial",settings.imperial},{"simplify",settings.simplifyIntersections},{"shade_underwater",shade}}},
+            {"imperial",settings.imperial},{"simplify",settings.simplifyIntersections},
+            {"shade_underwater",underwaterDisplay["shade"].toBool(shade)}}},
         {"colors",inputColors},{"texts",context["texts"]},{"sections",sectionInput},
         {"surface_display",QJsonObject{{"show_normals",normals},{"faces",faceIds},{"layers",layerIds},{"curves",curveIds},
             {"flows",flowDefinitions},{"layer_faces",layerFaces}}}};
-    if(previous&&input_==previous->input_) {
+    if(previous&&placement&&previous->canReuseMetadata()&&!net.faces.empty()&&geometry.desiredLevel>0&&
+       gPoints.size()==previous->input_["geometry"].toObject()["points"].toArray().size()+1){
+        // The add-point command introduces only an unattached vertex. Compare
+        // the entire drawing input after removing that one appended vertex:
+        // face/edge/curve bindings, styles, cut planes and hydro settings must
+        // all match. Refined surfaces only emit referenced vertices. Empty
+        // and unsubdivided models still use the ordinary generator.
+        auto drawingInput=input_;
+        auto drawingGeometry=drawingInput["geometry"].toObject();
+        gPoints.removeLast();drawingGeometry["points"]=gPoints;drawingInput["geometry"]=drawingGeometry;
+        placementGeometryReused_=drawingInput==previous->input_;
+    }
+    if(previous&&(input_==previous->input_||placementGeometryReused_)) {
         artifacts_=previous->artifacts_;generatedSurface_=previous->generatedSurface_;generatedMetadata_=previous->generatedMetadata_;
     }
 }
 
-QJsonObject Publication::generate(const QString &directory,const QString &cacheDirectory,const QString &documentId,quint64 revision,const std::function<void(const QJsonObject&)>& displayReady,bool displayOnly) const {
+QJsonObject Publication::generate(const QString &directory,const QString &cacheDirectory,const QString &documentId,quint64 revision,const std::function<void(const QJsonObject&)>& displayReady,bool displayOnly,QJsonObject* timings,std::unique_ptr<fs::SnapshotSurface>* parsedSurface) const {
     const auto joinPresentation=qScopeGuard([this]{if(presentation_.valid())presentation_.wait();});
     QElapsedTimer clock;clock.start();
     auto input=input_,model=model_;input["document_id"]=model["document_id"]=documentId;input["revision"]=model["revision"]=qint64(revision);
     const QDir dir(directory);if(displayReady)input["first_frame"]=true;if(displayOnly)input["display_only"]=true;save(dir.filePath("native-input.json"),input);
-    const bool reuse=!artifacts_.empty();
+    const bool reuse=!displayOnly&&!artifacts_.empty();
     bool modelWritten=false;const bool parallelPresentation=presentation_.valid();
     double modelWriteMs=0;
     const auto completeDisplay=[&]{
         if(modelWritten)return;QElapsedTimer part;part.start();
+        double checkpoint=0;
+        const auto mark=[&](const char* key){
+            if(timings){const double now=part.nsecsElapsed()/1e6;timings->insert(QLatin1String(key),now-checkpoint);checkpoint=now;}
+        };
+    // Decode the worker's result while the independently computed annotations
+    // can still run, and retain these exact bytes only for this transaction.
+    const auto surface=[&]{
+        if(reuse&&!placementGeometryReused_)return generatedSurface_;
+        const auto path=dir.filePath("surface.json");
+        constexpr auto displayLimit=64*1024*1024;
+        const auto size=QFileInfo(path).size();
+        if(!parsedSurface||size<1024*1024||size>displayLimit)return readJson(path);
+        *parsedSurface=std::make_unique<fs::SnapshotSurface>(fs::SnapshotSurface::parse(readBytes(path,displayLimit)));
+        return (*parsedSurface)->object();
+    }();
+    mark("publication_surface_load_ms");
     if(presentation_.valid()){
         const auto annotations=presentation_.get();auto overlay=model["overlay"].toObject();
         overlay["hydro"]=annotations["hydro"];model["overlay"]=overlay;
         // Retain the same completed metadata for later edit/reuse comparisons.
         model_["overlay"]=overlay;
     }
-    const auto surface=reuse?generatedSurface_:readJson(dir.filePath("surface.json"));
+    mark("publication_annotations_wait_ms");
     generatedSurface_=surface;
     // Surface geometry is revision-neutral in the worker cache. Its checksum
     // and document identity are carried by native-report, validated by Service.
@@ -318,8 +377,13 @@ QJsonObject Publication::generate(const QString &directory,const QString &cacheD
     model["diagnostics"]=QJsonObject{{"legacy_triangle_count",0},{"surface_engine","cpp-native"},{"flow_engine","cpp-native"},
         {"source_child_faces",surface["child_faces"]},{"source_triangle_count",surface["triangles"].toArray().size()},
         {"forms_created",0},{"viewports_created",0},{"snapshot_engine","cpp-publication"}};
-    const auto bytes=QJsonDocument(model).toJson(QJsonDocument::Compact);save(dir.filePath("model.json"),bytes);
+    mark("publication_model_assemble_ms");
+    const auto bytes=parsedSurface&&*parsedSurface?(*parsedSurface)->encodeModel(model):QJsonDocument(model).toJson(QJsonDocument::Compact);
+    mark("publication_model_encode_ms");
+    save(dir.filePath("model.json"),bytes);
+    mark("publication_model_write_ms");
     generatedMetadata_=bytes.size()<=64LL*1024*1024?fs::SnapshotMetadata::capture(bytes,model["settings"].toObject(),model["name"].toString()):fs::SnapshotMetadata{};
+    mark("publication_metadata_index_ms");
         modelWriteMs+=part.nsecsElapsed()/1e6;modelWritten=true;
     };
     const auto deliverDisplay=[&]{
@@ -353,7 +417,8 @@ QJsonObject Publication::generate(const QString &directory,const QString &cacheD
     return {{"document_id",documentId},{"revision",qint64(revision)},{"model",dir.filePath("model.json")},
         {"drawing_deferred",displayOnly},{"scene",displayOnly?QString{}:dir.filePath("scene.fslp")},{"dxf",displayOnly?QString{}:dir.filePath("reference.dxf")},{"native_report",dir.filePath("native-report.json")},
         {"sections",dir.filePath("sections.json")},{"surface",dir.filePath("surface.json")},{"snapshot_engine","cpp-publication"},{"artifacts_reused",reuse},{"worker_ms",reuse?0:workerMs},{"snapshot_write_ms",modelWriteMs},
-        {"presentation_parallel",parallelPresentation},{"display_early",bool(displayReady)}};
+        {"presentation_parallel",parallelPresentation},{"display_early",bool(displayReady)},
+        {"placement_geometry_reused",placementGeometryReused_}};
 }
 std::optional<QJsonObject> Publication::metadataChanges(const Publication &previous) const {
     if(artifacts_.empty()||input_!=previous.input_)return {};
@@ -365,24 +430,37 @@ std::optional<QJsonObject> Publication::metadataChanges(const Publication &previ
     if(a!=b)return {};
     return changes;
 }
+namespace {
+QByteArray replayReport(const QByteArray &bytes,const QString &documentId,quint64 revision) {
+    auto report=QJsonDocument::fromJson(bytes).object();
+    report["document_id"]=documentId;report["revision"]=qint64(revision);report["artifacts_reused"]=true;
+    for(auto i=report.begin();i!=report.end();++i)if(i.key().endsWith("_ms"))i.value()=0;
+    return QJsonDocument(report).toJson(QJsonDocument::Compact);
+}
+// A replay writes only to the caller's new private transaction directory.
+// The service still promotes the complete set after every write has succeeded.
+void writeReplayFile(const QString &path,const QByteArray &bytes) {
+    QFile file(path);
+    if(!file.open(QIODevice::WriteOnly|QIODevice::NewOnly)||file.write(bytes)!=bytes.size()||!file.flush())
+        bad("Cannot write history publication artifact");
+    file.close();
+    if(file.error()!=QFile::NoError)bad("Cannot close history publication artifact");
+}
+struct ReplayWork {
+    double inflate=0,encode=0,write=0;
+    void add(const ReplayWork &other) {inflate+=other.inflate;encode+=other.encode;write+=other.write;}
+};
+QJsonObject frameResult(const QDir &dir,const QString &documentId,quint64 revision,double elapsed) {
+    return {{"document_id",documentId},{"revision",qint64(revision)},{"model",dir.filePath("model.json")},
+        {"scene",dir.filePath("scene.fslp")},{"dxf",dir.filePath("reference.dxf")},{"native_report",dir.filePath("native-report.json")},
+        {"sections",dir.filePath("sections.json")},{"surface",dir.filePath("surface.json")},{"snapshot_engine","cpp-publication"},
+        {"worker_ms",0},{"snapshot_write_ms",elapsed},{"artifacts_reused",true}};
+}
+}
 void PublicationFrame::writeArtifacts(const QString &directory,const QString &documentId,quint64 revision) const {
     const QDir dir(directory);
-    // The two large independent blobs may be inflated/written concurrently.
-    // The owning transaction joins before validating and promoting any path.
-    std::future<void> sceneWrite;
-    for(const auto &[name,stored]:artifacts_) {
-        if(packed_&&name=="scene.fslp"){
-            sceneWrite=std::async(std::launch::async,[path=dir.filePath(name),data=stored]{save(path,qUncompress(data));});continue;
-        }
-        const QByteArray bytes=packed_?qUncompress(stored):stored;
-        if(name=="native-report.json") {
-            auto report=QJsonDocument::fromJson(bytes).object();
-            report["document_id"]=documentId;report["revision"]=qint64(revision);report["artifacts_reused"]=true;
-            for(auto i=report.begin();i!=report.end();++i)if(i.key().endsWith("_ms"))i.value()=0;
-            save(dir.filePath(name),report);
-        }else save(dir.filePath(name),bytes);
-    }
-    if(sceneWrite.valid())sceneWrite.get();
+    for(const auto &[name,bytes]:artifacts_)
+        save(dir.filePath(name),name=="native-report.json"?replayReport(bytes,documentId,revision):bytes);
 }
 void Publication::retainValidatedArtifacts(const QString &directory) {
     if(generatedMetadata_.empty()){artifacts_.clear();return;}
@@ -418,34 +496,84 @@ QJsonObject Publication::generateMetadata(const QString &directory,const QJsonOb
     result["snapshot_write_ms"]=clock.nsecsElapsed()/1e6;return result;
 }
 PublicationFrame PublicationFrame::packedForHistory() const {
-    auto frame=*this;frame.packed_=true;frame.generatedMetadata_=generatedMetadata_.packedForHistory();
-    for(auto& [name,data]:frame.artifacts_)data=qCompress(data,1);
+    auto frame=*this;frame.packed_=true;
+    // These two buffers dominate large history entries. Pack them independently
+    // of the model, using exactly the same codec and existing history budget.
+    std::map<QString,std::future<QByteArray>> workers;
+    if(QThread::idealThreadCount()>=4){
+        for(const auto& name:{QStringLiteral("scene.fslp"),QStringLiteral("surface.json")}) {
+            const auto it=artifacts_.find(name);
+            if(it!=artifacts_.end()&&it->second.size()>=1024*1024){
+                try{workers.emplace(name,std::async(std::launch::async,[bytes=it->second]{return qCompress(bytes,1);}));}
+                catch(const std::system_error&){/* Pack synchronously if a worker is unavailable. */}
+            }
+        }
+    }
+    frame.generatedMetadata_=generatedMetadata_.packedForHistory();
+    for(auto& [name,data]:frame.artifacts_){
+        const auto worker=workers.find(name);
+        data=worker==workers.end()?qCompress(data,1):worker->second.get();
+    }
     return frame;
 }
 qsizetype PublicationFrame::retainedBytes() const {
     qsizetype n=generatedMetadata_.bytes().size()+QJsonDocument(input_).toJson(QJsonDocument::Compact).size();
     for(const auto &item:artifacts_)n+=item.second.size();return n;
 }
-bool PublicationFrame::canonicalHistoryLayer(const QJsonObject &bindings) const {
-    // Undo rebuilds last_layer_number from the FBM rather than the live edit high water.
-    const int live=bindings.value("last_used_layer_id").toInt(-1);int file=-1;
+int PublicationFrame::restoredLayerNumber() const {
+    // Restoring a file uses its layer IDs, not the live allocation high-water mark.
+    int file=-1;
     for(const auto &v:input_["geometry"].toObject()["layers"].toArray())file=std::max(file,v.toObject()["layer_id"].toInt());
-    return live<=file;
+    return file;
 }
 QJsonObject PublicationFrame::replay(const QString &directory,const QString &id,quint64 revision) const {
-    if(!packed_)return writeFrame(directory,id,revision,generatedMetadata_.updated({},revision));
-    QElapsedTimer clock;clock.start();auto blobs=std::async(std::launch::async,[this,directory,id,revision]{writeArtifacts(directory,id,revision);});
-    auto result=writeFrame(directory,id,revision,generatedMetadata_.expandedFromHistory().updated({},revision),false);
-    blobs.get();result["snapshot_write_ms"]=clock.nsecsElapsed()/1e6;return result;
+    QElapsedTimer total;total.start();const QDir dir(directory);
+    const auto writeArtifact=[packed=packed_,&dir,&id,revision](const QString &name,const QByteArray &stored){
+        QElapsedTimer clock;clock.start();ReplayWork work;
+        auto bytes=packed?qUncompress(stored):stored;
+        if(bytes.isEmpty())bad("Invalid history artifact");
+        work.inflate=packed?clock.nsecsElapsed()/1e6:0;clock.restart();
+        if(name=="native-report.json")bytes=replayReport(bytes,id,revision);
+        work.encode=clock.nsecsElapsed()/1e6;clock.restart();
+        writeReplayFile(dir.filePath(name),bytes);
+        work.write=clock.nsecsElapsed()/1e6;return work;
+    };
+    // Keep the large, independent display files off the model metadata lane.
+    // At most two workers run; a failure joins them before the stage is removed.
+    std::array<std::future<ReplayWork>,2> display;
+    for(const auto &name:{QStringLiteral("scene.fslp"),QStringLiteral("surface.json")}) {
+        auto found=artifacts_.find(name);
+        if(packed_&&found!=artifacts_.end()&&found->second.size()>=256*1024)
+            display[name=="scene.fslp"?0:1]=std::async(std::launch::async,writeArtifact,name,found->second);
+    }
+    QElapsedTimer clock;clock.start();ReplayWork work;
+    const auto expanded=packed_?generatedMetadata_.expandedFromHistory():generatedMetadata_;
+    work.inflate=packed_?clock.nsecsElapsed()/1e6:0;clock.restart();
+    const auto layer=restoredLayerNumber();
+    const auto model=expanded.updated({},revision,layer);
+    auto input=input_;input["document_id"]=id;input["revision"]=qint64(revision);
+    const auto inputBytes=QJsonDocument(input).toJson(QJsonDocument::Compact);
+    work.encode=clock.nsecsElapsed()/1e6;clock.restart();
+    writeReplayFile(dir.filePath("model.json"),model.bytes());
+    writeReplayFile(dir.filePath("native-input.json"),inputBytes);
+    work.write=clock.nsecsElapsed()/1e6;
+    for(const auto &[name,bytes]:artifacts_) {
+        if((name=="scene.fslp"&&display[0].valid())||(name=="surface.json"&&display[1].valid()))continue;
+        work.add(writeArtifact(name,bytes));
+    }
+    for(auto &job:display)if(job.valid())work.add(job.get());
+    auto result=frameResult(dir,id,revision,total.nsecsElapsed()/1e6);
+    // Summed per-lane time; these stages can overlap on dense hulls.
+    result["history_layer_number"]=layer;
+    result["history_inflate_work_ms"]=work.inflate;result["history_encode_work_ms"]=work.encode;
+    result["history_file_write_work_ms"]=work.write;
+    return result;
 }
-QJsonObject PublicationFrame::writeFrame(const QString &directory,const QString &documentId,quint64 revision,const fs::SnapshotMetadata &model,bool withArtifacts) const {
+QJsonObject PublicationFrame::writeFrame(const QString &directory,const QString &documentId,quint64 revision,const fs::SnapshotMetadata &model) const {
     QElapsedTimer clock;clock.start();const QDir dir(directory);
     auto input=input_;input["document_id"]=documentId;input["revision"]=qint64(revision);
-    if(withArtifacts)writeArtifacts(directory,documentId,revision);
+    writeArtifacts(directory,documentId,revision);
     save(dir.filePath("native-input.json"),input);save(dir.filePath("model.json"),model.bytes());
-    return {{"document_id",documentId},{"revision",qint64(revision)},{"model",dir.filePath("model.json")},
-        {"scene",dir.filePath("scene.fslp")},{"dxf",dir.filePath("reference.dxf")},{"native_report",dir.filePath("native-report.json")},
-        {"sections",dir.filePath("sections.json")},{"surface",dir.filePath("surface.json")},{"snapshot_engine","cpp-publication"},
-        {"worker_ms",0},{"snapshot_write_ms",clock.nsecsElapsed()/1e6},{"artifacts_reused",true}};
+    return frameResult(dir,documentId,revision,clock.nsecsElapsed()/1e6);
 }
 }

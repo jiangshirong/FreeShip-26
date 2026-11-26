@@ -17,18 +17,14 @@ Vec3 unit(Vec3 a){const double n=std::hypot(a.x,a.y,a.z);return n>1e-30?Vec3{a.x
 quint64 edge(int a,int b){return (quint64(quint32(std::min(a,b)))<<32)|quint32(std::max(a,b));}
 }
 QColor gaussianColor(double value,double minimum,double maximum){
-    double f=.5;
-    if(std::abs(value)>=1e-4){
-        const double bound=value>0?maximum:minimum;
-        const double ratio=bound!=0?std::clamp(value/bound,0.,1.):0;
-        f=.5+(value>0?-.5:.5)*std::pow(ratio,.1);
-    }
-    // Legacy 420..700 nm display ramp, with its 0.8 gamma correction.
-    const double w=420+(1-f)*280;double r=0,g=0,b=0;
-    if(w<440){r=(440-w)/60;b=1;}else if(w<490){g=(w-440)/50;b=1;}
-    else if(w<510){g=1;b=(510-w)/20;}else if(w<580){r=(w-510)/70;g=1;}
-    else if(w<645){r=1;g=(645-w)/65;}else r=1;
-    auto c=[](double x){return qRound(255*std::pow(std::clamp(x,0.,1.),.8));};return {c(r),c(g),c(b)};
+    const QColor zero("#dce8df");
+    if(std::abs(value)<1e-4)return zero;
+    const QColor end=value>0?QColor("#af3f2f"):QColor("#2452a0");
+    const double bound=value>0?maximum:minimum;
+    const double ratio=bound!=0?std::clamp(value/bound,0.,1.):0;
+    const double strength=std::pow(ratio,.35);
+    const auto blend=[strength](int start,int stop){return qRound(start+(stop-start)*strength);};
+    return {blend(zero.red(),end.red()),blend(zero.green(),end.green()),blend(zero.blue(),end.blue())};
 }
 std::shared_ptr<const SurfaceAnalysis> analyzeSurface(const fs::ModelSnapshot& snapshot){
     if(!snapshot.surfaceTopology)throw std::runtime_error("Surface topology is unavailable");
@@ -95,13 +91,105 @@ std::shared_ptr<const SurfaceAnalysis> analyzeSurface(const fs::ModelSnapshot& s
         out.angleDefect[p]=out.valid[p]?360-out.angleDefect[p]*180/pi:0;
         if(out.valid[p]){out.minimum=std::min(out.minimum,out.angleDefect[p]);out.maximum=std::max(out.maximum,out.angleDefect[p]);}
     }
-    const QColor unknown(150,150,150);
-    for(const auto& face:mesh.faces)for(int j=2;j<face.size();++j){const int indices[]{face[0],face[j-1],face[j]};SurfaceShadeTriangle triangle;
-        auto flat=unit(cross(sub(mesh.points[indices[1]],mesh.points[indices[0]]),sub(mesh.points[indices[2]],mesh.points[indices[0]])));
-        for(int k=0;k<3;++k){int p=indices[k];auto& v=triangle[k];v.normal=(mesh.types[p]==0||mesh.types[p]==2)?out.normals[p]:flat;
-            v.gaussian=out.valid[p]?gaussianColor(out.angleDefect[p],out.minimum,out.maximum):unknown;
-            v.developable=out.valid[p]&&!plateBoundary[p]?(std::abs(out.angleDefect[p])<1e-4?QColor(0,255,0):QColor(255,0,0)):unknown;}
-        out.triangles.append(triangle);
+    out.developableEvaluated.resize(n);
+    for(int p=0;p<n;++p)out.developableEvaluated[p]=out.valid[p]&&!plateBoundary[p];
+
+    // Angle deficit needs a complete neighborhood. For display, carry nearby
+    // evaluated colors to an open edge or plate seam on that side alone.
+    // The extension never supplies a measurement or crosses an invalid vertex.
+    struct BoundaryShade {
+        QVector<int> neighbors;
+        int distance=-1,count=0;
+        double nonzero=0;
+        quint8 classes=0;
+    };
+    QHash<quint64,int> boundaryIndices;
+    QVector<BoundaryShade> boundaryShades;
+    const auto boundaryKey=[](int region,int p){return (quint64(quint32(region))<<32)|quint32(p);};
+    const auto boundaryIndex=[&](int region,int p){
+        if(invalid[p]||(!boundary[p]&&!plateBoundary[p]))return -1;
+        const auto key=boundaryKey(region,p);
+        auto it=boundaryIndices.constFind(key);
+        if(it!=boundaryIndices.cend())return it.value();
+        const int index=int(boundaryShades.size());
+        boundaryIndices.insert(key,index);
+        boundaryShades.append(BoundaryShade{});
+        return index;
+    };
+    const auto isNonzero=[&](int p){return std::abs(out.angleDefect[p])>=1e-4;};
+    for(int i=0;i<mesh.faces.size();++i){
+        const auto& face=mesh.faces[i];
+        const int region=mesh.plateRegions.value(i,0);
+        for(int j=0;j<face.size();++j){
+            const int a=face[j],b=face[(j+1)%face.size()];
+            const int ia=boundaryIndex(region,a),ib=boundaryIndex(region,b);
+            if(ia>=0&&ib>=0){
+                boundaryShades[ia].neighbors.append(ib);
+                boundaryShades[ib].neighbors.append(ia);
+            }else{
+                const int index=ia>=0?ia:ib;
+                const int sample=ia>=0?b:a;
+                if(index<0||!out.developableEvaluated[sample])continue;
+                auto& shade=boundaryShades[index];
+                const bool nonzero=isNonzero(sample);
+                shade.nonzero+=nonzero;
+                shade.classes|=shadeBit(nonzero?ShadeClass::Nonzero:ShadeClass::NearZero);
+                ++shade.count;
+            }
+        }
+    }
+    QVector<int> queue;
+    for(int i=0;i<boundaryShades.size();++i)if(boundaryShades[i].count){
+        boundaryShades[i].distance=0;
+        queue.append(i);
+    }
+    for(int i=0;i<queue.size();++i){
+        const auto& from=boundaryShades[queue[i]];
+        for(int index:from.neighbors){
+            auto& to=boundaryShades[index];
+            if(to.distance<0){to.distance=from.distance+1;queue.append(index);}
+            if(to.distance!=from.distance+1)continue;
+            to.nonzero+=from.nonzero/from.count;
+            to.classes|=from.classes;
+            ++to.count;
+        }
+    }
+    const auto unknown=developableDisplayColor(ShadeClass::Unknown);
+    const auto nearZero=developableDisplayColor(ShadeClass::NearZero);
+    const auto nonzero=developableDisplayColor(ShadeClass::Nonzero);
+    const auto boundaryColor=[&](double weight){
+        const auto mix=[weight](int a,int b){return qRound(a+(b-a)*weight);};
+        return QColor(mix(nearZero.red(),nonzero.red()),mix(nearZero.green(),nonzero.green()),
+                      mix(nearZero.blue(),nonzero.blue()));
+    };
+    for(int i=0;i<mesh.faces.size();++i){
+        const auto& face=mesh.faces[i];
+        const int region=mesh.plateRegions.value(i,0);
+        for(int j=2;j<face.size();++j){
+            const int indices[]{face[0],face[j-1],face[j]};
+            SurfaceShadeTriangle triangle;
+            const auto flat=unit(cross(sub(mesh.points[indices[1]],mesh.points[indices[0]]),
+                                       sub(mesh.points[indices[2]],mesh.points[indices[0]])));
+            for(int k=0;k<3;++k){
+                const int p=indices[k];
+                auto& v=triangle[k];
+                v.normal=(mesh.types[p]==0||mesh.types[p]==2)?out.normals[p]:flat;
+                const auto sign=isNonzero(p)?(out.angleDefect[p]>0?ShadeClass::Positive:ShadeClass::Negative):ShadeClass::NearZero;
+                v.gaussian=out.valid[p]?gaussianColor(out.angleDefect[p],out.minimum,out.maximum):unknown;
+                v.gaussianClasses=shadeBit(out.valid[p]?sign:ShadeClass::Unknown);
+                if(out.developableEvaluated[p]){
+                    const auto kind=isNonzero(p)?ShadeClass::Nonzero:ShadeClass::NearZero;
+                    v.developable=developableDisplayColor(kind);
+                    v.developableClasses=shadeBit(kind);
+                }else{
+                    const int index=boundaryIndices.value(boundaryKey(region,p),-1);
+                    const auto* shade=index>=0?&boundaryShades[index]:nullptr;
+                    v.developable=shade&&shade->count?boundaryColor(shade->nonzero/shade->count):unknown;
+                    v.developableClasses=shade&&shade->count?shade->classes:shadeBit(ShadeClass::Unknown);
+                }
+            }
+            out.triangles.append(triangle);
+        }
     }
     if(out.triangles.size()!=snapshot.triangles.size())throw std::runtime_error("Analysis triangle count mismatch");
     cache[key]={snapshot.surfaceTopology,result};return result;

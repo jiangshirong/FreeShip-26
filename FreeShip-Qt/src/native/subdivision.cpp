@@ -10,7 +10,7 @@
  * ANY WARRANTY, including MERCHANTABILITY or FITNESS FOR A PARTICULAR
  * PURPOSE. See ../../COPYING for the complete license.
  */
-#include "subdivision.h"
+#include "subdivision_faces.h"
 #include <algorithm>
 #include <cmath>
 #include <limits>
@@ -390,6 +390,19 @@ Mesh refine(const Mesh& previous, SubdivisionMode mode, unsigned nextLevel,Subdi
     return mesh;
 }
 
+template<class AddPoint>
+void appendFaces(const Mesh& mesh, Index roots, unsigned level, std::vector<SubdivisionFace>& faces, AddPoint point) {
+    faces.reserve(mesh.faces.size());
+    std::vector<Index> children(roots, 0);
+    for (const auto& face : mesh.faces) {
+        SubdivisionFace f; f.rootControlFace = face.root;
+        f.childIndex = level == 0 ? -1 : int(children[face.root]++); f.layer = face.layer;
+        f.points.reserve(face.points.size());
+        for (auto p : face.points) f.points.push_back(point(p));
+        faces.push_back(std::move(f));
+    }
+}
+
 SubdivisionLevel canonical(const Mesh& mesh, const Mesh& control, const GeometryInput& input, unsigned level,SubdivisionProgram* program=nullptr) {
     SubdivisionLevel out; out.level = level; out.layers = input.layers;
     std::vector<Index> mapped(mesh.points.size(), absent);
@@ -407,13 +420,7 @@ SubdivisionLevel canonical(const Mesh& mesh, const Mesh& control, const Geometry
         }
         return mapped[i];
     };
-    std::vector<Index> children(input.faces.size(), 0);
-    for (const auto& face : mesh.faces) {
-        SubdivisionFace f; f.rootControlFace = face.root;
-        f.childIndex = level == 0 ? -1 : int(children[face.root]++); f.layer = face.layer;
-        for (auto p : face.points) f.points.push_back(point(p));
-        out.faces.push_back(std::move(f));
-    }
+    appendFaces(mesh, input.faces.size(), level, out.faces, point);
     for (const auto& curve : mesh.curves) {
         SubdivisionCurve c; c.visible = curve.visible; c.freeStanding = curve.freeStanding;
         for (auto p : curve.points) { c.points.push_back(point(p)); c.knuckles.push_back(mesh.points[p].type == VertexType::Corner); }
@@ -480,6 +487,30 @@ void compactProgram(SubdivisionProgram& p){
     for(auto& i:p.outputs)i=mapped[i];p.operations.resize(end);
 }
 }
+SubdivisionFaces buildSubdivisionFaces(const GeometryInput& input,unsigned level) {
+    if (level > maximumLevel) throw std::invalid_argument("Subdivision level must be between zero and four");
+    auto mesh = initialMesh(input);
+    for (unsigned n = 1; n <= level; ++n) mesh = refine(mesh, input.subdivisionMode, n);
+    SubdivisionFaces out;
+    if (level == 0) {
+        out.points.reserve(mesh.points.size());
+        for (const auto& p : mesh.points) out.points.push_back({p.position,p.type});
+        appendFaces(mesh,input.faces.size(),level,out.faces,[](Index p) { return p; });
+        return out;
+    }
+    std::vector<Index> mapped(mesh.points.size(),absent);
+    appendFaces(mesh,input.faces.size(),level,out.faces,[&](Index id) {
+        auto& index=mapped[id];
+        if (index==absent) {
+            index=out.points.size();
+            const auto& p=mesh.points[id];
+            out.points.push_back({p.position,p.type});
+        }
+        return index;
+    });
+    return out;
+}
+
 SubdivisionProgram compileSubdivision(const GeometryInput& input,unsigned level){
     if(level>maximumLevel)throw std::invalid_argument("Subdivision level must be between zero and four");
     SubdivisionProgram program;program.operations.push_back({});auto control=initialMesh(input);

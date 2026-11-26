@@ -598,10 +598,10 @@ void MainWindow::auditMenuInteraction(){
             bool waiting=false,refreshed=false;QElapsedTimer elapsed;elapsed.start();QTimer poll;poll.setInterval(5);
             connect(&poll,&QTimer::timeout,this,[&]{
                 if(!activeProject_)return;
-                auto* buttons=activeProject_->findChild<QDialogButtonBox*>();
-                if(session_.busy())waiting=waiting||(activeProject_->property("project_waiting").toBool()&&buttons&&!buttons->button(QDialogButtonBox::Ok)->isEnabled());
+                auto* editor=activeProject_->fieldEditor("comment");
+                if(session_.busy())waiting=waiting||(activeProject_->property("project_waiting").toBool()&&editor&&!editor->isEnabled());
                 else{
-                    refreshed=!activeProject_->property("project_waiting").toBool()&&buttons&&buttons->button(QDialogButtonBox::Ok)->isEnabled()&&
+                    refreshed=!activeProject_->property("project_waiting").toBool()&&editor&&editor->isEnabled()&&
                         static_cast<QPlainTextEdit*>(activeProject_->fieldEditor("comment"))->toPlainText()==fresh&&activeProject_->changes().isEmpty();
                     activeProject_->reject();
                 }

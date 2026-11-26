@@ -8,6 +8,7 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QElapsedTimer>
+#include <QMouseEvent>
 #include <QOpenGLFunctions>
 #include <cmath>
 #include <cstdio>
@@ -48,10 +49,16 @@ int main(int argc,char** argv){
     auto check=[&](QString name,bool good){cases.append(QJsonObject{{"id",name},{"status",good?"pass":"fail"}});failed|=!good;std::fprintf(stderr,"%s %s\n",good?"pass":"fail",name.toUtf8().constData());std::fflush(stderr);};
     try{
         const auto planar=fan(false),saddle=fan(true);const auto plane=analyzeSurface(*planar),negative=analyzeSurface(*saddle);
+        const auto green=developableDisplayColor(ShadeClass::NearZero);
+        const auto red=developableDisplayColor(ShadeClass::Nonzero);
+        const auto gray=developableDisplayColor(ShadeClass::Unknown);
         check("flat-interior-angle-deficit-zero",plane->valid[0]&&std::abs(plane->angleDefect[0])<1e-10);
-        check("open-boundary-is-unknown-not-green",plane->boundary==4&&!plane->valid[1]&&plane->triangles[0][1].developable==QColor(150,150,150));
+        check("open-boundary-remains-unevaluated",plane->boundary==4&&!plane->valid[1]&&!plane->developableEvaluated[1]);
+        check("planar-color-reaches-open-edge",plane->triangles[0][1].developable==green);
+        const auto unsupported=mesh({{0,0,0},{1,0,0},{0,1,0}},{{0,1,2}});
+        check("patch-without-samples-stays-gray",analyzeSurface(*unsupported)->triangles[0][0].developable==gray);
         check("saddle-angle-deficit-minus-120",negative->valid[0]&&std::abs(negative->angleDefect[0]+120)<1e-10);
-        check("saddle-interior-is-flagged",negative->triangles[0][0].developable==QColor(255,0,0));
+        check("saddle-interior-is-flagged",negative->triangles[0][0].developable==red);
         QVector<Vec3> quadSaddlePoints;
         QVector<QVector<int>> quadSaddleFaces;
         for(int x=-1;x<=1;++x)for(int y=-1;y<=1;++y)
@@ -61,7 +68,7 @@ int main(int argc,char** argv){
         const auto twisted=analyzeSurface(*quadSaddle);
         check("twisted-quad-saddle-has-negative-deficit",
               twisted->valid[4]&&twisted->angleDefect[4]<-1&&
-              twisted->triangles[0][2].developable==QColor(255,0,0));
+              twisted->triangles[0][2].developable==red);
         QVector<Vec3> chinePoints;
         QVector<QVector<int>> chineFaces;
         QVector<int> chineRegions;
@@ -79,13 +86,19 @@ int main(int argc,char** argv){
         const auto joined=analyzeSurface(*joinedChine),cut=analyzeSurface(*cutChine);
         check("curved-chine-whole-shell-retains-gaussian-angle-deficit",
               std::abs(cut->angleDefect[7])>10&&cut->angleDefect==joined->angleDefect);
-        check("curved-chine-plate-seam-is-neutral",
-              joined->triangles[2][2].developable==QColor(255,0,0)&&
-              cut->triangles[2][2].developable==QColor(150,150,150)&&
-              cut->triangles[4][1].developable==QColor(150,150,150));
+        check("curved-chine-seam-is-unevaluated-on-its-two-plates",
+              joined->triangles[2][2].developable==red&&!cut->developableEvaluated[7]&&
+              cut->triangles[2][2].developable==green&&cut->triangles[4][1].developable==green);
         check("curved-chine-two-plate-interiors-are-developable",
-              cut->triangles[0][2].developable==QColor(0,255,0)&&
-              cut->triangles[4][2].developable==QColor(0,255,0));
+              cut->triangles[0][2].developable==green&&cut->triangles[4][2].developable==green);
+        auto seamPoints=planar->surfaceTopology->points;
+        auto seamFaces=planar->surfaceTopology->faces;
+        seamPoints.append({1,1,0});
+        seamFaces.append({2,1,5});
+        const auto separateSeam=analyzeSurface(*mesh(seamPoints,seamFaces,0,{0,0,0,0,1}));
+        check("color-extension-does-not-cross-unsupported-plate-seam",
+              !separateSeam->developableEvaluated[1]&&separateSeam->triangles[0][2].developable==green&&
+              separateSeam->triangles[4][1].developable==gray);
         const QVector<Vec3> octaPoints{{1,0,0},{-1,0,0},{0,1,0},{0,-1,0},{0,0,1},{0,0,-1}};
         const QVector<QVector<int>> octaFaces{{0,2,4},{2,1,4},{1,3,4},{3,0,4},{2,0,5},{1,2,5},{3,1,5},{0,3,5}};
         auto octa=mesh(octaPoints,octaFaces);const auto positive=analyzeSurface(*octa);bool convex=true;double total=0;
@@ -106,12 +119,92 @@ int main(int argc,char** argv){
         check("disconnected-vertex-fans-are-unknown",!analyzeSurface(*bowtie)->valid[0]);
         auto badFaces=planar->surfaceTopology->faces;badFaces.append({0,1,3});auto bad=mesh(planar->surfaceTopology->points,badFaces);check("nonmanifold-edge-is-unknown",!analyzeSurface(*bad)->valid[0]);
         check("analysis-shared-for-same-immutable-topology",analyzeSurface(*planar)==plane);
-        check("sign-colors-follow-original-spectrum",gaussianColor(120,-120,120)==QColor(255,0,0)&&gaussianColor(-120,-120,120).blue()==255&&gaussianColor(0,-120,120).green()==255);
+        check("curvature-ramp-diverges-from-neutral",gaussianColor(120,-120,120)==QColor("#af3f2f")&&
+              gaussianColor(-120,-120,120)==QColor("#2452a0")&&gaussianColor(0,-120,120)==QColor("#dce8df")&&
+              gaussianColor(12,-120,120).red()>gaussianColor(120,-120,120).red()&&
+              gaussianColor(-12,-120,120).red()>gaussianColor(-120,-120,120).red());
         // The analytic cylinder above is intentionally open. For renderer checks,
         // add caps so the plan camera has a nonzero projected surface to sample.
         QVector<int> top,bottom;for(int i=0;i<16;++i){top.append(32+i);bottom.append(15-i);}auto cappedFaces=cylinderFaces;cappedFaces.append(top);cappedFaces.append(bottom);auto capped=mesh(cylinderPoints,cappedFaces);
         HullView view;view.setAttribute(Qt::WA_DontShowOnScreen);view.resize(800,600);view.setAnimationsEnabled(false);view.setProjection(HullProjection::Perspective);view.setSnapshot(capped);view.setGridVisible(false);view.setHydroVisible(false);view.setControlNetVisible(false);view.image();
         check("ordinary-render-does-not-build-analysis",!view.viewSettingsEvidence().value("analysis_built").toBool());
+        const auto legend=[&]{
+            QSet<QString> colors;
+            for(const auto item:view.viewSettingsEvidence().value("shade_legend").toArray())
+                colors.insert(item.toObject().value("color").toString());
+            return colors;
+        };
+        auto layers=std::make_shared<fs::ModelSnapshot>(*planar);
+        layers->layers[0].color=0x0000ff;
+        layers->layers.append({2,"Hidden behind surface",0x00ff00,true,false});
+        layers->layers.back().useInHydrostatics=false;
+        layers->layers.append({3,"Separate surface",0xff0000,true,false});
+        layers->layers.back().useInHydrostatics=false;
+        const auto triangle=layers->triangles[0].vertices;
+        layers->triangles.clear();
+        auto front=triangle,back=triangle,separateTriangle=triangle;
+        for(auto& p:front)p.z=1;
+        for(auto& p:back)p.z=-1;
+        for(auto& p:separateTriangle)p.x+=4;
+        layers->triangles={{1,front},{2,back},{3,separateTriangle}};
+        layers->surfaceTopology.reset();
+        layers->underwaterShadeOverride=true;
+        layers->underwaterColorOverride=0x9933aa;
+        layers->waterlineZ=2;
+        view.setSnapshot(layers);view.setProjection(HullProjection::Plan);view.fit();view.setFillVisible(true);
+        const auto originalLight=view.light();
+        auto unlit=originalLight;unlit.enabled=false;view.setLight(unlit);
+        const auto fillColors=[&](const QImage& pixels){
+            return pixels.pixelColor(view.project({.3,.3,1}).toPoint())==QColor("#aa3399")&&
+                   pixels.pixelColor(view.project({4.3,.3,0}).toPoint())==QColor("#0000ff");
+        };
+        const auto softwareFill=view.softwareImage();
+        check("cpu-fill-keeps-water-and-layer-colors-without-legend",legend().isEmpty()&&fillColors(softwareFill));
+        const auto viewportFill=view.image();
+        check("viewport-fill-keeps-water-and-layer-colors-without-legend",legend().isEmpty()&&fillColors(viewportFill));
+        check("settled-frame-supersampling",view.viewSettingsEvidence().value("shade_sample_dpr").toDouble()==2);
+        view.setLight(originalLight);
+        view.setSnapshot(saddle);view.setProjection(HullProjection::Perspective);view.fit();
+        view.setShadeMode(HullShade::Gaussian);view.image();
+        const auto saddleColors=legend();
+        const QPointF start(350,280),stop(110,365);
+        const auto projectedBefore=view.project({1,0,1});
+        const auto mouse=[&](QEvent::Type type,QPointF at,Qt::MouseButton button,Qt::MouseButtons held){
+            QMouseEvent event(type,at,view.mapToGlobal(at),button,held,Qt::ControlModifier);
+            QApplication::sendEvent(&view,&event);
+        };
+        mouse(QEvent::MouseButtonPress,start,Qt::LeftButton,Qt::LeftButton);
+        mouse(QEvent::MouseMove,stop,Qt::NoButton,Qt::LeftButton);
+        mouse(QEvent::MouseButtonRelease,stop,Qt::LeftButton,Qt::NoButton);
+        view.image();
+        check("negative-curvature-legend-survives-orbit",projectedBefore!=view.project({1,0,1})&&
+              saddleColors.contains("#2452a0")&&legend()==saddleColors);
+        view.zoomAt({400,300},8);view.image();
+        check("negative-curvature-legend-survives-zoom",legend()==saddleColors);
+        view.panBy({900,0});view.image();
+        check("negative-curvature-legend-survives-pan",legend()==saddleColors);
+        view.setSnapshot(planar);view.fit();
+        view.image();
+        check("gaussian-legend-omits-negative-on-planar-hull",!legend().contains("#2452a0")&&legend().contains("#dce8df"));
+        view.setProjection(HullProjection::Plan);view.fit();
+        view.setShadeMode(HullShade::Developable);view.image();
+        check("developable-legend-omits-gray-when-boundaries-have-support",legend()==QSet<QString>{green.name()});
+        view.setSnapshot(unsupported);view.fit();view.image();
+        check("developable-legend-retains-gray-for-unsupported-patches",legend()==QSet<QString>{gray.name()});
+        view.setSnapshot(quadSaddle);view.fit();view.setShadeMode(HullShade::Developable);
+        const auto continuous=[&](const QImage& pixels){
+            for(double y:{-.75,-.5,-.25,.25,.5,.75})for(double x:{-.03,0.,.03}){
+                if(pixels.pixelColor(view.project({x,y,.25*x*y}).toPoint())!=red)return false;
+            }
+            return true;
+        };
+        check("software-color-crosses-coarse-face-edges",continuous(view.softwareImage()));
+        const auto connected=view.image();
+        check("viewport-color-crosses-coarse-face-edges",continuous(connected)&&legend()==QSet<QString>{red.name()});
+        connected.save(out+"/developable-continuous.png");
+        view.setShadeMode(HullShade::Zebra);view.image();
+        check("zebra-palette-does-not-depend-on-view-angle",legend().size()==2);
+        view.setSnapshot(capped);
         QJsonArray comparisons;
         for(auto projection:{HullProjection::Profile,HullProjection::Plan,HullProjection::Body,HullProjection::Perspective}){
             view.setProjection(projection);view.fit();
@@ -120,6 +213,8 @@ int main(int argc,char** argv){
                 if(view.gpuReady()){auto compared=compare(cpu,gpu);compared["mode"]=mode;compared["projection"]=int(projection);comparisons.append(compared);check(name+"-gpu-cpu",compared["samples"].toInt()>100&&compared["max_channel_error"].toInt()<=1);}
                 const auto count=view.viewSettingsEvidence().value("fill_renders");for(int i=0;i<5;++i)view.image();check(name+"-cache",view.viewSettingsEvidence().value("fill_renders")==count);
             }
+            view.setFillVisible(true);view.image();
+            check(QString("fill-clears-analysis-legend-projection-%1").arg(int(projection)),legend().isEmpty());
         }
         report["gpu_available"]=view.gpuReady();report["gpu_comparisons"]=comparisons;
         if(!view.gpuReady())cases.append(QJsonObject{{"id","gpu-comparisons"},{"status","not_run"},{"message","No OpenGL context on this Qt platform."}});

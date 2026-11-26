@@ -8,6 +8,7 @@
 class ModelSession;class QListWidget;class StudioMessage;class QTableWidget;class QDoubleSpinBox;
 class QCheckBox;class QGraphicsScene;class QGraphicsView;class QGraphicsItem;class QPagedPaintDevice;
 class QSpinBox;
+class CalculationLayers;
 class PlatesDialog final:public QDialog {
 public:
     PlatesDialog(ModelSession& session,bool hidden,QWidget* parent=nullptr);
@@ -25,6 +26,7 @@ protected:
     void hideEvent(QHideEvent* event) override;
     void showEvent(QShowEvent* event) override;
 private:
+    CalculationLayers* layerChoice_=nullptr;
     friend class MainWindow;
     void previewAssembly();
     void buildScene();void updateItems();void positionChanged(int row);void select(int row);void placePlate(int row);

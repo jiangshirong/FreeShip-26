@@ -369,3 +369,4 @@ qt_add_resources(qt_update_about_tests "update_about_vendors"
 add_executable(qt_message_lifecycle_tests "${CALCULATION_TEST_DIR}/message_lifecycle_tests.cpp")
 target_link_libraries(qt_message_lifecycle_tests PRIVATE property_ui)
 target_link_libraries(qt_math_notation_tests PRIVATE property_ui math_notation)
+

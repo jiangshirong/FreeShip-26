@@ -3,7 +3,7 @@
 #include <QOpenGLFunctions>
 #include <limits>
 
-HullGpu::HullGpu(const HullRenderMesh& mesh) {
+HullGpu::HullGpu() {
     QSurfaceFormat format;
     format.setVersion(2, 0);
     format.setRenderableType(QSurfaceFormat::OpenGL);
@@ -30,35 +30,37 @@ HullGpu::HullGpu(const HullRenderMesh& mesh) {
         "if(lighting){vec3 d=lightPosition-center;float len=length(d);"
         "float cosine=len>0.000000000001?abs(dot(normal,d/len)):0.0;"
         "lightFactor=clamp(ambient+intensity*cosine,0.0,1.0);}"
-        "if(shadeMode==1){rgb=gaussianColor;lightFactor=1.0;} else if(shadeMode==2)rgb=developColor;"
+        "if(shadeMode==1){rgb=gaussianColor;lightFactor=1.0;} else if(shadeMode==2){rgb=developColor;lightFactor=1.0;} else if(shadeMode==3)lightFactor=1.0;"
         "zebraValue=0.0;if(shadeMode==3){vec3 sight=perspective?eye-position:viewDirection;float len=length(sight);"
         "zebraValue=clamp(len>0.000000000001?abs(dot(sight/len,smoothNormal)):0.0,0.0,1.0);} }") &&
         program_->addShaderFromSourceCode(QOpenGLShader::Fragment,
         "varying vec3 rgb; varying float height; varying float lightFactor;"
-        "varying float zebraValue; uniform int shadeMode; uniform vec3 zebraColor;"
+        "varying float zebraValue; uniform int shadeMode; uniform vec3 zebraColor; uniform vec3 zebraLight;"
         "uniform bool shadeUnderwater;"
         "uniform float waterline; varying vec3 wetRgb;"
-        "void main(){ vec3 c=(shadeMode==0 && shadeUnderwater && height<waterline)"
-        "?wetRgb:rgb; if(shadeMode==3 && mod(floor(zebraValue/0.02),2.0)>0.5)c=zebraColor;"
+        "void main(){ vec3 c=(shadeMode==0 && shadeUnderwater && height<waterline)?wetRgb:rgb;"
+        "if(shadeMode==3){bool dark=mod(floor(zebraValue*50.0+0.5),2.0)>0.5;c=dark?zebraColor:zebraLight;}"
         "gl_FragColor=vec4(c*lightFactor,1.0); }") &&
         program_->link();
     if (!linked) { context_.doneCurrent(); return; }
 
     context_.doneCurrent();
-    setMesh(mesh);
 }
+
+HullGpu::HullGpu(const HullRenderMesh& mesh):HullGpu(){setMesh(mesh);}
 
 void HullGpu::setMesh(const HullRenderMesh& mesh) {
     ready_=false;analysisReady_=false;
     if(!program_||!program_->isLinked()||!context_.makeCurrent(&surface_))return;
     auto* gl=context_.functions();
     // Buffer byte sizes are signed ints in Qt's OpenGL wrapper.
-    if (mesh.triangles.size() > std::numeric_limits<int>::max() / (45 * int(sizeof(float)))) {
+    constexpr int floatsPerVertex=15;
+    if (mesh.triangles.size() > std::numeric_limits<int>::max() / (3*floatsPerVertex*int(sizeof(float)))) {
         context_.doneCurrent();
         return;
     }
     QVector<float> data;
-    data.reserve(mesh.triangles.size() * 45);
+    data.reserve(mesh.triangles.size()*3*floatsPerVertex);
     for (const auto& triangle : mesh.triangles) {
         const auto wet=triangle.useUnderwater?underwaterTint(triangle.color,mesh.underwaterColor,mesh.underwaterAlpha):triangle.color;
         fs::Vec3 center{};for(const auto& p:triangle.vertices){center.x+=(p.x-mesh.center.x)/(3*mesh.extent);center.y+=(p.y-mesh.center.y)/(3*mesh.extent);center.z+=(p.z-mesh.center.z)/(3*mesh.extent);}
@@ -76,7 +78,7 @@ void HullGpu::setMesh(const HullRenderMesh& mesh) {
             data.append(float(wet.redF()));data.append(float(wet.greenF()));data.append(float(wet.blueF()));
         }
     }
-    vertexCount_ = int(data.size() / 15);
+    vertexCount_ = int(data.size()/floatsPerVertex);
     shadeUnderwater_ = mesh.shadeUnderwater;
     waterline_ = float((mesh.waterlineZ - mesh.center.z) / mesh.extent);
     if (buffer_.create() && buffer_.bind()) {
@@ -138,6 +140,7 @@ QImage HullGpu::render(QSize logicalSize, qreal dpr, const QMatrix4x4& camera, c
     program_->setUniformValue("shadeMode",int(style.mode));program_->setUniformValue("perspective",style.perspective);
     program_->setUniformValue("eye",QVector3D(style.eye.x,style.eye.y,style.eye.z));program_->setUniformValue("viewDirection",QVector3D(style.direction.x,style.direction.y,style.direction.z));
     program_->setUniformValue("zebraColor",QVector3D(style.zebra.redF(),style.zebra.greenF(),style.zebra.blueF()));
+    program_->setUniformValue("zebraLight",QVector3D(style.zebraLight.redF(),style.zebraLight.greenF(),style.zebraLight.blueF()));
     const int position = program_->attributeLocation("position");
     const int normal = program_->attributeLocation("normal");
     const int color = program_->attributeLocation("color");
@@ -145,20 +148,21 @@ QImage HullGpu::render(QSize logicalSize, qreal dpr, const QMatrix4x4& camera, c
     const int wet=program_->attributeLocation("wetColor");
     program_->enableAttributeArray(position);
     program_->enableAttributeArray(normal);
-    program_->enableAttributeArray(color);
     program_->enableAttributeArray(center);
+    const int stride=15*int(sizeof(float));
+    program_->setAttributeBuffer(position,GL_FLOAT,0,3,stride);
+    program_->setAttributeBuffer(normal,GL_FLOAT,3*sizeof(float),3,stride);
+    program_->setAttributeBuffer(center,GL_FLOAT,9*sizeof(float),3,stride);
+    program_->enableAttributeArray(color);
     program_->enableAttributeArray(wet);
-    program_->setAttributeBuffer(position, GL_FLOAT, 0, 3, 15 * sizeof(float));
-    program_->setAttributeBuffer(normal, GL_FLOAT, 3 * sizeof(float), 3, 15 * sizeof(float));
-    program_->setAttributeBuffer(color, GL_FLOAT, 6 * sizeof(float), 3, 15 * sizeof(float));
-    program_->setAttributeBuffer(center,GL_FLOAT,9*sizeof(float),3,15*sizeof(float));
-    program_->setAttributeBuffer(wet,GL_FLOAT,12*sizeof(float),3,15*sizeof(float));
+    program_->setAttributeBuffer(color,GL_FLOAT,6*sizeof(float),3,stride);
+    program_->setAttributeBuffer(wet,GL_FLOAT,12*sizeof(float),3,stride);
     const int smooth=program_->attributeLocation("smoothNormal"),gauss=program_->attributeLocation("gaussianColor"),develop=program_->attributeLocation("developColor");
     if(style.mode!=HullShade::Flat){
         analysisBuffer_.bind();for(int location:{smooth,gauss,develop})program_->enableAttributeArray(location);
         program_->setAttributeBuffer(smooth,GL_FLOAT,0,3,9*sizeof(float));program_->setAttributeBuffer(gauss,GL_FLOAT,3*sizeof(float),3,9*sizeof(float));program_->setAttributeBuffer(develop,GL_FLOAT,6*sizeof(float),3,9*sizeof(float));
     }else for(int location:{smooth,gauss,develop}){program_->disableAttributeArray(location);program_->setAttributeValue(location,QVector3D{});}
-    gl->glDrawArrays(GL_TRIANGLES, 0, vertexCount_);
+    gl->glDrawArrays(GL_TRIANGLES,0,vertexCount_);
     program_->disableAttributeArray(position);
     program_->disableAttributeArray(normal);
     program_->disableAttributeArray(color);
@@ -168,7 +172,7 @@ QImage HullGpu::render(QSize logicalSize, qreal dpr, const QMatrix4x4& camera, c
     analysisBuffer_.release();
     buffer_.release();
     program_->release();
-    QImage image = fbo_->toImage();
+    QImage image=fbo_->toImage();
     fbo_->release();
     context_.doneCurrent();
     image.setDevicePixelRatio(dpr);

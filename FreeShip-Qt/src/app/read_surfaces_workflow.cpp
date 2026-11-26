@@ -343,9 +343,9 @@ void MainWindow::auditReadSurfaces(bool copyOnly){
                                 play->click();
                                 row["tutorial_paused_keeps_caption"]=captionIsFixed();
                             }
-                            if((language=="zh"&&!compact)||language=="ru"){
+                            if((language=="zh"&&!compact)||language=="ru"||(language=="en"&&chapter==1)){
                                 const auto saveArtwork=[&](const QString& name){
-                                    const auto prefix=language=="ru"?stem:workflowOutput_+"/views/tutorial-features";
+                                    const auto prefix=language=="zh"?workflowOutput_+"/views/tutorial-features":stem;
                                     dialog->grab().save(prefix+"-"+name+".png");
                                 };
                                 if(chapter==0&&nodes.size()==3){
@@ -359,8 +359,12 @@ void MainWindow::auditReadSurfaces(bool copyOnly){
                                     select(track(4,.98));
                                     saveArtwork("compare-load");
                                 }else if(chapter==1&&nodes.size()==3){
-                                    select(track(1,.50));
+                                    select(track(0,.97));
+                                    saveArtwork("rebuild-samples");
+                                    select(track(1,.30));
                                     saveArtwork("rebuild-transition");
+                                    select(track(1,.97));
+                                    saveArtwork("rebuild-control-net");
                                     select(track(2,.97));
                                     saveArtwork("rebuild-before-after");
                                 }else if(chapter==3&&nodes.size()==9){

@@ -10,7 +10,12 @@
 #include "studio_ui.h"
 #include "grid_preview_panel.h"
 #include "print_hull_panel.h"
+#include "studio_motion.h"
+#include "studio_help_hint.h"
+#include "obj_import_layer_tree.h"
 #include <QButtonGroup>
+#include <QPainter>
+#include <QVariantAnimation>
 #include <QCheckBox>
 #include <QComboBox>
 #include <QDialogButtonBox>
@@ -32,14 +37,12 @@
 #include <QSpinBox>
 #include <QRegularExpression>
 #include <QTabWidget>
-#include <QStackedWidget>
 #include <QToolButton>
 #include <QFutureWatcher>
 #include <QPromise>
 #include <QThreadPool>
 #include <cmath>
-namespace {
-QString localizedExchangeError(const QString& source){
+static QString localizedExchangeError(const QString& source){
     // Translate only the known diagnostic framing; values and file contents
     // after a diagnostic prefix belong to the imported/exported data.
     for(const auto* wrapper:{"模型交接：","曲线导入："}){
@@ -65,6 +68,142 @@ QString localizedExchangeError(const QString& source){
     }
     return uiDiagnosticText(source);
 }
+namespace {
+constexpr std::array objModes{
+    std::array{"mesh","保留原网格","保留 OBJ 网格的外形，将多边形面拆成三角面"},
+    std::array{"control","作为控制网格导入","用 OBJ 的顶点和多边形面建立控制网格。细分后的曲面可能与原网格有偏差"},
+    std::array{"fit","拟合船体曲面","自动调整控制点，让细分后的船体曲面贴合原网格"}
+};
+
+QIcon objModeIcon(int mode){
+    QPixmap image(224,144);
+    image.setDevicePixelRatio(2);
+    image.fill(Qt::transparent);
+    QPainter painter(&image);
+    painter.setRenderHint(QPainter::Antialiasing);
+    const auto point=[mode](qreal u,qreal v){
+        const qreal bend=mode==2?std::sin(u*3.141592653589793)*(5+12*v):0;
+        return QPointF(8+51*u+43*v,39-27*u+24*v+bend);
+    };
+    const auto stroke=[&](QPointF a,QPointF b,bool alongU,qreal fixed){
+        QPolygonF line{a};
+        for(int i=1;i<16;++i)line<< (alongU?point(i/16.,fixed):point(fixed,i/16.));
+        line<<b;
+        return line;
+    };
+    QPolygonF face=stroke(point(0,0),point(1,0),true,0)+stroke(point(1,0),point(1,1),false,1);
+    const auto back=stroke(point(0,1),point(1,1),true,1);
+    for(auto i=back.crbegin();i!=back.crend();++i)face<<*i;
+    face<<point(0,0);
+    painter.setBrush(QColor(mode==2?"#bcdfd3":"#e3eee9"));
+    painter.setPen(QPen(QColor("#447369"),1.5));
+    painter.drawPolygon(face);
+    painter.setPen(QPen(QColor(mode==2?"#468e80":"#74998e"),.85));
+    const int columns=mode==0?5:3;
+    for(int x=1;x<columns;++x)painter.drawPolyline(stroke(point(double(x)/columns,0),point(double(x)/columns,1),false,double(x)/columns));
+    for(int y=1;y<3;++y)painter.drawPolyline(stroke(point(0,double(y)/3),point(1,double(y)/3),true,double(y)/3));
+    if(mode==0)for(int x=0;x<columns;++x)for(int y=0;y<3;++y)
+        painter.drawLine(point(double(x)/columns,double(y)/3),point(double(x+1)/columns,double(y+1)/3));
+    if(mode==1){
+        painter.setPen(QPen(QColor("#3f776b"),1));
+        painter.setBrush(QColor("#f5faf7"));
+        for(int x=0;x<=columns;++x)for(int y=0;y<=3;++y)
+            painter.drawEllipse(point(double(x)/columns,double(y)/3),2,2);
+    }
+    return QIcon(image);
+}
+
+class ObjModeCard final : public QToolButton {
+public:
+    explicit ObjModeCard(int mode,QWidget* parent) : QToolButton(parent),help_(new StudioHelpHint(this,22)) {
+        const auto& copy=objModes[mode];
+        setProperty("obj_import_mode",copy[0]);
+        setObjectName("ObjModeCard");
+        setCheckable(true);
+        setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
+        setIcon(objModeIcon(mode));
+        setIconSize({112,72});
+        setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Preferred);
+        setMinimumHeight(111);
+        bindUiText(this,"text",copy[1]);
+        bindUiText(help_,"toolTip",copy[2]);
+        bindUiText(help_,"accessibleName",copy[2]);
+        setStyleSheet("QToolButton#ObjModeCard{background:#f8fbf9;border:1px solid #d4e0da;border-radius:8px;padding:10px 6px 8px;}"
+                      "QToolButton#ObjModeCard:hover{border-color:#9fbaae;}"
+                      "QToolButton#ObjModeCard:checked{background:#e0f0e8;border-color:#7eaa9a;color:#086d61;}"
+                      "QToolButton#ObjModeCard:disabled{color:#8d9994;}");
+    }
+protected:
+    void resizeEvent(QResizeEvent* event) override {
+        QToolButton::resizeEvent(event);
+        help_->move(width()-help_->width()-7,7);
+    }
+private:
+    StudioHelpHint* help_;
+};
+
+class ObjToleranceRow final : public QWidget {
+public:
+    ObjToleranceRow(){
+        auto* row=new QHBoxLayout(this);row->setContentsMargins(0,0,0,0);row->setSpacing(6);
+        setStyleSheet(
+            "QToolButton#ObjToleranceAuto,QLineEdit#ObjToleranceValue {color:#315d57;background:transparent;"
+            "border:1px solid #d7e3dd;border-radius:5px;padding:5px 10px;}"
+            "QToolButton#ObjToleranceAuto:focus,QLineEdit#ObjToleranceValue:focus {border-color:#739f90;}"
+            "QToolButton#ObjToleranceAuto:disabled,QLineEdit#ObjToleranceValue:disabled {color:#8d9994;}");
+        automatic=new QToolButton;
+        automatic->setObjectName("ObjToleranceAuto");
+        automatic->setText(uiText("按船壳大小"));
+        bindUiText(automatic,"text","按船壳大小");
+        automatic->setToolTip(uiText("船壳外接长方体的对角线长度的 0.1%"));
+        automatic->setProperty("obj_tolerance_mode","relative");
+        automatic->setCheckable(true);automatic->setChecked(true);
+        automatic->setFocusPolicy(Qt::StrongFocus);
+        value=new QLineEdit;
+        value->setObjectName("ObjToleranceValue");value->setProperty("obj_tolerance_value",true);
+        value->setAccessibleName(uiText("最大允许采样偏差 (mm)"));
+        value->setPlaceholderText(QStringLiteral("—"));value->setReadOnly(true);value->setMinimumWidth(96);
+        value->installEventFilter(this);
+        row->addWidget(automatic);row->addWidget(value,1);
+        slide_.setDuration(180);slide_.setEasingCurve(QEasingCurve::InOutCubic);
+        connect(&slide_,&QVariantAnimation::valueChanged,this,[this](const QVariant& phase){phase_=phase.toReal();update();});
+        connect(automatic,&QToolButton::clicked,this,[this]{selectAutomatic(true);});
+    }
+    QToolButton* automatic;
+    QLineEdit* value;
+    void setEstimate(double estimate){
+        estimate_=estimate;
+        if(automatic->isChecked())showEstimate();
+    }
+    bool manual()const{return !automatic->isChecked();}
+protected:
+    bool eventFilter(QObject* object,QEvent* event)override{
+        if(object==value&&(event->type()==QEvent::MouseButtonPress||event->type()==QEvent::FocusIn)&&!manual())
+            selectAutomatic(false);
+        return QWidget::eventFilter(object,event);
+    }
+    void paintEvent(QPaintEvent*)override{
+        QPainter p(this);p.setRenderHint(QPainter::Antialiasing);
+        const QRectF a=automatic->geometry(),b=value->geometry();
+        const QRectF highlight(a.topLeft()+(b.topLeft()-a.topLeft())*phase_,
+                              a.size()+(b.size()-a.size())*phase_);
+        p.setPen(QColor("#82b3a3"));p.setBrush(QColor("#d5e9df"));
+        p.drawRoundedRect(highlight.adjusted(.5,.5,-.5,-.5),5,5);
+    }
+private:
+    void showEstimate(){value->setText(estimate_>0?QString::number(estimate_,'g',12):QString{});}
+    void selectAutomatic(bool on){
+        automatic->setChecked(on);value->setReadOnly(on);
+        if(on)showEstimate();
+        const double end=on?0.:1.;
+        slide_.stop();
+        if(phase_!=end&&isVisible()&&studio_motion::enabled()){
+            slide_.setStartValue(phase_);slide_.setEndValue(end);slide_.start();
+        }else{phase_=end;update();}
+    }
+    QVariantAnimation slide_;
+    double phase_=0.,estimate_=0.;
+};
 bool sectionFormat(const QString& f){return f=="dxfcrease"||f=="offset_table"||f=="michlet"||f=="addmass"||f=="ghs"||f=="arch_hll"||f=="arch_app"||f=="pam";}
 bool metricFormat(const QString& f){return f=="michlet"||f=="addmass"||f=="arch_hll"||f=="arch_app"||f=="pam";}
 bool fileUnits(const QString& f){return f=="part"||f=="waves"||f=="fef"||f=="chines"||f=="surface"||f=="hull";}
@@ -83,6 +222,7 @@ ExchangeDialog::ExchangeDialog(ModelSession& session,bool importing,QString form
     confirmOverwrite=[this](const QString& path){return confirmStudioAction(this,uiText("替换文件"),uiText("文件已存在，是否替换？\n")+path);};
     auto* layout=new QVBoxLayout(this);layout->setContentsMargins(22,18,22,18);layout->setSpacing(12);
     auto* form=new QFormLayout;
+    QWidget* objSidebar=nullptr;
     if(importing_){
         auto* fileRow=new QHBoxLayout;importPath_=new QLineEdit;importPath_->setProperty("exchange_field","path");
         auto* browse=studioFolderButton(uiText("浏览…"));
@@ -93,7 +233,10 @@ ExchangeDialog::ExchangeDialog(ModelSession& session,bool importing,QString form
             const auto filter=uiText(fs::cad::title(format_))+" (*."+ext+(format_=="iges"?" *.iges":"")+")";
             const auto start=importPath_->text().isEmpty()?preferenceFileLocation("import"):importPath_->text();
             const auto path=studioOpenFile(this,windowTitle(),start,filter);
-            if(!path.isEmpty())importPath_->setText(path);
+            if(!path.isEmpty()){
+                if(objLayerTree_&&path==importPath_->text())scheduleObjLayers();
+                else importPath_->setText(path);
+            }
         });
     }
     units_=new QComboBox;units_->setProperty("exchange_field","units");for(auto pair:{std::pair{"米 (m)","m"},{"毫米 (mm)","mm"},{"厘米 (cm)","cm"},{"英尺 (ft)","ft"},{"英寸 (in)","in"}})addUiItem(units_,pair.first,pair.second);
@@ -109,68 +252,61 @@ ExchangeDialog::ExchangeDialog(ModelSession& session,bool importing,QString form
     axes_->setVisible(format_=="obj");control_->setVisible(format_=="obj");hidden_->setVisible(!importing&&format_!="fef");binary_->setVisible(!importing&&format_=="stl");symmetric_->setVisible(format_!="fef");units_->setEnabled(format_!="fef");
     if(importing_&&format_=="obj"){
         control_->hide();
-        objImportMode_=new QComboBox;
-        objImportMode_->setProperty("exchange_field","obj_import_mode");
-        addUiItem(objImportMode_,"保留原网格","mesh");
-        addUiItem(objImportMode_,"作为控制网导入","control");
-        addUiItem(objImportMode_,"光顺重建船型","fit");
-        form->addRow(uiText("导入方式"),objImportMode_);
+        resize(865,490);
+        objImportCards_=new QWidget;
+        auto* cards=new QHBoxLayout(objImportCards_);
+        cards->setContentsMargins(0,0,0,0);
+        objImportMode_=new QButtonGroup(this);
+        for(int mode=0;mode<int(objModes.size());++mode){
+            auto* card=new ObjModeCard(mode,objImportCards_);
+            objImportMode_->addButton(card,mode);
+            cards->addWidget(card,1);
+        }
+        objImportMode_->button(0)->setChecked(true);
+        auto* methodLabel=new QLabel;
+        bindUiText(methodLabel,"text","导入方式");
+        form->addRow(methodLabel);
+        form->addRow(objImportCards_);
+        objSidebar=new QWidget;
+        auto* layerLayout=new QVBoxLayout(objSidebar);
+        layerLayout->setContentsMargins(0,0,0,0);
+        auto* layerLabel=new QLabel;
+        bindUiText(layerLabel,"text","图层","collection");
+        layerLayout->addWidget(layerLabel);
+        objLayerTree_=new ObjImportLayerTree(objSidebar);
+        objLayerTree_->setStyleSheet("QTreeWidget{background:#f9fbfa;border:1px solid #ceddd6;border-radius:5px;padding:3px;}"
+                                     "QTreeView::item{min-height:24px;} QTreeView::item:selected{background:#e0eee6;color:#234d42;}");
+        layerLayout->addWidget(objLayerTree_,1);
+        objLayersTimer_.setSingleShot(true);
+        objLayersTimer_.setInterval(100);
+        connect(&objLayersTimer_,&QTimer::timeout,this,&ExchangeDialog::readObjLayers);
+        connect(importPath_,&QLineEdit::textChanged,this,&ExchangeDialog::scheduleObjLayers);
         objInferCreases_=check(uiText("自动识别折痕"),"obj_infer_creases");
         objInferCreases_->setChecked(true);
-        objToleranceRow_=new QWidget;
-        auto* row=new QHBoxLayout(objToleranceRow_);
-        row->setContentsMargins(0,0,0,0);
-        row->setSpacing(6);
-        objToleranceRow_->setStyleSheet(
-            "QToolButton {color:#315d57;background:#f8faf9;border:1px solid #d7e3dd;"
-            "border-radius:5px;padding:5px 10px;}"
-            "QToolButton:hover {background:#e3eee8;}"
-            "QToolButton:focus {border-color:#739f90;}"
-            "QToolButton:checked {color:#124f47;background:#d5e9df;border-color:#82b3a3;}"
-            "QToolButton:disabled {color:#8d9994;}"
-            "QLineEdit#ObjToleranceValue {border-color:#82b3a3;}");
-        auto* relative=new QToolButton;
-        relative->setText(uiText("按船壳大小"));
-        relative->setToolTip(uiText("船壳外接长方体的对角线长度的 0.1%"));
-        relative->setProperty("obj_tolerance_mode","relative");
-        objManualTolerance_=new QToolButton;
-        objManualTolerance_->setText(uiText("输入数值"));
-        objManualTolerance_->setProperty("obj_tolerance_mode","manual");
-        objManualTolerance_->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Preferred);
-        auto* choices=new QButtonGroup(objToleranceRow_);
-        relative->setCheckable(true);
-        relative->setFocusPolicy(Qt::StrongFocus);
-        objManualTolerance_->setCheckable(true);
-        objManualTolerance_->setFocusPolicy(Qt::StrongFocus);
-        choices->addButton(relative);
-        choices->addButton(objManualTolerance_);
-        relative->setChecked(true);
-
-        auto* manual=new QStackedWidget;
-        manual->setMinimumWidth(96);
-        objTolerance_=new QLineEdit;
-        objTolerance_->setObjectName("ObjToleranceValue");
-        objTolerance_->setProperty("obj_tolerance_value",true);
-        objTolerance_->setAccessibleName(uiText("最大允许采样偏差 (mm)"));
-        objTolerance_->setPlaceholderText(uiText("输入数值"));
-        objTolerance_->setEnabled(false);
-        manual->addWidget(objManualTolerance_);
-        manual->addWidget(objTolerance_);
-        connect(objManualTolerance_,&QToolButton::toggled,this,[this,manual](bool selected){
-            objTolerance_->setEnabled(selected);
-            manual->setCurrentWidget(selected?static_cast<QWidget*>(objTolerance_):objManualTolerance_);
-            if(selected)objTolerance_->setFocus(Qt::OtherFocusReason);
-        });
-        row->addWidget(relative);
-        row->addWidget(manual,1);
+        auto* tolerance=new ObjToleranceRow;
+        objToleranceRow_=tolerance;
+        objTolerance_=tolerance->value;
+        objAutomaticTolerance_=tolerance->automatic;
         form->addRow(uiText("最大允许采样偏差 (mm)"),objToleranceRow_);
         const auto showOptions=[this,form]{
-            const auto mode=objImportMode_->currentData().toString();
-            form->setRowVisible(objInferCreases_,mode!="mesh");
-            form->setRowVisible(objToleranceRow_,mode=="fit");
+            const int mode=objImportMode_->checkedId();
+            form->setRowVisible(objInferCreases_,mode!=0);
+            form->setRowVisible(objToleranceRow_,mode==2);
         };
-        connect(objImportMode_,&QComboBox::currentIndexChanged,this,showOptions);
+        connect(objImportMode_,&QButtonGroup::idClicked,this,showOptions);
         showOptions();
+        objToleranceTimer_.setSingleShot(true);
+        objToleranceTimer_.setInterval(100);
+        connect(&objToleranceTimer_,&QTimer::timeout,this,&ExchangeDialog::estimateObjTolerance);
+        const auto schedule=[this,tolerance]{
+            if(objToleranceCancel_)objToleranceCancel_->store(true,std::memory_order_relaxed);
+            objToleranceTimer_.stop();tolerance->setEstimate(0.);
+            if(objImportMode_->checkedId()==2&&!importPath_->text().trimmed().isEmpty())objToleranceTimer_.start();
+        };
+        connect(importPath_,&QLineEdit::textChanged,this,schedule);
+        connect(units_,&QComboBox::currentIndexChanged,this,schedule);
+        connect(axes_,&QCheckBox::toggled,this,schedule);
+        connect(objImportMode_,&QButtonGroup::idClicked,this,schedule);
     }
     if(format_=="coordinates"){control_->setVisible(true);control_->setText(uiText("导出原控制点（不补镜像，不按图层显隐筛选）"));connect(control_,&QCheckBox::toggled,this,[this](bool b){hidden_->setEnabled(!b);symmetric_->setEnabled(!b);});}
     if(format_=="offset_table"||format_=="offsets"||format_=="dxf3d"){hidden_->hide();symmetric_->hide();}
@@ -237,7 +373,17 @@ ExchangeDialog::ExchangeDialog(ModelSession& session,bool importing,QString form
         auto model=session.model();double scale=model&&model->units=="imperial"?.3048:1.;
         for(auto key:{QString("origin_x"),QString("origin_y")}){auto* edit=new QLineEdit(QString::number(key=="origin_x"&&model?.5*model->length*scale:0,'g',17));edit->setProperty("exchange_number",key);references_[key]=edit;form->addRow(key=="origin_x"?uiText("波形原点 · 模型 X (m)"):uiText("波形原点 · 模型 Y (m)"),edit);}
     }
-    layout->addLayout(form);
+    if(objSidebar){
+        auto* columns=new QHBoxLayout;
+        columns->setSpacing(12);
+        columns->addLayout(form,3);
+        auto* divider=new QFrame;
+        divider->setFixedWidth(1);
+        divider->setStyleSheet("background:#c9ddd4;");
+        columns->addWidget(divider);
+        columns->addWidget(objSidebar,1);
+        layout->addLayout(columns,1);
+    }else layout->addLayout(form);
     if(!importing_&&format_=="stl"){
         printMode_=check(uiText("3D 打印船壳（敞口）"),"print_shell");
         printHull_=new PrintHullPanel(session_,this);layout->addWidget(printHull_);
@@ -271,7 +417,7 @@ ExchangeDialog::ExchangeDialog(ModelSession& session,bool importing,QString form
     const bool formatWarning=(!importing_&&(format_=="fef"||format_=="iges"||format_=="arch_app"||format_=="part"))||format_=="polycad"||format_=="surface"||format_=="vrml";
     details_->setMessage(details_->text(),formatWarning?StudioMessageRole::Warning:StudioMessageRole::Explanation);
     details_->setVisible(!details_->text().isEmpty());
-    layout->addWidget(details_);status_=new StudioMessage(StudioMessageRole::Feedback);status_->setProperty("exchange_status",true);layout->addWidget(status_);layout->addStretch();
+    layout->addWidget(details_);status_=new StudioMessage(StudioMessageRole::Feedback);status_->setProperty("exchange_status",true);layout->addWidget(status_);if(!objSidebar)layout->addStretch();
     auto* buttons=new QDialogButtonBox;run_=buttons->addButton(importing?uiText("导入"):uiText("导出"),QDialogButtonBox::ActionRole);run_->setProperty("exchange_action",importing?"import":"export");
     if(!importing){
         const auto refreshFormat=[this]{setStudioFormatButton(run_,fs::cad::extension(format_),uiText("导出 ")+uiText(fs::cad::title(format_)));};
@@ -285,16 +431,19 @@ ExchangeDialog::ExchangeDialog(ModelSession& session,bool importing,QString form
     connect(&exportProcess_,&QProcess::errorOccurred,this,[this](QProcess::ProcessError e){if(e==QProcess::FailedToStart){exportTimeout_.stop();exporting_=false;showFailure(uiText("无法启动几何导出组件。"));}});
 }
 ExchangeDialog::~ExchangeDialog(){
-    if(objCancel_)objCancel_->store(true,std::memory_order_relaxed);
+    if(objLayersCancel_)objLayersCancel_->store(true,std::memory_order_relaxed);
+    if(objToleranceCancel_)objToleranceCancel_->store(true,std::memory_order_relaxed);
+    if(importCancel_)importCancel_->store(true,std::memory_order_relaxed);
     exportTimeout_.stop();cancelled_=true;exportProcess_.disconnect(this);if(exportProcess_.state()!=QProcess::NotRunning){exportProcess_.kill();exportProcess_.waitForFinished(2000);}
 }
-bool ExchangeDialog::busy()const{return session_.busy()||exporting_||objCancel_||(printHull_&&printHull_->pending());}
+bool ExchangeDialog::busy()const{return session_.busy()||exporting_||importCancel_||importPending_||(printHull_&&printHull_->pending());}
 void ExchangeDialog::refreshState(){
-    const bool idle=!busy();run_->setEnabled(idle&&(importing_||session_.ready()));
+    const bool idle=!busy();run_->setEnabled(idle&&!objLayersLoading_&&(importing_||session_.ready()));
     if(importPath_)importPath_->setReadOnly(!idle);
     units_->setEnabled(idle&&!fileUnits(format_)&&!metricFormat(format_));for(auto* box:{axes_,control_,symmetric_,hidden_,binary_,closeDeck_})box->setEnabled(idle);
     if(objImportMode_){
-        objImportMode_->setEnabled(idle);
+        objImportCards_->setEnabled(idle);
+        objLayerTree_->setEnabled(idle&&!objLayersLoading_);
         objInferCreases_->setEnabled(idle);
         objToleranceRow_->setEnabled(idle);
     }
@@ -309,17 +458,17 @@ void ExchangeDialog::refreshState(){
     }
 }
 void ExchangeDialog::reject(){
-    if(objCancel_){
-        objCancel_->store(true,std::memory_order_relaxed);
+    if(importCancel_){
+        importCancel_->store(true,std::memory_order_relaxed);
         QDialog::reject();
-    }else if(exporting_){cancelled_=true;exportProcess_.kill();status_->setMessage(uiText("正在取消导出…"),StudioMessageRole::Feedback,true);}else if(!session_.busy())QDialog::reject();else if(format_=="iges"){session_.cancelCad();status_->setMessage(uiText("正在取消曲面生成…"),StudioMessageRole::Feedback,true);}
+    }else if(exporting_){cancelled_=true;exportProcess_.kill();status_->setMessage(uiText("正在取消导出…"),StudioMessageRole::Feedback,true);}else if(!session_.busy()&&!importPending_)QDialog::reject();else if(format_=="iges"){session_.cancelCad();status_->setMessage(uiText("正在取消曲面生成…"),StudioMessageRole::Feedback,true);}
 }
 QString ExchangeDialog::failure()const{
     const auto error=status_->property("error").toString();
     return error.isEmpty()&&printMode_&&printMode_->isChecked()?printHull_->failure():error;
 }
-void ExchangeDialog::showFailure(const QString& error){const auto message=localizedExchangeError(error);status_->setProperty("error",message);status_->setMessage(message,StudioMessageRole::Warning);refreshState();}
-void ExchangeDialog::imported(){succeeded_=true;accept();}
+void ExchangeDialog::showFailure(const QString& error){importPending_=false;pendingCadPath_.clear();const auto message=localizedExchangeError(error);status_->setProperty("error",message);status_->setMessage(message,StudioMessageRole::Warning);refreshState();}
+void ExchangeDialog::imported(){if(importPending_){importPending_=false;succeeded_=true;accept();}}
 void ExchangeDialog::receiveCad(const QJsonObject& data){
     if(pendingCadPath_.isEmpty())return;
     try{fs::cad::write(pendingCadPath_,"iges",*session_.model(),pendingCadOptions_,data);succeeded_=true;status_->setMessage(uiText("已导出：")+pendingCadPath_,StudioMessageRole::Feedback);pendingCadPath_.clear();}
@@ -361,12 +510,16 @@ void ExchangeDialog::submit(){
             if((format_=="part"||format_=="waves")&&!session_.ready())
                 throw std::runtime_error(uiText("请先打开或新建工程，再追加部件或波形。"));
             if(objImportMode_){
-                const auto mode=objImportMode_->currentData().toString();
-                o.controlNet=mode=="control";
+                if(objLayersLoading_)return;
+                if(!objLayersError_.isEmpty())throw std::runtime_error(objLayersError_.toUtf8().constData());
+                const int mode=objImportMode_->checkedId();
+                o.controlNet=mode==1;
+                o.objLayerMode=fs::exchange::ObjLayerMode::Assigned;
+                o.objAssignedLayers=objLayerTree_->assignments();
                 o.inferObjCreases=objInferCreases_->isChecked();
-                if(mode=="fit"){
+                if(mode==2){
                     o.reconstructObj=true;
-                    if(objManualTolerance_->isChecked()){
+                    if(!objAutomaticTolerance_->isChecked()){
                         bool ok=false;
                         o.objToleranceMm=objTolerance_->text().trimmed().toDouble(&ok);
                         if(!ok||!std::isfinite(o.objToleranceMm)||o.objToleranceMm<=0||o.objToleranceMm>1e9)
@@ -376,7 +529,7 @@ void ExchangeDialog::submit(){
                     return;
                 }
             }
-            importPrepared(fs::exchange::read(path,format_,o));
+            importPrepared(fs::exchange::read(path,format_,o),path);
         }
         else{
             if(!session_.ready())return;
@@ -401,20 +554,80 @@ void ExchangeDialog::submit(){
     }catch(const std::exception& e){showFailure(QString::fromUtf8(e.what()));}
 }
 
+void ExchangeDialog::scheduleObjLayers(){
+    if(objLayersCancel_)objLayersCancel_->store(true,std::memory_order_relaxed);
+    objLayersTimer_.stop();
+    objLayerTree_->clear();
+    objLayersError_.clear();
+    objLayersLoading_=!importPath_->text().trimmed().isEmpty();
+    if(objLayersLoading_)objLayersTimer_.start();
+    refreshState();
+}
+
+void ExchangeDialog::readObjLayers(){
+    const QString path=importPath_->text().trimmed();
+    if(path.isEmpty())return;
+    using Result=std::pair<QStringList,QString>;
+    const auto cancel=std::make_shared<std::atomic_bool>(false);
+    objLayersCancel_=cancel;
+    auto promise=std::make_shared<QPromise<Result>>();
+    auto* watcher=new QFutureWatcher<Result>(this);
+    connect(watcher,&QFutureWatcher<Result>::finished,this,[this,watcher,cancel]{
+        watcher->deleteLater();
+        if(cancel->load(std::memory_order_relaxed))return;
+        const auto result=watcher->result();
+        objLayersLoading_=false;
+        objLayersError_=result.second;
+        objLayerTree_->setSources(result.first);
+        refreshState();
+    });
+    promise->start();
+    watcher->setFuture(promise->future());
+    QThreadPool::globalInstance()->start([path,cancel,promise]{
+        Result result;
+        try{result.first=fs::exchange::objLayerSources(path,cancel.get());}
+        catch(const std::exception& error){result.second=QString::fromUtf8(error.what());}
+        promise->addResult(std::move(result));
+        promise->finish();
+    });
+}
+
+void ExchangeDialog::estimateObjTolerance(){
+    const auto path=importPath_->text().trimmed();
+    fs::exchange::Options options;
+    options.units=units_->currentData().toString();options.legacyAxes=axes_->isChecked();
+    const auto cancel=objToleranceCancel_=std::make_shared<std::atomic_bool>(false);
+    auto* watcher=new QFutureWatcher<double>(this);
+    connect(watcher,&QFutureWatcher<double>::finished,this,[this,watcher,cancel]{
+        const auto estimate=watcher->result();
+        watcher->deleteLater();
+        if(!cancel->load(std::memory_order_relaxed))
+            static_cast<ObjToleranceRow*>(objToleranceRow_)->setEstimate(estimate);
+    });
+    QPromise<double> promise;
+    watcher->setFuture(promise.future());
+    QThreadPool::globalInstance()->start([promise=std::move(promise),path,options,cancel]()mutable{
+        promise.start();double estimate=0.;
+        try{estimate=fs::exchange::objAutomaticToleranceMm(path,options,cancel.get());}
+        catch(const std::exception&){}
+        promise.addResult(estimate);promise.finish();
+    });
+}
+
 void ExchangeDialog::startObjFit(const QString& path,const fs::exchange::Options& options){
     const auto source=session_.model();
     const auto cancel=std::make_shared<std::atomic_bool>(false);
-    objCancel_=cancel;
+    importCancel_=cancel;
     status_->setMessage(uiText("正在重建船型并测量偏差…"),StudioMessageRole::Feedback,true);
     refreshState();
     auto promise=std::make_shared<QPromise<ObjFitResult>>();
     auto* watcher=new QFutureWatcher<ObjFitResult>(this);
-    connect(watcher,&QFutureWatcher<ObjFitResult>::finished,this,[this,watcher,source,cancel]{
+    connect(watcher,&QFutureWatcher<ObjFitResult>::finished,this,[this,watcher,source,cancel,path]{
         watcher->deleteLater();
         if(cancel->load(std::memory_order_relaxed))return;
         auto result=watcher->result();
         if(!result.error.isEmpty()||!result.document.objFit){
-            objCancel_.reset();
+            importCancel_.reset();
             showFailure(result.error.isEmpty()?uiText("船型重建失败。"):result.error);
             return;
         }
@@ -427,7 +640,7 @@ void ExchangeDialog::startObjFit(const QString& path,const fs::exchange::Options
             .arg(model.points.size()).arg(model.faces.size()).arg(fit.maximumMm,0,'g',6)
             .arg(fit.rmsMm,0,'g',6).arg(fit.toleranceMm,0,'g',6);
         const bool proceed=confirmStudioAction(this,uiText("OBJ 船型重建结果"),description);
-        objCancel_.reset();
+        importCancel_.reset();
         status_->clear();
         refreshState();
         if(!proceed)return;
@@ -436,7 +649,7 @@ void ExchangeDialog::startObjFit(const QString& path,const fs::exchange::Options
             showFailure(uiText("当前模型已改变，请重新导入。"));
             return;
         }
-        try{importPrepared(std::move(result.document));}
+        try{importPrepared(std::move(result.document),path);}
         catch(const std::exception& e){showFailure(QString::fromUtf8(e.what()));}
     });
     promise->start();
@@ -450,7 +663,7 @@ void ExchangeDialog::startObjFit(const QString& path,const fs::exchange::Options
     });
 }
 
-void ExchangeDialog::importPrepared(fs::exchange::Document document){
+void ExchangeDialog::importPrepared(fs::exchange::Document document,const QString& path){
     const bool append=format_=="part"||format_=="waves";
     if(append&&!session_.ready())throw std::runtime_error(uiText("请先打开或新建工程，再追加部件或波形。"));
     if(document.discardedZeroAreaFaces&&!confirmStudioAction(this,uiText("导入 VRML"),
@@ -461,13 +674,16 @@ void ExchangeDialog::importPrepared(fs::exchange::Document document){
         data["wave_patch"]=true;
         data["wave_origin_m"]=QJsonObject{{"x",refs["origin_x"]},{"y",refs["origin_y"]}};
     }
-    auto apply=[guard=QPointer<ExchangeDialog>(this),data,append]{
+    auto apply=[guard=QPointer<ExchangeDialog>(this),data,append,path]{
         if(!guard||!guard->isVisible())return;
         guard->status_->setMessage(uiText("正在生成模型…"),StudioMessageRole::Feedback,true);
-        guard->session_.importModel(data,append);
+        guard->importPending_=true;
+        const bool started=guard->importInNewTab
+            ?guard->importInNewTab(data,path):guard->session_.importModel(data,append);
+        if(!started&&guard->importPending_)guard->showFailure(uiText("无法准备导入数据。"));
         guard->refreshState();
     };
-    if(beforeImport&&!append)beforeImport(apply);
+    if(beforeImport&&!append&&!importInNewTab)beforeImport(apply);
     else apply();
 }
 QJsonObject ExchangeDialog::referenceValues() const {

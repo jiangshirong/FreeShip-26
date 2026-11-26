@@ -10,6 +10,7 @@
 #include <QPointF>
 #include <QSet>
 #include <QWidget>
+#include <atomic>
 #include <functional>
 #include <memory>
 #include <optional>
@@ -36,7 +37,12 @@ public:
     void setDisplayPreview(std::shared_ptr<const fs::ModelSnapshot> presentation);
     void setMoveSectionPreview(std::shared_ptr<const QVector<fs::Section>> sections);
     std::shared_ptr<const QVector<fs::Section>> moveSectionPreview()const;
-    void setDragSectionComparison(DragSections pairs,DragShell shell={});
+    struct DragShellRaster;
+    using DragRasterLayer=std::shared_ptr<const DragShellRaster>;
+    using DragRasterJob=std::function<DragRasterLayer(const DragShell&,const DragRasterLayer&,const std::atomic_bool*)>;
+    void setDragSectionComparison(DragSections pairs,DragShell shell={},std::shared_ptr<const DragShellRaster> raster={});
+    DragRasterJob dragRasterJob(bool originalOnly=false)const;
+    bool verifyDragRaster()const;
     void retainReleasedCreases();
     DragShell dragShellComparison()const;
     DragSections dragSectionComparison()const;
@@ -44,6 +50,8 @@ public:
     bool axisPointMove()const;
     void setPendingPointMoves(const QVector<fs::PointMove>& moves);
     void setPlateDiagnosticFaces(const QString& document, quint64 revision, QVector<QVector<fs::Vec3>> faces);
+    void setFaceOrientationPreview(QSet<fs::EntityId> conflicts, QSet<fs::EntityId> flipped = {});
+    QSet<fs::EntityId> selectedMissingFace(const QSet<fs::EntityId>& selection) const;
     bool curveEditMotionEnabled() const;
     void setCurveEditMotion(std::shared_ptr<fs::curveEdit::Motion> motion);
     std::shared_ptr<const fs::ModelSnapshot> snapshot() const;
@@ -117,6 +125,7 @@ public:
     QPointF backgroundReference(QPointF screen)const;
     bool calibrateBackgroundAt(QPointF screen,QPointF coordinate);
     void fit();
+    void setViewDividerDragging(bool dragging);
     void panBy(QPointF delta);
     void zoomAt(QPointF anchor, double factor);
     QPointF project(const fs::Vec3& point) const;
@@ -131,6 +140,10 @@ public:
 
     double lastPaintMs = 0;
     quint64 paintCount = 0;
+    // Only active during the isolated frame-by-frame drag diagnostic.
+    bool measureDragPaint = false;
+    mutable QJsonObject dragPaintTimings;
+    std::function<void()> onDragRasterTargetChanged;
     std::function<void()> onHullFrame;
     std::function<void()> onHullVisibleFrame;
     std::function<void(fs::EntityId)> onPointSelected,onRepeatPointClick;
@@ -178,7 +191,8 @@ private:
     void positionDisplayModeButton();
     fs::EntityId repeatPoint_=0;
     QString projectionSourceKey() const;
-    void draw(QPainter&, qreal devicePixelRatio,bool final=true,bool forceSoftware=false,int* verifySections=nullptr) const;
+    void draw(QPainter&, qreal devicePixelRatio,bool final=true,bool forceSoftware=false,int* verifySections=nullptr,
+              bool deferFaceLegend=false) const;
     void fitToViewport(bool resizing);
     bool showsTransformHandles()const;
     bool canTransform()const;
